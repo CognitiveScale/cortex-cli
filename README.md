@@ -13,46 +13,46 @@ cortex <command> [sub-command] [options]
 ### Commands:
 
 - configure
-  - list
+    - list
 - deploy
 - agents
-  - list
-  - save [agentDefinition]
-  - describe [agentName]
-  - delete [agentName]
-  - invoke
+    - list
+    - save [agentDefinition]
+    - describe [agentName]
+    - delete [agentName]
+    - invoke
 - types
-  - list
-  - save [typeDefinition]
-  - describe [typeName]
-  - delete [typeName]
+    - list
+    - save [typeDefinition]
+    - describe [typeName]
+    - delete [typeName]
 - skills
-  - list
-  - save [skillDefinition]
-  - describe [skillName]
-  - delete [skillName]
+    - list
+    - save [skillDefinition]
+    - describe [skillName]
+    - delete [skillName]
 - processors
-  - save-runtime [runtimeDefinition]
-  - list-runtimes
-  - invoke-action
-  - list-actions
+    - save-runtime [runtimeDefinition]
+    - list-runtimes
+    - invoke-action
+    - list-actions
 - content
-  - upload
-  - download
-  - describe
+    - upload
+    - download
+    - describe
 - jobs
 - connections
-  - list
-  - save [connectionDefinition]
-  - delete [connectionName]
-  - describe [connectionName]
-  - test [connectionName]
+    - list
+    - save [connectionDefinition]
+    - delete [connectionName]
+    - describe [connectionName]
+    - test [connectionName]
 - datasets
-  - list
-  - save [datasetDefinition]
-  - delete [datasetName]
-  - describe [datasetName]
-  - get-dataframe [datasetName]
-  - get-stream [datasetName]
+    - list
+    - save [datasetDefinition]
+    - delete [datasetName]
+    - describe [datasetName]
+    - get-dataframe [datasetName]
+    - get-stream [datasetName]
 - snapshots
 - instances
