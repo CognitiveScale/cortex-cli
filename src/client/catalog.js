@@ -25,12 +25,47 @@ module.exports = class Catalog {
             .send({name, title, description, properties, inputs, outputs});
     }
 
+    listAgents(token) {
+        debug('listAgents() => %s', this.endpoints.agents);
+        return request
+            .get(this.endpoints.agents)
+            .set('Authorization', `Bearer ${token}`)
+            .then((res) => {
+                if (res.ok) {
+                    return {success: true, agents: res.body.agents};
+                }
+                return {success: false, status: res.status, message: res.body};
+            });
+    }
+
     saveAgent(token, {name, project, title, description, properties, inputs, outputs, processors}) {
         debug('saveAgent(%s) => %s', name, this.endpoints.agents);
         return request
             .post(this.endpoints.agents)
             .set('Authorization', `Bearer ${token}`)
-            .send({name, project, title, description, properties, inputs, outputs, processors});
+            .send({name, project, title, description, properties, inputs, outputs, processors})
+            .then((res) => {
+                if (res.ok) {
+                    return {success: true, message: res.body};
+                }
+                return {success: false, message: res.body, status: res.status};
+            });
+    }
+
+    describeAgent(token, agentName) {
+        const endpoint = `${this.endpoints.agents}/${agentName}`;
+        debug('describeAgent(%s) => %s', agentName, endpoint);
+        return request
+            .get(endpoint)
+            .set('Authorization', `Bearer ${token}`)
+            .then((res) => {
+                if (res.ok) {
+                    return {success: true, agent: res.body};
+                }
+                else {
+                    return {success: false, message: res.body, status: res.status};
+                }
+            });
     }
 
     saveType(token, {name, title, description, fields}) {
