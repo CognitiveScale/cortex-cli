@@ -22,7 +22,42 @@ module.exports = class Catalog {
         return request
             .post(this.endpoints.skills)
             .set('Authorization', `Bearer ${token}`)
-            .send({name, title, description, properties, inputs, outputs});
+            .send({name, title, description, properties, inputs, outputs})
+            .then((res) => {
+                if (res.ok) {
+                    return {success: true, message: res.body};
+                }
+                return {success: false, message: res.body, status: res.status};
+            });
+    }
+
+    listSkills(token) {
+        debug('listSkill() => %s', this.endpoints.skills);
+        return request
+            .get(this.endpoints.skills)
+            .set('Authorization', `Bearer ${token}`)
+            .then((res) => {
+                if (res.ok) {
+                    return {success: true, skills: res.body.skills || res.body.processors};
+                }
+                return {success: false, status: res.status, message: res.body};
+            });
+    }
+
+    describeSkill(token, skillName) {
+        const endpoint = `${this.endpoints.skills}/${skillName}`;
+        debug('describeSkill(%s) => %s', skillName, endpoint);
+        return request
+            .get(endpoint)
+            .set('Authorization', `Bearer ${token}`)
+            .then((res) => {
+                if (res.ok) {
+                    return {success: true, skill: res.body};
+                }
+                else {
+                    return {success: false, message: res.body, status: res.status};
+                }
+            });
     }
 
     listAgents(token) {

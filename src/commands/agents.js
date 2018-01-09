@@ -16,11 +16,11 @@ module.exports.SaveAgentCommand = class SaveAgentCommand {
         const catalog = new Catalog(profile.url);
 
         const agentDefStr = fs.readFileSync(agentDefinition);
-        const agent = parseObject(agentDefStr);
+        const agent = parseObject(agentDefStr, options);
 
         catalog.saveAgent(profile.token, agent).then((response) => {
             if (response.success) {
-                printSuccess(`Agent saved: ${response.message}`, options);
+                printSuccess(`Agent saved`, options);
             }
             else {
                 printError(`Failed to save agent: ${response.status} ${response.message}`, options);

@@ -2,52 +2,52 @@
 
 const program = require('commander');
 const chalk = require('chalk');
-const { SaveAgentCommand, ListAgentsCommand, DescribeAgentCommand } = require('../src/commands/agents');
+const { SaveSkillCommand, ListSkillsCommand, DescribeSkillCommand } = require('../src/commands/skills');
 
-program.description('Work with Cortex Agents');
+program.description('Work with Cortex Skills');
     
-// Save Agent
+// Save Skill
 program
-    .command('save <agentDefinition>')
-    .description('Save an agent definition')
+    .command('save <skillDefinition>')
+    .description('Save a skill definition')
     .option('--color [on/off]', 'Turn on/off color output.', 'on')
     .option('--profile [profile]', 'The profile to use', 'default')
-    .option('-y, --yaml', 'Use YAML for agent definition format')
-    .action((agentDefinition, options) => {
+    .option('-y, --yaml', 'Use YAML for skill definition format')
+    .action((skillDefinition, options) => {
         try {
-            new SaveAgentCommand(program).execute(agentDefinition, options);
+            new SaveSkillCommand(program).execute(skillDefinition, options);
         }
         catch (err) {
             console.error(chalk.red(err.message));
         }
     });
 
-// List Agents
+// List Skills
 program
     .command('list')
-    .description('List agent definitions')
+    .description('List skill definitions')
     .option('--color [on/off]', 'Turn on/off color output.', 'on')
     .option('--profile [profile]', 'The profile to use', 'default')
     .option('--query [query]', 'A JMESPath query to use in filtering the response data.')
     .action((options) => {
         try {
-            new ListAgentsCommand(program).execute(options);
+            new ListSkillsCommand(program).execute(options);
         }
         catch (err) {
             console.error(chalk.red(err.message));
         }
     });
 
-// Describe Agent
+// Describe Skill
 program
-    .command('describe <agentName>')
-    .description('Describe agent')
+    .command('describe <skillName>')
+    .description('Describe skill')
     .option('--color [on/off]', 'Turn on/off color output.', 'on')
     .option('--profile [profile]', 'The profile to use', 'default')
     .option('--query [query]', 'A JMESPath query to use in filtering the response data.')
-    .action((agentName, options) => {
+    .action((skillName, options) => {
         try {
-            new DescribeAgentCommand(program).execute(agentName, options);
+            new DescribeSkillCommand(program).execute(skillName, options);
         }
         catch (err) {
             console.error(chalk.red(err.message));
