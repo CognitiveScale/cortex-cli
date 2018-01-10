@@ -20,7 +20,8 @@ cortex <command> [sub-command] [options]
     - save [agentDefinition]
     - describe [agentName]
     - delete [agentName]
-    - invoke
+    - invoke [serviceName]
+    - get-service-activation [activationId]
 - types
     - list
     - save [typeDefinition]
@@ -34,8 +35,10 @@ cortex <command> [sub-command] [options]
 - processors
     - save-runtime [runtimeDefinition]
     - list-runtimes
-    - invoke-action
-    - list-actions
+    - describe-runtime [runtimeName]
+    - delete-runtime [runtimeName]
+    - invoke-action [runtimeName] [actionId]
+    - list-actions [runtimeName]
 - content
     - upload
     - download

@@ -27,7 +27,7 @@ module.exports.SaveSkillCommand = class SaveSkillCommand {
             }
         })
         .catch((err) => {
-            printError(`Failed to describe skill ${skillName}: ${err.status} ${err.message}`, options);
+            printError(`Failed to save skill: ${err.status} ${err.message}`, options);
         });
     }
 };

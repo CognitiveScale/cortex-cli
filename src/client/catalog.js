@@ -13,7 +13,7 @@ const createEndpoints = (baseUri) => {
 module.exports = class Catalog {
 
     constructor(cortexUrl) {
-        this.cortexUrl = constructor;
+        this.cortexUrl = cortexUrl;
         this.endpoints = createEndpoints(cortexUrl);
     }
 
@@ -32,7 +32,7 @@ module.exports = class Catalog {
     }
 
     listSkills(token) {
-        debug('listSkill() => %s', this.endpoints.skills);
+        debug('listSkills() => %s', this.endpoints.skills);
         return request
             .get(this.endpoints.skills)
             .set('Authorization', `Bearer ${token}`)
@@ -108,6 +108,41 @@ module.exports = class Catalog {
         return request
             .post(this.endpoints.types)
             .set('Authorization', `Bearer ${token}`)
-            .send({name, title, description, fields});
+            .send({name, title, description, fields})
+            .then((res) => {
+                if (res.ok) {
+                    return {success: true, message: res.body};
+                }
+                return {success: false, message: res.body, status: res.status};
+            });
+    }
+
+    describeType(token, typeName) {
+        const endpoint = `${this.endpoints.types}/${typeName}`;
+        debug('describeType(%s) => %s', typeName, endpoint);
+        return request
+            .get(endpoint)
+            .set('Authorization', `Bearer ${token}`)
+            .then((res) => {
+                if (res.ok) {
+                    return {success: true, type: res.body};
+                }
+                else {
+                    return {success: false, message: res.body, status: res.status};
+                }
+            });
+    }
+
+    listTypes(token) {
+        debug('listTypes() => %s', this.endpoints.types);
+        return request
+            .get(this.endpoints.types)
+            .set('Authorization', `Bearer ${token}`)
+            .then((res) => {
+                if (res.ok) {
+                    return {success: true, types: res.body.types};
+                }
+                return {success: false, status: res.status, message: res.body};
+            });
     }
 };

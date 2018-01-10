@@ -17,6 +17,7 @@ module.exports.SaveAgentCommand = class SaveAgentCommand {
 
         const agentDefStr = fs.readFileSync(agentDefinition);
         const agent = parseObject(agentDefStr, options);
+        debug('%o', agent);
 
         catalog.saveAgent(profile.token, agent).then((response) => {
             if (response.success) {
@@ -27,7 +28,7 @@ module.exports.SaveAgentCommand = class SaveAgentCommand {
             }
         })
         .catch((err) => {
-            printError(`Failed to describe agent ${agentName}: ${err.status} ${err.message}`, options);
+            printError(`Failed to save agent: ${err.status} ${err.message}`, options);
         });
     }
 };
