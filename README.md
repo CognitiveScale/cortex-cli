@@ -110,8 +110,6 @@ cortex agents list --query "[].{name: name, title: title}"
     - [x] list
     - [x] save [typeDefinition]
     - [x] describe [typeName]
-
-
     - [ ] delete [typeName]
 - [x] skills
     - [x] list
