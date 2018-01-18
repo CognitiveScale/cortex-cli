@@ -30,6 +30,7 @@
     "jmespath": "^0.15.0",
     "joi": "^13.1.0",
     "js-yaml": "^3.10.0",
-    "superagent": "^3.8.2"
+    "superagent": "^3.8.2",
+    "uuid": "^3.2.1"
   }
 }

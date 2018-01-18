@@ -99,13 +99,24 @@ cortex agents list --query "[].{name: name, title: title}"
 - [x] configure
     - [ ] list
 - [ ] deploy
+- [x] functions
+    - [X] list
+    - [ ] describe
+    - [x] invoke
+    - [ ] deploy
+    - [ ] delete
+- [ ] stacks
+   - [ ] list
+   - [ ] describe
+   - [ ] deploy
+   - [ ] delete
 - [x] agents
     - [x] list
     - [x] save [agentDefinition]
     - [x] describe [agentName]
-    - [ ]delete [agentName]
-    - [ ]invoke [serviceName]
-    - [ ]get-service-activation [activationId]
+    - [ ] delete [agentName]
+    - [ ] invoke [serviceName]
+    - [ ] get-service-activation [activationId]
 - [x] types
     - [x] list
     - [x] save [typeDefinition]
@@ -142,4 +153,9 @@ cortex agents list --query "[].{name: name, title: title}"
     - [ ] get-dataframe [datasetName]
     - [ ] get-stream [datasetName]
 - [ ] snapshots
-- [ ] instances
+- [ ] environments
+   - [ ] list
+- [ ] container-registries
+    - [ ] list
+    - [ ] save [registryName]
+    - [ ] delete [registryName]
