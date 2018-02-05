@@ -1,0 +1,3 @@
+builder:
+  image: c12e/nodejs:dev-6.12.0
+  command: "./build.sh CI"
