@@ -1,0 +1,37 @@
+#!/bin/bash
+
+## This script wraps the cortex executable and executes all cortex commands
+## through a container. It mounts the proper directories in places to offer 
+## seemless integration with the container. The user of this script should not 
+## notice a difference between this script and the original cortex-cli binary.
+## This script is intended to minimize the dependencies users need to run the 
+## cortex-cli. 
+
+## Some requirements for this script: 
+## - Users should be able to publically download this script.
+## - Our doc site should point to this script as well.
+## - This script should download the newest container before running.
+
+WORKING_DIR_IN_CONTAINER=/users_current_dir
+USER_IN_CONTAINER=root
+
+function run_docker_based_cortex_commands(){
+	docker run --rm -it \
+		# Mount the current working dir into the containers working dir ...
+		-v ${PWD}/:${WORKING_DIR_IN_CONTAINER} \
+		# Mount the users local cortex config dir into the containers config dir ...
+		-v ${HOME}/.cortex:/${USER_IN_CONTAINER}/.cortex \
+		c12e/cortex-cli ${@}
+}
+
+# - [x] Create .cortex locally if it doesnt exist ... 
+# ... (this is needed so we can mount just the .mount dir into the container)
+test -d ${HOME}/.cortex || mkdir ${HOME}/.cortex
+
+# - [-] make sure user already configured ... if not ... prompt them to configure ... 
+# ... (decided not to do ... this logic should be in the cortex bin not here.)
+# test -f ${HOME}/.cortex/config || run_docker_based_cortex_commands configure
+command -v docker && true || (>&2 echo "docker was not found in the path." && exit 1)
+
+# - [x] Proxy to container with proper mounts ...
+run_docker_based_cortex_commands ${@}

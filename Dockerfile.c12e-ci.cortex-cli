@@ -1,0 +1,13 @@
+FROM c12e/nodejs:6.12.0
+
+WORKDIR /build
+COPY . /build
+RUN apk --no-cache add curl jq make
+
+# - [x] Install cortex yeoman generator (it is included in the package.json)
+RUN npm install -g .
+
+# - [x] Switch to another directory to offer a clean workspace
+WORKDIR /users_current_dir
+
+ENTRYPOINT ["cortex"]
