@@ -1,12 +1,12 @@
 const fs = require('fs');
 const uuid = require('uuid');
 const debug = require('debug')('cortex:cli');
-const { loadProfile } = require('../config');
-const Processors = require('../client/processors');
-const { printSuccess, printError, filterObject, parseObject } = require('./utils');
-const { exec } = require('child_process');
+const {loadProfile} = require('../config');
+const Functions = require('../client/functions');
+const {printSuccess, printError, filterObject, parseObject} = require('./utils');
+const {exec} = require('child_process');
 
-module.exports.ListFunctionsCommand = class ListFunctionsCommand {
+module.exports.ListFunctionsCommand = class {
 
     constructor(program) {
         this.program = program;
@@ -15,25 +15,52 @@ module.exports.ListFunctionsCommand = class ListFunctionsCommand {
     execute(options) {
         debug('%s.executeListFunctions()', options.profile);
         const profile = loadProfile(options.profile);
-        const processors = new Processors(profile.url);
-        const runtimeName = 'cortex/default';
+        const functions = new Functions(profile.url);
 
-        processors.listRuntimeActions(profile.token, runtimeName).then((response) => {
-            if (response.success) {
-                let result = filterObject(response.actions, options);
-                printSuccess(JSON.stringify(result, null, 2), options);
-            }
-            else {
-                printError(`Failed to list functions: ${response.status} ${response.message}`, options);
-            }
-        })
-        .catch((err) => {
-            printError(`Failed to list functions: ${err.status} ${err.message}`, options);
-        });
+        functions.listFunctions(profile.token)
+            .then((response) => {
+                if (response.success) {
+                    let result = filterObject(response.functions, options);
+                    printSuccess(JSON.stringify(result, null, 2), options);
+                }
+                else {
+                    printError(`Failed to list functions: ${response.status} ${response.message}`, options);
+                }
+            })
+            .catch((err) => {
+                printError(`Failed to list functions: ${err.status} ${err.message}`, options);
+            });
     }
 };
 
-module.exports.DeployFunctionCommand = class DeployFunctionCommand {
+module.exports.DescribeFunctionCommand = class {
+
+    constructor(program) {
+        this.program = program;
+    }
+
+    execute(functionName, options) {
+        debug('%s.executeDescribeFunction(%s)', functionName, options.profile);
+        const profile = loadProfile(options.profile);
+        const functions = new Functions(profile.url);
+
+        functions.describeFunction(profile.token, functionName, options.download !== undefined)
+            .then((response) => {
+                if (response.success) {
+                    let result = filterObject(response.function, options);
+                    printSuccess(JSON.stringify(result, null, 2), options);
+                }
+                else {
+                    printError(`Failed to list functions: ${response.status} ${response.message}`, options);
+                }
+            })
+            .catch((err) => {
+                printError(`Failed to list functions: ${err.status} ${err.message}`, options);
+            });
+    }
+};
+
+module.exports.DeployIBMCloudFunctionCommand = class {
 
     constructor(program) {
         this.program = program;
@@ -59,7 +86,7 @@ module.exports.DeployFunctionCommand = class DeployFunctionCommand {
 
         exec(cmd, (err, stdout, stderr) => {
             if (err) {
-                printError(`Failed to deploy function: ${err}`);
+                printError(`Failed to deploy function: ${err}`, options);
                 return;
             }
             printSuccess(`Function ${actionId} deployed`, options);
@@ -67,17 +94,49 @@ module.exports.DeployFunctionCommand = class DeployFunctionCommand {
     }
 };
 
-module.exports.InvokeFunctionCommand = class InvokeFunctionCommand {
+module.exports.DeployFunctionCommand = class {
 
     constructor(program) {
         this.program = program;
     }
 
-    execute(actionId, options) {
-        debug('executeInvokeFunction(%s, %s)', options.profile, actionId);
+    execute(functionName, options) {
+        debug('deployFunction(%s, %s)', options.profile, functionName);
+
         const profile = loadProfile(options.profile);
-        const processors = new Processors(profile.url);
-        const runtimeName = 'cortex/default';
+        const functions = new Functions(profile.url);
+
+        const kind = options.kind;
+        const dockerImage = options.docker;
+        const code = options.code;
+        const memory = parseInt(options.memory);
+        const timeout = parseInt(options.timeout);
+
+        functions.deployFunction(profile.token, functionName, dockerImage, kind, code, memory, timeout)
+            .then((response) => {
+                if (response.success) {
+                    printSuccess(JSON.stringify(response.message, null, 2), options);
+                }
+                else {
+                    printError(`Function deployment failed: ${response.status} ${response.message}`, options);
+                }
+            })
+            .catch((err) => {
+                printError(`Failed to deploy function: ${err.status} ${err.message}`, options);
+            });
+    }
+};
+
+module.exports.InvokeFunctionCommand = class {
+
+    constructor(program) {
+        this.program = program;
+    }
+
+    execute(functionName, options) {
+        debug('executeInvokeFunction(%s, %s)', options.profile, functionName);
+        const profile = loadProfile(options.profile);
+        const functions = new Functions(profile.url);
 
         let params = {};
         if (options.params) {
@@ -87,26 +146,21 @@ module.exports.InvokeFunctionCommand = class InvokeFunctionCommand {
             const paramsStr = fs.readFileSync(options.paramsFile);
             params = parseObject(paramsStr, options);
         }
-        
-        if (!params.token) params.token = profile.token;
-        if (!params.apiEndpoint) params.apiEndpoint = profile.url;
-        if (!params.instanceId) params.instanceId = uuid();
-        if (!params.sessionId) params.sessionId = uuid();
-        if (!params.channelId) params.channelId = uuid();
 
         debug('params: %o', params);
 
-        processors.invokeRuntimeAction(profile.token, runtimeName, actionId, params).then((response) => {
-            if (response.success) {
-                let result = filterObject(response.result, options);
-                printSuccess(JSON.stringify(result, null, 2), options);
-            }
-            else {
-                printError(`Function invocation failed: ${response.status} ${response.message}`, options);
-            }
-        })
-        .catch((err) => {
-            printError(`Failed to invoke function: ${err.status} ${err.message}`, options);
-        });
+        functions.invokeFunction(profile.token, functionName, params)
+            .then((response) => {
+                if (response.success) {
+                    let result = filterObject(response.result, options);
+                    printSuccess(JSON.stringify(result, null, 2), options);
+                }
+                else {
+                    printError(`Function invocation failed: ${response.status} ${response.message}`, options);
+                }
+            })
+            .catch((err) => {
+                printError(`Failed to invoke function: ${err.status} ${err.message}`, options);
+            });
     }
 };

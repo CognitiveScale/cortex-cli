@@ -29,16 +29,17 @@ program
         }
     });
 
-// List Functions
+// Describe Function
 program
-    .command('describe <functionId>')
+    .command('describe <functionName>')
     .description('Describe a function')
     .option('--color [on/off]', 'Turn on/off color output.', 'on')
     .option('--profile [profile]', 'The profile to use', 'default')
     .option('--query [query]', 'A JMESPath query to use in filtering the response data.')
-    .action((options) => {
+    .option('-d, --download', 'Download code binary in response')
+    .action((functionName, options) => {
         try {
-            new ListFunctionsCommand(program).execute(options);
+            new DescribeFunctionCommand(program).execute(functionName, options);
         }
         catch (err) {
             console.error(chalk.red(err.message));
@@ -80,16 +81,18 @@ program
 
 // Deploy Action
 program
-    .command('deploy <functionId>')
+    .command('deploy <functionName>')
     .description('Deploy a function')
     .option('--kind [kind]', 'Function runtime kind') // python:3, python:2, nodejs:default
     .option('--code [code]', 'The code file or code archive to deploy')
     .option('--docker [image]', 'Docker image to use as the runner')
+    .option('--memory [memory]', 'Function memory limit in megabytes', '256')
+    .option('--timeout [timeout]', 'Execution timeout in milliseconds', '60000')
     .option('--color [on/off]', 'Turn on/off color output.', 'on')
     .option('--profile [profile]', 'The profile to use', 'default')
-    .action((functionId, options) => {
+    .action((functionName, options) => {
         try {
-            new DeployFunctionCommand(program).execute(functionId, options);
+            new DeployFunctionCommand(program).execute(functionName, options);
         }
         catch (err) {
             console.error(chalk.red(err.message));

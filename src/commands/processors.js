@@ -181,6 +181,12 @@ module.exports.InvokeActionCommand = class InvokeActionCommand {
             params = parseObject(paramsStr, options);
         }
 
+        if (!params.token) params.token = profile.token;
+        if (!params.apiEndpoint) params.apiEndpoint = profile.url;
+        if (!params.instanceId) params.instanceId = uuid();
+        if (!params.sessionId) params.sessionId = uuid();
+        if (!params.channelId) params.channelId = uuid();
+
         debug('params: %o', params);
 
         processors.invokeRuntimeAction(profile.token, runtimeName, actionId, params).then((response) => {

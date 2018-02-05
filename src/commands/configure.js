@@ -7,10 +7,11 @@ const prompt = require('co-prompt');
 const chalk = require('chalk');
 const Auth = require('../client/auth');
 const { readConfig, writeConfig } = require('../config');
+const { printSuccess, printError } = require('./utils');
 
 const DEFAULT_CORTEX_URL = 'https://api.cortex.insights.ai';
 
-module.exports = class ConfigureCommand {
+module.exports.ConfigureCommand = class ConfigureCommand {
 
     constructor(program) {
         this.program = program;
@@ -79,5 +80,29 @@ module.exports = class ConfigureCommand {
         }
 
         writeConfig(config);
+    }
+};
+
+module.exports.ListConfigurationCommand = class ListConfigurationCommand {
+
+    constructor(program) {
+        this.program = program;
+    }
+
+    execute(options) {
+        debug('listing configuration for profile: %s', options.profile);
+        
+        const config = readConfig();
+        const profile = config[options.profile];
+
+        if (profile === undefined) {
+            printError(`No profile named ${options.profile}.  Run cortex configure --profile ${options.profile} to create it.`, options);
+            return;
+        }
+
+        printSuccess(`Profile: ${options.profile}`, options);
+        printSuccess(`Cortex URL: ${profile.url}`, options);
+        printSuccess(`Account: ${profile.tenantId}`, options);
+        printSuccess(`Username: ${profile.username}`, options);
     }
 };

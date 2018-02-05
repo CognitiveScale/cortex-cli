@@ -3,7 +3,7 @@
 const program = require('commander');
 
 program
-    .version('5.0.0alpha1')
+    .version('5.0.0alpha1', '-v, --version')
     .description('Cortex CLI')
     .command('configure', 'Configure the Cortex CLI')
     .command('agents [cmd]', 'Work with Cortex Agents')

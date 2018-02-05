@@ -24,7 +24,7 @@ cortex <command> [sub-command] [options]
 ### Common Options
 
 - -h, --help
-- -V, --version
+- -v, --version
 
 ### Getting Started
 ```bash
@@ -97,14 +97,14 @@ cortex agents list --query "[].{name: name, title: title}"
 ### Command List and Implementation Status:
 
 - [x] configure
-    - [ ] list
+    - [x] list
 - [ ] deploy
 - [x] functions
-    - [X] list
-    - [ ] describe
-    - [x] invoke
-    - [ ] deploy
-    - [ ] delete
+    - [x] list
+    - [X] describe [functionName]
+    - [x] invoke [functionName]
+    - [X] deploy [functionName]
+    - [ ] delete [functionName]
 - [ ] stacks
    - [ ] list
    - [ ] describe
@@ -115,8 +115,8 @@ cortex agents list --query "[].{name: name, title: title}"
     - [x] save [agentDefinition]
     - [x] describe [agentName]
     - [ ] delete [agentName]
-    - [ ] invoke [serviceName]
-    - [ ] get-service-activation [activationId]
+    - [x] invoke [serviceName]
+    - [x] get-service-activation [activationId]
 - [x] types
     - [x] list
     - [x] save [typeDefinition]
@@ -139,6 +139,10 @@ cortex agents list --query "[].{name: name, title: title}"
     - [ ] download
     - [ ] describe
 - [ ] jobs
+    - [ ] list
+    - [ ] save
+    - [ ] describe
+    - [ ] delete
 - [ ] connections
     - [ ] list
     - [ ] save [connectionDefinition]
@@ -155,6 +159,9 @@ cortex agents list --query "[].{name: name, title: title}"
 - [ ] snapshots
 - [ ] environments
    - [ ] list
+   - [ ] save [environmentDefinition]
+   - [ ] delete [environmentDefinition]
+   - [ ] describe [environmentName]
 - [ ] container-registries
     - [ ] list
     - [ ] save [registryName]
