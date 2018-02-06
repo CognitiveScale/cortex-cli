@@ -10,10 +10,8 @@ npm install -g .
 ```
 
 #### Docker-Based Executable
-
-- [ ] Todo add link after it is available ..
 ```
-sudo curl -L <link-to-publicly-downloadable-script> -o /usr/local/bin/cortex && sudo chmod +x /usr/local/bin/cortex
+docker run -v /usr/local/bin/:/bootstrap_bin_path --rm c12e/cortex-cli bootstrap
 ```
 
 **NOTE:** When we have a release of this module, it will be published to npm.org for distribution.
