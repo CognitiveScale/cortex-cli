@@ -6,6 +6,7 @@ program
     .version('5.0.0alpha1', '-v, --version')
     .description('Cortex CLI')
     .command('configure', 'Configure the Cortex CLI')
+    .command('project [cmd]', 'Work with a related collection of Cortex contributions')
     .command('agents [cmd]', 'Work with Cortex Agents')
     .command('skills [cmd]', 'Work with Cortex Skills')
     .command('types [cmd]', 'Work with Cortex Types')
