@@ -1,5 +1,7 @@
 #!/bin/bash
 
+## Build: <<VERSION>>
+
 ## This script wraps the cortex executable and executes all cortex commands
 ## through a container. It mounts the proper directories in places to offer 
 ## seemless integration with the container. The user of this script should not 

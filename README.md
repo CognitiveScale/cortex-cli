@@ -11,8 +11,10 @@ npm install -g .
 
 #### Docker-Based Executable
 ```
-docker run -v /usr/local/bin/:/bootstrap_bin_path --rm c12e/cortex-cli bootstrap
+docker run --rm c12e/cortex-cli bootstrap > /usr/local/bin/cortex ; chmod +x /usr/local/bin/cortex
 ```
+**NOTE:** /usr/local/bin can be replaced with a directory on the user's path
+
 
 **NOTE:** When we have a release of this module, it will be published to npm.org for distribution.
 
