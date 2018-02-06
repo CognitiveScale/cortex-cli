@@ -56,7 +56,7 @@ module.exports.ListAgentsCommand = class ListAgentsCommand {
             }
         })
         .catch((err) => {
-            printError(`Failed to list agents ${agentName}: ${err.status} ${err.message}`, options);
+            printError(`Failed to list agents: ${err.status} ${err.message}`, options);
         });
     }
 };
