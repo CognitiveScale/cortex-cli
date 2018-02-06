@@ -1,0 +1,8 @@
+FROM c12e/nodejs:6.12.0
+
+COPY . /from_ci_cd_build
+
+# Make sure the cortex executable is on the path ... 
+RUN ln -s /from_ci_cd_build/bin/cortex.js /usr/local/bin/cortex
+
+ENTRYPOINT ["cortex"]

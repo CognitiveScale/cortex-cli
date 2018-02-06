@@ -2,9 +2,18 @@
 A command line utility for the Cortex Platform.
 
 ### Installation:
+
+#### From Source:
 Once you have the code pulled, run this command from the cortex-cli directory:
 ```bash
 npm install -g .
+```
+
+#### Docker-Based Executable
+
+- [ ] Todo add link after it is available ..
+```
+sudo curl -L <link-to-publicly-downloadable-script> -o /usr/local/bin/cortex && sudo chmod +x /usr/local/bin/cortex
 ```
 
 **NOTE:** When we have a release of this module, it will be published to npm.org for distribution.
