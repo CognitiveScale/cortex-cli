@@ -1,10 +1,24 @@
+/*
+ * Copyright 2018 Cognitive Scale, Inc. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the “License”);
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an “AS IS” BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 const fs = require('fs');
-const uuid = require('uuid');
 const debug = require('debug')('cortex:cli');
 const {loadProfile} = require('../config');
 const Functions = require('../client/functions');
 const {printSuccess, printError, filterObject, parseObject} = require('./utils');
-const {exec} = require('child_process');
 
 module.exports.ListFunctionsCommand = class {
 
@@ -57,40 +71,6 @@ module.exports.DescribeFunctionCommand = class {
             .catch((err) => {
                 printError(`Failed to list functions: ${err.status} ${err.message}`, options);
             });
-    }
-};
-
-module.exports.DeployIBMCloudFunctionCommand = class {
-
-    constructor(program) {
-        this.program = program;
-    }
-
-    execute(actionId, options) {
-        debug('deployFunction(%s, %s)', options.profile, actionId);
-        const profile = loadProfile(options.profile);
-        const kind = options.kind;
-        const dockerImage = options.docker;
-        const code = options.code;
-
-        let cmd = `bx wsk action update ${actionId} ${code}`;
-        if (kind) {
-            cmd += ` --kind ${kind}`;
-        }
-
-        if (dockerImage) {
-            cmd += ` --docker ${dockerImage}`;
-        }
-
-        debug('deploy command: %s', cmd);
-
-        exec(cmd, (err, stdout, stderr) => {
-            if (err) {
-                printError(`Failed to deploy function: ${err}`, options);
-                return;
-            }
-            printSuccess(`Function ${actionId} deployed`, options);
-        });
     }
 };
 
