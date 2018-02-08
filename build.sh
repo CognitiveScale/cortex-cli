@@ -4,6 +4,7 @@
 
 IMAGE_NAME=$(git remote -v | grep "(fetch)" | sed -E "s/.*git@.*:.*\/(.*)\.git.*/\1/")
 BRANCH=$(git symbolic-ref --short -q HEAD)
+VERSION=$(git describe --long --always --dirty --match='v*.*' | sed 's/v//; s/-/./')
 
 function error_exit {
     echo "$1" >&2   ## Send message to stderr. Exclude >&2 if you don't want it that way.
@@ -12,6 +13,7 @@ function error_exit {
 
 function local_build(){
   npm install || error_exit "Failed to run npm install"
+  echo ${VERSION} > version.txt
 }
 
 # This runs on host os e.g MAC/Windows
@@ -26,11 +28,11 @@ function local_docker(){
 function docker_build(){
     npm config set loglevel warn
     npm install --silent
+    echo ${VERSION} > version.txt
 }
 
 ## MAIN
 cd "$(dirname "$0")"
-VERSION=$(git describe --long --always --dirty --match='v*.*' | sed 's/v//; s/-/./')
 echo "##### BUILDING BRANCH[${BRANCH}],VERSION[${VERSION}] of IMAGE[${IMAGE_NAME}] ######"
 case ${1-local} in
   CI)
