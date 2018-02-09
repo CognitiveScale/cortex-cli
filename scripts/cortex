@@ -38,7 +38,7 @@ USER_IN_CONTAINER=root
 
 function run_docker_based_cortex_commands(){
 	# Attempt to pull the latest cortex cli?
-	# docker pull c12e/cortex-cli 1>/dev/null 2>/dev/null
+	# docker pull c12e/cortex-cli:<<VERSION>> 1>/dev/null 2>/dev/null
 
 	# Make sure the working dir in the container has the same name as the 
 	#	 users current dir (yeoman uses the name of the current dir as the 
@@ -50,7 +50,7 @@ function run_docker_based_cortex_commands(){
 		--workdir ${WORKING_DIR_IN_CONTAINER} \
 		-v ${PWD}/:${WORKING_DIR_IN_CONTAINER} \
 		-v ${HOME}/.cortex:/${USER_IN_CONTAINER}/.cortex \
-		c12e/cortex-cli ${@}
+		c12e/cortex-cli:<<VERSION>> ${@}
 
 }
 
