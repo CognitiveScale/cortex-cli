@@ -106,20 +106,19 @@ module.exports.ListConfigurationCommand = class ListConfigurationCommand {
     }
 
     execute(options) {
-        const opts = options;
-        debug('listing configuration for profile: %s', opts.profile);
+        debug('listing configuration for profile: %s', options.profile);
         
         const config = readConfig();
-        const profile = config[opts.profile];
+        const profile = config[options.profile];
 
         if (profile === undefined) {
-            printError(`No profile named ${opts.profile}.  Run cortex configure --profile ${opts.profile} to create it.`, opts);
+            printError(`No profile named ${options.profile}.  Run cortex configure --profile ${options.profile} to create it.`, options);
             return;
         }
 
-        printSuccess(`Profile: ${options.profile}`, opts);
-        printSuccess(`Cortex URL: ${profile.url}`, opts);
-        printSuccess(`Account: ${profile.tenantId}`, opts);
-        printSuccess(`Username: ${profile.username}`, opts);
+        printSuccess(`Profile: ${options.profile}`, options);
+        printSuccess(`Cortex URL: ${profile.url}`, options);
+        printSuccess(`Account: ${profile.tenantId}`, options);
+        printSuccess(`Username: ${profile.username}`, options);
     }
 };
