@@ -8,7 +8,10 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+ssh://git@bitbucket.org/cognitivescale/cortex-cli.git"
+    "url": "https://github.com/CognitiveScale/cortex-cli.git"
+  },
+  "publishConfig": {
+    "access": "public"
   },
   "keywords": [
     "cognitivescale",
@@ -19,8 +22,8 @@
     "cortex": "./bin/cortex.js"
   },
   "author": "CognitiveScale",
-  "license": "ISC",
-  "homepage": "https://bitbucket.org/cognitivescale/cortex-cli#readme",
+  "license": "Apache 2.0",
+  "homepage": "https://github.com/CognitiveScale/cortex-cli",
   "dependencies": {
     "chalk": "^2.3.0",
     "co": "^4.6.0",
