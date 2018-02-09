@@ -1,0 +1,67 @@
+#!/bin/bash
+
+# Copyright 2018 Cognitive Scale, Inc. All Rights Reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the “License”);
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#   http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an “AS IS” BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+## Build: <<VERSION>>
+
+## This script wraps the cortex executable and executes all cortex commands
+## through a container. It mounts the proper directories in places to offer 
+## seemless integration with the container. The user of this script should not 
+## notice a difference between this script and the original cortex-cli binary.
+## This script is intended to minimize the dependencies users need to run the 
+## cortex-cli. 
+
+## Some requirements for this script: 
+## - Users should be able to publically download this script.
+## - Our doc site should point to this script as well.
+## - This script should download the newest container before running.
+
+## PLEASE NOTE: 
+## - This script assumes that a later version of docker is being used ...
+##    ... the one were when you write as root in the container that has a mounted
+##    volume, it does not appear as root on your local file system.
+
+WORKING_DIR_IN_CONTAINER="/workspace/$(basename ${PWD})"
+USER_IN_CONTAINER=root
+
+function run_docker_based_cortex_commands(){
+	# Attempt to pull the latest cortex cli?
+	# docker pull c12e/cortex-cli 1>/dev/null 2>/dev/null
+
+	# Make sure the working dir in the container has the same name as the 
+	#	 users current dir (yeoman uses the name of the current dir as the 
+	# 	default project name)
+	# Mount the current working dir into the containers working dir ...
+	# Mount the users local cortex config dir into the containers config dir ...
+	
+	docker run --rm -it \
+		--workdir ${WORKING_DIR_IN_CONTAINER} \
+		-v ${PWD}/:${WORKING_DIR_IN_CONTAINER} \
+		-v ${HOME}/.cortex:/${USER_IN_CONTAINER}/.cortex \
+		c12e/cortex-cli ${@}
+
+}
+
+# - [x] Create .cortex locally if it doesnt exist ... 
+# ... (this is needed so we can mount just the .mount dir into the container)
+test -d ${HOME}/.cortex || mkdir ${HOME}/.cortex
+
+# - [-] make sure user already configured ... if not ... prompt them to configure ... 
+# ... (decided not to do ... this logic should be in the cortex bin not here.)
+# test -f ${HOME}/.cortex/config || run_docker_based_cortex_commands configure
+command -v docker 1>/dev/null && true || (>&2 echo "docker was not found in the path." && exit 1)
+
+# - [x] Proxy to container with proper mounts ...
+run_docker_based_cortex_commands ${@}

@@ -1,3 +1,6 @@
+# This should be built when running a gocd job upon build and not checked in.
+version.txt
+
 # Created by .ignore support plugin (hsz.mobi)
 ### Node template
 # Logs

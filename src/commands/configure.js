@@ -1,3 +1,19 @@
+/*
+ * Copyright 2018 Cognitive Scale, Inc. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the “License”);
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an “AS IS” BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 const os = require('os');
 const fs = require('fs');
 const path = require('path');
@@ -7,10 +23,11 @@ const prompt = require('co-prompt');
 const chalk = require('chalk');
 const Auth = require('../client/auth');
 const { readConfig, writeConfig } = require('../config');
+const { printSuccess, printError } = require('./utils');
 
 const DEFAULT_CORTEX_URL = 'https://api.cortex.insights.ai';
 
-module.exports = class ConfigureCommand {
+module.exports.ConfigureCommand = class ConfigureCommand {
 
     constructor(program) {
         this.program = program;
@@ -79,5 +96,30 @@ module.exports = class ConfigureCommand {
         }
 
         writeConfig(config);
+    }
+};
+
+module.exports.ListConfigurationCommand = class ListConfigurationCommand {
+
+    constructor(program) {
+        this.program = program;
+    }
+
+    execute(options) {
+        const opts = options;
+        debug('listing configuration for profile: %s', opts.profile);
+        
+        const config = readConfig();
+        const profile = config[opts.profile];
+
+        if (profile === undefined) {
+            printError(`No profile named ${opts.profile}.  Run cortex configure --profile ${opts.profile} to create it.`, opts);
+            return;
+        }
+
+        printSuccess(`Profile: ${options.profile}`, opts);
+        printSuccess(`Cortex URL: ${profile.url}`, opts);
+        printSuccess(`Account: ${profile.tenantId}`, opts);
+        printSuccess(`Username: ${profile.username}`, opts);
     }
 };

@@ -18,85 +18,108 @@
 
 const program = require('commander');
 const chalk = require('chalk');
-const { SaveAgentCommand, ListAgentsCommand, DescribeAgentCommand, InvokeAgentServiceCommand, GetServiceActivationCommand } = require('../src/commands/agents');
+const { 
+    ListRuntimesCommand, 
+    ListRuntimeTypesCommand, 
+    ListActionsCommand, 
+    DescribeRuntimeCommand, 
+    DeleteRuntimeCommand, 
+    InvokeActionCommand 
+} = require('../src/commands/processors');
 
-program.description('Work with Cortex Agents');
+program.description('Work with the Cortex Processor Runtime');
     
-// Save Agent
+// List Processor Runtime Types
 program
-    .command('save <agentDefinition>')
-    .description('Save an agent definition')
-    .option('--color [on/off]', 'Turn on/off color output.', 'on')
-    .option('--profile [profile]', 'The profile to use', 'default')
-    .option('-y, --yaml', 'Use YAML for agent definition format')
-    .action((agentDefinition, options) => {
-        try {
-            new SaveAgentCommand(program).execute(agentDefinition, options);
-        }
-        catch (err) {
-            console.error(chalk.red(err.message));
-        }
-    });
-
-// List Agents
-program
-    .command('list')
-    .description('List agent definitions')
+    .command('list-runtime-types')
+    .description('List available processor runtime types')
     .option('--color [on/off]', 'Turn on/off color output.', 'on')
     .option('--profile [profile]', 'The profile to use', 'default')
     .option('--query [query]', 'A JMESPath query to use in filtering the response data.')
     .action((options) => {
         try {
-            new ListAgentsCommand(program).execute(options);
+            new ListRuntimeTypesCommand(program).execute(options);
         }
         catch (err) {
             console.error(chalk.red(err.message));
         }
     });
 
-// Describe Agent
+// List Processor Runtimes
 program
-    .command('describe <agentName>')
-    .description('Describe agent')
+    .command('list-runtimes')
+    .description('List configured processor runtimes')
     .option('--color [on/off]', 'Turn on/off color output.', 'on')
     .option('--profile [profile]', 'The profile to use', 'default')
     .option('--query [query]', 'A JMESPath query to use in filtering the response data.')
-    .action((agentName, options) => {
+    .action((options) => {
         try {
-            new DescribeAgentCommand(program).execute(agentName, options);
+            new ListRuntimesCommand(program).execute(options);
         }
         catch (err) {
             console.error(chalk.red(err.message));
         }
     });
 
-// Invoke Agent Service
+// Describe Processor Runtime
 program
-    .command('invoke <agentName> <serviceName>')
-    .description('Invoke an agent service')
+    .command('describe <runtimeName>')
+    .description('Describe a processor runtime')
     .option('--color [on/off]', 'Turn on/off color output.', 'on')
     .option('--profile [profile]', 'The profile to use', 'default')
+    .option('--query [query]', 'A JMESPath query to use in filtering the response data.')
+    .action((runtimeName, options) => {
+        try {
+            new DescribeRuntimeCommand(program).execute(runtimeName, options);
+        }
+        catch (err) {
+            console.error(chalk.red(err.message));
+        }
+    });
+
+// Delete Processor Runtime
+program
+    .command('delete <runtimeName>')
+    .description('Delete a processor runtime')
+    .option('--color [on/off]', 'Turn on/off color output.', 'on')
+    .option('--profile [profile]', 'The profile to use', 'default')
+    .action((runtimeName, options) => {
+        try {
+            new DeleteRuntimeCommand(program).execute(runtimeName, options);
+        }
+        catch (err) {
+            console.error(chalk.red(err.message));
+        }
+    });
+
+// List Actions
+program
+    .command('list-actions <runtimeName>')
+    .description('List the available processor runtime actions')
+    .option('--color [on/off]', 'Turn on/off color output.', 'on')
+    .option('--profile [profile]', 'The profile to use', 'default')
+    .option('--query [query]', 'A JMESPath query to use in filtering the response data.')
+    .action((runtimeName, options) => {
+        try {
+            new ListActionsCommand(program).execute(runtimeName, options);
+        }
+        catch (err) {
+            console.error(chalk.red(err.message));
+        }
+    });
+
+// Invoke Action
+program
+    .command('invoke <runtimeName> <actionId>')
+    .description('Invoke a processor action')
+    .option('--color [on/off]', 'Turn on/off color output.', 'on')
+    .option('--profile [profile]', 'The profile to use', 'default')
+    .option('--query [query]', 'A JMESPath query to use in filtering the response data.')
     .option('--params [params]', 'JSON params to send to the action')
     .option('--params-file [paramsFile]', 'A file containing either JSON or YAML formatted params')
-    .action((agentName, serviceName, options) => {
+    .action((runtimeName, actionId, options) => {
         try {
-            new InvokeAgentServiceCommand(program).execute(agentName, serviceName, options);
-        }
-        catch (err) {
-            console.error(chalk.red(err.message));
-        }
-    });
-
-//Get Agent Service Activation
-program
-    .command('get-service-activation <activationId>')
-    .description('Get service activation')
-    .option('--color [on/off]', 'Turn on/off color output.', 'on')
-    .option('--profile [profile]', 'The profile to use', 'default')
-    .option('--query [query]', 'A JMESPath query to use in filtering the response data.')
-    .action((activationId, options) => {
-        try {
-            new GetServiceActivationCommand(program).execute(activationId, options);
+            new InvokeActionCommand(program).execute(runtimeName, actionId, options);
         }
         catch (err) {
             console.error(chalk.red(err.message));

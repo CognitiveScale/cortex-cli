@@ -1,0 +1,10 @@
+.dockerignore
+package.json
+README.md
+Dockerfile.c12e-ci.cortex-cli
+c12e-ci.yml
+build.sh
+.gitignore
+.git/**/*
+.git/*
+.git

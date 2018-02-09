@@ -17,25 +17,26 @@
  */
 
 const program = require('commander');
-const { ConfigureCommand, ListConfigurationCommand } = require('../src/commands/configure');
+const chalk = require('chalk');
+const {
+    GenerateProjectCommand
+} = require('../src/commands/project');
 
-program.description('Configure the Cortex CLI');
+program.description('Work with a related collection of Cortex contributions');
 
-let cmd = undefined;
-
+// Generate Project
 program
+    .command('generate')
+    .description('Generates the structure and top level build script for a project')
     .option('--color [on/off]', 'Turn on/off color output.', 'on')
-    .option('--profile [profile]', 'The profile to configure', 'default');
-
-program
-    .command('list')
+    .option('--profile [profile]', 'The profile to use', 'default')
     .action((options) => {
-        cmd = 'list';
-        new ListConfigurationCommand(program).execute({profile: program.profile, color: program.color});
+        try {
+            new GenerateProjectCommand(program).execute(options);
+        }
+        catch (err) {
+            console.error(chalk.red(err.message));
+        }
     });
 
 program.parse(process.argv);
-
-if (cmd === undefined) {
-    new ConfigureCommand(program).execute({profile: program.profile, color: program.color});
-}
