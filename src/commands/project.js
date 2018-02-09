@@ -27,7 +27,7 @@ module.exports.GenerateProjectCommand = class GenerateProjectCommand {
     execute(options) {
         debug('%s.generateProject()', options.profile);
         const yenv = yeoman.createEnv();
-        yenv.register(require.resolve('generator-cortex'), 'cortex:app');
+        yenv.register(require.resolve('@c12e/generator-cortex'), 'cortex:app');
         // TODO: figure out which parameters to bubble up to the CLI,
         // and plumb the values through to the yeoman generator.
         yenv.run('cortex:app', { });
