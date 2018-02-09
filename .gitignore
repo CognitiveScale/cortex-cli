@@ -7,7 +7,6 @@ version.txt
 logs
 *.log
 npm-debug.log*
-package-lock.json
 
 # Runtime data
 pids
