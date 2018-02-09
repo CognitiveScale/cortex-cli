@@ -1,5 +1,5 @@
 #!/bin/bash -eu
-# wget https://bitbucket.org/cognitivescale/cortex-local/raw/cli-install/bootstrap/simple-cli-install.sh --user=colton_lee --password='*******'
+
 IMAGE_NAME='c12e/cortex-cli'
 IMAGE_TAG='latest-cortex-dev'
 FQ_IMAGE_NAME="${IMAGE_NAME}:${IMAGE_TAG}"
