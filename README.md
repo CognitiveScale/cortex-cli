@@ -1,7 +1,7 @@
 # Cortex CLI
 A command line utility for the Cortex Platform.
 
-[![Build Status](https://secure.travis-ci.org/CognitiveScale/generator-cortex.svg)](http://travis-ci.org/CognitiveScale/generator-cortex)
+[![Build Status](https://secure.travis-ci.org/CognitiveScale/cortex-cli.svg)](http://travis-ci.org/CognitiveScale/cortex-cli)
 
 ### Installation:
 
