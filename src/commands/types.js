@@ -18,7 +18,7 @@ const fs = require('fs');
 const debug = require('debug')('cortex:cli');
 const { loadProfile } = require('../config');
 const Catalog = require('../client/catalog');
-const { printSuccess, printError, filterObject, parseObject } = require('./utils');
+const { printSuccess, printError, filterObject, parseObject, printTable } = require('./utils');
 
 module.exports.SaveTypeCommand = class SaveTypeCommand {
 
@@ -27,14 +27,14 @@ module.exports.SaveTypeCommand = class SaveTypeCommand {
     }
 
     execute(typeDefinition, options) {
-        debug('%s.executeSaveType(%s)', options.profile, typeDefinition);
         const profile = loadProfile(options.profile);
-        const catalog = new Catalog(profile.url);
+        debug('%s.executeSaveType(%s)', profile.name, typeDefinition);
 
         const typeDefStr = fs.readFileSync(typeDefinition);
         const type = parseObject(typeDefStr, options);
         debug('%o', type);
 
+        const catalog = new Catalog(profile.url);
         catalog.saveType(profile.token, type).then((response) => {
             if (response.success) {
                 printSuccess(`Type definition saved`, options);
@@ -56,14 +56,28 @@ module.exports.ListTypesCommand = class ListTypesCommand {
     }
 
     execute(options) {
-        debug('%s.executeListTypes()', options.profile);
         const profile = loadProfile(options.profile);
+        debug('%s.executeListTypes()', profile.name);
+
         const catalog = new Catalog(profile.url);
-        
         catalog.listTypes(profile.token).then((response) => {
             if (response.success) {
                 let result = filterObject(response.types, options);
                 printSuccess(JSON.stringify(result, null, 2), options);
+
+                if (options.json) {
+                    let result = filterObject(response.types, options);
+                    printSuccess(JSON.stringify(result, null, 2), options);
+                }
+                else {
+                    const tableSpec = [
+                        { column: 'Title', field: 'title', width: 50 },
+                        { column: 'Name', field: 'name', width: 50 },
+                        { column: 'Version', field: '_version', width: 12 }
+                    ];
+
+                    printTable(tableSpec, response.types);
+                }
             }
             else {
                 printError(`Failed to list types: ${response.status} ${response.message}`, options);
@@ -82,10 +96,10 @@ module.exports.DescribeTypeCommand = class DescribeTypeCommand {
     }
 
     execute(typeName, options) {
-        debug('%s.executeDescribeType(%s)', options.profile, typeName);
         const profile = loadProfile(options.profile);
-        const catalog = new Catalog(profile.url);
+        debug('%s.executeDescribeType(%s)', profile.name, typeName);
 
+        const catalog = new Catalog(profile.url);
         catalog.describeType(profile.token, typeName).then((response) => {
             if (response.success) {
                 let result = filterObject(response.type, options);
@@ -99,4 +113,4 @@ module.exports.DescribeTypeCommand = class DescribeTypeCommand {
             printError(`Failed to describe type ${typeName}: ${err.status} ${err.message}`, options);
         });
     }
-}
+};

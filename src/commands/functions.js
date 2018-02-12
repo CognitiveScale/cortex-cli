@@ -16,9 +16,9 @@
 
 const fs = require('fs');
 const debug = require('debug')('cortex:cli');
-const {loadProfile} = require('../config');
+const { loadProfile } = require('../config');
 const Functions = require('../client/functions');
-const {printSuccess, printError, filterObject, parseObject} = require('./utils');
+const { printSuccess, printError, filterObject, parseObject, printTable } = require('./utils');
 
 module.exports.ListFunctionsCommand = class {
 
@@ -27,15 +27,27 @@ module.exports.ListFunctionsCommand = class {
     }
 
     execute(options) {
-        debug('%s.executeListFunctions()', options.profile);
         const profile = loadProfile(options.profile);
-        const functions = new Functions(profile.url);
+        debug('%s.executeListFunctions()', profile.name);
 
+        const functions = new Functions(profile.url);
         functions.listFunctions(profile.token)
             .then((response) => {
                 if (response.success) {
-                    let result = filterObject(response.functions, options);
-                    printSuccess(JSON.stringify(result, null, 2), options);
+                    if (options.json) {
+                        let result = filterObject(response.functions, options);
+                        printSuccess(JSON.stringify(result, null, 2), options);
+                    }
+                    else {
+                        const tableSpec = [
+                            { column: 'Name', field: 'name', width: 50 },
+                            { column: 'Image', field: 'image', width: 50 },
+                            { column: 'Kind', field: 'kind', width: 25 },
+                            { column: 'Created On', field: 'createdAt', width: 26 }
+                        ];
+
+                        printTable(tableSpec, response.functions);
+                    }
                 }
                 else {
                     printError(`Failed to list functions: ${response.status} ${response.message}`, options);
@@ -54,10 +66,10 @@ module.exports.DescribeFunctionCommand = class {
     }
 
     execute(functionName, options) {
-        debug('%s.executeDescribeFunction(%s)', functionName, options.profile);
         const profile = loadProfile(options.profile);
-        const functions = new Functions(profile.url);
+        debug('%s.executeDescribeFunction(%s)', profile.name, functionName);
 
+        const functions = new Functions(profile.url);
         functions.describeFunction(profile.token, functionName, options.download !== undefined)
             .then((response) => {
                 if (response.success) {
@@ -81,10 +93,8 @@ module.exports.DeployFunctionCommand = class {
     }
 
     execute(functionName, options) {
-        debug('deployFunction(%s, %s)', options.profile, functionName);
-
         const profile = loadProfile(options.profile);
-        const functions = new Functions(profile.url);
+        debug('%s.deployFunction(%s)', profile.name, functionName);
 
         const kind = options.kind;
         const dockerImage = options.docker;
@@ -92,6 +102,7 @@ module.exports.DeployFunctionCommand = class {
         const memory = parseInt(options.memory);
         const timeout = parseInt(options.timeout);
 
+        const functions = new Functions(profile.url);
         functions.deployFunction(profile.token, functionName, dockerImage, kind, code, memory, timeout)
             .then((response) => {
                 if (response.success) {
@@ -114,9 +125,8 @@ module.exports.InvokeFunctionCommand = class {
     }
 
     execute(functionName, options) {
-        debug('executeInvokeFunction(%s, %s)', options.profile, functionName);
         const profile = loadProfile(options.profile);
-        const functions = new Functions(profile.url);
+        debug('%s.executeInvokeFunction(%s)', profile.name, functionName);
 
         let params = {};
         if (options.params) {
@@ -129,6 +139,7 @@ module.exports.InvokeFunctionCommand = class {
 
         debug('params: %o', params);
 
+        const functions = new Functions(profile.url);
         functions.invokeFunction(profile.token, functionName, params)
             .then((response) => {
                 if (response.success) {
