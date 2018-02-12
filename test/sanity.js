@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 const commander = require('commander');
 const { ListProfilesCommand } = require('../src/commands/configure');
 
