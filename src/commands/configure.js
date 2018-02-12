@@ -84,7 +84,6 @@ module.exports.ConfigureCommand = class {
             }
         });
     }
-
     saveConfig(config, profileName, url, account, username, token) {
         config.setProfile(profileName, {url, account, username, token});
         config.currentProfile = profileName;
