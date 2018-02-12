@@ -15,13 +15,13 @@
  */
 
 const commander = require('commander');
-const { ListConfigurationCommand } = require('../src/commands/configure');
+const { ListProfilesCommand } = require('../src/commands/configure');
 
 describe('sanity check', function () {
     it('responds to help', function sanity(done) {
         const program = new commander.Command();
-        const command = new ListConfigurationCommand(program);
-        command.execute({profile: 'test'});
+        const command = new ListProfilesCommand(program);
+        command.execute({});
         done();
     });
 });
