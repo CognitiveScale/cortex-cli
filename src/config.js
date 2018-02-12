@@ -18,6 +18,7 @@ const os = require('os');
 const fs = require('fs');
 const path = require('path');
 const Joi = require('joi');
+const debug = require('debug')('cortex:config');
 
 module.exports.readConfig = readConfig = function() {
     const configDir = path.join(os.homedir(), '.cortex');
@@ -27,10 +28,20 @@ module.exports.readConfig = readConfig = function() {
 
     const configFile = path.join(configDir, 'config');
     if (fs.existsSync(configFile)) {
-        return JSON.parse(fs.readFileSync(configFile));
+        // deal with config versions
+        const configObj = JSON.parse(fs.readFileSync(configFile));
+        if (configObj.version && configObj.version === '2') {
+            // version 2
+            // debug('loaded v2 config: %o', configObj);
+            return new Config(configObj);
+        }
+
+        // version 1
+        // debug('loaded v1 config: %o', configObj);
+        return new Config({profiles: configObj});
     }
 
-    return {};
+    return undefined;
 };
 
 const ProfileSchema = Joi.object().keys({
@@ -43,11 +54,11 @@ const ProfileSchema = Joi.object().keys({
 
 class Profile {
 
-    constructor(name, {url, username, tenantId, token}) {
+    constructor(name, {url, username, tenantId, account, token}) {
         this.name = name;
         this.url = url;
         this.username = username;
-        this.account = tenantId;
+        this.account = tenantId || account;
         this.token = token;
     }
 
@@ -58,19 +69,73 @@ class Profile {
         }
         return this;
     }
+
+    toJSON() {
+        return {url: this.url, username: this.username, account: this.account, token: this.token};
+    }
+}
+
+const ConfigSchema = Joi.object().keys({
+    version: Joi.string().optional().default('1'),
+    profiles: Joi.object().optional(),
+    currentProfile: Joi.string().optional().default('default')
+});
+
+class Config {
+
+    constructor({version, profiles, currentProfile}) {
+        this.version = version || '2';
+        this.profiles = profiles || {};
+        this.currentProfile = currentProfile;
+
+        for (let name of Object.keys(this.profiles)) {
+            this.profiles[name] = new Profile(name, this.profiles[name]);
+        }
+    }
+
+    getProfile(name) {
+        const profile = this.profiles[name];
+        if (!profile) {
+            return null;
+        }
+
+        return new Profile(name, profile).validate();
+    }
+
+    setProfile(name, {url, account, tenantId, username, token}) {
+        this.profiles[name] = new Profile(name, {url, username, account, tenantId, token});
+    }
+
+    toJSON() {
+        const profiles = {};
+        for (let name of Object.keys(this.profiles)) {
+            profiles[name] = this.profiles[name].toJSON();
+        }
+
+        return {version: this.version, profiles: profiles, currentProfile: this.currentProfile};
+    }
+
+    save() {
+        const configDir = path.join(os.homedir(), '.cortex');
+        if (!fs.existsSync(configDir)) {
+            fs.mkdirSync(configDir);
+        }
+
+        const configFile = path.join(configDir, 'config');
+        fs.writeFileSync(configFile, JSON.stringify(this.toJSON(), null, 2));
+    }
 }
 
 module.exports.loadProfile = function(profileName) {
     const config = readConfig();
-    return new Profile(profileName, config[profileName] || {}).validate();
-};
-
-module.exports.writeConfig = function(config) {
-    const configDir = path.join(os.homedir(), '.cortex');
-    if (!fs.existsSync(configDir)) {
-        fs.mkdirSync(configDir);
+    if (config === undefined) {
+        throw new Error(`Please configure the Cortex CLI by running "cortex configure"`);
     }
 
-    const configFile = path.join(configDir, 'config');
-    fs.writeFileSync(configFile, JSON.stringify(config, null, 2));
+    const name = profileName || config.currentProfile || 'default';
+    const profile = config.getProfile(name);
+    if (!profile) {
+        throw new Error(`Profile with name "${name}" could not be located in your configuration.  Please run "cortex configure".`);
+    }
+    return profile;
 };

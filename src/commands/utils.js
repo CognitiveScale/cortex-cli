@@ -18,6 +18,7 @@ const chalk = require('chalk');
 const jmsepath = require('jmespath');
 const yaml = require('js-yaml');
 const debug = require('debug')('cortex:cli');
+const Table = require('cli-table');
 
 module.exports.printSuccess = function(message, options) {
     if (options.color === 'on') {
@@ -51,4 +52,26 @@ module.exports.parseObject = function(str, options) {
     }
     
     return JSON.parse(str);
+};
+
+function _extractValues(fields, obj) {
+    const rv = [];
+    fields.forEach((f) => rv.push(obj[f] || '-'));
+    return rv;
 }
+
+module.exports.printTable = function(spec, objects, transform) {
+    transform = transform || function (obj) { return obj; };
+
+    const head = spec.map((s) => s.column);
+    const colWidths = spec.map((s) => s.width);
+    const fields = spec.map((s) => s.field);
+    const values = objects.map((obj) => _extractValues(fields, transform(obj)));
+
+    debug('printing fields: %o', fields);
+
+    const table = new Table({head, colWidths, style: {head: ['cyan']}});
+    values.forEach((v) => table.push(v));
+
+    console.log(table.toString());
+};

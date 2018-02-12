@@ -18,7 +18,7 @@ const fs = require('fs');
 const debug = require('debug')('cortex:cli');
 const { loadProfile } = require('../config');
 const Catalog = require('../client/catalog');
-const { printSuccess, printError, filterObject, parseObject } = require('./utils');
+const { printSuccess, printError, filterObject, parseObject, printTable } = require('./utils');
 
 module.exports.SaveSkillCommand = class SaveSkillCommand {
 
@@ -27,13 +27,13 @@ module.exports.SaveSkillCommand = class SaveSkillCommand {
     }
 
     execute(skillDefinition, options) {
-        debug('%s.executeSaveSkill(%s)', options.profile, skillDefinition);
         const profile = loadProfile(options.profile);
-        const catalog = new Catalog(profile.url);
+        debug('%s.executeSaveSkill(%s)', profile.name, skillDefinition);
 
         const skillDefStr = fs.readFileSync(skillDefinition);
         const skill = parseObject(skillDefStr, options);
 
+        const catalog = new Catalog(profile.url);
         catalog.saveSkill(profile.token, skill).then((response) => {
             if (response.success) {
                 printSuccess(`Skill saved`, options);
@@ -55,21 +55,32 @@ module.exports.ListSkillsCommand = class ListSkillsCommand {
     }
 
     execute(options) {
-        debug('%s.executeListSkills()', options.profile);
         const profile = loadProfile(options.profile);
+        debug('%s.executeListSkills()', profile.name);
+
         const catalog = new Catalog(profile.url);
-        
         catalog.listSkills(profile.token).then((response) => {
             if (response.success) {
-                let result = filterObject(response.skills, options);
-                printSuccess(JSON.stringify(result, null, 2), options);
+                if (options.json) {
+                    let result = filterObject(response.skills, options);
+                    printSuccess(JSON.stringify(result, null, 2), options);
+                }
+                else {
+                    const tableSpec = [
+                        { column: 'Title', field: 'title', width: 50 },
+                        { column: 'Name', field: 'name', width: 50 },
+                        { column: 'Version', field: '_version', width: 12 }
+                    ];
+
+                    printTable(tableSpec, response.skills);
+                }
             }
             else {
                 printError(`Failed to list skills: ${response.status} ${response.message}`, options);
             }
         })
         .catch((err) => {
-            printError(`Failed to list skills ${skillName}: ${err.status} ${err.message}`, options);
+            printError(`Failed to list skills: ${err.status} ${err.message}`, options);
         });
     }
 };
@@ -81,10 +92,10 @@ module.exports.DescribeSkillCommand = class DescribeSkillCommand {
     }
 
     execute(skillName, options) {
-        debug('%s.executeDescribeSkill(%s)', options.profile, skillName);
         const profile = loadProfile(options.profile);
-        const catalog = new Catalog(profile.url);
+        debug('%s.executeDescribeSkill(%s)', profile.name, skillName);
 
+        const catalog = new Catalog(profile.url);
         catalog.describeSkill(profile.token, skillName).then((response) => {
             if (response.success) {
                 let result = filterObject(response.skill, options);
@@ -98,4 +109,4 @@ module.exports.DescribeSkillCommand = class DescribeSkillCommand {
             printError(`Failed to describe skill ${skillName}: ${err.status} ${err.message}`, options);
         });
     }
-}
+};

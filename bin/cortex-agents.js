@@ -27,7 +27,7 @@ program
     .command('save <agentDefinition>')
     .description('Save an agent definition')
     .option('--color [on/off]', 'Turn on/off color output.', 'on')
-    .option('--profile [profile]', 'The profile to use', 'default')
+    .option('--profile [profile]', 'The profile to use')
     .option('-y, --yaml', 'Use YAML for agent definition format')
     .action((agentDefinition, options) => {
         try {
@@ -43,8 +43,9 @@ program
     .command('list')
     .description('List agent definitions')
     .option('--color [on/off]', 'Turn on/off color output.', 'on')
-    .option('--profile [profile]', 'The profile to use', 'default')
-    .option('--query [query]', 'A JMESPath query to use in filtering the response data.')
+    .option('--profile [profile]', 'The profile to use')
+    .option('--json', 'Output results using JSON')
+    .option('--query [query]', 'A JMESPath query to use in filtering the response data. Ignored if output format is not JSON.')
     .action((options) => {
         try {
             new ListAgentsCommand(program).execute(options);
@@ -59,7 +60,7 @@ program
     .command('describe <agentName>')
     .description('Describe agent')
     .option('--color [on/off]', 'Turn on/off color output.', 'on')
-    .option('--profile [profile]', 'The profile to use', 'default')
+    .option('--profile [profile]', 'The profile to use')
     .option('--query [query]', 'A JMESPath query to use in filtering the response data.')
     .action((agentName, options) => {
         try {
@@ -75,7 +76,7 @@ program
     .command('invoke <agentName> <serviceName>')
     .description('Invoke an agent service')
     .option('--color [on/off]', 'Turn on/off color output.', 'on')
-    .option('--profile [profile]', 'The profile to use', 'default')
+    .option('--profile [profile]', 'The profile to use')
     .option('--params [params]', 'JSON params to send to the action')
     .option('--params-file [paramsFile]', 'A file containing either JSON or YAML formatted params')
     .action((agentName, serviceName, options) => {
@@ -92,7 +93,7 @@ program
     .command('get-service-activation <activationId>')
     .description('Get service activation')
     .option('--color [on/off]', 'Turn on/off color output.', 'on')
-    .option('--profile [profile]', 'The profile to use', 'default')
+    .option('--profile [profile]', 'The profile to use')
     .option('--query [query]', 'A JMESPath query to use in filtering the response data.')
     .action((activationId, options) => {
         try {

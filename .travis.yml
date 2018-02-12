@@ -7,8 +7,8 @@ cache:
 deploy:
   provider: npm
   email: msanchez@cognitivescale.com
+  skip_cleanup: true
   on:
-    tags: true
     branch: master
   api_key:
     secure: q7P79e+krncuRo130vZJTZ4uG++yhYeWBYNZQC4/fDrta4qF7ER9W0CQ/CTzfnqnT6arkQS+l0QmIrzxEiB0VDh2Oa9ZFTlwHomOQYUaZon1g7+8vlfGUbU6t52fRwhDZDZElJjYRz24D9yI6WIf8RErTYp/zP4ezkm/hwHm1x7Usrea5kVdAz7sBzuUGWwf5G7+Kxav6tYhe8YE4+VNfCvrDqBaYlzh4/9kGnPMEPe2GaiLWoEvdhP35TgVQvZCe+pehp7EtuwreGBETB0TTsmVQSwkVGvgMHjncjFEsOO4ClCTnbe6OrQ3NDf+JMA4gjRPh22B731GQZDhIbVP1CH2ODqFNy6cVwoc7Bz778vYyedXWtzlX9BD1gB9qUXPFS+XtS59PY2CL1c+cMuIdfYDyrJ1CIYHoosVxao1S/dwt7lgufB4acDgwwcQwZLzM12Bl4H2ibDbCFikcQgXZWoeHCkVXL2rZ9tnd0G5y/UuWUnU5rgR4v5YG/D5lrnIU4E2OkoW3uTNjt+JBmLkqMkwe7W7YeXtCJ95bd97cc+uQetevNay+dIwDZ3wage7Dfih8gl3muFKdea/FFNsElLVo8kgF5lyM6Eaf1rc5G3Zoq+5B8led6CFLvfbeVkeq3fZIVsNuXD+LeuJENlxPmYsgg9VrJdtKhIn9V0kF28=
