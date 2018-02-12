@@ -96,7 +96,6 @@ module.exports.SetProfileCommand = class {
     constructor(program) {
         this.program = program;
     }
-
     execute(profileName, options) {
         const config = readConfig();
         const profile = config.getProfile(profileName);
