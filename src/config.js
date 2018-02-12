@@ -21,10 +21,12 @@ const Joi = require('joi');
 const debug = require('debug')('cortex:config');
 
 module.exports.readConfig = readConfig = function() {
-    const configDir = path.join(os.homedir(), '.cortex');
+    const configDir = process.env.CORTEX_CONFIG_DIR || path.join(os.homedir(), '.cortex');
     if (!fs.existsSync(configDir)) {
         fs.mkdirSync(configDir);
     }
+
+    debug(`Reading config from ${configDir}`);
 
     const configFile = path.join(configDir, 'config');
     if (fs.existsSync(configFile)) {

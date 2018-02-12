@@ -13,14 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 const commander = require('commander');
 const { ListProfilesCommand } = require('../src/commands/configure');
 
 describe('sanity check', function () {
-    it('responds to help', function sanity(done) {
+    it('lists profiles', function sanity(done) {
         const program = new commander.Command();
         const command = new ListProfilesCommand(program);
-        command.execute({profile: 'test'});
+        command.execute({color: 'on'});
         done();
     });
 });

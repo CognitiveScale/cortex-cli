@@ -4,7 +4,7 @@
   "description": "Command line tool for CognitiveScale Cortex.",
   "main": "./bin/cortex.js",
   "scripts": {
-    "test": "mocha"
+    "test": "CORTEX_CONFIG_DIR=./test/cortex mocha"
   },
   "repository": {
     "type": "git",

@@ -89,7 +89,7 @@ fabric.properties
 .idea/
 
 # Local Config
-config/local.json
+test/cortex/local.json
 .local/
 
 dist/
