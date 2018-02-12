@@ -18,6 +18,8 @@ const fs = require('fs');
 const debug = require('debug')('cortex:cli');
 const { loadProfile } = require('../config');
 const Catalog = require('../client/catalog');
+const yeoman = require('yeoman-environment');
+
 const { printSuccess, printError, filterObject, parseObject } = require('./utils');
 
 module.exports.SaveSkillCommand = class SaveSkillCommand {
@@ -98,4 +100,21 @@ module.exports.DescribeSkillCommand = class DescribeSkillCommand {
             printError(`Failed to describe skill ${skillName}: ${err.status} ${err.message}`, options);
         });
     }
-}
+};
+
+module.exports.GenerateSkillCommand = class GenerateSkillCommand {
+
+    constructor(program) {
+        this.program = program;
+    }
+
+    execute(options) {
+        debug('%s.generateSkill()', options.profile);
+        const yenv = yeoman.createEnv();
+        yenv.lookup(()=>{
+            yenv.run('cortex:skill',
+            { },
+            (err) => { console.log(err); });
+        });
+    }
+};
