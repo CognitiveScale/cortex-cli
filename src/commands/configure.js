@@ -149,7 +149,7 @@ module.exports.ListProfilesCommand = class {
     execute(options) {
         const config = readConfig();
         if (config === undefined) {
-            printError(`Configuration not found.  Please run "cortex configure".`);
+            printError(`Configuration not found.  Please run "cortex configure".`, options);
             return;
         }
 
