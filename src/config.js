@@ -20,6 +20,10 @@ const path = require('path');
 const Joi = require('joi');
 const debug = require('debug')('cortex:config');
 
+module.exports.defaultConfig = defaultConfig = function(){
+  return new Config({});
+};
+
 module.exports.readConfig = readConfig = function() {
     const configDir = process.env.CORTEX_CONFIG_DIR || path.join(os.homedir(), '.cortex');
     if (!fs.existsSync(configDir)) {
