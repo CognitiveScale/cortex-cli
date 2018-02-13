@@ -84,7 +84,6 @@ module.exports.ConfigureCommand = class {
             }
         });
     }
-
     saveConfig(config, profileName, url, account, username, token) {
         if(!config)
           config = defaultConfig();
@@ -98,7 +97,6 @@ module.exports.SetProfileCommand = class {
     constructor(program) {
         this.program = program;
     }
-
     execute(profileName, options) {
         const config = readConfig();
         const profile = config.getProfile(profileName);
@@ -151,7 +149,7 @@ module.exports.ListProfilesCommand = class {
     execute(options) {
         const config = readConfig();
         if (config === undefined) {
-            printError(`Configuration not found.  Please run "cortex configure".`, options);
+            printError(`Configuration not found.  Please run "cortex configure".`,options);
             return;
         }
 
