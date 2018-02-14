@@ -31,3 +31,4 @@ program
     .command('functions [cmd]', 'Work with Cortex Functions');
 
 program.parse(process.argv);
+!program.commands.map(cmd => cmd._name).includes(program.args[0]) && program.help();

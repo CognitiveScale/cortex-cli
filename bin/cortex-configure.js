@@ -21,8 +21,6 @@ const { ConfigureCommand, DescribeProfileCommand, ListProfilesCommand, SetProfil
 
 program.description('Configure the Cortex CLI');
 
-let cmd = undefined;
-
 program
     .option('--color [on/off]', 'Turn on/off color output.', 'on')
     .option('--profile [profile]', 'The profile to configure');
@@ -31,7 +29,6 @@ program
     .command('list')
     .description('List configured profiles')
     .action((options) => {
-        cmd = 'list';
         new ListProfilesCommand(program).execute({color: program.color});
     });
 
@@ -39,7 +36,6 @@ program
     .command('describe <profileName>')
     .description('Describe a configured profile')
     .action((profileName, options) => {
-        cmd = 'describe';
         new DescribeProfileCommand(program).execute({profile: profileName, color: program.color});
     });
 
@@ -47,12 +43,12 @@ program
     .command('set-profile <profileName>')
     .description('Sets the current profile.')
     .action((profileName, options) => {
-        cmd = 'set-profile';
         new SetProfileCommand(program).execute(profileName, {color: program.color});
     });
 
 program.parse(process.argv);
-
-if (cmd === undefined) {
-    new ConfigureCommand(program).execute({profile: program.profile, color: program.color});
+if (program.args.length == 0){
+    return new ConfigureCommand(program).execute({profile: program.profile, color: program.color});
+}else {
+    ['string', 'undefined'].includes(typeof program.args[0]) && program.help();
 }
