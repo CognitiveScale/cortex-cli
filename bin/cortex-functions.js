@@ -62,20 +62,20 @@ program
         }
     });
 
-// List Functions
-program
-    .command('delete <functionId>')
-    .description('Delete a function')
-    .option('--color [on/off]', 'Turn on/off color output.', 'on')
-    .option('--profile [profile]', 'The profile to use')
-    .action((options) => {
-        try {
-            new DeleteFunctionCommand(program).execute(functionId, options);
-        }
-        catch (err) {
-            console.error(chalk.red(err.message));
-        }
-    });
+// Delete Function - TODO
+// program
+//     .command('delete <functionId>')
+//     .description('Delete a function')
+//     .option('--color [on/off]', 'Turn on/off color output.', 'on')
+//     .option('--profile [profile]', 'The profile to use')
+//     .action((options) => {
+//         try {
+//             new DeleteFunctionCommand(program).execute(functionId, options);
+//         }
+//         catch (err) {
+//             console.error(chalk.red(err.message));
+//         }
+//     });
 
 // Invoke Function
 program
