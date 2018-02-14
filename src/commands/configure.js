@@ -19,7 +19,7 @@ const co = require('co');
 const prompt = require('co-prompt');
 const chalk = require('chalk');
 const Auth = require('../client/auth');
-const { readConfig, writeConfig } = require('../config');
+const { readConfig, writeConfig, defaultConfig } = require('../config');
 const { printSuccess, printError } = require('./utils');
 
 const DEFAULT_CORTEX_URL = 'https://api.cortex.insights.ai';
@@ -32,10 +32,10 @@ module.exports.ConfigureCommand = class {
 
     execute(options) {
         const config = readConfig();
-        const profileName = options.profile || config.currentProfile || 'default';
+        const profileName = options.profile || (config && config.currentProfile) || 'default';
         debug('configuring profile: %s', profileName);
 
-        const profile = config.getProfile(profileName) || {};
+        const profile = (config && config.getProfile(profileName)) || {};
         const cmd = this;
 
         co(function*(){
@@ -84,8 +84,9 @@ module.exports.ConfigureCommand = class {
             }
         });
     }
-
     saveConfig(config, profileName, url, account, username, token) {
+        if(!config)
+          config = defaultConfig();
         config.setProfile(profileName, {url, account, username, token});
         config.currentProfile = profileName;
         config.save();
@@ -96,7 +97,6 @@ module.exports.SetProfileCommand = class {
     constructor(program) {
         this.program = program;
     }
-
     execute(profileName, options) {
         const config = readConfig();
         const profile = config.getProfile(profileName);
@@ -149,7 +149,7 @@ module.exports.ListProfilesCommand = class {
     execute(options) {
         const config = readConfig();
         if (config === undefined) {
-            printError(`Configuration not found.  Please run "cortex configure".`, options);
+            printError(`Configuration not found.  Please run "cortex configure".`,options);
             return;
         }
 
