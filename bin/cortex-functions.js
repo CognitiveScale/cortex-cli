@@ -116,3 +116,4 @@ program
     });
 
 program.parse(process.argv);
+['string', 'undefined'].includes(typeof program.args[0]) && program.help();
