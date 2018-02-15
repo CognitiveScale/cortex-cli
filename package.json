@@ -25,7 +25,7 @@
   "license": "Apache-2.0",
   "homepage": "https://github.com/CognitiveScale/cortex-cli",
   "dependencies": {
-    "@c12e/generator-cortex": "^0.2.2",
+    "@c12e/generator-cortex": "^0.2.6",
     "chalk": "^2.3.0",
     "cli-table": "^0.3.1",
     "co": "^4.6.0",
