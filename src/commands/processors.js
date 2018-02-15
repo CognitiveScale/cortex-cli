@@ -18,7 +18,7 @@ const fs = require('fs');
 const debug = require('debug')('cortex:cli');
 const { loadProfile } = require('../config');
 const Processors = require('../client/processors');
-const { printSuccess, printError, filterObject, parseObject } = require('./utils');
+const { printSuccess, printError, filterObject, parseObject, printTable } = require('./utils');
 
 module.exports.ListRuntimesCommand = class ListRuntimesCommand {
 
@@ -27,14 +27,25 @@ module.exports.ListRuntimesCommand = class ListRuntimesCommand {
     }
 
     execute(options) {
-        debug('%s.executeListRuntimes()', options.profile);
         const profile = loadProfile(options.profile);
-        const processors = new Processors(profile.url);
+        debug('%s.executeListRuntimes()', profile.name);
 
+        const processors = new Processors(profile.url);
         processors.listRuntimes(profile.token).then((response) => {
             if (response.success) {
-                let result = filterObject(response.runtimes, options);
-                printSuccess(JSON.stringify(result, null, 2), options);
+                if (options.json) {
+                    let result = filterObject(response.runtimes, options);
+                    printSuccess(JSON.stringify(result, null, 2), options);
+                }
+                else {
+                    const tableSpec = [
+                        { column: 'Title', field: 'title', width: 50 },
+                        { column: 'Name', field: 'name', width: 50 },
+                        { column: 'Type', field: 'runtimeType', width: 25 }
+                    ];
+
+                    printTable(tableSpec, response.runtimes);
+                }
             }
             else {
                 printError(`Failed to list runtimes: ${response.status} ${response.message}`, options);
@@ -53,14 +64,25 @@ module.exports.ListRuntimeTypesCommand = class ListRuntimeTypesCommand {
     }
 
     execute(options) {
-        debug('%s.executeListRuntimeTypes()', options.profile);
         const profile = loadProfile(options.profile);
-        const processors = new Processors(profile.url);
+        debug('%s.executeListRuntimeTypes()', profile.name);
 
+        const processors = new Processors(profile.url);
         processors.listRuntimeTypes(profile.token).then((response) => {
             if (response.success) {
-                let result = filterObject(response.runtimeTypes, options);
-                printSuccess(JSON.stringify(result, null, 2), options);
+                if (options.json) {
+                    let result = filterObject(response.runtimeTypes, options);
+                    printSuccess(JSON.stringify(result, null, 2), options);
+                }
+                else {
+                    const tableSpec = [
+                        { column: 'Title', field: 'title', width: 50 },
+                        { column: 'Name', field: 'name', width: 25 },
+                        { column: 'Description', field: 'description', width: 75 }
+                    ];
+
+                    printTable(tableSpec, response.runtimeTypes);
+                }
             }
             else {
                 printError(`Failed to list runtime types: ${response.status} ${response.message}`, options);
@@ -79,14 +101,37 @@ module.exports.ListActionsCommand = class ListActionsCommand {
     }
 
     execute(runtimeName, options) {
-        debug('%s.executeListRuntimeActionss()', options.profile);
         const profile = loadProfile(options.profile);
-        const processors = new Processors(profile.url);
+        debug('%s.executeListRuntimeActionss()', profile.name);
 
+        const processors = new Processors(profile.url);
         processors.listRuntimeActions(profile.token, runtimeName).then((response) => {
             if (response.success) {
-                let result = filterObject(response.actions, options);
-                printSuccess(JSON.stringify(result, null, 2), options);
+                if (options.json) {
+                    let result = filterObject(response.actions, options);
+                    printSuccess(JSON.stringify(result, null, 2), options);
+                }
+                else {
+                    const tableSpec = [
+                        { column: 'Name', field: 'name', width: 25 },
+                        { column: 'Version', field: 'version', width: 12 },
+                        { column: 'Kind', field: 'kind', width: 25 },
+                        { column: 'Memory', field: 'memory', width: 15 },
+                        { column: 'Timeout', field: 'timeout', width: 15 }
+                    ];
+
+                    const actions = response.actions.map((action) => {
+                        const a = {name: action.name, version: action.version, timeout: action.limits.timeout, memory: action.limits.memory, kind: 'blackbox'};
+
+                        if (action.annotations && action.annotations.length > 0) {
+                            a.kind = action.annotations[0].value;
+                        }
+
+                        return a;
+                    });
+
+                    printTable(tableSpec, actions);
+                }
             }
             else {
                 printError(`Failed to list actions for runtime ${runtimeName}: ${response.status} ${response.message}`, options);
@@ -105,10 +150,10 @@ module.exports.DescribeRuntimeCommand = class DescribeRuntimeCommand {
     }
 
     execute(runtimeName, options) {
-        debug('%s.executeDescribeRuntime(%s)', options.profile, runtimeName);
         const profile = loadProfile(options.profile);
-        const processors = new Processors(profile.url);
+        debug('%s.executeDescribeRuntime(%s)', profile.name, runtimeName);
 
+        const processors = new Processors(profile.url);
         processors.describeRuntime(profile.token, runtimeName).then((response) => {
             if (response.success) {
                 let result = filterObject(response.runtime, options);
@@ -131,10 +176,10 @@ module.exports.DeleteRuntimeCommand = class DeleteRuntimeCommand {
     }
 
     execute(runtimeName, options) {
-        debug('%s.executeDeleteRuntime(%s)', options.profile, runtimeName);
         const profile = loadProfile(options.profile);
-        const processors = new Processors(profile.url);
+        debug('%s.executeDeleteRuntime(%s)', profile.name, runtimeName);
 
+        const processors = new Processors(profile.url);
         processors.deleteRuntime(profile.token, runtimeName).then((response) => {
             if (response.success) {
                 printSuccess(`Processor runtime ${runtimeName} deleted`);
@@ -156,13 +201,13 @@ module.exports.SaveRuntimeCommand = class SaveRuntimeCommand {
     }
 
     execute(runtimeDefinition, options) {
-        debug('%s.executeSaveRuntime(%s)', options.profile, runtimeDefinition);
         const profile = loadProfile(options.profile);
-        const processors = new Processors(profile.url);
+        debug('%s.executeSaveRuntime(%s)', profile.name, runtimeDefinition);
 
         const runtimeStr = fs.readFileSync(runtimeDefinition);
         const runtime = parseObject(runtimeStr, options);
 
+        const processors = new Processors(profile.url);
         processors.saveRuntime(profile.token, runtime).then((response) => {
             if (response.success) {
                 printSuccess(`Processor runtime configuration saved at version ${response.version}`, options);
@@ -184,9 +229,8 @@ module.exports.InvokeActionCommand = class InvokeActionCommand {
     }
 
     execute(runtimeName, actionId, options) {
-        debug('%s.executeInvokeAction(%s, %s)', options.profile, runtimeName, actionId);
         const profile = loadProfile(options.profile);
-        const processors = new Processors(profile.url);
+        debug('%s.executeInvokeAction(%s, %s)', profile.name, runtimeName, actionId);
 
         let params = {};
         if (options.params) {
@@ -205,6 +249,7 @@ module.exports.InvokeActionCommand = class InvokeActionCommand {
 
         debug('params: %o', params);
 
+        const processors = new Processors(profile.url);
         processors.invokeRuntimeAction(profile.token, runtimeName, actionId, params).then((response) => {
             if (response.success) {
                 let result = filterObject(response.result, options);

@@ -1,0 +1,12 @@
+{
+    "version": "2",
+    "profiles": {
+        "test": {
+            "url": "http://localhost:8000",
+            "username": "test_user",
+            "account": "test_account",
+            "token": "DUMMY_TOKEN"
+        }
+    },
+    "currentProfile": "test"
+}

@@ -18,7 +18,7 @@
 
 const program = require('commander');
 const chalk = require('chalk');
-const { SaveSkillCommand, ListSkillsCommand, DescribeSkillCommand } = require('../src/commands/skills');
+const { SaveSkillCommand, ListSkillsCommand, DescribeSkillCommand, GenerateSkillCommand } = require('../src/commands/skills');
 
 program.description('Work with Cortex Skills');
     
@@ -27,7 +27,7 @@ program
     .command('save <skillDefinition>')
     .description('Save a skill definition')
     .option('--color [on/off]', 'Turn on/off color output.', 'on')
-    .option('--profile [profile]', 'The profile to use', 'default')
+    .option('--profile [profile]', 'The profile to use')
     .option('-y, --yaml', 'Use YAML for skill definition format')
     .action((skillDefinition, options) => {
         try {
@@ -43,7 +43,8 @@ program
     .command('list')
     .description('List skill definitions')
     .option('--color [on/off]', 'Turn on/off color output.', 'on')
-    .option('--profile [profile]', 'The profile to use', 'default')
+    .option('--profile [profile]', 'The profile to use')
+    .option('--json', 'Output results using JSON')
     .option('--query [query]', 'A JMESPath query to use in filtering the response data.')
     .action((options) => {
         try {
@@ -59,11 +60,25 @@ program
     .command('describe <skillName>')
     .description('Describe skill')
     .option('--color [on/off]', 'Turn on/off color output.', 'on')
-    .option('--profile [profile]', 'The profile to use', 'default')
+    .option('--profile [profile]', 'The profile to use')
     .option('--query [query]', 'A JMESPath query to use in filtering the response data.')
     .action((skillName, options) => {
         try {
             new DescribeSkillCommand(program).execute(skillName, options);
+        }
+        catch (err) {
+            console.error(chalk.red(err.message));
+        }
+    });
+
+program
+    .command('generate')
+    .description('Generates the structure and top level build script for a skill')
+    .option('--color [on/off]', 'Turn on/off color output.', 'on')
+    .option('--profile [profile]', 'The profile to use', 'default')
+    .action((options) => {
+        try {
+            new GenerateSkillCommand(program).execute(options);
         }
         catch (err) {
             console.error(chalk.red(err.message));

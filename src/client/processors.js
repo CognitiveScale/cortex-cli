@@ -60,7 +60,7 @@ module.exports = class Processors {
             .set('Authorization', `Bearer ${token}`)
             .then((res) => {
                 if (res.ok) {
-                    return {success: true, runtme: res.body.runtime};
+                    return {success: true, runtime: res.body.runtime};
                 }
                 return {success: false, status: res.status, message: res.body};
             });

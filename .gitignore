@@ -7,7 +7,6 @@ version.txt
 logs
 *.log
 npm-debug.log*
-package-lock.json
 
 # Runtime data
 pids
@@ -90,7 +89,7 @@ fabric.properties
 .idea/
 
 # Local Config
-config/local.json
+test/cortex/local.json
 .local/
 
 dist/

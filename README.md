@@ -1,20 +1,20 @@
 # Cortex CLI
 A command line utility for the Cortex Platform.
 
+[![Build Status](https://secure.travis-ci.org/CognitiveScale/cortex-cli.svg)](http://travis-ci.org/CognitiveScale/cortex-cli)
+
 ### Installation:
+
+#### From NPM:
+```bash
+npm install -g cortex-cli
+```
 
 #### From Source:
 Once you have the code pulled, run this command from the cortex-cli directory:
 ```bash
 npm install -g .
 ```
-
-#### Docker-Based Executable
-```
-docker run --rm c12e/cortex-cli bootstrap > /usr/local/bin/cortex ; chmod +x /usr/local/bin/cortex
-```
-**NOTE:** /usr/local/bin can be replaced with a directory on the user's path
-
 
 **NOTE:** When we have a release of this module, it will be published to npm.org for distribution.
 
@@ -147,6 +147,7 @@ cortex agents list --query "[].{name: name, title: title}"
     - [ ] upload
     - [ ] download
     - [ ] describe
+    - [ ] list
 - [ ] jobs
     - [ ] list
     - [ ] save

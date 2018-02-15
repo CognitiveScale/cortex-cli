@@ -15,12 +15,11 @@
  */
 
 const fs = require('fs');
-const uuid = require('uuid');
 const debug = require('debug')('cortex:cli');
 const { loadProfile } = require('../config');
 const Catalog = require('../client/catalog');
 const Agents = require('../client/agents');
-const { printSuccess, printError, filterObject, parseObject } = require('./utils');
+const { printSuccess, printError, filterObject, parseObject, printTable } = require('./utils');
 
 module.exports.SaveAgentCommand = class SaveAgentCommand {
 
@@ -29,14 +28,14 @@ module.exports.SaveAgentCommand = class SaveAgentCommand {
     }
 
     execute(agentDefinition, options) {
-        debug('%s.executeSaveAgent(%s)', options.profile, agentDefinition);
         const profile = loadProfile(options.profile);
-        const catalog = new Catalog(profile.url);
+        debug('%s.executeSaveAgent(%s)', profile.name, agentDefinition);
 
         const agentDefStr = fs.readFileSync(agentDefinition);
         const agent = parseObject(agentDefStr, options);
         debug('%o', agent);
 
+        const catalog = new Catalog(profile.url);
         catalog.saveAgent(profile.token, agent).then((response) => {
             if (response.success) {
                 printSuccess(`Agent saved`, options);
@@ -58,20 +57,33 @@ module.exports.ListAgentsCommand = class ListAgentsCommand {
     }
 
     execute(options) {
-        debug('%s.executeListAgents()', options.profile);
         const profile = loadProfile(options.profile);
+        debug('%s.executeListAgents()', profile.name);
+
         const catalog = new Catalog(profile.url);
-        
         catalog.listAgents(profile.token).then((response) => {
             if (response.success) {
-                let result = filterObject(response.agents, options);
-                printSuccess(JSON.stringify(result, null, 2), options);
+                if (options.json) {
+                    let result = filterObject(response.agents, options);
+                    printSuccess(JSON.stringify(result, null, 2), options);
+                }
+                else {
+                    const tableSpec = [
+                        { column: 'Name', field: 'name', width: 50 },
+                        { column: 'Title', field: 'title', width: 25 },
+                        { column: 'Description', field: 'description', width: 50 },
+                        { column: 'Created On', field: 'createdAt', width: 26 }
+                    ];
+
+                    printTable(tableSpec, response.agents);
+                }
             }
             else {
                 printError(`Failed to list agents: ${response.status} ${response.message}`, options);
             }
         })
         .catch((err) => {
+            debug(err);
             printError(`Failed to list agents: ${err.status} ${err.message}`, options);
         });
     }
@@ -84,10 +96,10 @@ module.exports.DescribeAgentCommand = class DescribeAgentCommand {
     }
 
     execute(agentName, options) {
-        debug('%s.executeDescribeAgent(%s)', options.profile, agentName);
         const profile = loadProfile(options.profile);
-        const catalog = new Catalog(profile.url);
+        debug('%s.executeDescribeAgent(%s)', profile.name, agentName);
 
+        const catalog = new Catalog(profile.url);
         catalog.describeAgent(profile.token, agentName).then((response) => {
             if (response.success) {
                 let result = filterObject(response.agent, options);
@@ -101,7 +113,7 @@ module.exports.DescribeAgentCommand = class DescribeAgentCommand {
             printError(`Failed to describe agent ${agentName}: ${err.status} ${err.message}`, options);
         });
     }
-}
+};
 
 module.exports.InvokeAgentServiceCommand = class {
     
@@ -110,9 +122,8 @@ module.exports.InvokeAgentServiceCommand = class {
     }
 
     execute(agentName, serviceName, options) {
-        debug('%s.invokeAgentService(%s, %s)', options.profile, agentName, serviceName);
         const profile = loadProfile(options.profile);
-        const agents = new Agents(profile.url);
+        debug('%s.invokeAgentService(%s, %s)', profile.name, agentName, serviceName);
 
         let params = {};
         if (options.params) {
@@ -125,6 +136,7 @@ module.exports.InvokeAgentServiceCommand = class {
 
         debug('params: %o', params);
 
+        const agents = new Agents(profile.url);
         agents.invokeAgentService(profile.token, agentName, serviceName, params).then((response) => {
             if (response.success) {
                 let result = filterObject(response.result, options);
@@ -144,7 +156,7 @@ module.exports.InvokeAgentServiceCommand = class {
             }
         });
     }
-}
+};
 
 module.exports.GetServiceActivationCommand = class {
 
@@ -153,10 +165,10 @@ module.exports.GetServiceActivationCommand = class {
     }
 
     execute(activationId, options) {
-        debug('%s.getServiceActivation(%s)', options.profile, activationId);
         const profile = loadProfile(options.profile);
-        const agents = new Agents(profile.url);
+        debug('%s.getServiceActivation(%s)', profile.name, activationId);
 
+        const agents = new Agents(profile.url);
         agents.getServiceActivation(profile.token, activationId).then((response) => {
             if (response.success) {
                 let result = filterObject(response.result.activation, options);
