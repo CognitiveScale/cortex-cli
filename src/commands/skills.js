@@ -122,7 +122,7 @@ module.exports.GenerateSkillCommand = class GenerateSkillCommand {
         debug('%s.generateSkill()', options.profile);
         const yenv = yeoman.createEnv();
         yenv.lookup(()=>{
-            yenv.run('cortex:skill',
+            yenv.run('@c12e/cortex:skill',
             { },
             (err) => { console.log(err); });
         });
