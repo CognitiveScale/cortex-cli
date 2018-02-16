@@ -124,7 +124,7 @@ module.exports.GenerateSkillCommand = class GenerateSkillCommand {
         yenv.lookup(()=>{
             yenv.run('@c12e/cortex:skill',
             { },
-            (err) => { err ? printError(err) : printSuccess("Done.") });
+            (err) => { err ? printError(err) : printSuccess('Done.') });
         });
     }
 };
