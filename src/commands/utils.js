@@ -21,7 +21,7 @@ const debug = require('debug')('cortex:cli');
 const Table = require('cli-table');
 
 module.exports.printSuccess = function(message, options) {
-    if (options.color === 'on') {
+    if (!options || options.color === 'on') {
         console.log(chalk.green(message));
     }
     else {
@@ -30,7 +30,7 @@ module.exports.printSuccess = function(message, options) {
 };
 
 module.exports.printError = function(message, options) {
-    if (options.color === 'on') {
+    if (!options ||  options.color === 'on') {
         console.error(chalk.red(message));
     }
     else {
