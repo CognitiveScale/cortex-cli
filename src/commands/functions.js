@@ -34,7 +34,7 @@ module.exports.ListFunctionsCommand = class {
         functions.listFunctions(profile.token)
             .then((response) => {
                 if (response.success) {
-                    if (options.json) {
+                    if (options.query || options.json) {
                         let result = filterObject(response.functions, options);
                         printSuccess(JSON.stringify(result, null, 2), options);
                     }

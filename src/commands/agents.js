@@ -63,7 +63,7 @@ module.exports.ListAgentsCommand = class ListAgentsCommand {
         const catalog = new Catalog(profile.url);
         catalog.listAgents(profile.token).then((response) => {
             if (response.success) {
-                if (options.json) {
+                if (options.query || options.json) {
                     let result = filterObject(response.agents, options);
                     printSuccess(JSON.stringify(result, null, 2), options);
                 }

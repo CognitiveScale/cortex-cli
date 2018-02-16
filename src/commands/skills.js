@@ -62,7 +62,7 @@ module.exports.ListSkillsCommand = class ListSkillsCommand {
         const catalog = new Catalog(profile.url);
         catalog.listSkills(profile.token).then((response) => {
             if (response.success) {
-                if (options.json) {
+                if (options.query || options.json) {
                     let result = filterObject(response.skills, options);
                     printSuccess(JSON.stringify(result, null, 2), options);
                 }
