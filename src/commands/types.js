@@ -65,7 +65,7 @@ module.exports.ListTypesCommand = class ListTypesCommand {
                 let result = filterObject(response.types, options);
                 printSuccess(JSON.stringify(result, null, 2), options);
 
-                if (options.json) {
+                if (options.query || options.json) {
                     let result = filterObject(response.types, options);
                     printSuccess(JSON.stringify(result, null, 2), options);
                 }

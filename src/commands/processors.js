@@ -33,7 +33,7 @@ module.exports.ListRuntimesCommand = class ListRuntimesCommand {
         const processors = new Processors(profile.url);
         processors.listRuntimes(profile.token).then((response) => {
             if (response.success) {
-                if (options.json) {
+                if (options.query || options.json) {
                     let result = filterObject(response.runtimes, options);
                     printSuccess(JSON.stringify(result, null, 2), options);
                 }
