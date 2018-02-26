@@ -17,15 +17,15 @@
 const request = require('superagent');
 const debug = require('debug')('cortex:cli');
 
-module.exports = class ListConnections {
+module.exports = class Connections {
 
     constructor(cortexUrl) {
         this.cortexUrl = cortexUrl;
-        this.endpointV2 = `${cortexUrl}/v2/connections`;
+        this.endpoint = `${cortexUrl}/v2/connections`;
     }
 
     listConnections(token) {
-        const endpoint = `${this.endpointV2}`;
+        const endpoint = `${this.endpoint}`;
         return request
             .get(endpoint)
             .set('Authorization', `Bearer ${token}`)
@@ -36,4 +36,19 @@ module.exports = class ListConnections {
                 return {success: false, status: res.status, message: res.body};
             });
     }
+
+    saveConnection(token, {name, title, description, connectionType, allowWrite, tags, params}) {
+        debug('saveConnection(%s) => %s', name, this.endpoint);
+        return request
+            .post(this.endpoint)
+            .set('Authorization', `Bearer ${token}`)
+            .send({name, title, description, connectionType, allowWrite, tags, params})
+            .then((res) => {
+                if (res.ok) {
+                    return {success: true, message: res.body};
+                }
+                return {success: false, message: res.body, status: res.status};
+            });
+    }
 }
+

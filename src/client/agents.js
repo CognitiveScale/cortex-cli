@@ -21,7 +21,7 @@ module.exports = class Agents {
 
     constructor(cortexUrl) {
         this.cortexUrl = cortexUrl;
-        this.endpointV2 = `${cortexUrl}/v2/agents`;
+        this.endpoint = `${cortexUrl}/v2/agents`;
         this.endpointV3 = `${cortexUrl}/v3/agents`;
     }
 

@@ -53,9 +53,37 @@ module.exports.ListConnections = class ListConnections {
                 printError(`Failed to list connections: ${response.status} ${response.message}`, options);
             }
         })
-            .catch((err) => {
-                debug(err);
-                printError(`Failed to list connections: ${err.status} ${err.message}`, options);
-            });
+        .catch((err) => {
+            debug(err);
+            printError(`Failed to list connections: ${err.status} ${err.message}`, options);
+        });
     }
+};
+module.exports.SaveConnectionCommand = class SaveConnectionCommand {
+
+    constructor(program) {
+        this.program = program;
+    }
+
+   execute(connectionDefinition, options) {
+       const profile = loadProfile(options.profile);
+       debug('%s.executeSaveDefinition(%s)', profile.name, connectionDefinition);
+
+       const connDefStr = fs.readFileSync(connectionDefinition);
+       const connObj = parseObject(connDefStr, options);
+       debug('%o', connObj);
+
+       const connection = new Connections(profile.url);
+       connection.saveConnection(profile.token, connObj).then((response) => {
+           if (response.success) {
+               printSuccess(`Connection saved`, options);
+           }
+           else {
+               printError(`Failed to save connection: ${response.status} ${response.message}`, options);
+           }
+       })
+       .catch((err) => {
+           printError(`Failed to save connection: ${err.status} ${err.message}`, options);
+       });
+   }
 };
