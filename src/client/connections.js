@@ -66,5 +66,20 @@ module.exports = class Connections {
                 }
             });
     }
+
+    testConnection(token, {name, title, description, connectionType, allowWrite, tags, params}) {
+        const url = this.endpoint + '/test';
+        debug('saveConnection(%s) => %s', name, url);
+        return request
+            .post(url)
+            .set('Authorization', `Bearer ${token}`)
+            .send({name, title, description, connectionType, allowWrite, tags, params})
+            .then((res) => {
+                if (res.ok) {
+                    return {success: true, message: res.body};
+                }
+                return {success: false, message: res.body, status: res.status};
+            });
+    }
 }
 

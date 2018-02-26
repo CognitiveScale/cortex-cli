@@ -18,7 +18,7 @@
 
 const program = require('commander');
 const chalk = require('chalk');
-const { ListConnections, SaveConnectionCommand, DescribeConnectionCommand } = require('../src/commands/connections');
+const { ListConnections, SaveConnectionCommand, DescribeConnectionCommand, TestConnectionCommand } = require('../src/commands/connections');
 
 program.description('Work with Cortex Connections');
 
@@ -66,6 +66,22 @@ program
     .action((connectionName, options) => {
         try {
             new DescribeConnectionCommand(program).execute(connectionName, options);
+        }
+        catch (err) {
+            console.error(chalk.red(err.message));
+        }
+    });
+
+// Test Connections
+program
+    .command('test')
+    .description('Test a connections definition before saving')
+    .option('--color [on/off]', 'Turn on/off color output.', 'on')
+    .option('--profile [profile]', 'The profile to use')
+    .option('-y, --yaml', 'Use YAML for agent definition format')
+    .action((connDefinition, options) => {
+        try {
+            new TestConnectionCommand(program).execute(connDefinition, options);
         }
         catch (err) {
             console.error(chalk.red(err.message));

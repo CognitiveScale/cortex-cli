@@ -59,6 +59,7 @@ module.exports.ListConnections = class ListConnections {
         });
     }
 };
+
 module.exports.SaveConnectionCommand = class SaveConnectionCommand {
 
     constructor(program) {
@@ -112,4 +113,33 @@ module.exports.DescribeConnectionCommand = class DescribeConnectionCommand {
             printError(`Failed to describe connection ${connectionName}: ${err.status} ${err.message}`, options);
         });
     }
+};
+
+module.exports.TestConnectionCommand = class TestConnectionCommand {
+
+    constructor(program) {
+        this.program = program;
+    }
+
+   execute(connectionDefinition, options) {
+       const profile = loadProfile(options.profile);
+       debug('%s.executeTestDefinition(%s)', profile.name, connectionDefinition);
+
+       const connDefStr = fs.readFileSync(connectionDefinition);
+       const connObj = parseObject(connDefStr, options);
+       debug('%o', connObj);
+
+       const connection = new Connections(profile.url);
+       connection.testConnection(profile.token, connObj).then((response) => {
+           if (response.success) {
+               printSuccess(`Connection successfully tested`, options);
+           }
+           else {
+               printError(`Failed while testing connection: ${response.status} ${response.message}`, options);
+           }
+       })
+       .catch((err) => {
+           printError(`Failed while testing connection: ${err.status} ${err.message}`, options);
+       });
+   }
 };
