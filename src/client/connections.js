@@ -17,20 +17,18 @@
 const request = require('superagent');
 const debug = require('debug')('cortex:cli');
 
-module.exports = class Agents {
+module.exports = class ListConnections {
 
     constructor(cortexUrl) {
         this.cortexUrl = cortexUrl;
         this.endpointV2 = `${cortexUrl}/v2/connections`;
     }
 
-    get(token, agentName, serviceName, params) {
-        const endpoint = `${this.endpointV2}/${agentName}/services/${serviceName}`;
-        debug('invokeAgentService(%s, %s) => %s', agentName, serviceName, endpoint);
+    listConnections(token) {
+        const endpoint = `${this.endpointV2}`;
         return request
-            .post(endpoint)
+            .get(endpoint)
             .set('Authorization', `Bearer ${token}`)
-            .send(params)
             .then((res) => {
                 if (res.ok) {
                     return {success: true, result: res.body};
