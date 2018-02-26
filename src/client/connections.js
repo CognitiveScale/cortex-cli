@@ -50,5 +50,21 @@ module.exports = class Connections {
                 return {success: false, message: res.body, status: res.status};
             });
     }
+
+    describeConnection(token, connectionName) {
+        const endpoint = `${this.endpoint}/${connectionName}`;
+        debug('describeConnection(%s) => %s', connectionName, endpoint);
+        return request
+            .get(endpoint)
+            .set('Authorization', `Bearer ${token}`)
+            .then((res) => {
+                if (res.ok) {
+                    return {success: true, result: res.body};
+                }
+                else {
+                    return {success: false, message: res.body, status: res.status};
+                }
+            });
+    }
 }
 

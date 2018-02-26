@@ -18,7 +18,7 @@
 
 const program = require('commander');
 const chalk = require('chalk');
-const { ListConnections, SaveConnectionCommand } = require('../src/commands/connections');
+const { ListConnections, SaveConnectionCommand, DescribeConnectionCommand } = require('../src/commands/connections');
 
 program.description('Work with Cortex Connections');
 
@@ -50,6 +50,22 @@ program
     .action((connDefinition, options) => {
         try {
             new SaveConnectionCommand(program).execute(connDefinition, options);
+        }
+        catch (err) {
+            console.error(chalk.red(err.message));
+        }
+    });
+
+// Describe Connection
+program
+    .command('describe <connectionName>')
+    .description('Describe connection')
+    .option('--color [on/off]', 'Turn on/off color output.', 'on')
+    .option('--profile [profile]', 'The profile to use')
+    .option('--query [query]', 'A JMESPath query to use in filtering the response data.')
+    .action((connectionName, options) => {
+        try {
+            new DescribeConnectionCommand(program).execute(connectionName, options);
         }
         catch (err) {
             console.error(chalk.red(err.message));

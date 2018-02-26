@@ -87,3 +87,29 @@ module.exports.SaveConnectionCommand = class SaveConnectionCommand {
        });
    }
 };
+
+module.exports.DescribeConnectionCommand = class DescribeConnectionCommand {
+
+    constructor(program) {
+        this.program = program;
+    }
+
+    execute(connectionName, options) {
+        const profile = loadProfile(options.profile);
+        debug('%s.executeDescribeConnection(%s)', profile.name, connectionName);
+
+        const connection = new Connections(profile.url);
+        connection.describeConnection(profile.token, connectionName).then((response) => {
+            if (response.success) {
+                let result = filterObject(response.result, options);
+                printSuccess(JSON.stringify(result, null, 2), options);
+            }
+            else {
+                printError(`Failed to describe connection ${connectionName}: ${response.message}`, options);
+            }
+        })
+        .catch((err) => {
+            printError(`Failed to describe connection ${connectionName}: ${err.status} ${err.message}`, options);
+        });
+    }
+};
