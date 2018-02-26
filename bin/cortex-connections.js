@@ -18,7 +18,7 @@
 
 const program = require('commander');
 const chalk = require('chalk');
-const { ListConnections, SaveConnectionCommand, DescribeConnectionCommand, TestConnectionCommand } = require('../src/commands/connections');
+const { ListConnections, SaveConnectionCommand, DescribeConnectionCommand, TestConnectionCommand, ListConnectionsTypes } = require('../src/commands/connections');
 
 program.description('Work with Cortex Connections');
 
@@ -82,6 +82,23 @@ program
     .action((connDefinition, options) => {
         try {
             new TestConnectionCommand(program).execute(connDefinition, options);
+        }
+        catch (err) {
+            console.error(chalk.red(err.message));
+        }
+    });
+
+// List Connections Types
+program
+    .command('list-types')
+    .description('List connections types')
+    .option('--color [on/off]', 'Turn on/off color output.', 'on')
+    .option('--profile [profile]', 'The profile to use')
+    .option('--json', 'Output results using JSON')
+    .option('--query [query]', 'A JMESPath query to use in filtering the response data. Ignored if output format is not JSON.')
+    .action((options) => {
+        try {
+            new ListConnectionsTypes(program).execute(options);
         }
         catch (err) {
             console.error(chalk.red(err.message));

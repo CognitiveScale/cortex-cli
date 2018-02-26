@@ -143,3 +143,43 @@ module.exports.TestConnectionCommand = class TestConnectionCommand {
        });
    }
 };
+
+module.exports.ListConnectionsTypes = class ListConnectionsTypes {
+
+    constructor(program) {
+        this.program = program;
+    }
+
+    execute(options) {
+        const profile = loadProfile(options.profile);
+        debug('%s.listConnectionsTypes()', profile.name);
+
+        const conns = new Connections(profile.url);
+        conns.listConnectionsTypes(profile.token).then((response) => {
+            if (response.success) {
+                if (options.query || options.json) {
+                    let result = filterObject(response.result.connectionTypes, options);
+                    printSuccess(JSON.stringify(result, null, 2), options);
+                }
+                else {
+                    let tableSpec = [
+                        { column: 'Name', field: 'name', width: 50 },
+                        { column: 'Title', field: 'title', width: 25 },
+                        { column: 'Description', field: 'description', width: 50 },
+                        { column: 'Created On', field: 'createdAt', width: 26 },
+                        { column: 'Updated On', field: 'updatedAt', width: 26 }
+                    ];
+
+                    printTable(tableSpec, response.result.connectionTypes);
+                }
+            }
+            else {
+                printError(`Failed to list connection types: ${response.status} ${response.message}`, options);
+            }
+        })
+        .catch((err) => {
+            debug(err);
+            printError(`Failed to list connection types: ${err.status} ${err.message}`, options);
+        });
+    }
+};
