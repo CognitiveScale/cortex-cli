@@ -158,7 +158,7 @@ cortex agents list --query "[].{name: name, title: title}"
     - [x] save [connectionDefinition]
     - [x] delete [connectionName]
     - [x] describe [connectionName]
-    - [ ] test [connectionName]
+    - [x] test [connectionName]
 - [ ] datasets
     - [ ] list
     - [ ] save [datasetDefinition]
