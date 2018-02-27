@@ -78,7 +78,7 @@ module.exports = class Connections {
                 if (res.ok) {
                     return {success: true, message: res.body};
                 }
-                return {success: false, message: res.body, status: res.status};
+                return {success: false, message: res.message, status: res.status};
             });
     }
 

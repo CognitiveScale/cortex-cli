@@ -39,10 +39,10 @@ module.exports.ListConnections = class ListConnections {
                 }
                 else {
                     let tableSpec = [
-                        { column: 'Name', field: 'name', width: 50 },
-                        { column: 'Title', field: 'title', width: 25 },
+                        { column: 'Name', field: 'name', width: 40 },
+                        { column: 'Title', field: 'title', width: 50 },
                         { column: 'Description', field: 'description', width: 50 },
-                        { column: 'Connection Type', field: 'connectionType', width: 50 },
+                        { column: 'Connection Type', field: 'connectionType', width: 25 },
                         { column: 'Created On', field: 'createdAt', width: 26 }
                     ];
 

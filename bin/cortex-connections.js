@@ -43,7 +43,7 @@ program
 // Save Connections
 program
     .command('save')
-    .description('Save a connections definition')
+    .description('Save a connections definition. Takes JSON file by default.')
     .option('--color [on/off]', 'Turn on/off color output.', 'on')
     .option('--profile [profile]', 'The profile to use')
     .option('-y, --yaml', 'Use YAML for agent definition format')
@@ -75,7 +75,7 @@ program
 // Test Connections
 program
     .command('test')
-    .description('Test a connections definition before saving')
+    .description('Test a connections definition before saving. Takes JSON file by default.')
     .option('--color [on/off]', 'Turn on/off color output.', 'on')
     .option('--profile [profile]', 'The profile to use')
     .option('-y, --yaml', 'Use YAML for agent definition format')
