@@ -42,7 +42,7 @@ program
 
 // Save Dataset
 program
-    .command('save')
+    .command('save <datasetDefinition>')
     .description('Save a dataset definition. Takes JSON file by default.')
     .option('--color [on/off]', 'Turn on/off color output.', 'on')
     .option('--profile [profile]', 'The profile to use')

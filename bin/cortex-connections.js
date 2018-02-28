@@ -42,7 +42,7 @@ program
 
 // Save Connections
 program
-    .command('save')
+    .command('save <connectionDefinition>')
     .description('Save a connections definition. Takes JSON file by default.')
     .option('--color [on/off]', 'Turn on/off color output.', 'on')
     .option('--profile [profile]', 'The profile to use')
@@ -74,7 +74,7 @@ program
 
 // Test Connections
 program
-    .command('test')
+    .command('test <connectionDefinition>')
     .description('Test a connections definition before saving. Takes JSON file by default.')
     .option('--color [on/off]', 'Turn on/off color output.', 'on')
     .option('--profile [profile]', 'The profile to use')
