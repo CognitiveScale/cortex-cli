@@ -31,4 +31,6 @@ program
     .command('processors [cmd]', 'Work with the Cortex Processor Runtime')
     .command('functions [cmd]', 'Work with Cortex Functions');
 
+process.env.DOC && require('../src/commands/utils').exportDoc(program);
+
 program.parse(process.argv);

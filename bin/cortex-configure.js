@@ -51,6 +51,8 @@ program
         new SetProfileCommand(program).execute(profileName, {color: program.color});
     });
 
+process.env.DOC && require('../src/commands/utils').exportDoc(program);
+
 program.parse(process.argv);
 
 if (cmd === undefined) {
