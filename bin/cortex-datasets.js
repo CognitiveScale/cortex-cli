@@ -103,4 +103,5 @@ program
         }
     });
 
+process.env.DOC && require('../src/commands/utils').exportDoc(program);
 program.parse(process.argv);
