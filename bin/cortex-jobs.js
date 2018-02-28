@@ -16,20 +16,28 @@
  * limitations under the License.
  */
 
-const { version } = require('../package.json');
 const program = require('commander');
+const chalk = require('chalk');
+const { ListJobs } = require('../src/commands/jobs');
 
+program.description('Work with Cortex Jobs');
+
+
+// List Connections
 program
-    .version(version, '-v, --version')
-    .description('Cortex CLI')
-    .command('configure', 'Configure the Cortex CLI')
-    .command('project [cmd]', 'Work with a related collection of Cortex contributions')
-    .command('agents [cmd]', 'Work with Cortex Agents')
-    .command('connections [cmd]', 'Work with Cortex Connections')
-    .command('jobs [cmd]', 'Work with Cortex Jobs')
-    .command('skills [cmd]', 'Work with Cortex Skills')
-    .command('types [cmd]', 'Work with Cortex Types')
-    .command('processors [cmd]', 'Work with the Cortex Processor Runtime')
-    .command('functions [cmd]', 'Work with Cortex Functions');
+    .command('list')
+    .description('List connections definitions')
+    .option('--color [on/off]', 'Turn on/off color output.', 'on')
+    .option('--profile [profile]', 'The profile to use')
+    .option('--json', 'Output results using JSON')
+    .option('--query [query]', 'A JMESPath query to use in filtering the response data. Ignored if output format is not JSON.')
+    .action((options) => {
+        try {
+            new ListJobs(program).execute(options);
+        }
+        catch (err) {
+            console.error(chalk.red(err.message));
+        }
+    });
 
 program.parse(process.argv);
