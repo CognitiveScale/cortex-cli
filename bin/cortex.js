@@ -26,6 +26,7 @@ program
     .command('project [cmd]', 'Work with a related collection of Cortex contributions')
     .command('agents [cmd]', 'Work with Cortex Agents')
     .command('connections [cmd]', 'Work with Cortex Connections')
+    .command('datasets [cmd]', 'Work with Cortex Datasets')
     .command('skills [cmd]', 'Work with Cortex Skills')
     .command('types [cmd]', 'Work with Cortex Types')
     .command('processors [cmd]', 'Work with the Cortex Processor Runtime')
