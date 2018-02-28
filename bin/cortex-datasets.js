@@ -18,87 +18,85 @@
 
 const program = require('commander');
 const chalk = require('chalk');
-const { ListConnections, SaveConnectionCommand, DescribeConnectionCommand, TestConnectionCommand, ListConnectionsTypes } = require('../src/commands/connections');
+const { ListDatasets, SaveDatasetsCommand, DescribeDatasetCommand, GetDataframeCommand, StreamDatasetCommand } = require('../src/commands/datasets');
 
 program.description('Work with Cortex Connections');
 
 
-// List Connections
+// List Dataset
 program
     .command('list')
-    .description('List connections definitions')
+    .description('List Datasets')
     .option('--color [on/off]', 'Turn on/off color output.', 'on')
     .option('--profile [profile]', 'The profile to use')
-    .option('--json', 'Output results using JSON')
+    .option('--json', 'Output results using detailed JSON')
     .option('--query [query]', 'A JMESPath query to use in filtering the response data. Ignored if output format is not JSON.')
     .action((options) => {
         try {
-            new ListConnections(program).execute(options);
+            new ListDatasets(program).execute(options);
         }
         catch (err) {
             console.error(chalk.red(err.message));
         }
     });
 
-// Save Connections
+// Save Dataset
 program
     .command('save')
-    .description('Save a connections definition. Takes JSON file by default.')
+    .description('Save a dataset definition. Takes JSON file by default.')
     .option('--color [on/off]', 'Turn on/off color output.', 'on')
     .option('--profile [profile]', 'The profile to use')
-    .option('-y, --yaml', 'Use YAML for agent definition format')
-    .action((connDefinition, options) => {
+    .option('-y, --yaml', 'Use YAML for dataset file definition format')
+    .action((datasetDef, options) => {
         try {
-            new SaveConnectionCommand(program).execute(connDefinition, options);
+            new SaveDatasetsCommand(program).execute(datasetDef, options);
         }
         catch (err) {
             console.error(chalk.red(err.message));
         }
     });
 
-// Describe Connection
+// Describe Dataset
 program
-    .command('describe <connectionName>')
-    .description('Describe connection')
+    .command('describe <datasetName>')
+    .description('Describe dataset')
     .option('--color [on/off]', 'Turn on/off color output.', 'on')
     .option('--profile [profile]', 'The profile to use')
     .option('--query [query]', 'A JMESPath query to use in filtering the response data.')
-    .action((connectionName, options) => {
+    .action((datasetName, options) => {
         try {
-            new DescribeConnectionCommand(program).execute(connectionName, options);
+            new DescribeDatasetCommand(program).execute(datasetName, options);
         }
         catch (err) {
             console.error(chalk.red(err.message));
         }
     });
 
-// Test Connections
+// Get Dataframe
 program
-    .command('test')
-    .description('Test a connections definition before saving. Takes JSON file by default.')
+    .command('get-dataframe <datasetName>')
+    .description('Get dataset in dataframe format')
     .option('--color [on/off]', 'Turn on/off color output.', 'on')
     .option('--profile [profile]', 'The profile to use')
-    .option('-y, --yaml', 'Use YAML for agent definition format')
-    .action((connDefinition, options) => {
+    .option('--query [query]', 'A JMESPath query to use in filtering the response data.')
+    .action((datasetName, options) => {
         try {
-            new TestConnectionCommand(program).execute(connDefinition, options);
+            new GetDataframeCommand(program).execute(datasetName, options);
         }
         catch (err) {
             console.error(chalk.red(err.message));
         }
     });
 
-// List Connections Types
+// Get Stream
 program
-    .command('list-types')
-    .description('List connections types')
+    .command('get-stream <datasetName>')
+    .description('Stream dataset content')
     .option('--color [on/off]', 'Turn on/off color output.', 'on')
     .option('--profile [profile]', 'The profile to use')
-    .option('--json', 'Output results using JSON')
-    .option('--query [query]', 'A JMESPath query to use in filtering the response data. Ignored if output format is not JSON.')
-    .action((options) => {
+    .action((datasetName, options) => {
         try {
-            new ListConnectionsTypes(program).execute(options);
+            new StreamDatasetCommand(program).execute(datasetName, options);
         }
         catch (err) {
             console.error(chalk.red(err.message));
