@@ -16,6 +16,7 @@
 
 const fs = require('fs');
 const debug = require('debug')('cortex:cli');
+const es = require('event-stream');
 const { loadProfile } = require('../config');
 const Datasets = require('../client/datasets');
 const { printSuccess, printError, filterObject, parseObject, printTable } = require('./utils');
@@ -156,8 +157,10 @@ module.exports.StreamDatasetCommand = class StreamDatasetCommand {
         const dataset = new Datasets(profile.url);
         dataset.streamDataset(profile.token, datasetName).then((response) => {
             if (response.success) {
-                let result = filterObject(response.result, options);
-                printSuccess(JSON.stringify(result, null, 2), options);
+                let stream = new es.Stream.PassThrough();
+                stream.write(response.result.text);
+                stream.end();
+                stream.pipe(process.stdout)
             }
             else {
                 printError(`Failed to stream dataset ${datasetName}: ${response.message}`, options);

@@ -91,11 +91,11 @@ module.exports = class Datasets {
             .set('Authorization', `Bearer ${token}`)
             .then((res) => {
                 if (res.ok) {
-                    return {success: true, result: res.body};
+                    return {success: true, result: res};
                 }
                 else {
                     return {success: false, message: res.body, status: res.status};
                 }
             });
     }
-}
+};
