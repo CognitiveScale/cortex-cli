@@ -18,7 +18,8 @@
 
 const program = require('commander');
 const chalk = require('chalk');
-const { ListConnections, SaveConnectionCommand, DescribeConnectionCommand, TestConnectionCommand, ListConnectionsTypes } = require('../src/commands/connections');
+const { ListConnections, SaveConnectionCommand, DescribeConnectionCommand, TestConnectionCommand,
+    ListConnectionsTypes, GenerateConnectionCommand } = require('../src/commands/connections');
 
 program.description('Work with Cortex Connections');
 
@@ -99,6 +100,22 @@ program
     .action((options) => {
         try {
             new ListConnectionsTypes(program).execute(options);
+        }
+        catch (err) {
+            console.error(chalk.red(err.message));
+        }
+    });
+
+
+// Generate Connections
+program
+    .command('generate')
+    .description('Generates the structure of the connection payload')
+    .option('--color [on/off]', 'Turn on/off color output.', 'on')
+    .option('--profile [profile]', 'The profile to use', 'default')
+    .action((options) => {
+        try {
+            new GenerateConnectionCommand(program).execute(options);
         }
         catch (err) {
             console.error(chalk.red(err.message));
