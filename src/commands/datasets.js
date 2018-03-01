@@ -17,6 +17,7 @@
 const fs = require('fs');
 const debug = require('debug')('cortex:cli');
 const es = require('event-stream');
+const yeoman = require('yeoman-environment');
 const { loadProfile } = require('../config');
 const Datasets = require('../client/datasets');
 const { printSuccess, printError, filterObject, parseObject, printTable } = require('./utils');
@@ -168,6 +169,23 @@ module.exports.StreamDatasetCommand = class StreamDatasetCommand {
         })
         .catch((err) => {
             printError(`Failed to stream dataset ${datasetName}: ${err.status} ${err.message}`, options);
+        });
+    }
+};
+
+module.exports.GenerateDatasetCommand = class GenerateDatasetCommand {
+
+    constructor(program) {
+        this.program = program;
+    }
+
+    execute(options) {
+        debug('%s.generateDataset()', options.profile);
+        const yenv = yeoman.createEnv();
+        yenv.lookup(()=>{
+            yenv.run('@c12e/cortex:datasets',
+                { },
+                (err) => { err ? printError(err) : printSuccess('Done.') });
         });
     }
 };
