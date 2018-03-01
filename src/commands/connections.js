@@ -15,6 +15,7 @@
  */
 
 const fs = require('fs');
+const yeoman = require('yeoman-environment');
 const debug = require('debug')('cortex:cli');
 const { loadProfile } = require('../config');
 const Connections = require('../client/connections');
@@ -181,6 +182,23 @@ module.exports.ListConnectionsTypes = class ListConnectionsTypes {
         .catch((err) => {
             debug(err);
             printError(`Failed to list connection types: ${err.status} ${err.message}`, options);
+        });
+    }
+};
+
+module.exports.GenerateConnectionCommand = class GenerateConnectionCommand {
+
+    constructor(program) {
+        this.program = program;
+    }
+
+    execute(options) {
+        debug('%s.generateConnection()', options.profile);
+        const yenv = yeoman.createEnv();
+        yenv.lookup(()=>{
+            yenv.run('@c12e/cortex:connections',
+                { },
+                (err) => { err ? printError(err) : printSuccess('Done.') });
         });
     }
 };
