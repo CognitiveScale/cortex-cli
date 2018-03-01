@@ -58,3 +58,42 @@ module.exports.ListJobs = class ListJobs {
         });
     }
 };
+
+module.exports.DescribeJob = class DescribeJob {
+
+    constructor(program) {
+        this.program = program;
+    }
+
+    execute(options) {
+        const profile = loadProfile(options.profile);
+        debug('%s.describeJob()', profile.name);
+
+        const jobs = new Jobs(profile.url);
+        const jobName = options.name;
+        jobs.describeJob(profile.token, jobName).then((response) => {
+            if (response.success) {
+                if (options.json) {
+                    let result = response.result.job;
+                    printSuccess(JSON.stringify(result, null, 2), options);
+                }
+                else {
+                    let tableSpec = [
+                        { column: 'Name', field: 'name', width: 40 },
+                        { column: 'Image', field: 'image', width: 90 },
+                        { column: 'Memory', field: 'memory', width: 10 },
+                        { column: 'Virtual CPUs', field: 'vcpus', width: 15 }
+                    ];
+                    printTable(tableSpec, [response.result.job]);
+                }
+            }
+            else {
+                printError(`Failed to describe job: ${response.status} ${response.message}`, options);
+            }
+        })
+        .catch((err) => {
+            debug(err);
+            printError(`Failed to describe job: ${err.status} ${err.message}`, options);
+        });
+    }
+};

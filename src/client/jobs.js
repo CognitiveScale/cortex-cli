@@ -31,9 +31,22 @@ module.exports = class Jobs {
             .set('Authorization', `Bearer ${token}`)
             .then((res) => {
                 if (res.ok) {
-                    return {success: true, result: res.body};
+                    return { success: true, result: res.body };
                 }
-                return {success: false, status: res.status, message: res.body};
+                return { success: false, status: res.status, message: res.body };
             });
+    }
+
+    describeJob(token, name) {
+        const endpoint = `${this.endpoint}/${name}`;
+        return request
+            .get(endpoint)
+            .set('Authorization', `Bearer ${token}`)
+            .then((res) => {
+                if (res.ok) {
+                    return { success: true, result: res.body };
+                }
+                return { success: false, status: res.status, message: res.body };
+            })
     }
 }
