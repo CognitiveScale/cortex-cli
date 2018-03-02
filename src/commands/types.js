@@ -34,8 +34,14 @@ module.exports.SaveTypeCommand = class SaveTypeCommand {
         const type = parseObject(typeDefStr, options);
         debug('%o', type);
 
+        let normalizedType = {};
+        if ( !('types' in type) )
+            normalizedType["types"] = [type];
+        else
+            normalizedType = type;
+
         const catalog = new Catalog(profile.url);
-        catalog.saveType(profile.token, type).then((response) => {
+        catalog.saveType(profile.token, normalizedType).then((response) => {
             if (response.success) {
                 printSuccess(`Type definition saved`, options);
             }
