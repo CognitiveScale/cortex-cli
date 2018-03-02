@@ -119,12 +119,13 @@ module.exports = class Catalog {
             });
     }
 
-    saveType(token, {name, title, description, fields}) {
-        debug('saveType(%s) => %s', name, this.endpoints.types);
+    saveType(token, types) {
+        const names = types.types.map((t) => t.name);
+        console.log('saveType(%s) => %s', JSON.stringify(names), this.endpoints.types);
         return request
             .post(this.endpoints.types)
             .set('Authorization', `Bearer ${token}`)
-            .send({name, title, description, fields})
+            .send(types)
             .then((res) => {
                 if (res.ok) {
                     return {success: true, message: res.body};
