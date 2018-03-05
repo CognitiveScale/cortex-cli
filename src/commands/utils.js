@@ -57,7 +57,6 @@ module.exports.parseObject = function(str, options) {
 function _extractValues(fields, obj) {
     const rv = [];
     fields.forEach((f) => rv.push(obj[f].toString() || '-'));
-    console.log(rv)
     return rv;
 }
 
