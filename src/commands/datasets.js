@@ -184,7 +184,7 @@ module.exports.GenerateDatasetCommand = class GenerateDatasetCommand {
         const yenv = yeoman.createEnv();
         yenv.lookup(()=>{
             yenv.run('@c12e/cortex:datasets',
-                { },
+                {'cortexOptions': options },
                 (err) => { err ? printError(err) : printSuccess('Done.') });
         });
     }
