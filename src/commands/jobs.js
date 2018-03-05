@@ -44,7 +44,6 @@ module.exports.ListJobs = class ListJobs {
                         { column: 'Memory', field: 'memory', width: 10 },
                         { column: 'Virtual CPUs', field: 'vcpus', width: 15 }
                     ];
-
                     printTable(tableSpec, response.result.jobs);
                 }
             }
@@ -85,6 +84,48 @@ module.exports.DescribeJob = class DescribeJob {
                         { column: 'Virtual CPUs', field: 'vcpus', width: 15 }
                     ];
                     printTable(tableSpec, [response.result.job]);
+                }
+            }
+            else {
+                printError(`Failed to describe job: ${response.status} ${response.message}`, options);
+            }
+        })
+        .catch((err) => {
+            debug(err);
+            printError(`Failed to describe job: ${err.status} ${err.message}`, options);
+        });
+    }
+};
+
+module.exports.JobStats = class JobStats {
+
+    constructor(program) {
+        this.program = program;
+    }
+
+    execute(options) {
+        const profile = loadProfile(options.profile);
+        debug('%s.describeJob()', profile.name);
+
+        const jobs = new Jobs(profile.url);
+        const jobName = options.name;
+        jobs.jobStats(profile.token, jobName).then((response) => {
+            if (response.success) {
+                if (options.json) {
+                    let result = response.result;
+                    printSuccess(JSON.stringify(result, null, 2), options);
+                }
+                else {
+                    let tableSpec = [
+                        { column: 'Submitted', field: 'SUBMITTED', width: 15 },
+                        { column: 'Pending', field: 'PENDING', width: 15 },
+                        { column: 'Runnable', field: 'RUNNABLE', width: 15 },
+                        { column: 'Starting', field: 'STARTING', width: 15 },
+                        { column: 'Running', field: 'RUNNING', width: 15 },
+                        { column: 'Succeeded', field: 'SUCCEEDED', width: 15 },
+                        { column: 'Failed', field: 'FAILED', width: 15 }
+                    ];
+                    printTable(tableSpec, [response.result.stats]);
                 }
             }
             else {

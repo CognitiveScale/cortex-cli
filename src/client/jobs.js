@@ -49,4 +49,17 @@ module.exports = class Jobs {
                 return { success: false, status: res.status, message: res.body };
             })
     }
+
+    jobStats(token, name) {
+        const endpoint = `${this.endpoint}/${name}/stats`;
+        return request
+            .get(endpoint)
+            .set('Authorization', `Bearer ${token}`)
+            .then((res) => {
+                if (res.ok) {
+                    return { success: true, result: res.body };
+                }
+                return { success: false, status: res.status, message: res.body };
+            })
+    }
 }

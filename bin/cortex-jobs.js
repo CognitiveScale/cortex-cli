@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 
+
 /*
 * Copyright 2018 Cognitive Scale, Inc. All Rights Reserved.
 *
@@ -18,7 +19,7 @@
 
 const program = require('commander');
 const chalk = require('chalk');
-const { ListJobs, SaveJob, DescribeJob } = require('../src/commands/jobs');
+const { ListJobs, JobStats, DescribeJob } = require('../src/commands/jobs');
 
 program.description('Work with Cortex Jobs');
 
@@ -51,6 +52,23 @@ program
     .action((options) => {
         try {
             new DescribeJob(program).execute(options);
+        }
+        catch (err) {
+            console.error(chalk.red(err.message));
+        }
+    });
+
+// Get Job Status
+program
+    .command('status')
+    .description('Get job status')
+    .option('--color [on/off]', 'Turn on/off color output.', 'on')
+    .option('--profile [profile]', 'The profile to use')
+    .option('--json', 'Output results using JSON')
+    .option('--name [name]', 'Job Id of the respective job')
+    .action((options) => {
+        try {
+            new JobStats(program).execute(options);
         }
         catch (err) {
             console.error(chalk.red(err.message));
