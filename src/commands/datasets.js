@@ -185,7 +185,7 @@ module.exports.GenerateDatasetCommand = class GenerateDatasetCommand {
         const profile = options.profile;
         yenv.lookup(()=>{
             yenv.run('@c12e/cortex:datasets',
-                {'cortexProfile': profile }, 
+                {'cortexProfile': profile },
                 (err) => { err ? printError(err) : printSuccess('Done.') });
         });
     }
