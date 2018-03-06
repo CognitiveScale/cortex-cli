@@ -1,6 +1,5 @@
 #!/usr/bin/env node
 
-
 /*
 * Copyright 2018 Cognitive Scale, Inc. All Rights Reserved.
 *
@@ -19,7 +18,7 @@
 
 const program = require('commander');
 const chalk = require('chalk');
-const { ListJobs, JobStats, DescribeJob } = require('../src/commands/jobs');
+const { ListJobs, JobStatus, DescribeJob, SaveJob } = require('../src/commands/jobs');
 
 program.description('Work with Cortex Jobs');
 
@@ -43,15 +42,14 @@ program
 
 // Describe Job
 program
-    .command('describe')
+    .command('describe <jobDefinition>')
     .description('Describe job definition')
     .option('--color [on/off]', 'Turn on/off color output.', 'on')
     .option('--profile [profile]', 'The profile to use')
     .option('--json', 'Output results using JSON')
-    .option('--name [name]', 'Job Id of the respective job')
-    .action((options) => {
+    .action((jobDefinition, options) => {
         try {
-            new DescribeJob(program).execute(options);
+            new DescribeJob(program).execute(jobDefinition, options);
         }
         catch (err) {
             console.error(chalk.red(err.message));
@@ -60,15 +58,31 @@ program
 
 // Get Job Status
 program
-    .command('status')
+    .command('status <jobDefinition>')
     .description('Get job status')
     .option('--color [on/off]', 'Turn on/off color output.', 'on')
     .option('--profile [profile]', 'The profile to use')
     .option('--json', 'Output results using JSON')
-    .option('--name [name]', 'Job Id of the respective job')
-    .action((options) => {
+    .action((jobDefinition, options) => {
         try {
-            new JobStats(program).execute(options);
+            new JobStatus(program).execute(jobDefinition, options);
+        }
+        catch (err) {
+            console.error(chalk.red(err.message));
+        }
+    });
+
+
+// Save Job
+program
+    .command('save <jobDefinition>')
+    .description('Save a job definition')
+    .option('--color [on/off]', 'Turn on/off color output.', 'on')
+    .option('--profile [profile]', 'The profile to use')
+    .option('-y, --yaml', 'Use YAML for job definition format')
+    .action((jobDefinition, options) => {
+        try {
+            new SaveJob(program).execute(jobDefinition, options);
         }
         catch (err) {
             console.error(chalk.red(err.message));

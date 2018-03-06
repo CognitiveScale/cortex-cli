@@ -50,16 +50,30 @@ module.exports = class Jobs {
             })
     }
 
-    jobStats(token, name) {
-        const endpoint = `${this.endpoint}/${name}/stats`;
+    jobStatus(token, jobDefinition) {
+        const endpoint = `${this.endpoint}/${jobDefinition}/stats`;
         return request
             .get(endpoint)
             .set('Authorization', `Bearer ${token}`)
             .then((res) => {
                 if (res.ok) {
                     return { success: true, result: res.body };
-                }
-                return { success: false, status: res.status, message: res.body };
-            })
+                    }
+                    return { success: false, status: res.status, message: res.body };
+                })
+    }
+
+    saveJob(token, {name, image, command, memory, vcpus, environment}) {
+        const endpoint = `${this.endpoint}`;
+        return request
+            .post(endpoint)
+            .set('Authorization', `Bearer ${token}`)
+            .send({name, image, command, memory, vcpus, environment})
+            .then((res) => {
+                if (res.ok) {
+                    return { success: true, result: res.body };
+                    }
+                    return { success: false, status: res.status, message: res.body };
+                })
     }
 }

@@ -64,13 +64,12 @@ module.exports.DescribeJob = class DescribeJob {
         this.program = program;
     }
 
-    execute(options) {
+    execute(jobDefinition, options) {
         const profile = loadProfile(options.profile);
         debug('%s.describeJob()', profile.name);
 
         const jobs = new Jobs(profile.url);
-        const jobName = options.name;
-        jobs.describeJob(profile.token, jobName).then((response) => {
+        jobs.describeJob(profile.token, jobDefinition).then((response) => {
             if (response.success) {
                 if (options.json) {
                     let result = response.result.job;
@@ -97,19 +96,18 @@ module.exports.DescribeJob = class DescribeJob {
     }
 };
 
-module.exports.JobStats = class JobStats {
+module.exports.JobStatus = class JobStatus {
 
     constructor(program) {
         this.program = program;
     }
 
-    execute(options) {
+    execute(jobDefinition, options) {
         const profile = loadProfile(options.profile);
-        debug('%s.describeJob()', profile.name);
+        debug('%s.jobStatus()', profile.name);
 
         const jobs = new Jobs(profile.url);
-        const jobName = options.name;
-        jobs.jobStats(profile.token, jobName).then((response) => {
+        jobs.jobStatus(profile.token, jobDefinition).then((response) => {
             if (response.success) {
                 if (options.json) {
                     let result = response.result;
@@ -135,6 +133,36 @@ module.exports.JobStats = class JobStats {
         .catch((err) => {
             debug(err);
             printError(`Failed to describe job: ${err.status} ${err.message}`, options);
+        });
+    }
+};
+
+module.exports.SaveJob = class SaveJob {
+
+    constructor(program) {
+        this.program = program;
+    }
+
+    execute(jobDefinition, options) {
+        const profile = loadProfile(options.profile);
+        debug('%s.saveJob()', profile.name);
+
+        const jobDefStr = fs.readFileSync(jobDefinition);
+        const job = parseObject(jobDefStr, options);
+        debug('%o', job);
+
+        const jobs = new Jobs(profile.url);
+        jobs.saveJob(profile.token, job).then((response) => {
+            if (response.success) {
+                printSuccess('Job saved', options);
+            }
+            else {
+                printError(`Failed to save job: ${response.status} ${response.message}`, options);
+            }
+        })
+        .catch((err) => {
+            debug(err);
+            printError(`Failed to save job: ${err.status} ${err.message}`, options);
         });
     }
 };
