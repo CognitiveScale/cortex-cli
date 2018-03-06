@@ -35,3 +35,4 @@ program
 process.env.DOC && require('../src/commands/utils').exportDoc(program);
 
 program.parse(process.argv);
+!program.commands.map(cmd => cmd._name).includes(program.args[0]) && program.help();
