@@ -56,7 +56,7 @@ module.exports.parseObject = function(str, options) {
 
 function _extractValues(fields, obj) {
     const rv = [];
-    fields.forEach((f) => rv.push((obj !== undefined || obj !== null)? obj[f].toString() : '-'));
+    fields.forEach((f) => rv.push((obj !== undefined && obj !== null)? obj[f].toString() : '-'));
     return rv;
 }
 
