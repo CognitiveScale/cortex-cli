@@ -76,4 +76,4 @@ module.exports = class Jobs {
                     return { success: false, status: res.status, message: res.body };
                 })
     }
-}
+};
