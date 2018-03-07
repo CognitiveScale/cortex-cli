@@ -20,6 +20,7 @@ const program = require('commander');
 const chalk = require('chalk');
 const { SaveAgentCommand, ListAgentsCommand, DescribeAgentCommand, InvokeAgentServiceCommand, GetServiceActivationCommand } = require('../src/commands/agents');
 
+let processed = false;
 program.description('Work with Cortex Agents');
     
 // Save Agent
@@ -32,6 +33,7 @@ program
     .action((agentDefinition, options) => {
         try {
             new SaveAgentCommand(program).execute(agentDefinition, options);
+            processed = true;
         }
         catch (err) {
             console.error(chalk.red(err.message));
@@ -49,6 +51,7 @@ program
     .action((options) => {
         try {
             new ListAgentsCommand(program).execute(options);
+            processed = true;
         }
         catch (err) {
             console.error(chalk.red(err.message));
@@ -65,6 +68,7 @@ program
     .action((agentName, options) => {
         try {
             new DescribeAgentCommand(program).execute(agentName, options);
+            processed = true;
         }
         catch (err) {
             console.error(chalk.red(err.message));
@@ -82,6 +86,7 @@ program
     .action((agentName, serviceName, options) => {
         try {
             new InvokeAgentServiceCommand(program).execute(agentName, serviceName, options);
+            processed = true;
         }
         catch (err) {
             console.error(chalk.red(err.message));
@@ -98,6 +103,7 @@ program
     .action((activationId, options) => {
         try {
             new GetServiceActivationCommand(program).execute(activationId, options);
+            processed = true;
         }
         catch (err) {
             console.error(chalk.red(err.message));
@@ -107,3 +113,5 @@ program
 process.env.DOC && require('../src/commands/utils').exportDoc(program);
 
 program.parse(process.argv);
+if (!processed)
+    ['string', 'undefined'].includes(typeof program.args[0]) && program.help();

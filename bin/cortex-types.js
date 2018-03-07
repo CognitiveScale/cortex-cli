@@ -20,6 +20,7 @@ const program = require('commander');
 const chalk = require('chalk');
 const { SaveTypeCommand, ListTypesCommand, DescribeTypeCommand } = require('../src/commands/types');
 
+let processed = false;
 program.description('Work with Cortex Types');
     
 // Save Type
@@ -32,6 +33,7 @@ program
     .action((typeDefinition, options) => {
         try {
             new SaveTypeCommand(program).execute(typeDefinition, options);
+            processed = true;
         }
         catch (err) {
             console.error(chalk.red(err.message));
@@ -49,6 +51,7 @@ program
     .action((options) => {
         try {
             new ListTypesCommand(program).execute(options);
+            processed = true;
         }
         catch (err) {
             console.error(chalk.red(err.message));
@@ -65,6 +68,7 @@ program
     .action((typeName, options) => {
         try {
             new DescribeTypeCommand(program).execute(typeName, options);
+            processed = true;
         }
         catch (err) {
             console.error(chalk.red(err.message));
@@ -74,3 +78,5 @@ program
 process.env.DOC && require('../src/commands/utils').exportDoc(program);
 
 program.parse(process.argv);
+if (!processed)
+    ['string', 'undefined'].includes(typeof program.args[0]) && program.help();
