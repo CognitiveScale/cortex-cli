@@ -98,8 +98,6 @@ program
     .option('--color [on/off]', 'Turn on/off color output.', 'on')
     .option('--profile [profile]', 'The profile to use')
     .option('--json', 'Output results using JSON')
-    .option('--jobId [jobId]', 'Job Id to fetch list of tasks')
-    .option('--taskId [taskId]', 'Id of the task')
     .option('--query [query]', 'A JMESPath query to use in filtering the response data. Ignored if output format is not JSON.')
     .action((options) => {
         try {
