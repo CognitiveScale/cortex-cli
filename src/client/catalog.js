@@ -33,12 +33,12 @@ module.exports = class Catalog {
         this.endpoints = createEndpoints(cortexUrl);
     }
 
-    saveSkill(token, {name, title, description, properties, inputs, outputs}) {
+    saveSkill(token, {name, title, description, properties, inputs, outputs, datasets=[]}) {
         debug('saveSkill(%s) => %s', name, this.endpoints.skills);
         return request
             .post(this.endpoints.skills)
             .set('Authorization', `Bearer ${token}`)
-            .send({name, title, description, properties, inputs, outputs})
+            .send({name, title, description, properties, inputs, outputs, datasets})
             .then((res) => {
                 if (res.ok) {
                     return {success: true, message: res.body};
