@@ -20,6 +20,7 @@ const program = require('commander');
 const chalk = require('chalk');
 const { SaveSkillCommand, ListSkillsCommand, DescribeSkillCommand, GenerateSkillCommand } = require('../src/commands/skills');
 
+let processed = false;
 program.description('Work with Cortex Skills');
     
 // Save Skill
@@ -32,6 +33,7 @@ program
     .action((skillDefinition, options) => {
         try {
             new SaveSkillCommand(program).execute(skillDefinition, options);
+            processed = true;
         }
         catch (err) {
             console.error(chalk.red(err.message));
@@ -49,6 +51,7 @@ program
     .action((options) => {
         try {
             new ListSkillsCommand(program).execute(options);
+            processed = true;
         }
         catch (err) {
             console.error(chalk.red(err.message));
@@ -65,6 +68,7 @@ program
     .action((skillName, options) => {
         try {
             new DescribeSkillCommand(program).execute(skillName, options);
+            processed = true;
         }
         catch (err) {
             console.error(chalk.red(err.message));
@@ -79,6 +83,7 @@ program
     .action((options) => {
         try {
             new GenerateSkillCommand(program).execute(options);
+            processed = true;
         }
         catch (err) {
             console.error(chalk.red(err.message));
@@ -88,3 +93,5 @@ program
 process.env.DOC && require('../src/commands/utils').exportDoc(program);
 
 program.parse(process.argv);
+if (!processed)
+    ['string', 'undefined'].includes(typeof program.args[0]) && program.help();

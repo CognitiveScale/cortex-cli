@@ -18,7 +18,7 @@
 
 const program = require('commander');
 const { ConfigureCommand, DescribeProfileCommand, ListProfilesCommand, SetProfileCommand } = require('../src/commands/configure');
-
+let processed = false;
 program.description('Configure the Cortex CLI');
 
 let cmd = undefined;
@@ -37,6 +37,7 @@ program
     .action((options) => {
         cmd = 'list';
         new ListProfilesCommand(program).execute({color: program.color});
+        processed = true;
     });
 
 program
@@ -45,6 +46,7 @@ program
     .action((profileName, options) => {
         cmd = 'describe';
         new DescribeProfileCommand(program).execute({profile: profileName, color: program.color});
+        processed = true;
     });
 
 program
@@ -53,11 +55,16 @@ program
     .action((profileName, options) => {
         cmd = 'set-profile';
         new SetProfileCommand(program).execute(profileName, {color: program.color});
+        processed = true;
     });
 
 process.env.DOC && require('../src/commands/utils').exportDoc(program);
 
+
 program.parse(process.argv);
+if (!processed)
+    ['string', 'undefined'].includes(typeof program.args[0]) && program.help();
+
 
 if (cmd === undefined) {
     new ConfigureCommand(program).execute({profile: program.profile, color: program.color});

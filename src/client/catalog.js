@@ -121,7 +121,7 @@ module.exports = class Catalog {
 
     saveType(token, types) {
         const names = types.types.map((t) => t.name);
-        console.log('saveType(%s) => %s', JSON.stringify(names), this.endpoints.types);
+        debug('saveType(%s) => %s', JSON.stringify(names), this.endpoints.types);
         return request
             .post(this.endpoints.types)
             .set('Authorization', `Bearer ${token}`)

@@ -21,6 +21,7 @@ const chalk = require('chalk');
 const { ListConnections, SaveConnectionCommand, DescribeConnectionCommand, TestConnectionCommand,
     ListConnectionsTypes, GenerateConnectionCommand } = require('../src/commands/connections');
 
+let processed = false;
 program.description('Work with Cortex Connections');
 
 
@@ -35,6 +36,7 @@ program
     .action((options) => {
         try {
             new ListConnections(program).execute(options);
+            processed = true;
         }
         catch (err) {
             console.error(chalk.red(err.message));
@@ -51,6 +53,7 @@ program
     .action((connDefinition, options) => {
         try {
             new SaveConnectionCommand(program).execute(connDefinition, options);
+            processed = true;
         }
         catch (err) {
             console.error(chalk.red(err.message));
@@ -67,6 +70,7 @@ program
     .action((connectionName, options) => {
         try {
             new DescribeConnectionCommand(program).execute(connectionName, options);
+            processed = true;
         }
         catch (err) {
             console.error(chalk.red(err.message));
@@ -83,6 +87,7 @@ program
     .action((connDefinition, options) => {
         try {
             new TestConnectionCommand(program).execute(connDefinition, options);
+            processed = true;
         }
         catch (err) {
             console.error(chalk.red(err.message));
@@ -100,6 +105,7 @@ program
     .action((options) => {
         try {
             new ListConnectionsTypes(program).execute(options);
+            processed = true;
         }
         catch (err) {
             console.error(chalk.red(err.message));
@@ -116,6 +122,7 @@ program
     .action((options) => {
         try {
             new GenerateConnectionCommand(program).execute(options);
+            processed = true;
         }
         catch (err) {
             console.error(chalk.red(err.message));
@@ -124,3 +131,5 @@ program
 
 process.env.DOC && require('../src/commands/utils').exportDoc(program);
 program.parse(process.argv);
+if (!processed)
+    ['string', 'undefined'].includes(typeof program.args[0]) && program.help();

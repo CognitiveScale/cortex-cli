@@ -20,6 +20,7 @@ const program = require('commander');
 const chalk = require('chalk');
 const { ListDatasets, SaveDatasetsCommand, DescribeDatasetCommand, GetDataframeCommand, StreamDatasetCommand } = require('../src/commands/datasets');
 
+let processed = false;
 program.description('Work with Cortex Connections');
 
 
@@ -34,6 +35,7 @@ program
     .action((options) => {
         try {
             new ListDatasets(program).execute(options);
+            processed = true;
         }
         catch (err) {
             console.error(chalk.red(err.message));
@@ -50,6 +52,7 @@ program
     .action((datasetDef, options) => {
         try {
             new SaveDatasetsCommand(program).execute(datasetDef, options);
+            processed = true;
         }
         catch (err) {
             console.error(chalk.red(err.message));
@@ -66,6 +69,7 @@ program
     .action((datasetName, options) => {
         try {
             new DescribeDatasetCommand(program).execute(datasetName, options);
+            processed = true;
         }
         catch (err) {
             console.error(chalk.red(err.message));
@@ -82,6 +86,7 @@ program
     .action((datasetName, options) => {
         try {
             new GetDataframeCommand(program).execute(datasetName, options);
+            processed = true;
         }
         catch (err) {
             console.error(chalk.red(err.message));
@@ -97,6 +102,7 @@ program
     .action((datasetName, options) => {
         try {
             new StreamDatasetCommand(program).execute(datasetName, options);
+            processed = true;
         }
         catch (err) {
             console.error(chalk.red(err.message));
@@ -105,3 +111,5 @@ program
 
 process.env.DOC && require('../src/commands/utils').exportDoc(program);
 program.parse(process.argv);
+if (!processed)
+    ['string', 'undefined'].includes(typeof program.args[0]) && program.help();
