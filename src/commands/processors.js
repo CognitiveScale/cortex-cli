@@ -138,7 +138,7 @@ module.exports.ListActionsCommand = class ListActionsCommand {
             }
         })
         .catch((err) => {
-            printError(`Failed to list actions for runtime ${runtimeName}: ${err.status} ${err.message}`, options);
+            printError(`Failed to list actions for runtime ${runtimeName}: ${JSON.stringify(err.response.body)} `, options);
         });
     }
 };
