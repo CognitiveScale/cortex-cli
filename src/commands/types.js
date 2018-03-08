@@ -68,11 +68,11 @@ module.exports.ListTypesCommand = class ListTypesCommand {
         const catalog = new Catalog(profile.url);
         catalog.listTypes(profile.token).then((response) => {
             if (response.success) {
-                let result = filterObject(response.types, options);
-                printSuccess(JSON.stringify(result, null, 2), options);
+                let result = response.types;
+                if (options.query)
+                    result = filterObject(result, options);
 
-                if (options.query || options.json) {
-                    let result = filterObject(response.types, options);
+                if (options.json) {
                     printSuccess(JSON.stringify(result, null, 2), options);
                 }
                 else {
@@ -82,7 +82,7 @@ module.exports.ListTypesCommand = class ListTypesCommand {
                         { column: 'Version', field: '_version', width: 12 }
                     ];
 
-                    printTable(tableSpec, response.types);
+                    printTable(tableSpec, result);
                 }
             }
             else {
@@ -90,7 +90,7 @@ module.exports.ListTypesCommand = class ListTypesCommand {
             }
         })
         .catch((err) => {
-            printError(`Failed to list types ${typeName}: ${err.status} ${err.message}`, options);
+            printError(`Failed to list types: ${err.status} ${err.message}`, options);
         });
     }
 };

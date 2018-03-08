@@ -34,8 +34,11 @@ module.exports.ListRuntimesCommand = class ListRuntimesCommand {
         const processors = new Processors(profile.url);
         processors.listRuntimes(profile.token).then((response) => {
             if (response.success) {
-                if (options.query || options.json) {
-                    let result = filterObject(response.runtimes, options);
+                let result = response.runtimes;
+                if (options.query)
+                    result = filterObject(result, options);
+
+                if(options.json) {
                     printSuccess(JSON.stringify(result, null, 2), options);
                 }
                 else {
@@ -45,7 +48,7 @@ module.exports.ListRuntimesCommand = class ListRuntimesCommand {
                         { column: 'Type', field: 'runtimeType', width: 25 }
                     ];
 
-                    printTable(tableSpec, response.runtimes);
+                    printTable(tableSpec, result);
                 }
             }
             else {
@@ -71,8 +74,11 @@ module.exports.ListRuntimeTypesCommand = class ListRuntimeTypesCommand {
         const processors = new Processors(profile.url);
         processors.listRuntimeTypes(profile.token).then((response) => {
             if (response.success) {
+                let result = response.runtimeTypes;
+                if (options.query)
+                    result = filterObject(result, options);
+
                 if (options.json) {
-                    let result = filterObject(response.runtimeTypes, options);
                     printSuccess(JSON.stringify(result, null, 2), options);
                 }
                 else {
@@ -82,7 +88,7 @@ module.exports.ListRuntimeTypesCommand = class ListRuntimeTypesCommand {
                         { column: 'Description', field: 'description', width: 75 }
                     ];
 
-                    printTable(tableSpec, response.runtimeTypes);
+                    printTable(tableSpec, result);
                 }
             }
             else {
@@ -108,8 +114,11 @@ module.exports.ListActionsCommand = class ListActionsCommand {
         const processors = new Processors(profile.url);
         processors.listRuntimeActions(profile.token, runtimeName).then((response) => {
             if (response.success) {
+                let result = response.actions;
+                if (options.query)
+                    result = filterObject(result, options);
+
                 if (options.json) {
-                    let result = filterObject(response.actions, options);
                     printSuccess(JSON.stringify(result, null, 2), options);
                 }
                 else {
@@ -121,7 +130,7 @@ module.exports.ListActionsCommand = class ListActionsCommand {
                         { column: 'Timeout', field: 'timeout', width: 15 }
                     ];
 
-                    const actions = response.actions.map((action) => {
+                    const actions = result.map((action) => {
                         const a = {name: action.name, version: action.version, timeout: action.limits.timeout, memory: action.limits.memory, kind: 'blackbox'};
 
                         if (action.annotations && action.annotations.length > 0) {

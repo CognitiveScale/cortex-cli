@@ -34,8 +34,11 @@ module.exports.ListDatasets = class ListDatasets {
         const datasets = new Datasets(profile.url);
         datasets.listDatasets(profile.token).then((response) => {
             if (response.success) {
-                if (options.query || options.json) {
-                    let result = filterObject(response.result, options);
+                let result = response.result;
+                if (options.query) {
+                    result = filterObject(response.result, options);
+                }
+                if (options.json) {
                     printSuccess(JSON.stringify(result, null, 2), options);
                 }
                 else {
@@ -49,7 +52,7 @@ module.exports.ListDatasets = class ListDatasets {
                         { column: 'Updated On', field: 'updatedAt', width: 26 },
                     ];
 
-                    printTable(tableSpec, response.result);
+                    printTable(tableSpec, result);
                 }
             }
             else {
@@ -131,8 +134,7 @@ module.exports.GetDataframeCommand = class GetDataframeCommand {
         const dataset = new Datasets(profile.url);
         dataset.getDataframe(profile.token, datasetName).then((response) => {
             if (response.success) {
-                let result = filterObject(response.result, options);
-                printSuccess(JSON.stringify(result, null, 2), options);
+                printSuccess(JSON.stringify(response.result, null, 2), options);
             }
             else {
                 printError(`Failed to get dataframe ${datasetName}: ${response.message}`, options);
