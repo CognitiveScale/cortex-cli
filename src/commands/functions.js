@@ -41,6 +41,7 @@ module.exports.ListFunctionsCommand = class {
                     else {
                         const tableSpec = [
                             { column: 'Name', field: 'name', width: 50 },
+                            { column: 'Function Id', field: 'functionId', width: 50 },
                             { column: 'Image', field: 'image', width: 50 },
                             { column: 'Kind', field: 'kind', width: 25 },
                             { column: 'Created On', field: 'createdAt', width: 26 }
