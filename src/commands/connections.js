@@ -100,7 +100,7 @@ module.exports.SaveConnectionCommand = class SaveConnectionCommand {
 
            const payload = {'content': jdbcJarFilePath, 'key': contentKey};
 
-           content.saveContent(profile.token, payload).then((response) => {
+           content.uploadContent(profile.token, payload).then((response) => {
 
                let marshaledConnObj = connObj;
                marshaledConnObj.params = this.stripJarPathFromParams(marshaledConnObj.params);
