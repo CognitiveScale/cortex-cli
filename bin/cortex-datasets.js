@@ -18,7 +18,8 @@
 
 const program = require('commander');
 const chalk = require('chalk');
-const { ListDatasets, SaveDatasetsCommand, DescribeDatasetCommand, GetDataframeCommand, StreamDatasetCommand } = require('../src/commands/datasets');
+const { ListDatasets, SaveDatasetsCommand, DescribeDatasetCommand, GetDataframeCommand,
+    StreamDatasetCommand, GenerateDatasetCommand } = require('../src/commands/datasets');
 
 let processed = false;
 program.description('Work with Cortex Connections');
@@ -103,6 +104,20 @@ program
         try {
             new StreamDatasetCommand(program).execute(datasetName, options);
             processed = true;
+        }
+        catch (err) {
+            console.error(chalk.red(err.message));
+        }
+    });
+
+program
+    .command('generate')
+    .description('Generates the structure and top level build script for a dataset')
+    .option('--color [on/off]', 'Turn on/off color output.', 'on')
+    .option('--profile [profile]', 'The profile to use', 'default')
+    .action((options) => {
+        try {
+            new GenerateDatasetCommand(program).execute(options);
         }
         catch (err) {
             console.error(chalk.red(err.message));
