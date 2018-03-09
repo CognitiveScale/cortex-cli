@@ -34,7 +34,7 @@ module.exports.ListJobs = class ListJobs {
         jobs.listJobs(profile.token).then((response) => {
             if (response.success) {
                 if (options.query || options.json) {
-                    let result = filterObject(response.result, options);
+                    let result = filterObject(response.result.jobs, options);
                     printSuccess(JSON.stringify(result, null, 2), options);
                 }
                 else {
@@ -72,7 +72,7 @@ module.exports.DescribeJob = class DescribeJob {
         jobs.describeJob(profile.token, jobDefinition).then((response) => {
             if (response.success) {
                 if (options.json) {
-                    let result = response.result.job;
+                    let result = filterObject(response.result.job, options);
                     printSuccess(JSON.stringify(result, null, 2), options);
                 }
                 else {
