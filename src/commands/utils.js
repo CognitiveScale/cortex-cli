@@ -74,3 +74,17 @@ module.exports.printTable = function(spec, objects, transform) {
 
     console.log(table.toString());
 };
+
+module.exports.exportDoc = function(program){
+    console.log(JSON.stringify(program.commands.map((c)=>({
+        name: c._name,
+        description: c._description,
+        usage:  c.usage(),
+        options: c.options.map((o)=>({
+            flags: o.flags,
+            defaultValue: o.defaultValue,
+            description: o.description
+        }))
+    }))));
+    process.exit(0);
+};

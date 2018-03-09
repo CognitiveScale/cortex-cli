@@ -20,13 +20,14 @@ const program = require('commander');
 const chalk = require('chalk');
 const { ListTasks, TaskLogs, CancelTask, DescribeTask, TaskStatus } = require('../src/commands/tasks');
 
+let processed = false;
 program.description('Work with Cortex Jobs');
 
 
 // List Tasks
 program
     .command('list <jobDefinition>')
-    .description('List connections definitions')
+    .description('List task definitions within a job definition')
     .option('--color [on/off]', 'Turn on/off color output.', 'on')
     .option('--profile [profile]', 'The profile to use')
     .option('--json', 'Output results using JSON')
@@ -34,6 +35,7 @@ program
     .action((jobDefinition, options) => {
         try {
             new ListTasks(program).execute(jobDefinition, options);
+            processed = true;
         }
         catch (err) {
             console.error(chalk.red(err.message));
@@ -51,6 +53,7 @@ program
     .action((jobDefinition, taskDefinition, options) => {
         try {
             new TaskLogs(program).execute(jobDefinition, taskDefinition, options);
+            processed = true;
         }
         catch (err) {
             console.error(chalk.red(err.message));
@@ -68,6 +71,7 @@ program
     .action((jobDefinition, taskDefinition, options) => {
         try {
             new CancelTask(program).execute(jobDefinition, taskDefinition, options);
+            processed = true;
         }
         catch (err) {
             console.error(chalk.red(err.message));
@@ -85,6 +89,7 @@ program
     .action((jobDefinition, taskDefinition, options) => {
         try {
             new DescribeTask(program).execute(jobDefinition, taskDefinition, options);
+            processed = true;
         }
         catch (err) {
             console.error(chalk.red(err.message));
@@ -102,9 +107,16 @@ program
     .action((options) => {
         try {
             new TaskStatus(program).execute(options);
+            processed = true;
         }
         catch (err) {
             console.error(chalk.red(err.message));
         }
     });
+
+
+process.env.DOC && require('../src/commands/utils').exportDoc(program);
+
 program.parse(process.argv);
+if (!processed)
+    ['string', 'undefined'].includes(typeof program.args[0]) && program.help();
