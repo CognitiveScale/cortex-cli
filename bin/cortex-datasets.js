@@ -123,20 +123,6 @@ program
         }
     });
 
-program
-    .command('generate')
-    .description('Generates the structure and top level build script for a dataset')
-    .option('--color [on/off]', 'Turn on/off color output.', 'on')
-    .option('--profile [profile]', 'The profile to use', 'default')
-    .action((options) => {
-        try {
-            new GenerateDatasetCommand(program).execute(options);
-        }
-        catch (err) {
-            console.error(chalk.red(err.message));
-        }
-    });
-
 process.env.DOC && require('../src/commands/utils').exportDoc(program);
 program.parse(process.argv);
 if (!processed)
