@@ -24,7 +24,21 @@ module.exports = class Content {
         this.endpoint = `${cortexUrl}/v2/content`;
     }
 
-    saveContent(token, {content, key}) {
+    listContent(token) {
+        debug('listContent %s', this.endpoint);
+        return request
+            .get(this.endpoint)
+            .set('Authorization', `Bearer ${token}`)
+            .accept('application/json')
+            .then((res) => {
+                if (res.ok) {
+                    return {success: true, message: res.body};
+                }
+                return {success: false, message: res.body, status: res.status};
+            });
+    }
+
+    uploadContent(token, {content, key}) {
         debug('saveContent(%s, %s) => %s', key, content, this.endpoint);
         return request
             .post(this.endpoint)
@@ -39,6 +53,37 @@ module.exports = class Content {
                 return {success: false, message: res.body, status: res.status};
             });
     }
+
+    deleteContent(token, contentKey) {
+        debug('deleteContent(%s) => %s', contentKey, this.endpoint);
+        const url = `${this.endpoint}/${contentKey}`;
+        return request
+            .delete(url)
+            .set('Authorization', `Bearer ${token}`)
+            .accept('application/json')
+            .then((res) => {
+                if (res.ok) {
+                    return {success: true, message: res.body};
+                }
+                return {success: false, message: res.body, status: res.status};
+            });
+    }
+
+    downloadContent(token, contentKey) {
+        debug('downloadContent(%s) => %s', contentKey, this.endpoint);
+        const url = `${this.endpoint}/${contentKey}`;
+        return request
+            .get(url)
+            .set('Authorization', `Bearer ${token}`)
+            .accept('application/json')
+            .then((res) => {
+                if (res.ok) {
+                    return {success: true, message: res.text};
+                }
+                return {success: false, message: res.body, status: res.status};
+            });
+    }
+
 
 };
 

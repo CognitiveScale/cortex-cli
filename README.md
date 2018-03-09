@@ -143,11 +143,11 @@ cortex agents list --query "[].{name: name, title: title}"
     - [x] delete-runtime [runtimeName]
     - [x] invoke-action [runtimeName] [actionId]
     - [x] list-actions [runtimeName]
-- [ ] content
-    - [ ] upload
-    - [ ] download
-    - [ ] describe
-    - [ ] list
+- [x] content
+    - [x] upload
+    - [x] download
+    - [x] delete
+    - [x] list
 - [ ] jobs
     - [ ] list
     - [ ] save
