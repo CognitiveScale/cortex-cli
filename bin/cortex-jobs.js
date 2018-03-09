@@ -27,7 +27,7 @@ program.description('Work with Cortex Jobs');
 // List Jobs
 program
     .command('list')
-    .description('List connections definitions')
+    .description('List job definitions')
     .option('--color [on/off]', 'Turn on/off color output.', 'on')
     .option('--profile [profile]', 'The profile to use')
     .option('--json', 'Output results using JSON')
