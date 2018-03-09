@@ -83,7 +83,6 @@ program
     .description('Get dataset in dataframe format')
     .option('--color [on/off]', 'Turn on/off color output.', 'on')
     .option('--profile [profile]', 'The profile to use')
-    .option('--query [query]', 'A JMESPath query to use in filtering the response data.')
     .action((datasetName, options) => {
         try {
             new GetDataframeCommand(program).execute(datasetName, options);

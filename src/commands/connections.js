@@ -35,8 +35,11 @@ module.exports.ListConnections = class ListConnections {
         const conns = new Connections(profile.url);
         conns.listConnections(profile.token).then((response) => {
             if (response.success) {
-                if (options.query || options.json) {
-                    let result = filterObject(response.result.connections, options);
+                let result = response.result.connections;
+                if (options.query)
+                    result = filterObject(result, options);
+
+                if (options.json) {
                     printSuccess(JSON.stringify(result, null, 2), options);
                 }
                 else {
@@ -49,7 +52,7 @@ module.exports.ListConnections = class ListConnections {
                         { column: 'Created On', field: 'createdAt', width: 26 }
                     ];
 
-                    printTable(tableSpec, response.result.connections);
+                    printTable(tableSpec, result);
                 }
             }
             else {
@@ -206,8 +209,11 @@ module.exports.ListConnectionsTypes = class ListConnectionsTypes {
         const conns = new Connections(profile.url);
         conns.listConnectionsTypes(profile.token).then((response) => {
             if (response.success) {
-                if (options.query || options.json) {
-                    let result = filterObject(response.result.connectionTypes, options);
+                let result = response.result.connectionTypes;
+                if (options.query)
+                    result = filterObject(result, options);
+
+                if (options.json) {
                     printSuccess(JSON.stringify(result, null, 2), options);
                 }
                 else {
@@ -219,7 +225,7 @@ module.exports.ListConnectionsTypes = class ListConnectionsTypes {
                         { column: 'Updated On', field: 'updatedAt', width: 26 }
                     ];
 
-                    printTable(tableSpec, response.result.connectionTypes);
+                    printTable(tableSpec, result);
                 }
             }
             else {
