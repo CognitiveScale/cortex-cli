@@ -156,16 +156,17 @@ cortex agents list --query "[].{name: name, title: title}"
 - [ ] connections
     - [x] list
     - [x] save [connectionDefinition]
-    - [x] delete [connectionName]
+    - [ ] delete [connectionName]
     - [x] describe [connectionName]
     - [x] test [connectionName]
+    - [x] generate
 - [ ] datasets
-    - [ ] list
-    - [ ] save [datasetDefinition]
+    - [x] list
+    - [x] save [datasetDefinition]
     - [ ] delete [datasetName]
-    - [ ] describe [datasetName]
-    - [ ] get-dataframe [datasetName]
-    - [ ] get-stream [datasetName]
+    - [x] describe [datasetName]
+    - [x] get-dataframe [datasetName]
+    - [x] get-stream [datasetName]
 - [ ] snapshots
 - [ ] environments
    - [ ] list

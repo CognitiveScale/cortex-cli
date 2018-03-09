@@ -33,12 +33,12 @@ module.exports = class Catalog {
         this.endpoints = createEndpoints(cortexUrl);
     }
 
-    saveSkill(token, {name, title, description, properties, inputs, outputs}) {
+    saveSkill(token, {name, title, description, properties, inputs, outputs, datasets=[]}) {
         debug('saveSkill(%s) => %s', name, this.endpoints.skills);
         return request
             .post(this.endpoints.skills)
             .set('Authorization', `Bearer ${token}`)
-            .send({name, title, description, properties, inputs, outputs})
+            .send({name, title, description, properties, inputs, outputs, datasets})
             .then((res) => {
                 if (res.ok) {
                     return {success: true, message: res.body};
@@ -119,12 +119,13 @@ module.exports = class Catalog {
             });
     }
 
-    saveType(token, {name, title, description, fields}) {
-        debug('saveType(%s) => %s', name, this.endpoints.types);
+    saveType(token, types) {
+        const names = types.types.map((t) => t.name);
+        debug('saveType(%s) => %s', JSON.stringify(names), this.endpoints.types);
         return request
             .post(this.endpoints.types)
             .set('Authorization', `Bearer ${token}`)
-            .send({name, title, description, fields})
+            .send(types)
             .then((res) => {
                 if (res.ok) {
                     return {success: true, message: res.body};

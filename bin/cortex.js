@@ -28,9 +28,13 @@ program
     .command('connections [cmd]', 'Work with Cortex Connections')
     .command('jobs [cmd]', 'Work with Cortex Jobs')
     .command('tasks [cmd]', 'Work with Cortex Tasks')
+    .command('datasets [cmd]', 'Work with Cortex Datasets')
     .command('skills [cmd]', 'Work with Cortex Skills')
     .command('types [cmd]', 'Work with Cortex Types')
     .command('processors [cmd]', 'Work with the Cortex Processor Runtime')
     .command('functions [cmd]', 'Work with Cortex Functions');
 
+process.env.DOC && require('../src/commands/utils').exportDoc(program);
+
 program.parse(process.argv);
+!program.commands.map(cmd => cmd._name).includes(program.args[0]) && program.help();

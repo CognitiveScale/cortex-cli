@@ -15,9 +15,11 @@
  */
 
 const fs = require('fs');
+const yeoman = require('yeoman-environment');
 const debug = require('debug')('cortex:cli');
 const { loadProfile } = require('../config');
 const Connections = require('../client/connections');
+const Content = require('../client/content');
 const { printSuccess, printError, filterObject, parseObject, printTable } = require('./utils');
 
 module.exports.ListConnections = class ListConnections {
@@ -43,6 +45,7 @@ module.exports.ListConnections = class ListConnections {
                         { column: 'Title', field: 'title', width: 50 },
                         { column: 'Description', field: 'description', width: 50 },
                         { column: 'Connection Type', field: 'connectionType', width: 25 },
+                        { column: 'Writeable', field: 'allowWrite', width: 15 },
                         { column: 'Created On', field: 'createdAt', width: 26 }
                     ];
 
@@ -66,6 +69,20 @@ module.exports.SaveConnectionCommand = class SaveConnectionCommand {
         this.program = program;
     }
 
+   getParamsValue(connectionDefinition, paramName) {
+       const results = connectionDefinition.params.filter(item => item.name === paramName);
+       if (results && results.length) {
+            return results[0]['value'];
+
+       } else {
+            return undefined;
+       }
+   }
+
+   stripJarPathFromParams(params) {
+       return params.filter(item => item.name !== 'jdbc_jar_file');
+   }
+
    execute(connectionDefinition, options) {
        const profile = loadProfile(options.profile);
        debug('%s.executeSaveDefinition(%s)', profile.name, connectionDefinition);
@@ -74,18 +91,50 @@ module.exports.SaveConnectionCommand = class SaveConnectionCommand {
        const connObj = parseObject(connDefStr, options);
        debug('%o', connObj);
 
-       const connection = new Connections(profile.url);
-       connection.saveConnection(profile.token, connObj).then((response) => {
-           if (response.success) {
-               printSuccess(`Connection saved`, options);
-           }
-           else {
-               printError(`Failed to save connection: ${response.status} ${response.message}`, options);
-           }
-       })
-       .catch((err) => {
-           printError(`Failed to save connection: ${err.status} ${err.message}`, options);
-       });
+       const jdbcJarFilePath = this.getParamsValue(connObj, 'jdbc_jar_file');
+       const contentKey = this.getParamsValue(connObj, 'managed_content_key');
+
+       if (jdbcJarFilePath) {
+           const content = new Content(profile.url);
+           const connection = new Connections(profile.url);
+
+           const payload = {'content': jdbcJarFilePath, 'key': contentKey};
+
+           content.saveContent(profile.token, payload).then((response) => {
+
+               let marshaledConnObj = connObj;
+               marshaledConnObj.params = this.stripJarPathFromParams(marshaledConnObj.params);
+
+               connection.saveConnection(profile.token, marshaledConnObj).then((response) => {
+                   if (response.success) {
+                       printSuccess(`Connection saved`, options);
+                   }
+                   else {
+                       printError(`Failed to save connection: ${response.status} ${response.message}`, options);
+                   }
+               })
+               .catch((err) => {
+                   printError(`Failed to save connection: ${err.status} ${err.message}`, options);
+               });
+           })
+           .catch((err) => {
+               printError(`Failed to upload jdbc jar: ${err.status} ${err.message}`, options);
+           });
+       } else {
+
+           const connection = new Connections(profile.url);
+           connection.saveConnection(profile.token, connObj).then((response) => {
+               if (response.success) {
+                   printSuccess(`Connection saved`, options);
+               }
+               else {
+                   printError(`Failed to save connection: ${response.status} ${response.message}`, options);
+               }
+           })
+           .catch((err) => {
+               printError(`Failed to save connection: ${err.status} ${err.message}`, options);
+           });
+       }
    }
 };
 
@@ -180,6 +229,23 @@ module.exports.ListConnectionsTypes = class ListConnectionsTypes {
         .catch((err) => {
             debug(err);
             printError(`Failed to list connection types: ${err.status} ${err.message}`, options);
+        });
+    }
+};
+
+module.exports.GenerateConnectionCommand = class GenerateConnectionCommand {
+
+    constructor(program) {
+        this.program = program;
+    }
+
+    execute(options) {
+        debug('%s.generateConnection()', options.profile);
+        const yenv = yeoman.createEnv();
+        yenv.lookup(()=>{
+            yenv.run('@c12e/cortex:connections',
+                { },
+                (err) => { err ? printError(err) : printSuccess('Done.') });
         });
     }
 };

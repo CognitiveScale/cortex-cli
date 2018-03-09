@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+const uuid = require('uuid');
 const fs = require('fs');
 const debug = require('debug')('cortex:cli');
 const { loadProfile } = require('../config');
@@ -138,7 +139,7 @@ module.exports.ListActionsCommand = class ListActionsCommand {
             }
         })
         .catch((err) => {
-            printError(`Failed to list actions for runtime ${runtimeName}: ${err.status} ${err.message}`, options);
+            printError(`Failed to list actions for runtime ${runtimeName}: ${JSON.stringify(err.response.body)} `, options);
         });
     }
 };
@@ -260,7 +261,7 @@ module.exports.InvokeActionCommand = class InvokeActionCommand {
             }
         })
         .catch((err) => {
-            printError(`Failed to invoke action: ${err.status} ${err.message}`, options);
+            printError(`Failed to invoke action: ${err.response.body.message}`, options);
         });
     }
 };
