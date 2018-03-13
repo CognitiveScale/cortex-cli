@@ -18,7 +18,7 @@
 
 const program = require('commander');
 const chalk = require('chalk');
-const { ListTasks, TaskLogs, CancelTask, DescribeTask, TaskStatus } = require('../src/commands/tasks');
+const { ListTasks, TaskLogs, CancelTask, DescribeTask } = require('../src/commands/tasks');
 
 let processed = false;
 program.description('Work with Cortex Jobs');
@@ -95,25 +95,6 @@ program
             console.error(chalk.red(err.message));
         }
     });
-
-// Get Task Status
-program
-    .command('status')
-    .description('Get task status')
-    .option('--color [on/off]', 'Turn on/off color output.', 'on')
-    .option('--profile [profile]', 'The profile to use')
-    .option('--json', 'Output results using JSON')
-    .option('--query [query]', 'A JMESPath query to use in filtering the response data. Ignored if output format is not JSON.')
-    .action((options) => {
-        try {
-            new TaskStatus(program).execute(options);
-            processed = true;
-        }
-        catch (err) {
-            console.error(chalk.red(err.message));
-        }
-    });
-
 
 process.env.DOC && require('../src/commands/utils').exportDoc(program);
 
