@@ -26,11 +26,11 @@ module.exports.ListTasks = class ListTasks {
         this.program = program;
     }
 
-    execute(jobDefinition, options) {
+    execute(jobId, options) {
         const profile = loadProfile(options.profile);
         debug('%s.listTasks()', profile.name);
 
-        const tasks = new Tasks(profile.url, jobDefinition);
+        const tasks = new Tasks(profile.url, jobId);
         tasks.listTasks(profile.token).then((response) => {
             if (response.success) {
                 if (options.query || options.json) {
@@ -61,12 +61,12 @@ module.exports.TaskLogs = class TaskLogs {
         this.program = program;
     }
 
-    execute(jobDefinition, taskDefinition, options) {
+    execute(jobId, taskId, options) {
         const profile = loadProfile(options.profile);
         debug('%s.taskLogs()', profile.name);
 
-        const tasks = new Tasks(profile.url, jobDefinition);
-        tasks.taskLogs(profile.token, taskDefinition).then((response) => {
+        const tasks = new Tasks(profile.url, jobId);
+        tasks.taskLogs(profile.token, taskId).then((response) => {
             if (response.success) {
                 if (options.query || options.json) {
                     let result = filterObject(response.result, options);
@@ -97,13 +97,13 @@ module.exports.CancelTask = class CancelTask {
         this.program = program;
     }
 
-    execute(jobDefinition, taskDefinition, options) {
+    execute(jobId, taskId, options) {
         const profile = loadProfile(options.profile);
         debug('%s.cancelTask()', profile.name);
 
         const message = options.message;
-        const tasks = new Tasks(profile.url, jobDefinition);
-        tasks.cancelTask(profile.token, taskDefinition, message).then((response) => {
+        const tasks = new Tasks(profile.url, jobId);
+        tasks.cancelTask(profile.token, taskId, message).then((response) => {
             if (response.success) {
                 if (options.query || options.json) {
                     let result = filterObject(response.result, options);
@@ -133,12 +133,12 @@ module.exports.DescribeTask = class DescribeTask {
         this.program = program;
     }
 
-    execute(jobDefinition, taskDefinition, options) {
+    execute(jobId, taskId, options) {
         const profile = loadProfile(options.profile);
         debug('%s.describeTask()', profile.name);
 
-        const tasks = new Tasks(profile.url, jobDefinition);
-        tasks.describeTask(profile.token, taskDefinition).then((response) => {
+        const tasks = new Tasks(profile.url, jobId);
+        tasks.describeTask(profile.token, taskId).then((response) => {
             if (response.success) {
                 if (options.query || options.json) {
                     let result = filterObject(response.result, options);

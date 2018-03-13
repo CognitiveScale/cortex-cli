@@ -19,9 +19,9 @@ const debug = require('debug')('cortex:cli');
 
 module.exports = class Tasks {
 
-    constructor(cortexUrl, jobDefinition) {
+    constructor(cortexUrl, jobId) {
         this.cortexUrl = cortexUrl;
-        this.endpoint = `${cortexUrl}/v2/jobs/${jobDefinition}/tasks`;
+        this.endpoint = `${cortexUrl}/v2/jobs/${jobId}/tasks`;
     }
 
     listTasks(token) {
@@ -37,8 +37,8 @@ module.exports = class Tasks {
             });
     }
 
-    taskLogs(token, taskDefinition) {
-        const endpoint = `${this.endpoint}/${taskDefinition}/logs`;
+    taskLogs(token, taskId) {
+        const endpoint = `${this.endpoint}/${taskId}/logs`;
         return request
             .get(endpoint)
             .set('Authorization', `Bearer ${token}`)
@@ -50,8 +50,8 @@ module.exports = class Tasks {
             });
     }
 
-    cancelTask(token, taskDefinition, message) {
-        const endpoint = `${this.endpoint}/${taskDefinition}/cancel`;
+    cancelTask(token, taskId, message) {
+        const endpoint = `${this.endpoint}/${taskId}/cancel`;
         return request
             .post(endpoint)
             .set('Authorization', `Bearer ${token}`)
@@ -64,8 +64,8 @@ module.exports = class Tasks {
             });
     }
 
-    describeTask(token, taskDefinition) {
-        const endpoint = `${this.endpoint}/${taskDefinition}`;
+    describeTask(token, taskId) {
+        const endpoint = `${this.endpoint}/${taskId}`;
         return request
             .get(endpoint)
             .set('Authorization', `Bearer ${token}`)
@@ -76,4 +76,4 @@ module.exports = class Tasks {
                 return { success: false, status: res.status, message: res.body };
             });
     }
-}
+};

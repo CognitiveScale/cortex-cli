@@ -26,15 +26,15 @@ program.description('Work with Cortex Jobs');
 
 // List Tasks
 program
-    .command('list <jobDefinition>')
+    .command('list <jobId>')
     .description('List task definitions within a job definition')
     .option('--color [on/off]', 'Turn on/off color output.', 'on')
     .option('--profile [profile]', 'The profile to use')
     .option('--json', 'Output results using JSON')
     .option('--query [query]', 'A JMESPath query to use in filtering the response data. Ignored if output format is not JSON.')
-    .action((jobDefinition, options) => {
+    .action((jobId, options) => {
         try {
-            new ListTasks(program).execute(jobDefinition, options);
+            new ListTasks(program).execute(jobId, options);
             processed = true;
         }
         catch (err) {
@@ -44,15 +44,15 @@ program
 
 // Get Tasks logs
 program
-    .command('logs <jobDefinition> <taskDefinition>')
+    .command('logs <jobId> <taskId>')
     .description('Get Tasks logs')
     .option('--color [on/off]', 'Turn on/off color output.', 'on')
     .option('--profile [profile]', 'The profile to use')
     .option('--json', 'Output results using JSON')
     .option('--query [query]', 'A JMESPath query to use in filtering the response data. Ignored if output format is not JSON.')
-    .action((jobDefinition, taskDefinition, options) => {
+    .action((jobId, taskId, options) => {
         try {
-            new TaskLogs(program).execute(jobDefinition, taskDefinition, options);
+            new TaskLogs(program).execute(jobId, taskId, options);
             processed = true;
         }
         catch (err) {
@@ -62,15 +62,15 @@ program
 
 // Cancel task
 program
-    .command('cancel <jobDefinition> <taskDefinition>')
+    .command('cancel <jobId> <taskId>')
     .description('Cancel a task')
     .option('--color [on/off]', 'Turn on/off color output.', 'on')
     .option('--profile [profile]', 'The profile to use')
     .option('--json', 'Output results using JSON')
     .option('-m, --message <message>', 'Cancellation message')
-    .action((jobDefinition, taskDefinition, options) => {
+    .action((jobId, taskId, options) => {
         try {
-            new CancelTask(program).execute(jobDefinition, taskDefinition, options);
+            new CancelTask(program).execute(jobId, taskId, options);
             processed = true;
         }
         catch (err) {
@@ -80,15 +80,15 @@ program
 
 // Describe task
 program
-    .command('describe <jobDefinition> <taskDefinition>')
+    .command('describe <jobId> <taskId>')
     .description('Describe a task definition')
     .option('--color [on/off]', 'Turn on/off color output.', 'on')
     .option('--profile [profile]', 'The profile to use')
     .option('--json', 'Output results using JSON')
     .option('--query [query]', 'A JMESPath query to use in filtering the response data. Ignored if output format is not JSON.')
-    .action((jobDefinition, taskDefinition, options) => {
+    .action((jobId, taskId, options) => {
         try {
-            new DescribeTask(program).execute(jobDefinition, taskDefinition, options);
+            new DescribeTask(program).execute(jobId, taskId, options);
             processed = true;
         }
         catch (err) {
