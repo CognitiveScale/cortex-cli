@@ -18,24 +18,23 @@
 
 const program = require('commander');
 const chalk = require('chalk');
-const { ListDatasets, SaveDatasetsCommand, DescribeDatasetCommand, GetDataframeCommand,
-    StreamDatasetCommand, GenerateDatasetCommand } = require('../src/commands/datasets');
+const { ListContent, UploadContent, DeleteContent, DownloadContent } = require('../src/commands/content');
 
 let processed = false;
-program.description('Work with Cortex Connections');
+program.description('Work with Cortex Contents');
 
 
-// List Dataset
+// List Content
 program
     .command('list')
-    .description('List Datasets')
+    .description('List content')
     .option('--color [on/off]', 'Turn on/off color output.', 'on')
     .option('--profile [profile]', 'The profile to use')
-    .option('--json', 'Output results using detailed JSON')
+    .option('--json', 'Output results using JSON')
     .option('--query [query]', 'A JMESPath query to use in filtering the response data. Ignored if output format is not JSON.')
     .action((options) => {
         try {
-            new ListDatasets(program).execute(options);
+            new ListContent(program).execute(options);
             processed = true;
         }
         catch (err) {
@@ -43,16 +42,15 @@ program
         }
     });
 
-// Save Dataset
+// Upload Content
 program
-    .command('save <datasetDefinition>')
-    .description('Save a dataset definition. Takes JSON file by default.')
+    .command('upload <contentKey> <filePath>')
+    .description('Upload content')
     .option('--color [on/off]', 'Turn on/off color output.', 'on')
     .option('--profile [profile]', 'The profile to use')
-    .option('-y, --yaml', 'Use YAML for dataset file definition format')
-    .action((datasetDef, options) => {
+    .action((contentKey, filePath, options) => {
         try {
-            new SaveDatasetsCommand(program).execute(datasetDef, options);
+            new UploadContent(program).execute(contentKey, filePath, options);
             processed = true;
         }
         catch (err) {
@@ -60,16 +58,15 @@ program
         }
     });
 
-// Describe Dataset
+// Delete Content
 program
-    .command('describe <datasetName>')
-    .description('Describe dataset')
+    .command('delete <contentKey>')
+    .description('Delete content')
     .option('--color [on/off]', 'Turn on/off color output.', 'on')
     .option('--profile [profile]', 'The profile to use')
-    .option('--query [query]', 'A JMESPath query to use in filtering the response data.')
-    .action((datasetName, options) => {
+    .action((contentKey, options) => {
         try {
-            new DescribeDatasetCommand(program).execute(datasetName, options);
+            new DeleteContent(program).execute(contentKey, options);
             processed = true;
         }
         catch (err) {
@@ -77,15 +74,15 @@ program
         }
     });
 
-// Get Dataframe
+// Download Content
 program
-    .command('get-dataframe <datasetName>')
-    .description('Get dataset in dataframe format')
+    .command('download <contentKey>')
+    .description('Download content')
     .option('--color [on/off]', 'Turn on/off color output.', 'on')
     .option('--profile [profile]', 'The profile to use')
-    .action((datasetName, options) => {
+    .action((contentKey, options) => {
         try {
-            new GetDataframeCommand(program).execute(datasetName, options);
+            new DownloadContent(program).execute(contentKey, options);
             processed = true;
         }
         catch (err) {
@@ -93,35 +90,6 @@ program
         }
     });
 
-// Get Stream
-program
-    .command('get-stream <datasetName>')
-    .description('Stream dataset content')
-    .option('--color [on/off]', 'Turn on/off color output.', 'on')
-    .option('--profile [profile]', 'The profile to use')
-    .action((datasetName, options) => {
-        try {
-            new StreamDatasetCommand(program).execute(datasetName, options);
-            processed = true;
-        }
-        catch (err) {
-            console.error(chalk.red(err.message));
-        }
-    });
-
-program
-    .command('generate')
-    .description('Generates the structure and top level build script for a dataset')
-    .option('--color [on/off]', 'Turn on/off color output.', 'on')
-    .option('--profile [profile]', 'The profile to use', 'default')
-    .action((options) => {
-        try {
-            new GenerateDatasetCommand(program).execute(options);
-        }
-        catch (err) {
-            console.error(chalk.red(err.message));
-        }
-    });
 
 process.env.DOC && require('../src/commands/utils').exportDoc(program);
 program.parse(process.argv);

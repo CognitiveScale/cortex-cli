@@ -63,8 +63,11 @@ module.exports.ListAgentsCommand = class ListAgentsCommand {
         const catalog = new Catalog(profile.url);
         catalog.listAgents(profile.token).then((response) => {
             if (response.success) {
-                if (options.query || options.json) {
-                    let result = filterObject(response.agents, options);
+                let result = response.agents;
+                if (options.query)
+                    result = filterObject(result, options);
+
+                if (options.json) {
                     printSuccess(JSON.stringify(result, null, 2), options);
                 }
                 else {
@@ -75,7 +78,7 @@ module.exports.ListAgentsCommand = class ListAgentsCommand {
                         { column: 'Created On', field: 'createdAt', width: 26 }
                     ];
 
-                    printTable(tableSpec, response.agents);
+                    printTable(tableSpec, result);
                 }
             }
             else {

@@ -28,6 +28,7 @@ program
     .command('connections [cmd]', 'Work with Cortex Connections')
     .command('jobs [cmd]', 'Work with Cortex Jobs')
     .command('tasks [cmd]', 'Work with Cortex Tasks')
+    .command('content [cmd]', 'Work with Cortex Managed Content')
     .command('datasets [cmd]', 'Work with Cortex Datasets')
     .command('skills [cmd]', 'Work with Cortex Skills')
     .command('types [cmd]', 'Work with Cortex Types')

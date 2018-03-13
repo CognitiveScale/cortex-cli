@@ -112,6 +112,15 @@ program
     .option('--profile [profile]', 'The profile to use')
     .action((functionName, options) => {
         try {
+            if (!options.kind)
+                throw new Error('--kind [kind] required');
+
+            if (!options.code)
+                throw new Error('--code [code] required');
+
+            if (!options.docker)
+                throw new Error('--docker [image] required');
+
             new DeployFunctionCommand(program).execute(functionName, options);
             processed = true;
         }
