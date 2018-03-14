@@ -117,7 +117,7 @@ module.exports.SaveConnectionCommand = class SaveConnectionCommand {
                    }
                })
                .catch((err) => {
-                   printError(`Failed to save connection: ${err.status} ${err.message}`, options);
+                   printError(`Failed to save connection: ${err.response.body.message}`, options);
                });
            })
            .catch((err) => {
@@ -135,7 +135,7 @@ module.exports.SaveConnectionCommand = class SaveConnectionCommand {
                }
            })
            .catch((err) => {
-               printError(`Failed to save connection: ${err.status} ${err.message}`, options);
+               printError(`Failed to save connection: ${err.response.body.message}`, options);
            });
        }
    }
@@ -219,7 +219,7 @@ module.exports.TestConnectionCommand = class TestConnectionCommand {
                    }
                })
                .catch((err) => {
-                   printError(`Failed while testing connection: ${err.status} ${err.message}`, options);
+                   printError(`Failed while testing connection: ${err.response.body.message}`, options);
                });
            })
            .catch((err) => {
@@ -233,7 +233,7 @@ module.exports.TestConnectionCommand = class TestConnectionCommand {
                    printSuccess(`Connection successfully tested`, options);
                }
                else {
-                   printError(`Failed while testing connection: ${response.status} ${response.message}`, options);
+                   printError(`Failed while testing connection: ${err.response.body.message}`, options);
                }
            })
            .catch((err) => {
