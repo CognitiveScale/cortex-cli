@@ -15,6 +15,7 @@
  */
 
 const fs = require('fs');
+const path = require('path');
 const yeoman = require('yeoman-environment');
 const debug = require('debug')('cortex:cli');
 const { loadProfile } = require('../config');
@@ -69,22 +70,33 @@ module.exports.UploadContent = class UploadContent {
     execute(contentKey, filePath, options) {
         const profile = loadProfile(options.profile);
         debug('%s.listContent()', profile.name);
-
-        const payload = {'content': filePath, 'key': contentKey};
-
         const content = new Content(profile.url);
-        content.uploadContent(profile.token, payload).then((response) => {
-            if (response.success) {
-               printSuccess(`Content successfully uploaded.`, options);
-            }
-            else {
-                printError(`Failed to upload content: ${response.status} ${response.message}`, options);
-            }
-        })
-        .catch((err) => {
-            debug(err);
-            printError(`Failed to upload content: ${err.status} ${err.message}`, options);
-        });
+        if (options.secure) {
+            const fileContent = JSON.parse(fs.readFileSync(filePath));
+            content.uploadSecureContent(profile.token, contentKey, fileContent).then((response) => {
+                if (response.success) {
+                    printSuccess(`Secure content successfully uploaded.`, options);
+                }
+                else {
+                    printError(`Failed to upload secure content: ${response.status} ${response.message}`, options);
+                }
+            })
+        }
+        else {
+            const payload = {'content': filePath, 'key': contentKey};
+            content.uploadContent(profile.token, payload).then((response) => {
+                if (response.success) {
+                    printSuccess(`Content successfully uploaded.`, options);
+                }
+                else {
+                    printError(`Failed to upload content: ${response.status} ${response.message}`, options);
+                }
+            })
+            .catch((err) => {
+                debug(err);
+                printError(`Failed to upload content: ${err.status} ${err.message}`, options);
+            });
+        }
     }
 };
 

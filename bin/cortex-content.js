@@ -48,6 +48,7 @@ program
     .description('Upload content')
     .option('--color [on/off]', 'Turn on/off color output.', 'on')
     .option('--profile [profile]', 'The profile to use')
+    .option('--secure', 'Uploads the content securely to the Cortex Vault. Use this option for keytab files or content that contains sensitive information that is required during Runtime. Take note of the contentKey you give to this content for future reference.')
     .action((contentKey, filePath, options) => {
         try {
             new UploadContent(program).execute(contentKey, filePath, options);
