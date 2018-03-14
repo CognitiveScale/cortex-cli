@@ -56,7 +56,7 @@ module.exports.parseObject = function(str, options) {
 
 function _extractValues(fields, obj) {
     const rv = [];
-    fields.forEach((f) => rv.push(obj[f] || '-'));
+    fields.forEach((f) => rv.push((obj !== undefined && obj !== null)? obj[f].toString() : '-'));
     return rv;
 }
 
@@ -67,7 +67,6 @@ module.exports.printTable = function(spec, objects, transform) {
     const colWidths = spec.map((s) => s.width);
     const fields = spec.map((s) => s.field);
     const values = objects.map((obj) => _extractValues(fields, transform(obj)));
-
     debug('printing fields: %o', fields);
 
     const table = new Table({head, colWidths, style: {head: ['cyan']}});
@@ -88,4 +87,4 @@ module.exports.exportDoc = function(program){
         }))
     }))));
     process.exit(0);
-}
+};
