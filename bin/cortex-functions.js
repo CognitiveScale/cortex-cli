@@ -112,14 +112,13 @@ program
     .option('--profile [profile]', 'The profile to use')
     .action((functionName, options) => {
         try {
-            if (!options.kind)
-                throw new Error('--kind [kind] required');
+            if (!options.kind && !options.docker) {
+                throw new Error('--kind [kind] or --docker [image] required');
+            }
 
-            if (!options.code)
-                throw new Error('--code [code] required');
-
-            if (!options.docker)
-                throw new Error('--docker [image] required');
+            if (options.docker && options.kind) {
+                throw new Error('Use either --kind [kind] or --docker [image], but not both');
+            }
 
             new DeployFunctionCommand(program).execute(functionName, options);
             processed = true;

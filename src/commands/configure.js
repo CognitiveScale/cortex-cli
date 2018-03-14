@@ -130,7 +130,7 @@ module.exports.DescribeProfileCommand = class {
             return;
         }
 
-        const profileName = config.currentProfile || options.profile;
+        const profileName = options.profile || config.currentProfile;
         debug('describing profile: %s', profileName);
 
         const profile = config.getProfile(profileName);
