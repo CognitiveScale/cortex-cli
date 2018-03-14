@@ -173,6 +173,20 @@ module.exports.TestConnectionCommand = class TestConnectionCommand {
         this.program = program;
     }
 
+    getParamsValue(connectionDefinition, paramName) {
+        const results = connectionDefinition.params.filter(item => item.name === paramName);
+        if (results && results.length) {
+             return results[0]['value'];
+
+        } else {
+             return undefined;
+        }
+    }
+
+    stripJarPathFromParams(params) {
+     return params.filter(item => item.name !== 'jdbc_jar_file');
+    }
+
    execute(connectionDefinition, options) {
        const profile = loadProfile(options.profile);
        debug('%s.executeTestDefinition(%s)', profile.name, connectionDefinition);
@@ -181,18 +195,51 @@ module.exports.TestConnectionCommand = class TestConnectionCommand {
        const connObj = parseObject(connDefStr, options);
        debug('%o', connObj);
 
-       const connection = new Connections(profile.url);
-       connection.testConnection(profile.token, connObj).then((response) => {
-           if (response.success) {
-               printSuccess(`Connection successfully tested`, options);
-           }
-           else {
-               printError(`Failed while testing connection: ${response.status} ${response.message}`, options);
-           }
-       })
-       .catch((err) => {
-           printError(`Failed while testing connection: ${err.status} ${err.message}`, options);
-       });
+       const jdbcJarFilePath = this.getParamsValue(connObj, 'jdbc_jar_file');
+       const contentKey = this.getParamsValue(connObj, 'managed_content_key');
+
+       if (jdbcJarFilePath) {
+           const content = new Content(profile.url);
+           const connection = new Connections(profile.url);
+
+           const payload = {'content': jdbcJarFilePath, 'key': contentKey};
+
+           content.uploadContent(profile.token, payload).then((response) => {
+               const connection = new Connections(profile.url);
+
+               let marshaledConnObj = connObj;
+               marshaledConnObj.params = this.stripJarPathFromParams(marshaledConnObj.params);
+
+               connection.testConnection(profile.token, marshaledConnObj).then((response) => {
+                   if (response.success) {
+                       printSuccess(`Connection successfully tested`, options);
+                   }
+                   else {
+                       printError(`Failed while testing connection: ${response.status} ${response.message}`, options);
+                   }
+               })
+               .catch((err) => {
+                   printError(`Failed while testing connection: ${err.status} ${err.message}`, options);
+               });
+           })
+           .catch((err) => {
+               printError(`Failed to upload jdbc jar: ${err.status} ${err.message}`, options);
+           });
+
+       } else {
+           const connection = new Connections(profile.url);
+           connection.testConnection(profile.token, connObj).then((response) => {
+               if (response.success) {
+                   printSuccess(`Connection successfully tested`, options);
+               }
+               else {
+                   printError(`Failed while testing connection: ${response.status} ${response.message}`, options);
+               }
+           })
+           .catch((err) => {
+               printError(`Failed while testing connection: ${err.status} ${err.message}`, options);
+           });
+       }
    }
 };
 
