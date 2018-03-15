@@ -124,7 +124,6 @@ program
     .description('Get service activation')
     .option('--color [on/off]', 'Turn on/off color output.', 'on')
     .option('--profile [profile]', 'The profile to use')
-    .option('--query [query]', 'A JMESPath query to use in filtering the response data.')
     .action((agentName, options) => {
         try {
             new GetAgentSnapshot(program).execute(agentName, options);
