@@ -24,7 +24,8 @@ const {
     DescribeAgentCommand,
     InvokeAgentServiceCommand,
     GetServiceActivationCommand,
-    GetAgentSnapshot
+    GetAgentSnapshotCommand,
+    CreateAgentSnapshotCommand
 } = require('../src/commands/agents');
 
 let processed = false;
@@ -126,7 +127,24 @@ program
     .option('--profile [profile]', 'The profile to use')
     .action((agentName, options) => {
         try {
-            new GetAgentSnapshot(program).execute(agentName, options);
+            new GetAgentSnapshotCommand(program).execute(agentName, options);
+            processed = true;
+        }
+        catch (err) {
+            console.error(chalk.red(err.message));
+        }
+    });
+
+//Create Agent Snapshot
+program
+    .command('create-snapshot <snapshotDefinition>')
+    .description('Create agent snapshot')
+    .option('--color [on/off]', 'Turn on/off color output.', 'on')
+    .option('--profile [profile]', 'The profile to use')
+    .option('-y, --yaml', 'Use YAML for snapshot definition format')
+    .action((snapshotDefinition, options) => {
+        try {
+            new CreateAgentSnapshotCommand(program).execute(snapshotDefinition, options);
             processed = true;
         }
         catch (err) {

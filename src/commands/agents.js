@@ -204,7 +204,7 @@ module.exports.GetServiceActivationCommand = class {
     }
 };
 
-module.exports.GetAgentSnapshot = class {
+module.exports.GetAgentSnapshotCommand = class {
 
     constructor(program) {
         this.program = program;
@@ -227,5 +227,35 @@ module.exports.GetAgentSnapshot = class {
         .catch((err) => {
             printError(`Failed to get agent snapshot ${agentName}: ${err.status} ${err.message}`, options);
         });
+    }
+};
+
+module.exports.CreateAgentSnapshotCommand = class {
+
+    constructor(program) {
+        this.program = program;
+    }
+
+    execute(snapshotDefinition, options) {
+        const profile = loadProfile(options.profile);
+        debug('%s.createAgentSnapshot(%s)', profile.name, snapshotDefinition);
+
+        const snapshotDefStr = fs.readFileSync(snapshotDefinition);
+        const snapshot = parseObject(snapshotDefStr, options);
+        const agentName = snapshot.agentName;
+
+        const agents = new Agents(profile.url);
+        agents.createAgentSnapshot(profile.token, snapshot).then((response) => {
+            if (response.success) {
+                let result = filterObject(response.result.snapshots, options);
+                printSuccess(JSON.stringify(result, null, 2), options);
+            }
+            else {
+                printError(`Failed to get agent snapshot ${agentName}: ${response.message}`, options);
+            }
+        })
+            .catch((err) => {
+                printError(`Failed to get agent snapshot ${agentName}: ${err.status} ${err.message}`, options);
+            });
     }
 };
