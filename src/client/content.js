@@ -55,10 +55,10 @@ module.exports = class Content {
     }
 
     uploadSecureContent(token, key, content) {
-        let secureEndpoint = `${this.cortexUrl}/v2/tenants/secrets/${key}`;
-        debug('uploadSecureContent(%s => %s', content, secureEndpoint);
+        const url = `${this.cortexUrl}/v2/tenants/secrets/${key}`;
+        debug('uploadSecureContent(%s => %s', content, url);
         return request
-            .post(secureEndpoint)
+            .post(url)
             .set('Authorization', `Bearer ${token}`)
             .send(content)
             .accept('application/json')
@@ -101,6 +101,19 @@ module.exports = class Content {
             });
     }
 
-
+    downloadSecureContent(token, contentKey) {
+        const url = `${this.cortexUrl}/v2/tenants/secrets/${contentKey}`;
+        debug('downloadContent(%s) => %s', contentKey);
+        return request
+            .get(url)
+            .set('Authorization', `Bearer ${token}`)
+            .accept('application/json')
+            .then((res) => {
+                if (res.ok) {
+                    return {success: true, message: res.text};
+                }
+                return {success: false, message: res.body, status: res.status};
+            });
+    }
 };
 

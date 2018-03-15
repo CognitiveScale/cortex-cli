@@ -81,6 +81,7 @@ program
     .description('Download content')
     .option('--color [on/off]', 'Turn on/off color output.', 'on')
     .option('--profile [profile]', 'The profile to use')
+    .option('--secure', 'Downloads the content securely from the Cortex Vault.')
     .action((contentKey, options) => {
         try {
             new DownloadContent(program).execute(contentKey, options);
