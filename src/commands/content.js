@@ -137,18 +137,20 @@ module.exports.DownloadContent = class DownloadContent {
         debug('%s.DownloadContent()', profile.name);
 
         const content = new Content(profile.url);
+
+        // To download content from Secrets
         if (options.secure) {
             content.downloadSecureContent(profile.token, contentKey).then((response) => {
                 if (response.success) {
                     printSuccess(response.message, options);
                 }
                 else {
-                    printError(`Failed to download content: ${response.status} ${response.message}`, options);
+                    printError(`Failed to download secure content: ${response.status} ${response.message}`, options);
                 }
             })
                 .catch((err) => {
                     debug(err);
-                    printError(`Failed to download content: ${err.status} ${err.message}`, options);
+                    printError(`Failed to download secure content: ${err.status} ${err.message}`, options);
                 });
         }
         content.downloadContent(profile.token, contentKey).then((response) => {
