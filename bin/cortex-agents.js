@@ -65,6 +65,7 @@ program
     .option('--color [on/off]', 'Turn on/off color output.', 'on')
     .option('--profile [profile]', 'The profile to use')
     .option('--query [query]', 'A JMESPath query to use in filtering the response data.')
+    .option('--versions', 'To get list of versions of an agent')
     .action((agentName, options) => {
         try {
             new DescribeAgentCommand(program).execute(agentName, options);

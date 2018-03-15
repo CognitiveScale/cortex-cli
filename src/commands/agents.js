@@ -100,21 +100,38 @@ module.exports.DescribeAgentCommand = class DescribeAgentCommand {
 
     execute(agentName, options) {
         const profile = loadProfile(options.profile);
-        debug('%s.executeDescribeAgent(%s)', profile.name, agentName);
-
         const catalog = new Catalog(profile.url);
-        catalog.describeAgent(profile.token, agentName).then((response) => {
-            if (response.success) {
-                let result = filterObject(response.agent, options);
-                printSuccess(JSON.stringify(result, null, 2), options);
-            }
-            else {
-                printError(`Failed to describe agent ${agentName}: ${response.message}`, options);
-            }
-        })
-        .catch((err) => {
-            printError(`Failed to describe agent ${agentName}: ${err.status} ${err.message}`, options);
-        });
+        if (options.versions) {
+            debug('%s.executeDescribeAgentVersions(%s)', profile.name, agentName);
+            catalog.describeAgentVersions(profile.token, agentName).then((response) => {
+                if (response.success) {
+                    let result = filterObject(response.agent, options);
+                    printSuccess(JSON.stringify(result, null, 2), options);
+                }
+                else {
+                    printError(`Failed to describe agent versions ${agentName}: ${response.message}`, options);
+                }
+            })
+            .catch((err) => {
+                printError(`Failed to describe agent versions ${agentName}: ${err.status} ${err.message}`, options);
+            });
+        }
+
+        else {
+            debug('%s.executeDescribeAgent(%s)', profile.name, agentName);
+            catalog.describeAgent(profile.token, agentName).then((response) => {
+                if (response.success) {
+                    let result = filterObject(response.agent, options);
+                    printSuccess(JSON.stringify(result, null, 2), options);
+                }
+                else {
+                    printError(`Failed to describe agent ${agentName}: ${response.message}`, options);
+                }
+            })
+            .catch((err) => {
+                printError(`Failed to describe agent ${agentName}: ${err.status} ${err.message}`, options);
+            });
+        }
     }
 };
 
