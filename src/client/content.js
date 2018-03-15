@@ -62,6 +62,7 @@ module.exports = class Content {
             .set('Authorization', `Bearer ${token}`)
             .send(content)
             .accept('application/json')
+            .type('json')
             .then((res) => {
                 if (res.ok) {
                     return {success: true, message: res.body};
