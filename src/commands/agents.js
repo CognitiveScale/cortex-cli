@@ -203,3 +203,29 @@ module.exports.GetServiceActivationCommand = class {
         });
     }
 };
+
+module.exports.GetAgentSnapshot = class {
+
+    constructor(program) {
+        this.program = program;
+    }
+
+    execute(agentName, options) {
+        const profile = loadProfile(options.profile);
+        debug('%s.getAgentSnapshot(%s)', profile.name, agentName);
+
+        const agents = new Agents(profile.url);
+        agents.getAgentSnapshot(profile.token, agentName).then((response) => {
+            if (response.success) {
+                let result = filterObject(response.result.snapshots, options);
+                printSuccess(JSON.stringify(result, null, 2), options);
+            }
+            else {
+                printError(`Failed to get agent snapshot ${agentName}: ${response.message}`, options);
+            }
+        })
+        .catch((err) => {
+            printError(`Failed to get agent snapshot ${agentName}: ${err.status} ${err.message}`, options);
+        });
+    }
+};
