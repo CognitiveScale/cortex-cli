@@ -186,3 +186,29 @@ module.exports.GetServiceActivationCommand = class {
         });
     }
 };
+
+module.exports.GetAgentInstancesCommand = class {
+
+    constructor(program) {
+        this.program = program;
+    }
+
+    execute(agentName, options) {
+        const profile = loadProfile(options.profile);
+        debug('%s.getAgentInstances(%s)', profile.name, agentName);
+
+        const agents = new Agents(profile.url);
+        agents.getAgentInstances(profile.token, agentName).then((response) => {
+            if (response.success) {
+                let result = filterObject(response.result, options);
+                printSuccess(JSON.stringify(result, null, 2), options);
+            }
+            else {
+                printError(`Failed to get agent instances ${agentName}: ${response.message}`, options);
+            }
+        })
+            .catch((err) => {
+                printError(`Failed to get agent instances ${agentName}: ${err.status} ${err.message}`, options);
+            });
+    }
+};

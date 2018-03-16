@@ -18,7 +18,7 @@
 
 const program = require('commander');
 const chalk = require('chalk');
-const { SaveAgentCommand, ListAgentsCommand, DescribeAgentCommand, InvokeAgentServiceCommand, GetServiceActivationCommand } = require('../src/commands/agents');
+const { SaveAgentCommand, ListAgentsCommand, DescribeAgentCommand, InvokeAgentServiceCommand, GetServiceActivationCommand, GetAgentInstancesCommand } = require('../src/commands/agents');
 
 let processed = false;
 program.description('Work with Cortex Agents');
@@ -103,6 +103,23 @@ program
     .action((activationId, options) => {
         try {
             new GetServiceActivationCommand(program).execute(activationId, options);
+            processed = true;
+        }
+        catch (err) {
+            console.error(chalk.red(err.message));
+        }
+    });
+
+
+//List agent instances
+program
+    .command('list-instances <agentName>')
+    .description('List agent instances  ')
+    .option('--color [on/off]', 'Turn on/off color output.', 'on')
+    .option('--profile [profile]', 'The profile to use')
+    .action((agentName, options) => {
+        try {
+            new GetAgentInstancesCommand(program).execute(agentName, options);
             processed = true;
         }
         catch (err) {
