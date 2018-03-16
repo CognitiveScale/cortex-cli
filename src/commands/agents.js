@@ -251,11 +251,11 @@ module.exports.CreateAgentSnapshotCommand = class {
                 printSuccess(JSON.stringify(result, null, 2), options);
             }
             else {
-                printError(`Failed to get agent snapshot ${agentName}: ${response.message}`, options);
+                printError(`Failed to create agent snapshot ${agentName}: ${response.message}`, options);
             }
         })
             .catch((err) => {
-                printError(`Failed to get agent snapshot ${agentName}: ${err.status} ${err.message}`, options);
+                printError(`Failed to create agent snapshot ${agentName}: ${err.status} ${err.message}`, options);
             });
     }
 };
