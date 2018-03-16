@@ -247,7 +247,7 @@ module.exports.CreateAgentSnapshotCommand = class {
         const agents = new Agents(profile.url);
         agents.createAgentSnapshot(profile.token, snapshot).then((response) => {
             if (response.success) {
-                let result = filterObject(response.result.snapshots, options);
+                let result = filterObject(response.result, options);
                 printSuccess(JSON.stringify(result, null, 2), options);
             }
             else {

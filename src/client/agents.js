@@ -70,8 +70,8 @@ module.exports = class Agents {
 
     createAgentSnapshot(token, snapshot) {
         const agentName = snapshot.agentName;
-        const endpoint = `${this.endpoint}/snapshots/${agentName}`;
-        debug('getAgentSnapshot(%s) => %s', agentName, endpoint);
+        const endpoint = `${this.endpoint}/snapshots`;
+        debug('getAgentSnapshot=> %s', endpoint);
         return request
             .post(endpoint)
             .set('Authorization', `Bearer ${token}`)

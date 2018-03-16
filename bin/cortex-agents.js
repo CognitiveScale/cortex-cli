@@ -138,10 +138,9 @@ program
 //Create Agent Snapshot
 program
     .command('create-snapshot <snapshotDefinition>')
-    .description('Create agent snapshot')
+    .description('Create agent snapshot with JSON file as input')
     .option('--color [on/off]', 'Turn on/off color output.', 'on')
     .option('--profile [profile]', 'The profile to use')
-    .option('-y, --yaml', 'Use YAML for snapshot definition format')
     .action((snapshotDefinition, options) => {
         try {
             new CreateAgentSnapshotCommand(program).execute(snapshotDefinition, options);
