@@ -157,17 +157,20 @@ module.exports.DownloadContent = class DownloadContent {
                     printError(`Failed to download secure content: ${err.status} ${err.message}`, options);
                 });
         }
-        content.downloadContent(profile.token, contentKey).then((response) => {
-            if (response.success) {
-                printSuccess(response.message, options);
-            }
-            else {
-                printError(`Failed to download content: ${response.status} ${response.message}`, options);
-            }
-        })
-        .catch((err) => {
-            debug(err);
-            printError(`Failed to download content: ${err.status} ${err.message}`, options);
-        });
+        else {
+            content.downloadContent(profile.token, contentKey).then((response) => {
+                if (response.success) {
+                    printSuccess(response.message, options);
+                }
+                else {
+                    printError(`Failed to download content: ${response.status} ${response.message}`, options);
+                }
+            })
+                .catch((err) => {
+                    debug(err);
+                    printError(`Failed to download content: ${err.status} ${err.message}`, options);
+                });
+        }
+
     }
 };
