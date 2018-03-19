@@ -72,8 +72,12 @@ module.exports.UploadContent = class UploadContent {
         debug('%s.listContent()', profile.name);
         const content = new Content(profile.url);
         if (options.secure) {
-            const fileContent = fs.readFileSync(filePath, 'UTF-8');
-            content.uploadSecureContent(profile.token, contentKey, fileContent).then((response) => {
+            const fileContent = fs.readFileSync(filePath);
+            const fileBaseName = path.basename(filePath);
+
+            const secureContent = {};
+            secureContent[fileBaseName] = new Buffer(fileContent).toString('base64');
+            content.uploadSecureContent(profile.token, contentKey, secureContent).then((response) => {
                 if (response.success) {
                     printSuccess(`Secure content successfully uploaded.`, options);
                 }
