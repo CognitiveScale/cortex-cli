@@ -307,3 +307,29 @@ module.exports.DeleteAgentInstanceCommand = class {
             });
     }
 };
+
+module.exports.StopAgentInstanceCommand = class {
+
+    constructor(program) {
+        this.program = program;
+    }
+
+    execute(instanceId, options) {
+        const profile = loadProfile(options.profile);
+        debug('%s.stopAgentInstance(%s)', profile.name, instanceId);
+
+        const agents = new Agents(profile.url);
+        agents.stopAgentInstance(profile.token, instanceId).then((response) => {
+            if (response.success) {
+                let result = filterObject(response.result, options);
+                printSuccess(JSON.stringify(result, null, 2), options);
+            }
+            else {
+                printError(`Failed to stop agent instance ${instanceId}: ${response.message}`, options);
+            }
+        })
+            .catch((err) => {
+                printError(`Failed to stop agent instance ${instanceId} : ${err.status} ${err.message}`, options);
+            });
+    }
+};

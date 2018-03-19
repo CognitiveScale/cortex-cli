@@ -112,4 +112,18 @@ module.exports = class Agents {
             });
     }
 
+    stopAgentInstance(token, instanceId) {
+        const endpoint = `${this.endpoint}/instances/${instanceId}/stop`;
+        debug('stopAgentInstance => %s', endpoint);
+        return request
+            .post(endpoint)
+            .set('Authorization', `Bearer ${token}`)
+            .then((res) => {
+                if (res.ok) {
+                    return {success: true, result: res.body};
+                }
+                return {success: false, status: res.status, message: res.body};
+            });
+    }
+
 };

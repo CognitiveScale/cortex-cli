@@ -27,7 +27,8 @@ const {
     ListAgentInstancesCommand,
     CreateAgentInstanceCommand,
     GetAgentInstanceCommand,
-    DeleteAgentInstanceCommand
+    DeleteAgentInstanceCommand,
+    StopAgentInstanceCommand
 } = require('../src/commands/agents');
 
 let processed = false;
@@ -186,6 +187,21 @@ program
         }
     });
 
+//Stop agent instance
+program
+    .command('stop-instance <instanceId>')
+    .description('Create agent instance')
+    .option('--color [on/off]', 'Turn on/off color output.', 'on')
+    .option('--profile [profile]', 'The profile to use')
+    .action((instanceId, options) => {
+        try {
+            new StopAgentInstanceCommand(program).execute(instanceId, options);
+            processed = true;
+        }
+        catch (err) {
+            console.error(chalk.red(err.message));
+        }
+    });
 process.env.DOC && require('../src/commands/utils').exportDoc(program);
 
 program.parse(process.argv);
