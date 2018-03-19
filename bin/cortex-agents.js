@@ -18,11 +18,20 @@
 
 const program = require('commander');
 const chalk = require('chalk');
-const { SaveAgentCommand, ListAgentsCommand, DescribeAgentCommand, InvokeAgentServiceCommand, GetServiceActivationCommand, GetAgentInstancesCommand, CreateAgentInstanceCommand } = require('../src/commands/agents');
+const {
+    SaveAgentCommand,
+    ListAgentsCommand,
+    DescribeAgentCommand,
+    InvokeAgentServiceCommand,
+    GetServiceActivationCommand,
+    ListAgentInstancesCommand,
+    CreateAgentInstanceCommand,
+    GetAgentInstanceCommand
+} = require('../src/commands/agents');
 
 let processed = false;
 program.description('Work with Cortex Agents');
-    
+
 // Save Agent
 program
     .command('save <agentDefinition>')
@@ -119,7 +128,7 @@ program
     .option('--profile [profile]', 'The profile to use')
     .action((agentName, options) => {
         try {
-            new GetAgentInstancesCommand(program).execute(agentName, options);
+            new ListAgentInstancesCommand(program).execute(agentName, options);
             processed = true;
         }
         catch (err) {
@@ -136,6 +145,23 @@ program
     .action((instanceDefinition, options) => {
         try {
             new CreateAgentInstanceCommand(program).execute(instanceDefinition, options);
+            processed = true;
+        }
+        catch (err) {
+            console.error(chalk.red(err.message));
+        }
+    });
+
+//Get agent instance
+program
+    .command('get-instance <instanceId>')
+    .description('Create agent instance')
+    .option('--color [on/off]', 'Turn on/off color output.', 'on')
+    .option('--profile [profile]', 'The profile to use')
+    .option('--json', 'Output results using JSON')
+    .action((instanceId, options) => {
+        try {
+            new GetAgentInstanceCommand(program).execute(instanceId, options);
             processed = true;
         }
         catch (err) {
