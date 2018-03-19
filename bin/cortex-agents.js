@@ -28,7 +28,8 @@ const {
     CreateAgentInstanceCommand,
     GetAgentInstanceCommand,
     DeleteAgentInstanceCommand,
-    StopAgentInstanceCommand
+    StopAgentInstanceCommand,
+    ListTriggersCommand
 } = require('../src/commands/agents');
 
 let processed = false;
@@ -202,6 +203,24 @@ program
             console.error(chalk.red(err.message));
         }
     });
+
+//List triggers
+program
+    .command('list-triggers')
+    .description('Create agent instance')
+    .option('--color [on/off]', 'Turn on/off color output.', 'on')
+    .option('--profile [profile]', 'The profile to use')
+    .action((options) => {
+        try {
+            new ListTriggersCommand(program).execute(options);
+            processed = true;
+        }
+        catch (err) {
+            console.error(chalk.red(err.message));
+        }
+    });
+
+
 process.env.DOC && require('../src/commands/utils').exportDoc(program);
 
 program.parse(process.argv);

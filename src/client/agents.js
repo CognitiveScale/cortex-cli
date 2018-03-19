@@ -126,4 +126,18 @@ module.exports = class Agents {
             });
     }
 
+    listTriggers(token) {
+        const endpoint = `${this.endpoint}/triggers`;
+        debug('listTriggers => %s', endpoint);
+        return request
+            .get(endpoint)
+            .set('Authorization', `Bearer ${token}`)
+            .then((res) => {
+                if (res.ok) {
+                    return {success: true, result: res.body};
+                }
+                return {success: false, status: res.status, message: res.body};
+            });
+    }
+
 };

@@ -333,3 +333,29 @@ module.exports.StopAgentInstanceCommand = class {
             });
     }
 };
+
+module.exports.ListTriggersCommand = class {
+
+    constructor(program) {
+        this.program = program;
+    }
+
+    execute(options) {
+        const profile = loadProfile(options.profile);
+        debug('%s.listTriggers', profile.name);
+
+        const agents = new Agents(profile.url);
+        agents.listTriggers(profile.token).then((response) => {
+            if (response.success) {
+                let result = filterObject(response.result, options);
+                printSuccess(JSON.stringify(result, null, 2), options);
+            }
+            else {
+                printError(`Failed to list triggers ${instanceId}: ${response.message}`, options);
+            }
+        })
+            .catch((err) => {
+                printError(`Failed to list triggers ${instanceId} : ${err.status} ${err.message}`, options);
+            });
+    }
+};
