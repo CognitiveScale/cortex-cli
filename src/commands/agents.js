@@ -200,7 +200,7 @@ module.exports.GetAgentInstancesCommand = class {
         const agents = new Agents(profile.url);
         agents.getAgentInstances(profile.token, agentName).then((response) => {
             if (response.success) {
-                let result = filterObject(response.result, options);
+                let result = filterObject(response.result.instances, options);
                 printSuccess(JSON.stringify(result, null, 2), options);
             }
             else {
@@ -210,5 +210,33 @@ module.exports.GetAgentInstancesCommand = class {
             .catch((err) => {
                 printError(`Failed to get agent instances ${agentName}: ${err.status} ${err.message}`, options);
             });
+    }
+};
+
+module.exports.CreateAgentInstanceCommand = class {
+
+    constructor(program) {
+        this.program = program;
+    }
+
+    execute(instanceDefinition, options) {
+        const profile = loadProfile(options.profile);
+        debug('%s.getAgentInstances', profile.name);
+
+        const agents = new Agents(profile.url);
+        const instanceDefStr = fs.readFileSync(instanceDefinition);
+        const instance = parseObject(instanceDefStr, options);
+        agents.createAgentInstance(profile.token, instance).then((response) => {
+            if (response.success) {
+                let result = filterObject(response.result, options);
+                printSuccess(JSON.stringify(result, null, 2), options);
+            }
+            else {
+                printError(`Failed to create agent instance : ${response.message}`, options);
+            }
+        })
+        .catch((err) => {
+            printError(`Failed to create agent instance : ${err.status} ${err.message}`, options);
+        });
     }
 };

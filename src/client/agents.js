@@ -67,4 +67,20 @@ module.exports = class Agents {
                 return {success: false, status: res.status, message: res.body};
             });
     }
+
+    createAgentInstance(token, instance) {
+        const endpoint = `${this.endpoint}/instances`;
+        debug('createAgentInstance => %s', endpoint);
+        return request
+            .post(endpoint)
+            .set('Authorization', `Bearer ${token}`)
+            .send(instance)
+            .type('json')
+            .then((res) => {
+                if (res.ok) {
+                    return {success: true, result: res.body};
+                }
+                return {success: false, status: res.status, message: res.body};
+            });
+    }
 };
