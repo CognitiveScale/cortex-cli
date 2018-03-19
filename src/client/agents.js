@@ -98,4 +98,18 @@ module.exports = class Agents {
             });
     }
 
+    deleteAgentInstance(token, instanceId) {
+        const endpoint = `${this.endpoint}/instances/${instanceId}`;
+        debug('deleteAgentInstance => %s', endpoint);
+        return request
+            .delete(endpoint)
+            .set('Authorization', `Bearer ${token}`)
+            .then((res) => {
+                if (res.ok) {
+                    return {success: true, result: res.body};
+                }
+                return {success: false, status: res.status, message: res.body};
+            });
+    }
+
 };

@@ -26,7 +26,8 @@ const {
     GetServiceActivationCommand,
     ListAgentInstancesCommand,
     CreateAgentInstanceCommand,
-    GetAgentInstanceCommand
+    GetAgentInstanceCommand,
+    DeleteAgentInstanceCommand
 } = require('../src/commands/agents');
 
 let processed = false;
@@ -162,6 +163,22 @@ program
     .action((instanceId, options) => {
         try {
             new GetAgentInstanceCommand(program).execute(instanceId, options);
+            processed = true;
+        }
+        catch (err) {
+            console.error(chalk.red(err.message));
+        }
+    });
+
+//Delete agent instance
+program
+    .command('delete-instance <instanceId>')
+    .description('Create agent instance')
+    .option('--color [on/off]', 'Turn on/off color output.', 'on')
+    .option('--profile [profile]', 'The profile to use')
+    .action((instanceId, options) => {
+        try {
+            new DeleteAgentInstanceCommand(program).execute(instanceId, options);
             processed = true;
         }
         catch (err) {

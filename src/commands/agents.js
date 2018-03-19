@@ -273,11 +273,37 @@ module.exports.GetAgentInstanceCommand = class {
 
             }
             else {
-                printError(`Failed to get agent instance : ${response.message}`, options);
+                printError(`Failed to get agent instance ${instanceId}: ${response.message}`, options);
             }
         })
             .catch((err) => {
-                printError(`Failed to get agent instance : ${err.status} ${err.message}`, options);
+                printError(`Failed to get agent instance ${instanceId}: ${err.status} ${err.message}`, options);
+            });
+    }
+};
+
+module.exports.DeleteAgentInstanceCommand = class {
+
+    constructor(program) {
+        this.program = program;
+    }
+
+    execute(instanceId, options) {
+        const profile = loadProfile(options.profile);
+        debug('%s.deleteAgentInstance(%s)', profile.name, instanceId);
+
+        const agents = new Agents(profile.url);
+        agents.deleteAgentInstance(profile.token, instanceId).then((response) => {
+            if (response.success) {
+                let result = filterObject(response.result, options);
+                printSuccess(JSON.stringify(result, null, 2), options);
+            }
+            else {
+                printError(`Failed to delete agent instance ${instanceId}: ${response.message}`, options);
+            }
+        })
+            .catch((err) => {
+                printError(`Failed to delete agent instance ${instanceId} : ${err.status} ${err.message}`, options);
             });
     }
 };
