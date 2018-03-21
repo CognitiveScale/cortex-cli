@@ -124,6 +124,8 @@ cortex agents list --query "[].{name: name, title: title}"
     - [x] save [agentDefinition]
     - [x] describe [agentName]
     - [ ] delete [agentName]
+    - [x] get-snapshots [agentName]
+    - [x] create-snapshots [snapshotDefinition]
     - [x] invoke [serviceName]
     - [x] get-service-activation [activationId]
 - [x] types
@@ -136,36 +138,47 @@ cortex agents list --query "[].{name: name, title: title}"
     - [x] save [skillDefinition]
     - [x] describe [skillName]
     - [ ] delete [skillName]
+    - [x] generate
 - [x] processors
-    - [x] save-runtime [runtimeDefinition]
+    - [ ] save-runtime [runtimeDefinition]
+    - [x] list-runtime-types
     - [x] list-runtimes
-    - [x] describe-runtime [runtimeName]
-    - [x] delete-runtime [runtimeName]
-    - [x] invoke-action [runtimeName] [actionId]
+    - [x] describe [runtimeName]
+    - [x] delete [runtimeName]
+    - [x] invoke [runtimeName] [actionId]
     - [x] list-actions [runtimeName]
-- [ ] content
-    - [ ] upload
-    - [ ] download
-    - [ ] describe
-    - [ ] list
+- [x] content
+    - [x] upload
+    - [x] download
+    - [x] delete
+    - [x] list
 - [ ] jobs
-    - [ ] list
-    - [ ] save
-    - [ ] describe
+    - [x] list
+    - [x] save
+    - [x] describe
+    - [x] status
     - [ ] delete
+- [x] tasks
+    - [x] list
+    - [x] logs
+    - [x] cancel
+    - [x] describe
 - [ ] connections
-    - [ ] list
-    - [ ] save [connectionDefinition]
+    - [x] list
+    - [x] list-types
+    - [x] save [connectionDefinition]
     - [ ] delete [connectionName]
-    - [ ] describe [connectionName]
-    - [ ] test [connectionName]
+    - [x] describe [connectionName]
+    - [x] test [connectionName]
+    - [x] generate
 - [ ] datasets
-    - [ ] list
-    - [ ] save [datasetDefinition]
+    - [x] list
+    - [x] save [datasetDefinition]
     - [ ] delete [datasetName]
-    - [ ] describe [datasetName]
-    - [ ] get-dataframe [datasetName]
-    - [ ] get-stream [datasetName]
+    - [x] describe [datasetName]
+    - [x] get-dataframe [datasetName]
+    - [x] get-stream [datasetName]
+    - [x] generate
 - [ ] snapshots
 - [ ] environments
    - [ ] list

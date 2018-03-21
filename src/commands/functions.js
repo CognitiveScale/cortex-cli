@@ -34,8 +34,11 @@ module.exports.ListFunctionsCommand = class {
         functions.listFunctions(profile.token)
             .then((response) => {
                 if (response.success) {
+                    let result = response.functions;
+                    if (options.query)
+                        result = filterObject(result, options);
+
                     if (options.json) {
-                        let result = filterObject(response.functions, options);
                         printSuccess(JSON.stringify(result, null, 2), options);
                     }
                     else {
@@ -46,7 +49,7 @@ module.exports.ListFunctionsCommand = class {
                             { column: 'Created On', field: 'createdAt', width: 26 }
                         ];
 
-                        printTable(tableSpec, response.functions);
+                        printTable(tableSpec, result);
                     }
                 }
                 else {

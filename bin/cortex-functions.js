@@ -26,6 +26,7 @@ const {
     DeployFunctionCommand
 } = require('../src/commands/functions');
 
+let processed = false;
 program.description('Work with Cortex Functions');
 
 // List Functions
@@ -39,6 +40,7 @@ program
     .action((options) => {
         try {
             new ListFunctionsCommand(program).execute(options);
+            processed = true;
         }
         catch (err) {
             console.error(chalk.red(err.message));
@@ -56,6 +58,7 @@ program
     .action((functionName, options) => {
         try {
             new DescribeFunctionCommand(program).execute(functionName, options);
+            processed = true;
         }
         catch (err) {
             console.error(chalk.red(err.message));
@@ -89,6 +92,7 @@ program
     .action((functionId, options) => {
         try {
             new InvokeFunctionCommand(program).execute(functionId, options);
+            processed = true;
         }
         catch (err) {
             console.error(chalk.red(err.message));
@@ -108,11 +112,24 @@ program
     .option('--profile [profile]', 'The profile to use')
     .action((functionName, options) => {
         try {
+            if (!options.kind && !options.docker) {
+                throw new Error('--kind [kind] or --docker [image] required');
+            }
+
+            if (options.docker && options.kind) {
+                throw new Error('Use either --kind [kind] or --docker [image], but not both');
+            }
+
             new DeployFunctionCommand(program).execute(functionName, options);
+            processed = true;
         }
         catch (err) {
             console.error(chalk.red(err.message));
         }
     });
 
+process.env.DOC && require('../src/commands/utils').exportDoc(program);
+
 program.parse(process.argv);
+if (!processed)
+    ['string', 'undefined'].includes(typeof program.args[0]) && program.help();

@@ -25,9 +25,17 @@ program
     .command('configure', 'Configure the Cortex CLI')
     .command('project [cmd]', 'Work with a related collection of Cortex contributions')
     .command('agents [cmd]', 'Work with Cortex Agents')
+    .command('connections [cmd]', 'Work with Cortex Connections')
+    .command('jobs [cmd]', 'Work with Cortex Jobs')
+    .command('tasks [cmd]', 'Work with Cortex Tasks')
+    .command('content [cmd]', 'Work with Cortex Managed Content')
+    .command('datasets [cmd]', 'Work with Cortex Datasets')
     .command('skills [cmd]', 'Work with Cortex Skills')
     .command('types [cmd]', 'Work with Cortex Types')
     .command('processors [cmd]', 'Work with the Cortex Processor Runtime')
     .command('functions [cmd]', 'Work with Cortex Functions');
 
+process.env.DOC && require('../src/commands/utils').exportDoc(program);
+
 program.parse(process.argv);
+!program.commands.map(cmd => cmd._name).includes(program.args[0]) && program.help();

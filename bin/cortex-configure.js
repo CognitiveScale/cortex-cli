@@ -18,14 +18,17 @@
 
 const program = require('commander');
 const { ConfigureCommand, DescribeProfileCommand, ListProfilesCommand, SetProfileCommand } = require('../src/commands/configure');
-
 program.description('Configure the Cortex CLI');
 
 let cmd = undefined;
 
 program
     .option('--color [on/off]', 'Turn on/off color output.', 'on')
-    .option('--profile [profile]', 'The profile to configure');
+    .option('--profile [profile]', 'The profile to configure')
+    .option('--url [url]', 'Cortex URL')
+    .option('--account [account]', 'Account')
+    .option('--username [username]', 'Username')
+    .option('--password [password]', 'Password');
 
 program
     .command('list')
@@ -50,6 +53,9 @@ program
         cmd = 'set-profile';
         new SetProfileCommand(program).execute(profileName, {color: program.color});
     });
+
+process.env.DOC && require('../src/commands/utils').exportDoc(program);
+
 
 program.parse(process.argv);
 

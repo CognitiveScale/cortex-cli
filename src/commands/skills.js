@@ -62,8 +62,11 @@ module.exports.ListSkillsCommand = class ListSkillsCommand {
         const catalog = new Catalog(profile.url);
         catalog.listSkills(profile.token).then((response) => {
             if (response.success) {
+                let result = response.skills;
+                if (options.query)
+                    result = filterObject(result, options);
+
                 if (options.json) {
-                    let result = filterObject(response.skills, options);
                     printSuccess(JSON.stringify(result, null, 2), options);
                 }
                 else {
@@ -73,7 +76,7 @@ module.exports.ListSkillsCommand = class ListSkillsCommand {
                         { column: 'Version', field: '_version', width: 12 }
                     ];
 
-                    printTable(tableSpec, response.skills);
+                    printTable(tableSpec, result);
                 }
             }
             else {
@@ -124,7 +127,7 @@ module.exports.GenerateSkillCommand = class GenerateSkillCommand {
         yenv.lookup(()=>{
             yenv.run('@c12e/cortex:skill',
             { },
-            (err) => { console.log(err); });
+            (err) => { err ? printError(err) : printSuccess('Done.') });
         });
     }
 };

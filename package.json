@@ -1,6 +1,6 @@
 {
   "name": "cortex-cli",
-  "version": "0.5.3",
+  "version": "0.5.5",
   "description": "Command line tool for CognitiveScale Cortex.",
   "main": "./bin/cortex.js",
   "scripts": {
@@ -25,21 +25,22 @@
   "license": "Apache-2.0",
   "homepage": "https://github.com/CognitiveScale/cortex-cli",
   "dependencies": {
-    "@c12e/generator-cortex": "^0.2.2",
-    "chalk": "^2.3.0",
-    "cli-table": "^0.3.1",
-    "co": "^4.6.0",
-    "co-prompt": "^1.0.0",
-    "commander": "^2.12.2",
-    "debug": "^3.1.0",
-    "jmespath": "^0.15.0",
-    "joi": "^13.1.0",
-    "js-yaml": "^3.10.0",
-    "superagent": "^3.8.2",
-    "uuid": "^3.2.1",
-    "yeoman-environment": "^2.0.5"
+    "@c12e/generator-cortex": "0.3.0",
+    "chalk": "2.3.0",
+    "cli-table": "0.3.1",
+    "co": "4.6.0",
+    "co-prompt": "1.0.0",
+    "commander": "2.12.2",
+    "debug": "3.1.0",
+    "event-stream": "3.3.4",
+    "jmespath": "0.15.0",
+    "joi": "13.1.0",
+    "js-yaml": "3.10.0",
+    "superagent": "3.8.2",
+    "uuid": "3.2.1",
+    "yeoman-environment": "2.0.5"
   },
   "devDependencies": {
-    "mocha": "^5.0.0"
+    "mocha": "5.0.0"
   }
 }

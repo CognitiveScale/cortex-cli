@@ -17,32 +17,15 @@
 const request = require('superagent');
 const debug = require('debug')('cortex:cli');
 
-module.exports = class Agents {
+module.exports = class Connections {
 
     constructor(cortexUrl) {
         this.cortexUrl = cortexUrl;
-        this.endpoint = `${cortexUrl}/v2/agents`;
-        this.endpointV3 = `${cortexUrl}/v3/agents`;
+        this.endpoint = `${cortexUrl}/v2/connections`;
     }
 
-    invokeAgentService(token, agentName, serviceName, params) {
-        const endpoint = `${this.endpointV3}/${agentName}/services/${serviceName}`;
-        debug('invokeAgentService(%s, %s) => %s', agentName, serviceName, endpoint);
-        return request
-            .post(endpoint)
-            .set('Authorization', `Bearer ${token}`)
-            .send(params)
-            .then((res) => {
-                if (res.ok) {
-                    return {success: true, result: res.body};
-                }
-                return {success: false, status: res.status, message: res.body};
-            });
-    }
-
-    getServiceActivation(token, activationId) {
-        const endpoint = `${this.endpointV3}/services/activations/${activationId}`;
-        debug('getServiceActivation(%s) => %s', activationId, endpoint);
+    listConnections(token) {
+        const endpoint = `${this.endpoint}`;
         return request
             .get(endpoint)
             .set('Authorization', `Bearer ${token}`)
@@ -54,9 +37,53 @@ module.exports = class Agents {
             });
     }
 
-    getAgentSnapshot(token, agentName) {
-        const endpoint = `${this.endpoint}/snapshots/${agentName}`;
-        debug('getAgentSnapshot(%s) => %s', agentName, endpoint);
+    saveConnection(token, {name, title, description, connectionType, allowWrite, tags, params}) {
+        debug('saveConnection(%s) => %s', name, this.endpoint);
+        return request
+            .post(this.endpoint)
+            .set('Authorization', `Bearer ${token}`)
+            .send({name, title, description, connectionType, allowWrite, tags, params})
+            .then((res) => {
+                if (res.ok) {
+                    return {success: true, message: res.body};
+                }
+                return {success: false, message: res.body, status: res.status};
+            });
+    }
+
+    describeConnection(token, connectionName) {
+        const endpoint = `${this.endpoint}/${connectionName}`;
+        debug('describeConnection(%s) => %s', connectionName, endpoint);
+        return request
+            .get(endpoint)
+            .set('Authorization', `Bearer ${token}`)
+            .then((res) => {
+                if (res.ok) {
+                    return {success: true, result: res.body};
+                }
+                else {
+                    return {success: false, message: res.body, status: res.status};
+                }
+            });
+    }
+
+    testConnection(token, {name, title, description, connectionType, allowWrite, tags, params}) {
+        const url = this.endpoint + '/test';
+        debug('saveConnection(%s) => %s', name, url);
+        return request
+            .post(url)
+            .set('Authorization', `Bearer ${token}`)
+            .send({name, title, description, connectionType, allowWrite, tags, params})
+            .then((res) => {
+                if (res.ok) {
+                    return {success: true, message: res.body};
+                }
+                return {success: false, message: res.message, status: res.status};
+            });
+    }
+
+    listConnectionsTypes(token) {
+        const endpoint = `${this.endpoint}/types`;
         return request
             .get(endpoint)
             .set('Authorization', `Bearer ${token}`)
@@ -68,20 +95,5 @@ module.exports = class Agents {
             });
     }
 
-    createAgentSnapshot(token, snapshot) {
-        const agentName = snapshot.agentName;
-        const endpoint = `${this.endpoint}/snapshots`;
-        debug('getAgentSnapshot=> %s', endpoint);
-        return request
-            .post(endpoint)
-            .set('Authorization', `Bearer ${token}`)
-            .send(snapshot)
-            .then((res) => {
-                if (res.ok) {
-                    return {success: true, result: res.body};
-                }
-                return {success: false, status: res.status, message: res.body};
-            });
-    }
+}
 
-};

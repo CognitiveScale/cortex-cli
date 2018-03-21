@@ -33,6 +33,11 @@ module.exports.ConfigureCommand = class {
     execute(options) {
         const config = readConfig();
         const profileName = options.profile || (config && config.currentProfile) || 'default';
+        const profileUrl = this.program.url || (config && config.url) || undefined;
+        const profileAccount = this.program.account || (config && config.account) || undefined;
+        const profileUsername = this.program.username || (config && config.username) || undefined;
+        const profilePassword = this.program.password || undefined;
+
         debug('configuring profile: %s', profileName);
 
         const profile = (config && config.getProfile(profileName)) || {};
@@ -44,10 +49,10 @@ module.exports.ConfigureCommand = class {
             const defaultUsername = profile.username || '';
 
             console.log(`Configuring profile ${chalk.green.bold(profileName)}:`);
-            let cortexUrl = yield prompt(`Cortex URL [${defaultCortexUrl}]: `);
-            let account = yield prompt(`Account [${defaultAccount}]: `);
-            let username = yield prompt(`Username [${defaultUsername}]: `);
-            const password = yield prompt.password('Password: ');
+            let cortexUrl = (profileUrl) ? profileUrl : yield prompt(`Cortex URL [${defaultCortexUrl}]: `);
+            let account = (profileAccount) ? profileAccount : yield prompt(`Account [${defaultAccount}]: `);
+            let username = (profileUsername) ? profileUsername : yield prompt(`Username [${defaultUsername}]: `);
+            const password = (profilePassword) ? profilePassword : yield prompt.password('Password: ');
 
             cortexUrl = cortexUrl || defaultCortexUrl;
             account = account || defaultAccount;
@@ -125,7 +130,7 @@ module.exports.DescribeProfileCommand = class {
             return;
         }
 
-        const profileName = config.currentProfile || options.profile;
+        const profileName = options.profile || config.currentProfile;
         debug('describing profile: %s', profileName);
 
         const profile = config.getProfile(profileName);

@@ -18,29 +18,24 @@
 
 const program = require('commander');
 const chalk = require('chalk');
-const { 
-    ListRuntimesCommand, 
-    ListRuntimeTypesCommand, 
-    ListActionsCommand, 
-    DescribeRuntimeCommand, 
-    DeleteRuntimeCommand, 
-    InvokeActionCommand 
-} = require('../src/commands/processors');
+const { ListConnections, SaveConnectionCommand, DescribeConnectionCommand, TestConnectionCommand,
+    ListConnectionsTypes, GenerateConnectionCommand } = require('../src/commands/connections');
 
 let processed = false;
-program.description('Work with the Cortex Processor Runtime');
-    
-// List Processor Runtime Types
+program.description('Work with Cortex Connections');
+
+
+// List Connections
 program
-    .command('list-runtime-types')
-    .description('List available processor runtime types')
+    .command('list')
+    .description('List connections definitions')
     .option('--color [on/off]', 'Turn on/off color output.', 'on')
     .option('--profile [profile]', 'The profile to use')
     .option('--json', 'Output results using JSON')
-    .option('--query [query]', 'A JMESPath query to use in filtering the response data.')
+    .option('--query [query]', 'A JMESPath query to use in filtering the response data. Ignored if output format is not JSON.')
     .action((options) => {
         try {
-            new ListRuntimeTypesCommand(program).execute(options);
+            new ListConnections(program).execute(options);
             processed = true;
         }
         catch (err) {
@@ -48,17 +43,68 @@ program
         }
     });
 
-// List Processor Runtimes
+// Save Connections
 program
-    .command('list-runtimes')
-    .description('List configured processor runtimes')
+    .command('save <connectionDefinition>')
+    .description('Save a connections definition. Takes JSON file by default.')
+    .option('--color [on/off]', 'Turn on/off color output.', 'on')
+    .option('--profile [profile]', 'The profile to use')
+    .option('-y, --yaml', 'Use YAML for agent definition format')
+    .action((connDefinition, options) => {
+        try {
+            new SaveConnectionCommand(program).execute(connDefinition, options);
+            processed = true;
+        }
+        catch (err) {
+            console.error(chalk.red(err.message));
+        }
+    });
+
+// Describe Connection
+program
+    .command('describe <connectionName>')
+    .description('Describe connection')
+    .option('--color [on/off]', 'Turn on/off color output.', 'on')
+    .option('--profile [profile]', 'The profile to use')
+    .option('--query [query]', 'A JMESPath query to use in filtering the response data.')
+    .action((connectionName, options) => {
+        try {
+            new DescribeConnectionCommand(program).execute(connectionName, options);
+            processed = true;
+        }
+        catch (err) {
+            console.error(chalk.red(err.message));
+        }
+    });
+
+// Test Connections
+program
+    .command('test <connectionDefinition>')
+    .description('Test a connections definition before saving. Takes JSON file by default.')
+    .option('--color [on/off]', 'Turn on/off color output.', 'on')
+    .option('--profile [profile]', 'The profile to use')
+    .option('-y, --yaml', 'Use YAML for agent definition format')
+    .action((connDefinition, options) => {
+        try {
+            new TestConnectionCommand(program).execute(connDefinition, options);
+            processed = true;
+        }
+        catch (err) {
+            console.error(chalk.red(err.message));
+        }
+    });
+
+// List Connections Types
+program
+    .command('list-types')
+    .description('List connections types')
     .option('--color [on/off]', 'Turn on/off color output.', 'on')
     .option('--profile [profile]', 'The profile to use')
     .option('--json', 'Output results using JSON')
-    .option('--query [query]', 'A JMESPath query to use in filtering the response data.')
+    .option('--query [query]', 'A JMESPath query to use in filtering the response data. Ignored if output format is not JSON.')
     .action((options) => {
         try {
-            new ListRuntimesCommand(program).execute(options);
+            new ListConnectionsTypes(program).execute(options);
             processed = true;
         }
         catch (err) {
@@ -66,69 +112,16 @@ program
         }
     });
 
-// Describe Processor Runtime
-program
-    .command('describe <runtimeName>')
-    .description('Describe a processor runtime')
-    .option('--color [on/off]', 'Turn on/off color output.', 'on')
-    .option('--profile [profile]', 'The profile to use')
-    .option('--query [query]', 'A JMESPath query to use in filtering the response data.')
-    .action((runtimeName, options) => {
-        try {
-            new DescribeRuntimeCommand(program).execute(runtimeName, options);
-            processed = true;
-        }
-        catch (err) {
-            console.error(chalk.red(err.message));
-        }
-    });
 
-// Delete Processor Runtime
+// Generate Connections
 program
-    .command('delete <runtimeName>')
-    .description('Delete a processor runtime')
+    .command('generate')
+    .description('Generates the structure of the connection payload')
     .option('--color [on/off]', 'Turn on/off color output.', 'on')
-    .option('--profile [profile]', 'The profile to use')
-    .action((runtimeName, options) => {
+    .option('--profile [profile]', 'The profile to use', 'default')
+    .action((options) => {
         try {
-            new DeleteRuntimeCommand(program).execute(runtimeName, options);
-            processed = true;
-        }
-        catch (err) {
-            console.error(chalk.red(err.message));
-        }
-    });
-
-// List Actions
-program
-    .command('list-actions <runtimeName>')
-    .description('List the available processor runtime actions')
-    .option('--color [on/off]', 'Turn on/off color output.', 'on')
-    .option('--profile [profile]', 'The profile to use')
-    .option('--json', 'Output results using JSON')
-    .option('--query [query]', 'A JMESPath query to use in filtering the response data.')
-    .action((runtimeName, options) => {
-        try {
-            new ListActionsCommand(program).execute(runtimeName, options);
-            processed = true;
-        }
-        catch (err) {
-            console.error(chalk.red(err.message));
-        }
-    });
-
-// Invoke Action
-program
-    .command('invoke <runtimeName> <actionId>')
-    .description('Invoke a processor action')
-    .option('--color [on/off]', 'Turn on/off color output.', 'on')
-    .option('--profile [profile]', 'The profile to use')
-    .option('--query [query]', 'A JMESPath query to use in filtering the response data.')
-    .option('--params [params]', 'JSON params to send to the action')
-    .option('--params-file [paramsFile]', 'A file containing either JSON or YAML formatted params')
-    .action((runtimeName, actionId, options) => {
-        try {
-            new InvokeActionCommand(program).execute(runtimeName, actionId, options);
+            new GenerateConnectionCommand(program).execute(options);
             processed = true;
         }
         catch (err) {
@@ -137,7 +130,6 @@ program
     });
 
 process.env.DOC && require('../src/commands/utils').exportDoc(program);
-
 program.parse(process.argv);
 if (!processed)
     ['string', 'undefined'].includes(typeof program.args[0]) && program.help();

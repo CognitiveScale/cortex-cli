@@ -18,29 +18,24 @@
 
 const program = require('commander');
 const chalk = require('chalk');
-const { 
-    ListRuntimesCommand, 
-    ListRuntimeTypesCommand, 
-    ListActionsCommand, 
-    DescribeRuntimeCommand, 
-    DeleteRuntimeCommand, 
-    InvokeActionCommand 
-} = require('../src/commands/processors');
+const { ListDatasets, SaveDatasetsCommand, DescribeDatasetCommand, GetDataframeCommand,
+    StreamDatasetCommand, GenerateDatasetCommand } = require('../src/commands/datasets');
 
 let processed = false;
-program.description('Work with the Cortex Processor Runtime');
-    
-// List Processor Runtime Types
+program.description('Work with Cortex Connections');
+
+
+// List Dataset
 program
-    .command('list-runtime-types')
-    .description('List available processor runtime types')
+    .command('list')
+    .description('List Datasets')
     .option('--color [on/off]', 'Turn on/off color output.', 'on')
     .option('--profile [profile]', 'The profile to use')
-    .option('--json', 'Output results using JSON')
-    .option('--query [query]', 'A JMESPath query to use in filtering the response data.')
+    .option('--json', 'Output results using detailed JSON')
+    .option('--query [query]', 'A JMESPath query to use in filtering the response data. Ignored if output format is not JSON.')
     .action((options) => {
         try {
-            new ListRuntimeTypesCommand(program).execute(options);
+            new ListDatasets(program).execute(options);
             processed = true;
         }
         catch (err) {
@@ -48,88 +43,80 @@ program
         }
     });
 
-// List Processor Runtimes
+// Save Dataset
 program
-    .command('list-runtimes')
-    .description('List configured processor runtimes')
+    .command('save <datasetDefinition>')
+    .description('Save a dataset definition. Takes JSON file by default.')
     .option('--color [on/off]', 'Turn on/off color output.', 'on')
     .option('--profile [profile]', 'The profile to use')
-    .option('--json', 'Output results using JSON')
+    .option('-y, --yaml', 'Use YAML for dataset file definition format')
+    .action((datasetDef, options) => {
+        try {
+            new SaveDatasetsCommand(program).execute(datasetDef, options);
+            processed = true;
+        }
+        catch (err) {
+            console.error(chalk.red(err.message));
+        }
+    });
+
+// Describe Dataset
+program
+    .command('describe <datasetName>')
+    .description('Describe dataset')
+    .option('--color [on/off]', 'Turn on/off color output.', 'on')
+    .option('--profile [profile]', 'The profile to use')
     .option('--query [query]', 'A JMESPath query to use in filtering the response data.')
+    .action((datasetName, options) => {
+        try {
+            new DescribeDatasetCommand(program).execute(datasetName, options);
+            processed = true;
+        }
+        catch (err) {
+            console.error(chalk.red(err.message));
+        }
+    });
+
+// Get Dataframe
+program
+    .command('get-dataframe <datasetName>')
+    .description('Get dataset in dataframe format')
+    .option('--color [on/off]', 'Turn on/off color output.', 'on')
+    .option('--profile [profile]', 'The profile to use')
+    .action((datasetName, options) => {
+        try {
+            new GetDataframeCommand(program).execute(datasetName, options);
+            processed = true;
+        }
+        catch (err) {
+            console.error(chalk.red(err.message));
+        }
+    });
+
+// Get Stream
+program
+    .command('get-stream <datasetName>')
+    .description('Stream dataset content')
+    .option('--color [on/off]', 'Turn on/off color output.', 'on')
+    .option('--profile [profile]', 'The profile to use')
+    .action((datasetName, options) => {
+        try {
+            new StreamDatasetCommand(program).execute(datasetName, options);
+            processed = true;
+        }
+        catch (err) {
+            console.error(chalk.red(err.message));
+        }
+    });
+
+program
+    .command('generate')
+    .description('Generates the structure and top level build script for a dataset')
+    .option('--color [on/off]', 'Turn on/off color output.', 'on')
+    .option('--profile [profile]', 'The profile to use', 'default')
     .action((options) => {
         try {
-            new ListRuntimesCommand(program).execute(options);
-            processed = true;
-        }
-        catch (err) {
-            console.error(chalk.red(err.message));
-        }
-    });
-
-// Describe Processor Runtime
-program
-    .command('describe <runtimeName>')
-    .description('Describe a processor runtime')
-    .option('--color [on/off]', 'Turn on/off color output.', 'on')
-    .option('--profile [profile]', 'The profile to use')
-    .option('--query [query]', 'A JMESPath query to use in filtering the response data.')
-    .action((runtimeName, options) => {
-        try {
-            new DescribeRuntimeCommand(program).execute(runtimeName, options);
-            processed = true;
-        }
-        catch (err) {
-            console.error(chalk.red(err.message));
-        }
-    });
-
-// Delete Processor Runtime
-program
-    .command('delete <runtimeName>')
-    .description('Delete a processor runtime')
-    .option('--color [on/off]', 'Turn on/off color output.', 'on')
-    .option('--profile [profile]', 'The profile to use')
-    .action((runtimeName, options) => {
-        try {
-            new DeleteRuntimeCommand(program).execute(runtimeName, options);
-            processed = true;
-        }
-        catch (err) {
-            console.error(chalk.red(err.message));
-        }
-    });
-
-// List Actions
-program
-    .command('list-actions <runtimeName>')
-    .description('List the available processor runtime actions')
-    .option('--color [on/off]', 'Turn on/off color output.', 'on')
-    .option('--profile [profile]', 'The profile to use')
-    .option('--json', 'Output results using JSON')
-    .option('--query [query]', 'A JMESPath query to use in filtering the response data.')
-    .action((runtimeName, options) => {
-        try {
-            new ListActionsCommand(program).execute(runtimeName, options);
-            processed = true;
-        }
-        catch (err) {
-            console.error(chalk.red(err.message));
-        }
-    });
-
-// Invoke Action
-program
-    .command('invoke <runtimeName> <actionId>')
-    .description('Invoke a processor action')
-    .option('--color [on/off]', 'Turn on/off color output.', 'on')
-    .option('--profile [profile]', 'The profile to use')
-    .option('--query [query]', 'A JMESPath query to use in filtering the response data.')
-    .option('--params [params]', 'JSON params to send to the action')
-    .option('--params-file [paramsFile]', 'A file containing either JSON or YAML formatted params')
-    .action((runtimeName, actionId, options) => {
-        try {
-            new InvokeActionCommand(program).execute(runtimeName, actionId, options);
-            processed = true;
+            new GenerateDatasetCommand(program).execute(options);
         }
         catch (err) {
             console.error(chalk.red(err.message));
@@ -137,7 +124,6 @@ program
     });
 
 process.env.DOC && require('../src/commands/utils').exportDoc(program);
-
 program.parse(process.argv);
 if (!processed)
     ['string', 'undefined'].includes(typeof program.args[0]) && program.help();

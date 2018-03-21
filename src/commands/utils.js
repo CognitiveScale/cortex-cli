@@ -21,7 +21,7 @@ const debug = require('debug')('cortex:cli');
 const Table = require('cli-table');
 
 module.exports.printSuccess = function(message, options) {
-    if (options.color === 'on') {
+    if (!options || options.color === 'on') {
         console.log(chalk.green(message));
     }
     else {
@@ -30,7 +30,7 @@ module.exports.printSuccess = function(message, options) {
 };
 
 module.exports.printError = function(message, options) {
-    if (options.color === 'on') {
+    if (!options ||  options.color === 'on') {
         console.error(chalk.red(message));
     }
     else {
@@ -56,7 +56,7 @@ module.exports.parseObject = function(str, options) {
 
 function _extractValues(fields, obj) {
     const rv = [];
-    fields.forEach((f) => rv.push(obj[f] || '-'));
+    fields.forEach((f) => rv.push((obj !== undefined && obj !== null && obj[f] !== undefined)? obj[f].toString() : '-'));
     return rv;
 }
 
@@ -67,11 +67,24 @@ module.exports.printTable = function(spec, objects, transform) {
     const colWidths = spec.map((s) => s.width);
     const fields = spec.map((s) => s.field);
     const values = objects.map((obj) => _extractValues(fields, transform(obj)));
-
     debug('printing fields: %o', fields);
 
     const table = new Table({head, colWidths, style: {head: ['cyan']}});
     values.forEach((v) => table.push(v));
 
     console.log(table.toString());
+};
+
+module.exports.exportDoc = function(program){
+    console.log(JSON.stringify(program.commands.map((c)=>({
+        name: c._name,
+        description: c._description,
+        usage:  c.usage(),
+        options: c.options.map((o)=>({
+            flags: o.flags,
+            defaultValue: o.defaultValue,
+            description: o.description
+        }))
+    }))));
+    process.exit(0);
 };

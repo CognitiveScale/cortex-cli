@@ -34,8 +34,14 @@ module.exports.SaveTypeCommand = class SaveTypeCommand {
         const type = parseObject(typeDefStr, options);
         debug('%o', type);
 
+        let normalizedType = {};
+        if ( !('types' in type) )
+            normalizedType["types"] = [type];
+        else
+            normalizedType = type;
+
         const catalog = new Catalog(profile.url);
-        catalog.saveType(profile.token, type).then((response) => {
+        catalog.saveType(profile.token, normalizedType).then((response) => {
             if (response.success) {
                 printSuccess(`Type definition saved`, options);
             }
@@ -62,11 +68,11 @@ module.exports.ListTypesCommand = class ListTypesCommand {
         const catalog = new Catalog(profile.url);
         catalog.listTypes(profile.token).then((response) => {
             if (response.success) {
-                let result = filterObject(response.types, options);
-                printSuccess(JSON.stringify(result, null, 2), options);
+                let result = response.types;
+                if (options.query)
+                    result = filterObject(result, options);
 
                 if (options.json) {
-                    let result = filterObject(response.types, options);
                     printSuccess(JSON.stringify(result, null, 2), options);
                 }
                 else {
@@ -76,7 +82,7 @@ module.exports.ListTypesCommand = class ListTypesCommand {
                         { column: 'Version', field: '_version', width: 12 }
                     ];
 
-                    printTable(tableSpec, response.types);
+                    printTable(tableSpec, result);
                 }
             }
             else {
@@ -84,7 +90,7 @@ module.exports.ListTypesCommand = class ListTypesCommand {
             }
         })
         .catch((err) => {
-            printError(`Failed to list types ${typeName}: ${err.status} ${err.message}`, options);
+            printError(`Failed to list types: ${err.status} ${err.message}`, options);
         });
     }
 };
@@ -114,3 +120,4 @@ module.exports.DescribeTypeCommand = class DescribeTypeCommand {
         });
     }
 };
+

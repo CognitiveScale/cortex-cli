@@ -18,39 +18,23 @@
 
 const program = require('commander');
 const chalk = require('chalk');
-const { SaveTypeCommand, ListTypesCommand, DescribeTypeCommand } = require('../src/commands/types');
+const { ListContent, UploadContent, DeleteContent, DownloadContent } = require('../src/commands/content');
 
 let processed = false;
-program.description('Work with Cortex Types');
-    
-// Save Type
-program
-    .command('save <typeDefinition>')
-    .description('Save a type definition')
-    .option('--color [on/off]', 'Turn on/off color output.', 'on')
-    .option('--profile [profile]', 'The profile to use')
-    .option('-y, --yaml', 'Use YAML for type definition format')
-    .action((typeDefinition, options) => {
-        try {
-            new SaveTypeCommand(program).execute(typeDefinition, options);
-            processed = true;
-        }
-        catch (err) {
-            console.error(chalk.red(err.message));
-        }
-    });
+program.description('Work with Cortex Contents');
 
-// List Types
+
+// List Content
 program
     .command('list')
-    .description('List type definitions')
+    .description('List content')
     .option('--color [on/off]', 'Turn on/off color output.', 'on')
     .option('--profile [profile]', 'The profile to use')
     .option('--json', 'Output results using JSON')
-    .option('--query [query]', 'A JMESPath query to use in filtering the response data.')
+    .option('--query [query]', 'A JMESPath query to use in filtering the response data. Ignored if output format is not JSON.')
     .action((options) => {
         try {
-            new ListTypesCommand(program).execute(options);
+            new ListContent(program).execute(options);
             processed = true;
         }
         catch (err) {
@@ -58,16 +42,15 @@ program
         }
     });
 
-// Describe Type
+// Upload Content
 program
-    .command('describe <typeName>')
-    .description('Describe type')
+    .command('upload <contentKey> <filePath>')
+    .description('Upload content')
     .option('--color [on/off]', 'Turn on/off color output.', 'on')
     .option('--profile [profile]', 'The profile to use')
-    .option('--query [query]', 'A JMESPath query to use in filtering the response data.')
-    .action((typeName, options) => {
+    .action((contentKey, filePath, options) => {
         try {
-            new DescribeTypeCommand(program).execute(typeName, options);
+            new UploadContent(program).execute(contentKey, filePath, options);
             processed = true;
         }
         catch (err) {
@@ -75,8 +58,40 @@ program
         }
     });
 
-process.env.DOC && require('../src/commands/utils').exportDoc(program);
+// Delete Content
+program
+    .command('delete <contentKey>')
+    .description('Delete content')
+    .option('--color [on/off]', 'Turn on/off color output.', 'on')
+    .option('--profile [profile]', 'The profile to use')
+    .action((contentKey, options) => {
+        try {
+            new DeleteContent(program).execute(contentKey, options);
+            processed = true;
+        }
+        catch (err) {
+            console.error(chalk.red(err.message));
+        }
+    });
 
+// Download Content
+program
+    .command('download <contentKey>')
+    .description('Download content')
+    .option('--color [on/off]', 'Turn on/off color output.', 'on')
+    .option('--profile [profile]', 'The profile to use')
+    .action((contentKey, options) => {
+        try {
+            new DownloadContent(program).execute(contentKey, options);
+            processed = true;
+        }
+        catch (err) {
+            console.error(chalk.red(err.message));
+        }
+    });
+
+
+process.env.DOC && require('../src/commands/utils').exportDoc(program);
 program.parse(process.argv);
 if (!processed)
     ['string', 'undefined'].includes(typeof program.args[0]) && program.help();
