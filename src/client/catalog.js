@@ -23,6 +23,7 @@ const createEndpoints = (baseUri) => {
         skills: `${baseUri}/v2/catalog/processors`,
         agents: `${baseUri}/v2/catalog/agents`,
         types: `${baseUri}/v2/catalog/types`,
+        agentVersions: `${baseUri}/v2/agents/versions`
     }
 };
 
@@ -106,6 +107,23 @@ module.exports = class Catalog {
     describeAgent(token, agentName) {
         const endpoint = `${this.endpoints.agents}/${agentName}`;
         debug('describeAgent(%s) => %s', agentName, endpoint);
+        return request
+            .get(endpoint)
+            .set('Authorization', `Bearer ${token}`)
+            .then((res) => {
+                if (res.ok) {
+                    return {success: true, agent: res.body};
+                }
+                else {
+                    return {success: false, message: res.body, status: res.status};
+                }
+            });
+    }
+
+    describeAgentVersions(token, agentName) {
+        const endpoint = `${this.endpoints.agentVersions}/${agentName}`;
+        debug('describeAgentVersions(%s) => %s', agentName, endpoint);
+
         return request
             .get(endpoint)
             .set('Authorization', `Bearer ${token}`)

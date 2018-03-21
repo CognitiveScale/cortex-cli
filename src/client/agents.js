@@ -54,6 +54,36 @@ module.exports = class Agents {
             });
     }
 
+    getAgentSnapshot(token, agentName) {
+        const endpoint = `${this.endpoint}/snapshots/${agentName}`;
+        debug('getAgentSnapshot(%s) => %s', agentName, endpoint);
+        return request
+            .get(endpoint)
+            .set('Authorization', `Bearer ${token}`)
+            .then((res) => {
+                if (res.ok) {
+                    return {success: true, result: res.body};
+                }
+                return {success: false, status: res.status, message: res.body};
+            });
+    }
+
+    createAgentSnapshot(token, snapshot) {
+        const agentName = snapshot.agentName;
+        const endpoint = `${this.endpoint}/snapshots`;
+        debug('getAgentSnapshot=> %s', endpoint);
+        return request
+            .post(endpoint)
+            .set('Authorization', `Bearer ${token}`)
+            .send(snapshot)
+            .then((res) => {
+                if (res.ok) {
+                    return {success: true, result: res.body};
+                }
+                return {success: false, status: res.status, message: res.body};
+            });
+    }
+
     listAgentInstances(token, agentName) {
         const endpoint = `${this.endpoint}/instances/${agentName}`;
         debug('getAgentInstances(%s) => %s', agentName, endpoint);
@@ -139,5 +169,4 @@ module.exports = class Agents {
                 return {success: false, status: res.status, message: res.body};
             });
     }
-
 };

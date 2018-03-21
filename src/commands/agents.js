@@ -100,21 +100,38 @@ module.exports.DescribeAgentCommand = class DescribeAgentCommand {
 
     execute(agentName, options) {
         const profile = loadProfile(options.profile);
-        debug('%s.executeDescribeAgent(%s)', profile.name, agentName);
-
         const catalog = new Catalog(profile.url);
-        catalog.describeAgent(profile.token, agentName).then((response) => {
-            if (response.success) {
-                let result = filterObject(response.agent, options);
-                printSuccess(JSON.stringify(result, null, 2), options);
-            }
-            else {
-                printError(`Failed to describe agent ${agentName}: ${response.message}`, options);
-            }
-        })
-        .catch((err) => {
-            printError(`Failed to describe agent ${agentName}: ${err.status} ${err.message}`, options);
-        });
+        if (options.versions) {
+            debug('%s.executeDescribeAgentVersions(%s)', profile.name, agentName);
+            catalog.describeAgentVersions(profile.token, agentName).then((response) => {
+                if (response.success) {
+                    let result = filterObject(response.agent, options);
+                    printSuccess(JSON.stringify(result, null, 2), options);
+                }
+                else {
+                    printError(`Failed to describe agent versions ${agentName}: ${response.message}`, options);
+                }
+            })
+            .catch((err) => {
+                printError(`Failed to describe agent versions ${agentName}: ${err.status} ${err.message}`, options);
+            });
+        }
+
+        else {
+            debug('%s.executeDescribeAgent(%s)', profile.name, agentName);
+            catalog.describeAgent(profile.token, agentName).then((response) => {
+                if (response.success) {
+                    let result = filterObject(response.agent, options);
+                    printSuccess(JSON.stringify(result, null, 2), options);
+                }
+                else {
+                    printError(`Failed to describe agent ${agentName}: ${response.message}`, options);
+                }
+            })
+            .catch((err) => {
+                printError(`Failed to describe agent ${agentName}: ${err.status} ${err.message}`, options);
+            });
+        }
     }
 };
 
@@ -209,6 +226,63 @@ module.exports.ListAgentInstancesCommand = class {
         })
             .catch((err) => {
                 printError(`Failed to list agent instances ${agentName}: ${err.status} ${err.message}`, options);
+            });
+    }
+};
+
+
+module.exports.GetAgentSnapshotCommand = class {
+
+    constructor(program) {
+        this.program = program;
+    }
+
+    execute(agentName, options) {
+        const profile = loadProfile(options.profile);
+        debug('%s.getAgentSnapshot(%s)', profile.name, agentName);
+
+        const agents = new Agents(profile.url);
+        agents.getAgentSnapshot(profile.token, agentName).then((response) => {
+            if (response.success) {
+                let result = filterObject(response.result.snapshots, options);
+                printSuccess(JSON.stringify(result, null, 2), options);
+            }
+            else {
+                printError(`Failed to get agent snapshot ${agentName}: ${response.message}`, options);
+            }
+        })
+            .catch((err) => {
+                printError(`Failed to get agent snapshot ${agentName}: ${err.status} ${err.message}`, options);
+            });
+    }
+};
+
+module.exports.CreateAgentSnapshotCommand = class {
+
+    constructor(program) {
+        this.program = program;
+    }
+
+    execute(snapshotDefinition, options) {
+        const profile = loadProfile(options.profile);
+        debug('%s.createAgentSnapshot(%s)', profile.name, snapshotDefinition);
+
+        const snapshotDefStr = fs.readFileSync(snapshotDefinition);
+        const snapshot = parseObject(snapshotDefStr, options);
+        const agentName = snapshot.agentName;
+
+        const agents = new Agents(profile.url);
+        agents.createAgentSnapshot(profile.token, snapshot).then((response) => {
+            if (response.success) {
+                let result = filterObject(response.result, options);
+                printSuccess(JSON.stringify(result, null, 2), options);
+            }
+            else {
+                printError(`Failed to create agent snapshot ${agentName}: ${response.message}`, options);
+            }
+        })
+            .catch((err) => {
+                printError(`Failed to create agent snapshot ${agentName}: ${err.status} ${err.message}`, options);
             });
     }
 };

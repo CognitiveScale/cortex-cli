@@ -29,7 +29,9 @@ const {
     GetAgentInstanceCommand,
     DeleteAgentInstanceCommand,
     StopAgentInstanceCommand,
-    ListTriggersCommand
+    ListTriggersCommand,
+    GetAgentSnapshotCommand,
+    CreateAgentSnapshotCommand
 } = require('../src/commands/agents');
 
 let processed = false;
@@ -77,6 +79,7 @@ program
     .option('--color [on/off]', 'Turn on/off color output.', 'on')
     .option('--profile [profile]', 'The profile to use')
     .option('--query [query]', 'A JMESPath query to use in filtering the response data.')
+    .option('--versions', 'To get list of versions of an agent')
     .action((agentName, options) => {
         try {
             new DescribeAgentCommand(program).execute(agentName, options);
@@ -122,6 +125,37 @@ program
         }
     });
 
+//Get Agent Snapshot
+program
+    .command('get-snapshots <agentName>')
+    .description('Get service activation')
+    .option('--color [on/off]', 'Turn on/off color output.', 'on')
+    .option('--profile [profile]', 'The profile to use')
+    .action((agentName, options) => {
+        try {
+            new GetAgentSnapshotCommand(program).execute(agentName, options);
+            processed = true;
+        }
+        catch (err) {
+            console.error(chalk.red(err.message));
+        }
+    });
+
+//Create Agent Snapshot
+program
+    .command('create-snapshot <snapshotDefinition>')
+    .description('Create agent snapshot with JSON file as input')
+    .option('--color [on/off]', 'Turn on/off color output.', 'on')
+    .option('--profile [profile]', 'The profile to use')
+    .action((snapshotDefinition, options) => {
+        try {
+            new CreateAgentSnapshotCommand(program).execute(snapshotDefinition, options);
+            processed = true;
+        }
+        catch (err) {
+            console.error(chalk.red(err.message));
+        }
+    });
 
 //List agent instances
 program
