@@ -59,6 +59,7 @@ process.env.DOC && require('../src/commands/utils').exportDoc(program);
 
 program.parse(process.argv);
 
+process.env.DOC && require('../src/commands/utils').exportDoc(program);
 if (cmd === undefined) {
     new ConfigureCommand(program).execute({profile: program.profile, color: program.color});
 }
