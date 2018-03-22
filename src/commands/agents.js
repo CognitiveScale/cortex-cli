@@ -204,6 +204,33 @@ module.exports.GetServiceActivationCommand = class {
     }
 };
 
+module.exports.ListAgentInstancesCommand = class {
+
+    constructor(program) {
+        this.program = program;
+    }
+
+    execute(agentName, options) {
+        const profile = loadProfile(options.profile);
+        debug('%s.listAgentInstances(%s)', profile.name, agentName);
+
+        const agents = new Agents(profile.url);
+        agents.listAgentInstances(profile.token, agentName).then((response) => {
+            if (response.success) {
+                let result = filterObject(response.result.instances, options);
+                printSuccess(JSON.stringify(result, null, 2), options);
+            }
+            else {
+                printError(`Failed to list agent instances ${agentName}: ${response.message}`, options);
+            }
+        })
+            .catch((err) => {
+                printError(`Failed to list agent instances ${agentName}: ${err.status} ${err.message}`, options);
+            });
+    }
+};
+
+
 module.exports.GetAgentSnapshotCommand = class {
 
     constructor(program) {
@@ -224,9 +251,9 @@ module.exports.GetAgentSnapshotCommand = class {
                 printError(`Failed to get agent snapshot ${agentName}: ${response.message}`, options);
             }
         })
-        .catch((err) => {
-            printError(`Failed to get agent snapshot ${agentName}: ${err.status} ${err.message}`, options);
-        });
+            .catch((err) => {
+                printError(`Failed to get agent snapshot ${agentName}: ${err.status} ${err.message}`, options);
+            });
     }
 };
 
@@ -256,6 +283,153 @@ module.exports.CreateAgentSnapshotCommand = class {
         })
             .catch((err) => {
                 printError(`Failed to create agent snapshot ${agentName}: ${err.status} ${err.message}`, options);
+            });
+    }
+};
+
+module.exports.CreateAgentInstanceCommand = class {
+
+    constructor(program) {
+        this.program = program;
+    }
+
+    execute(instanceDefinition, options) {
+        const profile = loadProfile(options.profile);
+        debug('%s.createAgentInstance', profile.name);
+
+        const agents = new Agents(profile.url);
+        const instanceDefStr = fs.readFileSync(instanceDefinition);
+        const instance = parseObject(instanceDefStr, options);
+        agents.createAgentInstance(profile.token, instance).then((response) => {
+            if (response.success) {
+                let result = filterObject(response.result, options);
+                printSuccess(JSON.stringify(result, null, 2), options);
+            }
+            else {
+                printError(`Failed to create agent instance : ${response.message}`, options);
+            }
+        })
+        .catch((err) => {
+            printError(`Failed to create agent instance : ${err.status} ${err.message}`, options);
+        });
+    }
+};
+
+module.exports.GetAgentInstanceCommand = class {
+
+    constructor(program) {
+        this.program = program;
+    }
+
+    execute(instanceId, options) {
+        const profile = loadProfile(options.profile);
+        debug('%s.getAgentInstance(%s)', profile.name, instanceId);
+
+        const agents = new Agents(profile.url);
+        agents.getAgentInstance(profile.token, instanceId).then((response) => {
+            if (response.success) {
+                let result = filterObject(response.result, options);
+                if (options.json) {
+                    printSuccess(JSON.stringify(result, null, 2), options);
+                }
+                else {
+                    const tableSpec = [
+                        { column: 'Instance Id', field: '_id', width: 26 },
+                        { column: 'Status', field: 'status', width: 15 },
+                        { column: 'Tenant Id', field: 'tenantId', width: 20 },
+                        { column: 'Snapshot Id', field: 'snapshotId', width: 26 },
+                        { column: 'Environment Id', field: 'environmentId', width: 26 },
+                        { column: 'Created At', field: 'createdAt', width: 26 },
+                        { column: 'Updated At', field: 'updatedAt', width: 26 }
+                    ];
+                    printTable(tableSpec, [result.instance]);
+                }
+
+            }
+            else {
+                printError(`Failed to get agent instance ${instanceId}: ${response.message}`, options);
+            }
+        })
+            .catch((err) => {
+                printError(`Failed to get agent instance ${instanceId}: ${err.status} ${err.message}`, options);
+            });
+    }
+};
+
+module.exports.DeleteAgentInstanceCommand = class {
+
+    constructor(program) {
+        this.program = program;
+    }
+
+    execute(instanceId, options) {
+        const profile = loadProfile(options.profile);
+        debug('%s.deleteAgentInstance(%s)', profile.name, instanceId);
+
+        const agents = new Agents(profile.url);
+        agents.deleteAgentInstance(profile.token, instanceId).then((response) => {
+            if (response.success) {
+                let result = filterObject(response.result, options);
+                printSuccess(JSON.stringify(result, null, 2), options);
+            }
+            else {
+                printError(`Failed to delete agent instance ${instanceId}: ${response.message}`, options);
+            }
+        })
+            .catch((err) => {
+                printError(`Failed to delete agent instance ${instanceId} : ${err.status} ${err.message}`, options);
+            });
+    }
+};
+
+module.exports.StopAgentInstanceCommand = class {
+
+    constructor(program) {
+        this.program = program;
+    }
+
+    execute(instanceId, options) {
+        const profile = loadProfile(options.profile);
+        debug('%s.stopAgentInstance(%s)', profile.name, instanceId);
+
+        const agents = new Agents(profile.url);
+        agents.stopAgentInstance(profile.token, instanceId).then((response) => {
+            if (response.success) {
+                let result = filterObject(response.result, options);
+                printSuccess(JSON.stringify(result, null, 2), options);
+            }
+            else {
+                printError(`Failed to stop agent instance ${instanceId}: ${response.message}`, options);
+            }
+        })
+            .catch((err) => {
+                printError(`Failed to stop agent instance ${instanceId} : ${err.status} ${err.message}`, options);
+            });
+    }
+};
+
+module.exports.ListTriggersCommand = class {
+
+    constructor(program) {
+        this.program = program;
+    }
+
+    execute(options) {
+        const profile = loadProfile(options.profile);
+        debug('%s.listTriggers', profile.name);
+
+        const agents = new Agents(profile.url);
+        agents.listTriggers(profile.token).then((response) => {
+            if (response.success) {
+                let result = filterObject(response.result, options);
+                printSuccess(JSON.stringify(result, null, 2), options);
+            }
+            else {
+                printError(`Failed to list triggers ${instanceId}: ${response.message}`, options);
+            }
+        })
+            .catch((err) => {
+                printError(`Failed to list triggers ${instanceId} : ${err.status} ${err.message}`, options);
             });
     }
 };
