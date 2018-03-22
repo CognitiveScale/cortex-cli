@@ -125,10 +125,10 @@ program
         }
     });
 
-//Get Agent Snapshot
+//Get Agent Snapshots
 program
     .command('get-snapshots <agentName>')
-    .description('Get service activation')
+    .description('Get agent snapshots')
     .option('--color [on/off]', 'Turn on/off color output.', 'on')
     .option('--profile [profile]', 'The profile to use')
     .action((agentName, options) => {
@@ -192,7 +192,7 @@ program
 //Get agent instance
 program
     .command('get-instance <instanceId>')
-    .description('Create agent instance')
+    .description('Get an agent instance')
     .option('--color [on/off]', 'Turn on/off color output.', 'on')
     .option('--profile [profile]', 'The profile to use')
     .option('--json', 'Output results using JSON')
@@ -209,7 +209,7 @@ program
 //Delete agent instance
 program
     .command('delete-instance <instanceId>')
-    .description('Create agent instance')
+    .description('Delete an agent instance')
     .option('--color [on/off]', 'Turn on/off color output.', 'on')
     .option('--profile [profile]', 'The profile to use')
     .action((instanceId, options) => {
@@ -225,7 +225,7 @@ program
 //Stop agent instance
 program
     .command('stop-instance <instanceId>')
-    .description('Create agent instance')
+    .description('Stop an agent instance')
     .option('--color [on/off]', 'Turn on/off color output.', 'on')
     .option('--profile [profile]', 'The profile to use')
     .action((instanceId, options) => {
@@ -241,7 +241,7 @@ program
 //List triggers
 program
     .command('list-triggers')
-    .description('Create agent instance')
+    .description('List of triggers for the current tenant')
     .option('--color [on/off]', 'Turn on/off color output.', 'on')
     .option('--profile [profile]', 'The profile to use')
     .action((options) => {
