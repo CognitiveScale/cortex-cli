@@ -84,4 +84,89 @@ module.exports = class Agents {
             });
     }
 
+    listAgentInstances(token, agentName) {
+        const endpoint = `${this.endpoint}/instances/${agentName}`;
+        debug('getAgentInstances(%s) => %s', agentName, endpoint);
+        return request
+            .get(endpoint)
+            .set('Authorization', `Bearer ${token}`)
+            .then((res) => {
+                if (res.ok) {
+                    return {success: true, result: res.body};
+                }
+                return {success: false, status: res.status, message: res.body};
+            });
+    }
+
+    createAgentInstance(token, instance) {
+        const endpoint = `${this.endpoint}/instances`;
+        debug('createAgentInstance => %s', endpoint);
+        return request
+            .post(endpoint)
+            .set('Authorization', `Bearer ${token}`)
+            .send(instance)
+            .type('json')
+            .then((res) => {
+                if (res.ok) {
+                    return {success: true, result: res.body};
+                }
+                return {success: false, status: res.status, message: res.body};
+            });
+    }
+
+    getAgentInstance(token, instanceId) {
+        const endpoint = `${this.endpoint}/instances/${instanceId}`;
+        debug('getAgentInstance => %s', endpoint);
+        return request
+            .get(endpoint)
+            .set('Authorization', `Bearer ${token}`)
+            .then((res) => {
+                if (res.ok) {
+                    return {success: true, result: res.body};
+                }
+                return {success: false, status: res.status, message: res.body};
+            });
+    }
+
+    deleteAgentInstance(token, instanceId) {
+        const endpoint = `${this.endpoint}/instances/${instanceId}`;
+        debug('deleteAgentInstance => %s', endpoint);
+        return request
+            .delete(endpoint)
+            .set('Authorization', `Bearer ${token}`)
+            .then((res) => {
+                if (res.ok) {
+                    return {success: true, result: res.body};
+                }
+                return {success: false, status: res.status, message: res.body};
+            });
+    }
+
+    stopAgentInstance(token, instanceId) {
+        const endpoint = `${this.endpoint}/instances/${instanceId}/stop`;
+        debug('stopAgentInstance => %s', endpoint);
+        return request
+            .post(endpoint)
+            .set('Authorization', `Bearer ${token}`)
+            .then((res) => {
+                if (res.ok) {
+                    return {success: true, result: res.body};
+                }
+                return {success: false, status: res.status, message: res.body};
+            });
+    }
+
+    listTriggers(token) {
+        const endpoint = `${this.endpoint}/triggers`;
+        debug('listTriggers => %s', endpoint);
+        return request
+            .get(endpoint)
+            .set('Authorization', `Bearer ${token}`)
+            .then((res) => {
+                if (res.ok) {
+                    return {success: true, result: res.body};
+                }
+                return {success: false, status: res.status, message: res.body};
+            });
+    }
 };
