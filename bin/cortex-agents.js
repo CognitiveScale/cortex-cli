@@ -192,7 +192,7 @@ program
 //Get agent instance
 program
     .command('get-instance <instanceId>')
-    .description('Get an agent instance')
+    .description('Get agent instance')
     .option('--color [on/off]', 'Turn on/off color output.', 'on')
     .option('--profile [profile]', 'The profile to use')
     .option('--json', 'Output results using JSON')
@@ -209,7 +209,7 @@ program
 //Delete agent instance
 program
     .command('delete-instance <instanceId>')
-    .description('Delete an agent instance')
+    .description('Delete agent instance')
     .option('--color [on/off]', 'Turn on/off color output.', 'on')
     .option('--profile [profile]', 'The profile to use')
     .action((instanceId, options) => {
@@ -225,7 +225,7 @@ program
 //Stop agent instance
 program
     .command('stop-instance <instanceId>')
-    .description('Stop an agent instance')
+    .description('Stop agent instance')
     .option('--color [on/off]', 'Turn on/off color output.', 'on')
     .option('--profile [profile]', 'The profile to use')
     .action((instanceId, options) => {
