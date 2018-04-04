@@ -15,6 +15,7 @@
  */
 
 const fs = require('fs');
+const path = require('path');
 const yeoman = require('yeoman-environment');
 const debug = require('debug')('cortex:cli');
 const { loadProfile } = require('../config');
@@ -69,22 +70,37 @@ module.exports.UploadContent = class UploadContent {
     execute(contentKey, filePath, options) {
         const profile = loadProfile(options.profile);
         debug('%s.listContent()', profile.name);
-
-        const payload = {'content': filePath, 'key': contentKey};
-
         const content = new Content(profile.url);
-        content.uploadContent(profile.token, payload).then((response) => {
-            if (response.success) {
-               printSuccess(`Content successfully uploaded.`, options);
-            }
-            else {
-                printError(`Failed to upload content: ${response.status} ${response.message}`, options);
-            }
-        })
-        .catch((err) => {
-            debug(err);
-            printError(`Failed to upload content: ${err.status} ${err.message}`, options);
-        });
+        if (options.secure) {
+            const fileContent = fs.readFileSync(filePath);
+            const fileBaseName = path.basename(filePath);
+
+            const secureContent = {};
+            secureContent[fileBaseName] = new Buffer(fileContent).toString('base64');
+            content.uploadSecureContent(profile.token, contentKey, secureContent).then((response) => {
+                if (response.success) {
+                    printSuccess(`Secure content successfully uploaded.`, options);
+                }
+                else {
+                    printError(`Failed to upload secure content: ${response.status} ${response.message}`, options);
+                }
+            })
+        }
+        else {
+            const payload = {'content': filePath, 'key': contentKey};
+            content.uploadContent(profile.token, payload).then((response) => {
+                if (response.success) {
+                    printSuccess(`Content successfully uploaded.`, options);
+                }
+                else {
+                    printError(`Failed to upload content: ${response.status} ${response.message}`, options);
+                }
+            })
+            .catch((err) => {
+                debug(err);
+                printError(`Failed to upload content: ${err.status} ${err.message}`, options);
+            });
+        }
     }
 };
 
@@ -125,17 +141,36 @@ module.exports.DownloadContent = class DownloadContent {
         debug('%s.DownloadContent()', profile.name);
 
         const content = new Content(profile.url);
-        content.downloadContent(profile.token, contentKey).then((response) => {
-            if (response.success) {
-                printSuccess(response.message, options);
-            }
-            else {
-                printError(`Failed to download content: ${response.status} ${response.message}`, options);
-            }
-        })
-        .catch((err) => {
-            debug(err);
-            printError(`Failed to download content: ${err.status} ${err.message}`, options);
-        });
+
+        // To download content from Secrets
+        if (options.secure) {
+            content.downloadSecureContent(profile.token, contentKey).then((response) => {
+                if (response.success) {
+                    printSuccess(response.message, options);
+                }
+                else {
+                    printError(`Failed to download secure content: ${response.status} ${response.message}`, options);
+                }
+            })
+                .catch((err) => {
+                    debug(err);
+                    printError(`Failed to download secure content: ${err.status} ${err.message}`, options);
+                });
+        }
+        else {
+            content.downloadContent(profile.token, contentKey).then((response) => {
+                if (response.success) {
+                    printSuccess(response.message, options);
+                }
+                else {
+                    printError(`Failed to download content: ${response.status} ${response.message}`, options);
+                }
+            })
+                .catch((err) => {
+                    debug(err);
+                    printError(`Failed to download content: ${err.status} ${err.message}`, options);
+                });
+        }
+
     }
 };

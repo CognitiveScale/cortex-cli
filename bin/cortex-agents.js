@@ -24,6 +24,12 @@ const {
     DescribeAgentCommand,
     InvokeAgentServiceCommand,
     GetServiceActivationCommand,
+    ListAgentInstancesCommand,
+    CreateAgentInstanceCommand,
+    GetAgentInstanceCommand,
+    DeleteAgentInstanceCommand,
+    StopAgentInstanceCommand,
+    ListTriggersCommand,
     GetAgentSnapshotCommand,
     CreateAgentSnapshotCommand
 } = require('../src/commands/agents');
@@ -119,10 +125,10 @@ program
         }
     });
 
-//Get Agent Snapshot
+
 program
     .command('get-snapshots <agentName>')
-    .description('Get service activation')
+    .description('Get agent snapshots')
     .option('--color [on/off]', 'Turn on/off color output.', 'on')
     .option('--profile [profile]', 'The profile to use')
     .action((agentName, options) => {
@@ -150,6 +156,106 @@ program
             console.error(chalk.red(err.message));
         }
     });
+
+
+//List agent instances
+program
+    .command('list-instances <agentName>')
+    .description('List agent instances  ')
+    .option('--color [on/off]', 'Turn on/off color output.', 'on')
+    .option('--profile [profile]', 'The profile to use')
+    .action((agentName, options) => {
+        try {
+            new ListAgentInstancesCommand(program).execute(agentName, options);
+            processed = true;
+        }
+        catch (err) {
+            console.error(chalk.red(err.message));
+        }
+    });
+
+//Create agent instances
+program
+    .command('create-instance <instanceDefinition>')
+    .description('Create agent instance')
+    .option('--color [on/off]', 'Turn on/off color output.', 'on')
+    .option('--profile [profile]', 'The profile to use')
+    .action((instanceDefinition, options) => {
+        try {
+            new CreateAgentInstanceCommand(program).execute(instanceDefinition, options);
+            processed = true;
+        }
+        catch (err) {
+            console.error(chalk.red(err.message));
+        }
+    });
+
+//Get agent instance
+program
+    .command('get-instance <instanceId>')
+    .description('Get agent instance')
+    .option('--color [on/off]', 'Turn on/off color output.', 'on')
+    .option('--profile [profile]', 'The profile to use')
+    .option('--json', 'Output results using JSON')
+    .action((instanceId, options) => {
+        try {
+            new GetAgentInstanceCommand(program).execute(instanceId, options);
+            processed = true;
+        }
+        catch (err) {
+            console.error(chalk.red(err.message));
+        }
+    });
+
+//Delete agent instance
+program
+    .command('delete-instance <instanceId>')
+    .description('Delete agent instance')
+    .option('--color [on/off]', 'Turn on/off color output.', 'on')
+    .option('--profile [profile]', 'The profile to use')
+    .action((instanceId, options) => {
+        try {
+            new DeleteAgentInstanceCommand(program).execute(instanceId, options);
+            processed = true;
+        }
+        catch (err) {
+            console.error(chalk.red(err.message));
+        }
+    });
+
+//Stop agent instance
+program
+    .command('stop-instance <instanceId>')
+    .description('Stop agent instance')
+    .option('--color [on/off]', 'Turn on/off color output.', 'on')
+    .option('--profile [profile]', 'The profile to use')
+    .action((instanceId, options) => {
+        try {
+            new StopAgentInstanceCommand(program).execute(instanceId, options);
+            processed = true;
+        }
+        catch (err) {
+            console.error(chalk.red(err.message));
+        }
+    });
+
+//List triggers
+program
+    .command('list-triggers')
+    .description('List of triggers for the current tenant')
+    .option('--color [on/off]', 'Turn on/off color output.', 'on')
+    .option('--profile [profile]', 'The profile to use')
+    .action((options) => {
+        try {
+            new ListTriggersCommand(program).execute(options);
+            processed = true;
+        }
+        catch (err) {
+            console.error(chalk.red(err.message));
+        }
+    });
+
+
 
 process.env.DOC && require('../src/commands/utils').exportDoc(program);
 
