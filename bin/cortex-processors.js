@@ -34,7 +34,7 @@ program.description('Work with the Cortex Processor Runtime');
 program
     .command('list-runtime-types')
     .description('List available processor runtime types')
-    .option('--color [on/off]', 'Turn on/off color output.', 'on')
+    .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
     .option('--json', 'Output results using JSON')
     .option('--query [query]', 'A JMESPath query to use in filtering the response data.')
@@ -52,7 +52,7 @@ program
 program
     .command('list-runtimes')
     .description('List configured processor runtimes')
-    .option('--color [on/off]', 'Turn on/off color output.', 'on')
+    .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
     .option('--json', 'Output results using JSON')
     .option('--query [query]', 'A JMESPath query to use in filtering the response data.')
@@ -70,7 +70,7 @@ program
 program
     .command('describe <runtimeName>')
     .description('Describe a processor runtime')
-    .option('--color [on/off]', 'Turn on/off color output.', 'on')
+    .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
     .option('--query [query]', 'A JMESPath query to use in filtering the response data.')
     .action((runtimeName, options) => {
@@ -87,7 +87,7 @@ program
 program
     .command('delete <runtimeName>')
     .description('Delete a processor runtime')
-    .option('--color [on/off]', 'Turn on/off color output.', 'on')
+    .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
     .action((runtimeName, options) => {
         try {
@@ -103,7 +103,7 @@ program
 program
     .command('list-actions <runtimeName>')
     .description('List the available processor runtime actions')
-    .option('--color [on/off]', 'Turn on/off color output.', 'on')
+    .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
     .option('--json', 'Output results using JSON')
     .option('--query [query]', 'A JMESPath query to use in filtering the response data.')
@@ -121,7 +121,7 @@ program
 program
     .command('invoke <runtimeName> <actionId>')
     .description('Invoke a processor action')
-    .option('--color [on/off]', 'Turn on/off color output.', 'on')
+    .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
     .option('--query [query]', 'A JMESPath query to use in filtering the response data.')
     .option('--params [params]', 'JSON params to send to the action')

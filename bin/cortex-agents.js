@@ -41,7 +41,7 @@ program.description('Work with Cortex Agents');
 program
     .command('save <agentDefinition>')
     .description('Save an agent definition')
-    .option('--color [on/off]', 'Turn on/off color output.', 'on')
+    .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
     .option('-y, --yaml', 'Use YAML for agent definition format')
     .action((agentDefinition, options) => {
@@ -58,7 +58,7 @@ program
 program
     .command('list')
     .description('List agent definitions')
-    .option('--color [on/off]', 'Turn on/off color output.', 'on')
+    .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
     .option('--json', 'Output results using JSON')
     .option('--query [query]', 'A JMESPath query to use in filtering the response data. Ignored if output format is not JSON.')
@@ -76,7 +76,7 @@ program
 program
     .command('describe <agentName>')
     .description('Describe agent')
-    .option('--color [on/off]', 'Turn on/off color output.', 'on')
+    .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
     .option('--query [query]', 'A JMESPath query to use in filtering the response data.')
     .option('--versions', 'To get list of versions of an agent')
@@ -94,7 +94,7 @@ program
 program
     .command('invoke <agentName> <serviceName>')
     .description('Invoke an agent service')
-    .option('--color [on/off]', 'Turn on/off color output.', 'on')
+    .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
     .option('--params [params]', 'JSON params to send to the action')
     .option('--params-file [paramsFile]', 'A file containing either JSON or YAML formatted params')
@@ -112,7 +112,7 @@ program
 program
     .command('get-service-activation <activationId>')
     .description('Get service activation')
-    .option('--color [on/off]', 'Turn on/off color output.', 'on')
+    .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
     .option('--query [query]', 'A JMESPath query to use in filtering the response data.')
     .action((activationId, options) => {
@@ -129,7 +129,7 @@ program
 program
     .command('get-snapshots <agentName>')
     .description('Get agent snapshots')
-    .option('--color [on/off]', 'Turn on/off color output.', 'on')
+    .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
     .action((agentName, options) => {
         try {
@@ -145,7 +145,7 @@ program
 program
     .command('create-snapshot <snapshotDefinition>')
     .description('Create agent snapshot with JSON file as input')
-    .option('--color [on/off]', 'Turn on/off color output.', 'on')
+    .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
     .action((snapshotDefinition, options) => {
         try {
@@ -162,7 +162,7 @@ program
 program
     .command('list-instances <agentName>')
     .description('List agent instances  ')
-    .option('--color [on/off]', 'Turn on/off color output.', 'on')
+    .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
     .action((agentName, options) => {
         try {
@@ -178,7 +178,7 @@ program
 program
     .command('create-instance <instanceDefinition>')
     .description('Create agent instance')
-    .option('--color [on/off]', 'Turn on/off color output.', 'on')
+    .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
     .action((instanceDefinition, options) => {
         try {
@@ -194,7 +194,7 @@ program
 program
     .command('get-instance <instanceId>')
     .description('Get agent instance')
-    .option('--color [on/off]', 'Turn on/off color output.', 'on')
+    .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
     .option('--json', 'Output results using JSON')
     .action((instanceId, options) => {
@@ -211,7 +211,7 @@ program
 program
     .command('delete-instance <instanceId>')
     .description('Delete agent instance')
-    .option('--color [on/off]', 'Turn on/off color output.', 'on')
+    .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
     .action((instanceId, options) => {
         try {
@@ -227,7 +227,7 @@ program
 program
     .command('stop-instance <instanceId>')
     .description('Stop agent instance')
-    .option('--color [on/off]', 'Turn on/off color output.', 'on')
+    .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
     .action((instanceId, options) => {
         try {
@@ -243,7 +243,7 @@ program
 program
     .command('list-triggers')
     .description('List of triggers for the current tenant')
-    .option('--color [on/off]', 'Turn on/off color output.', 'on')
+    .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
     .action((options) => {
         try {

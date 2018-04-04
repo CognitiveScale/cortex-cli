@@ -28,7 +28,7 @@ program.description('Work with Cortex Jobs');
 program
     .command('list')
     .description('List job definitions')
-    .option('--color [on/off]', 'Turn on/off color output.', 'on')
+    .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
     .option('--json', 'Output results using JSON')
     .option('--query [query]', 'A JMESPath query to use in filtering the response data. Ignored if output format is not JSON.')
@@ -46,7 +46,7 @@ program
 program
     .command('describe <jobDefinition>')
     .description('Describe job definition')
-    .option('--color [on/off]', 'Turn on/off color output.', 'on')
+    .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
     .option('--json', 'Output results using JSON')
     .action((jobDefinition, options) => {
@@ -63,7 +63,7 @@ program
 program
     .command('status <jobDefinition>')
     .description('Get job status')
-    .option('--color [on/off]', 'Turn on/off color output.', 'on')
+    .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
     .option('--json', 'Output results using JSON')
     .action((jobDefinition, options) => {
@@ -81,7 +81,7 @@ program
 program
     .command('save <jobDefinition>')
     .description('Save a job definition')
-    .option('--color [on/off]', 'Turn on/off color output.', 'on')
+    .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
     .option('-y, --yaml', 'Use YAML for job definition format')
     .action((jobDefinition, options) => {

@@ -27,7 +27,7 @@ program.description('Work with Cortex Types');
 program
     .command('save <typeDefinition>')
     .description('Save a type definition')
-    .option('--color [on/off]', 'Turn on/off color output.', 'on')
+    .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
     .option('-y, --yaml', 'Use YAML for type definition format')
     .action((typeDefinition, options) => {
@@ -44,7 +44,7 @@ program
 program
     .command('list')
     .description('List type definitions')
-    .option('--color [on/off]', 'Turn on/off color output.', 'on')
+    .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
     .option('--json', 'Output results using JSON')
     .option('--query [query]', 'A JMESPath query to use in filtering the response data.')
@@ -62,7 +62,7 @@ program
 program
     .command('describe <typeName>')
     .description('Describe type')
-    .option('--color [on/off]', 'Turn on/off color output.', 'on')
+    .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
     .option('--query [query]', 'A JMESPath query to use in filtering the response data.')
     .action((typeName, options) => {

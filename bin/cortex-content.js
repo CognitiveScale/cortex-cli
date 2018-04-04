@@ -28,7 +28,7 @@ program.description('Work with Cortex Contents');
 program
     .command('list')
     .description('List content')
-    .option('--color [on/off]', 'Turn on/off color output.', 'on')
+    .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
     .option('--json', 'Output results using JSON')
     .option('--query [query]', 'A JMESPath query to use in filtering the response data. Ignored if output format is not JSON.')
@@ -46,7 +46,7 @@ program
 program
     .command('upload <contentKey> <filePath>')
     .description('Upload content')
-    .option('--color [on/off]', 'Turn on/off color output.', 'on')
+    .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
     .option('--secure', 'Uploads the content securely to the Cortex Vault. Use this option for keytab files or content that contains sensitive information that is required during Runtime. Take note of the contentKey you give to this content for future reference.')
     .action((contentKey, filePath, options) => {
@@ -63,7 +63,7 @@ program
 program
     .command('delete <contentKey>')
     .description('Delete content')
-    .option('--color [on/off]', 'Turn on/off color output.', 'on')
+    .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
     .action((contentKey, options) => {
         try {
@@ -79,7 +79,7 @@ program
 program
     .command('download <contentKey>')
     .description('Download content')
-    .option('--color [on/off]', 'Turn on/off color output.', 'on')
+    .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
     .option('--secure', 'Downloads the content securely from the Cortex Vault.')
     .action((contentKey, options) => {

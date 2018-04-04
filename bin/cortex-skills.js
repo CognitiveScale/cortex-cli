@@ -27,7 +27,7 @@ program.description('Work with Cortex Skills');
 program
     .command('save <skillDefinition>')
     .description('Save a skill definition')
-    .option('--color [on/off]', 'Turn on/off color output.', 'on')
+    .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
     .option('-y, --yaml', 'Use YAML for skill definition format')
     .action((skillDefinition, options) => {
@@ -44,7 +44,7 @@ program
 program
     .command('list')
     .description('List skill definitions')
-    .option('--color [on/off]', 'Turn on/off color output.', 'on')
+    .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
     .option('--json', 'Output results using JSON')
     .option('--query [query]', 'A JMESPath query to use in filtering the response data.')
@@ -62,7 +62,7 @@ program
 program
     .command('describe <skillName>')
     .description('Describe skill')
-    .option('--color [on/off]', 'Turn on/off color output.', 'on')
+    .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
     .option('--query [query]', 'A JMESPath query to use in filtering the response data.')
     .action((skillName, options) => {
@@ -78,7 +78,7 @@ program
 program
     .command('generate')
     .description('Generates the structure and top level build script for a skill')
-    .option('--color [on/off]', 'Turn on/off color output.', 'on')
+    .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use', 'default')
     .action((options) => {
         try {
