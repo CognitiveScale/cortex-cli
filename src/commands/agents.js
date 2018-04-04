@@ -204,6 +204,7 @@ module.exports.GetServiceActivationCommand = class {
     }
 };
 
+
 module.exports.ListAgentInstancesCommand = class {
 
     constructor(program) {
@@ -251,6 +252,7 @@ module.exports.GetAgentSnapshotCommand = class {
                 printError(`Failed to get agent snapshot ${agentName}: ${response.message}`, options);
             }
         })
+
             .catch((err) => {
                 printError(`Failed to get agent snapshot ${agentName}: ${err.status} ${err.message}`, options);
             });
@@ -285,6 +287,7 @@ module.exports.CreateAgentSnapshotCommand = class {
                 printError(`Failed to create agent snapshot ${agentName}: ${err.status} ${err.message}`, options);
             });
     }
+
 };
 
 module.exports.CreateAgentInstanceCommand = class {

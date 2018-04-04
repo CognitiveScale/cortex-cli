@@ -125,7 +125,7 @@ program
         }
     });
 
-//Get Agent Snapshots
+
 program
     .command('get-snapshots <agentName>')
     .description('Get agent snapshots')
@@ -156,6 +156,7 @@ program
             console.error(chalk.red(err.message));
         }
     });
+
 
 //List agent instances
 program
@@ -253,6 +254,7 @@ program
             console.error(chalk.red(err.message));
         }
     });
+
 
 
 process.env.DOC && require('../src/commands/utils').exportDoc(program);

@@ -71,6 +71,7 @@ module.exports = class Content {
             });
     }
 
+
     deleteContent(token, contentKey) {
         debug('deleteContent(%s) => %s', contentKey, this.endpoint);
         const url = `${this.endpoint}/${contentKey}`;
@@ -101,6 +102,7 @@ module.exports = class Content {
             });
     }
 
+
     downloadSecureContent(token, contentKey) {
         const url = `${this.cortexUrl}/v2/tenants/secrets/${contentKey}`;
         debug('downloadContent(%s) => %s', contentKey);
@@ -115,5 +117,6 @@ module.exports = class Content {
                 return {success: false, message: res.body, status: res.status};
             });
     }
+
 };
 
