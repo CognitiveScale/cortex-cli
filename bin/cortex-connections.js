@@ -29,7 +29,7 @@ program.description('Work with Cortex Connections');
 program
     .command('list')
     .description('List connections definitions')
-    .option('--color [on/off]', 'Turn on/off color output.', 'on')
+    .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
     .option('--json', 'Output results using JSON')
     .option('--query [query]', 'A JMESPath query to use in filtering the response data. Ignored if output format is not JSON.')
@@ -47,7 +47,7 @@ program
 program
     .command('save <connectionDefinition>')
     .description('Save a connections definition. Takes JSON file by default.')
-    .option('--color [on/off]', 'Turn on/off color output.', 'on')
+    .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
     .option('-y, --yaml', 'Use YAML for agent definition format')
     .action((connDefinition, options) => {
@@ -64,7 +64,7 @@ program
 program
     .command('describe <connectionName>')
     .description('Describe connection')
-    .option('--color [on/off]', 'Turn on/off color output.', 'on')
+    .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
     .option('--query [query]', 'A JMESPath query to use in filtering the response data.')
     .action((connectionName, options) => {
@@ -81,7 +81,7 @@ program
 program
     .command('test <connectionDefinition>')
     .description('Test a connections definition before saving. Takes JSON file by default.')
-    .option('--color [on/off]', 'Turn on/off color output.', 'on')
+    .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
     .option('-y, --yaml', 'Use YAML for agent definition format')
     .action((connDefinition, options) => {
@@ -98,7 +98,7 @@ program
 program
     .command('list-types')
     .description('List connections types')
-    .option('--color [on/off]', 'Turn on/off color output.', 'on')
+    .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
     .option('--json', 'Output results using JSON')
     .option('--query [query]', 'A JMESPath query to use in filtering the response data. Ignored if output format is not JSON.')
@@ -117,7 +117,7 @@ program
 program
     .command('generate')
     .description('Generates the structure of the connection payload')
-    .option('--color [on/off]', 'Turn on/off color output.', 'on')
+    .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use', 'default')
     .action((options) => {
         try {

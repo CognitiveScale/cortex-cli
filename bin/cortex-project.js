@@ -29,7 +29,7 @@ program.description('Work with a related collection of Cortex contributions');
 program
     .command('generate')
     .description('Generates the structure and top level build script for a project')
-    .option('--color [on/off]', 'Turn on/off color output.', 'on')
+    .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
     .action((options) => {
         try {
