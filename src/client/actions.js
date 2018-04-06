@@ -88,7 +88,7 @@ module.exports = class Actions {
             .set('Authorization', `Bearer ${token}`)
             .then((res) => {
                 if (res.ok) {
-                    return {success: true, action: res.body.action};
+                    return {success: true, action: res.body.function};
                 }
                 return {success: false, status: res.status, message: res.body};
             });
