@@ -49,15 +49,15 @@ program
 
 // Describe Action
 program
-    .command('describe <functionName>')
-    .description('Describe a function')
+    .command('describe <actionName>')
+    .description('Describe a action')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
     .option('--query [query]', 'A JMESPath query to use in filtering the response data.')
     .option('-d, --download', 'Download code binary in response')
-    .action((functionName, options) => {
+    .action((actionName, options) => {
         try {
-            new DescribeActionCommand(program).execute(functionName, options);
+            new DescribeActionCommand(program).execute(actionName, options);
             processed = true;
         }
         catch (err) {
@@ -67,13 +67,13 @@ program
 
 // Delete Action - TODO
 // program
-//     .command('delete <functionId>')
-//     .description('Delete a function')
+//     .command('delete <actionId>')
+//     .description('Delete a action')
 //     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
 //     .option('--profile [profile]', 'The profile to use')
 //     .action((options) => {
 //         try {
-//             new DeleteActionCommand(program).execute(functionId, options);
+//             new DeleteActionCommand(program).execute(actionId, options);
 //         }
 //         catch (err) {
 //             console.error(chalk.red(err.message));
@@ -82,16 +82,16 @@ program
 
 // Invoke Action
 program
-    .command('invoke <functionId>')
-    .description('Invoke a function')
+    .command('invoke <actionId>')
+    .description('Invoke a action')
     .option('--params [params]', 'JSON params to send to the action')
     .option('--params-file [paramsFile]', 'A file containing either JSON or YAML formatted params')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
     .option('--query [query]', 'A JMESPath query to use in filtering the response data.')
-    .action((functionId, options) => {
+    .action((actionId, options) => {
         try {
-            new InvokeActionCommand(program).execute(functionId, options);
+            new InvokeActionCommand(program).execute(actionId, options);
             processed = true;
         }
         catch (err) {
@@ -101,8 +101,8 @@ program
 
 // Deploy Action
 program
-    .command('deploy <functionName>')
-    .description('Deploy a function')
+    .command('deploy <actionName>')
+    .description('Deploy a action')
     .option('--kind [kind]', 'Action runtime kind') // python:3, python:2, nodejs:default
     .option('--code [code]', 'The code file or code archive to deploy')
     .option('--docker [image]', 'Docker image to use as the runner')
@@ -110,7 +110,7 @@ program
     .option('--timeout [timeout]', 'Execution timeout in milliseconds', '60000')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
-    .action((functionName, options) => {
+    .action((actionName, options) => {
         try {
             if (!options.kind && !options.docker) {
                 throw new Error('--kind [kind] or --docker [image] required');
@@ -120,7 +120,7 @@ program
                 throw new Error('Use either --kind [kind] or --docker [image], but not both');
             }
 
-            new DeployActionCommand(program).execute(functionName, options);
+            new DeployActionCommand(program).execute(actionName, options);
             processed = true;
         }
         catch (err) {
