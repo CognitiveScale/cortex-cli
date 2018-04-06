@@ -25,8 +25,9 @@ module.exports = class Actions {
         this.endpointV3 = `${cortexUrl}/v3/actions`;
     }
 
-    invokeAction(token, actionName, params) {
-        const endpoint = `${this.endpointV3}/${actionName}/invoke`;
+    invokeAction(token, actionName, path, params) {
+        const endpoint = `${this.endpointV3}/${actionName}/invoke/${path}`;
+        console.log(endpoint)
         debug('invokeAction(%s) => %s', actionName, endpoint);
 
         return request

@@ -104,9 +104,10 @@ module.exports.DeployActionCommand = class {
         const code = options.code;
         const memory = parseInt(options.memory);
         const timeout = parseInt(options.timeout);
+        const path = options.path;
 
         const actions = new Actions(profile.url);
-        actions.deployAction(profile.token, actionName, dockerImage, kind, code, memory, timeout)
+        actions.deployAction(profile.token, actionName, dockerImage, kind, code, memory, timeout, path)
             .then((response) => {
                 if (response.success) {
                     printSuccess(JSON.stringify(response.message, null, 2), options);
@@ -141,9 +142,10 @@ module.exports.InvokeActionCommand = class {
         }
 
         debug('params: %o', params);
+        const path = options.path;
 
         const actions = new Actions(profile.url);
-        actions.invokeAction(profile.token, actionName, params)
+        actions.invokeAction(profile.token, actionName, path, params)
             .then((response) => {
                 if (response.success) {
                     let result = filterObject(response.result, options);
