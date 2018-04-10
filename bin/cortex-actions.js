@@ -85,7 +85,7 @@ program
 
 // Invoke Action
 program
-    .command('invoke <actionId>')
+    .command('invoke <actionName>')
     .description('Invoke an action')
     .option('--params [params]', 'JSON params to send to the action')
     .option('--params-file [paramsFile]', 'A file containing either JSON or YAML formatted params')
@@ -94,9 +94,9 @@ program
     .option('--query [query]', 'A JMESPath query to use in filtering the response data.')
     .option('--actionType [actionType]', 'Type of action')
     .option('--path [path]', 'Path to the daemon service url being invoked', '')
-    .action((actionId, options) => {
+    .action((actionName, options) => {
         try {
-            new InvokeActionCommand(program).execute(actionId, options);
+            new InvokeActionCommand(program).execute(actionName, options);
             processed = true;
         }
         catch (err) {
