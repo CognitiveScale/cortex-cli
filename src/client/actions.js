@@ -25,9 +25,14 @@ module.exports = class Actions {
         this.endpointV3 = `${cortexUrl}/v3/actions`;
     }
 
-    invokeAction(token, actionName, path, params) {
-        const endpoint = `${this.endpointV3}/${actionName}/invoke/${path}`;
-        console.log(endpoint)
+    invokeAction(token, actionName, path, params, actionType) {
+        let endpoint = `${this.endpointV3}/${actionName}/invoke`;
+        if (path) {
+            endpoint = `${endpoint}/${path}`
+        }
+        if (actionType) {
+            endpoint = `${endpoint}?actionType=${actionType}`
+        }
         debug('invokeAction(%s) => %s', actionName, endpoint);
 
         return request
@@ -42,8 +47,8 @@ module.exports = class Actions {
             });
     }
 
-    deployAction(token, actionName, docker, kind, code, memory, timeout) {
-        const endpoint = `${this.endpointV3}?overwrite=true`;
+    deployAction(token, actionName, docker, kind, code, memory, timeout, actionType) {
+        const endpoint = `${this.endpointV3}?actionType=${actionType}`;
         debug('deployAction(%s, docker=%s, kind=%s, code=%s, memory=%s, timeout=%s) => %s',
             actionName, docker, kind, code, memory, timeout, endpoint);
 
@@ -81,8 +86,8 @@ module.exports = class Actions {
 
     }
 
-    describeAction(token, actionName, download) {
-        const endpoint = `${this.endpointV3}/${actionName}?download=${download}`;
+    describeAction(token, actionName) {
+        const endpoint = `${this.endpointV3}/${actionName}`;
         debug('describeAction(%s) => %s', actionName, endpoint);
         return request
             .get(endpoint)
@@ -93,6 +98,23 @@ module.exports = class Actions {
                 }
                 return {success: false, status: res.status, message: res.body};
             });
+    }
 
+    deleteAction(token, actionName, actionType) {
+        let endpoint = `${this.endpointV3}/${actionName}`;
+        if (actionType) {
+            endpoint = `${endpoint}?actionType=${actionType}`
+        }
+        debug('deleteAction(%s, %s) => %s', actionName, actionType, endpoint);
+        return request
+            .delete(endpoint)
+            .set('Authorization', `Bearer ${token}`)
+            .accept('application/json')
+            .then((res) => {
+                if (res.ok) {
+                    return {success: true, action: res.body.action};
+                }
+                return {success: false, status: res.status, message: res.body};
+            });
     }
 };

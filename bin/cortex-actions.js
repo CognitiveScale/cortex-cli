@@ -65,13 +65,14 @@ program
         }
     });
 
-// Delete Action - TODO
+// Delete Action
 // program
 //     .command('delete <actionId>')
-//     .description('Delete a action')
+//     .description('Delete an action')
 //     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
 //     .option('--profile [profile]', 'The profile to use')
-//     .action((options) => {
+//     .option('--actionType [actionType]', 'Type of action')
+//     .action((actionId, options) => {
 //         try {
 //             new DeleteActionCommand(program).execute(actionId, options);
 //         }
@@ -79,6 +80,23 @@ program
 //             console.error(chalk.red(err.message));
 //         }
 //     });
+
+program
+    .command('delete <actionName>')
+    .description('Describe a action')
+    .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
+    .option('--profile [profile]', 'The profile to use')
+    .option('--query [query]', 'A JMESPath query to use in filtering the response data.')
+    .option('--actionType [actionType]', 'Type of action')
+    .action((actionName, options) => {
+        try {
+            new DeleteActionCommand(program).execute(actionName, options);
+            processed = true;
+        }
+        catch (err) {
+            console.error(chalk.red(err.message));
+        }
+    });
 
 // Invoke Action
 program
@@ -89,7 +107,7 @@ program
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
     .option('--query [query]', 'A JMESPath query to use in filtering the response data.')
-    .option('--actionType [actionType]', 'Type of action', 'functions')
+    .option('--actionType [actionType]', 'Type of action')
     .option('--path [path]', 'Path to the daemon service url being invoked', '')
     .action((actionId, options) => {
         try {
@@ -112,6 +130,7 @@ program
     .option('--timeout [timeout]', 'Execution timeout in milliseconds', '60000')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
+    .option('--actionType [actionType]', 'Type of action')
     .action((actionName, options) => {
         try {
             if (!options.kind && !options.docker) {

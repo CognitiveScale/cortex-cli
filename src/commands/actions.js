@@ -73,7 +73,7 @@ module.exports.DescribeActionCommand = class {
         debug('%s.executeDescribeAction(%s)', profile.name, actionName);
 
         const actions = new Actions(profile.url);
-        actions.describeAction(profile.token, actionName, options.download !== undefined)
+        actions.describeAction(profile.token, actionName)
             .then((response) => {
                 if (response.success) {
                     let result = filterObject(response.action, options);
@@ -104,10 +104,10 @@ module.exports.DeployActionCommand = class {
         const code = options.code;
         const memory = parseInt(options.memory);
         const timeout = parseInt(options.timeout);
-        const path = options.path;
 
         const actions = new Actions(profile.url);
-        actions.deployAction(profile.token, actionName, dockerImage, kind, code, memory, timeout, path)
+        const actionType = options.actionType;
+        actions.deployAction(profile.token, actionName, dockerImage, kind, code, memory, timeout, actionType)
             .then((response) => {
                 if (response.success) {
                     printSuccess(JSON.stringify(response.message, null, 2), options);
@@ -142,10 +142,10 @@ module.exports.InvokeActionCommand = class {
         }
 
         debug('params: %o', params);
+        const actionType = options.actionType;
         const path = options.path;
-
         const actions = new Actions(profile.url);
-        actions.invokeAction(profile.token, actionName, path, params)
+        actions.invokeAction(profile.token, actionName, path, params, actionType)
             .then((response) => {
                 if (response.success) {
                     let result = filterObject(response.result, options);
@@ -157,6 +157,34 @@ module.exports.InvokeActionCommand = class {
             })
             .catch((err) => {
                 printError(`Failed to invoke action: ${err.status} ${err.message}`, options);
+            });
+    }
+};
+
+
+module.exports.DeleteActionCommand = class {
+
+    constructor(program) {
+        this.program = program;
+    }
+
+    execute(actionName, options) {
+        const profile = loadProfile(options.profile);
+        debug('%s.executeDeleteAction(%s)', profile.name, actionName);
+        const actionType = options.actionType;
+        const actions = new Actions(profile.url);
+        actions.deleteAction(profile.token, actionName, actionType)
+            .then((response) => {
+                if (response.success) {
+                    let result = filterObject(response, options);
+                    printSuccess(JSON.stringify(result, null, 2), options);
+                }
+                else {
+                    printError(`Action deletion failed: ${response.status} ${response.message}`, options);
+                }
+            })
+            .catch((err) => {
+                printError(`Failed to delete action: ${err.status} ${err.message}`, options);
             });
     }
 };
