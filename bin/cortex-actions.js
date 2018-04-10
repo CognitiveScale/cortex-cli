@@ -50,7 +50,7 @@ program
 // Describe Action
 program
     .command('describe <actionName>')
-    .description('Describe a action')
+    .description('Describe an action')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
     .option('--query [query]', 'A JMESPath query to use in filtering the response data.')
@@ -68,7 +68,7 @@ program
 // Delete Action
 program
     .command('delete <actionName>')
-    .description('Describe a action')
+    .description('Delete an action')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
     .option('--query [query]', 'A JMESPath query to use in filtering the response data.')
@@ -86,7 +86,7 @@ program
 // Invoke Action
 program
     .command('invoke <actionId>')
-    .description('Invoke a action')
+    .description('Invoke an action')
     .option('--params [params]', 'JSON params to send to the action')
     .option('--params-file [paramsFile]', 'A file containing either JSON or YAML formatted params')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
@@ -107,7 +107,7 @@ program
 // Deploy Action
 program
     .command('deploy <actionName>')
-    .description('Deploy a action')
+    .description('Deploy an action')
     .option('--kind [kind]', 'Action runtime kind') // python:3, python:2, nodejs:default
     .option('--code [code]', 'The code file or code archive to deploy')
     .option('--docker [image]', 'Docker image to use as the runner')
