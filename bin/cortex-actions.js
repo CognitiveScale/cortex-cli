@@ -66,21 +66,6 @@ program
     });
 
 // Delete Action
-// program
-//     .command('delete <actionId>')
-//     .description('Delete an action')
-//     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
-//     .option('--profile [profile]', 'The profile to use')
-//     .option('--actionType [actionType]', 'Type of action')
-//     .action((actionId, options) => {
-//         try {
-//             new DeleteActionCommand(program).execute(actionId, options);
-//         }
-//         catch (err) {
-//             console.error(chalk.red(err.message));
-//         }
-//     });
-
 program
     .command('delete <actionName>')
     .description('Describe a action')
