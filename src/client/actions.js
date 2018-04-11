@@ -48,7 +48,10 @@ module.exports = class Actions {
     }
 
     deployAction(token, actionName, docker, kind, code, memory, timeout, actionType) {
-        const endpoint = `${this.endpointV3}?actionType=${actionType}`;
+        let endpoint = `${this.endpointV3}`;
+        if (actionType) {
+            endpoint = `${endpoint}?actionType=${actionType}`;
+        }
         debug('deployAction(%s, docker=%s, kind=%s, code=%s, memory=%s, timeout=%s) => %s',
             actionName, docker, kind, code, memory, timeout, endpoint);
 
