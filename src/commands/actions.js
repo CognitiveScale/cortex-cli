@@ -80,11 +80,11 @@ module.exports.DescribeActionCommand = class {
                     printSuccess(JSON.stringify(result, null, 2), options);
                 }
                 else {
-                    printError(`Failed to list actions: ${response.status} ${response.message}`, options);
+                    printError(`Failed to describe action: ${response.status} ${response.message}`, options);
                 }
             })
             .catch((err) => {
-                printError(`Failed to list actions: ${err.status} ${err.message}`, options);
+                printError(`Failed to describe action: ${err.status} ${err.message}`, options);
             });
     }
 };
