@@ -16,9 +16,9 @@
 
 const fs = require('fs');
 const debug = require('debug')('cortex:cli');
-const { loadProfile } = require('../config');
+const {loadProfile} = require('../config');
 const Actions = require('../client/actions');
-const { printSuccess, printError, filterObject, parseObject, printTable } = require('./utils');
+const {printSuccess, printError, filterObject, parseObject, printTable} = require('./utils');
 
 module.exports.ListActionsCommand = class {
 
@@ -43,10 +43,10 @@ module.exports.ListActionsCommand = class {
                     }
                     else {
                         const tableSpec = [
-                            { column: 'Name', field: 'name', width: 50 },
-                            { column: 'Image', field: 'image', width: 50 },
-                            { column: 'Kind', field: 'kind', width: 25 },
-                            { column: 'Created On', field: 'createdAt', width: 26 }
+                            {column: 'Name', field: 'name', width: 50},
+                            {column: 'Image', field: 'image', width: 50},
+                            {column: 'Kind', field: 'kind', width: 25},
+                            {column: 'Created On', field: 'createdAt', width: 26}
                         ];
 
                         printTable(tableSpec, result);
@@ -104,10 +104,13 @@ module.exports.DeployActionCommand = class {
         const code = options.code;
         const memory = parseInt(options.memory);
         const timeout = parseInt(options.timeout);
+        const actionType = options.actionType;
+        const command = options.command;
+        const ports = options.ports;
+        const environment = options.environment;
 
         const actions = new Actions(profile.url);
-        const actionType = options.actionType;
-        actions.deployAction(profile.token, actionName, dockerImage, kind, code, memory, timeout, actionType)
+        actions.deployAction(profile.token, actionName, dockerImage, kind, code, memory, timeout, actionType, command, ports, environment)
             .then((response) => {
                 if (response.success) {
                     printSuccess(JSON.stringify(response.message, null, 2), options);

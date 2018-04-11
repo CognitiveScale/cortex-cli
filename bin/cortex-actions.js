@@ -116,6 +116,9 @@ program
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
     .option('--actionType [actionType]', 'Type of action')
+    .option('--ports [ports]', 'Docker ports')                  //'["9091/tcp"]'
+    .option('--environment [environment]', 'Environment')
+    .option('--command [command]', 'Command to be executed')    //'["--daemon"]'
     .action((actionName, options) => {
         try {
             if (!options.kind && !options.docker) {

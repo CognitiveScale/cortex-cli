@@ -33,6 +33,7 @@ module.exports = class Actions {
         if (actionType) {
             endpoint = `${endpoint}?actionType=${actionType}`
         }
+        console.log(endpoint)
         debug('invokeAction(%s) => %s', actionName, endpoint);
 
         return request
@@ -47,11 +48,12 @@ module.exports = class Actions {
             });
     }
 
-    deployAction(token, actionName, docker, kind, code, memory, timeout, actionType) {
+    deployAction(token, actionName, docker, kind, code, memory, timeout, actionType, command, ports, environment) {
         let endpoint = `${this.endpointV3}`;
         if (actionType) {
             endpoint = `${endpoint}?actionType=${actionType}`;
         }
+        console.log(endpoint)
         debug('deployAction(%s, docker=%s, kind=%s, code=%s, memory=%s, timeout=%s) => %s',
             actionName, docker, kind, code, memory, timeout, endpoint);
 
@@ -65,6 +67,9 @@ module.exports = class Actions {
         if (memory) req.field('memory', memory);
         if (timeout) req.field('timeout', timeout);
         if (code) req.attach('code', code);
+        if (command) req.field('command', command);
+        if (ports) req.field('ports', ports);
+        if (environment) req.field('environment', environment);
 
         return req.then((res) => {
             if (res.ok) {
