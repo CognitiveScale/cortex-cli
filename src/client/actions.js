@@ -35,12 +35,10 @@ module.exports = class Actions {
         }
         debug('invokeAction(%s) => %s', actionName, endpoint);
 
-        const req = request
-            .post(endpoint)
+        const req = request(method || 'POST', endpoint)
             .set('Authorization', `Bearer ${token}`)
             .send(params);
 
-        if (method) req.field('method', method);
 
         return req.then((res) => {
             if (res.ok) {
