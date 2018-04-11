@@ -28,7 +28,7 @@ program.description('Work with Cortex Jobs');
 program
     .command('list <jobId>')
     .description('List task definitions within a job definition')
-    .option('--color [on/off]', 'Turn on/off color output.', 'on')
+    .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
     .option('--json', 'Output results using JSON')
     .option('--query [query]', 'A JMESPath query to use in filtering the response data. Ignored if output format is not JSON.')
@@ -46,7 +46,7 @@ program
 program
     .command('logs <jobId> <taskId>')
     .description('Get Tasks logs')
-    .option('--color [on/off]', 'Turn on/off color output.', 'on')
+    .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
     .option('--json', 'Output results using JSON')
     .option('--query [query]', 'A JMESPath query to use in filtering the response data. Ignored if output format is not JSON.')
@@ -64,7 +64,7 @@ program
 program
     .command('cancel <jobId> <taskId>')
     .description('Cancel a task')
-    .option('--color [on/off]', 'Turn on/off color output.', 'on')
+    .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
     .option('--json', 'Output results using JSON')
     .option('-m, --message <message>', 'Cancellation message')
@@ -82,7 +82,7 @@ program
 program
     .command('describe <jobId> <taskId>')
     .description('Describe a task definition')
-    .option('--color [on/off]', 'Turn on/off color output.', 'on')
+    .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
     .option('--json', 'Output results using JSON')
     .option('--query [query]', 'A JMESPath query to use in filtering the response data. Ignored if output format is not JSON.')

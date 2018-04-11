@@ -18,28 +18,28 @@
 
 const program = require('commander');
 const chalk = require('chalk');
-const { 
-    ListFunctionsCommand, 
-    DescribeFunctionCommand, 
-    DeleteFunctionCommand, 
-    InvokeFunctionCommand,
-    DeployFunctionCommand
-} = require('../src/commands/functions');
+const {
+    ListActionsCommand,
+    DescribeActionCommand,
+    DeleteActionCommand,
+    InvokeActionCommand,
+    DeployActionCommand
+} = require('../src/commands/actions');
 
 let processed = false;
-program.description('Work with Cortex Functions');
+program.description('Work with Cortex Actions');
 
-// List Functions
+// List Actions
 program
     .command('list')
-    .description('List the deployed functions')
+    .description('List the deployed actions')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
     .option('--json', 'Output results using JSON')
     .option('--query [query]', 'A JMESPath query to use in filtering the response data. Ignored if output format is not JSON.')
     .action((options) => {
         try {
-            new ListFunctionsCommand(program).execute(options);
+            new ListActionsCommand(program).execute(options);
             processed = true;
         }
         catch (err) {
@@ -47,17 +47,17 @@ program
         }
     });
 
-// Describe Function
+// Describe Action
 program
-    .command('describe <functionName>')
-    .description('Describe a function')
+    .command('describe <actionName>')
+    .description('Describe an action')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
     .option('--query [query]', 'A JMESPath query to use in filtering the response data.')
     .option('-d, --download', 'Download code binary in response')
-    .action((functionName, options) => {
+    .action((actionName, options) => {
         try {
-            new DescribeFunctionCommand(program).execute(functionName, options);
+            new DescribeActionCommand(program).execute(actionName, options);
             processed = true;
         }
         catch (err) {
@@ -65,33 +65,39 @@ program
         }
     });
 
-// Delete Function - TODO
-// program
-//     .command('delete <functionId>')
-//     .description('Delete a function')
-//     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
-//     .option('--profile [profile]', 'The profile to use')
-//     .action((options) => {
-//         try {
-//             new DeleteFunctionCommand(program).execute(functionId, options);
-//         }
-//         catch (err) {
-//             console.error(chalk.red(err.message));
-//         }
-//     });
-
-// Invoke Function
+// Delete Action
 program
-    .command('invoke <functionId>')
-    .description('Invoke a function')
+    .command('delete <actionName>')
+    .description('Delete an action')
+    .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
+    .option('--profile [profile]', 'The profile to use')
+    .option('--query [query]', 'A JMESPath query to use in filtering the response data.')
+    .option('--actionType [actionType]', 'Type of action')
+    .action((actionName, options) => {
+        try {
+            new DeleteActionCommand(program).execute(actionName, options);
+            processed = true;
+        }
+        catch (err) {
+            console.error(chalk.red(err.message));
+        }
+    });
+
+// Invoke Action
+program
+    .command('invoke <actionName>')
+    .description('Invoke an action')
     .option('--params [params]', 'JSON params to send to the action')
     .option('--params-file [paramsFile]', 'A file containing either JSON or YAML formatted params')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
     .option('--query [query]', 'A JMESPath query to use in filtering the response data.')
-    .action((functionId, options) => {
+    .option('--actionType [actionType]', 'Type of action')
+    .option('--path [path]', 'Path to the daemon service url being invoked', '')
+    .option('--method [method]', 'HTTP method')                                         // GET, POST ...
+    .action((actionName, options) => {
         try {
-            new InvokeFunctionCommand(program).execute(functionId, options);
+            new InvokeActionCommand(program).execute(actionName, options);
             processed = true;
         }
         catch (err) {
@@ -101,16 +107,20 @@ program
 
 // Deploy Action
 program
-    .command('deploy <functionName>')
-    .description('Deploy a function')
-    .option('--kind [kind]', 'Function runtime kind') // python:3, python:2, nodejs:default
+    .command('deploy <actionName>')
+    .description('Deploy an action')
+    .option('--kind [kind]', 'Action runtime kind') // python:3, python:2, nodejs:default
     .option('--code [code]', 'The code file or code archive to deploy')
     .option('--docker [image]', 'Docker image to use as the runner')
-    .option('--memory [memory]', 'Function memory limit in megabytes', '256')
+    .option('--memory [memory]', 'Action memory limit in megabytes', '256')
     .option('--timeout [timeout]', 'Execution timeout in milliseconds', '60000')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
-    .action((functionName, options) => {
+    .option('--actionType [actionType]', 'Type of action')
+    .option('--ports [ports]', 'Docker ports')                  //'["9091/tcp"]'
+    .option('--environment [environment]', 'Environment')
+    .option('--command [command]', 'Command to be executed')    //'["--daemon"]'
+    .action((actionName, options) => {
         try {
             if (!options.kind && !options.docker) {
                 throw new Error('--kind [kind] or --docker [image] required');
@@ -120,7 +130,7 @@ program
                 throw new Error('Use either --kind [kind] or --docker [image], but not both');
             }
 
-            new DeployFunctionCommand(program).execute(functionName, options);
+            new DeployActionCommand(program).execute(actionName, options);
             processed = true;
         }
         catch (err) {

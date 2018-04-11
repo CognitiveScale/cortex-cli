@@ -29,7 +29,7 @@ program.description('Work with Cortex Connections');
 program
     .command('list')
     .description('List Datasets')
-    .option('--color [on/off]', 'Turn on/off color output.', 'on')
+    .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
     .option('--json', 'Output results using detailed JSON')
     .option('--query [query]', 'A JMESPath query to use in filtering the response data. Ignored if output format is not JSON.')
@@ -47,7 +47,7 @@ program
 program
     .command('save <datasetDefinition>')
     .description('Save a dataset definition. Takes JSON file by default.')
-    .option('--color [on/off]', 'Turn on/off color output.', 'on')
+    .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
     .option('-y, --yaml', 'Use YAML for dataset file definition format')
     .action((datasetDef, options) => {
@@ -64,7 +64,7 @@ program
 program
     .command('describe <datasetName>')
     .description('Describe dataset')
-    .option('--color [on/off]', 'Turn on/off color output.', 'on')
+    .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
     .option('--query [query]', 'A JMESPath query to use in filtering the response data.')
     .action((datasetName, options) => {
@@ -81,7 +81,7 @@ program
 program
     .command('get-dataframe <datasetName>')
     .description('Get dataset in dataframe format')
-    .option('--color [on/off]', 'Turn on/off color output.', 'on')
+    .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
     .action((datasetName, options) => {
         try {
@@ -97,7 +97,7 @@ program
 program
     .command('get-stream <datasetName>')
     .description('Stream dataset content')
-    .option('--color [on/off]', 'Turn on/off color output.', 'on')
+    .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
     .action((datasetName, options) => {
         try {
@@ -112,7 +112,7 @@ program
 program
     .command('generate')
     .description('Generates the structure and top level build script for a dataset')
-    .option('--color [on/off]', 'Turn on/off color output.', 'on')
+    .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use', 'default')
     .action((options) => {
         try {
