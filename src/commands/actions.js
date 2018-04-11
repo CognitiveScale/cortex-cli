@@ -147,8 +147,9 @@ module.exports.InvokeActionCommand = class {
         debug('params: %o', params);
         const actionType = options.actionType;
         const path = options.path;
+        const method = options.method;
         const actions = new Actions(profile.url);
-        actions.invokeAction(profile.token, actionName, path, params, actionType)
+        actions.invokeAction(profile.token, actionName, path, params, actionType, method)
             .then((response) => {
                 if (response.success) {
                     let result = filterObject(response.result, options);

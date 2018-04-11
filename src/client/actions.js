@@ -25,7 +25,7 @@ module.exports = class Actions {
         this.endpointV3 = `${cortexUrl}/v3/actions`;
     }
 
-    invokeAction(token, actionName, path, params, actionType) {
+    invokeAction(token, actionName, path, params, actionType, method) {
         let endpoint = `${this.endpointV3}/${actionName}/invoke`;
         if (path) {
             endpoint = `${endpoint}/${path}`
@@ -33,19 +33,21 @@ module.exports = class Actions {
         if (actionType) {
             endpoint = `${endpoint}?actionType=${actionType}`
         }
-        console.log(endpoint)
         debug('invokeAction(%s) => %s', actionName, endpoint);
 
-        return request
+        const req = request
             .post(endpoint)
             .set('Authorization', `Bearer ${token}`)
-            .send(params)
-            .then((res) => {
-                if (res.ok) {
-                    return {success: true, result: res.body};
-                }
-                return {success: false, status: res.status, message: res.body};
-            });
+            .send(params);
+
+        if (method) req.field('method', method);
+
+        return req.then((res) => {
+            if (res.ok) {
+                return {success: true, result: res.body};
+            }
+            return {success: false, status: res.status, message: res.body};
+        });
     }
 
     deployAction(token, actionName, docker, kind, code, memory, timeout, actionType, command, ports, environment) {
@@ -53,7 +55,6 @@ module.exports = class Actions {
         if (actionType) {
             endpoint = `${endpoint}?actionType=${actionType}`;
         }
-        console.log(endpoint)
         debug('deployAction(%s, docker=%s, kind=%s, code=%s, memory=%s, timeout=%s) => %s',
             actionName, docker, kind, code, memory, timeout, endpoint);
 
@@ -81,7 +82,6 @@ module.exports = class Actions {
 
     listActions(token) {
         debug('listActions() => %s', this.endpointV3);
-        
         return request
             .get(this.endpointV3)
             .set('Authorization', `Bearer ${token}`)

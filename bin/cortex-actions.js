@@ -94,6 +94,7 @@ program
     .option('--query [query]', 'A JMESPath query to use in filtering the response data.')
     .option('--actionType [actionType]', 'Type of action')
     .option('--path [path]', 'Path to the daemon service url being invoked', '')
+    .option('--method [method]', 'HTTP method')                                         // GET, POST ...
     .action((actionName, options) => {
         try {
             new InvokeActionCommand(program).execute(actionName, options);
