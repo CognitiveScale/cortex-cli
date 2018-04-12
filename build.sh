@@ -12,8 +12,8 @@ function error_exit {
 }
 
 function local_build(){
-  npm install || error_exit "Failed to run npm install"
-  echo ${VERSION} > version.txt
+    npm install || error_exit "Failed to run npm install"
+    echo ${VERSION} > version.txt
 }
 
 # This runs on host os e.g MAC/Windows
@@ -29,17 +29,28 @@ function docker_build(){
     npm config set loglevel warn
     npm install -dd --verbose
     echo ${VERSION} > version.txt
+
+    npm config set registry https://cognitivescale.jfrog.io/cognitivescale/api/npm/npm-repo
+
+    BRANCH=$(git symbolic-ref --short -q HEAD)
+    if [[ ${BRANCH} = "master" ]]; then
+        rm -rf node_modules
+        npm install --silent --only=production
+        npm publish
+    elif [[ ${BRANCH} = "develop" ]]; then
+        npm publish --tag develop
+    fi
 }
 
 ## MAIN
 cd "$(dirname "$0")"
 echo "##### BUILDING BRANCH[${BRANCH}],VERSION[${VERSION}] of IMAGE[${IMAGE_NAME}] ######"
 case ${1-local} in
-  CI)
-    docker_build
-  ;;
-  *)
-    local_build
-    local_docker
-  ;;
+    CI)
+        docker_build
+        ;;
+    *)
+        local_build
+        local_docker
+        ;;
 esac
