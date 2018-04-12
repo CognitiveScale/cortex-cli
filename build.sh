@@ -27,7 +27,7 @@ function local_docker(){
 # This runs inside a linux docker container
 function docker_build(){
     npm config set loglevel warn
-    npm install
+    npm install -dd --verbose
     echo ${VERSION} > version.txt
 }
 
