@@ -57,13 +57,15 @@ module.exports = class Accounts {
     createGroup(token, groupName, description) {
         const endpoint = this.groupsEndpoint;
         debug('createGroup(%s) => %s', groupName, endpoint);
+        let body = {
+            name: groupName
+        };
+        if (description)
+            body.description = description;
         return request
             .post(endpoint)
             .set('Authorization', `Bearer ${token}`)
-            .send({
-                name: groupName,
-                description: description
-            })
+            .send(body)
             .then((res) => {
                 if (res.ok) {
                     return {success: true, result: res.body};
@@ -120,30 +122,20 @@ module.exports = class Accounts {
             });
     }
 
-    listResources(token) {
-        const endpoint = this.resourcesEndpoint;
-        debug('listResources => %s', endpoint);
-        return request
-            .get(endpoint)
-            .set('Authorization', `Bearer ${token}`)
-            .then((res) => {
-                if (res.ok) {
-                    return {success: true, result: res.body};
-                }
-                return {success: false, status: res.status, message: res.body};
-            });
-    }
-
-    registerResource(token, resourceName, description) {
+    registerResource(token, resourceName, description, access) {
         const endpoint = this.resourcesEndpoint;
         debug('registerResource(%s) => %s', resourceName, endpoint);
+        let body = {
+            name: resourceName
+        };
+        if (description)
+            body.description = description;
+        if (access)
+            body.access = access;
         return request
             .post(endpoint)
             .set('Authorization', `Bearer ${token}`)
-            .send({
-                name: resourceName,
-                description: description
-            })
+            .send(body)
             .then((res) => {
                 if (res.ok) {
                     return {success: true, result: res.body};
@@ -152,14 +144,14 @@ module.exports = class Accounts {
             });
     }
 
-    grantGroupAccessToResource(token, resourceName, groupId) {
-        const endpoint = `${this.resourcesEndpoint}/${resourceName}/access`;
-        debug('grantGroupAccessToResource(%s) => %s', resourceName, endpoint);
+    grantGroupAccessToResource(token, resourceId, groupName) {
+        const endpoint = `${this.resourcesEndpoint}/${resourceId}/access`;
+        debug('grantGroupAccessToResource(%s) => %s', resourceId, endpoint);
         return request
             .put(endpoint)
             .set('Authorization', `Bearer ${token}`)
             .send({
-                groupId: groupId
+                groupId: groupName
             })
             .then((res) => {
                 if (res.ok) {
@@ -169,32 +161,49 @@ module.exports = class Accounts {
             });
     }
 
-    unregisterResource(token, resourceName) {
-        const endpoint = `${this.resourcesEndpoint}/${resourceName}`;
-        debug('unregisterResource(%s) => %s', resourceName, endpoint);
-        return request
-            .delete(endpoint)
-            .set('Authorization', `Bearer ${token}`)
-            .then((res) => {
-                if (res.ok) {
-                    return {success: true, result: res.body};
-                }
-                return {success: false, status: res.status, message: res.body};
-            });
-    }
+    // TODO: To be implemented
+    // listResources(token) {
+    //     const endpoint = this.resourcesEndpoint;
+    //     debug('listResources => %s', endpoint);
+    //     return request
+    //         .get(endpoint)
+    //         .set('Authorization', `Bearer ${token}`)
+    //         .then((res) => {
+    //             if (res.ok) {
+    //                 return {success: true, result: res.body};
+    //             }
+    //             return {success: false, status: res.status, message: res.body};
+    //         });
+    // }
 
-    revokeGroupAccessToResource(token, resourceName) {
-        const endpoint = `${this.resourcesEndpoint}/${resourceName}/access`;
-        debug('revokeGroupAccessToResource(%s) => %s', resourceName, endpoint);
-        return request
-            .delete(endpoint)
-            .set('Authorization', `Bearer ${token}`)
-            .then((res) => {
-                if (res.ok) {
-                    return {success: true, result: res.body};
-                }
-                return {success: false, status: res.status, message: res.body};
-            });
-    }
+    // TODO: To be implemented
+    // unregisterResource(token, resourceName) {
+    //     const endpoint = `${this.resourcesEndpoint}/${resourceName}`;
+    //     debug('unregisterResource(%s) => %s', resourceName, endpoint);
+    //     return request
+    //         .delete(endpoint)
+    //         .set('Authorization', `Bearer ${token}`)
+    //         .then((res) => {
+    //             if (res.ok) {
+    //                 return {success: true, result: res.body};
+    //             }
+    //             return {success: false, status: res.status, message: res.body};
+    //         });
+    // }
+
+    // TODO: To be implemented
+    // revokeGroupAccessToResource(token, resourceId) {
+    //     const endpoint = `${this.resourcesEndpoint}/${resourceId}/access`;
+    //     debug('revokeGroupAccessToResource(%s) => %s', resourceId, endpoint);
+    //     return request
+    //         .delete(endpoint)
+    //         .set('Authorization', `Bearer ${token}`)
+    //         .then((res) => {
+    //             if (res.ok) {
+    //                 return {success: true, result: res.body};
+    //             }
+    //             return {success: false, status: res.status, message: res.body};
+    //         });
+    // }
 
 };

@@ -22,6 +22,12 @@ const chalk = require('chalk');
 const {
     CreateGroupCommand,
     AddMembersToGroupCommand,
+    ListGroupsCommand,
+    DescribeGroupCommand,
+    DeleteGroupCommand,
+    RemoveMembersFromGroupCommand,
+    RegisterResourceCommand,
+    GrantGroupAccessToResourceCommand,
 } = require('../src/commands/accounts');
 
 let processed = false;
@@ -29,7 +35,7 @@ program.description('Work with Cortex Accounts');
 
 // Create Group
 program
-    .command('groups-create <groupName>')
+    .command('create-groups <groupName>')
     .description('Create a group')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
@@ -46,13 +52,111 @@ program
 
 // Add Members to Group
 program
-    .command('groups-add-members <groupName> [members...]')
-    .description('Create a group')
+    .command('add-members-groups <groupName> [members...]')
+    .description('Add members to group')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
     .action((groupName, members, options) => {
         try {
             new AddMembersToGroupCommand(program).execute(groupName, members, options);
+            processed = true;
+        }
+        catch (err) {
+            console.error(chalk.red(err.message));
+        }
+    });
+
+// List Groups
+program
+    .command('list-groups')
+    .description('List groups')
+    .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
+    .option('--profile [profile]', 'The profile to use')
+    .action((options) => {
+        try {
+            new ListGroupsCommand(program).execute(options);
+            processed = true;
+        }
+        catch (err) {
+            console.error(chalk.red(err.message));
+        }
+    });
+
+// Describe Group
+program
+    .command('describe-groups <groupName>')
+    .description('Describe a group')
+    .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
+    .option('--profile [profile]', 'The profile to use')
+    .action((groupName, options) => {
+        try {
+            new DescribeGroupCommand(program).execute(groupName, options);
+            processed = true;
+        }
+        catch (err) {
+            console.error(chalk.red(err.message));
+        }
+    });
+
+// Delete Group
+program
+    .command('delete-groups <groupName>')
+    .description('Delete a group')
+    .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
+    .option('--profile [profile]', 'The profile to use')
+    .action((groupName, options) => {
+        try {
+            new DeleteGroupCommand(program).execute(groupName, options);
+            processed = true;
+        }
+        catch (err) {
+            console.error(chalk.red(err.message));
+        }
+    });
+
+// Remove Members From Group
+program
+    .command('remove-members-groups <groupName> [members...]')
+    .description('Remove members from a group')
+    .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
+    .option('--profile [profile]', 'The profile to use')
+    .action((groupName, members, options) => {
+        try {
+            new RemoveMembersFromGroupCommand(program).execute(groupName, members, options);
+            processed = true;
+        }
+        catch (err) {
+            console.error(chalk.red(err.message));
+        }
+    });
+
+// Register Resource
+program
+    .command('register-resources <resourceName>')
+    .description('Register a resource')
+    .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
+    .option('--profile [profile]', 'The profile to use')
+    .option('--description [description]', 'Resource description')
+    .option('--access [access]', 'Access level of resource [read/write/admin/execute]')
+    .action((resourceName, options) => {
+        try {
+            new RegisterResourceCommand(program).execute(resourceName, options);
+            processed = true;
+        }
+        catch (err) {
+            console.error(chalk.red(err.message));
+        }
+    });
+
+// Grant Group Access To Resource
+program
+    .command('grant-group-access-resources <resourceId> <groupName>')
+    .description('Grant group access to a resource')
+    .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
+    .option('--profile [profile]', 'The profile to use')
+    .action((resourceId, groupName, options) => {
+        try {
+            new GrantGroupAccessToResourceCommand(program).execute(resourceId, groupName, options);
             processed = true;
         }
         catch (err) {
