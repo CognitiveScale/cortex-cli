@@ -34,6 +34,7 @@ program
     .command('types [cmd]', 'Work with Cortex Types')
     .command('processors [cmd]', 'Work with the Cortex Processor Runtime')
     .command('functions [cmd]', 'Work with Cortex Functions')
+    .command('actions [cmd]', 'Work with Cortex Actions')
     .command('accounts [cmd]', 'Work with Cortex Accounts');
 
 process.env.DOC && require('../src/commands/utils').exportDoc(program);
