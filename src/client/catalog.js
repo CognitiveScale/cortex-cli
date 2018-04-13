@@ -20,7 +20,7 @@ const debug = require('debug')('cortex:cli');
 const createEndpoints = (baseUri) => {
     return {
         catalog: `${baseUri}/v2/catalog`,
-        skills: `${baseUri}/v3/catalog/skills   `,
+        skills: `${baseUri}/v3/catalog/skills`,
         agents: `${baseUri}/v3/catalog/agents`,
         types: `${baseUri}/v3/catalog/types`,
         agentVersions: `${baseUri}/v3/agents/versions`
