@@ -35,7 +35,7 @@ function docker_build(){
         rm -rf node_modules
         npm install --silent --only=production
 #        npm publish
-    elif [[ ${BRANCH} = "develop" ]]; then
+#    elif [[ ${BRANCH} = "develop" ]]; then
 #        npm publish --tag develop
     fi
 }
