@@ -1,6 +1,6 @@
 {
   "name": "cortex-cli",
-  "version": "0.6.4",
+  "version": "0.6.5",
   "description": "Command line tool for CognitiveScale Cortex.",
   "main": "./bin/cortex.js",
   "scripts": {
@@ -33,6 +33,7 @@
     "commander": "2.12.2",
     "debug": "3.1.0",
     "event-stream": "3.3.4",
+    "lodash": "^4.17.5",
     "jmespath": "0.15.0",
     "joi": "13.1.0",
     "js-yaml": "3.10.0",
