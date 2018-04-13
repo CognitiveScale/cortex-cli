@@ -22,20 +22,21 @@ const program = require('commander');
 program
     .version(version, '-v, --version')
     .description('Cortex CLI')
-    .command('configure', 'Configure the Cortex CLI')
-    .command('project [cmd]', 'Work with a related collection of Cortex contributions')
-    .command('agents [cmd]', 'Work with Cortex Agents')
-    .command('connections [cmd]', 'Work with Cortex Connections')
-    .command('jobs [cmd]', 'Work with Cortex Jobs')
-    .command('tasks [cmd]', 'Work with Cortex Tasks')
-    .command('content [cmd]', 'Work with Cortex Managed Content')
-    .command('datasets [cmd]', 'Work with Cortex Datasets')
-    .command('skills [cmd]', 'Work with Cortex Skills')
-    .command('types [cmd]', 'Work with Cortex Types')
-    .command('processors [cmd]', 'Work with the Cortex Processor Runtime')
-    .command('functions [cmd]', 'Work with Cortex Functions')
+    .command('accounts [cmd]', 'Work with Cortex Accounts')
     .command('actions [cmd]', 'Work with Cortex Actions')
-    .command('accounts [cmd]', 'Work with Cortex Accounts');
+    .command('agents [cmd]', 'Work with Cortex Agents')
+    .command('configure', 'Configure the Cortex CLI')
+    .command('connections [cmd]', 'Work with Cortex Connections')
+    .command('content [cmd]', 'Work with Cortex Managed Content')
+    .command('environments [cmd]', 'Work with Cortex Environments')
+    .command('functions [cmd]', 'Work with Cortex Functions')
+    .command('datasets [cmd]', 'Work with Cortex Datasets')
+    .command('jobs [cmd]', 'Work with Cortex Jobs')
+    .command('processors [cmd]', 'Work with the Cortex Processor Runtime')
+    .command('project [cmd]', 'Work with a related collection of Cortex contributions')
+    .command('skills [cmd]', 'Work with Cortex Skills')
+    .command('tasks [cmd]', 'Work with Cortex Tasks')
+    .command('types [cmd]', 'Work with Cortex Types');
 
 process.env.DOC && require('../src/commands/utils').exportDoc(program);
 

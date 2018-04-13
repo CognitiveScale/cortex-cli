@@ -37,12 +37,12 @@ module.exports = class Environments {
             });
     }
 
-    saveEnvironment(token, {name, title, description, connectionType, allowWrite, tags, params}) {
-        debug('saveConnection(%s) => %s', name, this.endpoint);
+    saveEnvironment(token, env) {
+        debug('saveEnvironment(%s) => %s', env.name, this.endpoint);
         return request
             .post(this.endpoint)
             .set('Authorization', `Bearer ${token}`)
-            .send({name, title, description, connectionType, allowWrite, tags, params})
+            .send(env)
             .then((res) => {
                 if (res.ok) {
                     return {success: true, message: res.body};
@@ -51,9 +51,9 @@ module.exports = class Environments {
             });
     }
 
-    describeEnviroment(token, connectionName) {
-        const endpoint = `${this.endpoint}/${connectionName}`;
-        debug('describeConnection(%s) => %s', connectionName, endpoint);
+    describeEnvironment(token, environmentName) {
+        const endpoint = `${this.endpoint}/${environmentName}`;
+        debug('describeEnvironment(%s) => %s', environmentName, endpoint);
         return request
             .get(endpoint)
             .set('Authorization', `Bearer ${token}`)
