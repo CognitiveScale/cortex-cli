@@ -30,15 +30,13 @@ function docker_build(){
     npm install -dd --verbose
     echo ${VERSION} > version.txt
 
-    npm config set registry https://cognitivescale.jfrog.io/cognitivescale/api/npm/npm-repo
-
     BRANCH=$(git symbolic-ref --short -q HEAD)
     if [[ ${BRANCH} = "master" ]]; then
         rm -rf node_modules
         npm install --silent --only=production
-        npm publish
+#        npm publish
     elif [[ ${BRANCH} = "develop" ]]; then
-        npm publish --tag develop
+#        npm publish --tag develop
     fi
 }
 
