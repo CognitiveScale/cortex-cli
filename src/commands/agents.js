@@ -286,6 +286,7 @@ module.exports.CreateAgentSnapshotCommand = class {
             snapshot = { agentName: options.agentName, title: options.title }
         } else {
             printError(`Either --title <..> and --agentName <..> or a snapshot definition file must be provided`, options);
+            return;
         }
         console.log(snapshot);
         const agentName = snapshot.agentName;

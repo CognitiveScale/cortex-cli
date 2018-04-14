@@ -93,6 +93,7 @@ module.exports.SaveEnvironmentCommand = class SaveEnvironmentCommand {
    }
 };
 
+
 module.exports.DescribeEnvironmentCommand = class DescribeEnvironmentCommand {
 
     constructor(program) {
@@ -118,3 +119,38 @@ module.exports.DescribeEnvironmentCommand = class DescribeEnvironmentCommand {
         });
     }
 };
+module.exports.PromoteEnvironmentCommand = class PromoteEnvironmentCommand {
+
+    constructor(program) {
+        this.program = program;
+    }
+
+    execute(promoteDefinition, options) {
+        const profile = loadProfile(options.profile);
+        debug('%s.executePromoteDefinition(%s)', profile.name, promoteDefinition);
+        let promObj;
+        if ( promoteDefinition ) {
+            const promStr = fs.readFileSync(promoteDefinition);
+            promObj = parseObject(promStr, options);
+        } else if ( _.get(options,'snapshotId','').length > 0 && _.get(options,'environmentName','').length > 0)  {
+            promObj = { snapshotId: options.snapshotId, environmentName: options.environmentName }
+        } else {
+            printError(`Either --snapshotId <..> and --environmentName <..> or a promotion definition file must be provided`, options);
+            return;
+        }
+        debug('%o', promObj);
+
+        const environment = new Environments(profile.url);
+        environment.promoteEnvironment(profile.token, promObj)
+            .then((response) => {
+                if (response.success) {
+                    printSuccess(`Snapshot: \'${promObj.snapshotId}\' successfully promoted to environment:\'${promObj.environmentName}\'`, options);
+                } else {
+                    printError(`Failed to promote to environment: ${response.status} ${response.message}`, options);
+                }})
+            .catch((err) => {
+                printError(`Failed to promote to environment: ${err.response.body.message}`, options);
+            });
+    }
+};
+

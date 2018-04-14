@@ -18,13 +18,13 @@
 
 const program = require('commander');
 const chalk = require('chalk');
-const { ListEnvironments, SaveEnvironmentCommand, DescribeEnvironmentCommand } = require('../src/commands/environments');
+const { ListEnvironments, SaveEnvironmentCommand, PromoteEnvironmentCommand, DescribeEnvironmentCommand } = require('../src/commands/environments');
 
 let processed = false;
-program.description('Work with Cortex Connections');
+program.description('Work with Cortex Environments');
 
 
-// List Connections
+// List Environments
 program
     .command('list')
     .description('List environments')
@@ -42,7 +42,7 @@ program
         }
     });
 
-// Save Connections
+// Save Environement
 program
     .command('save <environmentDefinition>')
     .description('Create an environment. Takes JSON file by default.')
@@ -59,7 +59,26 @@ program
         }
     });
 
-// Describe Connection
+// Promote Environment
+program
+    .command('promote [promotionDefinition]')
+    .description('Promote a snapshot to an environment. Takes JSON file by default.')
+    .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
+    .option('--profile [profile]', 'The profile to use')
+    .option('-y, --yaml', 'Use YAML for environment definition format')
+    .option('--snapshotId [snapshotId]', 'SnapshotID to promote')
+    .option('--environmentName [environmentName]', 'Environment to promote snapshotId to')
+    .action((promotionDefinition, options) => {
+        try {
+            new PromoteEnvironmentCommand(program).execute(promotionDefinition, options);
+            processed = true;
+        }
+        catch (err) {
+            console.error(chalk.red(err.message));
+        }
+    });
+
+// Describe Environment
 program
     .command('describe <environmentName>')
     .description('Describe environment')

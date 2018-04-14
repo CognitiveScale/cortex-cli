@@ -50,6 +50,19 @@ module.exports = class Environments {
                 return {success: false, message: res.body, status: res.status};
             });
     }
+    promoteEnvironment(token, promoteDef) {
+        debug('promoteEnvironment(%s) => %s', promoteDef.environmentName, this.endpoint);
+        return request
+            .post(`${this.endpoint}/promote`)
+            .set('Authorization', `Bearer ${token}`)
+            .send(promoteDef)
+            .then((res) => {
+                if (res.ok) {
+                    return {success: true, message: res.body};
+                }
+                return {success: false, message: res.body, status: res.status};
+            });
+    }
 
     describeEnvironment(token, environmentName) {
         const endpoint = `${this.endpoint}/${environmentName}`;
