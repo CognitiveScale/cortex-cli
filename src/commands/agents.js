@@ -19,6 +19,7 @@ const debug = require('debug')('cortex:cli');
 const { loadProfile } = require('../config');
 const Catalog = require('../client/catalog');
 const Agents = require('../client/agents');
+const _ = require('lodash/object');
 const { printSuccess, printError, filterObject, parseObject, printTable } = require('./utils');
 
 module.exports.SaveAgentCommand = class SaveAgentCommand {
@@ -231,30 +232,39 @@ module.exports.ListAgentInstancesCommand = class {
     }
 };
 
-
-module.exports.GetAgentSnapshotCommand = class {
-
+module.exports.ListAgentSnapshotsCommand = class {
     constructor(program) {
         this.program = program;
     }
 
     execute(agentName, options) {
         const profile = loadProfile(options.profile);
-        debug('%s.getAgentSnapshot(%s)', profile.name, agentName);
+        debug('%s.listAgentSnapshots(%s)', profile.name, agentName);
 
         const agents = new Agents(profile.url);
-        agents.getAgentSnapshot(profile.token, agentName).then((response) => {
+        agents.listAgentSnapshots(profile.token, agentName).then((response) => {
             if (response.success) {
                 let result = filterObject(response.result.snapshots, options);
-                printSuccess(JSON.stringify(result, null, 2), options);
+                if (options.json) {
+                    printSuccess(JSON.stringify(result, null, 2), options);
+                }
+                else {
+                    const tableSpec = [
+                        { column: 'Snapshot ID', field: 'id', width: 30 },
+                        { column: 'Title', field: 'title', width: 30 },
+                        { column: 'Description', field: 'description', width: 50 },
+                        { column: 'Created On', field: 'createdAt', width: 26 }
+                    ];
+                    printTable(tableSpec, result);
+                }
             }
             else {
-                printError(`Failed to get agent snapshot ${agentName}: ${response.message}`, options);
+                printError(`Failed to list agent snapshots ${agentName}: ${response.message}`, options);
             }
         })
 
             .catch((err) => {
-                printError(`Failed to get agent snapshot ${agentName}: ${err.status} ${err.message}`, options);
+                printError(`Failed to list agent snapshots ${agentName}: ${err.status} ${err.message}`, options);
             });
     }
 };
@@ -267,12 +277,19 @@ module.exports.CreateAgentSnapshotCommand = class {
 
     execute(snapshotDefinition, options) {
         const profile = loadProfile(options.profile);
-        debug('%s.createAgentSnapshot(%s)', profile.name, snapshotDefinition);
-
-        const snapshotDefStr = fs.readFileSync(snapshotDefinition);
-        const snapshot = parseObject(snapshotDefStr, options);
+        let snapshot;
+        if (snapshotDefinition) {
+            debug('%s.createAgentSnapshot(%s)', profile.name, snapshotDefinition);
+            const snapshotDefStr = fs.readFileSync(snapshotDefinition);
+            snapshot = parseObject(snapshotDefStr, options);
+        } else if ( _.get(options,'title','').length > 0 && _.get(options,'agentName','').length > 0)  {
+            snapshot = { agentName: options.agentName, title: options.title }
+        } else {
+            printError(`Either --title <..> and --agentName <..> or a snapshot definition file must be provided`, options);
+            return;
+        }
+        console.log(snapshot);
         const agentName = snapshot.agentName;
-
         const agents = new Agents(profile.url);
         agents.createAgentSnapshot(profile.token, snapshot).then((response) => {
             if (response.success) {
