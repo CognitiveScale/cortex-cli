@@ -245,15 +245,26 @@ module.exports.ListAgentSnapshotsCommand = class {
         agents.listAgentSnapshots(profile.token, agentName).then((response) => {
             if (response.success) {
                 let result = filterObject(response.result.snapshots, options);
-                printSuccess(JSON.stringify(result, null, 2), options);
+                if (options.json) {
+                    printSuccess(JSON.stringify(result, null, 2), options);
+                }
+                else {
+                    const tableSpec = [
+                        { column: 'Snapshot ID', field: 'id', width: 30 },
+                        { column: 'Title', field: 'title', width: 30 },
+                        { column: 'Description', field: 'description', width: 50 },
+                        { column: 'Created On', field: 'createdAt', width: 26 }
+                    ];
+                    printTable(tableSpec, result);
+                }
             }
             else {
-                printError(`Failed to get agent snapshot ${agentName}: ${response.message}`, options);
+                printError(`Failed to list agent snapshots ${agentName}: ${response.message}`, options);
             }
         })
 
             .catch((err) => {
-                printError(`Failed to get agent snapshot ${agentName}: ${err.status} ${err.message}`, options);
+                printError(`Failed to list agent snapshots ${agentName}: ${err.status} ${err.message}`, options);
             });
     }
 };
@@ -276,6 +287,7 @@ module.exports.CreateAgentSnapshotCommand = class {
         } else {
             printError(`Either --title <..> and --agentName <..> or a snapshot definition file must be provided`, options);
         }
+        console.log(snapshot);
         const agentName = snapshot.agentName;
         const agents = new Agents(profile.url);
         agents.createAgentSnapshot(profile.token, snapshot).then((response) => {
