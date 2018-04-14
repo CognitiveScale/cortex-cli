@@ -30,7 +30,7 @@ const {
     DeleteAgentInstanceCommand,
     StopAgentInstanceCommand,
     ListTriggersCommand,
-    GetAgentSnapshotCommand,
+    ListAgentSnapshotsCommand,
     CreateAgentSnapshotCommand
 } = require('../src/commands/agents');
 
@@ -127,13 +127,13 @@ program
 
 
 program
-    .command('get-snapshots <agentName>')
-    .description('Get agent snapshots')
+    .command('list-snapshots <agentName>')
+    .description('List agent snapshots')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
     .action((agentName, options) => {
         try {
-            new GetAgentSnapshotCommand(program).execute(agentName, options);
+            new ListAgentSnapshotsCommand(program).execute(agentName, options);
             processed = true;
         }
         catch (err) {
@@ -143,10 +143,13 @@ program
 
 //Create Agent Snapshot
 program
-    .command('create-snapshot <snapshotDefinition>')
-    .description('Create agent snapshot with JSON file as input')
+    .command('create-snapshot [snapshotDefinition]')
+    .description('Create an agent snapshot')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
+    .option('--agentName [name[:version]]', 'The name of the agent to snapshot')
+    .option('--title [title]', 'A descriptive title for the snapshot')
+
     .action((snapshotDefinition, options) => {
         try {
             new CreateAgentSnapshotCommand(program).execute(snapshotDefinition, options);
