@@ -34,12 +34,12 @@ module.exports = class Catalog {
         this.endpoints = createEndpoints(cortexUrl);
     }
 
-    saveSkill(token, {name, title, description, properties, inputs, outputs, datasets=[]}) {
-        debug('saveSkill(%s) => %s', name, this.endpoints.skills);
+    saveSkill(token, skillObj) {
+        debug('saveSkill(%s) => %s', skillObj.name, this.endpoints.skills);
         return request
             .post(this.endpoints.skills)
             .set('Authorization', `Bearer ${token}`)
-            .send({name, title, description, properties, inputs, outputs, datasets})
+            .send(skillObj)
             .then((res) => {
                 if (res.ok) {
                     return {success: true, message: res.body};
@@ -90,12 +90,12 @@ module.exports = class Catalog {
             });
     }
 
-    saveAgent(token, {name, project, title, description, properties, inputs, outputs, processors}) {
-        debug('saveAgent(%s) => %s', name, this.endpoints.agents);
+    saveAgent(token, agentObj) {
+        debug('saveAgent(%s) => %s', agentObj.name, this.endpoints.agents);
         return request
             .post(this.endpoints.agents)
             .set('Authorization', `Bearer ${token}`)
-            .send({name, project, title, description, properties, inputs, outputs, processors})
+            .send(agentObj)
             .then((res) => {
                 if (res.ok) {
                     return {success: true, message: res.body};
