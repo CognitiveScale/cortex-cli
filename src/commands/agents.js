@@ -288,7 +288,6 @@ module.exports.CreateAgentSnapshotCommand = class {
             printError(`Either --title <..> and --agentName <..> or a snapshot definition file must be provided`, options);
             return;
         }
-        console.log(snapshot);
         const agentName = snapshot.agentName;
         const agents = new Agents(profile.url);
         agents.createAgentSnapshot(profile.token, snapshot).then((response) => {
