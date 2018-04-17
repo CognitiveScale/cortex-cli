@@ -119,7 +119,7 @@ program
     .option('--actionType [actionType]', 'Type of action')
     .option('--ports [ports]', 'Docker ports')                  //'["9091/tcp"]'
     .option('--environment [environment]', 'Environment')
-    .option('--command [command]', 'Command to be executed')    //'["--daemon"]'
+    .option('--cmd [cmd]', 'Command to be executed')    //'["--daemon"]'
     .action((actionName, options) => {
         try {
             if (!options.kind && !options.docker) {
