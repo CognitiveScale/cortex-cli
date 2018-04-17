@@ -1,6 +1,6 @@
 {
   "name": "cortex-cli",
-  "version": "0.6.8",
+  "version": "0.6.9",
   "description": "Command line tool for CognitiveScale Cortex.",
   "main": "./bin/cortex.js",
   "scripts": {
@@ -25,7 +25,7 @@
   "license": "Apache-2.0",
   "homepage": "https://github.com/CognitiveScale/cortex-cli",
   "dependencies": {
-    "@c12e/generator-cortex": "0.3.2",
+    "@c12e/generator-cortex": "0.3.3",
     "chalk": "2.3.0",
     "cli-table": "0.3.1",
     "co": "4.6.0",
