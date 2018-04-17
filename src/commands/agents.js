@@ -219,7 +219,7 @@ module.exports.ListAgentInstancesCommand = class {
         const agents = new Agents(profile.url);
         agents.listAgentInstances(profile.token, agentName).then((response) => {
             if (response.success) {
-                let result = filterObject(response.result.instances, options);
+                let result = filterObject(response.result, options);
                 printSuccess(JSON.stringify(result, null, 2), options);
             }
             else {
