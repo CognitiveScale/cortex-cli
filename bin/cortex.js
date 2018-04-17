@@ -29,7 +29,6 @@ program
     .command('connections [cmd]', 'Work with Cortex Connections')
     .command('content [cmd]', 'Work with Cortex Managed Content')
     .command('environments [cmd]', 'Work with Cortex Environments')
-    .command('functions [cmd]', 'Work with Cortex Functions')
     .command('datasets [cmd]', 'Work with Cortex Datasets')
     .command('jobs [cmd]', 'Work with Cortex Jobs')
     .command('processors [cmd]', 'Work with the Cortex Processor Runtime')
