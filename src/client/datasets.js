@@ -21,7 +21,7 @@ module.exports = class Datasets {
 
     constructor(cortexUrl) {
         this.cortexUrl = cortexUrl;
-        this.endpoint = `${cortexUrl}/v2/datasets`;
+        this.endpoint = `${cortexUrl}/v3/datasets`;
     }
 
     listDatasets(token) {
