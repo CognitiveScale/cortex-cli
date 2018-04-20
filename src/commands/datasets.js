@@ -46,14 +46,13 @@ module.exports.ListDatasets = class ListDatasets {
                     let tableSpec = [
                         { column: 'Name', field: 'name', width: 40 },
                         { column: 'Title', field: 'title', width: 50 },
-                        { column: 'Data Type', field: 'typeName', width: 30 },
                         { column: 'Connection Name', field: 'connectionName', width: 25 },
                         { column: 'Description', field: 'description', width: 50 },
                         { column: 'Created On', field: 'createdAt', width: 26 },
                         { column: 'Updated On', field: 'updatedAt', width: 26 },
                     ];
 
-                    printTable(tableSpec, result);
+                    printTable(tableSpec, result.datasets);
                 }
             }
             else {
