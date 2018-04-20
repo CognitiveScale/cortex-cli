@@ -37,12 +37,12 @@ module.exports = class Connections {
             });
     }
 
-    saveConnection(token, {name, title, description, connectionType, allowWrite, tags, params}) {
-        debug('saveConnection(%s) => %s', name, this.endpoint);
+    saveConnection(token, connObj) {
+        debug('saveConnection(%s) => %s', connObj.name, this.endpoint);
         return request
             .post(this.endpoint)
             .set('Authorization', `Bearer ${token}`)
-            .send({name, title, description, connectionType, allowWrite, tags, params})
+            .send(connObj)
             .then((res) => {
                 if (res.ok) {
                     return {success: true, message: res.body};

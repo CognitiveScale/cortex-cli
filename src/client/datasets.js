@@ -37,12 +37,12 @@ module.exports = class Datasets {
             });
     }
 
-    saveDatasets(token, {name, title, description, typeName, connectionName, connectionQuery}) {
-        debug('saveConnection(%s) => %s', name, this.endpoint);
+    saveDatasets(token,dsObject) {
+        debug('saveConnection(%s) => %s', dsObject.name, this.endpoint);
         return request
             .post(this.endpoint)
             .set('Authorization', `Bearer ${token}`)
-            .send({name, title, description, typeName, connectionName, connectionQuery})
+            .send(dsObject)
             .then((res) => {
                 if (res.ok) {
                     return {success: true, message: res.body};
