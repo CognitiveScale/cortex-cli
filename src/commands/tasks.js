@@ -39,9 +39,15 @@ module.exports.ListTasks = class ListTasks {
                 }
                 else {
                     let tableSpec = [
-                        { column: 'Tasks', field: 'name', width: 40 }
+                        { column: 'Task ID', field: 'taskId', width: 40 },
+                        { column: 'Status', field: 'status', width: 40 },
+                        { column: 'Detail', field: 'statusReason', width: 40 },
+                        { column: 'Created', field: 'createdAt', width: 40 },
+                        { column: 'Started', field: 'startedAt', width: 40 },
+                        { column: 'Stopped', field: 'stoppedAt', width: 40 }
                     ];
-                    printTable(tableSpec, response.result.tasks.map(ea => ({"name": ea})));
+
+                    printTable(tableSpec, response.result.tasks);
                 }
             }
             else {
