@@ -89,6 +89,7 @@ module.exports = class Datasets {
         return request
             .get(endpoint)
             .set('Authorization', `Bearer ${token}`)
+            .buffer()
             .then((res) => {
                 if (res.ok) {
                     return {success: true, result: res};
@@ -96,6 +97,8 @@ module.exports = class Datasets {
                 else {
                     return {success: false, message: res.body, status: res.status};
                 }
+            }).catch((err) => {
+                printError(`Failed to stream dataset ${datasetName}: ${err.status} ${err.message}`, options);
             });
     }
 };
