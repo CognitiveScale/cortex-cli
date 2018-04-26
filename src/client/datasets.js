@@ -47,7 +47,10 @@ module.exports = class Datasets {
                 if (res.ok) {
                     return {success: true, message: res.body};
                 }
-                return {success: false, message: res.body, status: res.status};
+                return {success: false, message: res.body, status: res.status}; // don't think we ever hit this
+            }).catch((err) => {
+                const errorText = JSON.parse(err.response.text);
+                return {success: false, message: errorText.message, status: errorText.code}; // TODO do we want the internal code or the response code?
             });
     }
 

@@ -89,8 +89,8 @@ module.exports.SaveDatasetsCommand = class SaveDatasetsCommand {
                printError(`Failed to save Dataset: ${response.status} ${response.message}`, options);
            }
        })
-       .catch((err) => {
-           printError(`Failed to save Dataset: ${err.status} ${err.message}`, options);
+       .catch((err) => { // don't think we ever get here..
+           printError(`Failed to save Datasets: ${err.status} ${err.message}`, options);
        });
    }
 };
