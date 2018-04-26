@@ -44,7 +44,7 @@ module.exports.SaveSkillCommand = class SaveSkillCommand {
             }
         })
         .catch((err) => {
-            printError(`Failed to save skill: ${err.status} ${err.message}`, options);
+            printError(`Failed to save skill: ${err.status} ${err.response.body.error}`, options);
         });
     }
 };
