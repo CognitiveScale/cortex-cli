@@ -16,6 +16,7 @@
 
 const request = require('superagent');
 const debug = require('debug')('cortex:cli');
+const { constructError } = require('../commands/utils');
 
 module.exports = class Processors {
 
@@ -35,6 +36,9 @@ module.exports = class Processors {
                     return {success: true, runtimeTypes: res.body.runtimeTypes};
                 }
                 return {success: false, status: res.status, message: res.body};
+            })
+            .catch((err) => {
+                return constructError(err);
             });
     }
 
@@ -49,6 +53,9 @@ module.exports = class Processors {
                     return {success: true, runtimes: res.body.runtimes};
                 }
                 return {success: false, status: res.status, message: res.body};
+            })
+            .catch((err) => {
+                return constructError(err);
             });
     }
 
@@ -63,6 +70,9 @@ module.exports = class Processors {
                     return {success: true, runtime: res.body.runtime};
                 }
                 return {success: false, status: res.status, message: res.body};
+            })
+            .catch((err) => {
+                return constructError(err);
             });
     }
 
@@ -78,6 +88,9 @@ module.exports = class Processors {
                     return {success: true, version: res.body.version};
                 }
                 return {success: false, status: res.status, message: res.body};
+            })
+            .catch((err) => {
+                return constructError(err);
             });
     }
 
@@ -92,6 +105,9 @@ module.exports = class Processors {
                     return {success: true};
                 }
                 return {success: false, status: res.status, message: res.body};
+            })
+            .catch((err) => {
+                return constructError(err);
             });
     }
 
@@ -106,6 +122,9 @@ module.exports = class Processors {
                     return {success: true, actions: res.body.actions};
                 }
                 return {success: false, status: res.status, message: res.body};
+            })
+            .catch((err) => {
+                return constructError(err);
             });
     }
 
@@ -121,6 +140,9 @@ module.exports = class Processors {
                     return {success: true, result: res.body};
                 }
                 return {success: false, status: res.status, message: res.body};
+            })
+            .catch((err) => {
+                return constructError(err);
             });
     }
 };

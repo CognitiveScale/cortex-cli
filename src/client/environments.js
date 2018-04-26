@@ -16,6 +16,7 @@
 
 const request = require('superagent');
 const debug = require('debug')('cortex:cli');
+const { constructError } = require('../commands/utils');
 
 module.exports = class Environments {
 
@@ -34,6 +35,9 @@ module.exports = class Environments {
                     return {success: true, result: res.body};
                 }
                 return {success: false, status: res.status, message: res.body};
+            })
+            .catch((err) => {
+                return constructError(err);
             });
     }
 
@@ -48,6 +52,9 @@ module.exports = class Environments {
                     return {success: true, message: res.body};
                 }
                 return {success: false, message: res.body, status: res.status};
+            })
+            .catch((err) => {
+                return constructError(err);
             });
     }
     promoteEnvironment(token, promoteDef) {
@@ -61,6 +68,9 @@ module.exports = class Environments {
                     return {success: true, message: res.body};
                 }
                 return {success: false, message: res.body, status: res.status};
+            })
+            .catch((err) => {
+                return constructError(err);
             });
     }
 
@@ -77,6 +87,9 @@ module.exports = class Environments {
                 else {
                     return {success: false, message: res.body, status: res.status};
                 }
+            })
+            .catch((err) => {
+                return constructError(err);
             });
     }
 };
