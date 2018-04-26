@@ -16,6 +16,7 @@
 
 const request = require('superagent');
 const debug = require('debug')('cortex:cli');
+const { constructError } = require('../commands/utils');
 
 module.exports = class Content {
 
@@ -35,6 +36,9 @@ module.exports = class Content {
                     return {success: true, message: res.body};
                 }
                 return {success: false, message: res.body, status: res.status};
+            })
+            .catch((err) => {
+                return constructError(err);
             });
     }
 
@@ -51,6 +55,9 @@ module.exports = class Content {
                     return {success: true, message: res.body};
                 }
                 return {success: false, message: res.body, status: res.status};
+            })
+            .catch((err) => {
+                return constructError(err);
             });
     }
 
@@ -68,6 +75,9 @@ module.exports = class Content {
                     return {success: true, message: res.body};
                 }
                 return {success: false, message: res.body, status: res.status};
+            })
+            .catch((err) => {
+                return constructError(err);
             });
     }
 
@@ -84,6 +94,9 @@ module.exports = class Content {
                     return {success: true, message: res.body};
                 }
                 return {success: false, message: res.body, status: res.status};
+            })
+            .catch((err) => {
+                return constructError(err);
             });
     }
 
@@ -99,6 +112,9 @@ module.exports = class Content {
                     return {success: true, message: res.text};
                 }
                 return {success: false, message: res.body, status: res.status};
+            })
+            .catch((err) => {
+                return constructError(err);
             });
     }
 
@@ -115,6 +131,9 @@ module.exports = class Content {
                     return {success: true, message: res.text};
                 }
                 return {success: false, message: res.body, status: res.status};
+            })
+            .catch((err) => {
+                return constructError(err);
             });
     }
 

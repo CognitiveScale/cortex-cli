@@ -16,6 +16,7 @@
 
 const request = require('superagent');
 const debug = require('debug')('cortex:cli');
+const { constructError } = require('../commands/utils');
 
 const createEndpoints = (baseUri) => {
     return {
@@ -45,6 +46,9 @@ module.exports = class Catalog {
                     return {success: true, message: res.body};
                 }
                 return {success: false, message: res.body, status: res.status};
+            })
+            .catch((err) => {
+                return constructError(err);
             });
     }
 
@@ -58,6 +62,9 @@ module.exports = class Catalog {
                     return {success: true, skills: res.body.skills || res.body.processors};
                 }
                 return {success: false, status: res.status, message: res.body};
+            })
+            .catch((err) => {
+                return constructError(err);
             });
     }
 
@@ -74,6 +81,9 @@ module.exports = class Catalog {
                 else {
                     return {success: false, message: res.body, status: res.status};
                 }
+            })
+            .catch((err) => {
+                return constructError(err);
             });
     }
 
@@ -87,6 +97,9 @@ module.exports = class Catalog {
                     return {success: true, agents: res.body.agents};
                 }
                 return {success: false, status: res.status, message: res.body};
+            })
+            .catch((err) => {
+                return constructError(err);
             });
     }
 
@@ -101,6 +114,9 @@ module.exports = class Catalog {
                     return {success: true, message: res.body};
                 }
                 return {success: false, message: res.body, status: res.status};
+            })
+            .catch((err) => {
+                return constructError(err);
             });
     }
 
@@ -117,6 +133,9 @@ module.exports = class Catalog {
                 else {
                     return {success: false, message: res.body, status: res.status};
                 }
+            })
+            .catch((err) => {
+                return constructError(err);
             });
     }
 
@@ -134,6 +153,9 @@ module.exports = class Catalog {
                 else {
                     return {success: false, message: res.body, status: res.status};
                 }
+            })
+            .catch((err) => {
+                return constructError(err);
             });
     }
 
@@ -149,6 +171,9 @@ module.exports = class Catalog {
                     return {success: true, message: res.body};
                 }
                 return {success: false, message: res.body, status: res.status};
+            })
+            .catch((err) => {
+                return constructError(err);
             });
     }
 
@@ -165,6 +190,9 @@ module.exports = class Catalog {
                 else {
                     return {success: false, message: res.body, status: res.status};
                 }
+            })
+            .catch((err) => {
+                return constructError(err);
             });
     }
 
@@ -178,6 +206,9 @@ module.exports = class Catalog {
                     return {success: true, types: res.body.types};
                 }
                 return {success: false, status: res.status, message: res.body};
+            })
+            .catch((err) => {
+                return constructError(err);
             });
     }
 };

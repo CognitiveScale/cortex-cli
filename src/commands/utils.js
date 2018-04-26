@@ -20,6 +20,11 @@ const yaml = require('js-yaml');
 const debug = require('debug')('cortex:cli');
 const Table = require('cli-table');
 
+module.exports.constructError = function(error) {
+    const errorText = JSON.parse(error.response.text);
+    return {success: false, message: errorText.message, status: error.status};
+};
+
 module.exports.printSuccess = function(message, options) {
     if (!options || options.color === 'on') {
         console.log(chalk.green(message));

@@ -16,6 +16,7 @@
 
 const request = require('superagent');
 const debug = require('debug')('cortex:cli');
+const { constructError } = require('../commands/utils');
 
 module.exports = class Connections {
 
@@ -34,6 +35,9 @@ module.exports = class Connections {
                     return {success: true, result: res.body};
                 }
                 return {success: false, status: res.status, message: res.body};
+            })
+            .catch((err) => {
+                return constructError(err);
             });
     }
 
@@ -48,6 +52,9 @@ module.exports = class Connections {
                     return {success: true, message: res.body};
                 }
                 return {success: false, message: res.body, status: res.status};
+            })
+            .catch((err) => {
+                return constructError(err);
             });
     }
 
@@ -64,6 +71,9 @@ module.exports = class Connections {
                 else {
                     return {success: false, message: res.body, status: res.status};
                 }
+            })
+            .catch((err) => {
+                return constructError(err);
             });
     }
 
@@ -79,6 +89,9 @@ module.exports = class Connections {
                     return {success: true, message: res.body};
                 }
                 return {success: false, message: res.message, status: res.status};
+            })
+            .catch((err) => {
+                return constructError(err);
             });
     }
 
@@ -92,8 +105,11 @@ module.exports = class Connections {
                     return {success: true, result: res.body};
                 }
                 return {success: false, status: res.status, message: res.body};
+            })
+            .catch((err) => {
+                return constructError(err);
             });
     }
 
-}
+};
 

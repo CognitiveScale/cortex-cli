@@ -16,6 +16,7 @@
 
 const request = require('superagent');
 const debug = require('debug')('cortex:cli');
+const { constructError } = require('../commands/utils');
 
 module.exports = class Auth {
 
@@ -42,6 +43,9 @@ module.exports = class Auth {
                 else {
                     throw new Error('Authentication failed');
                 }
+            })
+            .catch((err) => {
+                return constructError(err);
             });
     }
 };

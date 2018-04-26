@@ -16,6 +16,7 @@
 
 const request = require('superagent');
 const debug = require('debug')('cortex:cli');
+const { constructError } = require('../commands/utils');
 
 module.exports = class Datasets {
 
@@ -34,6 +35,9 @@ module.exports = class Datasets {
                     return {success: true, result: res.body};
                 }
                 return {success: false, status: res.status, message: res.body};
+            })
+            .catch((err) => {
+                return constructError(err);
             });
     }
 
@@ -47,7 +51,10 @@ module.exports = class Datasets {
                 if (res.ok) {
                     return {success: true, message: res.body};
                 }
-                return {success: false, message: res.body, status: res.status};
+                return {success: false, message: res.body, status: res.status}; // don't think we ever hit this
+            })
+            .catch((err) => {
+                return constructError(err);
             });
     }
 
@@ -64,6 +71,9 @@ module.exports = class Datasets {
                 else {
                     return {success: false, message: res.body, status: res.status};
                 }
+            })
+            .catch((err) => {
+                return constructError(err);
             });
     }
 
@@ -80,6 +90,9 @@ module.exports = class Datasets {
                 else {
                     return {success: false, message: res.body, status: res.status};
                 }
+            })
+            .catch((err) => {
+                return constructError(err);
             });
     }
 
@@ -97,8 +110,9 @@ module.exports = class Datasets {
                 else {
                     return {success: false, message: res.body, status: res.status};
                 }
-            }).catch((err) => {
-                printError(`Failed to stream dataset ${datasetName}: ${err.status} ${err.message}`, options);
+            })
+            .catch((err) => {
+                return constructError(err);
             });
     }
 };
