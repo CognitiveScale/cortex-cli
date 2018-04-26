@@ -50,7 +50,7 @@ module.exports.SaveTypeCommand = class SaveTypeCommand {
             }
         })
         .catch((err) => {
-            printError(`Failed to save type: ${err.status} ${err.message}`, options);
+            printError(`Failed to save type: ${err.status} ${err.response.body.error}`, options);
         });
     }
 };
