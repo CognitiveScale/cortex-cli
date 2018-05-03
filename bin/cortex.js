@@ -16,6 +16,7 @@
  * limitations under the License.
  */
 
+const helper = require('./utils.js');
 const { version } = require('../package.json');
 const program = require('commander');
 
@@ -40,4 +41,5 @@ program
 process.env.DOC && require('../src/commands/utils').exportDoc(program);
 
 program.parse(process.argv);
-!program.commands.map(cmd => cmd._name).includes(program.args[0]) && program.help();
+!program.commands.map(cmd => cmd._name).includes(program.args[0]) && helper.helpAndExit(program);
+
