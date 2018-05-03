@@ -16,6 +16,7 @@
  * limitations under the License.
  */
 
+const helper = require('./utils.js');
 const program = require('commander');
 const chalk = require('chalk');
 
@@ -168,4 +169,4 @@ process.env.DOC && require('../src/commands/utils').exportDoc(program);
 
 program.parse(process.argv);
 if (!processed)
-    ['string', 'undefined'].includes(typeof program.args[0]) && program.help();
+    ['string', 'undefined'].includes(typeof program.args[0]) && helper.helpAndExit(program);

@@ -41,6 +41,7 @@ module.exports.printError = function(message, options) {
     else {
         console.error(message);
     }
+    process.exit(1)
 };
 
 module.exports.filterObject = function(obj, options) {
