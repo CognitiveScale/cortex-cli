@@ -22,7 +22,11 @@ const Table = require('cli-table');
 
 module.exports.constructError = function(error) {
     const errorText = JSON.parse(error.response.text);
-    return {success: false, message: errorText.message, status: error.status};
+    if (errorText.message) {
+        return {success: false, message: errorText.message, status: error.status};
+    } else {
+        return {success: false, message: JSON.stringify(errorText), status: error.status};
+    }
 };
 
 module.exports.printSuccess = function(message, options) {
