@@ -76,6 +76,7 @@ module.exports.ListAgentsCommand = class ListAgentsCommand {
                         { column: 'Name', field: 'name', width: 50 },
                         { column: 'Title', field: 'title', width: 25 },
                         { column: 'Description', field: 'description', width: 50 },
+                        { column: 'Environment', field: 'environmentId', width: 25 },
                         { column: 'Created On', field: 'createdAt', width: 26 }
                     ];
 
