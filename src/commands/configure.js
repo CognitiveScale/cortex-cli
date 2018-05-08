@@ -80,9 +80,13 @@ module.exports.ConfigureCommand = class {
             const auth = new Auth(cortexUrl);
             try {
                 const token = yield auth.login(account, username, password);
-                debug('token: %s', token);
-                cmd.saveConfig(config, profileName, cortexUrl, account, username, token);
-                console.log(`Configuration for profile ${chalk.green.bold(profileName)} saved.`);
+                if (token.status === 401) {
+                    console.error(chalk.red(`LOGIN FAILED: ${token.message}`));
+                } else {
+                    debug('token: %s', token);
+                    cmd.saveConfig(config, profileName, cortexUrl, account, username, token);
+                    console.log(`Configuration for profile ${chalk.green.bold(profileName)} saved.`);
+                }
             }
             catch (e) {
                 console.error(chalk.red(`LOGIN FAILED: ${e.message}`));
