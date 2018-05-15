@@ -97,7 +97,7 @@ module.exports.SaveConnectionCommand = class SaveConnectionCommand {
        const jdbcJarFilePath = this.getParamsValue(connObj, 'jdbc_jar_file');
        const contentKey = this.getParamsValue(connObj, 'managed_content_key');
 
-       if (jdbcJarFilePath) {
+       if (jdbcJarFilePath && !jdbcJarFilePath.includes("--Insert jar file path--")) {
            const content = new Content(profile.url);
            const connection = new Connections(profile.url);
 
