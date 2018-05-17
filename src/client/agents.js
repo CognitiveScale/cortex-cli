@@ -61,9 +61,10 @@ module.exports = class Agents {
             });
     }
 
-    listAgentSnapshots(token, agentName) {
-        const endpoint = `${this.endpoint}/snapshots/${agentName}`;
-        debug('listAgentSnapshots(%s) => %s', agentName, endpoint);
+    listAgentSnapshots(token, agentName, environmentName) {
+        let endpoint = `${this.endpoint}/snapshots/${agentName}`;
+        debug('listAgentSnapshots(%s, %s) => %s', agentName, environmentName, endpoint);
+        if (environmentName) endpoint = `${endpoint}?environmentName=${environmentName}`;
         return request
             .get(endpoint)
             .set('Authorization', `Bearer ${token}`)

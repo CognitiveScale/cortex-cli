@@ -132,6 +132,7 @@ program
     .description('List agent snapshots')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
+    .option('--environmentName [environmentName]', 'The environment to list or \'all\'')
     .action((agentName, options) => {
         try {
             new ListAgentSnapshotsCommand(program).execute(agentName, options);
