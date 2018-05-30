@@ -106,11 +106,11 @@ module.exports.DeployActionCommand = class {
         const timeout = parseInt(options.timeout);
         const actionType = options.actionType;
         const cmd = options.cmd;
-        const ports = options.ports;
+        const port = options.port;
         const environment = options.environment;
 
         const actions = new Actions(profile.url);
-        actions.deployAction(profile.token, actionName, dockerImage, kind, code, memory, timeout, actionType, cmd, ports, environment)
+        actions.deployAction(profile.token, actionName, dockerImage, kind, code, memory, timeout, actionType, cmd, port, environment)
             .then((response) => {
                 if (response.success) {
                     printSuccess(JSON.stringify(response.message, null, 2), options);
