@@ -52,7 +52,7 @@ module.exports = class Actions {
         });
     }
 
-    deployAction(token, actionName, docker, kind, code, memory, timeout, actionType, command, ports, environment) {
+    deployAction(token, actionName, docker, kind, code, memory, timeout, actionType, command, port, environment) {
         let endpoint = `${this.endpointV3}`;
         if (actionType) {
             endpoint = `${endpoint}?actionType=${actionType}`;
@@ -71,7 +71,7 @@ module.exports = class Actions {
         if (timeout) req.field('timeout', timeout);
         if (code) req.attach('code', code);
         if (command) req.field('command', command);
-        if (ports) req.field('ports', ports);
+        if (port) req.field('port', port);
         if (environment) req.field('environment', environment);
 
         return req.then((res) => {

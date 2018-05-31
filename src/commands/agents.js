@@ -239,10 +239,11 @@ module.exports.ListAgentSnapshotsCommand = class {
 
     execute(agentName, options) {
         const profile = loadProfile(options.profile);
+        const envName = options.environmentName;
         debug('%s.listAgentSnapshots(%s)', profile.name, agentName);
 
         const agents = new Agents(profile.url);
-        agents.listAgentSnapshots(profile.token, agentName).then((response) => {
+        agents.listAgentSnapshots(profile.token, agentName, envName).then((response) => {
             if (response.success) {
                 let result = filterObject(response.result.snapshots, options);
                 if (options.json) {
@@ -253,6 +254,7 @@ module.exports.ListAgentSnapshotsCommand = class {
                         { column: 'Snapshot ID', field: 'id', width: 30 },
                         { column: 'Title', field: 'title', width: 30 },
                         { column: 'Description', field: 'description', width: 50 },
+                        { column: 'Environment', field: 'environmentName', width: 30 },
                         { column: 'Created On', field: 'createdAt', width: 26 }
                     ];
                     printTable(tableSpec, result);
