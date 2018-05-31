@@ -69,13 +69,12 @@ class Profile {
     }
 
     validate() {
-        const {error, value} = Joi.validate(this, ProfileSchema);
+        const {error, value} = Joi.validate(this, ProfileSchema,{abortEarly: false});
         if (error) {
             throw new Error(`Invalid configuration profile <${this.name}>: ${error.details[0].message}.  Please run "cortex configure".`);
         }
         return this;
     }
-
     toJSON() {
         return {url: this.url, username: this.username, account: this.account, token: this.token};
     }
@@ -109,7 +108,9 @@ class Config {
     }
 
     setProfile(name, {url, account, tenantId, username, token}) {
-        this.profiles[name] = new Profile(name, {url, username, account, tenantId, token});
+         const profile = new Profile(name, {url, username, account, tenantId, token});
+         profile.validate(); // do not set/save invalid profiles ..
+        this.profiles[name] = profile
     }
 
     toJSON() {
