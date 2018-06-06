@@ -56,6 +56,7 @@ module.exports.ConfigureCommand = class {
             const password = (profilePassword) ? profilePassword : yield prompt.password('Password: ');
 
             cortexUrl = cortexUrl || defaultCortexUrl;
+            cortexUrl = cortexUrl.replace(/\/$/, ''); // strip any trailing /
             account = account || defaultAccount;
             username = username || defaultUsername;
 
@@ -82,7 +83,7 @@ module.exports.ConfigureCommand = class {
             try {
                 const authResp = yield auth.login(account, username, password);
                 if (! _.has(authResp,'jwt') ) {
-                    console.error(chalk.red(`LOGIN FAILED: ${authResp.message}`));
+                    console.error(chalk.red(`LOGIN FAILED: ${authResp.message || 'No token returned'}`));
                 } else {
                     const token = authResp.jwt;
                     debug('token: %s', authResp);
