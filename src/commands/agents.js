@@ -19,7 +19,7 @@ const debug = require('debug')('cortex:cli');
 const { loadProfile } = require('../config');
 const Catalog = require('../client/catalog');
 const Agents = require('../client/agents');
-const _ = require('lodash/object');
+const _ = require('lodash');
 const { printSuccess, printError, filterObject, parseObject, printTable } = require('./utils');
 
 module.exports.SaveAgentCommand = class SaveAgentCommand {
@@ -76,6 +76,7 @@ module.exports.ListAgentsCommand = class ListAgentsCommand {
                         { column: 'Name', field: 'name', width: 50 },
                         { column: 'Title', field: 'title', width: 25 },
                         { column: 'Description', field: 'description', width: 50 },
+                        { column: 'Environment', field: 'environmentId', width: 25 },
                         { column: 'Created On', field: 'createdAt', width: 26 }
                     ];
 
@@ -317,10 +318,17 @@ module.exports.CreateAgentInstanceCommand = class {
     execute(instanceDefinition, options) {
         const profile = loadProfile(options.profile);
         debug('%s.createAgentInstance', profile.name);
-
         const agents = new Agents(profile.url);
-        const instanceDefStr = fs.readFileSync(instanceDefinition);
-        const instance = parseObject(instanceDefStr, options);
+        let instance;
+        if (instanceDefinition) {
+            const instanceDefStr = fs.readFileSync(instanceDefinition);
+            instance = parseObject(instanceDefStr, options);
+        } else if ( !_.isEmpty(_.get(options,'snapshotId','')) )  {
+            instance = { snapshotId: options.snapshotId, environmentName: options.environmentName || 'cortex/default'}
+        } else {
+            printError(`Either --snapshotId <..> or a instance definition file must be provided`, options);
+            return;
+        }
         agents.createAgentInstance(profile.token, instance).then((response) => {
             if (response.success) {
                 let result = filterObject(response.result, options);

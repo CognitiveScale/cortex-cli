@@ -181,10 +181,12 @@ program
 
 //Create agent instances
 program
-    .command('create-instance <instanceDefinition>')
+    .command('create-instance [instanceDefinition]')
     .description('Create agent instance')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
+    .option('--snapshotId [snapshotId]', 'The name of the agent to snapshot')
+
     .action((instanceDefinition, options) => {
         try {
             new CreateAgentInstanceCommand(program).execute(instanceDefinition, options);

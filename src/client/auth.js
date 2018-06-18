@@ -38,7 +38,7 @@ module.exports = class Auth {
             .then((response) => {
                 if (response.ok) {
                     debug('login response: %o', response.body);
-                    return response.body.jwt;
+                    return response.body;
                 }
                 else {
                     throw new Error('Authentication failed');

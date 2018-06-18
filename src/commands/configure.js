@@ -16,10 +16,11 @@
 
 const debug = require('debug')('cortex:cli');
 const co = require('co');
+const _ = require('lodash');
 const prompt = require('co-prompt');
 const chalk = require('chalk');
 const Auth = require('../client/auth');
-const { readConfig, writeConfig, defaultConfig } = require('../config');
+const { readConfig, defaultConfig } = require('../config');
 const { printSuccess, printError } = require('./utils');
 
 const DEFAULT_CORTEX_URL = 'https://api.cortex.insights.ai';
@@ -32,10 +33,10 @@ module.exports.ConfigureCommand = class {
 
     execute(options) {
         const config = readConfig();
-        const profileName = options.profile || (config && config.currentProfile) || 'default';
-        const profileUrl = this.program.url || (config && config.url) || undefined;
-        const profileAccount = this.program.account || (config && config.account) || undefined;
-        const profileUsername = this.program.username || (config && config.username) || undefined;
+        const profileName = options.profile || _.get(config,'currentProfile','default');
+        const profileUrl = this.program.url || _.get(config,'url');
+        const profileAccount = this.program.account || _.get(config ,'account');
+        const profileUsername = this.program.username || _.get(config,'username');
         const profilePassword = this.program.password || undefined;
 
         debug('configuring profile: %s', profileName);
@@ -55,6 +56,7 @@ module.exports.ConfigureCommand = class {
             const password = (profilePassword) ? profilePassword : yield prompt.password('Password: ');
 
             cortexUrl = cortexUrl || defaultCortexUrl;
+            cortexUrl = cortexUrl.replace(/\/$/, ''); // strip any trailing /
             account = account || defaultAccount;
             username = username || defaultUsername;
 
@@ -79,11 +81,12 @@ module.exports.ConfigureCommand = class {
 
             const auth = new Auth(cortexUrl);
             try {
-                const token = yield auth.login(account, username, password);
-                if (token.status === 401) {
-                    console.error(chalk.red(`LOGIN FAILED: ${token.message}`));
+                const authResp = yield auth.login(account, username, password);
+                if (! _.has(authResp,'jwt') ) {
+                    console.error(chalk.red(`LOGIN FAILED: ${authResp.message || 'No token returned'}`));
                 } else {
-                    debug('token: %s', token);
+                    const token = authResp.jwt;
+                    debug('token: %s', authResp);
                     cmd.saveConfig(config, profileName, cortexUrl, account, username, token);
                     console.log(`Configuration for profile ${chalk.green.bold(profileName)} saved.`);
                 }
