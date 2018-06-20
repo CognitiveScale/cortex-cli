@@ -32,6 +32,7 @@ const {
     StopAgentInstanceCommand,
     ListTriggersCommand,
     ListAgentSnapshotsCommand,
+    DescribeAgentSnapshotCommand,
     CreateAgentSnapshotCommand
 } = require('../src/commands/agents');
 
@@ -136,6 +137,22 @@ program
     .action((agentName, options) => {
         try {
             new ListAgentSnapshotsCommand(program).execute(agentName, options);
+            processed = true;
+        }
+        catch (err) {
+            console.error(chalk.red(err.message));
+        }
+    });
+
+program
+    .command('describe-snapshot <snapshotId>')
+    .description('Describe agent snapshot')
+    .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
+    .option('--profile [profile]', 'The profile to use')
+    .option('--environmentName [environmentName]', 'The environment to list or \'all\'')
+    .action((snapshotId, options) => {
+        try {
+            new DescribeAgentSnapshotCommand(program).execute(snapshotId, options);
             processed = true;
         }
         catch (err) {

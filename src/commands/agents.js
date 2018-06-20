@@ -254,7 +254,7 @@ module.exports.ListAgentSnapshotsCommand = class {
                     const tableSpec = [
                         { column: 'Snapshot ID', field: 'id', width: 30 },
                         { column: 'Title', field: 'title', width: 30 },
-                        { column: 'Description', field: 'description', width: 50 },
+                        { column: 'Agent Version', field: 'agentVersion', width: 15 },
                         { column: 'Environment', field: 'environmentName', width: 30 },
                         { column: 'Created On', field: 'createdAt', width: 26 }
                     ];
@@ -269,6 +269,32 @@ module.exports.ListAgentSnapshotsCommand = class {
             .catch((err) => {
                 printError(`Failed to list agent snapshots ${agentName}: ${err.status} ${err.message}`, options);
             });
+    }
+};
+
+
+module.exports.DescribeAgentSnapshotCommand = class {
+    constructor(program) {
+        this.program = program;
+    }
+
+    execute(snapshotId, options) {
+        const profile = loadProfile(options.profile);
+        const envName = options.environmentName;
+        debug('%s.describeAgentSnapshot(%s)', profile.name, snapshotId);
+
+        const agents = new Agents(profile.url);
+        agents.describeAgentSnapshot(profile.token, snapshotId, envName).then((response) => {
+            if (response.success) {
+                let result = filterObject(response.result, options);
+                printSuccess(JSON.stringify(result, null, 2), options);
+            }
+            else {
+                printError(`Failed to describe agent snapshot ${snapshotId}: ${response.message}`, options);
+            }
+        }).catch((err) => {
+            printError(`Failed to describe agent snapshot ${snapshotId}: ${err.status} ${err.message}`, options);
+        });
     }
 };
 
