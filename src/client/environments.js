@@ -92,5 +92,22 @@ module.exports = class Environments {
                 return constructError(err);
             });
     }
+
+    listInstances(token, environmentName) {
+        const endpoint = `${this.endpoint}/${environmentName}/instances`;
+        debug('listInstances(%s) => %s', environmentName, this.endpoint);
+        return request
+            .get(endpoint)
+            .set('Authorization', `Bearer ${token}`)
+            .then((res) => {
+                if (res.ok) {
+                    return {success: true, result: res.body};
+                }
+                return {success: false, message: res.body, status: res.status};
+            })
+            .catch((err) => {
+                return constructError(err);
+            });
+    }
 };
 
