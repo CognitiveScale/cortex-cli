@@ -19,7 +19,8 @@
 const helper = require('./utils.js');
 const program = require('commander');
 const chalk = require('chalk');
-const { ListEnvironments, SaveEnvironmentCommand, PromoteEnvironmentCommand, DescribeEnvironmentCommand } = require('../src/commands/environments');
+const { ListEnvironments, SaveEnvironmentCommand, PromoteEnvironmentCommand,
+    DescribeEnvironmentCommand, ListInstancesCommand } = require('../src/commands/environments');
 
 let processed = false;
 program.description('Work with Cortex Environments');
@@ -89,6 +90,26 @@ program
     .action((environmentName, options) => {
         try {
             new DescribeEnvironmentCommand(program).execute(environmentName, options);
+            processed = true;
+        }
+        catch (err) {
+            console.error(chalk.red(err.message));
+        }
+    });
+
+
+
+// List Instances in Environment
+program
+    .command('list-instances [environmentName]')
+    .description('List instances in environment')
+    .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
+    .option('--profile [profile]', 'The profile to use')
+    .option('--json', 'Output results using JSON')
+    .option('--query [query]', 'A JMESPath query to use in filtering the response data. Ignored if output format is not JSON.')
+    .action((environmentName, options) => {
+        try {
+            new ListInstancesCommand(program).execute(environmentName || 'cortex/default', options);
             processed = true;
         }
         catch (err) {

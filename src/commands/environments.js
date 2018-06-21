@@ -32,8 +32,8 @@ module.exports.ListEnvironments = class ListEnvironments {
         const profile = loadProfile(options.profile);
         debug('%s.listEnvironment()', profile.name);
 
-        const conns = new Environments(profile.url);
-        conns.listEnvironments(profile.token).then((response) => {
+        const envs = new Environments(profile.url);
+        envs.listEnvironments(profile.token).then((response) => {
             if (response.success) {
                 let result = _.get(response,'result.environments',[]);
                 if (options.query)
@@ -119,6 +119,50 @@ module.exports.DescribeEnvironmentCommand = class DescribeEnvironmentCommand {
         });
     }
 };
+
+module.exports.ListInstancesCommand = class ListInstancesCommand {
+
+    constructor(program) {
+        this.program = program;
+    }
+
+    execute(environmentName, options) {
+        const profile = loadProfile(options.profile);
+        debug('%s.executeListInstances(%s)', profile.name, environmentName);
+        const environment = new Environments(profile.url);
+
+        environment.listInstances(profile.token, environmentName).then((response) => {
+            if (response.success) {
+                let result = _.get(response,'result.instances',[]);
+                if (options.query)
+                    result = filterObject(result, options);
+
+                if (options.json) {
+                    printSuccess(JSON.stringify(result, null, 2), options);
+                }
+                else {
+                    let tableSpec = [
+                        { column: 'Instance Id', field: 'id', width: 26 },
+                        { column: 'Status', field: 'status', width: 15 },
+                        { column: 'Snapshot Id', field: 'snapshotId', width: 26 },
+                        { column: 'Agent Name', field: 'agentName', width: 50 },
+                        { column: 'Agent Version', field: 'agentVersion', width: 15 },
+                        { column: 'Environment', field: 'environmentName', width: 26 },
+                        { column: 'Created At', field: 'createdAt', width: 26 },
+                    ];
+                    printTable(tableSpec, result);
+                }
+            }
+            else {
+                printError(`Failed to list instances in environment ${environmentName}: ${response.message}`, options);
+            }
+        })
+            .catch((err) => {
+                printError(`Failed to list instances in environment ${environmentName}: ${err.status} ${err.message}`, options);
+            });
+    }
+};
+
 module.exports.PromoteEnvironmentCommand = class PromoteEnvironmentCommand {
 
     constructor(program) {

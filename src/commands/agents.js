@@ -215,13 +215,31 @@ module.exports.ListAgentInstancesCommand = class {
 
     execute(agentName, options) {
         const profile = loadProfile(options.profile);
+        const envName = options.environmentName;
         debug('%s.listAgentInstances(%s)', profile.name, agentName);
 
         const agents = new Agents(profile.url);
-        agents.listAgentInstances(profile.token, agentName).then((response) => {
+        agents.listAgentInstances(profile.token, agentName, envName).then((response) => {
             if (response.success) {
-                let result = filterObject(response.result, options);
-                printSuccess(JSON.stringify(result, null, 2), options);
+                let result = response.instances;
+                if (options.query)
+                    result = filterObject(result, options);
+
+                if (options.json) {
+                    printSuccess(JSON.stringify(result, null, 2), options);
+                }
+                else {
+                    const tableSpec = [
+                        { column: 'Instance Id', field: 'id', width: 26 },
+                        { column: 'Status', field: 'status', width: 15 },
+                        { column: 'Snapshot Id', field: 'snapshotId', width: 26 },
+                        { column: 'Agent Version', field: 'agentVersion', width: 15 },
+                        { column: 'Environment', field: 'environmentName', width: 26 },
+                        { column: 'Created At', field: 'createdAt', width: 26 },
+                    ];
+
+                    printTable(tableSpec, result);
+                }
             }
             else {
                 printError(`Failed to list agent instances ${agentName}: ${response.message}`, options);

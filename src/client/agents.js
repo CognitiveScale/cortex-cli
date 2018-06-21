@@ -115,15 +115,17 @@ module.exports = class Agents {
             });
     }
 
-    listAgentInstances(token, agentName) {
-        const endpoint = `${this.endpoint}/instances/${agentName}`;
-        debug('getAgentInstances(%s) => %s', agentName, endpoint);
+    listAgentInstances(token, agentName, environmentName) {
+        let endpoint = `${this.endpoint}/instances/${agentName}`;
+        debug('getAgentInstances(%s, %s) => %s', agentName, environmentName, endpoint);
+        if (environmentName) endpoint = `${endpoint}?environmentName=${environmentName}`;
+
         return request
             .get(endpoint)
             .set('Authorization', `Bearer ${token}`)
             .then((res) => {
                 if (res.ok) {
-                    return {success: true, result: res.body};
+                    return {success: true, instances: res.body.instances};
                 }
                 return {success: false, status: res.status, message: res.body};
             })
