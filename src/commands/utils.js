@@ -21,12 +21,18 @@ const debug = require('debug')('cortex:cli');
 const Table = require('cli-table');
 
 module.exports.constructError = function(error) {
-    const errorText = JSON.parse(error.response.text);
-    if (errorText.message) {
-        return {success: false, message: errorText.message, status: error.status};
-    } else {
-        return {success: false, message: JSON.stringify(errorText), status: error.status};
+    // fallback to text in message or standard error message
+    let errResp = error.response;
+    let errorText = (errResp && errResp.text) || error.message;
+
+    // if JSON was returned, look for either a message or error in it
+    try {
+        const resp = errResp ? JSON.parse(errResp.text) : {};
+        if (resp.message || resp.error) errorText = resp.message || resp.error;
+    } catch(e) {
+        // Guess it wasn't JSON!
     }
+    return {success: false, message: errorText, status: error.status || ''};
 };
 
 module.exports.printSuccess = function(message, options) {
