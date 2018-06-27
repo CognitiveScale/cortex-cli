@@ -32,6 +32,7 @@ const {
     StopAgentInstanceCommand,
     ListTriggersCommand,
     ListAgentSnapshotsCommand,
+    DescribeAgentSnapshotCommand,
     CreateAgentSnapshotCommand
 } = require('../src/commands/agents');
 
@@ -143,6 +144,22 @@ program
         }
     });
 
+program
+    .command('describe-snapshot <snapshotId>')
+    .description('Describe agent snapshot')
+    .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
+    .option('--profile [profile]', 'The profile to use')
+    .option('--environmentName [environmentName]', 'The environment to list or \'all\'')
+    .action((snapshotId, options) => {
+        try {
+            new DescribeAgentSnapshotCommand(program).execute(snapshotId, options);
+            processed = true;
+        }
+        catch (err) {
+            console.error(chalk.red(err.message));
+        }
+    });
+
 //Create Agent Snapshot
 program
     .command('create-snapshot [snapshotDefinition]')
@@ -169,6 +186,9 @@ program
     .description('List agent instances  ')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
+    .option('--environmentName [environmentName]', 'The environment to list or \'all\'')
+    .option('--json', 'Output results using JSON')
+    .option('--query [query]', 'A JMESPath query to use in filtering the response data. Ignored if output format is not JSON.')
     .action((agentName, options) => {
         try {
             new ListAgentInstancesCommand(program).execute(agentName, options);
