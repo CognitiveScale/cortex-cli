@@ -232,7 +232,7 @@ module.exports.ListAgentInstancesCommand = class {
                     const tableSpec = [
                         { column: 'Instance Id', field: 'id', width: 26 },
                         { column: 'Status', field: 'status', width: 15 },
-                        { column: 'Snapshot Id', field: 'snapshotId', width: 26 },
+                        { column: 'Snapshot Id', field: 'snapshotId', width: 40 },
                         { column: 'Agent Version', field: 'agentVersion', width: 15 },
                         { column: 'Environment', field: 'environmentName', width: 26 },
                         { column: 'Created At', field: 'createdAt', width: 26 },
@@ -270,7 +270,7 @@ module.exports.ListAgentSnapshotsCommand = class {
                 }
                 else {
                     const tableSpec = [
-                        { column: 'Snapshot ID', field: 'id', width: 30 },
+                        { column: 'Snapshot ID', field: 'id', width: 40 },
                         { column: 'Title', field: 'title', width: 30 },
                         { column: 'Agent Version', field: 'agentVersion', width: 15 },
                         { column: 'Environment', field: 'environmentName', width: 30 },
@@ -410,7 +410,7 @@ module.exports.GetAgentInstanceCommand = class {
                         { column: 'Instance Id', field: '_id', width: 26 },
                         { column: 'Status', field: 'status', width: 15 },
                         { column: 'Tenant Id', field: 'tenantId', width: 20 },
-                        { column: 'Snapshot Id', field: 'snapshotId', width: 26 },
+                        { column: 'Snapshot Id', field: 'snapshotId', width: 40 },
                         { column: 'Environment Id', field: 'environmentId', width: 26 },
                         { column: 'Created At', field: 'createdAt', width: 26 },
                         { column: 'Updated At', field: 'updatedAt', width: 26 }
