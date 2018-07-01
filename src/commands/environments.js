@@ -141,7 +141,7 @@ module.exports.ListInstancesCommand = class ListInstancesCommand {
                     let tableSpec = [
                         { column: 'Instance Id', field: 'id', width: 26 },
                         { column: 'Status', field: 'status', width: 15 },
-                        { column: 'Snapshot Id', field: 'snapshotId', width: 26 },
+                        { column: 'Snapshot Id', field: 'snapshotId', width: 40 },
                         { column: 'Agent Name', field: 'agentName', width: 50 },
                         { column: 'Agent Version', field: 'agentVersion', width: 15 },
                         { column: 'Environment', field: 'environmentName', width: 26 },
