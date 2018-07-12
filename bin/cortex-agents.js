@@ -206,6 +206,7 @@ program
     .command('create-instance [instanceDefinition]')
     .description('Create agent instance')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
+    .option('--environmentName [environmentName]', 'The environment to use')
     .option('--profile [profile]', 'The profile to use')
     .option('--snapshotId [snapshotId]', 'The name of the agent to snapshot')
 
