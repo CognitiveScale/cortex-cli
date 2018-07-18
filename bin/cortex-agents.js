@@ -134,6 +134,8 @@ program
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
     .option('--environmentName [environmentName]', 'The environment to list or \'all\'')
+    .option('--json', 'Output results using JSON')
+    .option('--query [query]', 'A JMESPath query to use in filtering the response data.')
     .action((agentName, options) => {
         try {
             new ListAgentSnapshotsCommand(program).execute(agentName, options);
@@ -204,6 +206,7 @@ program
     .command('create-instance [instanceDefinition]')
     .description('Create agent instance')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
+    .option('--environmentName [environmentName]', 'The environment to use')
     .option('--profile [profile]', 'The profile to use')
     .option('--snapshotId [snapshotId]', 'The name of the agent to snapshot')
 
