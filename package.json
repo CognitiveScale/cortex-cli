@@ -33,10 +33,10 @@
     "commander": "2.12.2",
     "debug": "3.1.0",
     "event-stream": "3.3.4",
-    "lodash": "^4.17.5",
     "jmespath": "0.15.0",
     "joi": "13.1.0",
     "js-yaml": "3.10.0",
+    "lodash": "4.17.10",
     "superagent": "3.8.2",
     "uuid": "3.2.1",
     "yeoman-environment": "2.0.5"

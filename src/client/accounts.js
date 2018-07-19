@@ -33,6 +33,7 @@ module.exports = class Accounts {
         return request
             .get(endpoint)
             .set('Authorization', `Bearer ${token}`)
+            .set('x-cortex-proxy-notify', true)
             .then((res) => {
                 if (res.ok) {
                     return {success: true, result: res.body};
@@ -50,6 +51,7 @@ module.exports = class Accounts {
         return request
             .get(endpoint)
             .set('Authorization', `Bearer ${token}`)
+            .set('x-cortex-proxy-notify', true)
             .then((res) => {
                 if (res.ok) {
                     return {success: true, result: res.body};
@@ -72,6 +74,7 @@ module.exports = class Accounts {
         return request
             .post(endpoint)
             .set('Authorization', `Bearer ${token}`)
+            .set('x-cortex-proxy-notify', true)
             .send(body)
             .then((res) => {
                 if (res.ok) {
@@ -90,6 +93,7 @@ module.exports = class Accounts {
         return request
             .put(endpoint)
             .set('Authorization', `Bearer ${token}`)
+            .set('x-cortex-proxy-notify', true)
             .send({
                 members: members
             })
@@ -110,6 +114,7 @@ module.exports = class Accounts {
         return request
             .delete(endpoint)
             .set('Authorization', `Bearer ${token}`)
+            .set('x-cortex-proxy-notify', true)
             .then((res) => {
                 if (res.ok) {
                     return {success: true, result: res.body};
@@ -127,6 +132,7 @@ module.exports = class Accounts {
         return request
             .delete(endpoint)
             .set('Authorization', `Bearer ${token}`)
+            .set('x-cortex-proxy-notify', true)
             .send({
                 members: members
             })
@@ -154,6 +160,7 @@ module.exports = class Accounts {
         return request
             .post(endpoint)
             .set('Authorization', `Bearer ${token}`)
+            .set('x-cortex-proxy-notify', true)
             .send(body)
             .then((res) => {
                 if (res.ok) {
@@ -172,6 +179,7 @@ module.exports = class Accounts {
         return request
             .put(endpoint)
             .set('Authorization', `Bearer ${token}`)
+            .set('x-cortex-proxy-notify', true)
             .send({
                 groupId: groupName
             })

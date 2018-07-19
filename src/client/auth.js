@@ -16,6 +16,8 @@
 
 const request = require('superagent');
 const debug = require('debug')('cortex:cli');
+const _ = require('lodash');
+const chalk = require('chalk');
 const { constructError } = require('../commands/utils');
 
 module.exports = class Auth {
@@ -31,11 +33,15 @@ module.exports = class Auth {
     
         return request
             .post(endpoint)
+            .set('x-cortex-proxy-notify', true)
             .send({
                 username: username,
                 password: password
             })
             .then((response) => {
+                if (Boolean(_.get(response, 'headers.x-cortex-proxied', false)))
+                    console.log(chalk.blue('Request proxied to cloud.'));
+
                 if (response.ok) {
                     debug('login response: %o', response.body);
                     return response.body;
