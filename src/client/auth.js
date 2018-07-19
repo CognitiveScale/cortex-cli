@@ -40,7 +40,7 @@ module.exports = class Auth {
             })
             .then((response) => {
                 if (Boolean(_.get(response, 'headers.x-cortex-proxied', false)))
-                    console.log(chalk.blue('Request proxied to cloud.'));
+                    console.error(chalk.blue('Request proxied to cloud.'));
 
                 if (response.ok) {
                     debug('login response: %o', response.body);

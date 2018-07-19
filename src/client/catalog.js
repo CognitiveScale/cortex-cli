@@ -46,7 +46,7 @@ module.exports = class Catalog {
             .send(skillObj)
             .then((res) => {
                 if (Boolean(_.get(res, 'headers.x-cortex-proxied', false)))
-                    console.log(chalk.blue('Request proxied to cloud.'));
+                    console.error(chalk.blue('Request proxied to cloud.'));
                 if (res.ok) {
                     return {success: true, message: res.body};
                 }
@@ -65,7 +65,7 @@ module.exports = class Catalog {
             .set('x-cortex-proxy-notify', true)
             .then((res) => {
                 if (Boolean(_.get(res, 'headers.x-cortex-proxied', false)))
-                    console.log(chalk.blue('Request proxied to cloud.'));
+                    console.error(chalk.blue('Request proxied to cloud.'));
                 if (res.ok) {
                     return {success: true, skills: res.body.skills || res.body.processors};
                 }
@@ -85,7 +85,7 @@ module.exports = class Catalog {
             .set('x-cortex-proxy-notify', true)
             .then((res) => {
                 if (Boolean(_.get(res, 'headers.x-cortex-proxied', false)))
-                    console.log(chalk.blue('Request proxied to cloud.'));
+                    console.error(chalk.blue('Request proxied to cloud.'));
                 if (res.ok) {
                     return {success: true, skill: res.body};
                 }
@@ -106,7 +106,7 @@ module.exports = class Catalog {
             .set('x-cortex-proxy-notify', true)
             .then((res) => {
                 if (Boolean(_.get(res, 'headers.x-cortex-proxied', false)))
-                    console.log(chalk.blue('Request proxied to cloud.'));
+                    console.error(chalk.blue('Request proxied to cloud.'));
                 if (res.ok) {
                     return {success: true, agents: res.body.agents};
                 }
@@ -126,7 +126,7 @@ module.exports = class Catalog {
             .send(agentObj)
             .then((res) => {
                 if (Boolean(_.get(res, 'headers.x-cortex-proxied', false)))
-                    console.log(chalk.blue('Request proxied to cloud.'));
+                    console.error(chalk.blue('Request proxied to cloud.'));
                 if (res.ok) {
                     return {success: true, message: res.body};
                 }
@@ -146,7 +146,7 @@ module.exports = class Catalog {
             .set('x-cortex-proxy-notify', true)
             .then((res) => {
                 if (Boolean(_.get(res, 'headers.x-cortex-proxied', false)))
-                    console.log(chalk.blue('Request proxied to cloud.'));
+                    console.error(chalk.blue('Request proxied to cloud.'));
                 if (res.ok) {
                     return {success: true, agent: res.body};
                 }
@@ -169,7 +169,7 @@ module.exports = class Catalog {
             .set('x-cortex-proxy-notify', true)
             .then((res) => {
                 if (Boolean(_.get(res, 'headers.x-cortex-proxied', false)))
-                    console.log(chalk.blue('Request proxied to cloud.'));
+                    console.error(chalk.blue('Request proxied to cloud.'));
                 if (res.ok) {
                     return {success: true, agent: res.body};
                 }
@@ -192,7 +192,7 @@ module.exports = class Catalog {
             .send(types)
             .then((res) => {
                 if (Boolean(_.get(res, 'headers.x-cortex-proxied', false)))
-                    console.log(chalk.blue('Request proxied to cloud.'));
+                    console.error(chalk.blue('Request proxied to cloud.'));
                 if (res.ok) {
                     return {success: true, message: res.body};
                 }
@@ -212,7 +212,7 @@ module.exports = class Catalog {
             .set('x-cortex-proxy-notify', true)
             .then((res) => {
                 if (Boolean(_.get(res, 'headers.x-cortex-proxied', false)))
-                    console.log(chalk.blue('Request proxied to cloud.'));
+                    console.error(chalk.blue('Request proxied to cloud.'));
                 if (res.ok) {
                     return {success: true, type: res.body};
                 }
@@ -233,7 +233,7 @@ module.exports = class Catalog {
             .set('x-cortex-proxy-notify', true)
             .then((res) => {
                 if (Boolean(_.get(res, 'headers.x-cortex-proxied', false)))
-                    console.log(chalk.blue('Request proxied to cloud.'));
+                    console.error(chalk.blue('Request proxied to cloud.'));
                 if (res.ok) {
                     return {success: true, types: res.body.types};
                 }
