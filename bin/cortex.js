@@ -36,7 +36,8 @@ program
     .command('project [cmd]', 'Work with a related collection of Cortex contributions')
     .command('skills [cmd]', 'Work with Cortex Skills')
     .command('tasks [cmd]', 'Work with Cortex Tasks')
-    .command('types [cmd]', 'Work with Cortex Types');
+    .command('types [cmd]', 'Work with Cortex Types')
+    .command('variables [cmd]', 'Work with Cortex Secure Variables');
 
 process.env.DOC && require('../src/commands/utils').exportDoc(program);
 
