@@ -66,6 +66,9 @@ jspm_packages
 # Mongo Explorer plugin:
 .idea/mongoSettings.xml
 
+# Visual Studio Code
+.vscode/
+
 ## File-based project format:
 *.iws
 
