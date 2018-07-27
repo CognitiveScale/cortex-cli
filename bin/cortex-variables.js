@@ -47,8 +47,8 @@ program
 
 // Read Secure Variable Value
 program
-    .command('read <keyName>')
-    .description('Read secure variable value')
+    .command('describe <keyName>')
+    .description('Retrieve the value stored for the given variable key.')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
     .action((keyName, options) => {
@@ -63,11 +63,11 @@ program
 
 // Write Secure Variable Value
 program
-    .command('write <keyName> [value]')
-    .description('Write secure variable value')
+    .command('save <keyName> [value]')
+    .description('Save or overwrite a secure variable value. By default, values are stored as strings but can also be saved as JSON or YAML values.')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
-    .option('--data [data]', 'JSON value to store')
-    .option('--data-file [dataFile]', 'A file containing either JSON or YAML formatted value to store')
+    .option('--data [data]', 'JSON value to save')
+    .option('--data-file [dataFile]', 'A file containing either JSON or YAML formatted value to save')
     .option('--profile [profile]', 'The profile to use')
     .action((keyName, value, options) => {
         try {
