@@ -45,11 +45,8 @@ module.exports.ListEnvironments = class ListEnvironments {
                 else {
                     let tableSpec = [
                         { column: 'Name', field: 'name', width: 25 },
-                        { column: 'Label', field: 'label', width: 25 },
-                        { column: 'Type', field: 'type', width: 15 },
-                        { column: 'Console Url', field: 'consoleUrl', width: 50 },
-                        { column: 'White List', field: 'whiteList', width: 50 },
-                        { column: 'Black List', field: 'blackList', width: 50 },
+                        { column: 'Title', field: 'title', width: 50 },
+                        { column: 'Region', field: 'regionRef', width: 25 }
                     ];
                     printTable(tableSpec, result);
                 }
@@ -144,7 +141,7 @@ module.exports.ListInstancesCommand = class ListInstancesCommand {
                     let tableSpec = [
                         { column: 'Instance Id', field: 'id', width: 26 },
                         { column: 'Status', field: 'status', width: 15 },
-                        { column: 'Snapshot Id', field: 'snapshotId', width: 26 },
+                        { column: 'Snapshot Id', field: 'snapshotId', width: 40 },
                         { column: 'Agent Name', field: 'agentName', width: 50 },
                         { column: 'Agent Version', field: 'agentVersion', width: 15 },
                         { column: 'Environment', field: 'environmentName', width: 26 },
@@ -190,7 +187,13 @@ module.exports.PromoteEnvironmentCommand = class PromoteEnvironmentCommand {
                 if (response.success) {
                     printSuccess(`Snapshot: \'${promObj.snapshotId}\' successfully promoted to environment:\'${promObj.environmentName}\'`, options);
                 } else {
-                    printError(`Failed to promote to environment: ${response.status} ${response.message}`, options);
+                    let errMsg = `Failed to promote to environment: ${response.status} ${response.message}\n`;
+                    if (response.details) {
+                        response.details.forEach(d =>
+                            errMsg = errMsg + `${d.resource} ${d.name} - ${d.error}\n`);
+                    }
+                    printError(errMsg, options);
+
                 }})
             .catch((err) => {
                 printError(`Failed to promote to environment: ${err.response.body.message}`, options);
