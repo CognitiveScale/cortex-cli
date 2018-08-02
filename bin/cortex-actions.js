@@ -16,9 +16,12 @@
  * limitations under the License.
  */
 
-const helper = require('./utils.js');
-const program = require('commander');
 const chalk = require('chalk');
+const program = require('commander');
+
+const { withCompatibilityCheck } = require('../src/compatibility');
+const helper = require('./utils.js');
+
 const {
     ListActionsCommand,
     DescribeActionCommand,
@@ -38,7 +41,7 @@ program
     .option('--profile [profile]', 'The profile to use')
     .option('--json', 'Output results using JSON')
     .option('--query [query]', 'A JMESPath query to use in filtering the response data. Ignored if output format is not JSON.')
-    .action((options) => {
+    .action(withCompatibilityCheck((options) => {
         try {
             new ListActionsCommand(program).execute(options);
             processed = true;
@@ -46,7 +49,7 @@ program
         catch (err) {
             console.error(chalk.red(err.message));
         }
-    });
+    }));
 
 // Describe Action
 program
@@ -56,7 +59,7 @@ program
     .option('--profile [profile]', 'The profile to use')
     .option('--query [query]', 'A JMESPath query to use in filtering the response data.')
     .option('-d, --download', 'Download code binary in response')
-    .action((actionName, options) => {
+    .action(withCompatibilityCheck((actionName, options) => {
         try {
             new DescribeActionCommand(program).execute(actionName, options);
             processed = true;
@@ -64,7 +67,7 @@ program
         catch (err) {
             console.error(chalk.red(err.message));
         }
-    });
+    }));
 
 // Delete Action
 program
@@ -74,7 +77,7 @@ program
     .option('--profile [profile]', 'The profile to use')
     .option('--query [query]', 'A JMESPath query to use in filtering the response data.')
     .option('--actionType [actionType]', 'Type of action')
-    .action((actionName, options) => {
+    .action(withCompatibilityCheck((actionName, options) => {
         try {
             new DeleteActionCommand(program).execute(actionName, options);
             processed = true;
@@ -82,7 +85,7 @@ program
         catch (err) {
             console.error(chalk.red(err.message));
         }
-    });
+    }));
 
 // Invoke Action
 program
@@ -96,7 +99,7 @@ program
     .option('--actionType [actionType]', 'Type of action')
     .option('--path [path]', 'Path to the daemon service url being invoked', '')
     .option('--method [method]', 'HTTP method')                                         // GET, POST ...
-    .action((actionName, options) => {
+    .action(withCompatibilityCheck((actionName, options) => {
         try {
             new InvokeActionCommand(program).execute(actionName, options);
             processed = true;
@@ -104,7 +107,7 @@ program
         catch (err) {
             console.error(chalk.red(err.message));
         }
-    });
+    }));
 
 // Deploy Action
 program
@@ -121,7 +124,7 @@ program
     .option('--port [port]', 'Docker port')                  //'9091'
     .option('--environment [environment]', 'Environment')
     .option('--cmd [cmd]', 'Command to be executed')    //'["--daemon"]'
-    .action((actionName, options) => {
+    .action(withCompatibilityCheck((actionName, options) => {
         try {
             if (!options.kind && !options.docker) {
                 throw new Error('--kind [kind] or --docker [image] required');
@@ -137,7 +140,7 @@ program
         catch (err) {
             console.error(chalk.red(err.message));
         }
-    });
+    }));
 
 process.env.DOC && require('../src/commands/utils').exportDoc(program);
 

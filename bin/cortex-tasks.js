@@ -16,10 +16,18 @@
 * limitations under the License.
 */
 
-const helper = require('./utils.js');
-const program = require('commander');
 const chalk = require('chalk');
-const { ListTasks, TaskLogs, CancelTask, DescribeTask } = require('../src/commands/tasks');
+const program = require('commander');
+
+const { withCompatibilityCheck } = require('../src/compatibility');
+const helper = require('./utils.js');
+
+const {
+    ListTasks,
+    TaskLogs,
+    CancelTask,
+    DescribeTask
+} = require('../src/commands/tasks');
 
 let processed = false;
 program.description('Work with Cortex Jobs');
@@ -33,7 +41,7 @@ program
     .option('--profile [profile]', 'The profile to use')
     .option('--json', 'Output results using JSON')
     .option('--query [query]', 'A JMESPath query to use in filtering the response data. Ignored if output format is not JSON.')
-    .action((jobId, options) => {
+    .action(withCompatibilityCheck((jobId, options) => {
         try {
             new ListTasks(program).execute(jobId, options);
             processed = true;
@@ -41,7 +49,7 @@ program
         catch (err) {
             console.error(chalk.red(err.message));
         }
-    });
+    }));
 
 // Get Tasks logs
 program
@@ -51,7 +59,7 @@ program
     .option('--profile [profile]', 'The profile to use')
     .option('--json', 'Output results using JSON')
     .option('--query [query]', 'A JMESPath query to use in filtering the response data. Ignored if output format is not JSON.')
-    .action((jobId, taskId, options) => {
+    .action(withCompatibilityCheck((jobId, taskId, options) => {
         try {
             new TaskLogs(program).execute(jobId, taskId, options);
             processed = true;
@@ -59,7 +67,7 @@ program
         catch (err) {
             console.error(chalk.red(err.message));
         }
-    });
+    }));
 
 // Cancel task
 program
@@ -69,7 +77,7 @@ program
     .option('--profile [profile]', 'The profile to use')
     .option('--json', 'Output results using JSON')
     .option('-m, --message <message>', 'Cancellation message')
-    .action((jobId, taskId, options) => {
+    .action(withCompatibilityCheck((jobId, taskId, options) => {
         try {
             new CancelTask(program).execute(jobId, taskId, options);
             processed = true;
@@ -77,7 +85,7 @@ program
         catch (err) {
             console.error(chalk.red(err.message));
         }
-    });
+    }));
 
 // Describe task
 program
@@ -87,7 +95,7 @@ program
     .option('--profile [profile]', 'The profile to use')
     .option('--json', 'Output results using JSON')
     .option('--query [query]', 'A JMESPath query to use in filtering the response data. Ignored if output format is not JSON.')
-    .action((jobId, taskId, options) => {
+    .action(withCompatibilityCheck((jobId, taskId, options) => {
         try {
             new DescribeTask(program).execute(jobId, taskId, options);
             processed = true;
@@ -95,7 +103,7 @@ program
         catch (err) {
             console.error(chalk.red(err.message));
         }
-    });
+    }));
 
 process.env.DOC && require('../src/commands/utils').exportDoc(program);
 

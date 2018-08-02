@@ -16,10 +16,17 @@
  * limitations under the License.
  */
 
-const helper = require('./utils.js');
-const program = require('commander');
 const chalk = require('chalk');
-const { SaveTypeCommand, ListTypesCommand, DescribeTypeCommand } = require('../src/commands/types');
+const program = require('commander');
+
+const { withCompatibilityCheck } = require('../src/compatibility');
+const helper = require('./utils.js');
+
+const {
+    SaveTypeCommand,
+    ListTypesCommand,
+    DescribeTypeCommand
+} = require('../src/commands/types');
 
 let processed = false;
 program.description('Work with Cortex Types');
@@ -31,7 +38,7 @@ program
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
     .option('-y, --yaml', 'Use YAML for type definition format')
-    .action((typeDefinition, options) => {
+    .action(withCompatibilityCheck((typeDefinition, options) => {
         try {
             new SaveTypeCommand(program).execute(typeDefinition, options);
             processed = true;
@@ -39,7 +46,7 @@ program
         catch (err) {
             console.error(chalk.red(err.message));
         }
-    });
+    }));
 
 // List Types
 program
@@ -49,7 +56,7 @@ program
     .option('--profile [profile]', 'The profile to use')
     .option('--json', 'Output results using JSON')
     .option('--query [query]', 'A JMESPath query to use in filtering the response data.')
-    .action((options) => {
+    .action(withCompatibilityCheck((options) => {
         try {
             new ListTypesCommand(program).execute(options);
             processed = true;
@@ -57,7 +64,7 @@ program
         catch (err) {
             console.error(chalk.red(err.message));
         }
-    });
+    }));
 
 // Describe Type
 program
@@ -66,7 +73,7 @@ program
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
     .option('--query [query]', 'A JMESPath query to use in filtering the response data.')
-    .action((typeName, options) => {
+    .action(withCompatibilityCheck((typeName, options) => {
         try {
             new DescribeTypeCommand(program).execute(typeName, options);
             processed = true;
@@ -74,7 +81,7 @@ program
         catch (err) {
             console.error(chalk.red(err.message));
         }
-    });
+    }));
 
 process.env.DOC && require('../src/commands/utils').exportDoc(program);
 

@@ -16,9 +16,12 @@
  * limitations under the License.
  */
 
-const helper = require('./utils.js');
-const program = require('commander');
 const chalk = require('chalk');
+const program = require('commander');
+
+const { withCompatibilityCheck } = require('../src/compatibility');
+const helper = require('./utils.js');
+
 const {
     SaveAgentCommand,
     ListAgentsCommand,
@@ -46,7 +49,7 @@ program
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
     .option('-y, --yaml', 'Use YAML for agent definition format')
-    .action((agentDefinition, options) => {
+    .action(withCompatibilityCheck((agentDefinition, options) => {
         try {
             new SaveAgentCommand(program).execute(agentDefinition, options);
             processed = true;
@@ -54,7 +57,7 @@ program
         catch (err) {
             console.error(chalk.red(err.message));
         }
-    });
+    }));
 
 // List Agents
 program
@@ -64,7 +67,7 @@ program
     .option('--profile [profile]', 'The profile to use')
     .option('--json', 'Output results using JSON')
     .option('--query [query]', 'A JMESPath query to use in filtering the response data. Ignored if output format is not JSON.')
-    .action((options) => {
+    .action(withCompatibilityCheck((options) => {
         try {
             new ListAgentsCommand(program).execute(options);
             processed = true;
@@ -72,7 +75,7 @@ program
         catch (err) {
             console.error(chalk.red(err.message));
         }
-    });
+    }));
 
 // Describe Agent
 program
@@ -82,7 +85,7 @@ program
     .option('--profile [profile]', 'The profile to use')
     .option('--query [query]', 'A JMESPath query to use in filtering the response data.')
     .option('--versions', 'To get list of versions of an agent')
-    .action((agentName, options) => {
+    .action(withCompatibilityCheck((agentName, options) => {
         try {
             new DescribeAgentCommand(program).execute(agentName, options);
             processed = true;
@@ -90,7 +93,7 @@ program
         catch (err) {
             console.error(chalk.red(err.message));
         }
-    });
+    }));
 
 // Invoke Agent Service
 program
@@ -100,7 +103,7 @@ program
     .option('--profile [profile]', 'The profile to use')
     .option('--params [params]', 'JSON params to send to the action')
     .option('--params-file [paramsFile]', 'A file containing either JSON or YAML formatted params')
-    .action((agentName, serviceName, options) => {
+    .action(withCompatibilityCheck((agentName, serviceName, options) => {
         try {
             new InvokeAgentServiceCommand(program).execute(agentName, serviceName, options);
             processed = true;
@@ -108,7 +111,7 @@ program
         catch (err) {
             console.error(chalk.red(err.message));
         }
-    });
+    }));
 
 //Get Agent Service Activation
 program
@@ -136,7 +139,7 @@ program
     .option('--environmentName [environmentName]', 'The environment to list or \'all\'')
     .option('--json', 'Output results using JSON')
     .option('--query [query]', 'A JMESPath query to use in filtering the response data.')
-    .action((agentName, options) => {
+    .action(withCompatibilityCheck((agentName, options) => {
         try {
             new ListAgentSnapshotsCommand(program).execute(agentName, options);
             processed = true;
@@ -144,7 +147,7 @@ program
         catch (err) {
             console.error(chalk.red(err.message));
         }
-    });
+    }));
 
 program
     .command('describe-snapshot <snapshotId>')
@@ -152,7 +155,7 @@ program
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
     .option('--environmentName [environmentName]', 'The environment to list or \'all\'')
-    .action((snapshotId, options) => {
+    .action(withCompatibilityCheck((snapshotId, options) => {
         try {
             new DescribeAgentSnapshotCommand(program).execute(snapshotId, options);
             processed = true;
@@ -160,7 +163,7 @@ program
         catch (err) {
             console.error(chalk.red(err.message));
         }
-    });
+    }));
 
 //Create Agent Snapshot
 program
@@ -171,7 +174,7 @@ program
     .option('--agentName [name[:version]]', 'The name of the agent to snapshot')
     .option('--title [title]', 'A descriptive title for the snapshot')
 
-    .action((snapshotDefinition, options) => {
+    .action(withCompatibilityCheck((snapshotDefinition, options) => {
         try {
             new CreateAgentSnapshotCommand(program).execute(snapshotDefinition, options);
             processed = true;
@@ -179,7 +182,7 @@ program
         catch (err) {
             console.error(chalk.red(err.message));
         }
-    });
+    }));
 
 
 //List agent instances
@@ -191,7 +194,7 @@ program
     .option('--environmentName [environmentName]', 'The environment to list or \'all\'')
     .option('--json', 'Output results using JSON')
     .option('--query [query]', 'A JMESPath query to use in filtering the response data. Ignored if output format is not JSON.')
-    .action((agentName, options) => {
+    .action(withCompatibilityCheck((agentName, options) => {
         try {
             new ListAgentInstancesCommand(program).execute(agentName, options);
             processed = true;
@@ -199,7 +202,7 @@ program
         catch (err) {
             console.error(chalk.red(err.message));
         }
-    });
+    }));
 
 //Create agent instances
 program
@@ -210,7 +213,7 @@ program
     .option('--profile [profile]', 'The profile to use')
     .option('--snapshotId [snapshotId]', 'The name of the agent to snapshot')
 
-    .action((instanceDefinition, options) => {
+    .action(withCompatibilityCheck((instanceDefinition, options) => {
         try {
             new CreateAgentInstanceCommand(program).execute(instanceDefinition, options);
             processed = true;
@@ -218,7 +221,7 @@ program
         catch (err) {
             console.error(chalk.red(err.message));
         }
-    });
+    }));
 
 //Get agent instance
 program
@@ -227,7 +230,7 @@ program
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
     .option('--json', 'Output results using JSON')
-    .action((instanceId, options) => {
+    .action(withCompatibilityCheck((instanceId, options) => {
         try {
             new GetAgentInstanceCommand(program).execute(instanceId, options);
             processed = true;
@@ -235,7 +238,7 @@ program
         catch (err) {
             console.error(chalk.red(err.message));
         }
-    });
+    }));
 
 //Delete agent instance
 program
@@ -243,7 +246,7 @@ program
     .description('Delete agent instance')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
-    .action((instanceId, options) => {
+    .action(withCompatibilityCheck((instanceId, options) => {
         try {
             new DeleteAgentInstanceCommand(program).execute(instanceId, options);
             processed = true;
@@ -251,7 +254,7 @@ program
         catch (err) {
             console.error(chalk.red(err.message));
         }
-    });
+    }));
 
 //Stop agent instance
 program
@@ -259,7 +262,7 @@ program
     .description('Stop agent instance')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
-    .action((instanceId, options) => {
+    .action(withCompatibilityCheck((instanceId, options) => {
         try {
             new StopAgentInstanceCommand(program).execute(instanceId, options);
             processed = true;
@@ -267,7 +270,7 @@ program
         catch (err) {
             console.error(chalk.red(err.message));
         }
-    });
+    }));
 
 //List triggers
 program
@@ -275,7 +278,7 @@ program
     .description('List of triggers for the current tenant')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
-    .action((options) => {
+    .action(withCompatibilityCheck((options) => {
         try {
             new ListTriggersCommand(program).execute(options);
             processed = true;
@@ -283,7 +286,7 @@ program
         catch (err) {
             console.error(chalk.red(err.message));
         }
-    });
+    }));
 
 
 process.env.DOC && require('../src/commands/utils').exportDoc(program);

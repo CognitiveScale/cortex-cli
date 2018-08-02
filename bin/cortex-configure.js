@@ -17,7 +17,14 @@
  */
 
 const program = require('commander');
-const { ConfigureCommand, DescribeProfileCommand, ListProfilesCommand, SetProfileCommand } = require('../src/commands/configure');
+
+const {
+    ConfigureCommand,
+    DescribeProfileCommand,
+    ListProfilesCommand,
+    SetProfileCommand
+} = require('../src/commands/configure');
+
 program.description('Configure the Cortex CLI');
 
 let cmd = undefined;
