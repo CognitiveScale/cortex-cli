@@ -16,10 +16,18 @@
 * limitations under the License.
 */
 
-const helper = require('./utils.js');
-const program = require('commander');
 const chalk = require('chalk');
-const { ListJobs, JobStatus, DescribeJob, SaveJob } = require('../src/commands/jobs');
+const program = require('commander');
+
+const { withCompatibilityCheck } = require('../src/compatibility');
+const helper = require('./utils.js');
+
+const {
+    ListJobs,
+    JobStatus,
+    DescribeJob,
+    SaveJob
+} = require('../src/commands/jobs');
 
 let processed = false;
 program.description('Work with Cortex Jobs');
@@ -33,7 +41,7 @@ program
     .option('--profile [profile]', 'The profile to use')
     .option('--json', 'Output results using JSON')
     .option('--query [query]', 'A JMESPath query to use in filtering the response data. Ignored if output format is not JSON.')
-    .action((options) => {
+    .action(withCompatibilityCheck((options) => {
         try {
             new ListJobs(program).execute(options);
             processed = true;
@@ -41,7 +49,7 @@ program
         catch (err) {
             console.error(chalk.red(err.message));
         }
-    });
+    }));
 
 // Describe Job
 program
@@ -50,7 +58,7 @@ program
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
     .option('--json', 'Output results using JSON')
-    .action((jobDefinition, options) => {
+    .action(withCompatibilityCheck((jobDefinition, options) => {
         try {
             new DescribeJob(program).execute(jobDefinition, options);
             processed = true;
@@ -58,7 +66,7 @@ program
         catch (err) {
             console.error(chalk.red(err.message));
         }
-    });
+    }));
 
 // Get Job Status
 program
@@ -67,7 +75,7 @@ program
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
     .option('--json', 'Output results using JSON')
-    .action((jobDefinition, options) => {
+    .action(withCompatibilityCheck((jobDefinition, options) => {
         try {
             new JobStatus(program).execute(jobDefinition, options);
             processed = true;
@@ -75,7 +83,7 @@ program
         catch (err) {
             console.error(chalk.red(err.message));
         }
-    });
+    }));
 
 
 // Save Job
@@ -85,7 +93,7 @@ program
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
     .option('-y, --yaml', 'Use YAML for job definition format')
-    .action((jobDefinition, options) => {
+    .action(withCompatibilityCheck((jobDefinition, options) => {
         try {
             new SaveJob(program).execute(jobDefinition, options);
             processed = true;
@@ -93,7 +101,7 @@ program
         catch (err) {
             console.error(chalk.red(err.message));
         }
-    });
+    }));
 
 process.env.DOC && require('../src/commands/utils').exportDoc(program);
 

@@ -16,10 +16,18 @@
  * limitations under the License.
  */
 
-const helper = require('./utils.js');
-const program = require('commander');
 const chalk = require('chalk');
-const { ListContent, UploadContent, DeleteContent, DownloadContent } = require('../src/commands/content');
+const program = require('commander');
+
+const { withCompatibilityCheck } = require('../src/compatibility');
+const helper = require('./utils.js');
+
+const {
+    ListContent,
+    UploadContent,
+    DeleteContent,
+    DownloadContent
+} = require('../src/commands/content');
 
 let processed = false;
 program.description('Work with Cortex Contents');
@@ -33,7 +41,7 @@ program
     .option('--profile [profile]', 'The profile to use')
     .option('--json', 'Output results using JSON')
     .option('--query [query]', 'A JMESPath query to use in filtering the response data. Ignored if output format is not JSON.')
-    .action((options) => {
+    .action(withCompatibilityCheck((options) => {
         try {
             new ListContent(program).execute(options);
             processed = true;
@@ -41,7 +49,7 @@ program
         catch (err) {
             console.error(chalk.red(err.message));
         }
-    });
+    }));
 
 // Upload Content
 program
@@ -50,7 +58,7 @@ program
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
     .option('--secure', 'Uploads the content securely to the Cortex Vault. Use this option for keytab files or content that contains sensitive information that is required during Runtime. Take note of the contentKey you give to this content for future reference.')
-    .action((contentKey, filePath, options) => {
+    .action(withCompatibilityCheck((contentKey, filePath, options) => {
         try {
             new UploadContent(program).execute(contentKey, filePath, options);
             processed = true;
@@ -58,7 +66,7 @@ program
         catch (err) {
             console.error(chalk.red(err.message));
         }
-    });
+    }));
 
 // Delete Content
 program
@@ -66,7 +74,7 @@ program
     .description('Delete content')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
-    .action((contentKey, options) => {
+    .action(withCompatibilityCheck((contentKey, options) => {
         try {
             new DeleteContent(program).execute(contentKey, options);
             processed = true;
@@ -74,7 +82,7 @@ program
         catch (err) {
             console.error(chalk.red(err.message));
         }
-    });
+    }));
 
 // Download Content
 program
@@ -83,7 +91,7 @@ program
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
     .option('--secure', 'Downloads the content securely from the Cortex Vault.')
-    .action((contentKey, options) => {
+    .action(withCompatibilityCheck((contentKey, options) => {
         try {
             new DownloadContent(program).execute(contentKey, options);
             processed = true;
@@ -91,7 +99,7 @@ program
         catch (err) {
             console.error(chalk.red(err.message));
         }
-    });
+    }));
 
 
 process.env.DOC && require('../src/commands/utils').exportDoc(program);

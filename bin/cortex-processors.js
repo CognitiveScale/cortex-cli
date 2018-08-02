@@ -16,9 +16,12 @@
  * limitations under the License.
  */
 
-const helper = require('./utils.js');
-const program = require('commander');
 const chalk = require('chalk');
+const program = require('commander');
+
+const { withCompatibilityCheck } = require('../src/compatibility');
+const helper = require('./utils.js');
+
 const { 
     ListRuntimesCommand, 
     ListRuntimeTypesCommand, 
@@ -39,7 +42,7 @@ program
     .option('--profile [profile]', 'The profile to use')
     .option('--json', 'Output results using JSON')
     .option('--query [query]', 'A JMESPath query to use in filtering the response data.')
-    .action((options) => {
+    .action(withCompatibilityCheck((options) => {
         try {
             new ListRuntimeTypesCommand(program).execute(options);
             processed = true;
@@ -47,7 +50,7 @@ program
         catch (err) {
             console.error(chalk.red(err.message));
         }
-    });
+    }));
 
 // List Processor Runtimes
 program
@@ -57,7 +60,7 @@ program
     .option('--profile [profile]', 'The profile to use')
     .option('--json', 'Output results using JSON')
     .option('--query [query]', 'A JMESPath query to use in filtering the response data.')
-    .action((options) => {
+    .action(withCompatibilityCheck((options) => {
         try {
             new ListRuntimesCommand(program).execute(options);
             processed = true;
@@ -65,7 +68,7 @@ program
         catch (err) {
             console.error(chalk.red(err.message));
         }
-    });
+    }));
 
 // Describe Processor Runtime
 program
@@ -74,7 +77,7 @@ program
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
     .option('--query [query]', 'A JMESPath query to use in filtering the response data.')
-    .action((runtimeName, options) => {
+    .action(withCompatibilityCheck((runtimeName, options) => {
         try {
             new DescribeRuntimeCommand(program).execute(runtimeName, options);
             processed = true;
@@ -82,7 +85,7 @@ program
         catch (err) {
             console.error(chalk.red(err.message));
         }
-    });
+    }));
 
 // Delete Processor Runtime
 program
@@ -90,7 +93,7 @@ program
     .description('Delete a processor runtime')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
-    .action((runtimeName, options) => {
+    .action(withCompatibilityCheck((runtimeName, options) => {
         try {
             new DeleteRuntimeCommand(program).execute(runtimeName, options);
             processed = true;
@@ -98,7 +101,7 @@ program
         catch (err) {
             console.error(chalk.red(err.message));
         }
-    });
+    }));
 
 // List Actions
 program
@@ -108,7 +111,7 @@ program
     .option('--profile [profile]', 'The profile to use')
     .option('--json', 'Output results using JSON')
     .option('--query [query]', 'A JMESPath query to use in filtering the response data.')
-    .action((runtimeName, options) => {
+    .action(withCompatibilityCheck((runtimeName, options) => {
         try {
             new ListActionsCommand(program).execute(runtimeName, options);
             processed = true;
@@ -116,7 +119,7 @@ program
         catch (err) {
             console.error(chalk.red(err.message));
         }
-    });
+    }));
 
 // Invoke Action
 program
@@ -127,7 +130,7 @@ program
     .option('--query [query]', 'A JMESPath query to use in filtering the response data.')
     .option('--params [params]', 'JSON params to send to the action')
     .option('--params-file [paramsFile]', 'A file containing either JSON or YAML formatted params')
-    .action((runtimeName, actionId, options) => {
+    .action(withCompatibilityCheck((runtimeName, actionId, options) => {
         try {
             new InvokeActionCommand(program).execute(runtimeName, actionId, options);
             processed = true;
@@ -135,7 +138,7 @@ program
         catch (err) {
             console.error(chalk.red(err.message));
         }
-    });
+    }));
 
 process.env.DOC && require('../src/commands/utils').exportDoc(program);
 

@@ -16,11 +16,20 @@
  * limitations under the License.
  */
 
-const helper = require('./utils.js');
-const program = require('commander');
 const chalk = require('chalk');
-const { ListConnections, SaveConnectionCommand, DescribeConnectionCommand, TestConnectionCommand,
-    ListConnectionsTypes, GenerateConnectionCommand } = require('../src/commands/connections');
+const program = require('commander');
+
+const { withCompatibilityCheck } = require('../src/compatibility');
+const helper = require('./utils.js');
+
+const {
+    ListConnections,
+    SaveConnectionCommand,
+    DescribeConnectionCommand,
+    TestConnectionCommand,
+    ListConnectionsTypes,
+    GenerateConnectionCommand
+} = require('../src/commands/connections');
 
 let processed = false;
 program.description('Work with Cortex Connections');
@@ -34,7 +43,7 @@ program
     .option('--profile [profile]', 'The profile to use')
     .option('--json', 'Output results using JSON')
     .option('--query [query]', 'A JMESPath query to use in filtering the response data. Ignored if output format is not JSON.')
-    .action((options) => {
+    .action(withCompatibilityCheck((options) => {
         try {
             new ListConnections(program).execute(options);
             processed = true;
@@ -42,7 +51,7 @@ program
         catch (err) {
             console.error(chalk.red(err.message));
         }
-    });
+    }));
 
 // Save Connections
 program
@@ -51,7 +60,7 @@ program
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
     .option('-y, --yaml', 'Use YAML for agent definition format')
-    .action((connDefinition, options) => {
+    .action(withCompatibilityCheck((connDefinition, options) => {
         try {
             new SaveConnectionCommand(program).execute(connDefinition, options);
             processed = true;
@@ -59,7 +68,7 @@ program
         catch (err) {
             console.error(chalk.red(err.message));
         }
-    });
+    }));
 
 // Describe Connection
 program
@@ -68,7 +77,7 @@ program
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
     .option('--query [query]', 'A JMESPath query to use in filtering the response data.')
-    .action((connectionName, options) => {
+    .action(withCompatibilityCheck((connectionName, options) => {
         try {
             new DescribeConnectionCommand(program).execute(connectionName, options);
             processed = true;
@@ -76,7 +85,7 @@ program
         catch (err) {
             console.error(chalk.red(err.message));
         }
-    });
+    }));
 
 // Test Connections
 program
@@ -85,7 +94,7 @@ program
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
     .option('-y, --yaml', 'Use YAML for agent definition format')
-    .action((connDefinition, options) => {
+    .action(withCompatibilityCheck((connDefinition, options) => {
         try {
             new TestConnectionCommand(program).execute(connDefinition, options);
             processed = true;
@@ -93,7 +102,7 @@ program
         catch (err) {
             console.error(chalk.red(err.message));
         }
-    });
+    }));
 
 // List Connections Types
 program
@@ -103,7 +112,7 @@ program
     .option('--profile [profile]', 'The profile to use')
     .option('--json', 'Output results using JSON')
     .option('--query [query]', 'A JMESPath query to use in filtering the response data. Ignored if output format is not JSON.')
-    .action((options) => {
+    .action(withCompatibilityCheck((options) => {
         try {
             new ListConnectionsTypes(program).execute(options);
             processed = true;
@@ -111,7 +120,7 @@ program
         catch (err) {
             console.error(chalk.red(err.message));
         }
-    });
+    }));
 
 
 // Generate Connections
@@ -119,8 +128,7 @@ program
     .command('generate')
     .description('Generates the structure of the connection payload')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
-    .option('--profile [profile]', 'The profile to use', 'default')
-    .action((options) => {
+    .action((options) => { // deliberately not using withCompatibilityCheck()
         try {
             new GenerateConnectionCommand(program).execute(options);
             processed = true;

@@ -16,9 +16,11 @@
  * limitations under the License.
  */
 
-const helper = require('./utils.js');
-const program = require('commander');
 const chalk = require('chalk');
+const program = require('commander');
+
+const { withCompatibilityCheck } = require('../src/compatibility');
+const helper = require('./utils.js');
 
 const {
     ListVariablesCommand,
@@ -35,7 +37,7 @@ program
     .description('List secure variable keys')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
-    .action((options) => {
+    .action(withCompatibilityCheck((options) => {
         try {
             new ListVariablesCommand(program).execute(options);
             processed = true;
@@ -43,7 +45,7 @@ program
         catch (err) {
             console.error(chalk.red(err.message));
         }
-    });
+    }));
 
 // Read Secure Variable Value
 program
@@ -51,7 +53,7 @@ program
     .description('Retrieve the value stored for the given variable key.')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
-    .action((keyName, options) => {
+    .action(withCompatibilityCheck((keyName, options) => {
         try {
             new ReadVariableCommand(program).execute(keyName, options);
             processed = true;
@@ -59,7 +61,7 @@ program
         catch (err) {
             console.error(chalk.red(err.message));
         }
-    });
+    }));
 
 // Write Secure Variable Value
 program
@@ -69,7 +71,7 @@ program
     .option('--data [data]', 'JSON value to save')
     .option('--data-file [dataFile]', 'A file containing either JSON or YAML formatted value to save')
     .option('--profile [profile]', 'The profile to use')
-    .action((keyName, value, options) => {
+    .action(withCompatibilityCheck((keyName, value, options) => {
         try {
             new WriteVariableCommand(program).execute(keyName, value, options);
             processed = true;
@@ -77,7 +79,7 @@ program
         catch (err) {
             console.error(chalk.red(err.message));
         }
-    });
+    }));
 
 process.env.DOC && require('../src/commands/utils').exportDoc(program);
 

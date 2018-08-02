@@ -16,10 +16,18 @@
  * limitations under the License.
  */
 
-const helper = require('./utils.js');
-const program = require('commander');
 const chalk = require('chalk');
-const { SaveSkillCommand, ListSkillsCommand, DescribeSkillCommand, GenerateSkillCommand } = require('../src/commands/skills');
+const program = require('commander');
+
+const { withCompatibilityCheck } = require('../src/compatibility');
+const helper = require('./utils.js');
+
+const {
+    SaveSkillCommand,
+    ListSkillsCommand,
+    DescribeSkillCommand,
+    GenerateSkillCommand
+} = require('../src/commands/skills');
 
 let processed = false;
 program.description('Work with Cortex Skills');
@@ -31,7 +39,7 @@ program
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
     .option('-y, --yaml', 'Use YAML for skill definition format')
-    .action((skillDefinition, options) => {
+    .action(withCompatibilityCheck((skillDefinition, options) => {
         try {
             new SaveSkillCommand(program).execute(skillDefinition, options);
             processed = true;
@@ -39,7 +47,7 @@ program
         catch (err) {
             console.error(chalk.red(err.message));
         }
-    });
+    }));
 
 // List Skills
 program
@@ -49,7 +57,7 @@ program
     .option('--profile [profile]', 'The profile to use')
     .option('--json', 'Output results using JSON')
     .option('--query [query]', 'A JMESPath query to use in filtering the response data.')
-    .action((options) => {
+    .action(withCompatibilityCheck((options) => {
         try {
             new ListSkillsCommand(program).execute(options);
             processed = true;
@@ -57,7 +65,7 @@ program
         catch (err) {
             console.error(chalk.red(err.message));
         }
-    });
+    }));
 
 // Describe Skill
 program
@@ -66,7 +74,7 @@ program
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
     .option('--query [query]', 'A JMESPath query to use in filtering the response data.')
-    .action((skillName, options) => {
+    .action(withCompatibilityCheck((skillName, options) => {
         try {
             new DescribeSkillCommand(program).execute(skillName, options);
             processed = true;
@@ -74,14 +82,13 @@ program
         catch (err) {
             console.error(chalk.red(err.message));
         }
-    });
+    }));
 
 program
     .command('generate')
     .description('Generates the structure and top level build script for a skill')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
-    .option('--profile [profile]', 'The profile to use', 'default')
-    .action((options) => {
+    .action((options) => { // deliberately not using withCompatibilityCheck()
         try {
             new GenerateSkillCommand(program).execute(options);
             processed = true;
