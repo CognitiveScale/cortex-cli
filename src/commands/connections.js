@@ -293,7 +293,7 @@ module.exports.GenerateConnectionCommand = class GenerateConnectionCommand {
     }
 
     execute(options) {
-        debug('%s.generateConnection()', options.profile);
+        debug('%s.generateConnection()');
         const yenv = yeoman.createEnv();
         yenv.lookup(()=>{
             yenv.run('@c12e/cortex:connections',
