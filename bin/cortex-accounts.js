@@ -16,9 +16,10 @@
  * limitations under the License.
  */
 
-const helper = require('./utils.js');
-const program = require('commander');
 const chalk = require('chalk');
+const program = require('../src/commander');
+
+const { withCompatibilityCheck } = require('../src/compatibility');
 
 const {
     CreateGroupCommand,
@@ -31,142 +32,137 @@ const {
     GrantGroupAccessToResourceCommand,
 } = require('../src/commands/accounts');
 
-let processed = false;
 program.description('Work with Cortex Accounts');
 
 // Create Group
 program
     .command('create-groups <groupName>')
     .description('Create a group')
+    .option('--no-compat', 'Ignore API compatibility checks')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
     .option('--description [description]', 'Group description')
-    .action((groupName, options) => {
+    .action(withCompatibilityCheck((groupName, options) => {
         try {
             new CreateGroupCommand(program).execute(groupName, options);
-            processed = true;
         }
         catch (err) {
             console.error(chalk.red(err.message));
         }
-    });
+    }));
 
 // Add Members to Group
 program
     .command('add-members-groups <groupName> [members...]')
     .description('Add members to group')
+    .option('--no-compat', 'Ignore API compatibility checks')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
-    .action((groupName, members, options) => {
+    .action(withCompatibilityCheck((groupName, members, options) => {
         try {
             new AddMembersToGroupCommand(program).execute(groupName, members, options);
-            processed = true;
         }
         catch (err) {
             console.error(chalk.red(err.message));
         }
-    });
+    }));
 
 // List Groups
 program
     .command('list-groups')
     .description('List groups')
+    .option('--no-compat', 'Ignore API compatibility checks')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
-    .action((options) => {
+    .action(withCompatibilityCheck((options) => {
         try {
             new ListGroupsCommand(program).execute(options);
-            processed = true;
         }
         catch (err) {
             console.error(chalk.red(err.message));
         }
-    });
+    }));
 
 // Describe Group
 program
     .command('describe-groups <groupName>')
     .description('Describe a group')
+    .option('--no-compat', 'Ignore API compatibility checks')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
-    .action((groupName, options) => {
+    .action(withCompatibilityCheck((groupName, options) => {
         try {
             new DescribeGroupCommand(program).execute(groupName, options);
-            processed = true;
         }
         catch (err) {
             console.error(chalk.red(err.message));
         }
-    });
+    }));
 
 // Delete Group
 program
     .command('delete-groups <groupName>')
     .description('Delete a group')
+    .option('--no-compat', 'Ignore API compatibility checks')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
-    .action((groupName, options) => {
+    .action(withCompatibilityCheck((groupName, options) => {
         try {
             new DeleteGroupCommand(program).execute(groupName, options);
-            processed = true;
         }
         catch (err) {
             console.error(chalk.red(err.message));
         }
-    });
+    }));
 
 // Remove Members From Group
 program
     .command('remove-members-groups <groupName> [members...]')
     .description('Remove members from a group')
+    .option('--no-compat', 'Ignore API compatibility checks')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
-    .action((groupName, members, options) => {
+    .action(withCompatibilityCheck((groupName, members, options) => {
         try {
             new RemoveMembersFromGroupCommand(program).execute(groupName, members, options);
-            processed = true;
         }
         catch (err) {
             console.error(chalk.red(err.message));
         }
-    });
+    }));
 
 // Register Resource
 program
     .command('register-resources <resourceName>')
     .description('Register a resource')
+    .option('--no-compat', 'Ignore API compatibility checks')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
     .option('--description [description]', 'Resource description')
     .option('--access [access]', 'Access level of resource [read/write/admin/execute]')
-    .action((resourceName, options) => {
+    .action(withCompatibilityCheck((resourceName, options) => {
         try {
             new RegisterResourceCommand(program).execute(resourceName, options);
-            processed = true;
         }
         catch (err) {
             console.error(chalk.red(err.message));
         }
-    });
+    }));
 
 // Grant Group Access To Resource
 program
     .command('grant-group-access-resources <resourceId> <groupName>')
     .description('Grant group access to a resource')
+    .option('--no-compat', 'Ignore API compatibility checks')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
-    .action((resourceId, groupName, options) => {
+    .action(withCompatibilityCheck((resourceId, groupName, options) => {
         try {
             new GrantGroupAccessToResourceCommand(program).execute(resourceId, groupName, options);
-            processed = true;
         }
         catch (err) {
             console.error(chalk.red(err.message));
         }
-    });
-
-process.env.DOC && require('../src/commands/utils').exportDoc(program);
+    }));
 
 program.parse(process.argv);
-if (!processed)
-    ['string', 'undefined'].includes(typeof program.args[0]) && helper.helpAndExit(program);

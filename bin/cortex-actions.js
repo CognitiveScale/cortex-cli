@@ -16,9 +16,11 @@
  * limitations under the License.
  */
 
-const helper = require('./utils.js');
-const program = require('commander');
 const chalk = require('chalk');
+const program = require('../src/commander');
+
+const { withCompatibilityCheck } = require('../src/compatibility');
+
 const {
     ListActionsCommand,
     DescribeActionCommand,
@@ -27,67 +29,67 @@ const {
     DeployActionCommand
 } = require('../src/commands/actions');
 
-let processed = false;
 program.description('Work with Cortex Actions');
 
 // List Actions
 program
     .command('list')
     .description('List the deployed actions')
+    .option('--no-compat', 'Ignore API compatibility checks')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
     .option('--json', 'Output results using JSON')
     .option('--query [query]', 'A JMESPath query to use in filtering the response data. Ignored if output format is not JSON.')
-    .action((options) => {
+    .action(withCompatibilityCheck((options) => {
         try {
             new ListActionsCommand(program).execute(options);
-            processed = true;
         }
         catch (err) {
             console.error(chalk.red(err.message));
         }
-    });
+    }));
 
 // Describe Action
 program
     .command('describe <actionName>')
     .description('Describe an action')
+    .option('--no-compat', 'Ignore API compatibility checks')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
     .option('--query [query]', 'A JMESPath query to use in filtering the response data.')
     .option('-d, --download', 'Download code binary in response')
-    .action((actionName, options) => {
+    .action(withCompatibilityCheck((actionName, options) => {
         try {
             new DescribeActionCommand(program).execute(actionName, options);
-            processed = true;
         }
         catch (err) {
             console.error(chalk.red(err.message));
         }
-    });
+    }));
 
 // Delete Action
 program
     .command('delete <actionName>')
     .description('Delete an action')
+    .option('--no-compat', 'Ignore API compatibility checks')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
     .option('--query [query]', 'A JMESPath query to use in filtering the response data.')
     .option('--actionType [actionType]', 'Type of action')
-    .action((actionName, options) => {
+    .action(withCompatibilityCheck((actionName, options) => {
         try {
             new DeleteActionCommand(program).execute(actionName, options);
-            processed = true;
         }
         catch (err) {
             console.error(chalk.red(err.message));
         }
-    });
+    }));
 
 // Invoke Action
 program
     .command('invoke <actionName>')
     .description('Invoke an action')
+    .option('--no-compat', 'Ignore API compatibility checks')
     .option('--params [params]', 'JSON params to send to the action')
     .option('--params-file [paramsFile]', 'A file containing either JSON or YAML formatted params')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
@@ -96,20 +98,20 @@ program
     .option('--actionType [actionType]', 'Type of action')
     .option('--path [path]', 'Path to the daemon service url being invoked', '')
     .option('--method [method]', 'HTTP method')                                         // GET, POST ...
-    .action((actionName, options) => {
+    .action(withCompatibilityCheck((actionName, options) => {
         try {
             new InvokeActionCommand(program).execute(actionName, options);
-            processed = true;
         }
         catch (err) {
             console.error(chalk.red(err.message));
         }
-    });
+    }));
 
 // Deploy Action
 program
     .command('deploy <actionName>')
     .description('Deploy an action')
+    .option('--no-compat', 'Ignore API compatibility checks')
     .option('--kind [kind]', 'Action runtime kind') // python:3, python:2, nodejs:default
     .option('--code [code]', 'The code file or code archive to deploy')
     .option('--docker [image]', 'Docker image to use as the runner')
@@ -121,7 +123,7 @@ program
     .option('--port [port]', 'Docker port')                  //'9091'
     .option('--environment [environment]', 'Environment')
     .option('--cmd [cmd]', 'Command to be executed')    //'["--daemon"]'
-    .action((actionName, options) => {
+    .action(withCompatibilityCheck((actionName, options) => {
         try {
             if (!options.kind && !options.docker) {
                 throw new Error('--kind [kind] or --docker [image] required');
@@ -132,15 +134,10 @@ program
             }
 
             new DeployActionCommand(program).execute(actionName, options);
-            processed = true;
         }
         catch (err) {
             console.error(chalk.red(err.message));
         }
-    });
-
-process.env.DOC && require('../src/commands/utils').exportDoc(program);
+    }));
 
 program.parse(process.argv);
-if (!processed)
-    ['string', 'undefined'].includes(typeof program.args[0]) && helper.helpAndExit(program);

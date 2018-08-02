@@ -16,13 +16,20 @@
  * limitations under the License.
  */
 
-const helper = require('./utils.js');
-const program = require('commander');
 const chalk = require('chalk');
-const { ListDatasets, SaveDatasetsCommand, DescribeDatasetCommand, GetDataframeCommand,
-    StreamDatasetCommand, GenerateDatasetCommand } = require('../src/commands/datasets');
+const program = require('../src/commander');
 
-let processed = false;
+const { withCompatibilityCheck } = require('../src/compatibility');
+
+const {
+    ListDatasets,
+    SaveDatasetsCommand,
+    DescribeDatasetCommand,
+    GetDataframeCommand,
+    StreamDatasetCommand,
+    GenerateDatasetCommand
+} = require('../src/commands/datasets');
+
 program.description('Work with Cortex Connections');
 
 
@@ -30,92 +37,92 @@ program.description('Work with Cortex Connections');
 program
     .command('list')
     .description('List Datasets')
+    .option('--no-compat', 'Ignore API compatibility checks')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
     .option('--json', 'Output results using detailed JSON')
     .option('--query [query]', 'A JMESPath query to use in filtering the response data. Ignored if output format is not JSON.')
-    .action((options) => {
+    .action(withCompatibilityCheck((options) => {
         try {
             new ListDatasets(program).execute(options);
-            processed = true;
         }
         catch (err) {
             console.error(chalk.red(err.message));
         }
-    });
+    }));
 
 // Save Dataset
 program
     .command('save <datasetDefinition>')
     .description('Save a dataset definition. Takes JSON file by default.')
+    .option('--no-compat', 'Ignore API compatibility checks')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
     .option('-y, --yaml', 'Use YAML for dataset file definition format')
-    .action((datasetDef, options) => {
+    .action(withCompatibilityCheck((datasetDef, options) => {
         try {
             new SaveDatasetsCommand(program).execute(datasetDef, options);
-            processed = true;
         }
         catch (err) {
             console.error(chalk.red(err.message));
         }
-    });
+    }));
 
 // Describe Dataset
 program
     .command('describe <datasetName>')
     .description('Describe dataset')
+    .option('--no-compat', 'Ignore API compatibility checks')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
     .option('--query [query]', 'A JMESPath query to use in filtering the response data.')
-    .action((datasetName, options) => {
+    .action(withCompatibilityCheck((datasetName, options) => {
         try {
             new DescribeDatasetCommand(program).execute(datasetName, options);
-            processed = true;
         }
         catch (err) {
             console.error(chalk.red(err.message));
         }
-    });
+    }));
 
 // Get Dataframe
 program
     .command('get-dataframe <datasetName>')
     .description('Get dataset in dataframe format')
+    .option('--no-compat', 'Ignore API compatibility checks')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
-    .action((datasetName, options) => {
+    .action(withCompatibilityCheck((datasetName, options) => {
         try {
             new GetDataframeCommand(program).execute(datasetName, options);
-            processed = true;
         }
         catch (err) {
             console.error(chalk.red(err.message));
         }
-    });
+    }));
 
 // Get Stream
 program
     .command('get-stream <datasetName>')
     .description('Stream dataset content')
+    .option('--no-compat', 'Ignore API compatibility checks')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
-    .action((datasetName, options) => {
+    .action(withCompatibilityCheck((datasetName, options) => {
         try {
             new StreamDatasetCommand(program).execute(datasetName, options);
-            processed = true;
         }
         catch (err) {
             console.error(chalk.red(err.message));
         }
-    });
+    }));
 
 program
     .command('generate')
     .description('Generates the structure and top level build script for a dataset')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use', 'default')
-    .action((options) => {
+    .action((options) => {  // deliberately not using withCompatibilityCheck()
         try {
             new GenerateDatasetCommand(program).execute(options);
         }
@@ -124,7 +131,4 @@ program
         }
     });
 
-process.env.DOC && require('../src/commands/utils').exportDoc(program);
 program.parse(process.argv);
-if (!processed)
-    ['string', 'undefined'].includes(typeof program.args[0]) && helper.helpAndExit(program);
