@@ -36,6 +36,7 @@ program
     .command('list')
     .description('List secure variable keys')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
+    .option('--json', 'Output results using JSON')
     .option('--profile [profile]', 'The profile to use')
     .action(withCompatibilityCheck((options) => {
         try {
@@ -52,6 +53,7 @@ program
     .command('describe <keyName>')
     .description('Retrieve the value stored for the given variable key.')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
+    .option('--json', 'Output results using JSON')
     .option('--profile [profile]', 'The profile to use')
     .action(withCompatibilityCheck((keyName, options) => {
         try {
