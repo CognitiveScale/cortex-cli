@@ -16,9 +16,11 @@
  * limitations under the License.
  */
 
-const helper = require('./utils.js');
-const program = require('commander');
 const chalk = require('chalk');
+const program = require('commander');
+
+const { withCompatibilityCheck } = require('../src/compatibility');
+const helper = require('./utils.js');
 
 const {
     CreateGroupCommand,
@@ -41,7 +43,7 @@ program
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
     .option('--description [description]', 'Group description')
-    .action((groupName, options) => {
+    .action(withCompatibilityCheck((groupName, options) => {
         try {
             new CreateGroupCommand(program).execute(groupName, options);
             processed = true;
@@ -49,7 +51,7 @@ program
         catch (err) {
             console.error(chalk.red(err.message));
         }
-    });
+    }));
 
 // Add Members to Group
 program
@@ -57,7 +59,7 @@ program
     .description('Add members to group')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
-    .action((groupName, members, options) => {
+    .action(withCompatibilityCheck((groupName, members, options) => {
         try {
             new AddMembersToGroupCommand(program).execute(groupName, members, options);
             processed = true;
@@ -65,7 +67,7 @@ program
         catch (err) {
             console.error(chalk.red(err.message));
         }
-    });
+    }));
 
 // List Groups
 program
@@ -73,7 +75,7 @@ program
     .description('List groups')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
-    .action((options) => {
+    .action(withCompatibilityCheck((options) => {
         try {
             new ListGroupsCommand(program).execute(options);
             processed = true;
@@ -81,7 +83,7 @@ program
         catch (err) {
             console.error(chalk.red(err.message));
         }
-    });
+    }));
 
 // Describe Group
 program
@@ -89,7 +91,7 @@ program
     .description('Describe a group')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
-    .action((groupName, options) => {
+    .action(withCompatibilityCheck((groupName, options) => {
         try {
             new DescribeGroupCommand(program).execute(groupName, options);
             processed = true;
@@ -97,7 +99,7 @@ program
         catch (err) {
             console.error(chalk.red(err.message));
         }
-    });
+    }));
 
 // Delete Group
 program
@@ -105,7 +107,7 @@ program
     .description('Delete a group')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
-    .action((groupName, options) => {
+    .action(withCompatibilityCheck((groupName, options) => {
         try {
             new DeleteGroupCommand(program).execute(groupName, options);
             processed = true;
@@ -113,7 +115,7 @@ program
         catch (err) {
             console.error(chalk.red(err.message));
         }
-    });
+    }));
 
 // Remove Members From Group
 program
@@ -121,7 +123,7 @@ program
     .description('Remove members from a group')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
-    .action((groupName, members, options) => {
+    .action(withCompatibilityCheck((groupName, members, options) => {
         try {
             new RemoveMembersFromGroupCommand(program).execute(groupName, members, options);
             processed = true;
@@ -129,7 +131,7 @@ program
         catch (err) {
             console.error(chalk.red(err.message));
         }
-    });
+    }));
 
 // Register Resource
 program
@@ -139,7 +141,7 @@ program
     .option('--profile [profile]', 'The profile to use')
     .option('--description [description]', 'Resource description')
     .option('--access [access]', 'Access level of resource [read/write/admin/execute]')
-    .action((resourceName, options) => {
+    .action(withCompatibilityCheck((resourceName, options) => {
         try {
             new RegisterResourceCommand(program).execute(resourceName, options);
             processed = true;
@@ -147,7 +149,7 @@ program
         catch (err) {
             console.error(chalk.red(err.message));
         }
-    });
+    }));
 
 // Grant Group Access To Resource
 program
@@ -155,7 +157,7 @@ program
     .description('Grant group access to a resource')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
-    .action((resourceId, groupName, options) => {
+    .action(withCompatibilityCheck((resourceId, groupName, options) => {
         try {
             new GrantGroupAccessToResourceCommand(program).execute(resourceId, groupName, options);
             processed = true;
@@ -163,7 +165,7 @@ program
         catch (err) {
             console.error(chalk.red(err.message));
         }
-    });
+    }));
 
 process.env.DOC && require('../src/commands/utils').exportDoc(program);
 

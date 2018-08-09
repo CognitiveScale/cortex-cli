@@ -101,15 +101,15 @@ class Config {
     getProfile(name) {
         const profile = this.profiles[name];
         if (!profile) {
-            return null;
+            return undefined;
         }
 
         return new Profile(name, profile).validate();
     }
 
     setProfile(name, {url, account, tenantId, username, token}) {
-         const profile = new Profile(name, {url, username, account, tenantId, token});
-         profile.validate(); // do not set/save invalid profiles ..
+        const profile = new Profile(name, {url, username, account, tenantId, token});
+        profile.validate(); // do not set/save invalid profiles ..
         this.profiles[name] = profile
     }
 
