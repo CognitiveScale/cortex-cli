@@ -16,6 +16,7 @@
 
 const boxen = require('boxen');
 const chalk = require('chalk');
+const concat = require('lodash/fp/concat');
 const debug = require('debug')('cortex:cli');
 const filter = require('lodash/fp/filter');
 const findPackageJson = require('find-package-json');
@@ -26,6 +27,7 @@ const last = require('lodash/fp/last');
 const npmFetch = require('npm-registry-fetch');
 const request = require('superagent');
 const semver = require('semver');
+const uniq = require('lodash/fp/uniq');
 
 const { loadProfile } = require('./config');
 const { printError } = require('../src/commands/utils');
@@ -37,6 +39,7 @@ function getAvailableVersions(name) {
     return npmFetch
         .json(pkg.name)
         .then(manifest => keys(getOr({}, 'versions', manifest)))
+        .then(versions => uniq(concat(versions, pkg.version)))
         .then(versions => versions.sort(semver.compare))
         .catch((error) => {
             throw new Error('Unable to determine CLI available versions');
