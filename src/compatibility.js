@@ -33,6 +33,7 @@ const { printError } = require('../src/commands/utils');
 const pkg = findPackageJson(__dirname).next().value;
 
 function getAvailableVersions(name) {
+    debug('getAvailableVersions => %s', name);
     return npmFetch
         .json(pkg.name)
         .then(manifest => keys(getOr({}, 'versions', manifest)))
@@ -44,6 +45,7 @@ function getAvailableVersions(name) {
 
 function getRequiredVersion(profile) {
     const endpoint = `${profile.url}/v3/catalog/compatibility/applications/cortex-cli`;
+    debug('getRequiredVersion => %s', endpoint);
     return request
         .get(endpoint)
         .set('Authorization', `Bearer ${profile.token}`)
@@ -88,18 +90,21 @@ function upgradeRequired(args) {
 }
 
 function getCompatibility(profile) {
-    debug('getCompatibility => %s', this.endpoint);
+    debug('getCompatibility => %s profile', profile.name);
     return Promise
         .all([
             getAvailableVersions(pkg.name),
             getRequiredVersion(profile)
         ])
         .then(([versions, requirements]) => {
+            debug('getCompatibility => versions: %s, requirements: %s', versions, requirements);
             const compatibleVersions = filter(v => semver.satisfies(v, requirements), versions);
+            debug('getCompatibility => compatible versions: %s', compatibleVersions);
 
             const { version: current } = pkg;
             const latest = last(compatibleVersions);
             const satisfied = semver.satisfies(pkg.version, requirements);
+            debug('getCompatibility => satisfied: %s', satisfied);
 
             return ({ current, latest, satisfied });
         });
