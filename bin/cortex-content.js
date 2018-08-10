@@ -37,6 +37,7 @@ program.description('Work with Cortex Contents');
 program
     .command('list')
     .description('List content')
+    .option('--no-compat', 'Ignore API compatibility checks')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
     .option('--json', 'Output results using JSON')
@@ -55,6 +56,7 @@ program
 program
     .command('upload <contentKey> <filePath>')
     .description('Upload content')
+    .option('--no-compat', 'Ignore API compatibility checks')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
     .option('--secure', 'Uploads the content securely to the Cortex Vault. Use this option for keytab files or content that contains sensitive information that is required during Runtime. Take note of the contentKey you give to this content for future reference.')
@@ -72,6 +74,7 @@ program
 program
     .command('delete <contentKey>')
     .description('Delete content')
+    .option('--no-compat', 'Ignore API compatibility checks')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
     .action(withCompatibilityCheck((contentKey, options) => {
@@ -88,6 +91,7 @@ program
 program
     .command('download <contentKey>')
     .description('Download content')
+    .option('--no-compat', 'Ignore API compatibility checks')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
     .option('--secure', 'Downloads the content securely from the Cortex Vault.')

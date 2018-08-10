@@ -113,22 +113,27 @@ function getCompatibility(profile) {
 function withCompatibilityCheck(fn) {
     return (...args) => {
         const options = last(args) || {};
-        const { profile: profileName } = options;
-        const profile = loadProfile(profileName);
 
-        return getCompatibility(profile)
-            .then(({ current, latest, satisfied }) => {
-                if (!satisfied) {
-                    upgradeRequired({ current, latest });
-                }
-                else if (semver.gt(latest, current)) {
-                    upgradeAvailable({ current, latest });
-                }
-            })
-            .then(() => fn(...args))
-            .catch((error) => {
-                printError(error);
-            });
+        if (options.compat) {
+            const { profile: profileName } = options;
+            const profile = loadProfile(profileName);
+
+            return getCompatibility(profile)
+                .then(({ current, latest, satisfied }) => {
+                    if (!satisfied) {
+                        upgradeRequired({ current, latest });
+                    }
+                    else if (semver.gt(latest, current)) {
+                        upgradeAvailable({ current, latest });
+                    }
+                })
+                .then(() => fn(...args))
+                .catch((error) => {
+                    printError(error);
+                });
+        }
+
+        return Promise.resolve().then(() => fn(...args));
     };
 };
 

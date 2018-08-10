@@ -37,6 +37,7 @@ program.description('Work with Cortex Jobs');
 program
     .command('list <jobId>')
     .description('List task definitions within a job definition')
+    .option('--no-compat', 'Ignore API compatibility checks')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
     .option('--json', 'Output results using JSON')
@@ -55,6 +56,7 @@ program
 program
     .command('logs <jobId> <taskId>')
     .description('Get Tasks logs')
+    .option('--no-compat', 'Ignore API compatibility checks')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
     .option('--json', 'Output results using JSON')
@@ -73,6 +75,7 @@ program
 program
     .command('cancel <jobId> <taskId>')
     .description('Cancel a task')
+    .option('--no-compat', 'Ignore API compatibility checks')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
     .option('--json', 'Output results using JSON')
@@ -91,6 +94,7 @@ program
 program
     .command('describe <jobId> <taskId>')
     .description('Describe a task definition')
+    .option('--no-compat', 'Ignore API compatibility checks')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
     .option('--json', 'Output results using JSON')
