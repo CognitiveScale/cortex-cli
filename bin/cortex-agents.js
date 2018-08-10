@@ -46,6 +46,7 @@ program.description('Work with Cortex Agents');
 program
     .command('save <agentDefinition>')
     .description('Save an agent definition')
+    .option('--no-compat', 'Ignore API compatibility checks')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
     .option('-y, --yaml', 'Use YAML for agent definition format')
@@ -63,6 +64,7 @@ program
 program
     .command('list')
     .description('List agent definitions')
+    .option('--no-compat', 'Ignore API compatibility checks')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
     .option('--json', 'Output results using JSON')
@@ -81,6 +83,7 @@ program
 program
     .command('describe <agentName>')
     .description('Describe agent')
+    .option('--no-compat', 'Ignore API compatibility checks')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
     .option('--query [query]', 'A JMESPath query to use in filtering the response data.')
@@ -99,6 +102,7 @@ program
 program
     .command('invoke <agentName> <serviceName>')
     .description('Invoke an agent service')
+    .option('--no-compat', 'Ignore API compatibility checks')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
     .option('--params [params]', 'JSON params to send to the action')
@@ -117,10 +121,11 @@ program
 program
     .command('get-service-activation <activationId>')
     .description('Get service activation')
+    .option('--no-compat', 'Ignore API compatibility checks')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
     .option('--query [query]', 'A JMESPath query to use in filtering the response data.')
-    .action((activationId, options) => {
+    .action(withCompatibilityCheck((activationId, options) => {
         try {
             new GetServiceActivationCommand(program).execute(activationId, options);
             processed = true;
@@ -128,12 +133,13 @@ program
         catch (err) {
             console.error(chalk.red(err.message));
         }
-    });
+    }));
 
 
 program
     .command('list-snapshots <agentName>')
     .description('List agent snapshots')
+    .option('--no-compat', 'Ignore API compatibility checks')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
     .option('--environmentName [environmentName]', 'The environment to list or \'all\'')
@@ -152,6 +158,7 @@ program
 program
     .command('describe-snapshot <snapshotId>')
     .description('Describe agent snapshot')
+    .option('--no-compat', 'Ignore API compatibility checks')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
     .option('--environmentName [environmentName]', 'The environment to list or \'all\'')
@@ -169,11 +176,11 @@ program
 program
     .command('create-snapshot [snapshotDefinition]')
     .description('Create an agent snapshot')
+    .option('--no-compat', 'Ignore API compatibility checks')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
     .option('--agentName [name[:version]]', 'The name of the agent to snapshot')
     .option('--title [title]', 'A descriptive title for the snapshot')
-
     .action(withCompatibilityCheck((snapshotDefinition, options) => {
         try {
             new CreateAgentSnapshotCommand(program).execute(snapshotDefinition, options);
@@ -189,6 +196,7 @@ program
 program
     .command('list-instances <agentName>')
     .description('List agent instances  ')
+    .option('--no-compat', 'Ignore API compatibility checks')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
     .option('--environmentName [environmentName]', 'The environment to list or \'all\'')
@@ -208,11 +216,11 @@ program
 program
     .command('create-instance [instanceDefinition]')
     .description('Create agent instance')
+    .option('--no-compat', 'Ignore API compatibility checks')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--environmentName [environmentName]', 'The environment to use')
     .option('--profile [profile]', 'The profile to use')
     .option('--snapshotId [snapshotId]', 'The name of the agent to snapshot')
-
     .action(withCompatibilityCheck((instanceDefinition, options) => {
         try {
             new CreateAgentInstanceCommand(program).execute(instanceDefinition, options);
@@ -227,6 +235,7 @@ program
 program
     .command('get-instance <instanceId>')
     .description('Get agent instance')
+    .option('--no-compat', 'Ignore API compatibility checks')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
     .option('--json', 'Output results using JSON')
@@ -244,6 +253,7 @@ program
 program
     .command('delete-instance <instanceId>')
     .description('Delete agent instance')
+    .option('--no-compat', 'Ignore API compatibility checks')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
     .action(withCompatibilityCheck((instanceId, options) => {
@@ -260,6 +270,7 @@ program
 program
     .command('stop-instance <instanceId>')
     .description('Stop agent instance')
+    .option('--no-compat', 'Ignore API compatibility checks')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
     .action(withCompatibilityCheck((instanceId, options) => {
@@ -276,6 +287,7 @@ program
 program
     .command('list-triggers')
     .description('List of triggers for the current tenant')
+    .option('--no-compat', 'Ignore API compatibility checks')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
     .action(withCompatibilityCheck((options) => {

@@ -39,6 +39,7 @@ program.description('Work with Cortex Connections');
 program
     .command('list')
     .description('List Datasets')
+    .option('--no-compat', 'Ignore API compatibility checks')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
     .option('--json', 'Output results using detailed JSON')
@@ -57,6 +58,7 @@ program
 program
     .command('save <datasetDefinition>')
     .description('Save a dataset definition. Takes JSON file by default.')
+    .option('--no-compat', 'Ignore API compatibility checks')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
     .option('-y, --yaml', 'Use YAML for dataset file definition format')
@@ -74,6 +76,7 @@ program
 program
     .command('describe <datasetName>')
     .description('Describe dataset')
+    .option('--no-compat', 'Ignore API compatibility checks')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
     .option('--query [query]', 'A JMESPath query to use in filtering the response data.')
@@ -91,6 +94,7 @@ program
 program
     .command('get-dataframe <datasetName>')
     .description('Get dataset in dataframe format')
+    .option('--no-compat', 'Ignore API compatibility checks')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
     .action(withCompatibilityCheck((datasetName, options) => {
@@ -107,6 +111,7 @@ program
 program
     .command('get-stream <datasetName>')
     .description('Stream dataset content')
+    .option('--no-compat', 'Ignore API compatibility checks')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
     .action(withCompatibilityCheck((datasetName, options) => {

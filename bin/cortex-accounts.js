@@ -40,6 +40,7 @@ program.description('Work with Cortex Accounts');
 program
     .command('create-groups <groupName>')
     .description('Create a group')
+    .option('--no-compat', 'Ignore API compatibility checks')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
     .option('--description [description]', 'Group description')
@@ -57,6 +58,7 @@ program
 program
     .command('add-members-groups <groupName> [members...]')
     .description('Add members to group')
+    .option('--no-compat', 'Ignore API compatibility checks')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
     .action(withCompatibilityCheck((groupName, members, options) => {
@@ -73,6 +75,7 @@ program
 program
     .command('list-groups')
     .description('List groups')
+    .option('--no-compat', 'Ignore API compatibility checks')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
     .action(withCompatibilityCheck((options) => {
@@ -89,6 +92,7 @@ program
 program
     .command('describe-groups <groupName>')
     .description('Describe a group')
+    .option('--no-compat', 'Ignore API compatibility checks')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
     .action(withCompatibilityCheck((groupName, options) => {
@@ -105,6 +109,7 @@ program
 program
     .command('delete-groups <groupName>')
     .description('Delete a group')
+    .option('--no-compat', 'Ignore API compatibility checks')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
     .action(withCompatibilityCheck((groupName, options) => {
@@ -121,6 +126,7 @@ program
 program
     .command('remove-members-groups <groupName> [members...]')
     .description('Remove members from a group')
+    .option('--no-compat', 'Ignore API compatibility checks')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
     .action(withCompatibilityCheck((groupName, members, options) => {
@@ -137,6 +143,7 @@ program
 program
     .command('register-resources <resourceName>')
     .description('Register a resource')
+    .option('--no-compat', 'Ignore API compatibility checks')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
     .option('--description [description]', 'Resource description')
@@ -155,6 +162,7 @@ program
 program
     .command('grant-group-access-resources <resourceId> <groupName>')
     .description('Grant group access to a resource')
+    .option('--no-compat', 'Ignore API compatibility checks')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
     .action(withCompatibilityCheck((resourceId, groupName, options) => {

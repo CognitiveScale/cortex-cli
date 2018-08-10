@@ -38,6 +38,7 @@ program.description('Work with Cortex Environments');
 program
     .command('list')
     .description('List environments')
+    .option('--no-compat', 'Ignore API compatibility checks')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
     .option('--json', 'Output results using JSON')
@@ -56,6 +57,7 @@ program
 program
     .command('save <environmentDefinition>')
     .description('Create an environment. Takes JSON file by default.')
+    .option('--no-compat', 'Ignore API compatibility checks')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
     .option('-y, --yaml', 'Use YAML for environment definition format')
@@ -73,6 +75,7 @@ program
 program
     .command('promote [promotionDefinition]')
     .description('Promote a snapshot to an environment. Takes JSON file by default.')
+    .option('--no-compat', 'Ignore API compatibility checks')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
     .option('-y, --yaml', 'Use YAML for environment definition format')
@@ -92,6 +95,7 @@ program
 program
     .command('describe <environmentName>')
     .description('Describe environment')
+    .option('--no-compat', 'Ignore API compatibility checks')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
     .option('--query [query]', 'A JMESPath query to use in filtering the response data.')
@@ -111,6 +115,7 @@ program
 program
     .command('list-instances [environmentName]')
     .description('List instances in environment')
+    .option('--no-compat', 'Ignore API compatibility checks')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
     .option('--json', 'Output results using JSON')

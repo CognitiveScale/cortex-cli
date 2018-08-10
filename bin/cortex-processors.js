@@ -38,6 +38,7 @@ program.description('Work with the Cortex Processor Runtime');
 program
     .command('list-runtime-types')
     .description('List available processor runtime types')
+    .option('--no-compat', 'Ignore API compatibility checks')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
     .option('--json', 'Output results using JSON')
@@ -56,6 +57,7 @@ program
 program
     .command('list-runtimes')
     .description('List configured processor runtimes')
+    .option('--no-compat', 'Ignore API compatibility checks')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
     .option('--json', 'Output results using JSON')
@@ -74,6 +76,7 @@ program
 program
     .command('describe <runtimeName>')
     .description('Describe a processor runtime')
+    .option('--no-compat', 'Ignore API compatibility checks')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
     .option('--query [query]', 'A JMESPath query to use in filtering the response data.')
@@ -91,6 +94,7 @@ program
 program
     .command('delete <runtimeName>')
     .description('Delete a processor runtime')
+    .option('--no-compat', 'Ignore API compatibility checks')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
     .action(withCompatibilityCheck((runtimeName, options) => {
@@ -107,6 +111,7 @@ program
 program
     .command('list-actions <runtimeName>')
     .description('List the available processor runtime actions')
+    .option('--no-compat', 'Ignore API compatibility checks')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
     .option('--json', 'Output results using JSON')
@@ -125,6 +130,7 @@ program
 program
     .command('invoke <runtimeName> <actionId>')
     .description('Invoke a processor action')
+    .option('--no-compat', 'Ignore API compatibility checks')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
     .option('--query [query]', 'A JMESPath query to use in filtering the response data.')

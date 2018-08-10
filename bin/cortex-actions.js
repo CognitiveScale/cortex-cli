@@ -37,6 +37,7 @@ program.description('Work with Cortex Actions');
 program
     .command('list')
     .description('List the deployed actions')
+    .option('--no-compat', 'Ignore API compatibility checks')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
     .option('--json', 'Output results using JSON')
@@ -55,6 +56,7 @@ program
 program
     .command('describe <actionName>')
     .description('Describe an action')
+    .option('--no-compat', 'Ignore API compatibility checks')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
     .option('--query [query]', 'A JMESPath query to use in filtering the response data.')
@@ -73,6 +75,7 @@ program
 program
     .command('delete <actionName>')
     .description('Delete an action')
+    .option('--no-compat', 'Ignore API compatibility checks')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
     .option('--query [query]', 'A JMESPath query to use in filtering the response data.')
@@ -91,6 +94,7 @@ program
 program
     .command('invoke <actionName>')
     .description('Invoke an action')
+    .option('--no-compat', 'Ignore API compatibility checks')
     .option('--params [params]', 'JSON params to send to the action')
     .option('--params-file [paramsFile]', 'A file containing either JSON or YAML formatted params')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
@@ -113,6 +117,7 @@ program
 program
     .command('deploy <actionName>')
     .description('Deploy an action')
+    .option('--no-compat', 'Ignore API compatibility checks')
     .option('--kind [kind]', 'Action runtime kind') // python:3, python:2, nodejs:default
     .option('--code [code]', 'The code file or code archive to deploy')
     .option('--docker [image]', 'Docker image to use as the runner')
