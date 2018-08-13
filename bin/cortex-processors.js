@@ -17,10 +17,9 @@
  */
 
 const chalk = require('chalk');
-const program = require('commander');
+const program = require('../src/commander');
 
 const { withCompatibilityCheck } = require('../src/compatibility');
-const helper = require('./utils.js');
 
 const { 
     ListRuntimesCommand, 
@@ -31,7 +30,6 @@ const {
     InvokeActionCommand 
 } = require('../src/commands/processors');
 
-let processed = false;
 program.description('Work with the Cortex Processor Runtime');
     
 // List Processor Runtime Types
@@ -46,7 +44,6 @@ program
     .action(withCompatibilityCheck((options) => {
         try {
             new ListRuntimeTypesCommand(program).execute(options);
-            processed = true;
         }
         catch (err) {
             console.error(chalk.red(err.message));
@@ -65,7 +62,6 @@ program
     .action(withCompatibilityCheck((options) => {
         try {
             new ListRuntimesCommand(program).execute(options);
-            processed = true;
         }
         catch (err) {
             console.error(chalk.red(err.message));
@@ -83,7 +79,6 @@ program
     .action(withCompatibilityCheck((runtimeName, options) => {
         try {
             new DescribeRuntimeCommand(program).execute(runtimeName, options);
-            processed = true;
         }
         catch (err) {
             console.error(chalk.red(err.message));
@@ -100,7 +95,6 @@ program
     .action(withCompatibilityCheck((runtimeName, options) => {
         try {
             new DeleteRuntimeCommand(program).execute(runtimeName, options);
-            processed = true;
         }
         catch (err) {
             console.error(chalk.red(err.message));
@@ -119,7 +113,6 @@ program
     .action(withCompatibilityCheck((runtimeName, options) => {
         try {
             new ListActionsCommand(program).execute(runtimeName, options);
-            processed = true;
         }
         catch (err) {
             console.error(chalk.red(err.message));
@@ -139,15 +132,10 @@ program
     .action(withCompatibilityCheck((runtimeName, actionId, options) => {
         try {
             new InvokeActionCommand(program).execute(runtimeName, actionId, options);
-            processed = true;
         }
         catch (err) {
             console.error(chalk.red(err.message));
         }
     }));
 
-process.env.DOC && require('../src/commands/utils').exportDoc(program);
-
 program.parse(process.argv);
-if (!processed)
-    ['string', 'undefined'].includes(typeof program.args[0]) && helper.helpAndExit(program);

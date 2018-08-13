@@ -17,10 +17,9 @@
  */
 
 const chalk = require('chalk');
-const program = require('commander');
+const program = require('../src/commander');
 
 const { withCompatibilityCheck } = require('../src/compatibility');
-const helper = require('./utils.js');
 
 const {
     ListEnvironments,
@@ -30,7 +29,6 @@ const {
     ListInstancesCommand
 } = require('../src/commands/environments');
 
-let processed = false;
 program.description('Work with Cortex Environments');
 
 
@@ -46,7 +44,6 @@ program
     .action(withCompatibilityCheck((options) => {
         try {
             new ListEnvironments(program).execute(options);
-            processed = true;
         }
         catch (err) {
             console.error(chalk.red(err.message));
@@ -64,7 +61,6 @@ program
     .action(withCompatibilityCheck((envDefinition, options) => {
         try {
             new SaveEnvironmentCommand(program).execute(envDefinition, options);
-            processed = true;
         }
         catch (err) {
             console.error(chalk.red(err.message));
@@ -84,7 +80,6 @@ program
     .action(withCompatibilityCheck((promotionDefinition, options) => {
         try {
             new PromoteEnvironmentCommand(program).execute(promotionDefinition, options);
-            processed = true;
         }
         catch (err) {
             console.error(chalk.red(err.message));
@@ -102,7 +97,6 @@ program
     .action(withCompatibilityCheck((environmentName, options) => {
         try {
             new DescribeEnvironmentCommand(program).execute(environmentName, options);
-            processed = true;
         }
         catch (err) {
             console.error(chalk.red(err.message));
@@ -123,14 +117,10 @@ program
     .action(withCompatibilityCheck((environmentName, options) => {
         try {
             new ListInstancesCommand(program).execute(environmentName || 'cortex/default', options);
-            processed = true;
         }
         catch (err) {
             console.error(chalk.red(err.message));
         }
     }));
 
-process.env.DOC && require('../src/commands/utils').exportDoc(program);
 program.parse(process.argv);
-if (!processed)
-    ['string', 'undefined'].includes(typeof program.args[0]) && helper.helpAndExit(program);

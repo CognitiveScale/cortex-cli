@@ -17,10 +17,9 @@
 */
 
 const chalk = require('chalk');
-const program = require('commander');
+const program = require('../src/commander');
 
 const { withCompatibilityCheck } = require('../src/compatibility');
-const helper = require('./utils.js');
 
 const {
     ListTasks,
@@ -29,7 +28,6 @@ const {
     DescribeTask
 } = require('../src/commands/tasks');
 
-let processed = false;
 program.description('Work with Cortex Jobs');
 
 
@@ -45,7 +43,6 @@ program
     .action(withCompatibilityCheck((jobId, options) => {
         try {
             new ListTasks(program).execute(jobId, options);
-            processed = true;
         }
         catch (err) {
             console.error(chalk.red(err.message));
@@ -64,7 +61,6 @@ program
     .action(withCompatibilityCheck((jobId, taskId, options) => {
         try {
             new TaskLogs(program).execute(jobId, taskId, options);
-            processed = true;
         }
         catch (err) {
             console.error(chalk.red(err.message));
@@ -83,7 +79,6 @@ program
     .action(withCompatibilityCheck((jobId, taskId, options) => {
         try {
             new CancelTask(program).execute(jobId, taskId, options);
-            processed = true;
         }
         catch (err) {
             console.error(chalk.red(err.message));
@@ -102,15 +97,10 @@ program
     .action(withCompatibilityCheck((jobId, taskId, options) => {
         try {
             new DescribeTask(program).execute(jobId, taskId, options);
-            processed = true;
         }
         catch (err) {
             console.error(chalk.red(err.message));
         }
     }));
 
-process.env.DOC && require('../src/commands/utils').exportDoc(program);
-
 program.parse(process.argv);
-if (!processed)
-    ['string', 'undefined'].includes(typeof program.args[0]) && helper.helpAndExit(program);

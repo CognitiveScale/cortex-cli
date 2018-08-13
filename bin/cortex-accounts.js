@@ -17,10 +17,9 @@
  */
 
 const chalk = require('chalk');
-const program = require('commander');
+const program = require('../src/commander');
 
 const { withCompatibilityCheck } = require('../src/compatibility');
-const helper = require('./utils.js');
 
 const {
     CreateGroupCommand,
@@ -33,7 +32,6 @@ const {
     GrantGroupAccessToResourceCommand,
 } = require('../src/commands/accounts');
 
-let processed = false;
 program.description('Work with Cortex Accounts');
 
 // Create Group
@@ -47,7 +45,6 @@ program
     .action(withCompatibilityCheck((groupName, options) => {
         try {
             new CreateGroupCommand(program).execute(groupName, options);
-            processed = true;
         }
         catch (err) {
             console.error(chalk.red(err.message));
@@ -64,7 +61,6 @@ program
     .action(withCompatibilityCheck((groupName, members, options) => {
         try {
             new AddMembersToGroupCommand(program).execute(groupName, members, options);
-            processed = true;
         }
         catch (err) {
             console.error(chalk.red(err.message));
@@ -81,7 +77,6 @@ program
     .action(withCompatibilityCheck((options) => {
         try {
             new ListGroupsCommand(program).execute(options);
-            processed = true;
         }
         catch (err) {
             console.error(chalk.red(err.message));
@@ -98,7 +93,6 @@ program
     .action(withCompatibilityCheck((groupName, options) => {
         try {
             new DescribeGroupCommand(program).execute(groupName, options);
-            processed = true;
         }
         catch (err) {
             console.error(chalk.red(err.message));
@@ -115,7 +109,6 @@ program
     .action(withCompatibilityCheck((groupName, options) => {
         try {
             new DeleteGroupCommand(program).execute(groupName, options);
-            processed = true;
         }
         catch (err) {
             console.error(chalk.red(err.message));
@@ -132,7 +125,6 @@ program
     .action(withCompatibilityCheck((groupName, members, options) => {
         try {
             new RemoveMembersFromGroupCommand(program).execute(groupName, members, options);
-            processed = true;
         }
         catch (err) {
             console.error(chalk.red(err.message));
@@ -151,7 +143,6 @@ program
     .action(withCompatibilityCheck((resourceName, options) => {
         try {
             new RegisterResourceCommand(program).execute(resourceName, options);
-            processed = true;
         }
         catch (err) {
             console.error(chalk.red(err.message));
@@ -168,15 +159,10 @@ program
     .action(withCompatibilityCheck((resourceId, groupName, options) => {
         try {
             new GrantGroupAccessToResourceCommand(program).execute(resourceId, groupName, options);
-            processed = true;
         }
         catch (err) {
             console.error(chalk.red(err.message));
         }
     }));
 
-process.env.DOC && require('../src/commands/utils').exportDoc(program);
-
 program.parse(process.argv);
-if (!processed)
-    ['string', 'undefined'].includes(typeof program.args[0]) && helper.helpAndExit(program);

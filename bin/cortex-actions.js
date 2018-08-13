@@ -17,10 +17,9 @@
  */
 
 const chalk = require('chalk');
-const program = require('commander');
+const program = require('../src/commander');
 
 const { withCompatibilityCheck } = require('../src/compatibility');
-const helper = require('./utils.js');
 
 const {
     ListActionsCommand,
@@ -30,7 +29,6 @@ const {
     DeployActionCommand
 } = require('../src/commands/actions');
 
-let processed = false;
 program.description('Work with Cortex Actions');
 
 // List Actions
@@ -45,7 +43,6 @@ program
     .action(withCompatibilityCheck((options) => {
         try {
             new ListActionsCommand(program).execute(options);
-            processed = true;
         }
         catch (err) {
             console.error(chalk.red(err.message));
@@ -64,7 +61,6 @@ program
     .action(withCompatibilityCheck((actionName, options) => {
         try {
             new DescribeActionCommand(program).execute(actionName, options);
-            processed = true;
         }
         catch (err) {
             console.error(chalk.red(err.message));
@@ -83,7 +79,6 @@ program
     .action(withCompatibilityCheck((actionName, options) => {
         try {
             new DeleteActionCommand(program).execute(actionName, options);
-            processed = true;
         }
         catch (err) {
             console.error(chalk.red(err.message));
@@ -106,7 +101,6 @@ program
     .action(withCompatibilityCheck((actionName, options) => {
         try {
             new InvokeActionCommand(program).execute(actionName, options);
-            processed = true;
         }
         catch (err) {
             console.error(chalk.red(err.message));
@@ -140,15 +134,10 @@ program
             }
 
             new DeployActionCommand(program).execute(actionName, options);
-            processed = true;
         }
         catch (err) {
             console.error(chalk.red(err.message));
         }
     }));
 
-process.env.DOC && require('../src/commands/utils').exportDoc(program);
-
 program.parse(process.argv);
-if (!processed)
-    ['string', 'undefined'].includes(typeof program.args[0]) && helper.helpAndExit(program);

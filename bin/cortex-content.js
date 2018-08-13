@@ -17,10 +17,9 @@
  */
 
 const chalk = require('chalk');
-const program = require('commander');
+const program = require('../src/commander');
 
 const { withCompatibilityCheck } = require('../src/compatibility');
-const helper = require('./utils.js');
 
 const {
     ListContent,
@@ -29,7 +28,6 @@ const {
     DownloadContent
 } = require('../src/commands/content');
 
-let processed = false;
 program.description('Work with Cortex Contents');
 
 
@@ -45,7 +43,6 @@ program
     .action(withCompatibilityCheck((options) => {
         try {
             new ListContent(program).execute(options);
-            processed = true;
         }
         catch (err) {
             console.error(chalk.red(err.message));
@@ -63,7 +60,6 @@ program
     .action(withCompatibilityCheck((contentKey, filePath, options) => {
         try {
             new UploadContent(program).execute(contentKey, filePath, options);
-            processed = true;
         }
         catch (err) {
             console.error(chalk.red(err.message));
@@ -80,7 +76,6 @@ program
     .action(withCompatibilityCheck((contentKey, options) => {
         try {
             new DeleteContent(program).execute(contentKey, options);
-            processed = true;
         }
         catch (err) {
             console.error(chalk.red(err.message));
@@ -98,7 +93,6 @@ program
     .action(withCompatibilityCheck((contentKey, options) => {
         try {
             new DownloadContent(program).execute(contentKey, options);
-            processed = true;
         }
         catch (err) {
             console.error(chalk.red(err.message));
@@ -106,7 +100,4 @@ program
     }));
 
 
-process.env.DOC && require('../src/commands/utils').exportDoc(program);
 program.parse(process.argv);
-if (!processed)
-    ['string', 'undefined'].includes(typeof program.args[0]) && helper.helpAndExit(program);

@@ -17,10 +17,9 @@
  */
 
 const chalk = require('chalk');
-const program = require('commander');
+const program = require('../src/commander');
 
 const { withCompatibilityCheck } = require('../src/compatibility');
-const helper = require('./utils.js');
 
 const {
     SaveSkillCommand,
@@ -29,9 +28,8 @@ const {
     GenerateSkillCommand
 } = require('../src/commands/skills');
 
-let processed = false;
 program.description('Work with Cortex Skills');
-    
+
 // Save Skill
 program
     .command('save <skillDefinition>')
@@ -43,7 +41,6 @@ program
     .action(withCompatibilityCheck((skillDefinition, options) => {
         try {
             new SaveSkillCommand(program).execute(skillDefinition, options);
-            processed = true;
         }
         catch (err) {
             console.error(chalk.red(err.message));
@@ -62,7 +59,6 @@ program
     .action(withCompatibilityCheck((options) => {
         try {
             new ListSkillsCommand(program).execute(options);
-            processed = true;
         }
         catch (err) {
             console.error(chalk.red(err.message));
@@ -80,7 +76,6 @@ program
     .action(withCompatibilityCheck((skillName, options) => {
         try {
             new DescribeSkillCommand(program).execute(skillName, options);
-            processed = true;
         }
         catch (err) {
             console.error(chalk.red(err.message));
@@ -94,15 +89,10 @@ program
     .action((options) => { // deliberately not using withCompatibilityCheck()
         try {
             new GenerateSkillCommand(program).execute(options);
-            processed = true;
         }
         catch (err) {
             console.error(chalk.red(err.message));
         }
     });
 
-process.env.DOC && require('../src/commands/utils').exportDoc(program);
-
 program.parse(process.argv);
-if (!processed)
-    ['string', 'undefined'].includes(typeof program.args[0]) && helper.helpAndExit(program);

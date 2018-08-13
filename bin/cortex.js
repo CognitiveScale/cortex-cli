@@ -16,9 +16,10 @@
  * limitations under the License.
  */
 
-const helper = require('./utils.js');
+const identity = require('lodash/fp/identity');
+
+const program = require('../src/commander');
 const { version } = require('../package.json');
-const program = require('commander');
 
 program
     .version(version, '-v, --version')
@@ -39,8 +40,11 @@ program
     .command('types [cmd]', 'Work with Cortex Types')
     .command('variables [cmd]', 'Work with Cortex Secure Variables');
 
-process.env.DOC && require('../src/commands/utils').exportDoc(program);
-
-program.parse(process.argv);
-!program.commands.map(cmd => cmd._name).includes(program.args[0]) && helper.helpAndExit(program);
+program.parse(process.argv, { noActionHandler: function() {
+    
+}});
+if (!program.commands.map(cmd => cmd._name).includes(program.args[0])) {
+    program.outputHelp(identity);
+    process.exit(1);
+}
 

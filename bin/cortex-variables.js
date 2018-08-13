@@ -17,10 +17,9 @@
  */
 
 const chalk = require('chalk');
-const program = require('commander');
+const program = require('../src/commander');
 
 const { withCompatibilityCheck } = require('../src/compatibility');
-const helper = require('./utils.js');
 
 const {
     ListVariablesCommand,
@@ -28,7 +27,6 @@ const {
     WriteVariableCommand,
 } = require('../src/commands/variables');
 
-let processed = false;
 program.description('Work with Cortex Secure Variables');
 
 // List Secure Variable Keys
@@ -42,7 +40,6 @@ program
     .action(withCompatibilityCheck((options) => {
         try {
             new ListVariablesCommand(program).execute(options);
-            processed = true;
         }
         catch (err) {
             console.error(chalk.red(err.message));
@@ -60,7 +57,6 @@ program
     .action(withCompatibilityCheck((keyName, options) => {
         try {
             new ReadVariableCommand(program).execute(keyName, options);
-            processed = true;
         }
         catch (err) {
             console.error(chalk.red(err.message));
@@ -79,15 +75,10 @@ program
     .action(withCompatibilityCheck((keyName, value, options) => {
         try {
             new WriteVariableCommand(program).execute(keyName, value, options);
-            processed = true;
         }
         catch (err) {
             console.error(chalk.red(err.message));
         }
     }));
 
-process.env.DOC && require('../src/commands/utils').exportDoc(program);
-
 program.parse(process.argv);
-if (!processed)
-    ['string', 'undefined'].includes(typeof program.args[0]) && helper.helpAndExit(program);

@@ -17,10 +17,9 @@
  */
 
 const chalk = require('chalk');
-const program = require('commander');
+const program = require('../src/commander');
 
 const { withCompatibilityCheck } = require('../src/compatibility');
-const helper = require('./utils.js');
 
 const {
     SaveAgentCommand,
@@ -39,7 +38,6 @@ const {
     CreateAgentSnapshotCommand
 } = require('../src/commands/agents');
 
-let processed = false;
 program.description('Work with Cortex Agents');
 
 // Save Agent
@@ -53,7 +51,6 @@ program
     .action(withCompatibilityCheck((agentDefinition, options) => {
         try {
             new SaveAgentCommand(program).execute(agentDefinition, options);
-            processed = true;
         }
         catch (err) {
             console.error(chalk.red(err.message));
@@ -72,7 +69,6 @@ program
     .action(withCompatibilityCheck((options) => {
         try {
             new ListAgentsCommand(program).execute(options);
-            processed = true;
         }
         catch (err) {
             console.error(chalk.red(err.message));
@@ -91,7 +87,6 @@ program
     .action(withCompatibilityCheck((agentName, options) => {
         try {
             new DescribeAgentCommand(program).execute(agentName, options);
-            processed = true;
         }
         catch (err) {
             console.error(chalk.red(err.message));
@@ -110,7 +105,6 @@ program
     .action(withCompatibilityCheck((agentName, serviceName, options) => {
         try {
             new InvokeAgentServiceCommand(program).execute(agentName, serviceName, options);
-            processed = true;
         }
         catch (err) {
             console.error(chalk.red(err.message));
@@ -128,7 +122,6 @@ program
     .action(withCompatibilityCheck((activationId, options) => {
         try {
             new GetServiceActivationCommand(program).execute(activationId, options);
-            processed = true;
         }
         catch (err) {
             console.error(chalk.red(err.message));
@@ -148,7 +141,6 @@ program
     .action(withCompatibilityCheck((agentName, options) => {
         try {
             new ListAgentSnapshotsCommand(program).execute(agentName, options);
-            processed = true;
         }
         catch (err) {
             console.error(chalk.red(err.message));
@@ -165,7 +157,6 @@ program
     .action(withCompatibilityCheck((snapshotId, options) => {
         try {
             new DescribeAgentSnapshotCommand(program).execute(snapshotId, options);
-            processed = true;
         }
         catch (err) {
             console.error(chalk.red(err.message));
@@ -184,7 +175,6 @@ program
     .action(withCompatibilityCheck((snapshotDefinition, options) => {
         try {
             new CreateAgentSnapshotCommand(program).execute(snapshotDefinition, options);
-            processed = true;
         }
         catch (err) {
             console.error(chalk.red(err.message));
@@ -205,7 +195,6 @@ program
     .action(withCompatibilityCheck((agentName, options) => {
         try {
             new ListAgentInstancesCommand(program).execute(agentName, options);
-            processed = true;
         }
         catch (err) {
             console.error(chalk.red(err.message));
@@ -224,7 +213,6 @@ program
     .action(withCompatibilityCheck((instanceDefinition, options) => {
         try {
             new CreateAgentInstanceCommand(program).execute(instanceDefinition, options);
-            processed = true;
         }
         catch (err) {
             console.error(chalk.red(err.message));
@@ -242,7 +230,6 @@ program
     .action(withCompatibilityCheck((instanceId, options) => {
         try {
             new GetAgentInstanceCommand(program).execute(instanceId, options);
-            processed = true;
         }
         catch (err) {
             console.error(chalk.red(err.message));
@@ -259,7 +246,6 @@ program
     .action(withCompatibilityCheck((instanceId, options) => {
         try {
             new DeleteAgentInstanceCommand(program).execute(instanceId, options);
-            processed = true;
         }
         catch (err) {
             console.error(chalk.red(err.message));
@@ -276,7 +262,6 @@ program
     .action(withCompatibilityCheck((instanceId, options) => {
         try {
             new StopAgentInstanceCommand(program).execute(instanceId, options);
-            processed = true;
         }
         catch (err) {
             console.error(chalk.red(err.message));
@@ -293,7 +278,6 @@ program
     .action(withCompatibilityCheck((options) => {
         try {
             new ListTriggersCommand(program).execute(options);
-            processed = true;
         }
         catch (err) {
             console.error(chalk.red(err.message));
@@ -301,8 +285,4 @@ program
     }));
 
 
-process.env.DOC && require('../src/commands/utils').exportDoc(program);
-
 program.parse(process.argv);
-if (!processed)
-    ['string', 'undefined'].includes(typeof program.args[0]) && helper.helpAndExit(program);

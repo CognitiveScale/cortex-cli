@@ -17,10 +17,9 @@
  */
 
 const chalk = require('chalk');
-const program = require('commander');
+const program = require('../src/commander');
 
 const { withCompatibilityCheck } = require('../src/compatibility');
-const helper = require('./utils.js');
 
 const {
     ListDatasets,
@@ -31,7 +30,6 @@ const {
     GenerateDatasetCommand
 } = require('../src/commands/datasets');
 
-let processed = false;
 program.description('Work with Cortex Connections');
 
 
@@ -47,7 +45,6 @@ program
     .action(withCompatibilityCheck((options) => {
         try {
             new ListDatasets(program).execute(options);
-            processed = true;
         }
         catch (err) {
             console.error(chalk.red(err.message));
@@ -65,7 +62,6 @@ program
     .action(withCompatibilityCheck((datasetDef, options) => {
         try {
             new SaveDatasetsCommand(program).execute(datasetDef, options);
-            processed = true;
         }
         catch (err) {
             console.error(chalk.red(err.message));
@@ -83,7 +79,6 @@ program
     .action(withCompatibilityCheck((datasetName, options) => {
         try {
             new DescribeDatasetCommand(program).execute(datasetName, options);
-            processed = true;
         }
         catch (err) {
             console.error(chalk.red(err.message));
@@ -100,7 +95,6 @@ program
     .action(withCompatibilityCheck((datasetName, options) => {
         try {
             new GetDataframeCommand(program).execute(datasetName, options);
-            processed = true;
         }
         catch (err) {
             console.error(chalk.red(err.message));
@@ -117,7 +111,6 @@ program
     .action(withCompatibilityCheck((datasetName, options) => {
         try {
             new StreamDatasetCommand(program).execute(datasetName, options);
-            processed = true;
         }
         catch (err) {
             console.error(chalk.red(err.message));
@@ -138,7 +131,4 @@ program
         }
     });
 
-process.env.DOC && require('../src/commands/utils').exportDoc(program);
 program.parse(process.argv);
-if (!processed)
-    ['string', 'undefined'].includes(typeof program.args[0]) && helper.helpAndExit(program);

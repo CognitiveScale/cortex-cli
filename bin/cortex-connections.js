@@ -17,10 +17,9 @@
  */
 
 const chalk = require('chalk');
-const program = require('commander');
+const program = require('../src/commander');
 
 const { withCompatibilityCheck } = require('../src/compatibility');
-const helper = require('./utils.js');
 
 const {
     ListConnections,
@@ -31,7 +30,6 @@ const {
     GenerateConnectionCommand
 } = require('../src/commands/connections');
 
-let processed = false;
 program.description('Work with Cortex Connections');
 
 
@@ -47,7 +45,6 @@ program
     .action(withCompatibilityCheck((options) => {
         try {
             new ListConnections(program).execute(options);
-            processed = true;
         }
         catch (err) {
             console.error(chalk.red(err.message));
@@ -65,7 +62,6 @@ program
     .action(withCompatibilityCheck((connDefinition, options) => {
         try {
             new SaveConnectionCommand(program).execute(connDefinition, options);
-            processed = true;
         }
         catch (err) {
             console.error(chalk.red(err.message));
@@ -83,7 +79,6 @@ program
     .action(withCompatibilityCheck((connectionName, options) => {
         try {
             new DescribeConnectionCommand(program).execute(connectionName, options);
-            processed = true;
         }
         catch (err) {
             console.error(chalk.red(err.message));
@@ -101,7 +96,6 @@ program
     .action(withCompatibilityCheck((connDefinition, options) => {
         try {
             new TestConnectionCommand(program).execute(connDefinition, options);
-            processed = true;
         }
         catch (err) {
             console.error(chalk.red(err.message));
@@ -120,7 +114,6 @@ program
     .action(withCompatibilityCheck((options) => {
         try {
             new ListConnectionsTypes(program).execute(options);
-            processed = true;
         }
         catch (err) {
             console.error(chalk.red(err.message));
@@ -136,14 +129,10 @@ program
     .action((options) => { // deliberately not using withCompatibilityCheck()
         try {
             new GenerateConnectionCommand(program).execute(options);
-            processed = true;
         }
         catch (err) {
             console.error(chalk.red(err.message));
         }
     });
 
-process.env.DOC && require('../src/commands/utils').exportDoc(program);
 program.parse(process.argv);
-if (!processed)
-    ['string', 'undefined'].includes(typeof program.args[0]) && helper.helpAndExit(program);
