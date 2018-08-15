@@ -16,12 +16,15 @@
  * limitations under the License.
  */
 
-const helper = require('./utils.js');
-const { version } = require('../package.json');
-const program = require('commander');
+const findPackageJson = require('find-package-json');
+const identity = require('lodash/fp/identity');
+
+const program = require('../src/commander');
+
+const pkg = findPackageJson(__dirname).next().value;
 
 program
-    .version(version, '-v, --version')
+    .version(pkg.version, '-v, --version')
     .description('Cortex CLI')
     .command('accounts [cmd]', 'Work with Cortex Accounts')
     .command('actions [cmd]', 'Work with Cortex Actions')
@@ -39,8 +42,11 @@ program
     .command('types [cmd]', 'Work with Cortex Types')
     .command('variables [cmd]', 'Work with Cortex Secure Variables');
 
-process.env.DOC && require('../src/commands/utils').exportDoc(program);
-
-program.parse(process.argv);
-!program.commands.map(cmd => cmd._name).includes(program.args[0]) && helper.helpAndExit(program);
+program.parse(process.argv, { noActionHandler: function() {
+    
+}});
+if (!program.commands.map(cmd => cmd._name).includes(program.args[0])) {
+    program.outputHelp(identity);
+    process.exit(1);
+}
 
