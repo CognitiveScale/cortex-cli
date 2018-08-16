@@ -17,7 +17,7 @@
  */
 
 const chalk = require('chalk');
-const program = require('./src/commander');
+const program = require('../src/commander');
 
 const { GenerateProjectCommand } = require('../src/commands/project');
 
