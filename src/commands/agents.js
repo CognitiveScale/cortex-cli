@@ -179,7 +179,7 @@ module.exports.InvokeAgentServiceCommand = class {
     }
 };
 
-module.exports.GetServiceActivationCommand = class {
+module.exports.GetActivationCommand = class {
 
     constructor(program) {
         this.program = program;
@@ -187,24 +187,67 @@ module.exports.GetServiceActivationCommand = class {
 
     execute(activationId, options) {
         const profile = loadProfile(options.profile);
-        debug('%s.getServiceActivation(%s)', profile.name, activationId);
+        debug('%s.getActivation(%s)', profile.name, activationId);
 
         const agents = new Agents(profile.url);
-        agents.getServiceActivation(profile.token, activationId).then((response) => {
+        agents.getActivation(profile.token, activationId).then((response) => {
             if (response.success) {
                 let result = filterObject(response.result.activation, options);
                 printSuccess(JSON.stringify(result, null, 2), options);
             }
             else {
-                printError(`Failed to get service activation ${activationId}: ${response.message}`, options);
+                printError(`Failed to get activation ${activationId}: ${response.message}`, options);
             }
         })
         .catch((err) => {
-            printError(`Failed to get service activation ${activationId}: ${err.status} ${err.message}`, options);
+            printError(`Failed to get activation ${activationId}: ${err.status} ${err.message}`, options);
         });
     }
 };
 
+module.exports.ListActivationsCommand = class {
+
+    constructor(program) {
+        this.program = program;
+    }
+
+    execute(instanceId, options) {
+        const profile = loadProfile(options.profile);
+        const envName = options.environmentName;
+        debug('%s.listActivations(%s)', profile.name, instanceId);
+
+        const agents = new Agents(profile.url);
+        agents.listActivations(profile.token, instanceId, envName).then((response) => {
+            if (response.success) {
+                let result = response.result.activations;
+                if (options.query)
+                    result = filterObject(result, options);
+
+                if (options.json) {
+                    printSuccess(JSON.stringify(result, null, 2), options);
+                }
+                else {
+                    const tableSpec = [
+                        { column: 'Activation Id', field: 'activationId', width: 38 },
+                        { column: 'Type', field: 'type', width: 20 },
+                        { column: 'Status', field: 'status', width: 15 },
+                        { column: 'Start', field: 'start', width: 15 },
+                        { column: 'End', field: 'end', width: 15 },
+                        { column: 'Session Id', field: 'sessionId', width: 38 },
+                    ];
+
+                    printTable(tableSpec, result);
+                }
+            }
+            else {
+                printError(`Failed to list agent instances ${agentName}: ${response.message}`, options);
+            }
+        })
+            .catch((err) => {
+                printError(`Failed to list agent instances ${instanceId}: ${err.status} ${err.message}`, options);
+            });
+    }
+};
 
 module.exports.ListAgentInstancesCommand = class {
 

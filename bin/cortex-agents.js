@@ -26,7 +26,8 @@ const {
     ListAgentsCommand,
     DescribeAgentCommand,
     InvokeAgentServiceCommand,
-    GetServiceActivationCommand,
+    GetActivationCommand,
+    ListActivationsCommand,
     ListAgentInstancesCommand,
     CreateAgentInstanceCommand,
     GetAgentInstanceCommand,
@@ -37,6 +38,8 @@ const {
     DescribeAgentSnapshotCommand,
     CreateAgentSnapshotCommand
 } = require('../src/commands/agents');
+
+const { printError } = require('../src/commands/utils');
 
 program.description('Work with Cortex Agents');
 
@@ -119,15 +122,43 @@ program
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
     .option('--query [query]', 'A JMESPath query to use in filtering the response data.')
+    .action(() => {
+        printError('DEPRECATED.  Use get-activation instead.');
+    });
+
+program
+    .command('get-activation <activationId>')
+    .description('Get dataset or service activation')
+    .option('--no-compat', 'Ignore API compatibility checks')
+    .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
+    .option('--profile [profile]', 'The profile to use')
+    .option('--query [query]', 'A JMESPath query to use in filtering the response data.')
     .action(withCompatibilityCheck((activationId, options) => {
         try {
-            new GetServiceActivationCommand(program).execute(activationId, options);
+            new GetActivationCommand(program).execute(activationId, options);
         }
         catch (err) {
             console.error(chalk.red(err.message));
         }
     }));
 
+program
+    .command('list-activations <instanceId>')
+    .description('List agent instance activations')
+    .option('--no-compat', 'Ignore API compatibility checks')
+    .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
+    .option('--profile [profile]', 'The profile to use')
+    .option('--environmentName [environmentName]', 'The environment to list or \'all\'')
+    .option('--json', 'Output results using JSON')
+    .option('--query [query]', 'A JMESPath query to use in filtering the response data.')
+    .action(withCompatibilityCheck((instanceId, options) => {
+        try {
+            new ListActivationsCommand(program).execute(instanceId, options);
+        }
+        catch (err) {
+            console.error(chalk.red(err.message));
+        }
+    }));
 
 program
     .command('list-snapshots <agentName>')
