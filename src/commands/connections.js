@@ -233,7 +233,7 @@ module.exports.TestConnectionCommand = class TestConnectionCommand {
                    printSuccess(`Connection successfully tested`, options);
                }
                else {
-                   printError(`Failed while testing connection: ${err.response.body.message}`, options);
+                   printError(`Failed while testing connection: ${response.message || response.body.message }`, options);
                }
            })
            .catch((err) => {
