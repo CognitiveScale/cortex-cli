@@ -46,6 +46,15 @@ module.exports.printSuccess = function(message, options) {
     }
 };
 
+module.exports.printWarning = function(message, options) {
+    if (!options || options.color === 'on') {
+        console.log(chalk.yellow(message));
+    }
+    else {
+        console.log(message);
+    }
+};
+
 module.exports.printError = function(message, options) {
     if (!options ||  options.color === 'on') {
         console.error(chalk.red(message));
