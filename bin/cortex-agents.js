@@ -39,7 +39,7 @@ const {
     CreateAgentSnapshotCommand
 } = require('../src/commands/agents');
 
-const { printWarning } = require('../src/commands/utils');
+const { printError } = require('../src/commands/utils');
 
 program.description('Work with Cortex Agents');
 
@@ -124,7 +124,7 @@ program
     .option('--query [query]', 'A JMESPath query to use in filtering the response data.')
     .action(withCompatibilityCheck((activationId, options) => {
         try {
-            printWarning('DEPRECATED.  This command will be removed in a future version.  Use get-activation instead.', options);
+            printError('DEPRECATED.  This command will be removed in a future version.  Use get-activation instead.', options, false);
             new GetActivationCommand(program).execute(activationId, options);
         }
         catch (err) {

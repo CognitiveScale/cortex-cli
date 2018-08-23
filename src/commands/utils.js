@@ -55,14 +55,16 @@ module.exports.printWarning = function(message, options) {
     }
 };
 
-module.exports.printError = function(message, options) {
+module.exports.printError = function(message, options, exit = true) {
     if (!options ||  options.color === 'on') {
         console.error(chalk.red(message));
     }
     else {
         console.error(message);
     }
-    process.exit(1)
+    if (exit) {
+        process.exit(1)
+    }
 };
 
 module.exports.filterObject = function(obj, options) {
