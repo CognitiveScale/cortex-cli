@@ -103,12 +103,10 @@ function getCompatibility(profile) {
             debug('getCompatibility => versions: %s, requirements: %s', versions, requirements);
             const compatibleVersions = filter(v => semver.satisfies(v, requirements), versions);
             debug('getCompatibility => compatible versions: %s', compatibleVersions);
-
             const { version: current } = pkg;
             const latest = last(compatibleVersions);
             const satisfied = semver.satisfies(pkg.version, requirements);
             debug('getCompatibility => satisfied: %s', satisfied);
-
             return ({ current, latest, satisfied });
         });
 };
