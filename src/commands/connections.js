@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
+const _ = require('lodash');
 const fs = require('fs');
 const yeoman = require('yeoman-environment');
 const debug = require('debug')('cortex:cli');
@@ -174,7 +174,7 @@ module.exports.TestConnectionCommand = class TestConnectionCommand {
     }
 
     getParamsValue(connectionDefinition, paramName) {
-        const results = connectionDefinition.params.filter(item => item.name === paramName);
+        const results = _.get(connectionDefinition,'params',[]).filter(item => item.name === paramName);
         if (results && results.length) {
              return results[0]['value'];
 
