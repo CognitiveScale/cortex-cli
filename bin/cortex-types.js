@@ -17,10 +17,9 @@
  */
 
 const chalk = require('chalk');
-const program = require('commander');
+const program = require('../src/commander');
 
 const { withCompatibilityCheck } = require('../src/compatibility');
-const helper = require('./utils.js');
 
 const {
     SaveTypeCommand,
@@ -28,20 +27,19 @@ const {
     DescribeTypeCommand
 } = require('../src/commands/types');
 
-let processed = false;
 program.description('Work with Cortex Types');
     
 // Save Type
 program
     .command('save <typeDefinition>')
     .description('Save a type definition')
+    .option('--no-compat', 'Ignore API compatibility checks')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
     .option('-y, --yaml', 'Use YAML for type definition format')
     .action(withCompatibilityCheck((typeDefinition, options) => {
         try {
             new SaveTypeCommand(program).execute(typeDefinition, options);
-            processed = true;
         }
         catch (err) {
             console.error(chalk.red(err.message));
@@ -52,6 +50,7 @@ program
 program
     .command('list')
     .description('List type definitions')
+    .option('--no-compat', 'Ignore API compatibility checks')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
     .option('--json', 'Output results using JSON')
@@ -59,7 +58,6 @@ program
     .action(withCompatibilityCheck((options) => {
         try {
             new ListTypesCommand(program).execute(options);
-            processed = true;
         }
         catch (err) {
             console.error(chalk.red(err.message));
@@ -70,21 +68,17 @@ program
 program
     .command('describe <typeName>')
     .description('Describe type')
+    .option('--no-compat', 'Ignore API compatibility checks')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
     .option('--query [query]', 'A JMESPath query to use in filtering the response data.')
     .action(withCompatibilityCheck((typeName, options) => {
         try {
             new DescribeTypeCommand(program).execute(typeName, options);
-            processed = true;
         }
         catch (err) {
             console.error(chalk.red(err.message));
         }
     }));
 
-process.env.DOC && require('../src/commands/utils').exportDoc(program);
-
 program.parse(process.argv);
-if (!processed)
-    ['string', 'undefined'].includes(typeof program.args[0]) && helper.helpAndExit(program);

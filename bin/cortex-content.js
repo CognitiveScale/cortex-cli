@@ -17,10 +17,9 @@
  */
 
 const chalk = require('chalk');
-const program = require('commander');
+const program = require('../src/commander');
 
 const { withCompatibilityCheck } = require('../src/compatibility');
-const helper = require('./utils.js');
 
 const {
     ListContent,
@@ -29,7 +28,6 @@ const {
     DownloadContent
 } = require('../src/commands/content');
 
-let processed = false;
 program.description('Work with Cortex Contents');
 
 
@@ -37,6 +35,7 @@ program.description('Work with Cortex Contents');
 program
     .command('list')
     .description('List content')
+    .option('--no-compat', 'Ignore API compatibility checks')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
     .option('--json', 'Output results using JSON')
@@ -44,7 +43,6 @@ program
     .action(withCompatibilityCheck((options) => {
         try {
             new ListContent(program).execute(options);
-            processed = true;
         }
         catch (err) {
             console.error(chalk.red(err.message));
@@ -55,13 +53,13 @@ program
 program
     .command('upload <contentKey> <filePath>')
     .description('Upload content')
+    .option('--no-compat', 'Ignore API compatibility checks')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
     .option('--secure', 'Uploads the content securely to the Cortex Vault. Use this option for keytab files or content that contains sensitive information that is required during Runtime. Take note of the contentKey you give to this content for future reference.')
     .action(withCompatibilityCheck((contentKey, filePath, options) => {
         try {
             new UploadContent(program).execute(contentKey, filePath, options);
-            processed = true;
         }
         catch (err) {
             console.error(chalk.red(err.message));
@@ -72,12 +70,12 @@ program
 program
     .command('delete <contentKey>')
     .description('Delete content')
+    .option('--no-compat', 'Ignore API compatibility checks')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
     .action(withCompatibilityCheck((contentKey, options) => {
         try {
             new DeleteContent(program).execute(contentKey, options);
-            processed = true;
         }
         catch (err) {
             console.error(chalk.red(err.message));
@@ -88,13 +86,13 @@ program
 program
     .command('download <contentKey>')
     .description('Download content')
+    .option('--no-compat', 'Ignore API compatibility checks')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
     .option('--secure', 'Downloads the content securely from the Cortex Vault.')
     .action(withCompatibilityCheck((contentKey, options) => {
         try {
             new DownloadContent(program).execute(contentKey, options);
-            processed = true;
         }
         catch (err) {
             console.error(chalk.red(err.message));
@@ -102,7 +100,4 @@ program
     }));
 
 
-process.env.DOC && require('../src/commands/utils').exportDoc(program);
 program.parse(process.argv);
-if (!processed)
-    ['string', 'undefined'].includes(typeof program.args[0]) && helper.helpAndExit(program);

@@ -17,10 +17,9 @@
  */
 
 const chalk = require('chalk');
-const program = require('commander');
+const program = require('../src/commander');
 
 const { withCompatibilityCheck } = require('../src/compatibility');
-const helper = require('./utils.js');
 
 const {
     ListActionsCommand,
@@ -30,13 +29,13 @@ const {
     DeployActionCommand
 } = require('../src/commands/actions');
 
-let processed = false;
 program.description('Work with Cortex Actions');
 
 // List Actions
 program
     .command('list')
     .description('List the deployed actions')
+    .option('--no-compat', 'Ignore API compatibility checks')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
     .option('--json', 'Output results using JSON')
@@ -44,7 +43,6 @@ program
     .action(withCompatibilityCheck((options) => {
         try {
             new ListActionsCommand(program).execute(options);
-            processed = true;
         }
         catch (err) {
             console.error(chalk.red(err.message));
@@ -55,6 +53,7 @@ program
 program
     .command('describe <actionName>')
     .description('Describe an action')
+    .option('--no-compat', 'Ignore API compatibility checks')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
     .option('--query [query]', 'A JMESPath query to use in filtering the response data.')
@@ -62,7 +61,6 @@ program
     .action(withCompatibilityCheck((actionName, options) => {
         try {
             new DescribeActionCommand(program).execute(actionName, options);
-            processed = true;
         }
         catch (err) {
             console.error(chalk.red(err.message));
@@ -73,6 +71,7 @@ program
 program
     .command('delete <actionName>')
     .description('Delete an action')
+    .option('--no-compat', 'Ignore API compatibility checks')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
     .option('--query [query]', 'A JMESPath query to use in filtering the response data.')
@@ -80,7 +79,6 @@ program
     .action(withCompatibilityCheck((actionName, options) => {
         try {
             new DeleteActionCommand(program).execute(actionName, options);
-            processed = true;
         }
         catch (err) {
             console.error(chalk.red(err.message));
@@ -91,6 +89,7 @@ program
 program
     .command('invoke <actionName>')
     .description('Invoke an action')
+    .option('--no-compat', 'Ignore API compatibility checks')
     .option('--params [params]', 'JSON params to send to the action')
     .option('--params-file [paramsFile]', 'A file containing either JSON or YAML formatted params')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
@@ -102,7 +101,6 @@ program
     .action(withCompatibilityCheck((actionName, options) => {
         try {
             new InvokeActionCommand(program).execute(actionName, options);
-            processed = true;
         }
         catch (err) {
             console.error(chalk.red(err.message));
@@ -113,6 +111,7 @@ program
 program
     .command('deploy <actionName>')
     .description('Deploy an action')
+    .option('--no-compat', 'Ignore API compatibility checks')
     .option('--kind [kind]', 'Action runtime kind') // python:3, python:2, nodejs:default
     .option('--code [code]', 'The code file or code archive to deploy')
     .option('--docker [image]', 'Docker image to use as the runner')
@@ -135,15 +134,10 @@ program
             }
 
             new DeployActionCommand(program).execute(actionName, options);
-            processed = true;
         }
         catch (err) {
             console.error(chalk.red(err.message));
         }
     }));
 
-process.env.DOC && require('../src/commands/utils').exportDoc(program);
-
 program.parse(process.argv);
-if (!processed)
-    ['string', 'undefined'].includes(typeof program.args[0]) && helper.helpAndExit(program);

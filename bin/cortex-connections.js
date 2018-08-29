@@ -17,10 +17,9 @@
  */
 
 const chalk = require('chalk');
-const program = require('commander');
+const program = require('../src/commander');
 
 const { withCompatibilityCheck } = require('../src/compatibility');
-const helper = require('./utils.js');
 
 const {
     ListConnections,
@@ -31,7 +30,6 @@ const {
     GenerateConnectionCommand
 } = require('../src/commands/connections');
 
-let processed = false;
 program.description('Work with Cortex Connections');
 
 
@@ -39,6 +37,7 @@ program.description('Work with Cortex Connections');
 program
     .command('list')
     .description('List connections definitions')
+    .option('--no-compat', 'Ignore API compatibility checks')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
     .option('--json', 'Output results using JSON')
@@ -46,7 +45,6 @@ program
     .action(withCompatibilityCheck((options) => {
         try {
             new ListConnections(program).execute(options);
-            processed = true;
         }
         catch (err) {
             console.error(chalk.red(err.message));
@@ -57,13 +55,13 @@ program
 program
     .command('save <connectionDefinition>')
     .description('Save a connections definition. Takes JSON file by default.')
+    .option('--no-compat', 'Ignore API compatibility checks')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
     .option('-y, --yaml', 'Use YAML for agent definition format')
     .action(withCompatibilityCheck((connDefinition, options) => {
         try {
             new SaveConnectionCommand(program).execute(connDefinition, options);
-            processed = true;
         }
         catch (err) {
             console.error(chalk.red(err.message));
@@ -74,13 +72,13 @@ program
 program
     .command('describe <connectionName>')
     .description('Describe connection')
+    .option('--no-compat', 'Ignore API compatibility checks')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
     .option('--query [query]', 'A JMESPath query to use in filtering the response data.')
     .action(withCompatibilityCheck((connectionName, options) => {
         try {
             new DescribeConnectionCommand(program).execute(connectionName, options);
-            processed = true;
         }
         catch (err) {
             console.error(chalk.red(err.message));
@@ -91,13 +89,13 @@ program
 program
     .command('test <connectionDefinition>')
     .description('Test a connections definition before saving. Takes JSON file by default.')
+    .option('--no-compat', 'Ignore API compatibility checks')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
     .option('-y, --yaml', 'Use YAML for agent definition format')
     .action(withCompatibilityCheck((connDefinition, options) => {
         try {
             new TestConnectionCommand(program).execute(connDefinition, options);
-            processed = true;
         }
         catch (err) {
             console.error(chalk.red(err.message));
@@ -108,6 +106,7 @@ program
 program
     .command('list-types')
     .description('List connections types')
+    .option('--no-compat', 'Ignore API compatibility checks')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
     .option('--json', 'Output results using JSON')
@@ -115,7 +114,6 @@ program
     .action(withCompatibilityCheck((options) => {
         try {
             new ListConnectionsTypes(program).execute(options);
-            processed = true;
         }
         catch (err) {
             console.error(chalk.red(err.message));
@@ -131,14 +129,10 @@ program
     .action((options) => { // deliberately not using withCompatibilityCheck()
         try {
             new GenerateConnectionCommand(program).execute(options);
-            processed = true;
         }
         catch (err) {
             console.error(chalk.red(err.message));
         }
     });
 
-process.env.DOC && require('../src/commands/utils').exportDoc(program);
 program.parse(process.argv);
-if (!processed)
-    ['string', 'undefined'].includes(typeof program.args[0]) && helper.helpAndExit(program);

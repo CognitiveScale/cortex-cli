@@ -16,6 +16,7 @@
 
 const boxen = require('boxen');
 const chalk = require('chalk');
+const concat = require('lodash/fp/concat');
 const debug = require('debug')('cortex:cli');
 const filter = require('lodash/fp/filter');
 const findPackageJson = require('find-package-json');
@@ -26,6 +27,7 @@ const last = require('lodash/fp/last');
 const npmFetch = require('npm-registry-fetch');
 const request = require('superagent');
 const semver = require('semver');
+const uniq = require('lodash/fp/uniq');
 
 const { loadProfile } = require('./config');
 const { printError } = require('../src/commands/utils');
@@ -33,9 +35,11 @@ const { printError } = require('../src/commands/utils');
 const pkg = findPackageJson(__dirname).next().value;
 
 function getAvailableVersions(name) {
+    debug('getAvailableVersions => %s', name);
     return npmFetch
         .json(pkg.name)
         .then(manifest => keys(getOr({}, 'versions', manifest)))
+        .then(versions => uniq(concat(versions, pkg.version)))
         .then(versions => versions.sort(semver.compare))
         .catch((error) => {
             throw new Error('Unable to determine CLI available versions');
@@ -44,6 +48,7 @@ function getAvailableVersions(name) {
 
 function getRequiredVersion(profile) {
     const endpoint = `${profile.url}/v3/catalog/compatibility/applications/cortex-cli`;
+    debug('getRequiredVersion => %s', endpoint);
     return request
         .get(endpoint)
         .set('Authorization', `Bearer ${profile.token}`)
@@ -88,19 +93,20 @@ function upgradeRequired(args) {
 }
 
 function getCompatibility(profile) {
-    debug('getCompatibility => %s', this.endpoint);
+    debug('getCompatibility => %s profile', profile.name);
     return Promise
         .all([
             getAvailableVersions(pkg.name),
             getRequiredVersion(profile)
         ])
         .then(([versions, requirements]) => {
+            debug('getCompatibility => versions: %s, requirements: %s', versions, requirements);
             const compatibleVersions = filter(v => semver.satisfies(v, requirements), versions);
-
+            debug('getCompatibility => compatible versions: %s', compatibleVersions);
             const { version: current } = pkg;
             const latest = last(compatibleVersions);
             const satisfied = semver.satisfies(pkg.version, requirements);
-
+            debug('getCompatibility => satisfied: %s', satisfied);
             return ({ current, latest, satisfied });
         });
 };
@@ -108,22 +114,27 @@ function getCompatibility(profile) {
 function withCompatibilityCheck(fn) {
     return (...args) => {
         const options = last(args) || {};
-        const { profile: profileName } = options;
-        const profile = loadProfile(profileName);
 
-        return getCompatibility(profile)
-            .then(({ current, latest, satisfied }) => {
-                if (!satisfied) {
-                    upgradeRequired({ current, latest });
-                }
-                else if (semver.gt(latest, current)) {
-                    upgradeAvailable({ current, latest });
-                }
-            })
-            .then(() => fn(...args))
-            .catch((error) => {
-                printError(error);
-            });
+        if (options.compat) {
+            const { profile: profileName } = options;
+            const profile = loadProfile(profileName);
+
+            return getCompatibility(profile)
+                .then(({ current, latest, satisfied }) => {
+                    if (!satisfied) {
+                        upgradeRequired({ current, latest });
+                    }
+                    else if (semver.gt(latest, current)) {
+                        upgradeAvailable({ current, latest });
+                    }
+                })
+                .then(() => fn(...args))
+                .catch((error) => {
+                    printError(error);
+                });
+        }
+
+        return Promise.resolve().then(() => fn(...args));
     };
 };
 

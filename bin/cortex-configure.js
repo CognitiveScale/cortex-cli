@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-const program = require('commander');
+const program = require('../src/commander');
 
 const {
     ConfigureCommand,
@@ -41,7 +41,6 @@ program
     .command('list')
     .description('List configured profiles')
     .action((options) => {
-        cmd = 'list';
         new ListProfilesCommand(program).execute({color: program.color});
     });
 
@@ -49,7 +48,6 @@ program
     .command('describe <profileName>')
     .description('Describe a configured profile')
     .action((profileName, options) => {
-        cmd = 'describe';
         new DescribeProfileCommand(program).execute({profile: profileName, color: program.color});
     });
 
@@ -57,15 +55,9 @@ program
     .command('set-profile <profileName>')
     .description('Sets the current profile.')
     .action((profileName, options) => {
-        cmd = 'set-profile';
         new SetProfileCommand(program).execute(profileName, {color: program.color});
     });
 
-process.env.DOC && require('../src/commands/utils').exportDoc(program);
-
-
-program.parse(process.argv);
-
-if (cmd === undefined) {
+program.parse(process.argv, { noActionHandler: function() {
     new ConfigureCommand(program).execute({profile: program.profile, color: program.color});
-}
+}});

@@ -17,10 +17,9 @@
  */
 
 const chalk = require('chalk');
-const program = require('commander');
+const program = require('../src/commander');
 
 const { withCompatibilityCheck } = require('../src/compatibility');
-const helper = require('./utils.js');
 
 const {
     ListVariablesCommand,
@@ -28,19 +27,19 @@ const {
     WriteVariableCommand,
 } = require('../src/commands/variables');
 
-let processed = false;
 program.description('Work with Cortex Secure Variables');
 
 // List Secure Variable Keys
 program
     .command('list')
     .description('List secure variable keys')
+    .option('--no-compat', 'Ignore API compatibility checks')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
+    .option('--json', 'Output results using JSON')
     .option('--profile [profile]', 'The profile to use')
     .action(withCompatibilityCheck((options) => {
         try {
             new ListVariablesCommand(program).execute(options);
-            processed = true;
         }
         catch (err) {
             console.error(chalk.red(err.message));
@@ -51,12 +50,13 @@ program
 program
     .command('describe <keyName>')
     .description('Retrieve the value stored for the given variable key.')
+    .option('--no-compat', 'Ignore API compatibility checks')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
+    .option('--json', 'Output results using JSON')
     .option('--profile [profile]', 'The profile to use')
     .action(withCompatibilityCheck((keyName, options) => {
         try {
             new ReadVariableCommand(program).execute(keyName, options);
-            processed = true;
         }
         catch (err) {
             console.error(chalk.red(err.message));
@@ -67,6 +67,7 @@ program
 program
     .command('save <keyName> [value]')
     .description('Save or overwrite a secure variable value. By default, values are stored as strings but can also be saved as JSON or YAML values.')
+    .option('--no-compat', 'Ignore API compatibility checks')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--data [data]', 'JSON value to save')
     .option('--data-file [dataFile]', 'A file containing either JSON or YAML formatted value to save')
@@ -74,15 +75,10 @@ program
     .action(withCompatibilityCheck((keyName, value, options) => {
         try {
             new WriteVariableCommand(program).execute(keyName, value, options);
-            processed = true;
         }
         catch (err) {
             console.error(chalk.red(err.message));
         }
     }));
 
-process.env.DOC && require('../src/commands/utils').exportDoc(program);
-
 program.parse(process.argv);
-if (!processed)
-    ['string', 'undefined'].includes(typeof program.args[0]) && helper.helpAndExit(program);
