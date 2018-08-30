@@ -49,9 +49,30 @@ module.exports = class Agents {
             });
     }
 
-    getServiceActivation(token, activationId) {
-        const endpoint = `${this.endpointV3}/services/activations/${activationId}`;
-        debug('getServiceActivation(%s) => %s', activationId, endpoint);
+    getActivation(token, activationId) {
+        const endpoint = `${this.endpointV3}/activations/${activationId}`;
+        debug('getActivation(%s) => %s', activationId, endpoint);
+        return request
+            .get(endpoint)
+            .set('Authorization', `Bearer ${token}`)
+            .set('x-cortex-proxy-notify', true)
+            .then((res) => {
+                if (Boolean(_.get(res, 'headers.x-cortex-proxied', false)))
+                    console.error(chalk.blue('Request proxied to cloud.'));
+                if (res.ok) {
+                    return {success: true, result: res.body};
+                }
+                return {success: false, status: res.status, message: res.body};
+            })
+            .catch((err) => {
+                return constructError(err);
+            });
+    }
+
+    listActivations(token, instanceId, environmentName) {
+        let endpoint = `${this.endpointV3}/instances/${instanceId}/activations`;
+        debug('listActivations(%s, %s) => %s', instanceId, environmentName, endpoint);
+        if (environmentName) endpoint = `${endpoint}?environmentName=${environmentName}`;
         return request
             .get(endpoint)
             .set('Authorization', `Bearer ${token}`)

@@ -16,12 +16,18 @@
 * limitations under the License.
 */
 
-const helper = require('./utils.js');
-const program = require('commander');
 const chalk = require('chalk');
-const { ListJobs, JobStatus, DescribeJob, SaveJob } = require('../src/commands/jobs');
+const program = require('../src/commander');
 
-let processed = false;
+const { withCompatibilityCheck } = require('../src/compatibility');
+
+const {
+    ListJobs,
+    JobStatus,
+    DescribeJob,
+    SaveJob
+} = require('../src/commands/jobs');
+
 program.description('Work with Cortex Jobs');
 
 
@@ -29,74 +35,70 @@ program.description('Work with Cortex Jobs');
 program
     .command('list')
     .description('List job definitions')
+    .option('--no-compat', 'Ignore API compatibility checks')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
     .option('--json', 'Output results using JSON')
     .option('--query [query]', 'A JMESPath query to use in filtering the response data. Ignored if output format is not JSON.')
-    .action((options) => {
+    .action(withCompatibilityCheck((options) => {
         try {
             new ListJobs(program).execute(options);
-            processed = true;
         }
         catch (err) {
             console.error(chalk.red(err.message));
         }
-    });
+    }));
 
 // Describe Job
 program
     .command('describe <jobDefinition>')
     .description('Describe job definition')
+    .option('--no-compat', 'Ignore API compatibility checks')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
     .option('--json', 'Output results using JSON')
-    .action((jobDefinition, options) => {
+    .action(withCompatibilityCheck((jobDefinition, options) => {
         try {
             new DescribeJob(program).execute(jobDefinition, options);
-            processed = true;
         }
         catch (err) {
             console.error(chalk.red(err.message));
         }
-    });
+    }));
 
 // Get Job Status
 program
     .command('status <jobDefinition>')
     .description('Get job status')
+    .option('--no-compat', 'Ignore API compatibility checks')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
     .option('--json', 'Output results using JSON')
-    .action((jobDefinition, options) => {
+    .action(withCompatibilityCheck((jobDefinition, options) => {
         try {
             new JobStatus(program).execute(jobDefinition, options);
-            processed = true;
         }
         catch (err) {
             console.error(chalk.red(err.message));
         }
-    });
+    }));
 
 
 // Save Job
 program
     .command('save <jobDefinition>')
     .description('Save a job definition')
+    .option('--no-compat', 'Ignore API compatibility checks')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
     .option('-y, --yaml', 'Use YAML for job definition format')
-    .action((jobDefinition, options) => {
+    .action(withCompatibilityCheck((jobDefinition, options) => {
         try {
             new SaveJob(program).execute(jobDefinition, options);
-            processed = true;
         }
         catch (err) {
             console.error(chalk.red(err.message));
         }
-    });
-
-process.env.DOC && require('../src/commands/utils').exportDoc(program);
+    }));
 
 program.parse(process.argv);
-if (!processed)
-    ['string', 'undefined'].includes(typeof program.args[0]) && helper.helpAndExit(program);

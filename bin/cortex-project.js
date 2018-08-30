@@ -16,14 +16,11 @@
  * limitations under the License.
  */
 
-const helper = require('./utils.js');
-const program = require('commander');
 const chalk = require('chalk');
-const {
-    GenerateProjectCommand
-} = require('../src/commands/project');
+const program = require('../src/commander');
 
-let processed = false;
+const { GenerateProjectCommand } = require('../src/commands/project');
+
 program.description('Work with a related collection of Cortex contributions');
 
 // Generate Project
@@ -31,19 +28,13 @@ program
     .command('generate')
     .description('Generates the structure and top level build script for a project')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
-    .option('--profile [profile]', 'The profile to use')
     .action((options) => {
         try {
             new GenerateProjectCommand(program).execute(options);
-            processed = true;
         }
         catch (err) {
             console.error(chalk.red(err.message));
         }
     });
 
-process.env.DOC && require('../src/commands/utils').exportDoc(program);
-
 program.parse(process.argv);
-if (!processed)
-    ['string', 'undefined'].includes(typeof program.args[0]) && helper.helpAndExit(program);

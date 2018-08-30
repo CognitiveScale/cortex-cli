@@ -16,68 +16,69 @@
  * limitations under the License.
  */
 
-const helper = require('./utils.js');
-const program = require('commander');
 const chalk = require('chalk');
-const { SaveTypeCommand, ListTypesCommand, DescribeTypeCommand } = require('../src/commands/types');
+const program = require('../src/commander');
 
-let processed = false;
+const { withCompatibilityCheck } = require('../src/compatibility');
+
+const {
+    SaveTypeCommand,
+    ListTypesCommand,
+    DescribeTypeCommand
+} = require('../src/commands/types');
+
 program.description('Work with Cortex Types');
     
 // Save Type
 program
     .command('save <typeDefinition>')
     .description('Save a type definition')
+    .option('--no-compat', 'Ignore API compatibility checks')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
     .option('-y, --yaml', 'Use YAML for type definition format')
-    .action((typeDefinition, options) => {
+    .action(withCompatibilityCheck((typeDefinition, options) => {
         try {
             new SaveTypeCommand(program).execute(typeDefinition, options);
-            processed = true;
         }
         catch (err) {
             console.error(chalk.red(err.message));
         }
-    });
+    }));
 
 // List Types
 program
     .command('list')
     .description('List type definitions')
+    .option('--no-compat', 'Ignore API compatibility checks')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
     .option('--json', 'Output results using JSON')
     .option('--query [query]', 'A JMESPath query to use in filtering the response data.')
-    .action((options) => {
+    .action(withCompatibilityCheck((options) => {
         try {
             new ListTypesCommand(program).execute(options);
-            processed = true;
         }
         catch (err) {
             console.error(chalk.red(err.message));
         }
-    });
+    }));
 
 // Describe Type
 program
     .command('describe <typeName>')
     .description('Describe type')
+    .option('--no-compat', 'Ignore API compatibility checks')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
     .option('--query [query]', 'A JMESPath query to use in filtering the response data.')
-    .action((typeName, options) => {
+    .action(withCompatibilityCheck((typeName, options) => {
         try {
             new DescribeTypeCommand(program).execute(typeName, options);
-            processed = true;
         }
         catch (err) {
             console.error(chalk.red(err.message));
         }
-    });
-
-process.env.DOC && require('../src/commands/utils').exportDoc(program);
+    }));
 
 program.parse(process.argv);
-if (!processed)
-    ['string', 'undefined'].includes(typeof program.args[0]) && helper.helpAndExit(program);

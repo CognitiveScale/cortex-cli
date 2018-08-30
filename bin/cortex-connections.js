@@ -16,13 +16,20 @@
  * limitations under the License.
  */
 
-const helper = require('./utils.js');
-const program = require('commander');
 const chalk = require('chalk');
-const { ListConnections, SaveConnectionCommand, DescribeConnectionCommand, TestConnectionCommand,
-    ListConnectionsTypes, GenerateConnectionCommand } = require('../src/commands/connections');
+const program = require('../src/commander');
 
-let processed = false;
+const { withCompatibilityCheck } = require('../src/compatibility');
+
+const {
+    ListConnections,
+    SaveConnectionCommand,
+    DescribeConnectionCommand,
+    TestConnectionCommand,
+    ListConnectionsTypes,
+    GenerateConnectionCommand
+} = require('../src/commands/connections');
+
 program.description('Work with Cortex Connections');
 
 
@@ -30,88 +37,88 @@ program.description('Work with Cortex Connections');
 program
     .command('list')
     .description('List connections definitions')
+    .option('--no-compat', 'Ignore API compatibility checks')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
     .option('--json', 'Output results using JSON')
     .option('--query [query]', 'A JMESPath query to use in filtering the response data. Ignored if output format is not JSON.')
-    .action((options) => {
+    .action(withCompatibilityCheck((options) => {
         try {
             new ListConnections(program).execute(options);
-            processed = true;
         }
         catch (err) {
             console.error(chalk.red(err.message));
         }
-    });
+    }));
 
 // Save Connections
 program
     .command('save <connectionDefinition>')
     .description('Save a connections definition. Takes JSON file by default.')
+    .option('--no-compat', 'Ignore API compatibility checks')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
     .option('-y, --yaml', 'Use YAML for agent definition format')
-    .action((connDefinition, options) => {
+    .action(withCompatibilityCheck((connDefinition, options) => {
         try {
             new SaveConnectionCommand(program).execute(connDefinition, options);
-            processed = true;
         }
         catch (err) {
             console.error(chalk.red(err.message));
         }
-    });
+    }));
 
 // Describe Connection
 program
     .command('describe <connectionName>')
     .description('Describe connection')
+    .option('--no-compat', 'Ignore API compatibility checks')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
     .option('--query [query]', 'A JMESPath query to use in filtering the response data.')
-    .action((connectionName, options) => {
+    .action(withCompatibilityCheck((connectionName, options) => {
         try {
             new DescribeConnectionCommand(program).execute(connectionName, options);
-            processed = true;
         }
         catch (err) {
             console.error(chalk.red(err.message));
         }
-    });
+    }));
 
 // Test Connections
 program
     .command('test <connectionDefinition>')
     .description('Test a connections definition before saving. Takes JSON file by default.')
+    .option('--no-compat', 'Ignore API compatibility checks')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
     .option('-y, --yaml', 'Use YAML for agent definition format')
-    .action((connDefinition, options) => {
+    .action(withCompatibilityCheck((connDefinition, options) => {
         try {
             new TestConnectionCommand(program).execute(connDefinition, options);
-            processed = true;
         }
         catch (err) {
             console.error(chalk.red(err.message));
         }
-    });
+    }));
 
 // List Connections Types
 program
     .command('list-types')
     .description('List connections types')
+    .option('--no-compat', 'Ignore API compatibility checks')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
     .option('--json', 'Output results using JSON')
     .option('--query [query]', 'A JMESPath query to use in filtering the response data. Ignored if output format is not JSON.')
-    .action((options) => {
+    .action(withCompatibilityCheck((options) => {
         try {
             new ListConnectionsTypes(program).execute(options);
-            processed = true;
         }
         catch (err) {
             console.error(chalk.red(err.message));
         }
-    });
+    }));
 
 
 // Generate Connections
@@ -119,18 +126,13 @@ program
     .command('generate')
     .description('Generates the structure of the connection payload')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
-    .option('--profile [profile]', 'The profile to use', 'default')
-    .action((options) => {
+    .action((options) => { // deliberately not using withCompatibilityCheck()
         try {
             new GenerateConnectionCommand(program).execute(options);
-            processed = true;
         }
         catch (err) {
             console.error(chalk.red(err.message));
         }
     });
 
-process.env.DOC && require('../src/commands/utils').exportDoc(program);
 program.parse(process.argv);
-if (!processed)
-    ['string', 'undefined'].includes(typeof program.args[0]) && helper.helpAndExit(program);

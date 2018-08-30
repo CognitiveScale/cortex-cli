@@ -16,12 +16,18 @@
 * limitations under the License.
 */
 
-const helper = require('./utils.js');
-const program = require('commander');
 const chalk = require('chalk');
-const { ListTasks, TaskLogs, CancelTask, DescribeTask } = require('../src/commands/tasks');
+const program = require('../src/commander');
 
-let processed = false;
+const { withCompatibilityCheck } = require('../src/compatibility');
+
+const {
+    ListTasks,
+    TaskLogs,
+    CancelTask,
+    DescribeTask
+} = require('../src/commands/tasks');
+
 program.description('Work with Cortex Jobs');
 
 
@@ -29,76 +35,72 @@ program.description('Work with Cortex Jobs');
 program
     .command('list <jobId>')
     .description('List task definitions within a job definition')
+    .option('--no-compat', 'Ignore API compatibility checks')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
     .option('--json', 'Output results using JSON')
     .option('--query [query]', 'A JMESPath query to use in filtering the response data. Ignored if output format is not JSON.')
-    .action((jobId, options) => {
+    .action(withCompatibilityCheck((jobId, options) => {
         try {
             new ListTasks(program).execute(jobId, options);
-            processed = true;
         }
         catch (err) {
             console.error(chalk.red(err.message));
         }
-    });
+    }));
 
 // Get Tasks logs
 program
     .command('logs <jobId> <taskId>')
     .description('Get Tasks logs')
+    .option('--no-compat', 'Ignore API compatibility checks')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
     .option('--json', 'Output results using JSON')
     .option('--query [query]', 'A JMESPath query to use in filtering the response data. Ignored if output format is not JSON.')
-    .action((jobId, taskId, options) => {
+    .action(withCompatibilityCheck((jobId, taskId, options) => {
         try {
             new TaskLogs(program).execute(jobId, taskId, options);
-            processed = true;
         }
         catch (err) {
             console.error(chalk.red(err.message));
         }
-    });
+    }));
 
 // Cancel task
 program
     .command('cancel <jobId> <taskId>')
     .description('Cancel a task')
+    .option('--no-compat', 'Ignore API compatibility checks')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
     .option('--json', 'Output results using JSON')
     .option('-m, --message <message>', 'Cancellation message')
-    .action((jobId, taskId, options) => {
+    .action(withCompatibilityCheck((jobId, taskId, options) => {
         try {
             new CancelTask(program).execute(jobId, taskId, options);
-            processed = true;
         }
         catch (err) {
             console.error(chalk.red(err.message));
         }
-    });
+    }));
 
 // Describe task
 program
     .command('describe <jobId> <taskId>')
     .description('Describe a task definition')
+    .option('--no-compat', 'Ignore API compatibility checks')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
     .option('--json', 'Output results using JSON')
     .option('--query [query]', 'A JMESPath query to use in filtering the response data. Ignored if output format is not JSON.')
-    .action((jobId, taskId, options) => {
+    .action(withCompatibilityCheck((jobId, taskId, options) => {
         try {
             new DescribeTask(program).execute(jobId, taskId, options);
-            processed = true;
         }
         catch (err) {
             console.error(chalk.red(err.message));
         }
-    });
-
-process.env.DOC && require('../src/commands/utils').exportDoc(program);
+    }));
 
 program.parse(process.argv);
-if (!processed)
-    ['string', 'undefined'].includes(typeof program.args[0]) && helper.helpAndExit(program);
