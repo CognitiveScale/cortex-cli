@@ -146,10 +146,13 @@ module.exports.InvokeActionCommand = class {
 
         debug('params: %o', params);
         const actionType = options.actionType;
-        const path = options.path;
-        const method = options.method;
+        const properties = {
+            'daemon.method': options.method,
+            'daemon.path': options.path,
+        };
+        params['properties'] = properties;
         const actions = new Actions(profile.url);
-        actions.invokeAction(profile.token, actionName, path, params, actionType, method)
+        actions.invokeAction(profile.token, actionName, params, actionType)
             .then((response) => {
                 if (response.success) {
                     let result = filterObject(response.result, options);

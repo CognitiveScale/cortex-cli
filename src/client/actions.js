@@ -26,20 +26,17 @@ module.exports = class Actions {
         this.endpointV3 = `${cortexUrl}/v3/actions`;
     }
 
-    invokeAction(token, actionName, path, params, actionType, method) {
+    invokeAction(token, actionName, params, actionType) {
         let endpoint = `${this.endpointV3}/${actionName}/invoke`;
-        if (path) {
-            endpoint = `${endpoint}/${path}`
-        }
         if (actionType) {
             endpoint = `${endpoint}?actionType=${actionType}`
         }
         debug('invokeAction(%s) => %s', actionName, endpoint);
 
-        const req = request(method || 'POST', endpoint)
+        const req = request
+            .post(endpoint)
             .set('Authorization', `Bearer ${token}`)
             .send(params);
-
 
         return req.then((res) => {
             if (res.ok) {
