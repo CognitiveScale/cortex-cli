@@ -150,7 +150,7 @@ module.exports.InvokeActionCommand = class {
             'daemon.method': options.method,
             'daemon.path': options.path,
         };
-        params['properties'] = properties;
+        params.properties = properties;
         const actions = new Actions(profile.url);
         actions.invokeAction(profile.token, actionName, params, actionType)
             .then((response) => {
