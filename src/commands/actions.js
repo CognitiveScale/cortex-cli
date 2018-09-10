@@ -146,10 +146,10 @@ module.exports.InvokeActionCommand = class {
 
         debug('params: %o', params);
         const actionType = options.actionType;
-        params.properties = {
-            'daemon.method': options.method,
-            'daemon.path': options.path,
-        };
+        if (options.method)
+            params.properties['daemon.method'] = options.method;
+        if (options.path)
+            params.properties['daemon.path'] = options.path;
         const actions = new Actions(profile.url);
         actions.invokeAction(profile.token, actionName, params, actionType)
             .then((response) => {
