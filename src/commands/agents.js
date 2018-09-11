@@ -240,11 +240,11 @@ module.exports.ListActivationsCommand = class {
                 }
             }
             else {
-                printError(`Failed to list agent instances ${agentName}: ${response.message}`, options);
+                printError(`Failed to list activations for instance ${instanceId}: ${response.message}`, options);
             }
         })
             .catch((err) => {
-                printError(`Failed to list agent instances ${instanceId}: ${err.status} ${err.message}`, options);
+                printError(`Failed to list activations for instance ${instanceId}: ${err.status} ${err.message}`, options);
             });
     }
 };
