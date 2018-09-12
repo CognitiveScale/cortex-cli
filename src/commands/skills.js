@@ -13,13 +13,32 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
+const _ = require('lodash');
 const fs = require('fs');
 const yeoman = require('yeoman-environment');
 const debug = require('debug')('cortex:cli');
 const { loadProfile } = require('../config');
 const Catalog = require('../client/catalog');
 const { printSuccess, printError, filterObject, parseObject, printTable } = require('./utils');
+
+function _formatpath(p){
+    let cnt=0, res = '';
+    const len = p.length;
+    p.forEach(s => {
+        if (_.isNumber(s)) {
+            res += `[${s}]`
+        }else
+            if ( cnt < len)
+                res += s;
+            else
+                res +=s;
+        if (cnt < len-1 && !_.isNumber(p[cnt+1]))
+            res += '.';
+        cnt += 1;
+
+    })
+    return res;
+}
 
 module.exports.SaveSkillCommand = class SaveSkillCommand {
 
@@ -38,9 +57,19 @@ module.exports.SaveSkillCommand = class SaveSkillCommand {
         catalog.saveSkill(profile.token, skill).then((response) => {
             if (response.success) {
                 printSuccess(`Skill saved`, options);
-            }
-            else {
-                printError(`Failed to save skill: ${response.status} ${response.message}`, options);
+            } else {
+                if (response.details) {
+                    console.log(`Failed to save skill: ${response.status} ${response.message}`);
+                    console.log('The following issues were found:');
+                    const tableSpec = [
+                        {column: 'Path', field: 'path', width: 50},
+                        {column: 'Message', field: 'message', width: 100},
+                    ];
+                    response.details.map(d => d.path = _formatpath(d.path));
+                    printTable(tableSpec,response.details);
+                    printError(''); // Just exit
+
+                }
             }
         })
         .catch((err) => {

@@ -128,10 +128,10 @@ program
             if (!options.kind && !options.docker) {
                 throw new Error('--kind [kind] or --docker [image] required');
             }
-
-            if (options.docker && options.kind) {
-                throw new Error('Use either --kind [kind] or --docker [image], but not both');
-            }
+            // allow kind with docker for blackbox images..
+            // if (options.docker && options.kind) {
+            //     throw new Error('Use either --kind [kind] or --docker [image], but not both');
+            // }
 
             new DeployActionCommand(program).execute(actionName, options);
         }
