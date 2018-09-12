@@ -146,6 +146,7 @@ module.exports.InvokeActionCommand = class {
 
         debug('params: %o', params);
         const actionType = options.actionType;
+        params.properties = params.properties || {};
         if (options.method)
             params.properties['daemon.method'] = options.method;
         if (options.path)
