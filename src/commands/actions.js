@@ -217,3 +217,25 @@ module.exports.TaskLogsActionCommand = class {
         })
     }
 }
+
+module.exports.TaskCancelActionCommand = class {
+     constructor(program) {
+        this.program = program;
+    }
+
+    execute(jobId, taskId, options) {
+        const profile = loadProfile(options.profile);
+        debug('%s.taskCancelActions (%s, %s)', profile.name, jobId, taskId);
+        const actions = new Actions(profile.url);
+        actions.taskCancel(profile.token, jobId, taskId)
+            .then((response) => {
+                if (response.success) {
+                    const result = filterObject(response, options);
+                    printSuccess(JSON.stringify(result, null, 2), options);
+                }
+                else {
+                    printError(`Action cancel task failed: ${response.status} ${response.message}`, options);
+                }
+        })
+    }
+}

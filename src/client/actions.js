@@ -157,6 +157,24 @@ module.exports = class Actions {
             });
     }
 
+    taskCancel(token, jobId, taskId) {
+        const canonicalJobId = Actions.getCanonicalJobId(jobId);
+        const endpoint = `${this.endpointJobsV3}/${canonicalJobId}/tasks/${taskId}`;
+        return request
+            .delete(endpoint)
+            .set('Authorization', `Bearer ${token}`)
+            .accept('application/json')
+            .then((res) => {
+                if (res.ok) {
+                    return res.body;
+                }
+                return {success: false, status: res.status, message: res.body};
+            })
+            .catch((err) => {
+                return constructError(err);
+            });
+    }
+
     static getCanonicalJobId(jobId) {
         let canonicalJobId = jobId;
         const namespaceProvided = /\w\/\w/.test(jobId);

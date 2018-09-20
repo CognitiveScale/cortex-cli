@@ -27,7 +27,8 @@ const {
     DeleteActionCommand,
     InvokeActionCommand,
     DeployActionCommand,
-    TaskLogsActionCommand
+    TaskLogsActionCommand,
+    TaskCancelActionCommand
 } = require('../src/commands/actions');
 
 program.description('Work with Cortex Actions');
@@ -148,11 +149,27 @@ program
     .option('--no-compat', 'Ignore API compatibility checks')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
-    .option('--json', 'Output results using JSON')
     .option('--query [query]', 'A JMESPath query to use in filtering the response data. Ignored if output format is not JSON.')
     .action(withCompatibilityCheck((jobId, taskId, options) => {
         try {
             new TaskLogsActionCommand(program).execute(jobId, taskId, options);
+        }
+        catch (err) {
+            console.error(chalk.red(err.message));
+        }
+    }));
+
+// Cancel Tasks
+program
+    .command('task-cancel <jobId> <taskId>')
+    .description('Cancel Task')
+    .option('--no-compat', 'Ignore API compatibility checks')
+    .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
+    .option('--profile [profile]', 'The profile to use')
+    .option('--query [query]', 'A JMESPath query to use in filtering the response data. Ignored if output format is not JSON.')
+    .action(withCompatibilityCheck((jobId, taskId, options) => {
+        try {
+            new TaskCancelActionCommand(program).execute(jobId, taskId, options);
         }
         catch (err) {
             console.error(chalk.red(err.message));
