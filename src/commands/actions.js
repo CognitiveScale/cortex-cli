@@ -195,3 +195,25 @@ module.exports.DeleteActionCommand = class {
             });
     }
 };
+
+module.exports.TaskLogsActionCommand = class {
+     constructor(program) {
+        this.program = program;
+    }
+
+    execute(jobId, taskId, options) {
+        const profile = loadProfile(options.profile);
+        debug('%s.taskLogsActions (%s, %s)', profile.name, jobId, taskId);
+        const actions = new Actions(profile.url);
+        actions.taskLogs(profile.token, jobId, taskId)
+            .then((response) => {
+                if (response.success) {
+                    const result = filterObject(response, options);
+                    printSuccess(JSON.stringify(result, null, 2), options);
+                }
+                else {
+                    printError(`Action task logs failed: ${response.status} ${response.message}`, options);
+                }
+        })
+    }
+}
