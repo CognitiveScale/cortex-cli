@@ -26,7 +26,10 @@ const {
     DescribeActionCommand,
     DeleteActionCommand,
     InvokeActionCommand,
-    DeployActionCommand
+    DeployActionCommand,
+    TaskLogsActionCommand,
+    TaskCancelActionCommand,
+    TaskStatusActionCommand
 } = require('../src/commands/actions');
 
 program.description('Work with Cortex Actions');
@@ -134,6 +137,57 @@ program
             // }
 
             new DeployActionCommand(program).execute(actionName, options);
+        }
+        catch (err) {
+            console.error(chalk.red(err.message));
+        }
+    }));
+
+// Get Tasks logs
+program
+    .command('task-logs <jobId> <taskId>')
+    .description('Get Tasks logs')
+    .option('--no-compat', 'Ignore API compatibility checks')
+    .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
+    .option('--profile [profile]', 'The profile to use')
+    .option('--query [query]', 'A JMESPath query to use in filtering the response data. Ignored if output format is not JSON.')
+    .action(withCompatibilityCheck((jobId, taskId, options) => {
+        try {
+            new TaskLogsActionCommand(program).execute(jobId, taskId, options);
+        }
+        catch (err) {
+            console.error(chalk.red(err.message));
+        }
+    }));
+
+// Cancel Tasks
+program
+    .command('task-cancel <jobId> <taskId>')
+    .description('Cancel Task')
+    .option('--no-compat', 'Ignore API compatibility checks')
+    .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
+    .option('--profile [profile]', 'The profile to use')
+    .option('--query [query]', 'A JMESPath query to use in filtering the response data. Ignored if output format is not JSON.')
+    .action(withCompatibilityCheck((jobId, taskId, options) => {
+        try {
+            new TaskCancelActionCommand(program).execute(jobId, taskId, options);
+        }
+        catch (err) {
+            console.error(chalk.red(err.message));
+        }
+    }));
+
+// Get Tasks Status
+program
+    .command('task-status <jobId> <taskId>')
+    .description('Get Tasks status')
+    .option('--no-compat', 'Ignore API compatibility checks')
+    .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
+    .option('--profile [profile]', 'The profile to use')
+    .option('--query [query]', 'A JMESPath query to use in filtering the response data. Ignored if output format is not JSON.')
+    .action(withCompatibilityCheck((jobId, taskId, options) => {
+        try {
+            new TaskStatusActionCommand(program).execute(jobId, taskId, options);
         }
         catch (err) {
             console.error(chalk.red(err.message));

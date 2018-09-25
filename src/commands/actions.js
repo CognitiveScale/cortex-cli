@@ -146,10 +146,11 @@ module.exports.InvokeActionCommand = class {
 
         debug('params: %o', params);
         const actionType = options.actionType;
-        params.properties = {
-            'daemon.method': options.method,
-            'daemon.path': options.path,
-        };
+        params.properties = params.properties || {};
+        if (options.method)
+            params.properties['daemon.method'] = options.method;
+        if (options.path)
+            params.properties['daemon.path'] = options.path;
         const actions = new Actions(profile.url);
         actions.invokeAction(profile.token, actionName, params, actionType)
             .then((response) => {
@@ -194,3 +195,70 @@ module.exports.DeleteActionCommand = class {
             });
     }
 };
+
+module.exports.TaskLogsActionCommand = class {
+     constructor(program) {
+        this.program = program;
+    }
+
+    execute(jobId, taskId, options) {
+        const profile = loadProfile(options.profile);
+        debug('%s.taskLogsActions (%s, %s)', profile.name, jobId, taskId);
+        const actions = new Actions(profile.url);
+        actions.taskLogs(profile.token, jobId, taskId)
+            .then((response) => {
+                if (response.success) {
+                    const result = filterObject(response, options);
+                    printSuccess(JSON.stringify(result, null, 2), options);
+                }
+                else {
+                    printError(`Action task logs failed: ${response.status} ${response.message}`, options);
+                }
+        })
+    }
+};
+
+module.exports.TaskCancelActionCommand = class {
+     constructor(program) {
+        this.program = program;
+    }
+
+    execute(jobId, taskId, options) {
+        const profile = loadProfile(options.profile);
+        debug('%s.taskCancelActions (%s, %s)', profile.name, jobId, taskId);
+        const actions = new Actions(profile.url);
+        actions.taskCancel(profile.token, jobId, taskId)
+            .then((response) => {
+                if (response.success) {
+                    const result = filterObject(response, options);
+                    printSuccess(JSON.stringify(result, null, 2), options);
+                }
+                else {
+                    printError(`Action cancel task failed: ${response.status} ${response.message}`, options);
+                }
+        })
+    }
+};
+
+module.exports.TaskStatusActionCommand = class {
+     constructor(program) {
+        this.program = program;
+    }
+
+    execute(jobId, taskId, options) {
+        const profile = loadProfile(options.profile);
+        debug('%s.taskStatusActions (%s, %s)', profile.name, jobId, taskId);
+        const actions = new Actions(profile.url);
+        actions.taskStatus(profile.token, jobId, taskId)
+            .then((response) => {
+                if (response.success) {
+                    const result = filterObject(response, options);
+                    printSuccess(JSON.stringify(result, null, 2), options);
+                }
+                else {
+                    printError(`Action task logs failed: ${response.status} ${response.message}`, options);
+                }
+        })
+    }
+}
+
