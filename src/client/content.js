@@ -102,25 +102,46 @@ module.exports = class Content {
 
     downloadContent(token, contentKey) {
         debug('downloadContent(%s) => %s', contentKey, this.endpoint);
-        const url = `${this.endpoint}/${contentKey}`;
-        return request
+        // strip leading slash, if any
+        const cleanedKey = contentKey.replace(/^\//, '');
+        const url = `${this.endpoint}/${cleanedKey}`;
+        const stream = request
             .get(url)
-            .set('Authorization', `Bearer ${token}`)
-            .accept('application/json')
-            .then((res) => {
-                if (res.ok) {
-                    return {success: true, message: res.text};
+            .set('Authorization', `Bearer ${token}`);
+
+        return new Promise((resolve, reject) => {
+            stream.on('response', function(response) {
+                if (response.status !== 200) {
+                    stream.abort();
+                    return resolve({
+                        success: false,
+                        status: stream.response.status,
+                        message: stream.response.error
+                    });
                 }
-                return {success: false, message: res.body, status: res.status};
-            })
-            .catch((err) => {
-                return constructError(err);
             });
+
+            stream.on('end', () => {
+                return resolve({
+                    success: true,
+                    message: `\nDownloaded ${contentKey}`,
+                    status: stream.response.status
+                });
+            });
+
+            stream.on('error', (err) => {
+                return resolve(constructError(err));
+            });
+
+            stream.pipe(process.stdout);
+        });
     }
 
 
     downloadSecureContent(token, contentKey) {
-        const url = `${this.cortexUrl}/v2/tenants/secrets/${contentKey}`;
+        // strip leading slash, if any
+        const cleanedKey = contentKey.replace(/^\//, '');
+        const url = `${this.cortexUrl}/v2/tenants/secrets/${cleanedKey}`;
         debug('downloadContent(%s) => %s', contentKey);
         return request
             .get(url)
