@@ -267,7 +267,7 @@ module.exports.JobTaskListActionCommand = class {
         this.program = program;
     }
 
-    execute(jobId, taskId, options) {
+    execute(jobId, options) {
         const profile = loadProfile(options.profile);
         debug('%s.jobTaskListActions (%s, %s)', profile.name, jobId);
         const actions = new Actions(profile.url);

@@ -29,7 +29,8 @@ const {
     DeployActionCommand,
     TaskLogsActionCommand,
     TaskCancelActionCommand,
-    TaskStatusActionCommand
+    TaskStatusActionCommand,
+    JobTaskListActionCommand
 } = require('../src/commands/actions');
 
 program.description('Work with Cortex Actions');
@@ -201,10 +202,11 @@ program
     .option('--no-compat', 'Ignore API compatibility checks')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
-    .option('--query [query]', 'A JMESPath query to use in filtering the response data. Ignored if output format is not JSON.')
-    .action(withCompatibilityCheck((jobId, taskId, options) => {
+    .option('--query [query]', 'A JMESPath query to use in filtering the response data. Ignored if output format is not JSON.' +
+        ' Example to query for status [PENDING, SUBMITTED, STARTING, RUNNING, SUCCEEDED, FAILED] tasks: --query "data[?status == \'FAILED\'].taskId"')
+    .action(withCompatibilityCheck((jobId, options) => {
         try {
-            new JobTaskListActionCommand(program).execute(jobId, taskId, options);
+            new JobTaskListActionCommand(program).execute(jobId, options);
         }
         catch (err) {
             console.error(chalk.red(err.message));
