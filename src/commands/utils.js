@@ -19,6 +19,7 @@ const jmsepath = require('jmespath');
 const yaml = require('js-yaml');
 const debug = require('debug')('cortex:cli');
 const Table = require('cli-table');
+const { exec } = require('child_process');
 
 module.exports.constructError = function(error) {
     // fallback to text in message or standard error message
@@ -117,3 +118,25 @@ module.exports.exportDoc = function(program){
     }))));
     process.exit(0);
 };
+
+/**
+ * Execute a sub command, return stdout on success, return stderr on failure
+ * @param commandStr
+ * @returns {Promise<*>}
+ */
+async function callMe(commandStr) {
+    return new Promise((resolve, reject) => {
+        const proc = exec(commandStr,(err, stdout) => {
+            if (err) {
+                reject(err.message + stdout);
+            } else {
+                resolve(stdout);
+            }
+        });
+        // Pipe stdout to stderr in real time:
+        proc.stdout.pipe(process.stderr);
+
+    });
+}
+
+module.exports.callMe = callMe;

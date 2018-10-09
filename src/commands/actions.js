@@ -108,9 +108,10 @@ module.exports.DeployActionCommand = class {
         const cmd = options.cmd;
         const port = options.port;
         const environment = options.environment;
+        const pushDocker = options.pushDocker;
 
         const actions = new Actions(profile.url);
-        actions.deployAction(profile.token, actionName, dockerImage, kind, code, memory, timeout, actionType, cmd, port, environment)
+        actions.deployAction(profile.token, actionName, dockerImage, kind, code, memory, timeout, actionType, cmd, port, environment, pushDocker)
             .then((response) => {
                 if (response.success) {
                     printSuccess(JSON.stringify(response.message, null, 2), options);
