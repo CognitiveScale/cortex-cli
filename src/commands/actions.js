@@ -260,5 +260,49 @@ module.exports.TaskStatusActionCommand = class {
                 }
         })
     }
-}
+};
 
+module.exports.JobTaskListActionCommand = class {
+    constructor(program) {
+        this.program = program;
+    }
+
+    execute(jobId, options) {
+        const profile = loadProfile(options.profile);
+        debug('%s.jobTaskListActions (%s, %s)', profile.name, jobId);
+        const actions = new Actions(profile.url);
+        actions.jobListTasks(profile.token, jobId)
+            .then((response) => {
+                if (response.success) {
+                    const result = filterObject(response, options);
+                    printSuccess(JSON.stringify(result, null, 2), options);
+                }
+                else {
+                    printError(`Action list job\'s tasks failed: ${response.status} ${response.message}`, options);
+                }
+            })
+    }
+};
+
+
+module.exports.TaskStatsActionCommand = class {
+    constructor(program) {
+        this.program = program;
+    }
+
+    execute(jobId, options) {
+        const profile = loadProfile(options.profile);
+        debug('%s.taskStatsActions (%s, %s)', profile.name, jobId);
+        const actions = new Actions(profile.url);
+        actions.taskStats(profile.token, jobId)
+            .then((response) => {
+                if (response.success) {
+                    const result = filterObject(response, options);
+                    printSuccess(JSON.stringify(result, null, 2), options);
+                }
+                else {
+                    printError(`Action get Job tasks stats failed: ${response.status} ${response.message}`, options);
+                }
+            })
+    }
+};

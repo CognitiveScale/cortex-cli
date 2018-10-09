@@ -160,16 +160,16 @@ module.exports.DownloadContent = class DownloadContent {
         else {
             content.downloadContent(profile.token, contentKey).then((response) => {
                 if (response.success) {
-                    printSuccess(response.message, options);
+                    // messages need to be on stderr as content is streamed to stdout
+                    console.error(response.message);
                 }
                 else {
                     printError(`Failed to download content: ${response.status} ${response.message}`, options);
                 }
-            })
-                .catch((err) => {
+            }).catch((err) => {
                     debug(err);
                     printError(`Failed to download content: ${err.status} ${err.message}`, options);
-                });
+            });
         }
 
     }
