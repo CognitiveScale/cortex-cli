@@ -30,11 +30,8 @@ const {
     TaskLogsActionCommand,
     TaskCancelActionCommand,
     TaskStatusActionCommand,
-<<<<<<< HEAD
-    JobTaskListActionCommand
-=======
-    TaskStatsActionCommand
->>>>>>> working job stats
+    JobTaskListActionCommand,
+    TaskStatsActionCommand,
 } = require('../src/commands/actions');
 
 program.description('Work with Cortex Actions');
