@@ -193,7 +193,7 @@ module.exports = class Actions {
             });
     }
 
-    jobListTasks(token, jobId, taskId) {
+    jobListTasks(token, jobId) {
         const canonicalJobId = Actions.getCanonicalJobId(jobId);
         const endpoint = `${this.endpointJobsV3}/${canonicalJobId}/tasks`;
         return request
