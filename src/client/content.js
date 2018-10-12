@@ -14,6 +14,12 @@
  * limitations under the License.
  */
 
+const fs = require('fs');
+const os = require('os');
+const path = require('path');
+const { URL } = require('url');
+
+const ProgressBar = require('progress');
 const request = require('superagent');
 const debug = require('debug')('cortex:cli');
 const { constructError } = require('../commands/utils');
@@ -23,6 +29,11 @@ module.exports = class Content {
     constructor(cortexUrl) {
         this.cortexUrl = cortexUrl;
         this.endpoint = `${cortexUrl}/v2/content`;
+    }
+
+    _sanitizeKey(key) {
+        // strip leading slash, if any
+        return key.replace(/^\//, '');
     }
 
     listContent(token) {
@@ -43,12 +54,13 @@ module.exports = class Content {
     }
 
     uploadContent(token, {content, key}) {
-        debug('saveContent(%s, %s) => %s', key, content, this.endpoint);
+        debug('uploadContent(%s, %s) => %s', key, content, this.endpoint);
+        const contentKey = this._sanitizeKey(key);
         return request
             .post(this.endpoint)
             .set('Authorization', `Bearer ${token}`)
             .accept('application/json')
-            .field('key', key)
+            .field('key', contentKey)
             .attach('content', content)
             .then((res) => {
                 if (res.ok) {
@@ -61,9 +73,52 @@ module.exports = class Content {
             });
     }
 
+    uploadContentStreaming(token, key, content, showProgress = false) {
+        debug('uploadContentStreaming(%s, %s) => %s', key, content, `${this.endpoint}/${key}`);
+
+        // NOTE: superagent only supports uploads via .attach(), which uses multipart forms (@see
+        // https://github.com/visionmedia/superagent/issues/1250).  To perform a streaming upload,
+        // we use requestjs instead.
+        const request = require('request');
+
+        const contentKey = this._sanitizeKey(key);
+        const url = new URL(`${this.endpoint}/${contentKey}`);
+
+        let progressBar;
+        if (showProgress) {
+            progressBar = new ProgressBar(
+                '  uploading [:bar] :percent :etas',
+                { renderThrottle: 500, total: fs.statSync(content).size }
+            );
+        }
+
+        return new Promise((resolve) => {
+            fs
+                .createReadStream(content)
+                .on('data', (chunk) => progressBar && progressBar.tick(chunk.length))
+                .pipe(request
+                    .post({
+                        uri: url,
+                        headers: {
+                            'Accept': 'application/json',
+                            'Authorization': `Bearer ${token}`
+                        }
+                    })
+                    .on('response', (res) => {
+                        if (res.statusCode === 200) {
+                            resolve({success: true, message: res.body});
+                        }
+                        resolve({success: false, message: res.body, status: res.status});
+                    })
+                    .on('error', (err) => resolve(constructError(err)))
+                );
+        });
+    }
+
     uploadSecureContent(token, key, content) {
-        const url = `${this.cortexUrl}/v2/tenants/secrets/${key}`;
-        debug('uploadSecureContent(%s => %s', content, url);
+        const contentKey = this._sanitizeKey(key);
+        const url = `${this.cortexUrl}/v2/tenants/secrets/${contentKey}`;
+        debug('uploadSecureContent(%s) => %s', content, url);
         return request
             .post(url)
             .set('Authorization', `Bearer ${token}`)
@@ -82,8 +137,9 @@ module.exports = class Content {
     }
 
 
-    deleteContent(token, contentKey) {
-        debug('deleteContent(%s) => %s', contentKey, this.endpoint);
+    deleteContent(token, key) {
+        debug('deleteContent(%s) => %s', key, this.endpoint);
+        const contentKey = this._sanitizeKey(key);
         const url = `${this.endpoint}/${contentKey}`;
         return request
             .delete(url)
@@ -100,14 +156,33 @@ module.exports = class Content {
             });
     }
 
-    downloadContent(token, contentKey) {
-        debug('downloadContent(%s) => %s', contentKey, this.endpoint);
-        // strip leading slash, if any
-        const cleanedKey = contentKey.replace(/^\//, '');
-        const url = `${this.endpoint}/${cleanedKey}`;
+    downloadContent(token, key, showProgress = false) {
+        debug('downloadContent(%s) => %s', key, this.endpoint);
+        const contentKey = this._sanitizeKey(key);
+        const url = `${this.endpoint}/${contentKey}`;
+
         const stream = request
             .get(url)
-            .set('Authorization', `Bearer ${token}`);
+            .set('Authorization', `Bearer ${token}`)
+            .use((req) => {
+                if (showProgress) {
+                    req.on('request', (clientReq) => {
+                        clientReq.on('response', function(res) {
+                            const total = +(res.headers['content-length'] || res.headers['Content-Length']);
+                            const progressBar = new ProgressBar(
+                                '  downloading [:bar] :percent :etas',
+                                {
+                                    current: 0,
+                                    renderThrottle: 500,
+                                    total: total,
+                                }
+                            );
+                        
+                            res.on('data', (chunk) => progressBar.tick(chunk.length));
+                          });
+                    });
+                }
+            });
 
         return new Promise((resolve, reject) => {
             stream.on('response', function(response) {
@@ -138,11 +213,10 @@ module.exports = class Content {
     }
 
 
-    downloadSecureContent(token, contentKey) {
-        // strip leading slash, if any
-        const cleanedKey = contentKey.replace(/^\//, '');
-        const url = `${this.cortexUrl}/v2/tenants/secrets/${cleanedKey}`;
-        debug('downloadContent(%s) => %s', contentKey);
+    downloadSecureContent(token, key) {
+        const contentKey = this._sanitizeKey(key);
+        const url = `${this.cortexUrl}/v2/tenants/secrets/${contentKey}`;
+        debug('downloadContent(%s) => %s', contentKey, url);
         return request
             .get(url)
             .set('Authorization', `Bearer ${token}`)

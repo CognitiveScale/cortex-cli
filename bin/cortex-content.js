@@ -53,6 +53,7 @@ program
 program
     .command('upload <contentKey> <filePath>')
     .description('Upload content')
+    .option('--progress', 'Show upload progress')
     .option('--no-compat', 'Ignore API compatibility checks')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
@@ -86,6 +87,7 @@ program
 program
     .command('download <contentKey>')
     .description('Download content')
+    .option('--progress', 'Show download progress')
     .option('--no-compat', 'Ignore API compatibility checks')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
