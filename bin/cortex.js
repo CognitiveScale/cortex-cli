@@ -34,6 +34,7 @@ program
     .command('content [cmd]', 'Work with Cortex Managed Content')
     .command('environments [cmd]', 'Work with Cortex Environments')
     .command('datasets [cmd]', 'Work with Cortex Datasets')
+    .command('docker [cmd]', 'Work with Docker')
     .command('jobs [cmd]', 'Work with Cortex Jobs')
     .command('processors [cmd]', 'Work with the Cortex Processor Runtime')
     .command('project [cmd]', 'Work with a related collection of Cortex contributions')
@@ -49,4 +50,3 @@ if (!program.commands.map(cmd => cmd._name).includes(program.args[0])) {
     program.outputHelp(identity);
     process.exit(1);
 }
-
