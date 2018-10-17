@@ -128,6 +128,7 @@ program
     .option('--port [port]', 'Docker port')                  //'9091'
     .option('--environment [environment]', 'Environment')
     .option('--cmd [cmd]', 'Command to be executed')    //'["--daemon"]'
+    .option('--push-docker', 'Push Docker image to the Cortex registry.')    
     .action(withCompatibilityCheck((actionName, options) => {
         try {
             if (!options.kind && !options.docker) {

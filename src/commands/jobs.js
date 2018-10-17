@@ -152,7 +152,7 @@ module.exports.SaveJob = class SaveJob {
         debug('%o', job);
 
         const jobs = new Jobs(profile.url);
-        jobs.saveJob(profile.token, job).then((response) => {
+        jobs.saveJob(profile.token, job, options.pushDocker).then((response) => {
             if (response.success) {
                 printSuccess('Job saved', options);
             }
