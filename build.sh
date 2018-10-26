@@ -30,7 +30,7 @@ function docker_build(){
     npm cache clear --force
     npm install -dd --verbose
     echo ${VERSION} > version.txt
-
+    ./generate_docs.sh
     BRANCH=$(git symbolic-ref --short -q HEAD)
     if [[ ${BRANCH} = "master" ]]; then
         rm -rf node_modules

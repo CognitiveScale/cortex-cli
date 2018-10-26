@@ -1,6 +1,6 @@
 {
   "name": "cortex-cli",
-  "version": "0.11.0",
+  "version": "0.12.1",
   "description": "Command line tool for CognitiveScale Cortex.",
   "main": "./bin/cortex.js",
   "scripts": {
@@ -39,10 +39,14 @@
     "jmespath": "0.15.0",
     "joi": "13.1.0",
     "js-yaml": "3.10.0",
+    "jsonwebtoken": "8.3.0",
     "lodash": "4.17.10",
     "npm-registry-fetch": "3.2.0",
+    "progress": "2.0.0",
+    "request": "2.88.0",
     "semver": "5.5.0",
     "superagent": "3.8.2",
+    "url": "0.11.0",
     "uuid": "3.2.1",
     "yeoman-environment": "2.0.5"
   },
@@ -54,3 +58,4 @@
     "superagent-mocker": "0.5.2"
   }
 }
+

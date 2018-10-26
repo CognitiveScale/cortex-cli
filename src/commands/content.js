@@ -69,8 +69,11 @@ module.exports.UploadContent = class UploadContent {
 
     execute(contentKey, filePath, options) {
         const profile = loadProfile(options.profile);
-        debug('%s.listContent()', profile.name);
+        debug('%s.uploadContent()', profile.name);
+
         const content = new Content(profile.url);
+        const showProgress = !!options.progress;
+
         if (options.secure) {
             const fileContent = fs.readFileSync(filePath);
             const fileBaseName = path.basename(filePath);
@@ -87,8 +90,7 @@ module.exports.UploadContent = class UploadContent {
             })
         }
         else {
-            const payload = {'content': filePath, 'key': contentKey};
-            content.uploadContent(profile.token, payload).then((response) => {
+            content.uploadContentStreaming(profile.token, contentKey, filePath, showProgress).then((response) => {
                 if (response.success) {
                     printSuccess(`Content successfully uploaded.`, options);
                 }
@@ -141,6 +143,7 @@ module.exports.DownloadContent = class DownloadContent {
         debug('%s.DownloadContent()', profile.name);
 
         const content = new Content(profile.url);
+        const showProgress = !!options.progress;
 
         // To download content from Secrets
         if (options.secure) {
@@ -158,18 +161,18 @@ module.exports.DownloadContent = class DownloadContent {
                 });
         }
         else {
-            content.downloadContent(profile.token, contentKey).then((response) => {
+            content.downloadContent(profile.token, contentKey, showProgress).then((response) => {
                 if (response.success) {
-                    printSuccess(response.message, options);
+                    // messages need to be on stderr as content is streamed to stdout
+                    console.error(response.message);
                 }
                 else {
                     printError(`Failed to download content: ${response.status} ${response.message}`, options);
                 }
-            })
-                .catch((err) => {
+            }).catch((err) => {
                     debug(err);
                     printError(`Failed to download content: ${err.status} ${err.message}`, options);
-                });
+            });
         }
 
     }

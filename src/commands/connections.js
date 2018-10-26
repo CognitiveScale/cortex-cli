@@ -101,9 +101,7 @@ module.exports.SaveConnectionCommand = class SaveConnectionCommand {
            const content = new Content(profile.url);
            const connection = new Connections(profile.url);
 
-           const payload = {'content': jdbcJarFilePath, 'key': contentKey};
-
-           content.uploadContent(profile.token, payload).then((response) => {
+           content.uploadContentStreaming(profile.token, contentKey, jdbcJarFilePath).then((response) => {
 
                let marshaledConnObj = connObj;
                marshaledConnObj.params = this.stripJarPathFromParams(marshaledConnObj.params);
@@ -202,9 +200,7 @@ module.exports.TestConnectionCommand = class TestConnectionCommand {
            const content = new Content(profile.url);
            const connection = new Connections(profile.url);
 
-           const payload = {'content': jdbcJarFilePath, 'key': contentKey};
-
-           content.uploadContent(profile.token, payload).then((response) => {
+           content.uploadContentStreaming(profile.token, contentKey, jdbcJarFilePath).then((response) => {
                const connection = new Connections(profile.url);
 
                let marshaledConnObj = connObj;

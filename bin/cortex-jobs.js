@@ -92,6 +92,7 @@ program
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
     .option('-y, --yaml', 'Use YAML for job definition format')
+    .option('--push-docker', 'Push Docker image to the Cortex registry.')    
     .action(withCompatibilityCheck((jobDefinition, options) => {
         try {
             new SaveJob(program).execute(jobDefinition, options);

@@ -14,10 +14,13 @@
  * limitations under the License.
  */
 
+const url = require('url');
 const chalk = require('chalk');
 const request = require('superagent');
 const debug = require('debug')('cortex:cli');
-const { constructError } = require('../commands/utils');
+const _ = require('lodash');
+const jsonwebtoken = require('jsonwebtoken');
+const { constructError, callMe } = require('../commands/utils');
 
 module.exports = class Actions {
 
@@ -51,13 +54,19 @@ module.exports = class Actions {
         });
     }
 
-    deployAction(token, actionName, docker, kind, code, memory, timeout, actionType, command, port, environment) {
+    async deployAction(token, actionName, docker, kind, code, memory, timeout, actionType, command, port, environment, pushDocker) {
         let endpoint = `${this.endpointV3}`;
         if (actionType) {
             endpoint = `${endpoint}?actionType=${actionType}`;
         }
         debug('deployAction(%s, docker=%s, kind=%s, code=%s, memory=%s, timeout=%s) => %s',
             actionName, docker, kind, code, memory, timeout, endpoint);
+
+        try {
+            docker = await this._maybePushDockerImage(docker, token, pushDocker);
+        } catch (error) {
+            return {success: false, status: 400, message: error.message || error};
+        }
 
         const req = request
             .post(endpoint)
@@ -193,6 +202,57 @@ module.exports = class Actions {
             });
     }
 
+    jobListTasks(token, jobId) {
+        const canonicalJobId = Actions.getCanonicalJobId(jobId);
+        const endpoint = `${this.endpointJobsV3}/${canonicalJobId}/tasks`;
+        return request
+            .get(endpoint)
+            .set('Authorization', `Bearer ${token}`)
+            .accept('application/json')
+            .then((res) => {
+                if (res.ok) {
+                    return res.body;
+                }
+                return {success: false, status: res.status, message: res.body};
+            })
+            .catch((err) => {
+                return constructError(err);
+            });
+    }
+
+    taskStats(token, jobId) {
+        const canonicalJobId = Actions.getCanonicalJobId(jobId);
+        const endpoint = `${this.endpointJobsV3}/${canonicalJobId}/stats`;
+        return request
+            .get(endpoint)
+            .set('Authorization', `Bearer ${token}`)
+            .accept('application/json')
+            .then((res) => {
+                if (res.ok) {
+                    return res.body;
+                }
+                return {success: false, status: res.status, message: res.body};
+            })
+            .catch((err) => {
+                return constructError(err);
+            });
+    }
+
+    getConfig(token) {
+        return request
+            .get(_.join([this.endpointV3, '_config'], '/'))
+            .set('Authorization', `Bearer ${token}`)
+            .then((res) => {
+                if (res.ok) {
+                    return {success: true, config: res.body.config};
+                }
+                return {success: false, status: res.status, message: res.body};
+            })
+            .catch((err) => {
+                return constructError(err);
+            });
+    }
+
     static getCanonicalJobId(jobId) {
         let canonicalJobId = jobId;
         const namespaceProvided = /\w\/\w/.test(jobId);
@@ -201,5 +261,38 @@ module.exports = class Actions {
             console.warn(chalk.yellow(`Namespace not given in jobId, assuming 'default'`));
         }
         return canonicalJobId;
+    }
+
+    async _cortexRegistryUrl(token) {
+        const res = await this.getConfig(token);
+        if (res.success)
+            return res.config.dockerPrivateRegistryUrl
+        else 
+            throw res
+    }
+
+    _cortexRegistryImagePath(registryUrl, imageRepo, tenant) {
+        const imageName = _.split(imageRepo, '/').slice(-1)[0];
+        return _.join([registryUrl, tenant, imageName], '/');
+    }
+
+    _stripCortexPullthroughRegistry(image) {
+        return image.replace(/^registry\.cortex.*\.insights\.ai:5000\//, '')
+    }
+
+    async _maybePushDockerImage(image, token, pushDocker) {
+        if (!image || !pushDocker) {
+            return image
+        }
+        const imageClean = this._stripCortexPullthroughRegistry(image);
+        const registryUrl = await this._cortexRegistryUrl(token);
+        const imageName = image.replace(/.+\..+\//, '');
+        const cortexImageUrl = this._cortexRegistryImagePath(registryUrl, imageName, jsonwebtoken.decode(token).tenant);
+
+        await callMe(`docker login -u cli --password ${token} ${registryUrl}`);
+        await callMe(`docker pull ${imageClean}`);
+        await callMe(`docker tag ${imageClean} ${cortexImageUrl}`);
+        await callMe(`docker push ${cortexImageUrl}`);
+        return cortexImageUrl;
     }
 };
