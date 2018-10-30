@@ -144,13 +144,19 @@ module.exports.InvokeActionCommand = class {
             params = parseObject(paramsStr, options);
         }
 
-        debug('params: %o', params);
         const actionType = options.actionType;
         params.properties = params.properties || {};
         if (options.method)
             params.properties['daemon.method'] = options.method;
         if (options.path)
             params.properties['daemon.path'] = options.path;
+
+        // Set the API Endpoint and Token if not specified
+        if (!params.apiEndpoint) params.apiEndpoint = profile.url;
+        if (!params.token) params.token = profile.token;
+
+        debug('params: %o', params);
+
         const actions = new Actions(profile.url);
         actions.invokeAction(profile.token, actionName, params, actionType)
             .then((response) => {
