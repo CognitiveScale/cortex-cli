@@ -17,6 +17,7 @@
 const request = require('superagent');
 const debug = require('debug')('cortex:cli');
 const { constructError } = require('../commands/utils');
+const Actions = require('./actions');
 
 module.exports = class Jobs {
 
@@ -73,10 +74,16 @@ module.exports = class Jobs {
             });
     }
 
-    saveJob(token, {name, image, command, memory, vcpus, environment}) {
-        const endpoint = `${this.endpoint}`;
+    async saveJob(token, {name, image, command, memory, vcpus, environment}, pushDocker) {
+        const action = new Actions(this.cortexUrl);
+        try {
+            image = await action._maybePushDockerImage(image, token, pushDocker);
+        } catch (error) {
+            return {success: false, status: 400, message: error.message || error};
+        }
+
         return request
-            .post(endpoint)
+            .post(this.endpoint)
             .set('Authorization', `Bearer ${token}`)
             .send({name, image, command, memory, vcpus, environment})
             .then((res) => {
