@@ -12,6 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ * src/clients/agents.js
  */
 
 const request = require('superagent');
@@ -175,6 +176,28 @@ module.exports = class Agents {
             });
     }
 
+    listAgentServices(token, agentName, environmentName) {
+        let endpoint = `${this.endpoint}/instances/${agentName}`;
+        debug('listAgentServices(%s, %s) => %s', agentName, environmentName, endpoint);
+        if (environmentName) endpoint = `${endpoint}?environmentName=${environmentName}`;
+
+        return request
+            .get(endpoint)
+            .set('Authorization', `Bearer ${token}`)
+            .set('x-cortex-proxy-notify', true)
+            .then((res) => {
+                if (Boolean(_.get(res, 'headers.x-cortex-proxied', false)))
+                    console.error(chalk.blue('Request proxied to cloud.'));
+                if (res.ok) {
+                    return {success: true, instances: res.body.instances};
+                }
+                return {success: false, status: res.status, message: res.body};
+            })
+            .catch((err) => {
+                return constructError(err);
+            });
+    }
+
     createAgentInstance(token, instance) {
         const endpoint = `${this.endpoint}/instances`;
         debug('createAgentInstance => %s', endpoint);
@@ -256,6 +279,7 @@ module.exports = class Agents {
                 return constructError(err);
             });
     }
+
 
     listTriggers(token) {
         const endpoint = `${this.endpoint}/triggers`;
