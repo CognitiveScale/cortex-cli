@@ -12,6 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ * src/commands/agents.js
  */
 
 const fs = require('fs');
@@ -289,6 +290,56 @@ module.exports.ListAgentInstancesCommand = class {
         })
             .catch((err) => {
                 printError(`Failed to list agent instances ${agentName}: ${err.status} ${err.message}`, options);
+            });
+    }
+};
+
+module.exports.ListServicesCommand = class {
+    
+    constructor(program) {
+        this.program = program;
+    }
+
+    execute(agentName, options) {
+        const profile = loadProfile(options.profile);
+        const envName = options.environmentName;
+        debug('%s.listAgentServices(%s)', profile.name, agentName);
+
+        const agents = new Agents(profile.url);
+        agents.listAgentServices(profile.token, agentName, envName).then((response) => {
+            if (response.success) {
+                let result = response.instances;
+                if (options.query)
+                    result = filterObject(result, options);
+
+                if (options.json) {
+                    printSuccess(JSON.stringify(result, null, 2), options);
+                }
+                else {
+                    const catalog = new Catalog(profile.url);
+                    
+                    catalog.describeAgent(profile.token, agentName).then((response) => {
+                        if (response.success) {
+                            let result = filterObject(response.agent, options);
+                            var justin = result.inputs;
+                            for(var i =0;i<Object.keys(justin).length;i=i+1){
+                                if(justin[i].signalType=='Service'){
+                                var serviceOutput="https://api.cortex.insights.ai/v3/agents/"+agentName+"/services/"+justin[i].name;
+                                printSuccess(serviceOutput, options);
+                                }
+                            } 
+                        }
+                        else {
+                            printError(`Failed to describe agent ${agentName}: ${response.message}`, options);
+                        }
+                    })
+            }}
+            else {
+                printError(`Failed to list agent services ${agentName}: ${response.message}`, options);
+            }
+        })
+            .catch((err) => {
+                printError(`Failed to list agent services ${agentName}: ${err.status} ${err.message}`, options);
             });
     }
 };

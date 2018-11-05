@@ -34,6 +34,7 @@ const {
     DeleteAgentInstanceCommand,
     StopAgentInstanceCommand,
     ListTriggersCommand,
+    ListServicesCommand,
     ListAgentSnapshotsCommand,
     DescribeAgentSnapshotCommand,
     CreateAgentSnapshotCommand
@@ -122,15 +123,9 @@ program
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
     .option('--query [query]', 'A JMESPath query to use in filtering the response data.')
-    .action(withCompatibilityCheck((activationId, options) => {
-        try {
-            printError('DEPRECATED.  This command will be removed in a future version.  Use get-activation instead.', options, false);
-            new GetActivationCommand(program).execute(activationId, options);
-        }
-        catch (err) {
-            console.error(chalk.red(err.message));
-        }
-    }));
+    .action(() => {
+        printError('DEPRECATED.  Use get-activation instead.');
+    });
 
 program
     .command('get-activation <activationId>')
@@ -163,6 +158,26 @@ program
         }
         catch (err) {
             console.error(chalk.red(err.message));
+        }
+    }));
+
+
+    program
+    .command('list-services <agentName>')
+    .description('List agent service endpoints')
+    .option('--no-compat', 'Ignore API compatibility checks')
+    .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
+    .option('--profile [profile]', 'The profile to use')
+    .option('--environmentName [environmentName]', 'The environment to list or \'all\'')
+    .option('--json', 'Output results using JSON')
+    .option('--query [query]', 'A JMESPath query to use in filtering the response data.')
+    .action(withCompatibilityCheck((agentName, options) => {
+        try {
+            new ListServicesCommand(program).execute(agentName, options);
+        }
+        catch (err) {
+            console.error(chalk.red(err.message));
+            
         }
     }));
 
@@ -320,5 +335,6 @@ program
             console.error(chalk.red(err.message));
         }
     }));
+
 
 program.parse(process.argv);
