@@ -12,7 +12,6 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- * src/commands/agents.js
  */
 
 const fs = require('fs');
@@ -321,10 +320,9 @@ module.exports.ListServicesCommand = class {
                     catalog.describeAgent(profile.token, agentName).then((response) => {
                         if (response.success) {
                             let result = filterObject(response.agent, options);
-                            var justin = result.inputs;
-                            for(var i =0;i<Object.keys(justin).length;i=i+1){
-                                if(justin[i].signalType=='Service'){
-                                var serviceOutput="https://api.cortex.insights.ai/v3/agents/"+agentName+"/services/"+justin[i].name;
+                            for(var i =0;i<Object.keys(result.inputs).length;i=i+1){
+                                if(result.inputs[i].signalType=='Service'){
+                                var serviceOutput="https://api.cortex.insights.ai/v3/agents/"+agentName+"/services/"+result.inputs[i].name;
                                 printSuccess(serviceOutput, options);
                                 }
                             } 
