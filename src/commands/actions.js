@@ -15,6 +15,7 @@
  */
 
 const fs = require('fs');
+const uuid = require('uuid/v4');
 const debug = require('debug')('cortex:cli');
 const {loadProfile} = require('../config');
 const Actions = require('../client/actions');
@@ -155,6 +156,9 @@ module.exports.InvokeActionCommand = class {
         // Set the API Endpoint and Token if not specified
         if (!params.apiEndpoint) params.apiEndpoint = profile.url;
         if (!params.token) params.token = profile.token;
+
+        // Set the Activation ID if not specified
+        if (!params.activationId) params.activationId = uuid();
 
         debug('params: %o', params);
 
