@@ -293,6 +293,55 @@ module.exports.ListAgentInstancesCommand = class {
     }
 };
 
+module.exports.ListServicesCommand = class {
+    
+    constructor(program) {
+        this.program = program;
+    }
+
+    execute(agentName, options) {
+        const profile = loadProfile(options.profile);
+        const envName = options.environmentName;
+        debug('%s.listAgentServices(%s)', profile.name, agentName);
+
+        const agents = new Agents(profile.url);
+        agents.listAgentServices(profile.token, agentName, envName).then((response) => {
+            if (response.success) {
+                let result = response.instances;
+                if (options.query)
+                    result = filterObject(result, options);
+
+                if (options.json) {
+                    printSuccess(JSON.stringify(result, null, 2), options);
+                }
+                else {
+                    const catalog = new Catalog(profile.url);
+                    
+                    catalog.describeAgent(profile.token, agentName).then((response) => {
+                        if (response.success) {
+                            let result = filterObject(response.agent, options);
+                            for(var i =0;i<Object.keys(result.inputs).length;i=i+1){
+                                if(result.inputs[i].signalType=='Service'){
+                                var serviceOutput="https://api.cortex.insights.ai/v3/agents/"+agentName+"/services/"+result.inputs[i].name;
+                                printSuccess(serviceOutput, options);
+                                }
+                            } 
+                        }
+                        else {
+                            printError(`Failed to describe agent ${agentName}: ${response.message}`, options);
+                        }
+                    })
+            }}
+            else {
+                printError(`Failed to list agent services ${agentName}: ${response.message}`, options);
+            }
+        })
+            .catch((err) => {
+                printError(`Failed to list agent services ${agentName}: ${err.status} ${err.message}`, options);
+            });
+    }
+};
+
 module.exports.ListAgentSnapshotsCommand = class {
     constructor(program) {
         this.program = program;
