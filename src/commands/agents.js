@@ -21,7 +21,7 @@ const Catalog = require('../client/catalog');
 const Agents = require('../client/agents');
 const _ = require('lodash');
 const { printSuccess, printError, filterObject, parseObject, printTable } = require('./utils');
-
+const ACTIONS_API_VERSION = "/v3/";
 module.exports.SaveAgentCommand = class SaveAgentCommand {
 
     constructor(program) {
@@ -258,7 +258,6 @@ module.exports.ListAgentInstancesCommand = class {
     execute(agentName, options) {
         const profile = loadProfile(options.profile);
         const envName = options.environmentName;
-        printSuccess(envName,options);
         debug('%s.listAgentInstances(%s)', profile.name, agentName);
 
         const agents = new Agents(profile.url);
@@ -303,7 +302,7 @@ module.exports.ListServicesCommand = class {
     execute(agentName, options) {
         const profile = loadProfile(options.profile);
         const serviceName = "/services/";
-        const agentsV = "/v3/agents/"
+        const agentsV = "agents/"
         const ServiceCheck= "Service";
         debug('%s.listAgentServices(%s)', profile.name, agentName);
 
@@ -320,13 +319,13 @@ module.exports.ListServicesCommand = class {
                             let result = filterObject(response.agent, options);
                             for(var i =0;i<Object.keys(result.inputs).length;i=i+1){
                                 if(result.inputs[i].signalType==ServiceCheck){
-                                var serviceOutput=profile.url+agentsV+agentName+serviceName+result.inputs[i].name;
+                                var serviceOutput=profile.url+ACTIONS_API_VERSION+agentsV+agentName+serviceName+result.inputs[i].name;
                                 printSuccess(serviceOutput, options);
                                 }
                             } 
                         }
                         else {
-                            printError(`Failed to describe agent ${agentName}: ${response.message}`, options);
+                            printError(`Failed to list agent services ${agentName}: ${response.message}`, options);
                         }
                     })
             }}
