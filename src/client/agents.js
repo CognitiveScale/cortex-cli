@@ -175,12 +175,9 @@ module.exports = class Agents {
             });
     }
 
-    listAgentServices(token, agentName, environmentName) {
+    listAgentServices(token, agentName) {
         let endpoint = `${this.endpoint}/instances/${agentName}`;
-        debug('listAgentServices(%s, %s) => %s', agentName, environmentName, endpoint);
-        if (environmentName) endpoint = `${endpoint}?environmentName=${environmentName}`;
-
-        return request
+        debug('listAgentServices(%s, %s) => %s', agentName, endpoint);return request
             .get(endpoint)
             .set('Authorization', `Bearer ${token}`)
             .set('x-cortex-proxy-notify', true)

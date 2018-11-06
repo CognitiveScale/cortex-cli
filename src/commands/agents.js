@@ -258,6 +258,7 @@ module.exports.ListAgentInstancesCommand = class {
     execute(agentName, options) {
         const profile = loadProfile(options.profile);
         const envName = options.environmentName;
+        printSuccess(envName,options);
         debug('%s.listAgentInstances(%s)', profile.name, agentName);
 
         const agents = new Agents(profile.url);
@@ -301,28 +302,25 @@ module.exports.ListServicesCommand = class {
 
     execute(agentName, options) {
         const profile = loadProfile(options.profile);
-        const envName = options.environmentName;
+        const serviceName = "/services/";
+        const agentsV = "/v3/agents/"
+        const ServiceCheck= "Service";
         debug('%s.listAgentServices(%s)', profile.name, agentName);
 
         const agents = new Agents(profile.url);
-        agents.listAgentServices(profile.token, agentName, envName).then((response) => {
+        agents.listAgentServices(profile.token, agentName).then((response) => {
             if (response.success) {
                 let result = response.instances;
                 if (options.query)
                     result = filterObject(result, options);
-
-                if (options.json) {
-                    printSuccess(JSON.stringify(result, null, 2), options);
-                }
                 else {
                     const catalog = new Catalog(profile.url);
-                    
                     catalog.describeAgent(profile.token, agentName).then((response) => {
                         if (response.success) {
                             let result = filterObject(response.agent, options);
                             for(var i =0;i<Object.keys(result.inputs).length;i=i+1){
-                                if(result.inputs[i].signalType=='Service'){
-                                var serviceOutput="https://api.cortex.insights.ai/v3/agents/"+agentName+"/services/"+result.inputs[i].name;
+                                if(result.inputs[i].signalType==ServiceCheck){
+                                var serviceOutput=profile.url+agentsV+agentName+serviceName+result.inputs[i].name;
                                 printSuccess(serviceOutput, options);
                                 }
                             } 
