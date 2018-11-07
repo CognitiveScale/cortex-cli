@@ -117,6 +117,26 @@ module.exports = class Catalog {
             });
     }
 
+
+    listServices(token) {
+        debug('listServices() => %s', this.endpoints.agents);
+        return request
+            .get(this.endpoints.agents)
+            .set('Authorization', `Bearer ${token}`)
+            .set('x-cortex-proxy-notify', true)
+            .then((res) => {
+                if (Boolean(_.get(res, 'headers.x-cortex-proxied', false)))
+                    console.error(chalk.blue('Request proxied to cloud.'));
+                if (res.ok) {
+                    return {success: true, agents: res.body.agents};
+                }
+                return {success: false, status: res.status, message: res.body};
+            })
+            .catch((err) => {
+                return constructError(err);
+            });
+    }
+
     saveAgent(token, agentObj) {
         debug('saveAgent(%s) => %s', agentObj.name, this.endpoints.agents);
         return request

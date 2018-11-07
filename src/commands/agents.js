@@ -21,7 +21,7 @@ const Catalog = require('../client/catalog');
 const Agents = require('../client/agents');
 const _ = require('lodash');
 const { printSuccess, printError, filterObject, parseObject, printTable } = require('./utils');
-const ACTIONS_API_VERSION = "/v3/";
+const ACTIONS_API_VERSION = "v3";
 module.exports.SaveAgentCommand = class SaveAgentCommand {
 
     constructor(program) {
@@ -293,51 +293,40 @@ module.exports.ListAgentInstancesCommand = class {
     }
 };
 
-module.exports.ListServicesCommand = class {
+module.exports.ListServicesCommand = class ListServicesCommand{
     
     constructor(program) {
         this.program = program;
     }
 
     execute(agentName, options) {
+        
         const profile = loadProfile(options.profile);
-        const serviceName = "/services/";
-        const agentsV = "agents/"
-        const ServiceCheck= "Service";
-        debug('%s.listAgentServices(%s)', profile.name, agentName);
+        debug('%s.listServices(%s)', profile.name, agentName); 
+        const catalog = new Catalog(profile.url);
 
-        const agents = new Agents(profile.url);
-        agents.listAgentServices(profile.token, agentName).then((response) => {
+        catalog.listServices(profile.token, agentName).then((response) => {
             if (response.success) {
                 let result = response.instances;
-                if (options.query)
-                    result = filterObject(result, options);
-                else {
                     const catalog = new Catalog(profile.url);
                     catalog.describeAgent(profile.token, agentName).then((response) => {
                         if (response.success) {
-                            let result = filterObject(response.agent, options);
-                            for(var i =0;i<Object.keys(result.inputs).length;i=i+1){
-                                if(result.inputs[i].signalType==ServiceCheck){
-                                var serviceOutput=profile.url+ACTIONS_API_VERSION+agentsV+agentName+serviceName+result.inputs[i].name;
+                            const result = filterObject(response.agent, options);
+                            for(let i =0; i<Object.keys(result.inputs).length; i=i+1){
+                                if(result.inputs[i].signalType=="Service"){
+                                const serviceOutput=`${profile.url}/${ACTIONS_API_VERSION}/agents/${agentName}/services/${result.inputs[i].name}`;
                                 printSuccess(serviceOutput, options);
                                 }
                             } 
                         }
                         else {
-                            printError(`Failed to list agent services ${agentName}: ${response.message}`, options);
+                            printError(`Failed to describe agent ${agentName}: ${response.message}`, options);
                         }
                     })
-            }}
-            else {
-                printError(`Failed to list agent services ${agentName}: ${response.message}`, options);
-            }
-        })
-            .catch((err) => {
-                printError(`Failed to list agent services ${agentName}: ${err.status} ${err.message}`, options);
-            });
+                }
+            })
+        }
     }
-};
 
 module.exports.ListAgentSnapshotsCommand = class {
     constructor(program) {

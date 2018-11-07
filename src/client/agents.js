@@ -175,24 +175,6 @@ module.exports = class Agents {
             });
     }
 
-    listAgentServices(token, agentName) {
-        let endpoint = `${this.endpoint}/instances/${agentName}`;
-        debug('listAgentServices(%s, %s) => %s', agentName, endpoint);return request
-            .get(endpoint)
-            .set('Authorization', `Bearer ${token}`)
-            .set('x-cortex-proxy-notify', true)
-            .then((res) => {
-                if (Boolean(_.get(res, 'headers.x-cortex-proxied', false)))
-                    console.error(chalk.blue('Request proxied to cloud.'));
-                if (res.ok) {
-                    return {success: true, instances: res.body.instances};
-                }
-                return {success: false, status: res.status, message: res.body};
-            })
-            .catch((err) => {
-                return constructError(err);
-            });
-    }
 
     createAgentInstance(token, instance) {
         const endpoint = `${this.endpoint}/instances`;
