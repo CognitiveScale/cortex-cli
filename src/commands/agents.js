@@ -321,12 +321,16 @@ module.exports.ListServicesCommand = class ListServicesCommand{
                             printTable(tableSpec,nestedResult);
                     }
 
+                }).catch((err) => {
+                    printError(`Failed to return agent service information: ${agentName}: ${response.message}`, options);
                 });
                 }
                 else{
-                    printError("error");
+                    printError(`Failed to return agent service information: ${agentName}: ${response.message}`, options);
                 }
-            })
+            }).catch((err) => {
+                printError(`Failed to return agent service information: ${agentName}: ${response.message}`, options);
+            });
         }
     }
 
