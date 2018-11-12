@@ -19,6 +19,7 @@ const debug = require('debug')('cortex:cli');
 const _ = require('lodash');
 const chalk = require('chalk');
 const { constructError } = require('../commands/utils');
+const ACTIONS_API_VERSION = 'v3';
 
 const createEndpoints = (baseUri) => {
     return {
@@ -117,18 +118,36 @@ module.exports = class Catalog {
             });
     }
 
-
-    listServices(token) {
-        debug('listServices() => %s', this.endpoints.agents);
+    listServices(token, agentName,profile) {
+        let servicesList=[];
+        let urlList=[];
+        const endpoint = `${this.endpoints.agents}/${agentName}`;
+        debug('listServices() => %s', endpoint);
         return request
-            .get(this.endpoints.agents)
+            .get(endpoint)
             .set('Authorization', `Bearer ${token}`)
             .set('x-cortex-proxy-notify', true)
             .then((res) => {
                 if (Boolean(_.get(res, 'headers.x-cortex-proxied', false)))
                     console.error(chalk.blue('Request proxied to cloud.'));
+                    const catalog = new Catalog(profile.url);
+                    let serv2= catalog.describeAgent(profile.token, agentName).then((response) => {
+                        if (response.success) {
+                            const result = response.agent;
+                            for(let i =0; i<Object.keys(result.inputs).length; i=i+1){
+                                if(result.inputs[i].signalType=="Service"){
+                                    result.inputs[i].url=`${profile.url}/${ACTIONS_API_VERSION}/agents/${agentName}/services/${result.inputs[i].name}`;
+                                    urlList[i]=result.inputs[i].url;
+                                    servicesList[i]=result.inputs[i];
+                                }
+                            }
+                        }
+                        return {success: true, services: servicesList, urls:urlList};
+                    });
                 if (res.ok) {
-                    return {success: true, agents: res.body.agents};
+                    return {success: true, services: serv2.then((promise)=>{
+                        return {success: true, services: servicesList, urls:urlList};
+                    })};
                 }
                 return {success: false, status: res.status, message: res.body};
             })
@@ -136,7 +155,10 @@ module.exports = class Catalog {
                 return constructError(err);
             });
     }
-
+    function(callback){
+        console.log(servicesList);
+        callback();
+    }
     saveAgent(token, agentObj) {
         debug('saveAgent(%s) => %s', agentObj.name, this.endpoints.agents);
         return request

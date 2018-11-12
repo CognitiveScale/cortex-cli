@@ -21,7 +21,6 @@ const Catalog = require('../client/catalog');
 const Agents = require('../client/agents');
 const _ = require('lodash');
 const { printSuccess, printError, filterObject, parseObject, printTable } = require('./utils');
-const ACTIONS_API_VERSION = "v3";
 module.exports.SaveAgentCommand = class SaveAgentCommand {
 
     constructor(program) {
@@ -293,36 +292,38 @@ module.exports.ListAgentInstancesCommand = class {
     }
 };
 
-module.exports.ListServicesCommand = class ListServicesCommand{
-    
+module.exports.ListServicesCommand = class ListServicesCommand{ 
     constructor(program) {
         this.program = program;
     }
 
     execute(agentName, options) {
-        
         const profile = loadProfile(options.profile);
         debug('%s.listServices(%s)', profile.name, agentName); 
+        
         const catalog = new Catalog(profile.url);
-
-        catalog.listServices(profile.token, agentName).then((response) => {
+        catalog.listServices(profile.token, agentName,profile).then((response) => {
             if (response.success) {
-                let result = response.instances;
-                    const catalog = new Catalog(profile.url);
-                    catalog.describeAgent(profile.token, agentName).then((response) => {
-                        if (response.success) {
-                            const result = filterObject(response.agent, options);
-                            for(let i =0; i<Object.keys(result.inputs).length; i=i+1){
-                                if(result.inputs[i].signalType=="Service"){
-                                const serviceOutput=`${profile.url}/${ACTIONS_API_VERSION}/agents/${agentName}/services/${result.inputs[i].name}`;
-                                printSuccess(serviceOutput, options);
-                                }
-                            } 
-                        }
-                        else {
-                            printError(`Failed to describe agent ${agentName}: ${response.message}`, options);
-                        }
-                    })
+                let result = response.services;
+                result.then((response)=>{
+                    let nestedResult=response.services;
+                    if(options.query){
+                        nestedResult = filterObject(nestedResult, options);
+                        printSuccess(nestedResult,options);
+                    }
+                    else if(options.json){
+                        printSuccess(JSON.stringify(nestedResult,null,2),options);
+                    }
+                    else{
+                        for(let i=0;i<Object.keys(response.urls).length;i=i+1){
+                            printSuccess(response.urls[i],options);
+                            }
+                    }
+
+                });
+                }
+                else{
+                    printError("error");
                 }
             })
         }
