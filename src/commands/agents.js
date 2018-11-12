@@ -315,9 +315,10 @@ module.exports.ListServicesCommand = class ListServicesCommand{
                         printSuccess(JSON.stringify(nestedResult,null,2),options);
                     }
                     else{
-                        for(let i=0;i<Object.keys(response.urls).length;i=i+1){
-                            printSuccess(response.urls[i],options);
-                            }
+                        const tableSpec = [
+                            { column: 'Service Endpoint URLs', field: 'url', width: 100 }
+                            ];
+                            printTable(tableSpec,nestedResult);
                     }
 
                 });
