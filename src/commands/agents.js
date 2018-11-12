@@ -316,7 +316,7 @@ module.exports.ListServicesCommand = class ListServicesCommand{
                     }
                     else{
                         const tableSpec = [
-                            { column: 'Service Endpoint URLs', field: 'url', width: 100 }
+                            { column: 'Service Endpoint URLs', field: 'url', width: 125 }
                             ];
                             printTable(tableSpec,nestedResult);
                     }
