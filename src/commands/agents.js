@@ -302,38 +302,28 @@ module.exports.ListServicesCommand = class ListServicesCommand{
         debug('%s.listServices(%s)', profile.name, agentName); 
         
         const catalog = new Catalog(profile.url);
-        catalog.listServices(profile.token, agentName,profile).then((response) => {
+        catalog.listServices(profile.token, agentName, profile).then((response) => {
             if (response.success) {
-                let result = response.services;
-                result.then((response)=>{
-                    let nestedResult=response.services;
-                    if(options.query){
-                        nestedResult = filterObject(nestedResult, options);
-                        printSuccess(nestedResult,options);
-                    }
-                    else if(options.json){
-                        printSuccess(JSON.stringify(nestedResult,null,2),options);
-                    }
-                    else{
-                        const tableSpec = [
-                            { column: 'Service Name', field: 'name', width: 25 },
-                            { column: 'Service Endpoint URLs', field: 'url', width: 115 }
-                            ];
-                            printTable(tableSpec,nestedResult);
-                    }
-
-                }).catch((err) => {
-                    printError(`Failed to return agent service information: ${agentName}: ${response.message}`, options);
-                });
+                let result = filterObject(response.services, options);
+                if (options.json) {
+                    printSuccess(JSON.stringify(result, null, 2), options);
                 }
-                else{
-                    printError(`Failed to return agent service information: ${agentName}: ${response.message}`, options);
+                else {
+                    const tableSpec = [
+                        {column: 'Service Name', field: 'name', width: 25},
+                        {column: 'Service Endpoint URLs', field: 'url', width: 115}
+                    ];
+                    printTable(tableSpec, result);
                 }
-            }).catch((err) => {
+            }
+            else {
                 printError(`Failed to return agent service information: ${agentName}: ${response.message}`, options);
-            });
-        }
+            }
+        }).catch((err) => {
+            printError(`Failed to return agent service information: ${agentName}: ${err.status} ${err.message}`, options);
+        });
     }
+}
 
 module.exports.ListAgentSnapshotsCommand = class {
     constructor(program) {
