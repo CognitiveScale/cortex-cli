@@ -123,9 +123,15 @@ program
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
     .option('--query [query]', 'A JMESPath query to use in filtering the response data.')
-    .action(() => {
-        printError('DEPRECATED.  Use get-activation instead.');
-    });
+    .action(withCompatibilityCheck((activationId, options) => {
+        try {
+            printError('DEPRECATED.  This command will be removed in a future version.  Use get-activation instead.', options, false);
+            new GetActivationCommand(program).execute(activationId, options);
+        }
+        catch (err) {
+            console.error(chalk.red(err.message));
+        }
+    }));
 
 program
     .command('get-activation <activationId>')
@@ -334,6 +340,5 @@ program
             console.error(chalk.red(err.message));
         }
     }));
-
 
 program.parse(process.argv);
