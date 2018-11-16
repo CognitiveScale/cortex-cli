@@ -50,3 +50,4 @@ if (!program.commands.map(cmd => cmd._name).includes(program.args[0])) {
     program.outputHelp(identity);
     process.exit(1);
 }
+
