@@ -28,7 +28,7 @@ const {
     DescribeTask
 } = require('../src/commands/tasks');
 
-program.description('Work with Cortex v2 Job tasks. Use Cortex Actions for v3 jobs.');
+program.description('Work with Cortex v2 tasks. Use Cortex Actions for v3 tasks.');
 
 
 // List Tasks

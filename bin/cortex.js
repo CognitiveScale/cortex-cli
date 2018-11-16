@@ -39,7 +39,7 @@ program
     .command('processors [cmd]', 'Work with the Cortex Processor Runtime')
     .command('project [cmd]', 'Work with a related collection of Cortex contributions')
     .command('skills [cmd]', 'Work with Cortex Skills')
-    .command('tasks [cmd]', 'Work with Cortex Tasks(v2 jobs)')
+    .command('tasks [cmd]', 'Work with Cortex v2 Tasks')
     .command('types [cmd]', 'Work with Cortex Types')
     .command('variables [cmd]', 'Work with Cortex Secure Variables');
 
