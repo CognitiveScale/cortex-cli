@@ -28,13 +28,13 @@ const {
     DescribeTask
 } = require('../src/commands/tasks');
 
-program.description('Work with Cortex Jobs');
+program.description('Work with Cortex v2 Job tasks. Use Cortex Actions for v3 jobs.');
 
 
 // List Tasks
 program
     .command('list <jobId>')
-    .description('List task definitions within a job definition')
+    .description('List task definitions within a v2 job definition')
     .option('--no-compat', 'Ignore API compatibility checks')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
@@ -52,7 +52,7 @@ program
 // Get Tasks logs
 program
     .command('logs <jobId> <taskId>')
-    .description('Get Tasks logs')
+    .description('Get v2 task logs')
     .option('--no-compat', 'Ignore API compatibility checks')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
@@ -70,7 +70,7 @@ program
 // Cancel task
 program
     .command('cancel <jobId> <taskId>')
-    .description('Cancel a task')
+    .description('Cancel a v2 task')
     .option('--no-compat', 'Ignore API compatibility checks')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
@@ -88,7 +88,7 @@ program
 // Describe task
 program
     .command('describe <jobId> <taskId>')
-    .description('Describe a task definition')
+    .description('Describe a v2 task definition')
     .option('--no-compat', 'Ignore API compatibility checks')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
