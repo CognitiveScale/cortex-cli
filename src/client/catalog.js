@@ -19,6 +19,7 @@ const debug = require('debug')('cortex:cli');
 const _ = require('lodash');
 const chalk = require('chalk');
 const { constructError } = require('../commands/utils');
+const AGENTS_API_VERSION = 'v3';
 
 const createEndpoints = (baseUri) => {
     return {
@@ -115,6 +116,21 @@ module.exports = class Catalog {
             .catch((err) => {
                 return constructError(err);
             });
+    }
+
+    listServices(token, agentName, profile) {
+        debug('listServices() using describeAgent');
+        return this.describeAgent(profile.token, agentName).then((response) => {
+            if (response.success) {
+                const urlBase = `${profile.url}/${AGENTS_API_VERSION}/agents/${agentName}/services`;
+                const servicesList = response.agent.inputs
+                    .filter(i => i.signalType === 'Service')
+                    .map(i => ({ ...i, url: `${urlBase}/${i.name}` }));
+                return { success: true, services: servicesList };
+            } else {
+                return response;
+            }
+        });
     }
 
     saveAgent(token, agentObj) {

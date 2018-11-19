@@ -21,7 +21,6 @@ const Catalog = require('../client/catalog');
 const Agents = require('../client/agents');
 const _ = require('lodash');
 const { printSuccess, printError, filterObject, parseObject, printTable } = require('./utils');
-
 module.exports.SaveAgentCommand = class SaveAgentCommand {
 
     constructor(program) {
@@ -292,6 +291,39 @@ module.exports.ListAgentInstancesCommand = class {
             });
     }
 };
+
+module.exports.ListServicesCommand = class ListServicesCommand{ 
+    constructor(program) {
+        this.program = program;
+    }
+
+    execute(agentName, options) {
+        const profile = loadProfile(options.profile);
+        debug('%s.listServices(%s)', profile.name, agentName); 
+        
+        const catalog = new Catalog(profile.url);
+        catalog.listServices(profile.token, agentName, profile).then((response) => {
+            if (response.success) {
+                let result = filterObject(response.services, options);
+                if (options.json) {
+                    printSuccess(JSON.stringify(result, null, 2), options);
+                }
+                else {
+                    const tableSpec = [
+                        {column: 'Service Name', field: 'name', width: 25},
+                        {column: 'Service Endpoint URL', field: 'url', width: 115}
+                    ];
+                    printTable(tableSpec, result);
+                }
+            }
+            else {
+                printError(`Failed to return agent service information: ${agentName}: ${response.message}`, options);
+            }
+        }).catch((err) => {
+            printError(`Failed to return agent service information: ${agentName}: ${err.status} ${err.message}`, options);
+        });
+    }
+}
 
 module.exports.ListAgentSnapshotsCommand = class {
     constructor(program) {

@@ -175,6 +175,7 @@ module.exports = class Agents {
             });
     }
 
+
     createAgentInstance(token, instance) {
         const endpoint = `${this.endpoint}/instances`;
         debug('createAgentInstance => %s', endpoint);
@@ -256,6 +257,7 @@ module.exports = class Agents {
                 return constructError(err);
             });
     }
+
 
     listTriggers(token) {
         const endpoint = `${this.endpoint}/triggers`;
