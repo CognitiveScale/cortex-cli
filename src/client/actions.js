@@ -54,7 +54,7 @@ module.exports = class Actions {
         });
     }
 
-    async deployAction(token, actionName, docker, kind, code, memory, timeout, actionType, command, port, environment, pushDocker) {
+    async deployAction(token, actionName, docker, kind, code, memory, timeout, actionType, command, port, environment, environmentVariables, pushDocker) {
         let endpoint = `${this.endpointV3}`;
         if (actionType) {
             endpoint = `${endpoint}?actionType=${actionType}`;
@@ -81,6 +81,7 @@ module.exports = class Actions {
         if (command) req.field('command', command);
         if (port) req.field('port', port);
         if (environment) req.field('environment', environment);
+        if (environmentVariables) req.field('environmentVariables', environmentVariables);
 
         return req.then((res) => {
             if (res.ok) {

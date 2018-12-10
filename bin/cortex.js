@@ -35,18 +35,19 @@ program
     .command('environments [cmd]', 'Work with Cortex Environments')
     .command('datasets [cmd]', 'Work with Cortex Datasets')
     .command('docker [cmd]', 'Work with Docker')
-    .command('jobs [cmd]', 'Work with Cortex Jobs')
+    .command('jobs [cmd]', 'Work with Cortex v2 Jobs')
     .command('processors [cmd]', 'Work with the Cortex Processor Runtime')
     .command('project [cmd]', 'Work with a related collection of Cortex contributions')
     .command('skills [cmd]', 'Work with Cortex Skills')
-    .command('tasks [cmd]', 'Work with Cortex Tasks')
+    .command('tasks [cmd]', 'Work with Cortex v2 Tasks')
     .command('types [cmd]', 'Work with Cortex Types')
     .command('variables [cmd]', 'Work with Cortex Secure Variables');
 
 program.parse(process.argv, { noActionHandler: function() {
-    
+
 }});
 if (!program.commands.map(cmd => cmd._name).includes(program.args[0])) {
     program.outputHelp(identity);
     process.exit(1);
 }
+

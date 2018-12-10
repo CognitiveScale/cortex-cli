@@ -73,7 +73,7 @@ module.exports = class Content {
             });
     }
 
-    uploadContentStreaming(token, key, content, showProgress = false) {
+    uploadContentStreaming(token, key, content, showProgress = false, contentType='application/octet-stream') {
         debug('uploadContentStreaming(%s, %s) => %s', key, content, `${this.endpoint}/${key}`);
 
         // NOTE: superagent only supports uploads via .attach(), which uses multipart forms (@see
@@ -101,7 +101,8 @@ module.exports = class Content {
                         uri: url,
                         headers: {
                             'Accept': 'application/json',
-                            'Authorization': `Bearer ${token}`
+                            'Authorization': `Bearer ${token}`,
+                            'Content-Type': contentType,
                         }
                     })
                     .on('response', (res) => {

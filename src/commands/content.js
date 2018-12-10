@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
+const _ = require('lodash');
 const fs = require('fs');
 const path = require('path');
 const yeoman = require('yeoman-environment');
@@ -90,7 +90,8 @@ module.exports.UploadContent = class UploadContent {
             })
         }
         else {
-            content.uploadContentStreaming(profile.token, contentKey, filePath, showProgress).then((response) => {
+            const contentType = _.get(options, 'contentType', 'application/octet-stream');
+            content.uploadContentStreaming(profile.token, contentKey, filePath, showProgress, contentType).then((response) => {
                 if (response.success) {
                     printSuccess(`Content successfully uploaded.`, options);
                 }

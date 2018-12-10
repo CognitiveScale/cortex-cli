@@ -28,13 +28,13 @@ const {
     SaveJob
 } = require('../src/commands/jobs');
 
-program.description('Work with Cortex Jobs');
+program.description('Work with Cortex v2 Jobs. Use Cortex Actions for v3 jobs.');
 
 
 // List Jobs
 program
     .command('list')
-    .description('List job definitions')
+    .description('List v2 job definitions')
     .option('--no-compat', 'Ignore API compatibility checks')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
@@ -52,7 +52,7 @@ program
 // Describe Job
 program
     .command('describe <jobDefinition>')
-    .description('Describe job definition')
+    .description('Describe v2 job definition')
     .option('--no-compat', 'Ignore API compatibility checks')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
@@ -69,7 +69,7 @@ program
 // Get Job Status
 program
     .command('status <jobDefinition>')
-    .description('Get job status')
+    .description('Get v2 job status')
     .option('--no-compat', 'Ignore API compatibility checks')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
@@ -87,12 +87,12 @@ program
 // Save Job
 program
     .command('save <jobDefinition>')
-    .description('Save a job definition')
+    .description('Save a v2 job definition')
     .option('--no-compat', 'Ignore API compatibility checks')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
     .option('-y, --yaml', 'Use YAML for job definition format')
-    .option('--push-docker', 'Push Docker image to the Cortex registry.')    
+    .option('--push-docker', 'Push Docker image to the Cortex registry.')
     .action(withCompatibilityCheck((jobDefinition, options) => {
         try {
             new SaveJob(program).execute(jobDefinition, options);
