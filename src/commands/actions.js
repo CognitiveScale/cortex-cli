@@ -158,9 +158,6 @@ module.exports.InvokeActionCommand = class {
         if (!params.apiEndpoint) params.apiEndpoint = profile.url;
         if (!params.token) params.token = profile.token;
 
-        // Set the Activation ID if not specified
-        if (!params.activationId) params.activationId = uuid();
-
         debug('params: %o', params);
 
         const actions = new Actions(profile.url);
