@@ -36,7 +36,7 @@ module.exports = class Actions {
         if (actionType) {
             endpoint = `${endpoint}?actionType=${actionType}`
         }
-        debug('invokeAction(%s) => %s', actionName, endpoint);
+        debug('invokeAction(%s) => %s', actionName, endpoint);  
 
         const req = request
             .post(endpoint)
