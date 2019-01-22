@@ -194,7 +194,10 @@ module.exports = class Actions {
             .accept('application/json')
             .then((res) => {
                 if (res.ok) {
-                    return res.body;
+                    const resBody = res.body;
+                    debug('resBody (with provider status as well): %s', resBody);
+                    const respBodyNoProviderField = _.omit(resBody, '_providerStatus');
+                    return respBodyNoProviderField;
                 }
                 return {success: false, status: res.status, message: res.body};
             })
