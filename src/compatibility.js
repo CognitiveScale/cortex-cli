@@ -78,7 +78,7 @@ function notifyUpdate({ required = false, current, latest }) {
         chalk.cyan(`npm i ${isInstalledGlobally ? '-g ' : ''}${pkg.name}@${latest}`) +
         ' to update';
 
-    console.log(boxen(message, opts));
+    console.warn(boxen(message, opts));
 }
 
 function upgradeAvailable(args) {
