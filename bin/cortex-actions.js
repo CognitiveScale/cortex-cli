@@ -121,6 +121,7 @@ program
     .option('--code [code]', 'The code file or code archive to deploy')
     .option('--docker [image]', 'Docker image to use as the runner')
     .option('--memory [memory]', 'Action memory limit in megabytes', '256')
+    .option('--vcpus [vcpus]', 'Action vcpus limit in integer', '1')
     .option('--timeout [timeout]', 'Execution timeout in milliseconds', '60000')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
