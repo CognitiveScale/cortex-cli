@@ -98,6 +98,8 @@ program
     .option('--params [params]', 'JSON params to send to the action')
     .option('--params-file [paramsFile]', 'A file containing either JSON or YAML formatted params')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
+    .option('--memory [memory]', 'Action memory limit in megabytes', '256')
+    .option('--vcpus [vcpus]', 'Action vcpus limit in integer', '1')
     .option('--profile [profile]', 'The profile to use')
     .option('--query [query]', 'A JMESPath query to use in filtering the response data.')
     .option('--actionType [actionType]', 'Type of action')

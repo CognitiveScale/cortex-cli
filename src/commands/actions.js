@@ -154,6 +154,10 @@ module.exports.InvokeActionCommand = class {
             params.properties['daemon.method'] = options.method;
         if (options.path)
             params.properties['daemon.path'] = options.path;
+        if (options.memory)
+            params.properties['memory'] =parseInt(options.memory);
+        if (options.vcpus)
+            params.properties['vcpus'] =parseInt(options.vcpus);
 
         // Set the API Endpoint and Token if not specified
         if (!params.apiEndpoint) params.apiEndpoint = profile.url;
