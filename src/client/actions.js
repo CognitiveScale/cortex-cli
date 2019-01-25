@@ -243,7 +243,7 @@ module.exports = class Actions {
     }
 
     listTasksByActivation(token, activationId) {
-        const endpoint = `${this.endpointJobsV3}/actions/${activationId}`;
+        const endpoint = `${this.endpointV3}/${activationId}`;
         return request
             .get(endpoint)
             .set('Authorization', `Bearer ${token}`)

@@ -352,7 +352,7 @@ program
     .option('--no-compat', 'Ignore API compatibility checks')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
-    .action(withCompatibilityCheck((options) => {
+    .action(withCompatibilityCheck((activationId, options) => {
         try {
             new ListTaskByActivation(program).execute(activationId, options);
         }
