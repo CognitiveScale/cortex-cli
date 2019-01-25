@@ -40,6 +40,10 @@ const {
     CreateAgentSnapshotCommand
 } = require('../src/commands/agents');
 
+const {
+    ListTaskByActivation,
+} = require('../src/commands/actions');
+
 const { printError } = require('../src/commands/utils');
 
 program.description('Work with Cortex Agents');
@@ -335,6 +339,22 @@ program
     .action(withCompatibilityCheck((options) => {
         try {
             new ListTriggersCommand(program).execute(options);
+        }
+        catch (err) {
+            console.error(chalk.red(err.message));
+        }
+    }));
+
+//List Tasks
+program
+    .command('list-tasks <activationId>')
+    .description('List tasks associated with a given activationId')
+    .option('--no-compat', 'Ignore API compatibility checks')
+    .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
+    .option('--profile [profile]', 'The profile to use')
+    .action(withCompatibilityCheck((options) => {
+        try {
+            new ListTaskByActivation(program).execute(activationId, options);
         }
         catch (err) {
             console.error(chalk.red(err.message));

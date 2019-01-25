@@ -315,3 +315,27 @@ module.exports.TaskStatsActionCommand = class {
             })
     }
 };
+
+
+module.exports.ListTaskByActivation = class {
+    constructor(program) {
+        this.program = program;
+    }
+
+    execute(activationId, options) {
+        const profile = loadProfile(options.profile);
+        debug('%s.listTasksByActivation (%s, %s)', profile.name, activationId);
+        const actions = new Actions(profile.url);
+        actions.listTasksByActivation(profile.token, activationId)
+            .then((response) => {
+                if (response.success) {
+                    const result = filterObject(response, options);
+                    printSuccess(JSON.stringify(result, null, 2), options);
+                }
+                else {
+                    printError(`Agent task list by activation failed: ${response.status} ${response.message}`, options);
+                }
+            })
+    }
+};
+

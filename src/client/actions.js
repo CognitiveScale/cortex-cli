@@ -242,6 +242,23 @@ module.exports = class Actions {
             });
     }
 
+    listTasksByActivation(token, activationId) {
+        const endpoint = `${this.endpointJobsV3}/actions/${activationId}`;
+        return request
+            .get(endpoint)
+            .set('Authorization', `Bearer ${token}`)
+            .accept('application/json')
+            .then((res) => {
+                if (res.ok) {
+                    return res.body;
+                }
+                return {success: false, status: res.status, message: res.body};
+            })
+            .catch((err) => {
+                return constructError(err);
+            });
+    }
+
     getConfig(token) {
         return request
             .get(_.join([this.endpointV3, '_config'], '/'))
