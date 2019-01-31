@@ -15,6 +15,7 @@
  */
 
 const fs = require('fs');
+const uuid = require('uuid/v4');
 const debug = require('debug')('cortex:cli');
 const {loadProfile} = require('../config');
 const Actions = require('../client/actions');
@@ -146,13 +147,19 @@ module.exports.InvokeActionCommand = class {
             params = parseObject(paramsStr, options);
         }
 
-        debug('params: %o', params);
         const actionType = options.actionType;
         params.properties = params.properties || {};
         if (options.method)
             params.properties['daemon.method'] = options.method;
         if (options.path)
             params.properties['daemon.path'] = options.path;
+
+        // Set the API Endpoint and Token if not specified
+        if (!params.apiEndpoint) params.apiEndpoint = profile.url;
+        if (!params.token) params.token = profile.token;
+
+        debug('params: %o', params);
+
         const actions = new Actions(profile.url);
         actions.invokeAction(profile.token, actionName, params, actionType)
             .then((response) => {
@@ -308,3 +315,27 @@ module.exports.TaskStatsActionCommand = class {
             })
     }
 };
+
+
+module.exports.ListTaskByActivation = class {
+    constructor(program) {
+        this.program = program;
+    }
+
+    execute(activationId, options) {
+        const profile = loadProfile(options.profile);
+        debug('%s.listTasksByActivation (%s, %s)', profile.name, activationId);
+        const actions = new Actions(profile.url);
+        actions.listTasksByActivation(profile.token, activationId)
+            .then((response) => {
+                if (response.success) {
+                    const result = filterObject(response, options);
+                    printSuccess(JSON.stringify(result, null, 2), options);
+                }
+                else {
+                    printError(`Agent task list by activation failed: ${response.status} ${response.message}`, options);
+                }
+            })
+    }
+};
+

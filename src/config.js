@@ -62,10 +62,10 @@ class Profile {
 
     constructor(name, {url, username, tenantId, account, token}) {
         this.name = name;
-        this.url = url;
+        this.url = process.env.CORTEX_URI || url;
         this.username = username;
         this.account = tenantId || account;
-        this.token = token;
+        this.token = process.env.CORTEX_TOKEN || token;
     }
 
     validate() {

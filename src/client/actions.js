@@ -36,7 +36,7 @@ module.exports = class Actions {
         if (actionType) {
             endpoint = `${endpoint}?actionType=${actionType}`
         }
-        debug('invokeAction(%s) => %s', actionName, endpoint);
+        debug('invokeAction(%s) => %s', actionName, endpoint);  
 
         const req = request
             .post(endpoint)
@@ -194,7 +194,10 @@ module.exports = class Actions {
             .accept('application/json')
             .then((res) => {
                 if (res.ok) {
-                    return res.body;
+                    const resBody = res.body;
+                    debug('resBody (with provider status as well): %s', resBody);
+                    const respBodyNoProviderField = _.omit(resBody, '_providerStatus');
+                    return respBodyNoProviderField;
                 }
                 return {success: false, status: res.status, message: res.body};
             })
@@ -224,6 +227,23 @@ module.exports = class Actions {
     taskStats(token, jobId) {
         const canonicalJobId = Actions.getCanonicalJobId(jobId);
         const endpoint = `${this.endpointJobsV3}/${canonicalJobId}/stats`;
+        return request
+            .get(endpoint)
+            .set('Authorization', `Bearer ${token}`)
+            .accept('application/json')
+            .then((res) => {
+                if (res.ok) {
+                    return res.body;
+                }
+                return {success: false, status: res.status, message: res.body};
+            })
+            .catch((err) => {
+                return constructError(err);
+            });
+    }
+
+    listTasksByActivation(token, activationId) {
+        const endpoint = `${this.endpointV3}/${activationId}`;
         return request
             .get(endpoint)
             .set('Authorization', `Bearer ${token}`)
