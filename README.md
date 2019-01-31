@@ -190,4 +190,3 @@ cortex agents list --query "[].{name: name, title: title}"
     - [ ] list
     - [ ] save [registryName]
     - [ ] delete [registryName]
-
