@@ -104,6 +104,7 @@ module.exports.DeployActionCommand = class {
         const dockerImage = options.docker;
         const code = options.code;
         const memory = parseInt(options.memory);
+        const vcpus = parseInt(options.vcpus);
         const timeout = parseInt(options.timeout);
         const actionType = options.actionType;
         const cmd = options.cmd;
@@ -113,7 +114,7 @@ module.exports.DeployActionCommand = class {
         const pushDocker = options.pushDocker;
 
         const actions = new Actions(profile.url);
-        actions.deployAction(profile.token, actionName, dockerImage, kind, code, memory, timeout, actionType, cmd, port, environment, environmentVariables, pushDocker)
+        actions.deployAction(profile.token, actionName, dockerImage, kind, code, memory, vcpus, timeout, actionType, cmd, port, environment, environmentVariables, pushDocker)
             .then((response) => {
                 if (response.success) {
                     printSuccess(JSON.stringify(response.message, null, 2), options);
@@ -153,6 +154,10 @@ module.exports.InvokeActionCommand = class {
             params.properties['daemon.method'] = options.method;
         if (options.path)
             params.properties['daemon.path'] = options.path;
+        if (options.memory)
+            params.properties['memory'] =parseInt(options.memory);
+        if (options.vcpus)
+            params.properties['vcpus'] =parseInt(options.vcpus);
 
         // Set the API Endpoint and Token if not specified
         if (!params.apiEndpoint) params.apiEndpoint = profile.url;
