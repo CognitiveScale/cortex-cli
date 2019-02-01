@@ -95,7 +95,7 @@ module.exports.SaveConnectionCommand = class SaveConnectionCommand {
        debug('%o', connObj);
 
        const jdbcJarFilePath = this.getParamsValue(connObj, 'jdbc_jar_file');
-       const contentKey = this.getParamsValue(connObj, 'managed_content_key');
+       const contentKey = this.getParamsValue(connObj, 'managed_content_key') || this.getParamsValue(connObj, 'plugin_jar');
 
        if (jdbcJarFilePath && !jdbcJarFilePath.includes("--Insert jar file path--")) {
            const content = new Content(profile.url);
@@ -194,7 +194,7 @@ module.exports.TestConnectionCommand = class TestConnectionCommand {
        debug('%o', connObj);
 
        const jdbcJarFilePath = this.getParamsValue(connObj, 'jdbc_jar_file');
-       const contentKey = this.getParamsValue(connObj, 'managed_content_key');
+       const contentKey = this.getParamsValue(connObj, 'managed_content_key') || this.getParamsValue(connObj, 'plugin_jar');
 
        if (jdbcJarFilePath) {
            const content = new Content(profile.url);
