@@ -36,7 +36,7 @@ module.exports = class Actions {
         if (actionType) {
             endpoint = `${endpoint}?actionType=${actionType}`
         }
-        debug('invokeAction(%s) => %s', actionName, endpoint);  
+        debug('invokeAction(%s) => %s', actionName, endpoint);
 
         const req = request
             .post(endpoint)
@@ -54,13 +54,13 @@ module.exports = class Actions {
         });
     }
 
-    async deployAction(token, actionName, docker, kind, code, memory, timeout, actionType, command, port, environment, environmentVariables, pushDocker) {
+    async deployAction(token, actionName, docker, kind, code, memory, vcpus, timeout, actionType, command, port, environment, environmentVariables, pushDocker) {
         let endpoint = `${this.endpointV3}`;
         if (actionType) {
             endpoint = `${endpoint}?actionType=${actionType}`;
         }
-        debug('deployAction(%s, docker=%s, kind=%s, code=%s, memory=%s, timeout=%s) => %s',
-            actionName, docker, kind, code, memory, timeout, endpoint);
+        debug('deployAction(%s, docker=%s, kind=%s, code=%s, memory=%s, vcpus=%s, timeout=%s) => %s',
+            actionName, docker, kind, code, memory, vcpus, timeout, endpoint);
 
         try {
             docker = await this._maybePushDockerImage(docker, token, pushDocker);
@@ -76,6 +76,7 @@ module.exports = class Actions {
         if (docker) req.field('docker', docker);
         if (kind) req.field('kind', kind);
         if (memory) req.field('memory', memory);
+        if (vcpus) req.field('vcpus', vcpus);
         if (timeout) req.field('timeout', timeout);
         if (code) req.attach('code', code);
         if (command) req.field('command', command);
@@ -288,7 +289,7 @@ module.exports = class Actions {
         const res = await this.getConfig(token);
         if (res.success)
             return res.config.dockerPrivateRegistryUrl
-        else 
+        else
             throw res
     }
 

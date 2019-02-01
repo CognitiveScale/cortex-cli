@@ -1,0 +1,12 @@
+name: advanced-plugin
+title: Advanced Plugin
+description: Update this description
+connectionType: advanced_jdbc
+allowWrite: true
+params:
+  - name: "plugin_jar"
+    value: test_plugin.jar
+  - name: "jdbc_jar_file"
+    value: "tests/test_data/test-plugin.jar"
+  - name: "plugin_properties"
+    value: '{"myProp":"value"}'
