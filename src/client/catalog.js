@@ -125,7 +125,7 @@ module.exports = class Catalog {
                 const urlBase = `${profile.url}/${AGENTS_API_VERSION}/agents/${agentName}/services`;
                 const servicesList = response.agent.inputs
                     .filter(i => i.signalType === 'Service')
-                    .map(i => ({ ...i, url: `${urlBase}/${i.name}` }));
+                    .map(i => ({ ...i, url: `${urlBase}/${i.name}` }))
                 return { success: true, services: servicesList };
             } else {
                 return response;
