@@ -185,7 +185,7 @@ module.exports.PromoteEnvironmentCommand = class PromoteEnvironmentCommand {
         environment.promoteEnvironment(profile.token, promObj)
             .then((response) => {
                 if (response.success) {
-                    printSuccess(`Snapshot: \'${promObj.snapshotId}\' successfully promoted to environment:\'${promObj.environmentName}\' and created instance: \'${response.instanceId}\'`, options);
+                    printSuccess(`Snapshot \'${promObj.snapshotId}\' successfully promoted to \'${promObj.environmentName}\' environment. Instance \'${response.instanceId}\' created.`, options);
                 } else {
                     let errMsg = `Failed to promote to environment: ${response.status} ${response.message}\n`;
                     if (response.details) {
