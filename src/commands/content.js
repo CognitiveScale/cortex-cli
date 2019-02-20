@@ -74,8 +74,6 @@ module.exports.UploadContent = class UploadContent {
 
         const contentClient = new Content(profile.url);
 
-        const chunkSize = parseInt(options.chunkSize);
-        //const chunkSize = parseInt(options.chunkSize);
         const uploadSecure = _.partial(UploadContent.uploadSecure, contentClient, profile, options);
         const upload = _.partial(UploadContent.upload, contentClient, profile, options);
 
@@ -92,17 +90,11 @@ module.exports.UploadContent = class UploadContent {
                 }, 0);
                 console.log(`\nTotal:\n${humanReadableFileSize(totalBytes)}\t${filePath}`);
 
-                debug(`chunksize ${chunkSize}`);
 
                 if (!options.test) {
-                    _.chunk(filesDict, chunkSize)
-                        .reduce((promise, currentChunk) => promise
-                            .then(() => {
-                                debug(`working on chunk of files: ${JSON.stringify(currentChunk)}`);
-                                const promises = currentChunk.map((item) => upload(`${contentKey}/${item.relative}`, item.canonical));
-                                return Promise.all(promises);
-                            }), Promise.resolve()
-                        );
+                    filesDict.forEach((item) => {
+                        upload(`${contentKey}/${item.relative}`, item.canonical);
+                    });
                 } else {
                     console.log('Test option set. Nothing uploaded.');
                 }
@@ -142,7 +134,7 @@ module.exports.UploadContent = class UploadContent {
     static upload(contentClient, profile, options, contentKey, filePath) {
         const showProgress = !!options.progress;
         const contentType = _.get(options, 'contentType', 'application/octet-stream');
-        return contentClient.uploadContentStreaming(profile.token, contentKey, filePath, showProgress, contentType).then((response) => {
+        contentClient.uploadContentStreaming(profile.token, contentKey, filePath, showProgress, contentType).then((response) => {
             if (response.success) {
                 printSuccess(`Content successfully uploaded.`, options);
             }
