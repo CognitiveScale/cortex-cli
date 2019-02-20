@@ -36,7 +36,6 @@ program
     .command('datasets [cmd]', 'Work with Cortex Datasets')
     .command('docker [cmd]', 'Work with Docker')
     .command('jobs [cmd]', 'Work with Cortex v2 Jobs')
-    .command('processors [cmd]', 'Work with the Cortex Processor Runtime')
     .command('project [cmd]', 'Work with a related collection of Cortex contributions')
     .command('skills [cmd]', 'Work with Cortex Skills')
     .command('tasks [cmd]', 'Work with Cortex v2 Tasks')
