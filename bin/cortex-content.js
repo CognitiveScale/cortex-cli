@@ -54,6 +54,8 @@ program
     .command('upload <contentKey> <filePath>')
     .description('Upload content')
     .option('--progress', 'Show upload progress')
+    .option('--test', 'Show what would be uploaded along with file size')
+    .option('--recursive', 'Recursively walk <filePath> and prefix each path stored with <contentKey>')
     .option('--no-compat', 'Ignore API compatibility checks')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
