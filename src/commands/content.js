@@ -20,7 +20,7 @@ const yeoman = require('yeoman-environment');
 const debug = require('debug')('cortex:cli');
 const { loadProfile } = require('../config');
 const Content = require('../client/content');
-const { printSuccess, printError, filterObject, parseObject, printTable } = require('./utils');
+const { printSuccess, printError, filterObject, parseObject, printTable, getSourceFiles, humanReadableFileSize } = require('./utils');
 
 module.exports.ListContent = class ListContent {
 
@@ -47,6 +47,7 @@ module.exports.ListContent = class ListContent {
                         { column: 'Size (bytes)', field: 'Size', width: 20 }
                     ];
 
+
                     printTable(tableSpec, response.message);
                 }
             }
@@ -67,43 +68,85 @@ module.exports.UploadContent = class UploadContent {
         this.program = program;
     }
 
-    execute(contentKey, filePath, options) {
+    execute(contentKey, filePath, options, cbTest) {
         const profile = loadProfile(options.profile);
         debug('%s.uploadContent()', profile.name);
 
-        const content = new Content(profile.url);
-        const showProgress = !!options.progress;
+        const contentClient = new Content(profile.url);
 
-        if (options.secure) {
-            const fileContent = fs.readFileSync(filePath);
-            const fileBaseName = path.basename(filePath);
 
-            const secureContent = {};
-            secureContent[fileBaseName] = new Buffer(fileContent).toString('base64');
-            content.uploadSecureContent(profile.token, contentKey, secureContent).then((response) => {
-                if (response.success) {
-                    printSuccess(`Secure content successfully uploaded.`, options);
+        const uploadSecure = _.partial(UploadContent.uploadSecure, contentClient, profile, options);
+        const upload = _.partial(UploadContent.upload, contentClient, profile, options);
+
+        if (options.recursive) {
+            getSourceFiles(filePath, (filesDict, err) => {
+                if (err) {
+                    debug(err);
+                    printError(`Failed to upload content: ${err.status} ${err.message}`, options);
                 }
-                else {
-                    printError(`Failed to upload secure content: ${response.status} ${response.message}`, options);
+
+                const totalBytes = filesDict.reduce((accum, current) => {
+                    console.log(`${humanReadableFileSize(current.size)}\t${current.relative} -> ${contentKey}/${current.relative}`);
+                    return accum + current.size;
+                }, 0);
+                console.log(`\nTotal:\n${humanReadableFileSize(totalBytes)}\t${filePath}`);
+
+
+                if (!options.test) {
+                    filesDict.forEach((item) => {
+                        upload(`${contentKey}/${item.relative}`, item.canonical);
+                    });
+                } else {
+                    console.log('Test option set. Nothing uploaded.');
                 }
-            })
-        }
-        else {
-            const contentType = _.get(options, 'contentType', 'application/octet-stream');
-            content.uploadContentStreaming(profile.token, contentKey, filePath, showProgress, contentType).then((response) => {
-                if (response.success) {
-                    printSuccess(`Content successfully uploaded.`, options);
+
+                if (cbTest) {
+                    // for unit tests
+                    cbTest(filesDict);
                 }
-                else {
-                    printError(`Failed to upload content: ${response.status} ${response.message}`, options);
-                }
-            })
-            .catch((err) => {
-                debug(err);
-                printError(`Failed to upload content: ${err.status} ${err.message}`, options);
             });
+        } else {
+            if (options.secure) {
+                uploadSecure(contentKey, filePath);
+            }
+            else {
+                upload(contentKey, filePath);
+            }
         }
+    }
+
+
+    static uploadSecure(contentClient, profile, options, contentKey, filePath) {
+        const fileContent = fs.readFileSync(filePath);
+        const fileBaseName = path.basename(filePath);
+
+        const secureContent = {};
+        secureContent[fileBaseName] = new Buffer(fileContent).toString('base64');
+        contentClient.uploadSecureContent(profile.token, contentKey, secureContent).then((response) => {
+            if (response.success) {
+                printSuccess(`Secure content successfully uploaded.`, options);
+            }
+            else {
+                printError(`Failed to upload secure content: ${response.status} ${response.message}`, options);
+            }
+        })
+    }
+
+    static upload(contentClient, profile, options, contentKey, filePath) {
+        const showProgress = !!options.progress;
+        const contentType = _.get(options, 'contentType', 'application/octet-stream');
+        contentClient.uploadContentStreaming(profile.token, contentKey, filePath, showProgress, contentType).then((response) => {
+            if (response.success) {
+                printSuccess(`Content successfully uploaded.`, options);
+            }
+            else {
+                printError(`Failed to upload content: ${response.status} ${response.message}`, options);
+            }
+        })
+        .catch((err) => {
+            debug(err);
+            printError(`Failed to upload content: ${err.status} ${err.message}`, options);
+        });
     }
 };
 
