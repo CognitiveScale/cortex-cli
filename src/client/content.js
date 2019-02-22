@@ -79,7 +79,6 @@ module.exports = class Content {
         // NOTE: superagent only supports uploads via .attach(), which uses multipart forms (@see
         // https://github.com/visionmedia/superagent/issues/1250).  To perform a streaming upload,
         // we use requestjs instead.
-        //const request = require('request');
         const request = require('requestretry');
 
         const contentKey = this._sanitizeKey(key);

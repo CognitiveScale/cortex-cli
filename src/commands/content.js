@@ -76,12 +76,6 @@ module.exports.UploadContent = class UploadContent {
 
 
         const uploadSecure = _.partial(UploadContent.uploadSecure, contentClient, profile, options);
-
-        if(options.recursive) {
-            // large directory uploads may take a while; look alive
-            options.progress = true;
-        }
-
         const upload = _.partial(UploadContent.upload, contentClient, profile, options);
 
         if (options.recursive) {
