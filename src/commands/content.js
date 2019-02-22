@@ -76,6 +76,12 @@ module.exports.UploadContent = class UploadContent {
 
 
         const uploadSecure = _.partial(UploadContent.uploadSecure, contentClient, profile, options);
+
+        if(options.recursive) {
+            // large directory uploads may take a while; look alive
+            options.progress = true;
+        }
+
         const upload = _.partial(UploadContent.upload, contentClient, profile, options);
 
         if (options.recursive) {
@@ -93,9 +99,13 @@ module.exports.UploadContent = class UploadContent {
 
 
                 if (!options.test) {
+                    const uploadPromises = [];
                     filesDict.forEach((item) => {
-                        upload(`${contentKey}/${item.relative}`, item.canonical);
+                        uploadPromises.push(
+                            upload(`${contentKey}/${item.relative}`, item.canonical)
+                        );
                     });
+                    return Promise.all(uploadPromises);
                 } else {
                     console.log('Test option set. Nothing uploaded.');
                 }
@@ -132,10 +142,10 @@ module.exports.UploadContent = class UploadContent {
         })
     }
 
-    static upload(contentClient, profile, options, contentKey, filePath) {
+    static async upload(contentClient, profile, options, contentKey, filePath) {
         const showProgress = !!options.progress;
         const contentType = _.get(options, 'contentType', 'application/octet-stream');
-        contentClient.uploadContentStreaming(profile.token, contentKey, filePath, showProgress, contentType).then((response) => {
+        return contentClient.uploadContentStreaming(profile.token, contentKey, filePath, showProgress, contentType).then((response) => {
             if (response.success) {
                 printSuccess(`Content successfully uploaded.`, options);
             }

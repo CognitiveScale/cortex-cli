@@ -79,7 +79,8 @@ module.exports = class Content {
         // NOTE: superagent only supports uploads via .attach(), which uses multipart forms (@see
         // https://github.com/visionmedia/superagent/issues/1250).  To perform a streaming upload,
         // we use requestjs instead.
-        const request = require('request');
+        //const request = require('request');
+        const request = require('requestretry');
 
         const contentKey = this._sanitizeKey(key);
         const url = new URL(`${this.endpoint}/${contentKey}`);
@@ -103,6 +104,15 @@ module.exports = class Content {
                             'Accept': 'application/json',
                             'Authorization': `Bearer ${token}`,
                             'Content-Type': contentType,
+                        },
+                        maxAttempts: 5,  // (default) try 5 times
+                        retryDelay: 5000, // (default) wait for 5s before trying again
+                        retryStrategy: request.RetryStrategies.HTTPOrNetworkError // (default) retry on 5xx or network errors
+                    }, function(err, response, body){
+                        // this callback will only be called when the request succeeded or after maxAttempts or on error
+                        if (response) {
+                            debug('The number of request attempts: ' + response.attempts);
+                            console.log(response.body);
                         }
                     })
                     .on('response', (res) => {
