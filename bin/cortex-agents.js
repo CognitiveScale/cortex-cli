@@ -29,6 +29,7 @@ const {
     GetActivationCommand,
     ListActivationsCommand,
     ListAgentInstancesCommand,
+    ListSnapshotInstancesCommand,
     CreateAgentInstanceCommand,
     GetAgentInstanceCommand,
     DeleteAgentInstanceCommand,
@@ -202,6 +203,25 @@ program
     .action(withCompatibilityCheck((agentName, options) => {
         try {
             new ListAgentSnapshotsCommand(program).execute(agentName, options);
+        }
+        catch (err) {
+            console.error(chalk.red(err.message));
+        }
+    }));
+
+//List snapshot instances
+program
+    .command('list-snapshot-instances <snapshotId>')
+    .description('List snapshot instances  ')
+    .option('--no-compat', 'Ignore API compatibility checks')
+    .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
+    .option('--profile [profile]', 'The profile to use')
+    .option('--environmentName [environmentName]', 'The environment to list or \'all\'')
+    .option('--json', 'Output results using JSON')
+    .option('--query [query]', 'A JMESPath query to use in filtering the response data. Ignored if output format is not JSON.')
+    .action(withCompatibilityCheck((snapshotId, options) => {
+        try {
+            new ListSnapshotInstancesCommand(program).execute(snapshotId, options);
         }
         catch (err) {
             console.error(chalk.red(err.message));
