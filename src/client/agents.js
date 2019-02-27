@@ -113,7 +113,7 @@ module.exports = class Agents {
 
 
     listSnapshotInstances(token, snapshotId, environmentName) {
-        let endpoint = `${this.endpoint}/instances?snapshotId=${snapshotId}`;
+        let endpoint = `${this.endpoint}/instances?snapshot=${snapshotId}`;
         debug('listSnapshotInstances(%s, %s) => (%s)', snapshotId, environmentName, endpoint);
         if (environmentName) endpoint = `${endpoint}&environmentName=${environmentName}`;
 
