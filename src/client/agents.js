@@ -111,6 +111,29 @@ module.exports = class Agents {
             });
     }
 
+
+    listSnapshotInstances(token, snapshotId, environmentName) {
+        let endpoint = `${this.endpoint}/instances?snapshot=${snapshotId}`;
+        debug('listSnapshotInstances(%s, %s) => (%s)', snapshotId, environmentName, endpoint);
+        if (environmentName) endpoint = `${endpoint}&environmentName=${environmentName}`;
+
+        return request
+            .get(endpoint)
+            .set('Authorization', `Bearer ${token}`)
+            .set('x-cortex-proxy-notify', true)
+            .then((res) => {
+                if (Boolean(_.get(res, 'headers.x-cortex-proxied', false)))
+                    console.error(chalk.blue('Request proxied to cloud.'));
+                if (res.ok) {
+                    return {success: true, instances: res.body.instances};
+                }
+                return {success: false, status: res.status, message: res.body};
+            })
+            .catch((err) => {
+                return constructError(err);
+            });
+    }
+
     describeAgentSnapshot(token, snapshotId, environmentName) {
         let endpoint = `${this.endpoint}/snapshots/${snapshotId}?deps=true`;
         debug('describeAgentSnapshot(%s, %s) => %s', snapshotId, environmentName, endpoint);
