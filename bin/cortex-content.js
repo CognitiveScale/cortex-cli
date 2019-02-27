@@ -61,6 +61,7 @@ program
     .option('--profile [profile]', 'The profile to use')
     .option('--secure', 'Uploads the content securely to the Cortex Vault. \n\t\t\t\tUse this option for keytab files or content that contains sensitive information that is required during Runtime. \n\t\t\t\tTake note of the contentKey you give to this content for future reference.')
     .option('--content-type [MIME type]', 'Sets the \`Content-Type\` or MIME type of the content ( default: application/octet-stream )')
+    .option('--chunkSize [int]', 'Number of files to simultaneous upload', 10)
     .action(withCompatibilityCheck((contentKey, filePath, options) => {
         try {
             new UploadContent(program).execute(contentKey, filePath, options);
