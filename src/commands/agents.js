@@ -299,7 +299,7 @@ module.exports.ListServicesCommand = class ListServicesCommand{
 
     execute(agentName, options) {
         const profile = loadProfile(options.profile);
-        debug('%s.listServices(%s)', profile.name, agentName); 
+        debug('%s.listServices(%s)', profile.name, agentName);
         
         const catalog = new Catalog(profile.url);
         catalog.listServices(profile.token, agentName, profile).then((response) => {
@@ -311,7 +311,8 @@ module.exports.ListServicesCommand = class ListServicesCommand{
                 else {
                     const tableSpec = [
                         {column: 'Service Name', field: 'name', width: 25},
-                        {column: 'Service Endpoint URL', field: 'url', width: 115}
+                        {column: 'Service Endpoint URL', field: 'url', width: 115},
+                        {column: 'Parameters', field: 'formated_types', width: 65}
                     ];
                     printTable(tableSpec, result);
                 }
