@@ -126,16 +126,6 @@ module.exports = class Catalog {
                 const servicesList = response.agent.inputs
                     .filter(i => i.signalType === 'Service')
                     .map(i => ({ ...i, url: `${urlBase}/${i.name}` }))
-                    .map(i => ({ ...i, formated_types:
-                    (i.parameters
-                    .map(o => {
-                        if(o.type==='array'){
-                            return (`[Name: ${o.name}, Type: ${o.type}<${o.format}>]`);
-                        }
-                        else{
-                           return (`[Name: ${o.name}, Type: ${o.type}]`);
-                        }
-                        }).join('\n'))}));
                 return { success: true, services: servicesList };
             } else {
                 return response;
