@@ -105,7 +105,6 @@ module.exports.DeployActionCommand = class {
         const code = options.code;
         const memory = parseInt(options.memory);
         const vcpus = parseInt(options.vcpus);
-        const timeout = parseInt(options.timeout);
         const actionType = options.actionType;
         const cmd = options.cmd;
         const port = options.port;
@@ -114,7 +113,7 @@ module.exports.DeployActionCommand = class {
         const pushDocker = options.pushDocker;
 
         const actions = new Actions(profile.url);
-        actions.deployAction(profile.token, actionName, dockerImage, kind, code, memory, vcpus, timeout, actionType, cmd, port, environment, environmentVariables, pushDocker)
+        actions.deployAction(profile.token, actionName, dockerImage, kind, code, memory, vcpus, actionType, cmd, port, environment, environmentVariables, pushDocker)
             .then((response) => {
                 if (response.success) {
                     printSuccess(JSON.stringify(response.message, null, 2), options);
