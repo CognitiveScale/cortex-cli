@@ -364,6 +364,45 @@ module.exports.ListAgentSnapshotsCommand = class {
     }
 };
 
+module.exports.ListSnapshotInstancesCommand = class {
+
+    constructor(program) {
+        this.program = program;
+    }
+
+    execute(snapshotId, options) {
+        const profile = loadProfile(options.profile);
+        debug('%s.listSnapshotInstances(%s)', profile.name, snapshotId);
+
+        const agents = new Agents(profile.url);
+        const envName = options.environmentName;
+        agents.listSnapshotInstances(profile.token, snapshotId, envName).then((response) => {
+            if (response.success) {
+                let result = filterObject(response.instances, options);
+                if (options.json) {
+                    printSuccess(JSON.stringify(result, null, 2), options);
+                }
+                else {
+                    const tableSpec = [
+                        { column: 'Instance Id', field: 'instanceId', width: 26 },
+                        { column: 'Status', field: 'status', width: 15 },
+                        { column: 'Environment Id', field: 'environmentName', width: 26 },
+                        { column: 'Created At', field: 'createdAt', width: 26 },
+                    ];
+                    printTable(tableSpec, result);
+                }
+
+            }
+            else {
+                printError(`Failed to list instances for snapshot ${snapshotId}: ${response.message}`, options);
+            }
+        })
+            .catch((err) => {
+                printError(`Failed to list instances for snapshot ${snapshotId}: ${err.status} ${err.message}`, options);
+            });
+    }
+};
+
 
 module.exports.DescribeAgentSnapshotCommand = class {
     constructor(program) {

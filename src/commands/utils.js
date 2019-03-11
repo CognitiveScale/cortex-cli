@@ -15,7 +15,11 @@
  */
 
 const chalk = require('chalk');
+const path = require('path');
+const fs = require('fs');
+const _ = require('lodash');
 const jmsepath = require('jmespath');
+const glob = require('glob');
 const yaml = require('js-yaml');
 const debug = require('debug')('cortex:cli');
 const Table = require('cli-table');
@@ -140,3 +144,49 @@ async function callMe(commandStr) {
 }
 
 module.exports.callMe = callMe;
+
+module.exports.getSourceFiles = function(source, cb) {
+    const options = {silent:true};
+    const normalizedSource = (source.endsWith('/')) ? source : `${source}/`;
+    const normalizedPath = path.join(normalizedSource, '**', '*');
+    glob(normalizedPath, options, function (err, files) {
+        // files is an array of filenames.
+        if (err) {
+            cb(err);
+        } else {
+            const results = files.filter(path => fs.lstatSync(path).isFile()).map((path) => {
+                return {
+                    canonical: path,
+                    relative: path.slice(normalizedSource.length),
+                    size: fs.lstatSync(path).size,
+                };
+            });
+            cb(results);
+        }
+    });
+};
+
+function round(value, precision) {
+    const multiplier = Math.pow(10, precision || 0);
+    return Math.floor(value * multiplier) / multiplier;
+}
+
+module.exports.humanReadableFileSize = function(sizeInBytes) {
+    const ranges = {
+        'K': Math.pow(10, 3),
+        'M': Math.pow(10, 6),
+        'G': Math.pow(10, 9),
+        'T': Math.pow(10, 12),
+    };
+    if (sizeInBytes < ranges['K']) {
+        return `${sizeInBytes}B`
+    } else if (sizeInBytes < ranges['M']) {
+        return `${round(sizeInBytes/ranges['K'], 1)}K`
+    } else if (sizeInBytes < ranges['G']) {
+        return `${round(sizeInBytes/ranges['M'], 1)}M`
+    } else if (sizeInBytes < ranges['T']) {
+        return `${round(sizeInBytes/ranges['G'], 1)}G`
+    }
+
+};
+
