@@ -190,3 +190,21 @@ module.exports.humanReadableFileSize = function(sizeInBytes) {
 
 };
 
+module.exports.formatValidationPath = (p) => {
+    let cnt = 0, res = '';
+    const len = p.length;
+    p.forEach(s => {
+        if (_.isNumber(s)) {
+            res += `[${s}]`
+        } else if (cnt < len)
+            res += s;
+        else
+            res += s;
+        if (cnt < len - 1 && !_.isNumber(p[cnt + 1]))
+            res += '.';
+        cnt += 1;
+
+    });
+    return res;
+};
+
