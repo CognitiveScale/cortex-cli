@@ -127,13 +127,15 @@ module.exports = class Catalog {
                     .filter(i => i.signalType === 'Service')
                     .map(i => ({ ...i, url: `${urlBase}/${i.name}` }))
                     .map(i => ({ ...i, formated_types:
-                    (i.parameters.$ref != null ? `$ref:${i.parameters.$ref}` : i.parameters
+                    (i.parameters === null ? null
+                     : i.parameters.$ref != null ? `$ref:${i.parameters.$ref}` 
+                     : i.parameters
                     .map(o => {
                         if(o.type==='array'){
-                            return (`-Name: ${o.name}, Type: ${o.type}<${o.format}>`);
+                            return (`Name: ${o.name}, Type: ${o.type}<${o.format}>`);
                         }
                         else{
-                           return (`-Name: ${o.name}, Type: ${o.type}`);
+                           return (`Name: ${o.name}, Type: ${o.type}`);
                         }
                         }).join('\n'))}));
                 return { success: true, services: servicesList };
