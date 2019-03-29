@@ -95,7 +95,9 @@ module.exports = class Content {
         return new Promise((resolve) => {
             fs
                 .createReadStream(content)
-                .on('data', (chunk) => progressBar && progressBar.tick(chunk.length))
+                .on('data', (chunk) => {
+                    progressBar && progressBar.tick(chunk.length);
+                })
                 .pipe(request
                     .post({
                         uri: url,
@@ -104,14 +106,14 @@ module.exports = class Content {
                             'Authorization': `Bearer ${token}`,
                             'Content-Type': contentType,
                         }
-                    })
-                    .on('response', (res) => {
+                    }, function(err, res, body) {
                         if (res.statusCode === 200) {
-                            resolve({success: true, message: res.body});
+                            resolve({success: true, message: body});
+                            return;
                         }
-                        resolve({success: false, message: res.body, status: res.status});
+                        // NOTE this is using npm request NOT superagent - fields are different
+                        resolve({success: false, message: body, status: res.statusCode});
                     })
-                    .on('error', (err) => resolve(constructError(err)))
                 );
         });
     }
