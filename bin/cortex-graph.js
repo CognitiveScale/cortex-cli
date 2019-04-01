@@ -22,8 +22,10 @@ const program = require('../src/commander');
 const { withCompatibilityCheck } = require('../src/compatibility');
 
 const {
-    FindEntitiesCommand,
-    PublishEventsCommand
+    FindEventsCommand,
+    PublishEventsCommand,
+    GetEntityCommand,
+    QueryGraphCommand,
 } = require('../src/commands/graph');
 
 program.description('Work with the Cortex Graph');
@@ -31,7 +33,7 @@ program.description('Work with the Cortex Graph');
 // Find Entity Events
 program
     .command('find-events')
-    .description('Find entities in the event store')
+    .description('Find entity events in the event store')
     .option('--no-compat', 'Ignore API compatibility checks')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
@@ -43,7 +45,7 @@ program
     .option('--skip [skip]', 'Move the result cursor to this position before returning results.')
     .action(withCompatibilityCheck((options) => {
         try {
-            new FindEntitiesCommand(program).execute(options);
+            new FindEventsCommand(program).execute(options);
         }
         catch (err) {
             console.error(chalk.red(err.message));
@@ -61,6 +63,39 @@ program
     .action(withCompatibilityCheck(async (file, options) => {
         await new PublishEventsCommand(program).execute(file, options)
             .catch(err => console.error(chalk.red(err.message)));
+    }));
+
+// Describe Entity
+program
+    .command('get-entity <entityId>')
+    .description('Get an entity in the graph by ID')
+    .option('--no-compat', 'Ignore API compatibility checks')
+    .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
+    .option('--profile [profile]', 'The profile to use')
+    .action(withCompatibilityCheck(async (entityId, options) => {
+        try {
+            new GetEntityCommand(program).execute(entityId, options);
+        }
+        catch (err) {
+            console.error(chalk.red(err.message));
+        }
+    }));
+
+// Query the graph
+program
+    .command('query <query>')
+    .description('Query the graph using the OpenCypher query language')
+    .option('--no-compat', 'Ignore API compatibility checks')
+    .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
+    .option('--profile [profile]', 'The profile to use')
+    .option('--json', 'Output results using JSON')
+    .action(withCompatibilityCheck(async (query, options) => {
+        try {
+            new QueryGraphCommand(program).execute(query, options);
+        }
+        catch (err) {
+            console.error(chalk.red(err.message));
+        }
     }));
 
 program.parse(process.argv);

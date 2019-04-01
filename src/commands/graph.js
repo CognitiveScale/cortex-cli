@@ -18,11 +18,13 @@ const _ = require('lodash');
 const debug = require('debug')('cortex:cli');
 const split = require('split');
 const fs = require('fs');
+const Table = require('tty-table');
 const { loadProfile } = require('../config');
 const { Graph } = require('../client/graph');
 const { printSuccess, printError, filterObject, formatValidationPath, printTable } = require('./utils');
 
-class FindEntitiesCommand {
+
+class FindEventsCommand {
 
     constructor(program) {
         this.program = program;
@@ -30,10 +32,10 @@ class FindEntitiesCommand {
 
     execute(options) {
         const profile = loadProfile(options.profile);
-        debug('%s.executeFindEntities()', profile.name);
+        debug('%s.executeFindEvents()', profile.name);
 
         const graph = new Graph(profile.url);
-        graph.findEntities(profile.token, options.filter, options.sort, options.limit, options.skip)
+        graph.findEvents(profile.token, options.filter, options.sort, options.limit, options.skip)
             .then((response) => {
                 if (response.success) {
                     let result = response.events;
@@ -125,7 +127,84 @@ class PublishEventsCommand {
     }
 }
 
+class GetEntityCommand {
+
+    constructor(program) {
+        this.program = program;
+    }
+
+    execute(entityId, options) {
+        const profile = loadProfile(options.profile);
+        debug('%s.executeGetEntity(%s)', profile.name, entityId);
+
+        const graph = new Graph(profile.url);
+        graph.getEntity(profile.token, entityId)
+            .then((response) => {
+                if (response.success) {
+                    let result = response.entity;
+                    if (options.query)
+                        result = filterObject(result, options);
+
+                    printSuccess(JSON.stringify(result, null, 2), options);
+                }
+                else {
+                    printError(`Failed to get entity: ${response.status} ${response.message}`, options);
+                }
+            })
+            .catch((err) => {
+                printError(`Failed to get entity: ${err.status} ${err.message}`, options);
+            });
+    }
+}
+
+class QueryGraphCommand {
+
+    constructor(program) {
+        this.program = program;
+    }
+
+    execute(query, options) {
+        const profile = loadProfile(options.profile);
+        debug('%s.executeQueryGraph(%s)', profile.name, query);
+
+        const graph = new Graph(profile.url);
+        graph.query(profile.token, query)
+            .then((response) => {
+                if (response.success) {
+                    const result = response.result;
+                    const rows = result.values || [];
+
+                    debug('query result:', result);
+
+                    if (options.json) {
+                        printSuccess(JSON.stringify(result, null, 2), options);
+                    }
+                    else {
+                        const table = new Table(
+                            result.columns.map(c => ({ value: c, headerColor : 'cyan', })), 
+                            rows,
+                            { defaultValue: '---'});
+                        
+                        printSuccess(query);
+                        console.log(table.render());
+                        console.log();
+                        printSuccess(`Found ${rows.length} results in ${result.took} milliseconds`, options); 
+                    }
+                }
+                else {
+                    printError(`Failed to execute query: ${response.status} ${response.message}`, options);
+                }
+            })
+            .catch((err) => {
+                debug(err);
+                printError(`Failed to execute query: ${err.status} ${err.message}`, options);
+            });
+    }
+}
+
 module.exports = {
-    FindEntitiesCommand,
+    FindEventsCommand,
     PublishEventsCommand,
+    GetEntityCommand,
+    QueryGraphCommand,
 };

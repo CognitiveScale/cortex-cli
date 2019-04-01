@@ -25,8 +25,10 @@ const createEndpoints = (baseUri) => {
     return {
         profiles: `${baseUri}/v3/graph/profiles`,
         schemas: `${baseUri}/v3/graph/profiles/schemas`,
-        entities: `${baseUri}/v3/graph/events/entities`,
+        events: `${baseUri}/v3/graph/events`,
+        entities: `${baseUri}/v3/graph/entities`,
         track: `${baseUri}/v3/graph/events/track`,
+        query: `${baseUri}/v3/graph/query`,
     }
 };
 
@@ -116,11 +118,11 @@ class Graph {
             });
     }
 
-    findEntities(token, filter, sort, limit, skip) {
-        debug('findEntities() => GET %s', this.endpoints.entities);
+    findEvents(token, filter, sort, limit, skip) {
+        debug('findEvents() => GET %s', this.endpoints.events);
 
         const req = request
-            .get(this.endpoints.entities)
+            .get(this.endpoints.events)
             .set('Authorization', `Bearer ${token}`)
             .set('x-cortex-proxy-notify', true);
 
@@ -150,10 +152,10 @@ class Graph {
     }
 
     publishEntities(token, entityEvents) {
-        debug('publishEntities() => POST %s', this.endpoints.entities);
+        debug('publishEntities() => POST %s', this.endpoints.events);
 
         return request
-            .post(this.endpoints.entities)
+            .post(this.endpoints.events)
             .use(throttle.plugin())
             .set('Authorization', `Bearer ${token}`)
             .set('x-cortex-proxy-notify', true)
@@ -220,6 +222,51 @@ class Graph {
                 console.error(chalk.blue('Request proxied to cloud.'));
             if (res.ok) {
                 return {success: true, message: res.body.message || res.body};
+            }
+            return {success: false, message: res.body, status: res.status};
+        })
+        .catch((err) => {
+            return constructError(err);
+        });
+    }
+
+    getEntity(token, entityId) {
+        const endpoint = `${this.endpoints.entities}/${entityId}`;
+        debug('getEntity(%s) => GET %s', entityId, endpoint);
+
+        const req = request
+            .get(endpoint)
+            .set('Authorization', `Bearer ${token}`)
+            .set('x-cortex-proxy-notify', true);
+
+        return req.then((res) => {
+            if (Boolean(_.get(res, 'headers.x-cortex-proxied', false)))
+                console.error(chalk.blue('Request proxied to cloud.'));
+            if (res.ok) {
+                return {success: true, entity: res.body};
+            }
+            return {success: false, message: res.body, status: res.status};
+        })
+        .catch((err) => {
+            return constructError(err);
+        });
+    }
+
+    query(token, query) {
+        const endpoint = this.endpoints.query;
+        debug('queryGraph(%s) => POST %s', query, endpoint);
+
+        const req = request
+            .post(endpoint)
+            .set('Authorization', `Bearer ${token}`)
+            .set('x-cortex-proxy-notify', true)
+            .send({ query })
+
+        return req.then((res) => {
+            if (Boolean(_.get(res, 'headers.x-cortex-proxied', false)))
+                console.error(chalk.blue('Request proxied to cloud.'));
+            if (res.ok) {
+                return {success: true, result: res.body};
             }
             return {success: false, message: res.body, status: res.status};
         })
