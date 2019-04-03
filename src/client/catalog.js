@@ -126,23 +126,8 @@ module.exports = class Catalog {
                 const servicesList = response.agent.inputs
                     .filter(i => i.signalType === 'Service')
                     .map(i => ({ ...i, url: `${urlBase}/${i.name}` }))
-<<<<<<< Updated upstream
-                    .map(i => ({ ...i, formated_types:
-                    (i.parameters === null ? null
-                     : i.parameters.$ref != null ? `$ref:${i.parameters.$ref}` 
-                     : i.parameters
-                    .map(o => {
-                        if(o.type==='array'){
-                            return (`Name: ${o.name}, Type: ${o.type}<${o.format}>`);
-                        }
-                        else{
-                           return (`Name: ${o.name}, Type: ${o.type}`);
-                        }
-                        }).join('\n'))}));
-=======
                     .map(i => ({ ...i, formatted_types:
                     formatAllServiceInputParameters(i.parameters)}));
->>>>>>> Stashed changes
                 return { success: true, services: servicesList };
             } else {
                 return response;
