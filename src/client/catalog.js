@@ -18,7 +18,7 @@ const request = require('superagent');
 const debug = require('debug')('cortex:cli');
 const _ = require('lodash');
 const chalk = require('chalk');
-const { constructError } = require('../commands/utils');
+const { constructError, formatAllServiceInputParameters } = require('../commands/utils');
 const AGENTS_API_VERSION = 'v3';
 
 const createEndpoints = (baseUri) => {
@@ -126,18 +126,8 @@ module.exports = class Catalog {
                 const servicesList = response.agent.inputs
                     .filter(i => i.signalType === 'Service')
                     .map(i => ({ ...i, url: `${urlBase}/${i.name}` }))
-                    .map(i => ({ ...i, formated_types:
-                    (i.parameters === null ? null
-                     : i.parameters.$ref != null ? `$ref:${i.parameters.$ref}` 
-                     : i.parameters
-                    .map(o => {
-                        if(o.type==='array'){
-                            return (`Name: ${o.name}, Type: ${o.type}<${o.format}>`);
-                        }
-                        else{
-                           return (`Name: ${o.name}, Type: ${o.type}`);
-                        }
-                        }).join('\n'))}));
+                    .map(i => ({ ...i, formatted_types:
+                    formatAllServiceInputParameters(i.parameters)}));
                 return { success: true, services: servicesList };
             } else {
                 return response;

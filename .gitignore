@@ -97,9 +97,3 @@ test/cortex/local.json
 
 dist/
 
-package-lock.json
-src/commands/test_json.json
-src/commands/test_yaml.yaml
-src/commands/.DS_Store
-.DS_Store
-src/.DS_Store

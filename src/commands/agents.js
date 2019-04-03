@@ -312,7 +312,7 @@ module.exports.ListServicesCommand = class ListServicesCommand{
                     const tableSpec = [
                         {column: 'Service Name', field: 'name', width: 25},
                         {column: 'Service Endpoint URL', field: 'url', width: 115},
-                        {column: 'Parameters', field: 'formated_types', width: 65}
+                        {column: 'Parameters', field: 'formatted_types', width: 65}
                     ];
                     printTable(tableSpec, result);
                 }
