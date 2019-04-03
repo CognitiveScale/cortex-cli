@@ -96,3 +96,5 @@ test/cortex/local.json
 .local/
 
 dist/
+
+package-lock.json
