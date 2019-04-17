@@ -19,10 +19,10 @@ const debug = require('debug')('cortex:cli');
 const split = require('split');
 const fs = require('fs');
 const Table = require('tty-table');
+const ProgressBar = require('progress');
 const { loadProfile } = require('../config');
 const { Graph } = require('../client/graph');
-const { printSuccess, printError, filterObject, formatValidationPath, printTable } = require('./utils');
-
+const { printSuccess, printError, filterObject, countLinesInFile, printTable } = require('./utils');
 
 class FindEventsCommand {
 
@@ -80,11 +80,11 @@ class PublishEventsCommand {
         let eventCount = 0;
         const errors = [];
 
-        const publishEvent = async (event) => {
+        const publishEvent = async (event, bar) => {
             if (!event) return;
 
             debug('publishing event: ', event);
-            ++eventCount;
+            eventCount++;
 
             let rs;
             if (options.tracking) {
@@ -95,12 +95,13 @@ class PublishEventsCommand {
             }
 
             if (!rs.success) errors.push(rs.message);
+            bar.tick();
         };
 
-        const processStream = (stream, resolve, reject) => {
+        const processStream = (stream, resolve, reject, bar) => {
             const tasks = [];
             stream.pipe(split((s) => JSON.parse(JSON.stringify(s))))
-                .on('data', (event) => tasks.push(publishEvent(event)))
+                .on('data', (event) => tasks.push(publishEvent(event, bar)))
                 .on('error', (err) => reject(err))
                 .on('end', () => Promise.all(tasks).then(() => {
                     printSuccess(`Processed ${eventCount} events with ${errors.length} errors`);
@@ -112,10 +113,19 @@ class PublishEventsCommand {
         };
 
         if (file) {
-            return new Promise((resolve, reject) => {
-                const stream = fs.createReadStream(file).pipe(split((s) => JSON.parse(JSON.stringify(s))));
-                processStream(stream, resolve, reject);
-            });
+            return countLinesInFile(file)
+                .then((numEvents) => {
+                    printSuccess(`Publishing ${numEvents} events from file ${file}`);
+                    const bar = new ProgressBar(
+                        'publishing [:bar] :current/:total :rate evt/s :elapsed s', 
+                        { total: numEvents, width: 65 }
+                    );
+
+                    return new Promise((resolve, reject) => {
+                        const stream = fs.createReadStream(file);
+                        processStream(stream, resolve, reject, bar);
+                    });
+                });
         }
         else {
             return new Promise((resolve, reject) => {

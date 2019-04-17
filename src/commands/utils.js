@@ -208,3 +208,14 @@ module.exports.formatValidationPath = (p) => {
     return res;
 };
 
+module.exports.countLinesInFile = (filePath) => {
+    return new Promise((resolve, reject) => {
+        let count = 0;
+        fs.createReadStream(filePath)
+            .on('error', e => reject(e))
+            .on('data', chunk => {
+                for (let i=0; i < chunk.length; ++i) if (chunk[i] == 10) count++;
+            })
+            .on('end', () => resolve(count));
+    });
+};
