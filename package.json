@@ -42,6 +42,7 @@
     "js-yaml": "3.10.0",
     "jsonwebtoken": "8.3.0",
     "lodash": "4.17.11",
+    "moment": "^2.24.0",
     "npm-registry-fetch": "3.2.0",
     "progress": "2.0.0",
     "request": "2.88.0",

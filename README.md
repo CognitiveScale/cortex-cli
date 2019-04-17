@@ -194,3 +194,11 @@ cortex agents list --query "[].{name: name, title: title}"
 - [x] graph
     - [x] find-events
     - [x] publish
+- [x] experiments
+    - [x] list
+    - [x] describe
+    - [x] delete
+    - [x] list-runs
+    - [x] describe-runs
+    - [x] delete-run
+    - [x] download-artifact
