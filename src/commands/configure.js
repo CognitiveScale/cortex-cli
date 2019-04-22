@@ -64,6 +64,10 @@ module.exports.ConfigureCommand = class {
             debug('account: %s', account);
             debug('username: %s', username);
 
+            if (!cortexUrl.match(/^[a-zA-Z]+:\/\//)) {
+                cortexUrl = 'http://' + cortexUrl;
+            }
+
             if (!cortexUrl) {
                 console.error(chalk.red('Cortex URL must be provided'));
                 return;

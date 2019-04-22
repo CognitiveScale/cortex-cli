@@ -299,7 +299,7 @@ module.exports.ListServicesCommand = class ListServicesCommand{
 
     execute(agentName, options) {
         const profile = loadProfile(options.profile);
-        debug('%s.listServices(%s)', profile.name, agentName); 
+        debug('%s.listServices(%s)', profile.name, agentName);
         
         const catalog = new Catalog(profile.url);
         catalog.listServices(profile.token, agentName, profile).then((response) => {
