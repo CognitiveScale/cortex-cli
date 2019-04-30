@@ -21,7 +21,7 @@ const prompt = require('co-prompt');
 const chalk = require('chalk');
 const Auth = require('../client/auth');
 const { readConfig, defaultConfig } = require('../config');
-const { printSuccess, printError } = require('./utils');
+const { printSuccess, printError } = require('./utils/baseutils');
 
 const DEFAULT_CORTEX_URL = 'https://api.cortex.insights.ai';
 

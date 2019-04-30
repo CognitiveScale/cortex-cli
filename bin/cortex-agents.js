@@ -45,7 +45,7 @@ const {
     ListTaskByActivation,
 } = require('../src/commands/actions');
 
-const { printError } = require('../src/commands/utils');
+const { printError } = require('../src/commands/utils/baseutils');
 
 program.description('Work with Cortex Agents');
 

@@ -13,10 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 const request = require('superagent');
+const { getRequest }  = require('../commands/utils/apiutils');
+
 const debug = require('debug')('cortex:cli');
-const { constructError } = require('../commands/utils');
+const { constructError } = require('../commands/utils/baseutils');
 const Actions = require('./actions');
 
 module.exports = class Jobs {
@@ -28,8 +29,7 @@ module.exports = class Jobs {
 
     listJobs(token) {
         const endpoint = `${this.endpoint}`;
-        return request
-            .get(endpoint)
+        return getRequest(endpoint)
             .set('Authorization', `Bearer ${token}`)
             .then((res) => {
                 if (res.ok) {
@@ -44,8 +44,7 @@ module.exports = class Jobs {
 
     describeJob(token, name) {
         const endpoint = `${this.endpoint}/${name}`;
-        return request
-            .get(endpoint)
+        return getRequest(endpoint)
             .set('Authorization', `Bearer ${token}`)
             .then((res) => {
                 if (res.ok) {
@@ -60,8 +59,7 @@ module.exports = class Jobs {
 
     jobStatus(token, jobDefinition) {
         const endpoint = `${this.endpoint}/${jobDefinition}/stats`;
-        return request
-            .get(endpoint)
+        return getRequest(endpoint)
             .set('Authorization', `Bearer ${token}`)
             .then((res) => {
                 if (res.ok) {

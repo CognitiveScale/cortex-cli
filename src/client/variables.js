@@ -15,9 +15,11 @@
  */
 
 const debug = require('debug')('cortex:cli');
-const request = require('superagent');
 
-const { constructError } = require('../commands/utils');
+const request = require('superagent');
+const { getRequest }  = require('../commands/utils/apiutils');
+
+const { constructError } = require('../commands/utils/baseutils');
 
 module.exports = class Variables {
 
@@ -29,8 +31,7 @@ module.exports = class Variables {
     listVariables(token) {
         const endpoint = `${this.endpoint}?list=true`;
         debug('listVariables => %s', endpoint);
-        return request
-            .get(endpoint)
+        return getRequest(endpoint)
             .set('Authorization', `Bearer ${token}`)
             .set('x-cortex-proxy-notify', true)
             .then((res) => {
@@ -48,8 +49,7 @@ module.exports = class Variables {
         const endpoint = `${this.endpoint}/${keyName}`;
         const body = {}
         debug('readVariable($s) => %s', keyName, endpoint);
-        return request
-            .get(endpoint)
+        return getRequest(endpoint)
             .set('Authorization', `Bearer ${token}`)
             .set('x-cortex-proxy-notify', true)
             .then((res) => {

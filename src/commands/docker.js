@@ -16,9 +16,9 @@
 
 const debug = require('debug')('cortex:cli');
 const {loadProfile} = require('../config');
-const {printSuccess, printError} = require('./utils');
+const {printSuccess, printError} = require('./utils/baseutils');
 const Actions = require('../client/actions');
-const { callMe } = require('../commands/utils');
+const { callMe } = require('../commands/utils/baseutils');
 
 module.exports.DockerLoginCommand = class {
 

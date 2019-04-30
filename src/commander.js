@@ -18,7 +18,7 @@ const commander = require('commander');
 const identity = require('lodash/fp/identity');
 const merge = require('lodash/fp/merge');
 
-const { exportDoc } = require('./commands/utils.js');
+const { exportDoc } = require('./commands/utils/baseutils');
 
 // Monkey-patch `commander` library to keep track of when an action executes
 commander.Command.prototype._action = commander.Command.prototype.action;

@@ -16,11 +16,14 @@
 
 const url = require('url');
 const chalk = require('chalk');
+
 const request = require('superagent');
+const { getRequest }  = require('../commands/utils/apiutils');
+
 const debug = require('debug')('cortex:cli');
 const _ = require('lodash');
 const jsonwebtoken = require('jsonwebtoken');
-const { constructError, callMe } = require('../commands/utils');
+const { constructError, callMe } = require('../commands/utils/baseutils');
 
 module.exports = class Actions {
 
@@ -96,8 +99,7 @@ module.exports = class Actions {
 
     listActions(token) {
         debug('listActions() => %s', this.endpointV3);
-        return request
-            .get(this.endpointV3)
+        return getRequest(this.endpointV3)
             .set('Authorization', `Bearer ${token}`)
             .then((res) => {
                 if (res.ok) {
@@ -114,8 +116,7 @@ module.exports = class Actions {
     describeAction(token, actionName) {
         const endpoint = `${this.endpointV3}/${actionName}`;
         debug('describeAction(%s) => %s', actionName, endpoint);
-        return request
-            .get(endpoint)
+        return getRequest(endpoint)
             .set('Authorization', `Bearer ${token}`)
             .then((res) => {
                 if (res.ok) {
@@ -152,8 +153,7 @@ module.exports = class Actions {
     taskLogs(token, jobId, taskId) {
         const canonicalJobId = Actions.getCanonicalJobId(jobId);
         const endpoint = `${this.endpointJobsV3}/${canonicalJobId}/tasks/${taskId}/logs`;
-        return request
-            .get(endpoint)
+        return getRequest(endpoint)
             .set('Authorization', `Bearer ${token}`)
             .accept('application/json')
             .then((res) => {
@@ -188,8 +188,7 @@ module.exports = class Actions {
     taskStatus(token, jobId, taskId) {
         const canonicalJobId = Actions.getCanonicalJobId(jobId);
         const endpoint = `${this.endpointJobsV3}/${canonicalJobId}/tasks/${taskId}/status`;
-        return request
-            .get(endpoint)
+        return getRequest(endpoint)
             .set('Authorization', `Bearer ${token}`)
             .accept('application/json')
             .then((res) => {
@@ -209,8 +208,7 @@ module.exports = class Actions {
     jobListTasks(token, jobId) {
         const canonicalJobId = Actions.getCanonicalJobId(jobId);
         const endpoint = `${this.endpointJobsV3}/${canonicalJobId}/tasks`;
-        return request
-            .get(endpoint)
+        return getRequest(endpoint)
             .set('Authorization', `Bearer ${token}`)
             .accept('application/json')
             .then((res) => {
@@ -227,8 +225,7 @@ module.exports = class Actions {
     taskStats(token, jobId) {
         const canonicalJobId = Actions.getCanonicalJobId(jobId);
         const endpoint = `${this.endpointJobsV3}/${canonicalJobId}/stats`;
-        return request
-            .get(endpoint)
+        return getRequest(endpoint)
             .set('Authorization', `Bearer ${token}`)
             .accept('application/json')
             .then((res) => {
@@ -244,8 +241,7 @@ module.exports = class Actions {
 
     listTasksByActivation(token, activationId) {
         const endpoint = `${this.endpointV3}/${activationId}`;
-        return request
-            .get(endpoint)
+        return getRequest(endpoint)
             .set('Authorization', `Bearer ${token}`)
             .accept('application/json')
             .then((res) => {
@@ -260,8 +256,8 @@ module.exports = class Actions {
     }
 
     getConfig(token) {
-        return request
-            .get(_.join([this.endpointV3, '_config'], '/'))
+        const endpoint = `${this.endpointV3}/_config`;
+        return getRequest(endpoint)
             .set('Authorization', `Bearer ${token}`)
             .then((res) => {
                 if (res.ok) {

@@ -19,7 +19,7 @@ const yeoman = require('yeoman-environment');
 const debug = require('debug')('cortex:cli');
 const { loadProfile } = require('../config');
 const Catalog = require('../client/catalog');
-const { printSuccess, printError, filterObject, parseObject, printTable } = require('./utils');
+const { printSuccess, printError, filterObject, parseObject, printTable } = require('./utils/baseutils');
 
 function _formatpath(p){
     let cnt=0, res = '';

@@ -22,7 +22,7 @@ const map = require('lodash/fp/map');
 
 const { loadProfile } = require('../config');
 const Variables = require('../client/variables');
-const { printSuccess, printError, filterObject, parseObject, printTable } = require('./utils');
+const { printSuccess, printError, filterObject, parseObject, printTable } = require('./utils/baseutils');
 
 module.exports.ListVariablesCommand = class {
 

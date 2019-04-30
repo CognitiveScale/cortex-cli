@@ -13,12 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 const request = require('superagent');
+const { getRequest }  = require('../commands/utils/apiutils');
+
 const debug = require('debug')('cortex:cli');
 const _ = require('lodash');
 const chalk = require('chalk');
-const { constructError, formatAllServiceInputParameters } = require('../commands/utils');
+const { constructError, formatAllServiceInputParameters } = require('../commands/utils/baseutils');
 const AGENTS_API_VERSION = 'v3';
 
 const createEndpoints = (baseUri) => {
@@ -60,8 +61,7 @@ module.exports = class Catalog {
 
     listSkills(token) {
         debug('listSkills() => %s', this.endpoints.skills);
-        return request
-            .get(this.endpoints.skills)
+        return getRequest(this.endpoints.skills)
             .set('Authorization', `Bearer ${token}`)
             .set('x-cortex-proxy-notify', true)
             .then((res) => {
@@ -80,8 +80,7 @@ module.exports = class Catalog {
     describeSkill(token, skillName) {
         const endpoint = `${this.endpoints.skills}/${skillName}`;
         debug('describeSkill(%s) => %s', skillName, endpoint);
-        return request
-            .get(endpoint)
+        return getRequest(endpoint)
             .set('Authorization', `Bearer ${token}`)
             .set('x-cortex-proxy-notify', true)
             .then((res) => {
@@ -100,9 +99,10 @@ module.exports = class Catalog {
     }
 
     listAgents(token) {
-        debug('listAgents() => %s', this.endpoints.agents);
-        return request
-            .get(this.endpoints.agents)
+        const endpoint = this.endpoints.agents;
+        debug('listAgents() => %s', endpoint);
+        
+        return getRequest(endpoint)
             .set('Authorization', `Bearer ${token}`)
             .set('x-cortex-proxy-notify', true)
             .then((res) => {
@@ -158,8 +158,7 @@ module.exports = class Catalog {
     describeAgent(token, agentName) {
         const endpoint = `${this.endpoints.agents}/${agentName}`;
         debug('describeAgent(%s) => %s', agentName, endpoint);
-        return request
-            .get(endpoint)
+        return getRequest(endpoint)
             .set('Authorization', `Bearer ${token}`)
             .set('x-cortex-proxy-notify', true)
             .then((res) => {
@@ -181,8 +180,7 @@ module.exports = class Catalog {
         const endpoint = `${this.endpoints.agentVersions}/${agentName}`;
         debug('describeAgentVersions(%s) => %s', agentName, endpoint);
 
-        return request
-            .get(endpoint)
+        return getRequest(endpoint)
             .set('Authorization', `Bearer ${token}`)
             .set('x-cortex-proxy-notify', true)
             .then((res) => {
@@ -224,8 +222,7 @@ module.exports = class Catalog {
     describeType(token, typeName) {
         const endpoint = `${this.endpoints.types}/${typeName}`;
         debug('describeType(%s) => %s', typeName, endpoint);
-        return request
-            .get(endpoint)
+        return getRequest(endpoint)
             .set('Authorization', `Bearer ${token}`)
             .set('x-cortex-proxy-notify', true)
             .then((res) => {
@@ -244,9 +241,9 @@ module.exports = class Catalog {
     }
 
     listTypes(token) {
-        debug('listTypes() => %s', this.endpoints.types);
-        return request
-            .get(this.endpoints.types)
+        const endpoint = this.endpoints.types;
+        debug('listTypes() => %s', endpoint);
+        return getRequest(endpoint)
             .set('Authorization', `Bearer ${token}`)
             .set('x-cortex-proxy-notify', true)
             .then((res) => {

@@ -20,7 +20,7 @@ const { loadProfile } = require('../config');
 const Catalog = require('../client/catalog');
 const Agents = require('../client/agents');
 const _ = require('lodash');
-const { printSuccess, printError, filterObject, parseObject, printTable } = require('./utils');
+const { printSuccess, printError, filterObject, parseObject, printTable } = require('./utils/baseutils');
 module.exports.SaveAgentCommand = class SaveAgentCommand {
 
     constructor(program) {

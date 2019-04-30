@@ -25,12 +25,15 @@ const isInstalledGlobally = require('is-installed-globally');
 const keys = require('lodash/fp/keys');
 const last = require('lodash/fp/last');
 const npmFetch = require('npm-registry-fetch');
+
 const request = require('superagent');
+const { getRequest }  = require('./commands/utils/apiutils');
+
 const semver = require('semver');
 const uniq = require('lodash/fp/uniq');
 
 const { loadProfile } = require('./config');
-const { printError } = require('../src/commands/utils');
+const { printError } = require('./commands/utils/baseutils');
 
 const pkg = findPackageJson(__dirname).next().value;
 
@@ -49,8 +52,7 @@ function getAvailableVersions(name) {
 function getRequiredVersion(profile) {
     const endpoint = `${profile.url}/v3/catalog/compatibility/applications/cortex-cli`;
     debug('getRequiredVersion => %s', endpoint);
-    return request
-        .get(endpoint)
+    return getRequest(endpoint)
         .set('Authorization', `Bearer ${profile.token}`)
         .set('x-cortex-proxy-notify', true)
         .then((res) => {

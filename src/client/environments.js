@@ -13,10 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 const request = require('superagent');
+const { getRequest }  = require('../commands/utils/apiutils');
+
 const debug = require('debug')('cortex:cli');
-const { constructError } = require('../commands/utils');
+const { constructError } = require('../commands/utils/baseutils');
 
 module.exports = class Environments {
 
@@ -27,8 +28,7 @@ module.exports = class Environments {
 
     listEnvironments(token) {
         const endpoint = `${this.endpoint}`;
-        return request
-            .get(endpoint)
+        return getRequest(endpoint)
             .set('Authorization', `Bearer ${token}`)
             .then((res) => {
                 if (res.ok) {
@@ -77,8 +77,7 @@ module.exports = class Environments {
     describeEnvironment(token, environmentName) {
         const endpoint = `${this.endpoint}/${environmentName}`;
         debug('describeEnvironment(%s) => %s', environmentName, endpoint);
-        return request
-            .get(endpoint)
+        return getRequest(endpoint)
             .set('Authorization', `Bearer ${token}`)
             .then((res) => {
                 if (res.ok) {
@@ -96,8 +95,7 @@ module.exports = class Environments {
     listInstances(token, environmentName) {
         const endpoint = `${this.endpoint}/${environmentName}/instances`;
         debug('listInstances(%s) => %s', environmentName, this.endpoint);
-        return request
-            .get(endpoint)
+        return getRequest(endpoint)
             .set('Authorization', `Bearer ${token}`)
             .then((res) => {
                 if (res.ok) {

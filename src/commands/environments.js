@@ -20,7 +20,7 @@ const debug = require('debug')('cortex:cli');
 const { loadProfile } = require('../config');
 const Environments = require('../client/environments');
 const Content = require('../client/content');
-const { printSuccess, printError, filterObject, parseObject, printTable } = require('./utils');
+const { printSuccess, printError, filterObject, parseObject, printTable } = require('./utils/baseutils');
 const _ = require('lodash/object');
 module.exports.ListEnvironments = class ListEnvironments {
 

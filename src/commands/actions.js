@@ -19,7 +19,7 @@ const uuid = require('uuid/v4');
 const debug = require('debug')('cortex:cli');
 const {loadProfile} = require('../config');
 const Actions = require('../client/actions');
-const {printSuccess, printError, filterObject, parseObject, printTable} = require('./utils');
+const {printSuccess, printError, filterObject, parseObject, printTable} = require('./utils/baseutils');
 
 module.exports.ListActionsCommand = class {
 

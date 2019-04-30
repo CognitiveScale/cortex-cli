@@ -13,10 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 const request = require('superagent');
+const { getRequest }  = require('../commands/utils/apiutils');
+
 const debug = require('debug')('cortex:cli');
-const { constructError } = require('../commands/utils');
+const { constructError } = require('../commands/utils/baseutils');
 
 module.exports = class Accounts {
 
@@ -30,8 +31,7 @@ module.exports = class Accounts {
     listGroups(token) {
         const endpoint = this.groupsEndpoint;
         debug('listGroups => %s', endpoint);
-        return request
-            .get(endpoint)
+        return getRequest(endpoint)
             .set('Authorization', `Bearer ${token}`)
             .set('x-cortex-proxy-notify', true)
             .then((res) => {
@@ -48,8 +48,7 @@ module.exports = class Accounts {
     describeGroup(token, groupName) {
         const endpoint = `${this.groupsEndpoint}/${groupName}`;
         debug('describeGroup($s) => %s', groupName, endpoint);
-        return request
-            .get(endpoint)
+        return getRequest(endpoint)
             .set('Authorization', `Bearer ${token}`)
             .set('x-cortex-proxy-notify', true)
             .then((res) => {

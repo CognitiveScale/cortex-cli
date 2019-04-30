@@ -18,7 +18,7 @@ const fs = require('fs');
 const debug = require('debug')('cortex:cli');
 const { loadProfile } = require('../config');
 const Catalog = require('../client/catalog');
-const { printSuccess, printError, filterObject, parseObject, printTable } = require('./utils');
+const { printSuccess, printError, filterObject, parseObject, printTable } = require('./utils/baseutils');
 
 module.exports.SaveTypeCommand = class SaveTypeCommand {
 

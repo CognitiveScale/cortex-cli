@@ -20,7 +20,7 @@ const debug = require('debug')('cortex:cli');
 const { loadProfile } = require('../config');
 const Connections = require('../client/connections');
 const Content = require('../client/content');
-const { printSuccess, printError, filterObject, parseObject, printTable } = require('./utils');
+const { printSuccess, printError, filterObject, parseObject, printTable } = require('./utils/baseutils');
 
 module.exports.ListConnections = class ListConnections {
 

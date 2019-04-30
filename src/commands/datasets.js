@@ -20,7 +20,7 @@ const es = require('event-stream');
 const yeoman = require('yeoman-environment');
 const { loadProfile } = require('../config');
 const Datasets = require('../client/datasets');
-const { printSuccess, printError, filterObject, parseObject, printTable } = require('./utils');
+const { printSuccess, printError, filterObject, parseObject, printTable } = require('./utils/baseutils');
 
 module.exports.ListDatasets = class ListDatasets {
 

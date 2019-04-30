@@ -13,10 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 const request = require('superagent');
+const { getRequest }  = require('../commands/utils/apiutils');
+
 const debug = require('debug')('cortex:cli');
-const { constructError } = require('../commands/utils');
+const { constructError } = require('../commands/utils/baseutils');
 
 module.exports = class Tasks {
 
@@ -27,8 +28,7 @@ module.exports = class Tasks {
 
     listTasks(token) {
         const endpoint = `${this.endpoint}`;
-        return request
-            .get(endpoint)
+        return getRequest(endpoint)
             .set('Authorization', `Bearer ${token}`)
             .then((res) => {
                 if (res.ok) {
@@ -43,8 +43,7 @@ module.exports = class Tasks {
 
     taskLogs(token, taskId) {
         const endpoint = `${this.endpoint}/${taskId}/logs`;
-        return request
-            .get(endpoint)
+        return getRequest(endpoint)
             .set('Authorization', `Bearer ${token}`)
             .then((res) => {
                 if (res.ok) {
@@ -76,8 +75,7 @@ module.exports = class Tasks {
 
     describeTask(token, taskId) {
         const endpoint = `${this.endpoint}/${taskId}`;
-        return request
-            .get(endpoint)
+        return getRequest(endpoint)
             .set('Authorization', `Bearer ${token}`)
             .then((res) => {
                 if (res.ok) {

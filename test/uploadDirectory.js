@@ -16,7 +16,7 @@
 
 const commander = require('commander');
 const { UploadContent } = require('../src/commands/content');
-const { humanReadableFileSize } = require('../src/commands/utils');
+const { humanReadableFileSize } = require('../src/commands/utils/baseutils');
 const chai = require('chai');
 const expect = chai.expect;
 

@@ -13,12 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 const request = require('superagent');
+const { getRequest }  = require('../commands/utils/apiutils');
+
 const debug = require('debug')('cortex:cli');
 const _ = require('lodash');
 const chalk = require('chalk');
-const { constructError } = require('../commands/utils');
+const { constructError } = require('../commands/utils/baseutils');
 
 module.exports = class Agents {
 
@@ -52,8 +53,7 @@ module.exports = class Agents {
     getActivation(token, activationId) {
         const endpoint = `${this.endpointV3}/activations/${activationId}`;
         debug('getActivation(%s) => %s', activationId, endpoint);
-        return request
-            .get(endpoint)
+        return getRequest(endpoint)
             .set('Authorization', `Bearer ${token}`)
             .set('x-cortex-proxy-notify', true)
             .then((res) => {
@@ -73,8 +73,7 @@ module.exports = class Agents {
         let endpoint = `${this.endpointV3}/instances/${instanceId}/activations`;
         debug('listActivations(%s, %s) => %s', instanceId, environmentName, endpoint);
         if (environmentName) endpoint = `${endpoint}?environmentName=${environmentName}`;
-        return request
-            .get(endpoint)
+        return getRequest(endpoint)
             .set('Authorization', `Bearer ${token}`)
             .set('x-cortex-proxy-notify', true)
             .then((res) => {
@@ -94,8 +93,7 @@ module.exports = class Agents {
         let endpoint = `${this.endpoint}/snapshots/${agentName}`;
         debug('listAgentSnapshots(%s, %s) => %s', agentName, environmentName, endpoint);
         if (environmentName) endpoint = `${endpoint}?environmentName=${environmentName}`;
-        return request
-            .get(endpoint)
+        return getRequest(endpoint)
             .set('Authorization', `Bearer ${token}`)
             .set('x-cortex-proxy-notify', true)
             .then((res) => {
@@ -117,8 +115,7 @@ module.exports = class Agents {
         debug('listSnapshotInstances(%s, %s) => (%s)', snapshotId, environmentName, endpoint);
         if (environmentName) endpoint = `${endpoint}&environmentName=${environmentName}`;
 
-        return request
-            .get(endpoint)
+        return getRequest(endpoint)
             .set('Authorization', `Bearer ${token}`)
             .set('x-cortex-proxy-notify', true)
             .then((res) => {
@@ -138,8 +135,7 @@ module.exports = class Agents {
         let endpoint = `${this.endpoint}/snapshots/${snapshotId}?deps=true`;
         debug('describeAgentSnapshot(%s, %s) => %s', snapshotId, environmentName, endpoint);
         if (environmentName) endpoint = `${endpoint}&environmentName=${environmentName}`;
-        return request
-            .get(endpoint)
+        return getRequest(endpoint)
             .set('Authorization', `Bearer ${token}`)
             .set('x-cortex-proxy-notify', true)
             .then((res) => {
@@ -181,8 +177,7 @@ module.exports = class Agents {
         debug('getAgentInstances(%s, %s) => %s', agentName, environmentName, endpoint);
         if (environmentName) endpoint = `${endpoint}?environmentName=${environmentName}`;
 
-        return request
-            .get(endpoint)
+        return getRequest(endpoint)
             .set('Authorization', `Bearer ${token}`)
             .set('x-cortex-proxy-notify', true)
             .then((res) => {
@@ -224,8 +219,7 @@ module.exports = class Agents {
     getAgentInstance(token, instanceId) {
         const endpoint = `${this.endpoint}/instances/${instanceId}`;
         debug('getAgentInstance => %s', endpoint);
-        return request
-            .get(endpoint)
+        return getRequest(endpoint)
             .set('Authorization', `Bearer ${token}`)
             .set('x-cortex-proxy-notify', true)
             .then((res) => {
@@ -285,8 +279,7 @@ module.exports = class Agents {
     listTriggers(token) {
         const endpoint = `${this.endpoint}/triggers`;
         debug('listTriggers => %s', endpoint);
-        return request
-            .get(endpoint)
+        return getRequest(endpoint)
             .set('Authorization', `Bearer ${token}`)
             .set('x-cortex-proxy-notify', true)
             .then((res) => {

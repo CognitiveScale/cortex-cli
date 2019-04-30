@@ -13,10 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 const request = require('superagent');
+const { getRequest }  = require('../commands/utils/apiutils');
+
 const debug = require('debug')('cortex:cli');
-const { constructError } = require('../commands/utils');
+const { constructError } = require('../commands/utils/baseutils');
 
 module.exports = class Connections {
 
@@ -27,8 +28,7 @@ module.exports = class Connections {
 
     listConnections(token) {
         const endpoint = `${this.endpoint}`;
-        return request
-            .get(endpoint)
+        return getRequest(endpoint)
             .set('Authorization', `Bearer ${token}`)
             .then((res) => {
                 if (res.ok) {
@@ -61,8 +61,7 @@ module.exports = class Connections {
     describeConnection(token, connectionName) {
         const endpoint = `${this.endpoint}/${connectionName}`;
         debug('describeConnection(%s) => %s', connectionName, endpoint);
-        return request
-            .get(endpoint)
+        return getRequest(endpoint)
             .set('Authorization', `Bearer ${token}`)
             .then((res) => {
                 if (res.ok) {
@@ -97,8 +96,7 @@ module.exports = class Connections {
 
     listConnectionsTypes(token) {
         const endpoint = `${this.endpoint}/types`;
-        return request
-            .get(endpoint)
+        return getRequest(endpoint)
             .set('Authorization', `Bearer ${token}`)
             .then((res) => {
                 if (res.ok) {

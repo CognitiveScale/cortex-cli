@@ -13,10 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 const request = require('superagent');
+const { getRequest }  = require('../commands/utils/apiutils');
+
 const debug = require('debug')('cortex:cli');
-const { constructError } = require('../commands/utils');
+const { constructError } = require('../commands/utils/baseutils');
 
 module.exports = class Datasets {
 
@@ -27,8 +28,7 @@ module.exports = class Datasets {
 
     listDatasets(token) {
         const endpoint = `${this.endpoint}`;
-        return request
-            .get(endpoint)
+        return getRequest(endpoint)
             .set('Authorization', `Bearer ${token}`)
             .then((res) => {
                 if (res.ok) {
@@ -61,8 +61,7 @@ module.exports = class Datasets {
     describeDataset(token, datasetName) {
         const endpoint = `${this.endpoint}/${datasetName}`;
         debug('describeConnection(%s) => %s', datasetName, endpoint);
-        return request
-            .get(endpoint)
+        return getRequest(endpoint)
             .set('Authorization', `Bearer ${token}`)
             .then((res) => {
                 if (res.ok) {
@@ -80,8 +79,7 @@ module.exports = class Datasets {
     getDataframe (token, datasetName) {
         const endpoint = `${this.endpoint}/${datasetName}/dataframe`;
         debug('describeConnection(%s) => %s', datasetName, endpoint);
-        return request
-            .get(endpoint)
+        return getRequest(endpoint)
             .set('Authorization', `Bearer ${token}`)
             .then((res) => {
                 if (res.ok) {
@@ -99,8 +97,7 @@ module.exports = class Datasets {
     streamDataset(token, datasetName) {
         const endpoint = `${this.endpoint}/${datasetName}/stream`;
         debug('describeConnection(%s) => %s', datasetName, endpoint);
-        return request
-            .get(endpoint)
+        return getRequest(endpoint)
             .set('Authorization', `Bearer ${token}`)
             .buffer()
             .then((res) => {

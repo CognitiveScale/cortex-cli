@@ -16,7 +16,7 @@
 
 const debug = require('debug')('cortex:cli');
 const yeoman = require('yeoman-environment');
-const { printSuccess, printError, filterObject, parseObject } = require('./utils');
+const { printSuccess, printError, filterObject, parseObject } = require('./utils/baseutils');
 
 module.exports.GenerateProjectCommand = class GenerateProjectCommand {
 

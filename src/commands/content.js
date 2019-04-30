@@ -20,7 +20,7 @@ const yeoman = require('yeoman-environment');
 const debug = require('debug')('cortex:cli');
 const { loadProfile } = require('../config');
 const Content = require('../client/content');
-const { printSuccess, printError, filterObject, parseObject, printTable, getSourceFiles, humanReadableFileSize } = require('./utils');
+const { printSuccess, printError, filterObject, parseObject, printTable, getSourceFiles, humanReadableFileSize } = require('./utils/baseutils');
 
 module.exports.ListContent = class ListContent {
 

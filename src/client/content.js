@@ -20,9 +20,12 @@ const path = require('path');
 const { URL } = require('url');
 
 const ProgressBar = require('progress');
+
 const request = require('superagent');
+const { getRequest }  = require('../commands/utils/apiutils');
+
 const debug = require('debug')('cortex:cli');
-const { constructError } = require('../commands/utils');
+const { constructError } = require('../commands/utils/baseutils');
 
 module.exports = class Content {
 
@@ -38,8 +41,7 @@ module.exports = class Content {
 
     listContent(token) {
         debug('listContent %s', this.endpoint);
-        return request
-            .get(this.endpoint)
+        return getRequest(this.endpoint)
             .set('Authorization', `Bearer ${token}`)
             .accept('application/json')
             .then((res) => {
@@ -162,10 +164,9 @@ module.exports = class Content {
     downloadContent(token, key, showProgress = false) {
         debug('downloadContent(%s) => %s', key, this.endpoint);
         const contentKey = this._sanitizeKey(key);
-        const url = `${this.endpoint}/${contentKey}`;
+        const endpoint = `${this.endpoint}/${contentKey}`;
 
-        const stream = request
-            .get(url)
+        const stream = getRequest(endpoint)
             .set('Authorization', `Bearer ${token}`)
             .use((req) => {
                 if (showProgress) {
@@ -218,10 +219,9 @@ module.exports = class Content {
 
     downloadSecureContent(token, key) {
         const contentKey = this._sanitizeKey(key);
-        const url = `${this.cortexUrl}/v2/tenants/secrets/${contentKey}`;
-        debug('downloadContent(%s) => %s', contentKey, url);
-        return request
-            .get(url)
+        const endpoint = `${this.cortexUrl}/v2/tenants/secrets/${contentKey}`;
+        debug('downloadContent(%s) => %s', contentKey, endpoint);
+        return getRequest(endpoint)
             .set('Authorization', `Bearer ${token}`)
             .accept('application/json')
             .then((res) => {
