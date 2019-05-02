@@ -16,7 +16,7 @@
 
 const url = require('url');
 const chalk = require('chalk');
-const request = require('superagent');
+const  { request } = require('../commands/apiutils');
 const debug = require('debug')('cortex:cli');
 const _ = require('lodash');
 const jsonwebtoken = require('jsonwebtoken');
