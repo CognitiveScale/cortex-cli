@@ -20,7 +20,7 @@ const path = require('path');
 const { URL } = require('url');
 
 const ProgressBar = require('progress');
-const request = require('superagent');
+const  { request } = require('../commands/apiutils');
 const debug = require('debug')('cortex:cli');
 const { constructError } = require('../commands/utils');
 
@@ -79,7 +79,7 @@ module.exports = class Content {
         // NOTE: superagent only supports uploads via .attach(), which uses multipart forms (@see
         // https://github.com/visionmedia/superagent/issues/1250).  To perform a streaming upload,
         // we use requestjs instead.
-        const request = require('request');
+        const requestLibRequest = require('request');
 
         const contentKey = this._sanitizeKey(key);
         const url = new URL(`${this.endpoint}/${contentKey}`);
@@ -98,7 +98,7 @@ module.exports = class Content {
                 .on('data', (chunk) => {
                     progressBar && progressBar.tick(chunk.length);
                 })
-                .pipe(request
+                .pipe(requestLibRequest
                     .post({
                         uri: url,
                         headers: {
