@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-const request = require('superagent');
+const  { request } = require('../commands/apiutils');
 const debug = require('debug')('cortex:cli');
 const _ = require('lodash');
 const chalk = require('chalk');
