@@ -19,25 +19,35 @@ function requestWrapper() {
     const bothProxiesSet = process.env.https_proxy && process.env.http_proxy;
     const bothProxiesWarning = 'Both process.env.https_proxy AND process.env.http_proxy are set as env variables. Will default to process.env.https_proxy';
 
+    const bypassProxy = process.env.bypass_proxy;
+
     this.get = function(endpoint) {
+        if (bypassProxy) return superagentRequest.get(endpoint);
+
         bothProxiesSet && printWarning(bothProxiesWarning);
         return superagentRequest
             .get(endpoint)
             .proxy(proxyEnv);
     };
     this.delete = function(endpoint) {
+        if (bypassProxy) return superagentRequest.delete(endpoint);
+
         bothProxiesSet && printWarning(bothProxiesWarning);
         return superagentRequest
             .delete(endpoint)
             .proxy(proxyEnv)
     };
     this.post = function(endpoint) {
+        if (bypassProxy) return superagentRequest.post(endpoint);
+
         bothProxiesSet && printWarning(bothProxiesWarning);
         return superagentRequest
             .post(endpoint)
             .proxy(proxyEnv)
     }
     this.put = function(endpoint) {
+        if (bypassProxy) return superagentRequest.put(endpoint);
+
         bothProxiesSet && printWarning(bothProxiesWarning);
         return superagentRequest
             .put(endpoint)
