@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-const request = require('superagent');
+const  { request } = require('../commands/apiutils');
 const debug = require('debug')('cortex:cli');
 const _ = require('lodash');
 const chalk = require('chalk');
-const { constructError } = require('../commands/utils');
+const { constructError, formatAllServiceInputParameters } = require('../commands/utils');
 const AGENTS_API_VERSION = 'v3';
 
 const createEndpoints = (baseUri) => {
@@ -126,6 +126,8 @@ module.exports = class Catalog {
                 const servicesList = response.agent.inputs
                     .filter(i => i.signalType === 'Service')
                     .map(i => ({ ...i, url: `${urlBase}/${i.name}` }))
+                    .map(i => ({ ...i, formatted_types:
+                    formatAllServiceInputParameters(i.parameters)}));
                 return { success: true, services: servicesList };
             } else {
                 return response;

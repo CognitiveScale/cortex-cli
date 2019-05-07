@@ -190,3 +190,20 @@ module.exports.humanReadableFileSize = function(sizeInBytes) {
 
 };
 
+module.exports.formatAllServiceInputParameters = function(allParameters){
+     if(allParameters.$ref != null){
+         return `$ref:${allParameters.$ref}`;
+     }
+     else{
+         return allParameters.map(inputParameters => formatServiceInputParameter(inputParameters)).join('\n');    
+     }
+}
+
+function formatServiceInputParameter(inputParameter){
+    if(inputParameter.type === 'array'){
+        return (`-Name: ${inputParameter.name}, Type: ${inputParameter.type}<${inputParameter.format}>`);
+    }
+    else{
+        return (`-Name: ${inputParameter.name}, Type: ${inputParameter.type}`);
+     }
+}

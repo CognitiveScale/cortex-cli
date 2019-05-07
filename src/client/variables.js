@@ -15,7 +15,7 @@
  */
 
 const debug = require('debug')('cortex:cli');
-const request = require('superagent');
+const  { request } = require('../commands/apiutils');
 
 const { constructError } = require('../commands/utils');
 
