@@ -152,7 +152,7 @@ module.exports.getSourceFiles = function(source, cb) {
     glob(normalizedPath, options, function (err, files) {
         // files is an array of filenames.
         if (err) {
-            cb(err);
+            cb(err, null);
         } else {
             const results = files.filter(path => fs.lstatSync(path).isFile()).map((path) => {
                 return {
@@ -161,7 +161,7 @@ module.exports.getSourceFiles = function(source, cb) {
                     size: fs.lstatSync(path).size,
                 };
             });
-            cb(results);
+            cb(null, results);
         }
     });
 };
