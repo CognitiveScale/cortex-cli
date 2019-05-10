@@ -22,7 +22,7 @@ const semver = require('semver');
 const superagent = require('superagent');
 const superagentMock = require('superagent-mocker');
 
-const compatibilityModule = rewire('../src/compatibility');
+const compatibilityModule = rewire('../../src/compatibility');
 
 chai.use(chaiAsPromised);
 const expect = chai.expect;

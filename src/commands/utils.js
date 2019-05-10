@@ -190,32 +190,20 @@ module.exports.humanReadableFileSize = function(sizeInBytes) {
 
 };
 
-module.exports.formatValidationPath = (p) => {
-    let cnt = 0, res = '';
-    const len = p.length;
-    p.forEach(s => {
-        if (_.isNumber(s)) {
-            res += `[${s}]`
-        } else if (cnt < len)
-            res += s;
-        else
-            res += s;
-        if (cnt < len - 1 && !_.isNumber(p[cnt + 1]))
-            res += '.';
-        cnt += 1;
+module.exports.formatAllServiceInputParameters = function(allParameters){
+     if(allParameters.$ref != null){
+         return `$ref:${allParameters.$ref}`;
+     }
+     else{
+         return allParameters.map(inputParameters => formatServiceInputParameter(inputParameters)).join('\n');    
+     }
+}
 
-    });
-    return res;
-};
-
-module.exports.countLinesInFile = (filePath) => {
-    return new Promise((resolve, reject) => {
-        let count = 0;
-        fs.createReadStream(filePath)
-            .on('error', e => reject(e))
-            .on('data', chunk => {
-                for (let i=0; i < chunk.length; ++i) if (chunk[i] == 10) count++;
-            })
-            .on('end', () => resolve(count));
-    });
-};
+function formatServiceInputParameter(inputParameter){
+    if(inputParameter.type === 'array'){
+        return (`-Name: ${inputParameter.name}, Type: ${inputParameter.type}<${inputParameter.format}>`);
+    }
+    else{
+        return (`-Name: ${inputParameter.name}, Type: ${inputParameter.type}`);
+     }
+}

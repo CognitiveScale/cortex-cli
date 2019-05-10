@@ -1,10 +1,10 @@
 {
   "name": "cortex-cli",
-  "version": "0.12.14",
+  "version": "0.12.15",
   "description": "Command line tool for CognitiveScale Cortex.",
   "main": "./bin/cortex.js",
   "scripts": {
-    "test": "CORTEX_CONFIG_DIR=./test/cortex mocha"
+    "test": "CORTEX_CONFIG_DIR=./test/cortex mocha --recursive"
   },
   "repository": {
     "type": "git",
@@ -50,6 +50,7 @@
     "superagent": "3.8.2",
     "superagent-throttle": "^1.0.1",
     "tty-table": "^2.7.0",
+    "superagent-proxy": "^2.0.0",
     "url": "0.11.0",
     "uuid": "3.2.1",
     "yeoman-environment": "2.0.5"
