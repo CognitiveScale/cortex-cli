@@ -71,11 +71,11 @@ module.exports.ConfigureCommand = class {
             cortexUrl = _validate((cortexUrl || defaultCortexUrl),URL_VALIDATION_MSG ,URL_REGEX);
             cortexUrl =cortexUrl.replace(/\/$/, '');
             let account = (profileAccount) ? profileAccount : yield prompt(`Account [${defaultAccount}]: `);
-            account = _validate(account || defaultAccount, 'Expecting a valid non-empty account name.');
+            account = _validate(account || defaultAccount, 'Invalid account name, expecting non-empty value.');
             let username = (profileUsername) ? profileUsername : yield prompt(`Username [${defaultUsername}]: `);
-            username = _validate(username || defaultUsername, 'Expecting a valid non-empty username');
+            username = _validate(username || defaultUsername, 'Invalid user name, expecting non-empty value.');
             const password = _validate((profilePassword) ? profilePassword : yield prompt.password('Password: '),
-                'Expecting a valid non-empty password');
+                'Invalid password, expecting non-empty value.');
 
             debug('cortexUrl: %s', cortexUrl);
             debug('account: %s', account);
