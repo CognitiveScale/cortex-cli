@@ -24,13 +24,28 @@ const { readConfig, defaultConfig } = require('../config');
 const { printSuccess, printError } = require('./utils');
 
 const DEFAULT_CORTEX_URL = 'https://api.cortex.insights.ai';
+const URL_REGEX=/^(https?):\/\/(-\.)?([^\s/?\.#-]+\.?)+(\/[^\s]*)?$/;
+/**
+ * Validate 's'' is not empty, return 's' or throw error
+ * @param s
+ * @param msg
+ * @param regex
+ * @returns {*}
+ * @private
+ */
+function _validate(s, msg, regex=undefined) {
+    if (_.isEmpty(s) || (regex && !regex.test(s))) {
+        console.error(chalk.red(msg));
+        process.exit(1);
+    }
+    return s;
+}
 
 module.exports.ConfigureCommand = class {
 
     constructor(program) {
         this.program = program;
     }
-
     execute(options) {
         const config = readConfig();
         const profileName = options.profile || _.get(config,'currentProfile','default');
@@ -51,14 +66,16 @@ module.exports.ConfigureCommand = class {
 
             console.log(`Configuring profile ${chalk.green.bold(profileName)}:`);
             let cortexUrl = (profileUrl) ? profileUrl : yield prompt(`Cortex URL [${defaultCortexUrl}]: `);
+            // strip any trailing /
+            const URL_VALIDATION_MSG='Invalid url should be non-empty url (http[s]://<hostname>)';
+            cortexUrl = _validate((cortexUrl || defaultCortexUrl),URL_VALIDATION_MSG ,URL_REGEX);
+            cortexUrl =cortexUrl.replace(/\/$/, '');
             let account = (profileAccount) ? profileAccount : yield prompt(`Account [${defaultAccount}]: `);
+            account = _validate(account || defaultAccount, 'Expecting a valid non-empty account name.');
             let username = (profileUsername) ? profileUsername : yield prompt(`Username [${defaultUsername}]: `);
-            const password = (profilePassword) ? profilePassword : yield prompt.password('Password: ');
-
-            cortexUrl = cortexUrl || defaultCortexUrl;
-            cortexUrl = cortexUrl.replace(/\/$/, ''); // strip any trailing /
-            account = account || defaultAccount;
-            username = username || defaultUsername;
+            username = _validate(username || defaultUsername, 'Expecting a valid non-empty username');
+            const password = _validate((profilePassword) ? profilePassword : yield prompt.password('Password: '),
+                'Expecting a valid non-empty password');
 
             debug('cortexUrl: %s', cortexUrl);
             debug('account: %s', account);
