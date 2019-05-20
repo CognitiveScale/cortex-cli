@@ -67,7 +67,7 @@ module.exports.ConfigureCommand = class {
             console.log(`Configuring profile ${chalk.green.bold(profileName)}:`);
             let cortexUrl = (profileUrl) ? profileUrl : yield prompt(`Cortex URL [${defaultCortexUrl}]: `);
             // strip any trailing /
-            const URL_VALIDATION_MSG='Invalid url should be non-empty url (http[s]://<hostname>)';
+            const URL_VALIDATION_MSG=`Invalid url "${cortexUrl}" expecting (http[s]://<hostname>)`;
             cortexUrl = _validate((cortexUrl || defaultCortexUrl),URL_VALIDATION_MSG ,URL_REGEX);
             cortexUrl =cortexUrl.replace(/\/$/, '');
             let account = (profileAccount) ? profileAccount : yield prompt(`Account [${defaultAccount}]: `);
