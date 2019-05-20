@@ -49,7 +49,7 @@ module.exports.ConfigureCommand = class {
     execute(options) {
         const config = readConfig();
         const profileName = options.profile || _.get(config,'currentProfile','default');
-        const profileUrl = this.program.url || _.get(config,'url');
+        const profileUrl = (this.program.url || process.env.CORTEX_URI) || _.get(config,'url');
         const profileAccount = this.program.account || _.get(config ,'account');
         const profileUsername = this.program.username || _.get(config,'username');
         const profilePassword = this.program.password || undefined;
