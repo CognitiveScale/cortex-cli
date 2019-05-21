@@ -22,7 +22,26 @@ const Table = require('tty-table');
 const ProgressBar = require('progress');
 const { loadProfile } = require('../config');
 const { Graph } = require('../client/graph');
-const { printSuccess, printError, filterObject, countLinesInFile, printTable } = require('./utils');
+const { printSuccess, printError, filterObject, printTable } = require('./utils');
+
+
+function countLinesInFile(file){
+    return new Promise((resolve, reject) => {
+        let counter = -1;
+        fs
+            .createReadStream(file)
+            .pipe(split())
+            .on('data', (doesntMatter) => {
+                counter = counter + 1;
+            })
+            .on('error', (error) => {
+                reject(error);
+            })
+            .on('end', () => {
+                resolve(counter);
+            });
+    });
+}
 
 class FindEventsCommand {
 
@@ -95,7 +114,11 @@ class PublishEventsCommand {
             }
 
             if (!rs.success) errors.push(rs.message);
-            bar.tick();
+            
+            // In the case of a stream ... bar is not used ...
+            if (!_.isEmpty(bar)){
+                bar.tick();
+            }
         };
 
         const processStream = (stream, resolve, reject, bar) => {

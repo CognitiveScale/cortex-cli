@@ -96,10 +96,11 @@ class Graph {
     }
 
     deleteProfile(token, profileId, schemaName) {
-        debug('deleteProfile(%s) => DELETE %s', profileId, this.endpoints.profiles);
+        const endpoint = `${this.endpoints.profiles}/${profileId}`;
+        debug('deleteProfile(%s) => DELETE %s', profileId, endpoint);
 
         const req = request
-            .delete(this.endpoints.profiles)
+            .delete(endpoint)
             .set('Authorization', `Bearer ${token}`)
             .set('x-cortex-proxy-notify', true);
 

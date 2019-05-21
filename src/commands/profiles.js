@@ -20,7 +20,7 @@ const debug = require('debug')('cortex:cli');
 const { loadProfile } = require('../config');
 const Catalog = require('../client/catalog');
 const { Graph } = require('../client/graph');
-const { printSuccess, printError, filterObject, parseObject, printTable, formatValidationPath } = require('./utils');
+const { printSuccess, printError, filterObject, parseObject, printTable } = require('./utils');
 
 class SaveProfileSchemaCommand {
 
@@ -51,7 +51,6 @@ class SaveProfileSchemaCommand {
                             {column: 'Path', field: 'path', width: 50},
                             {column: 'Message', field: 'message', width: 100},
                         ];
-                        details.map(d => d.path = formatValidationPath(d.path));
                         printTable(tableSpec, details);
                         printError(''); // Just exit
                     }
