@@ -30,52 +30,52 @@ const {
     InstallResourceCommand
 } = require('../src/commands/marketplace');
 
-program.description('Work with Cortex Marketplace Datasets');
+program.description('Work with Cortex Marketplace Connections');
 
-// Save dataset in marketplace
+// Save connection in marketplace
 program
-    .command('save <datasetDefinition> <executablePath>')
-    .description('Save dataset in marketplace')
+    .command('save <connectionDefinition> <executablePath>')
+    .description('Save connection in marketplace')
     .option('--no-compat', 'Ignore API compatibility checks')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
-    .option('-y, --yaml', 'Use YAML for dataset definition format')
+    .option('-y, --yaml', 'Use YAML for connection definition format')
     .option('-z, --zip', 'Use zip file to gather the executables')
-    .action(withCompatibilityCheck((datasetDefinition, executablePath, options) => {
+    .action(withCompatibilityCheck((connectionDefinition, executablePath, options) => {
         try {
-            new SaveResourceCommand(program, 'dataset').execute(datasetDefinition, executablePath, options);
+            new SaveResourceCommand(program, 'connection').execute(connectionDefinition, executablePath, options);
         }
         catch (err) {
             console.error(chalk.red(err.message));
         }
     }));
 
-// List datasets of marketplace
+// List connections of marketplace
 program
     .command('list')
-    .description('List datasets in marketplace')
+    .description('List connections in marketplace')
     .option('--no-compat', 'Ignore API compatibility checks')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
     .option('--json', 'Output results using JSON')
     .option('--query [query]', 'A JMESPath query to use in filtering the response data.')
-    .option('--sort [sort]', 'To sort datasets by any field')
-    .option('--offset [offset]', 'Skip the number of datasets in the response')
-    .option('--limit [limit]', 'Limit the number of datasets in the response')
-    .option('--private', 'List only private datasets', false)
+    .option('--sort [sort]', 'To sort connections by any field')
+    .option('--offset [offset]', 'Skip the number of connections in the response')
+    .option('--limit [limit]', 'Limit the number of connections in the response')
+    .option('--private', 'List only private connections', false)
     .action(withCompatibilityCheck((options) => {
         try {
-            new ListResourceCommand(program, 'dataset').execute(options);
+            new ListResourceCommand(program, 'connection').execute(options);
         }
         catch (err) {
             console.error(chalk.red(err.message));
         }
     }));
 
-// Describe dataset of marketplace
+// Describe connection of marketplace
 program
     .command('describe <resourceName>')
-    .description('Get details of a dataset from marketplace')
+    .description('Get details of a connection from marketplace')
     .option('--no-compat', 'Ignore API compatibility checks')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
@@ -83,17 +83,17 @@ program
     .option('--query [query]', 'A JMESPath query to use in filtering the response data.')
     .action(withCompatibilityCheck((resourceName, options) => {
         try {
-            new DescribeResourceCommand(program, 'dataset').execute(resourceName, options);
+            new DescribeResourceCommand(program, 'connection').execute(resourceName, options);
         }
         catch (err) {
             console.error(chalk.red(err.message));
         }
     }));
 
-// Delete dataset of marketplace
+// Delete connection of marketplace
 program
     .command('delete <resourceName>')
-    .description('Delete a dataset from marketplace')
+    .description('Delete a connection from marketplace')
     .option('--no-compat', 'Ignore API compatibility checks')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
@@ -101,40 +101,40 @@ program
     .option('--query [query]', 'A JMESPath query to use in filtering the response data.')
     .action(withCompatibilityCheck((resourceName, options) => {
         try {
-            new DeleteResourceCommand(program, 'dataset').execute(resourceName, options);
+            new DeleteResourceCommand(program, 'connection').execute(resourceName, options);
         }
         catch (err) {
             console.error(chalk.red(err.message));
         }
     }));
 
-// Search dataset in marketplace
+// Search connection in marketplace
 program
     .command('search [searchString]')
-    .description('Search datasets in marketplace')
+    .description('Search connections in marketplace')
     .option('--no-compat', 'Ignore API compatibility checks')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
     .option('--json', 'Output results using JSON')
     .option('--query [query]', 'A JMESPath query to use in filtering the response data.')
     .option('--filter [filter]', 'Filter query object to search')
-    .option('--sort [sort]', 'To sort datasets by any field')
-    .option('--offset [offset]', 'Skip the number of datasets in the response')
-    .option('--limit [limit]', 'Limit the number of datasets in the response')
-    .option('--private', 'List only private datasets', false)
+    .option('--sort [sort]', 'To sort connections by any field')
+    .option('--offset [offset]', 'Skip the number of connections in the response')
+    .option('--limit [limit]', 'Limit the number of connections in the response')
+    .option('--private', 'List only private connections', false)
     .action(withCompatibilityCheck((searchString, options) => {
         try {
-            new SearchResourceCommand(program, 'dataset').execute(searchString, options);
+            new SearchResourceCommand(program, 'connection').execute(searchString, options);
         }
         catch (err) {
             console.error(chalk.red(err.message));
         }
     }));
 
-// Install dataset from marketplace
+// Install connection from marketplace
 program
     .command('install <resourceName>')
-    .description('Install a dataset from marketplace')
+    .description('Install a connection from marketplace')
     .option('--no-compat', 'Ignore API compatibility checks')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
@@ -142,7 +142,7 @@ program
     .option('--query [query]', 'A JMESPath query to use in filtering the response data.')
     .action(withCompatibilityCheck((resourceNameWithNamespace, options) => {
         try {
-            new InstallResourceCommand(program, 'dataset').execute(resourceNameWithNamespace, options);
+            new InstallResourceCommand(program, 'connection').execute(resourceNameWithNamespace, options);
         }
         catch (err) {
             console.error(chalk.red(err.message));
