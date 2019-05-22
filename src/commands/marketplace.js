@@ -55,7 +55,7 @@ module.exports.SaveResourceCommand = class SaveResourceCommand {
                 }
             })
             .catch((err) => {
-                printError(`Failed to save ${this.resourceType}: ${err.status} ${err.response.body.error}`, options);
+                printError(`Failed to save ${this.resourceType}: ${err.status} ${err.message}`, options);
             });
     }
 };
@@ -148,11 +148,11 @@ module.exports.DeleteResourceCommand = class DeleteResourceCommand {
         const resource = new Resource(profile.url);
         resource.deleteResource(this.resourceType, namespace, resourceName, profile.token).then((response) => {
             if (response.success) {
-                let result = filterObject(response.resource, options);
+                let result = filterObject(response.status, options);
                 printSuccess(JSON.stringify(result, null, 2), options);
             }
             else {
-                printError(`Failed to delete ${this.resourceType} ${resourceNameWithNamespace}: ${response.message}`, options);
+                printError(`Failed to delete ${this.resourceType} ${resourceNameWithNamespace}: ${response.status} ${response.message}`, options);
             }
         })
             .catch((err) => {
@@ -295,7 +295,7 @@ module.exports.ExecuteResourceCommand = class ExecutesourceCommand {
                 printSuccess(JSON.stringify(result, null, 2), options);
             }
             else {
-                printError(`Failed to execute ${this.resourceType} ${resourceNameWithNamespace}: ${response.message}`, options);
+                printError(`Failed to execute ${this.resourceType} ${resourceNameWithNamespace}: ${response.details || response.message}`, options);
             }
         })
             .catch((err) => {
