@@ -51,7 +51,7 @@ module.exports.SaveResourceCommand = class SaveResourceCommand {
                 if (response.success) {
                     printSuccess(`${this.resourceType} saved`, options);
                 } else {
-                    printError(`Failed to save ${this.resourceType}: ${response.status} ${response.details || response.message}`);
+                    printError(`Failed to save ${this.resourceType}: ${response.status} ${JSON.stringify(response.details || response.message)}`);
                 }
             })
             .catch((err) => {

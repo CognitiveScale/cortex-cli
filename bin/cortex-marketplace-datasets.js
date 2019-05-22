@@ -32,50 +32,50 @@ const {
 
 program.description('Work with Cortex Marketplace Agents');
 
-// Save agent in marketplace
+// Save dataset in marketplace
 program
-    .command('save <agentDefinition> <executablePath>')
-    .description('Save agent in marketplace')
+    .command('save <datasetDefinition> <executablePath>')
+    .description('Save dataset in marketplace')
     .option('--no-compat', 'Ignore API compatibility checks')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
-    .option('-y, --yaml', 'Use YAML for agent definition format')
+    .option('-y, --yaml', 'Use YAML for dataset definition format')
     .option('-z, --zip', 'Use zip file to gather the executables')
-    .action(withCompatibilityCheck((agentDefinition, executablePath, options) => {
+    .action(withCompatibilityCheck((datasetDefinition, executablePath, options) => {
         try {
-            new SaveResourceCommand(program, 'agent').execute(agentDefinition, executablePath, options);
+            new SaveResourceCommand(program, 'dataset').execute(datasetDefinition, executablePath, options);
         }
         catch (err) {
             console.error(chalk.red(err.message));
         }
     }));
 
-// List agents of marketplace
+// List datasets of marketplace
 program
     .command('list')
-    .description('List agents in marketplace')
+    .description('List datasets in marketplace')
     .option('--no-compat', 'Ignore API compatibility checks')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
     .option('--json', 'Output results using JSON')
     .option('--query [query]', 'A JMESPath query to use in filtering the response data.')
-    .option('--sort [sort]', 'To sort agents by any field')
-    .option('--offset [offset]', 'Skip the number of agents in the response')
-    .option('--limit [limit]', 'Limit the number of agents in the response')
-    .option('--private', 'List only private agents', false)
+    .option('--sort [sort]', 'To sort datasets by any field')
+    .option('--offset [offset]', 'Skip the number of datasets in the response')
+    .option('--limit [limit]', 'Limit the number of datasets in the response')
+    .option('--private', 'List only private datasets', false)
     .action(withCompatibilityCheck((options) => {
         try {
-            new ListResourceCommand(program, 'agent').execute(options);
+            new ListResourceCommand(program, 'dataset').execute(options);
         }
         catch (err) {
             console.error(chalk.red(err.message));
         }
     }));
 
-// Describe agent of marketplace
+// Describe dataset of marketplace
 program
     .command('describe <resourceName>')
-    .description('Get details of a agent from marketplace')
+    .description('Get details of a dataset from marketplace')
     .option('--no-compat', 'Ignore API compatibility checks')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
@@ -83,17 +83,17 @@ program
     .option('--query [query]', 'A JMESPath query to use in filtering the response data.')
     .action(withCompatibilityCheck((resourceName, options) => {
         try {
-            new DescribeResourceCommand(program, 'agent').execute(resourceName, options);
+            new DescribeResourceCommand(program, 'dataset').execute(resourceName, options);
         }
         catch (err) {
             console.error(chalk.red(err.message));
         }
     }));
 
-// Delete agent of marketplace
+// Delete dataset of marketplace
 program
     .command('delete <resourceName>')
-    .description('Delete a agent from marketplace')
+    .description('Delete a dataset from marketplace')
     .option('--no-compat', 'Ignore API compatibility checks')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
@@ -101,40 +101,40 @@ program
     .option('--query [query]', 'A JMESPath query to use in filtering the response data.')
     .action(withCompatibilityCheck((resourceName, options) => {
         try {
-            new DeleteResourceCommand(program, 'agent').execute(resourceName, options);
+            new DeleteResourceCommand(program, 'dataset').execute(resourceName, options);
         }
         catch (err) {
             console.error(chalk.red(err.message));
         }
     }));
 
-// Search agent in marketplace
+// Search dataset in marketplace
 program
     .command('search [searchString]')
-    .description('Search agents in marketplace')
+    .description('Search datasets in marketplace')
     .option('--no-compat', 'Ignore API compatibility checks')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
     .option('--json', 'Output results using JSON')
     .option('--query [query]', 'A JMESPath query to use in filtering the response data.')
     .option('--filter [filter]', 'Filter query object to search')
-    .option('--sort [sort]', 'To sort agents by any field')
-    .option('--offset [offset]', 'Skip the number of agents in the response')
-    .option('--limit [limit]', 'Limit the number of agents in the response')
-    .option('--private', 'List only private agents', false)
+    .option('--sort [sort]', 'To sort datasets by any field')
+    .option('--offset [offset]', 'Skip the number of datasets in the response')
+    .option('--limit [limit]', 'Limit the number of datasets in the response')
+    .option('--private', 'List only private datasets', false)
     .action(withCompatibilityCheck((searchString, options) => {
         try {
-            new SearchResourceCommand(program, 'agent').execute(searchString, options);
+            new SearchResourceCommand(program, 'dataset').execute(searchString, options);
         }
         catch (err) {
             console.error(chalk.red(err.message));
         }
     }));
 
-// Install agent from marketplace
+// Install dataset from marketplace
 program
     .command('install <resourceName>')
-    .description('Install a agent from marketplace')
+    .description('Install a dataset from marketplace')
     .option('--no-compat', 'Ignore API compatibility checks')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
@@ -142,7 +142,7 @@ program
     .option('--query [query]', 'A JMESPath query to use in filtering the response data.')
     .action(withCompatibilityCheck((resourceNameWithNamespace, options) => {
         try {
-            new InstallResourceCommand(program, 'agent').execute(resourceNameWithNamespace, options);
+            new InstallResourceCommand(program, 'dataset').execute(resourceNameWithNamespace, options);
         }
         catch (err) {
             console.error(chalk.red(err.message));
