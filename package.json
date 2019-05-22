@@ -1,6 +1,6 @@
 {
   "name": "cortex-cli",
-  "version": "0.12.15",
+  "version": "0.12.16",
   "description": "Command line tool for CognitiveScale Cortex.",
   "main": "./bin/cortex.js",
   "scripts": {
@@ -42,11 +42,14 @@
     "js-yaml": "3.13.1",
     "jsonwebtoken": "8.5.1",
     "lodash": "4.17.11",
+    "moment": "^2.24.0",
     "npm-registry-fetch": "3.9.0",
     "progress": "2.0.3",
     "request": "2.88.0",
     "semver": "5.5.0",
     "superagent": "3.8.2",
+    "superagent-throttle": "^1.0.1",
+    "tty-table": "^2.7.0",
     "superagent-proxy": "^2.0.0",
     "url": "0.11.0",
     "uuid": "3.3.2",
