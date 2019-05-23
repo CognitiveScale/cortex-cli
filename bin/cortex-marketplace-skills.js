@@ -35,16 +35,16 @@ program.description('Work with Cortex Marketplace Skills');
 
 // Save Skill in marketplace
 program
-    .command('save <skillDefinition> <executablePath>')
+    .command('save <skillDefinition>')
     .description('Save skill in marketplace')
     .option('--no-compat', 'Ignore API compatibility checks')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
     .option('-y, --yaml', 'Use YAML for skill definition format')
-    .option('-z, --zip', 'Use zip file to gather the executables')
-    .action(withCompatibilityCheck((skillDefinition, executablePath, options) => {
+    .option('-z, --zip <zip>', 'Use zip file to gather the executables')
+    .action(withCompatibilityCheck((skillDefinition, options) => {
         try {
-            new SaveResourceCommand(program, 'skill').execute(skillDefinition, executablePath, options);
+            new SaveResourceCommand(program, 'skill').execute(skillDefinition, options);
         }
         catch (err) {
             console.error(chalk.red(err.message));
@@ -80,7 +80,6 @@ program
     .option('--no-compat', 'Ignore API compatibility checks')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
-    .option('--json', 'Output results using JSON')
     .option('--query [query]', 'A JMESPath query to use in filtering the response data.')
     .action(withCompatibilityCheck((skillNameWithNamespace, options) => {
         try {
@@ -98,8 +97,6 @@ program
     .option('--no-compat', 'Ignore API compatibility checks')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
-    .option('--json', 'Output results using JSON')
-    .option('--query [query]', 'A JMESPath query to use in filtering the response data.')
     .action(withCompatibilityCheck((skillNameWithNamespace, options) => {
         try {
             new DeleteResourceCommand(program, 'skill').execute(skillNameWithNamespace, options);
@@ -157,7 +154,6 @@ program
     .option('--no-compat', 'Ignore API compatibility checks')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
-    .option('--json', 'Output results using JSON')
     .option('--query [query]', 'A JMESPath query to use in filtering the response data.')
     .option('--inputParams <inputParams>', 'Input data to use for execution of skill action')
     .option('--route <route>', 'Action name to invoke the service')

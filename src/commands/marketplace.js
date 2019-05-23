@@ -15,7 +15,6 @@
  */
 const _ = require('lodash');
 const fs = require('fs');
-const yeoman = require('yeoman-environment');
 const debug = require('debug')('cortex:cli');
 const { loadProfile } = require('../config');
 const Resource = require('../client/marketplace');
@@ -34,6 +33,21 @@ const getNamespaceAndResourceName = (resourceName) => {
     return parts;
 };
 
+/**
+ * Read from file and parse JSON. If not parse the given value.
+ * 
+ * @param filterString - JSON filepath or JSON string
+ * @returns Object - Parsed JSON
+ */
+const readJsonFromFileOrString = (filterString) => {
+    try {
+        const data = fs.readFileSync(filterString);
+        return JSON.parse(data.toString());
+    } catch (err) {
+        return JSON.parse(filterString);
+    }
+};
+
 module.exports.SaveResourceCommand = class SaveResourceCommand {
 
     constructor(program, resourceType) {
@@ -41,20 +55,36 @@ module.exports.SaveResourceCommand = class SaveResourceCommand {
         this.resourceType = resourceType;
     }
 
-    execute(resourceDefinition, executablePath, options) {
+    static getZipFilePath(options) {
+        if (!options.zip) {
+            printError('error: option `--zip <zip>` argument missing', options);
+        }
+
+        if (!fs.existsSync(options.zip)) {
+            printError(`Zip file path ${options.zip} does not exist`, options);
+        }
+        return options.zip;
+    }
+
+    execute(resourceDefinition, options) {
         const profile = loadProfile(options.profile);
         debug('%s.executeSave%s(%s)', profile.name, _.upperFirst(this.resourceType), resourceDefinition);
 
         const resourceDefStr = fs.readFileSync(resourceDefinition);
         const resourceObject = parseObject(resourceDefStr, options);
+        const zipFilePath = SaveResourceCommand.getZipFilePath(options);
 
-        const [ namespace, resourceName ] = getNamespaceAndResourceName(resourceObject.asset.name);
+        if (!resourceObject.asset) {
+            printError(`"asset" field in ${this.resourceType} definition is required`);
+        }
+
+        const [ namespace, resourceName ] = getNamespaceAndResourceName(resourceObject.name || resourceObject.asset.name);
 
         const resource = new Resource(profile.url);
-        resource.saveResource(this.resourceType, namespace, resourceName, profile.token, resourceObject, executablePath)
+        resource.saveResource(this.resourceType, namespace, resourceName, profile.token, resourceObject, zipFilePath)
             .then((response) => {
                 if (response.success) {
-                    printSuccess(`${this.resourceType} saved`, options);
+                    printSuccess(`${_.upperFirst(this.resourceType)} saved`, options);
                 } else {
                     printError(`Failed to save ${this.resourceType}: ${response.status} ${JSON.stringify(response.details || response.message)}`);
                 }
@@ -128,7 +158,7 @@ module.exports.DescribeResourceCommand = class DescribeResourceCommand {
                 printSuccess(JSON.stringify(result, null, 2), options);
             }
             else {
-                printError(`Failed to describe ${this.resourceType} ${resourceNameWithNamespace}: ${response.details || response.message}`, options);
+                printError(`Failed to describe ${this.resourceType} ${resourceNameWithNamespace}: ${response.message}`, options);
             }
         })
             .catch((err) => {
@@ -153,7 +183,7 @@ module.exports.DeleteResourceCommand = class DeleteResourceCommand {
         const resource = new Resource(profile.url);
         resource.deleteResource(this.resourceType, namespace, resourceName, profile.token).then((response) => {
             if (response.success) {
-                let result = filterObject(response.status, options);
+                let result = filterObject(response, options);
                 printSuccess(JSON.stringify(result, null, 2), options);
             }
             else {
@@ -189,7 +219,13 @@ module.exports.SearchResourceCommand = class SearchResourceCommand {
         };
 
         if (options.filter) {
-            Object.assign(searchObject._filter, JSON.parse(options.filter));
+            let filterQuery = {};
+            try {
+                filterQuery = readJsonFromFileOrString(options.filter);
+            } catch (err) {
+                printError('filterQuery should be valid JSON');
+            }
+            Object.assign(searchObject._filter, filterQuery);
         }
 
         const resource = new Resource(profile.url);
@@ -258,35 +294,37 @@ module.exports.InstallResourceCommand = class InstallResourceCommand {
     }
 };
 
-module.exports.ExecuteResourceCommand = class ExecutesourceCommand {
+module.exports.ExecuteResourceCommand = class ExecuteResourceCommand {
 
     constructor(program, resourceType) {
         this.program = program;
         this.resourceType = resourceType;
     }
 
-    static validateInputParams(options) {
+    static getInputParams(options) {
         if (!options.inputParams) {
-            options.color = 'off';
             printError('error: option `--inputParams <inputParams>` argument missing', options);
         }
         try {
-            JSON.parse(options.inputParams);
+            const inputParams = {
+                payload: readJsonFromFileOrString(options.inputParams)
+            };
+            return JSON.stringify(inputParams);
         } catch (err) {
             printError('inputParams should be a valid json');
         }
     }
 
-    static validateRoute(options) {
+    static getRoute(options) {
         if (!options.route) {
-            options.color = 'off';
             printError('error: option `--route <route>` argument missing', options);
         }
+        return options.route;
     }
 
     execute(resourceNameWithNamespace, options) {
-        ExecutesourceCommand.validateInputParams(options);
-        ExecutesourceCommand.validateRoute(options);
+        const inputParams = ExecuteResourceCommand.getInputParams(options);
+        const route = ExecuteResourceCommand.getRoute(options);
 
         const profile = loadProfile(options.profile);
         debug('%s.executeSearch%s(%s)', profile.name, _.upperFirst(this.resourceType), resourceNameWithNamespace);
@@ -294,15 +332,16 @@ module.exports.ExecuteResourceCommand = class ExecutesourceCommand {
         const [ namespace, resourceName ] = getNamespaceAndResourceName(resourceNameWithNamespace);
 
         const resource = new Resource(profile.url);
-        resource.executeResource(this.resourceType, namespace, resourceName, profile.token, options.inputParams, options.route).then((response) => {
-            if (response.success) {
-                let result = filterObject(response.response, options);
-                printSuccess(JSON.stringify(result, null, 2), options);
-            }
-            else {
-                printError(`Failed to execute ${this.resourceType} ${resourceNameWithNamespace}: ${response.details || response.message}`, options);
-            }
-        })
+        resource.executeResource(this.resourceType, namespace, resourceName, profile.token, inputParams, route)
+            .then((response) => {
+                if (response.success) {
+                    let result = filterObject(response.response, options);
+                    printSuccess(JSON.stringify(result, null, 2), options);
+                }
+                else {
+                    printError(`Failed to execute ${this.resourceType} ${resourceNameWithNamespace}: ${response.details || response.message}`, options);
+                }
+            })
             .catch((err) => {
                 printError(`Failed to execute ${this.resourceType} ${resourceNameWithNamespace}: ${err.status} ${err.message}`, options);
             });

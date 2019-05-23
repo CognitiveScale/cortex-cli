@@ -26,7 +26,7 @@ module.exports = class Resource {
         this.marketplaceUrl = `${baseUrl}/v3/marketplace`;
     }
 
-    saveResource(resourceType, namespace, resourceName, token, resourceObject, zipFile) {
+    saveResource(resourceType, namespace, resourceName, token, resourceObject, zipFilePath) {
         const endpoint = `${this.marketplaceUrl}/admin/resource/${resourceType}/${namespace}/${resourceName}`;
         debug('saveResource(%s) => %s', resourceObject.asset.name, endpoint);
         return request
@@ -35,7 +35,7 @@ module.exports = class Resource {
             .set('x-cortex-proxy-notify', true)
             .accept('application/json')
             .field('meta', JSON.stringify(resourceObject))
-            .attach('content', zipFile)
+            .attach('content', zipFilePath)
             .then((res) => {
                 if (Boolean(_.get(res, 'headers.x-cortex-proxied', false)))
                     console.error(chalk.blue('Request proxied to cloud.'));
