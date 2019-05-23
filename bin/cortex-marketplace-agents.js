@@ -74,34 +74,34 @@ program
 
 // Describe agent of marketplace
 program
-    .command('describe <resourceName>')
+    .command('describe <agentNameWithNamespace>')
     .description('Get details of a agent from marketplace')
     .option('--no-compat', 'Ignore API compatibility checks')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
     .option('--json', 'Output results using JSON')
     .option('--query [query]', 'A JMESPath query to use in filtering the response data.')
-    .action(withCompatibilityCheck((resourceName, options) => {
+    .action(withCompatibilityCheck((agentNameWithNamespace, options) => {
         try {
-            new DescribeResourceCommand(program, 'agent').execute(resourceName, options);
+            new DescribeResourceCommand(program, 'agent').execute(agentNameWithNamespace, options);
         }
         catch (err) {
             console.error(chalk.red(err.message));
         }
     }));
 
-// Delete agent of marketplace
+// Delete agent from marketplace
 program
-    .command('delete <resourceName>')
-    .description('Delete a agent from marketplace')
+    .command('delete <agentNameWithNamespace>')
+    .description('Delete an agent from marketplace')
     .option('--no-compat', 'Ignore API compatibility checks')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
     .option('--json', 'Output results using JSON')
     .option('--query [query]', 'A JMESPath query to use in filtering the response data.')
-    .action(withCompatibilityCheck((resourceName, options) => {
+    .action(withCompatibilityCheck((agentNameWithNamespace, options) => {
         try {
-            new DeleteResourceCommand(program, 'agent').execute(resourceName, options);
+            new DeleteResourceCommand(program, 'agent').execute(agentNameWithNamespace, options);
         }
         catch (err) {
             console.error(chalk.red(err.message));
@@ -133,16 +133,16 @@ program
 
 // Install agent from marketplace
 program
-    .command('install <resourceName>')
+    .command('install <agentNameWithNamespace>')
     .description('Install a agent from marketplace')
     .option('--no-compat', 'Ignore API compatibility checks')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
     .option('--json', 'Output results using JSON')
     .option('--query [query]', 'A JMESPath query to use in filtering the response data.')
-    .action(withCompatibilityCheck((resourceNameWithNamespace, options) => {
+    .action(withCompatibilityCheck((agentNameWithNamespace, options) => {
         try {
-            new InstallResourceCommand(program, 'agent').execute(resourceNameWithNamespace, options);
+            new InstallResourceCommand(program, 'agent').execute(agentNameWithNamespace, options);
         }
         catch (err) {
             console.error(chalk.red(err.message));

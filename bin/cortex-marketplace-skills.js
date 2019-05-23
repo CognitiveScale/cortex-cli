@@ -75,34 +75,34 @@ program
 
 // Describe Skill of marketplace
 program
-    .command('describe <resourceName>')
+    .command('describe <skillNameWithNamespace>')
     .description('Get details of a skill from marketplace')
     .option('--no-compat', 'Ignore API compatibility checks')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
     .option('--json', 'Output results using JSON')
     .option('--query [query]', 'A JMESPath query to use in filtering the response data.')
-    .action(withCompatibilityCheck((resourceName, options) => {
+    .action(withCompatibilityCheck((skillNameWithNamespace, options) => {
         try {
-            new DescribeResourceCommand(program, 'skill').execute(resourceName, options);
+            new DescribeResourceCommand(program, 'skill').execute(skillNameWithNamespace, options);
         }
         catch (err) {
             console.error(chalk.red(err.message));
         }
     }));
 
-// Delete Skill of marketplace
+// Delete Skill from marketplace
 program
-    .command('delete <resourceName>')
+    .command('delete <skillNameWithNamespace>')
     .description('Delete a skill from marketplace')
     .option('--no-compat', 'Ignore API compatibility checks')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
     .option('--json', 'Output results using JSON')
     .option('--query [query]', 'A JMESPath query to use in filtering the response data.')
-    .action(withCompatibilityCheck((resourceName, options) => {
+    .action(withCompatibilityCheck((skillNameWithNamespace, options) => {
         try {
-            new DeleteResourceCommand(program, 'skill').execute(resourceName, options);
+            new DeleteResourceCommand(program, 'skill').execute(skillNameWithNamespace, options);
         }
         catch (err) {
             console.error(chalk.red(err.message));
@@ -134,16 +134,16 @@ program
 
 // Install Skill from marketplace
 program
-    .command('install <resourceName>')
+    .command('install <skillNameWithNamespace>')
     .description('Install a skill from marketplace')
     .option('--no-compat', 'Ignore API compatibility checks')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
     .option('--json', 'Output results using JSON')
     .option('--query [query]', 'A JMESPath query to use in filtering the response data.')
-    .action(withCompatibilityCheck((resourceNameWithNamespace, options) => {
+    .action(withCompatibilityCheck((skillNameWithNamespace, options) => {
         try {
-            new InstallResourceCommand(program, 'skill').execute(resourceNameWithNamespace, options);
+            new InstallResourceCommand(program, 'skill').execute(skillNameWithNamespace, options);
         }
         catch (err) {
             console.error(chalk.red(err.message));
@@ -152,7 +152,7 @@ program
 
 // Execute Skill in marketplace
 program
-    .command('execute <resourceNameWithNamespace>')
+    .command('execute <skillNameWithNamespace>')
     .description('Execute a skill in marketplace')
     .option('--no-compat', 'Ignore API compatibility checks')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
@@ -161,9 +161,9 @@ program
     .option('--query [query]', 'A JMESPath query to use in filtering the response data.')
     .option('--inputParams <inputParams>', 'Input data to use for execution of skill action')
     .option('--route <route>', 'Action name to invoke the service')
-    .action(withCompatibilityCheck((resourceNameWithNamespace, options) => {
+    .action(withCompatibilityCheck((skillNameWithNamespace, options) => {
         try {
-            new ExecuteResourceCommand(program, 'skill').execute(resourceNameWithNamespace, options);
+            new ExecuteResourceCommand(program, 'skill').execute(skillNameWithNamespace, options);
         }
         catch (err) {
             console.error(chalk.red(err.message));

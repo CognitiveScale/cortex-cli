@@ -74,34 +74,34 @@ program
 
 // Describe dataset of marketplace
 program
-    .command('describe <resourceName>')
+    .command('describe <datasetNameWithNamespace>')
     .description('Get details of a dataset from marketplace')
     .option('--no-compat', 'Ignore API compatibility checks')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
     .option('--json', 'Output results using JSON')
     .option('--query [query]', 'A JMESPath query to use in filtering the response data.')
-    .action(withCompatibilityCheck((resourceName, options) => {
+    .action(withCompatibilityCheck((datasetNameWithNamespace, options) => {
         try {
-            new DescribeResourceCommand(program, 'dataset').execute(resourceName, options);
+            new DescribeResourceCommand(program, 'dataset').execute(datasetNameWithNamespace, options);
         }
         catch (err) {
             console.error(chalk.red(err.message));
         }
     }));
 
-// Delete dataset of marketplace
+// Delete dataset from marketplace
 program
-    .command('delete <resourceName>')
+    .command('delete <datasetNameWithNamespace>')
     .description('Delete a dataset from marketplace')
     .option('--no-compat', 'Ignore API compatibility checks')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
     .option('--json', 'Output results using JSON')
     .option('--query [query]', 'A JMESPath query to use in filtering the response data.')
-    .action(withCompatibilityCheck((resourceName, options) => {
+    .action(withCompatibilityCheck((datasetNameWithNamespace, options) => {
         try {
-            new DeleteResourceCommand(program, 'dataset').execute(resourceName, options);
+            new DeleteResourceCommand(program, 'dataset').execute(datasetNameWithNamespace, options);
         }
         catch (err) {
             console.error(chalk.red(err.message));
@@ -133,16 +133,16 @@ program
 
 // Install dataset from marketplace
 program
-    .command('install <resourceName>')
+    .command('install <datasetNameWithNamespace>')
     .description('Install a dataset from marketplace')
     .option('--no-compat', 'Ignore API compatibility checks')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
     .option('--json', 'Output results using JSON')
     .option('--query [query]', 'A JMESPath query to use in filtering the response data.')
-    .action(withCompatibilityCheck((resourceNameWithNamespace, options) => {
+    .action(withCompatibilityCheck((datasetNameWithNamespace, options) => {
         try {
-            new InstallResourceCommand(program, 'dataset').execute(resourceNameWithNamespace, options);
+            new InstallResourceCommand(program, 'dataset').execute(datasetNameWithNamespace, options);
         }
         catch (err) {
             console.error(chalk.red(err.message));

@@ -22,11 +22,16 @@ const Resource = require('../client/marketplace');
 const { printSuccess, printError, filterObject, parseObject, printTable } = require('./utils');
 
 const getNamespaceAndResourceName = (resourceName) => {
-    if (_.isEmpty(resourceName)) { throw new SyntaxError(`Invalid name ${resourceName} must conform to namespace/version`); }
+    if (_.isEmpty(resourceName)) { throw new SyntaxError(`Invalid name ${resourceName} must conform to namespace/name:?version`); }
 
     if (resourceName.startsWith('/')) { throw new SyntaxError("Names cannot start with '/' "); }
 
-    return resourceName.split('/');
+    const parts = resourceName.split('/');
+    if (!parts[1]) {
+        throw new SyntaxError('Provide a name with namespace');
+    }
+
+    return parts;
 };
 
 module.exports.SaveResourceCommand = class SaveResourceCommand {
@@ -38,7 +43,7 @@ module.exports.SaveResourceCommand = class SaveResourceCommand {
 
     execute(resourceDefinition, executablePath, options) {
         const profile = loadProfile(options.profile);
-        debug('%s.executeSaveResource(%s)', profile.name, resourceDefinition);
+        debug('%s.executeSave%s(%s)', profile.name, _.upperFirst(this.resourceType), resourceDefinition);
 
         const resourceDefStr = fs.readFileSync(resourceDefinition);
         const resourceObject = parseObject(resourceDefStr, options);
@@ -69,7 +74,7 @@ module.exports.ListResourceCommand = class ListResourceCommand {
 
     execute(options) {
         const profile = loadProfile(options.profile);
-        debug('%s.executeListResource(%s)', profile.name);
+        debug('%s.executeList%s()', profile.name, _.upperFirst(this.resourceType));
         const sortBy = options.sort || '';
         const offset = options.offset || 0;
         const limit = options.limit || 10;
@@ -112,7 +117,7 @@ module.exports.DescribeResourceCommand = class DescribeResourceCommand {
 
     execute(resourceNameWithNamespace, options) {
         const profile = loadProfile(options.profile);
-        debug('%s.executeDescribeResource(%s)', profile.name, resourceNameWithNamespace);
+        debug('%s.executeDescribe%(%s)', profile.name, _.upperFirst(this.resourceType), resourceNameWithNamespace);
 
         const [ namespace, resourceName ] = getNamespaceAndResourceName(resourceNameWithNamespace);
 
@@ -141,7 +146,7 @@ module.exports.DeleteResourceCommand = class DeleteResourceCommand {
 
     execute(resourceNameWithNamespace, options) {
         const profile = loadProfile(options.profile);
-        debug('%s.executeDeleteResource(%s)', profile.name, resourceNameWithNamespace);
+        debug('%s.executeDelete%s(%s)', profile.name, _.upperFirst(this.resourceType), resourceNameWithNamespace);
 
         const [ namespace, resourceName ] = getNamespaceAndResourceName(resourceNameWithNamespace);
 
@@ -170,7 +175,7 @@ module.exports.SearchResourceCommand = class SearchResourceCommand {
 
     execute(searchString, options) {
         const profile = loadProfile(options.profile);
-        debug('%s.executeSearchResources(%s)', profile.name, searchString);
+        debug('%s.executeSearch%s(%s)', profile.name, _.upperFirst(this.resourceType), searchString);
         const sortBy = options.sort || '';
         const offset = options.offset || 0;
         const limit = options.limit || 10;
@@ -222,7 +227,7 @@ module.exports.InstallResourceCommand = class InstallResourceCommand {
 
     execute(resourceNameWithNamespace, options) {
         const profile = loadProfile(options.profile);
-        debug('%s.executeSearchResources(%s)', profile.name, resourceNameWithNamespace);
+        debug('%s.executeSearch%s(%s)', profile.name, _.upperFirst(this.resourceType), resourceNameWithNamespace);
 
         const [ namespace, resourceName ] = getNamespaceAndResourceName(resourceNameWithNamespace);
 
@@ -260,7 +265,7 @@ module.exports.ExecuteResourceCommand = class ExecutesourceCommand {
         this.resourceType = resourceType;
     }
 
-    validateInputParams(options) {
+    static validateInputParams(options) {
         if (!options.inputParams) {
             options.color = 'off';
             printError('error: option `--inputParams <inputParams>` argument missing', options);
@@ -272,7 +277,7 @@ module.exports.ExecuteResourceCommand = class ExecutesourceCommand {
         }
     }
 
-    validateRoute(options) {
+    static validateRoute(options) {
         if (!options.route) {
             options.color = 'off';
             printError('error: option `--route <route>` argument missing', options);
@@ -280,11 +285,11 @@ module.exports.ExecuteResourceCommand = class ExecutesourceCommand {
     }
 
     execute(resourceNameWithNamespace, options) {
-        this.validateInputParams(options);
-        this.validateRoute(options);
+        ExecutesourceCommand.validateInputParams(options);
+        ExecutesourceCommand.validateRoute(options);
 
         const profile = loadProfile(options.profile);
-        debug('%s.executeSearchResources(%s)', profile.name, resourceNameWithNamespace);
+        debug('%s.executeSearch%s(%s)', profile.name, _.upperFirst(this.resourceType), resourceNameWithNamespace);
 
         const [ namespace, resourceName ] = getNamespaceAndResourceName(resourceNameWithNamespace);
 
