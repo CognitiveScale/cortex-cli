@@ -78,7 +78,7 @@ module.exports.SaveResourceCommand = class SaveResourceCommand {
             printError(`"asset" field in ${this.resourceType} definition is required`);
         }
 
-        const [ namespace, resourceName ] = getNamespaceAndResourceName(resourceObject.name || resourceObject.asset.name);
+        const [ namespace, resourceName ] = getNamespaceAndResourceName(resourceObject.asset.name);
 
         const resource = new Resource(profile.url);
         resource.saveResource(this.resourceType, namespace, resourceName, profile.token, resourceObject, zipFilePath)
