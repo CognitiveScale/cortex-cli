@@ -114,7 +114,7 @@ module.exports.ListResourceCommand = class ListResourceCommand {
         resource.listResourcesByType(this.resourceType, profile.token, privateOnly, sortBy, offset, limit)
             .then((response) => {
                 if (response.success) {
-                    let result = filterObject(response, options) || [];
+                    let result = filterObject(response.resources, options) || [];
 
                     if (options.json) {
                         printSuccess(JSON.stringify(result, null, 2), options);
@@ -126,7 +126,7 @@ module.exports.ListResourceCommand = class ListResourceCommand {
                             { column: 'Version', field: '_version', width: 12 }
                         ];
 
-                        printTable(tableSpec, result.resources || result);
+                        printTable(tableSpec, result);
                     }
                 } else {
                     printError(`Failed to list ${this.resourceType}: ${response.status} ${response.message}`, options);
@@ -231,7 +231,7 @@ module.exports.SearchResourceCommand = class SearchResourceCommand {
         const resource = new Resource(profile.url);
         resource.searchResources(this.resourceType, searchObject, profile.token, privateOnly, sortBy, offset, limit).then((response) => {
             if (response.success) {
-                const result = filterObject(response, options) || [];
+                const result = filterObject(response.resources, options) || [];
 
                 if (options.json) {
                     printSuccess(JSON.stringify(result, null, 2), options);
@@ -242,7 +242,7 @@ module.exports.SearchResourceCommand = class SearchResourceCommand {
                         { column: 'Version', field: '_version', width: 12 }
                     ];
 
-                    printTable(tableSpec, result.resources || result);
+                    printTable(tableSpec, result);
                 }
             } else {
                 printError(`Failed to search ${this.resourceType}: [status:${response.status}] ${response.message}`, options);
@@ -270,7 +270,7 @@ module.exports.InstallResourceCommand = class InstallResourceCommand {
         const resource = new Resource(profile.url);
         resource.installResource(this.resourceType, namespace, resourceName, profile.token).then((response) => {
             if (response.success) {
-                let result = filterObject(response, options) || [];
+                let result = filterObject(response.scripts, options) || [];
 
                 if (options.json) {
                     printSuccess(JSON.stringify(result, null, 2), options);
@@ -281,7 +281,7 @@ module.exports.InstallResourceCommand = class InstallResourceCommand {
                         { column: 'code', field: 'code', width: 12 }
                     ];
 
-                    printTable(tableSpec, result.scripts || result);
+                    printTable(tableSpec, result);
                 }
             }
             else {
