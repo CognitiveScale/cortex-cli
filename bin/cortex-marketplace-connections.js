@@ -34,16 +34,16 @@ program.description('Work with Cortex Marketplace Connections');
 
 // Save connection in marketplace
 program
-    .command('save <connectionDefinition> <executablePath>')
+    .command('save <connectionDefinition>')
     .description('Save connection in marketplace')
     .option('--no-compat', 'Ignore API compatibility checks')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
     .option('-y, --yaml', 'Use YAML for connection definition format')
-    .option('-z, --zip', 'Use zip file to gather the executables')
-    .action(withCompatibilityCheck((connectionDefinition, executablePath, options) => {
+    .option('-z, --zip <zip>', 'Use zip file to gather the executables')
+    .action(withCompatibilityCheck((connectionDefinition, options) => {
         try {
-            new SaveResourceCommand(program, 'connection').execute(connectionDefinition, executablePath, options);
+            new SaveResourceCommand(program, 'connection').execute(connectionDefinition, options);
         }
         catch (err) {
             console.error(chalk.red(err.message));
