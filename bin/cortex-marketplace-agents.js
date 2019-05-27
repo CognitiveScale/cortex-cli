@@ -74,15 +74,15 @@ program
 
 // Describe agent of marketplace
 program
-    .command('describe <agentNameWithNamespace>')
+    .command('describe <agentName>')
     .description('Get details of a agent from marketplace')
     .option('--no-compat', 'Ignore API compatibility checks')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
     .option('--query [query]', 'A JMESPath query to use in filtering the response data.')
-    .action(withCompatibilityCheck((agentNameWithNamespace, options) => {
+    .action(withCompatibilityCheck((agentName, options) => {
         try {
-            new DescribeResourceCommand(program, 'agent').execute(agentNameWithNamespace, options);
+            new DescribeResourceCommand(program, 'agent').execute(agentName, options);
         }
         catch (err) {
             console.error(chalk.red(err.message));
@@ -91,14 +91,14 @@ program
 
 // Delete agent from marketplace
 program
-    .command('delete <agentNameWithNamespace>')
+    .command('delete <agentName>')
     .description('Delete an agent from marketplace')
     .option('--no-compat', 'Ignore API compatibility checks')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
-    .action(withCompatibilityCheck((agentNameWithNamespace, options) => {
+    .action(withCompatibilityCheck((agentName, options) => {
         try {
-            new DeleteResourceCommand(program, 'agent').execute(agentNameWithNamespace, options);
+            new DeleteResourceCommand(program, 'agent').execute(agentName, options);
         }
         catch (err) {
             console.error(chalk.red(err.message));
@@ -130,16 +130,16 @@ program
 
 // Install agent from marketplace
 program
-    .command('install <agentNameWithNamespace>')
+    .command('install <agentName>')
     .description('Install a agent from marketplace')
     .option('--no-compat', 'Ignore API compatibility checks')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
     .option('--json', 'Output results using JSON')
     .option('--query [query]', 'A JMESPath query to use in filtering the response data.')
-    .action(withCompatibilityCheck((agentNameWithNamespace, options) => {
+    .action(withCompatibilityCheck((agentName, options) => {
         try {
-            new InstallResourceCommand(program, 'agent').execute(agentNameWithNamespace, options);
+            new InstallResourceCommand(program, 'agent').execute(agentName, options);
         }
         catch (err) {
             console.error(chalk.red(err.message));

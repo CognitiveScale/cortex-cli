@@ -74,15 +74,15 @@ program
 
 // Describe connection of marketplace
 program
-    .command('describe <connectionNameWithNamespace>')
+    .command('describe <connectionName>')
     .description('Get details of a connection from marketplace')
     .option('--no-compat', 'Ignore API compatibility checks')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
     .option('--query [query]', 'A JMESPath query to use in filtering the response data.')
-    .action(withCompatibilityCheck((connectionNameWithNamespace, options) => {
+    .action(withCompatibilityCheck((connectionName, options) => {
         try {
-            new DescribeResourceCommand(program, 'connection').execute(connectionNameWithNamespace, options);
+            new DescribeResourceCommand(program, 'connection').execute(connectionName, options);
         }
         catch (err) {
             console.error(chalk.red(err.message));
@@ -91,14 +91,14 @@ program
 
 // Delete connection from marketplace
 program
-    .command('delete <connectionNameWithNamespace>')
+    .command('delete <connectionName>')
     .description('Delete a connection from marketplace')
     .option('--no-compat', 'Ignore API compatibility checks')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
-    .action(withCompatibilityCheck((connectionNameWithNamespace, options) => {
+    .action(withCompatibilityCheck((connectionName, options) => {
         try {
-            new DeleteResourceCommand(program, 'connection').execute(connectionNameWithNamespace, options);
+            new DeleteResourceCommand(program, 'connection').execute(connectionName, options);
         }
         catch (err) {
             console.error(chalk.red(err.message));
@@ -130,16 +130,16 @@ program
 
 // Install connection from marketplace
 program
-    .command('install <connectionNameWithNamespace>')
+    .command('install <connectionName>')
     .description('Install a connection from marketplace')
     .option('--no-compat', 'Ignore API compatibility checks')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
     .option('--json', 'Output results using JSON')
     .option('--query [query]', 'A JMESPath query to use in filtering the response data.')
-    .action(withCompatibilityCheck((connectionNameWithNamespace, options) => {
+    .action(withCompatibilityCheck((connectionName, options) => {
         try {
-            new InstallResourceCommand(program, 'connection').execute(connectionNameWithNamespace, options);
+            new InstallResourceCommand(program, 'connection').execute(connectionName, options);
         }
         catch (err) {
             console.error(chalk.red(err.message));

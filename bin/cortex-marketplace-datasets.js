@@ -74,15 +74,15 @@ program
 
 // Describe dataset of marketplace
 program
-    .command('describe <datasetNameWithNamespace>')
+    .command('describe <datasetName>')
     .description('Get details of a dataset from marketplace')
     .option('--no-compat', 'Ignore API compatibility checks')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
     .option('--query [query]', 'A JMESPath query to use in filtering the response data.')
-    .action(withCompatibilityCheck((datasetNameWithNamespace, options) => {
+    .action(withCompatibilityCheck((datasetName, options) => {
         try {
-            new DescribeResourceCommand(program, 'dataset').execute(datasetNameWithNamespace, options);
+            new DescribeResourceCommand(program, 'dataset').execute(datasetName, options);
         }
         catch (err) {
             console.error(chalk.red(err.message));
@@ -91,14 +91,14 @@ program
 
 // Delete dataset from marketplace
 program
-    .command('delete <datasetNameWithNamespace>')
+    .command('delete <datasetName>')
     .description('Delete a dataset from marketplace')
     .option('--no-compat', 'Ignore API compatibility checks')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
-    .action(withCompatibilityCheck((datasetNameWithNamespace, options) => {
+    .action(withCompatibilityCheck((datasetName, options) => {
         try {
-            new DeleteResourceCommand(program, 'dataset').execute(datasetNameWithNamespace, options);
+            new DeleteResourceCommand(program, 'dataset').execute(datasetName, options);
         }
         catch (err) {
             console.error(chalk.red(err.message));
@@ -130,16 +130,16 @@ program
 
 // Install dataset from marketplace
 program
-    .command('install <datasetNameWithNamespace>')
+    .command('install <datasetName>')
     .description('Install a dataset from marketplace')
     .option('--no-compat', 'Ignore API compatibility checks')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
     .option('--json', 'Output results using JSON')
     .option('--query [query]', 'A JMESPath query to use in filtering the response data.')
-    .action(withCompatibilityCheck((datasetNameWithNamespace, options) => {
+    .action(withCompatibilityCheck((datasetName, options) => {
         try {
-            new InstallResourceCommand(program, 'dataset').execute(datasetNameWithNamespace, options);
+            new InstallResourceCommand(program, 'dataset').execute(datasetName, options);
         }
         catch (err) {
             console.error(chalk.red(err.message));
