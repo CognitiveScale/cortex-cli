@@ -27,7 +27,8 @@ const {
     DescribeResourceCommand,
     DeleteResourceCommand,
     SearchResourceCommand,
-    InstallResourceCommand
+    InstallResourceCommand,
+    GenerateResourceCommand
 } = require('../src/commands/marketplace');
 
 program.description('Work with Cortex Marketplace Agents');
@@ -145,6 +146,20 @@ program
             console.error(chalk.red(err.message));
         }
     }));
+
+// Generate agent definition yaml file
+program
+    .command('generate')
+    .description('Generates the meta definition of a agent')
+    .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
+    .action((options) => { // deliberately not using withCompatibilityCheck()
+        try {
+            new GenerateResourceCommand(program, 'agent').execute(options);
+        }
+        catch (err) {
+            console.error(chalk.red(err.message));
+        }
+    });
 
 
 program.parse(process.argv);

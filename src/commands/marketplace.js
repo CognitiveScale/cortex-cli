@@ -15,6 +15,7 @@
  */
 const _ = require('lodash');
 const fs = require('fs');
+const yeoman = require('yeoman-environment');
 const debug = require('debug')('cortex:cli');
 const { loadProfile } = require('../config');
 const Resource = require('../client/marketplace');
@@ -345,5 +346,24 @@ module.exports.ExecuteResourceCommand = class ExecuteResourceCommand {
             .catch((err) => {
                 printError(`Failed to execute ${this.resourceType} ${resourceNameWithNamespace}: ${err.status} ${err.message}`, options);
             });
+    }
+};
+
+module.exports.GenerateResourceCommand = class GenerateSkillCommand {
+
+    constructor(program, resourceType) {
+        this.program = program;
+        this.resourceType = resourceType;
+    }
+
+    execute(options) {
+        const profile = loadProfile(options.profile);
+        debug('%s.generate%s()', profile.name, _.upperFirst(this.resourceType));
+        const yenv = yeoman.createEnv();
+        yenv.lookup(()=>{
+            yenv.run(`@c12e/cortex:marketplace_${this.resourceType}`,
+                { },
+                (err) => { err ? printError(err) : printSuccess('Done.') });
+        });
     }
 };

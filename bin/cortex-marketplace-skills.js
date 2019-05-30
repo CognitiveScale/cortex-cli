@@ -28,7 +28,8 @@ const {
     DeleteResourceCommand,
     SearchResourceCommand,
     InstallResourceCommand,
-    ExecuteResourceCommand
+    ExecuteResourceCommand,
+    GenerateResourceCommand
 } = require('../src/commands/marketplace');
 
 program.description('Work with Cortex Marketplace Skills');
@@ -165,5 +166,19 @@ program
             console.error(chalk.red(err.message));
         }
     }));
+
+// Generate skill definition yaml file
+program
+    .command('generate')
+    .description('Generates the meta definition of a skill')
+    .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
+    .action((options) => { // deliberately not using withCompatibilityCheck()
+        try {
+            new GenerateResourceCommand(program, 'skill').execute(options);
+        }
+        catch (err) {
+            console.error(chalk.red(err.message));
+        }
+    });
 
 program.parse(process.argv);
