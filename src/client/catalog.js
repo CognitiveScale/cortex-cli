@@ -27,7 +27,8 @@ const createEndpoints = (baseUri) => {
         skills: `${baseUri}/v3/catalog/skills`,
         agents: `${baseUri}/v3/catalog/agents`,
         types: `${baseUri}/v3/catalog/types`,
-        agentVersions: `${baseUri}/v3/agents/versions`
+        agentVersions: `${baseUri}/v3/agents/versions`,
+        profileSchemas: `${baseUri}/v3/graph/profiles/schemas`,
     }
 };
 
@@ -256,6 +257,95 @@ module.exports = class Catalog {
                     return {success: true, types: res.body.types};
                 }
                 return {success: false, status: res.status, message: res.body};
+            })
+            .catch((err) => {
+                return constructError(err);
+            });
+    }
+
+    saveProfileSchema(token, schemaObj) {
+        debug('saveProfileSchema(%s) => %s', schemaObj.name, this.endpoints.profileSchemas);
+        return request
+            .post(this.endpoints.profileSchemas)
+            .set('Authorization', `Bearer ${token}`)
+            .set('x-cortex-proxy-notify', true)
+            .send(schemaObj)
+            .then((res) => {
+                if (Boolean(_.get(res, 'headers.x-cortex-proxied', false)))
+                    console.error(chalk.blue('Request proxied to cloud.'));
+                if (res.ok) {
+                    return {success: true, message: res.body};
+                }
+                return {success: false, message: res.body, status: res.status};
+            })
+            .catch((err) => {
+                return constructError(err);
+            });
+    }
+
+    listProfileSchemas(token, filter, sort, limit, skip) {
+        debug('listProfileSchemas() => %s', this.endpoints.profileSchemas);
+        const req = request
+            .get(this.endpoints.profileSchemas)
+            .set('Authorization', `Bearer ${token}`)
+            .set('x-cortex-proxy-notify', true);
+
+        if (filter) req.query({ filter });
+        if (sort) req.query({ sort });
+        if (limit) req.query({ limit });
+        if (skip) req.query({ skip });
+        
+        return req.then((res) => {
+            if (Boolean(_.get(res, 'headers.x-cortex-proxied', false)))
+                console.error(chalk.blue('Request proxied to cloud.'));
+            if (res.ok) {
+                return {success: true, schemas: res.body.schemas};
+            }
+            return {success: false, status: res.status, message: res.body};
+        })
+        .catch((err) => {
+            return constructError(err);
+        });
+    }
+
+    describeProfileSchema(token, schemaName) {
+        const endpoint = `${this.endpoints.profileSchemas}/${schemaName}`;
+        debug('describeProfileSchema(%s) => %s', schemaName, endpoint);
+        return request
+            .get(endpoint)
+            .set('Authorization', `Bearer ${token}`)
+            .set('x-cortex-proxy-notify', true)
+            .then((res) => {
+                if (Boolean(_.get(res, 'headers.x-cortex-proxied', false)))
+                    console.error(chalk.blue('Request proxied to cloud.'));
+                if (res.ok) {
+                    return {success: true, schema: res.body};
+                }
+                else {
+                    return {success: false, message: res.body, status: res.status};
+                }
+            })
+            .catch((err) => {
+                return constructError(err);
+            });
+    }
+
+    deleteProfileSchema(token, schemaName) {
+        const endpoint = `${this.endpoints.profileSchemas}/${schemaName}`;
+        debug('deleteProfileSchema(%s) => %s', schemaName, endpoint);
+        return request
+            .delete(endpoint)
+            .set('Authorization', `Bearer ${token}`)
+            .set('x-cortex-proxy-notify', true)
+            .then((res) => {
+                if (Boolean(_.get(res, 'headers.x-cortex-proxied', false)))
+                    console.error(chalk.blue('Request proxied to cloud.'));
+                if (res.ok) {
+                    return {success: true};
+                }
+                else {
+                    return {success: false, message: res.body, status: res.status};
+                }
             })
             .catch((err) => {
                 return constructError(err);

@@ -41,7 +41,10 @@ program
     .command('tasks [cmd]', 'Work with Cortex v2 Tasks')
     .command('types [cmd]', 'Work with Cortex Types')
     .command('variables [cmd]', 'Work with Cortex Secure Variables')
-    .command('marketplace [cmd]', 'Work with Cortex Marketplace');
+    .command('marketplace [cmd]', 'Work with Cortex Marketplace')
+    .command('experiments [cmd]', 'Work with Cortex Experiments')
+    .command('profiles [cmd]', 'Work with Cortex Profiles')
+    .command('graph [cmd]', 'Work with the Cortex Graph');
 
 program.parse(process.argv, { noActionHandler: function() {
 
