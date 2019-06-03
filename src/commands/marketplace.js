@@ -34,21 +34,6 @@ const getNamespaceAndResourceName = (resourceName) => {
     return parts;
 };
 
-/**
- * Read from file and parse JSON. If not parse the given value.
- * 
- * @param filterString - JSON filepath or JSON string
- * @returns Object - Parsed JSON
- */
-const readJsonFromFileOrString = (filterString) => {
-    try {
-        const data = fs.readFileSync(filterString);
-        return JSON.parse(data.toString());
-    } catch (err) {
-        return JSON.parse(filterString);
-    }
-};
-
 module.exports.SaveResourceCommand = class SaveResourceCommand {
 
     constructor(program, resourceType) {
@@ -220,13 +205,13 @@ module.exports.SearchResourceCommand = class SearchResourceCommand {
         };
 
         if (options.filter) {
-            let filterQuery = {};
             try {
-                filterQuery = readJsonFromFileOrString(options.filter);
+                const filterQuery = parseObject(options.filter, options);
+                Object.assign(searchObject._filter, filterQuery);
             } catch (err) {
-                printError('filterQuery should be valid JSON');
+                debug('Error parsing filterQuery: %e', err.message);
+                printError('filterQuery should be valid JSON string');
             }
-            Object.assign(searchObject._filter, filterQuery);
         }
 
         const resource = new Resource(profile.url);
@@ -272,18 +257,7 @@ module.exports.InstallResourceCommand = class InstallResourceCommand {
         resource.installResource(this.resourceType, namespace, resourceName, profile.token).then((response) => {
             if (response.success) {
                 let result = filterObject(response.scripts, options) || [];
-
-                if (options.json) {
-                    printSuccess(JSON.stringify(result, null, 2), options);
-                } else {
-                    const tableSpec = [
-                        { column: 'Script', field: 'script', width: 40 },
-                        { column: 'Output', field: 'output', width: 100 },
-                        { column: 'code', field: 'code', width: 12 }
-                    ];
-
-                    printTable(tableSpec, result);
-                }
+                printSuccess(JSON.stringify(result, null, 2), options);
             }
             else {
                 printError(`Failed to install ${this.resourceType} ${resourceNameWithNamespace}: ${response.details || response.message}`, options);
@@ -302,30 +276,25 @@ module.exports.ExecuteResourceCommand = class ExecuteResourceCommand {
         this.resourceType = resourceType;
     }
 
-    static getInputParams(options) {
-        if (!options.inputParams) {
-            printError('error: option `--inputParams <inputParams>` argument missing', options);
-        }
-        try {
-            const inputParams = {
-                payload: readJsonFromFileOrString(options.inputParams)
-            };
-            return JSON.stringify(inputParams);
-        } catch (err) {
-            printError('inputParams should be a valid json');
-        }
-    }
-
-    static getRoute(options) {
+    execute(resourceNameWithNamespace, options) {
         if (!options.route) {
             printError('error: option `--route <route>` argument missing', options);
         }
-        return options.route;
-    }
+        const route = options.route;
 
-    execute(resourceNameWithNamespace, options) {
-        const inputParams = ExecuteResourceCommand.getInputParams(options);
-        const route = ExecuteResourceCommand.getRoute(options);
+        // Add input params into the payload field as per marketplace web
+        let params = {
+            payload: ""
+        };
+        if (options.params) {
+            params.payload = parseObject(options.params, options);
+        } else if (options.paramsFile) {
+            const paramsStr = fs.readFileSync(options.paramsFile);
+            params.payload = parseObject(paramsStr, options);
+        } else {
+            printError('--params [params] or --params-file [paramsFile] argument missing');
+        }
+        params = JSON.stringify(params);
 
         const profile = loadProfile(options.profile);
         debug('%s.executeSearch%s(%s)', profile.name, _.upperFirst(this.resourceType), resourceNameWithNamespace);
@@ -333,7 +302,7 @@ module.exports.ExecuteResourceCommand = class ExecuteResourceCommand {
         const [ namespace, resourceName ] = getNamespaceAndResourceName(resourceNameWithNamespace);
 
         const resource = new Resource(profile.url);
-        resource.executeResource(this.resourceType, namespace, resourceName, profile.token, inputParams, route)
+        resource.executeResource(this.resourceType, namespace, resourceName, profile.token, params, route)
             .then((response) => {
                 if (response.success) {
                     let result = filterObject(response.response, options);
