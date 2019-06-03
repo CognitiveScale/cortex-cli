@@ -115,7 +115,7 @@ program
     .option('--profile [profile]', 'The profile to use')
     .option('--json', 'Output results using JSON')
     .option('--query [query]', 'A JMESPath query to use in filtering the response data.')
-    .option('--filter [filter]', 'Filter query object to search')
+    .option('--filter [filter]', 'Filter query(a JSON string) to search')
     .option('--sort [sort]', 'To sort skills by any field')
     .option('--offset [offset]', 'Skip the number of skills in the response')
     .option('--limit [limit]', 'Limit the number of skills in the response')
@@ -136,7 +136,6 @@ program
     .option('--no-compat', 'Ignore API compatibility checks')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
-    .option('--json', 'Output results using JSON')
     .option('--query [query]', 'A JMESPath query to use in filtering the response data.')
     .action(withCompatibilityCheck((skillName, options) => {
         try {
@@ -155,8 +154,10 @@ program
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
     .option('--query [query]', 'A JMESPath query to use in filtering the response data.')
-    .option('--inputParams <inputParams>', 'Input data to use for execution of skill action')
-    .option('--route <route>', 'Action name to invoke the service')
+    .option('--params [params]', 'JSON params to use as input for execution of skill action')
+    .option('--params-file [paramsFile]', 'A file containing either JSON or YAML formatted params')
+    .option('--route <route>', 'Action name to invoke on execute')
+    .option('-y, --yaml', 'Use YAML for paramsFile option')
     .action(withCompatibilityCheck((skillName, options) => {
         try {
             new ExecuteResourceCommand(program, 'skill').execute(skillName, options);

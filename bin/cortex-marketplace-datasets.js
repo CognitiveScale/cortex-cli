@@ -114,7 +114,7 @@ program
     .option('--profile [profile]', 'The profile to use')
     .option('--json', 'Output results using JSON')
     .option('--query [query]', 'A JMESPath query to use in filtering the response data.')
-    .option('--filter [filter]', 'Filter query object to search')
+    .option('--filter [filter]', 'Filter query(a JSON string) to search')
     .option('--sort [sort]', 'To sort datasets by any field')
     .option('--offset [offset]', 'Skip the number of datasets in the response')
     .option('--limit [limit]', 'Limit the number of datasets in the response')
@@ -135,7 +135,6 @@ program
     .option('--no-compat', 'Ignore API compatibility checks')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
-    .option('--json', 'Output results using JSON')
     .option('--query [query]', 'A JMESPath query to use in filtering the response data.')
     .action(withCompatibilityCheck((datasetName, options) => {
         try {
