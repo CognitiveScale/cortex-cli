@@ -146,14 +146,15 @@ program
         }
     }));
 
-// Generate connection definition yaml file
+// Generate connection definition yaml file for marketplace
 program
-    .command('generate')
+    .command('generate <connectionDefinition>')
     .description('Generates the meta definition of a connection')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
-    .action((options) => { // deliberately not using withCompatibilityCheck()
+    .option('-y, --yaml', 'Use YAML for connection definition format')
+    .action((connectionDefinition, options) => { // deliberately not using withCompatibilityCheck()
         try {
-            new GenerateResourceCommand(program, 'connection').execute(options);
+            new GenerateResourceCommand(program, 'connection').execute(connectionDefinition, options);
         }
         catch (err) {
             console.error(chalk.red(err.message));

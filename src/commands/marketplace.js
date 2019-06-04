@@ -318,20 +318,24 @@ module.exports.ExecuteResourceCommand = class ExecuteResourceCommand {
     }
 };
 
-module.exports.GenerateResourceCommand = class GenerateSkillCommand {
+module.exports.GenerateResourceCommand = class GenerateResourceCommand {
 
     constructor(program, resourceType) {
         this.program = program;
         this.resourceType = resourceType;
     }
 
-    execute(options) {
+    execute(resourceDefinition, options) {
         const profile = loadProfile(options.profile);
         debug('%s.generate%s()', profile.name, _.upperFirst(this.resourceType));
         const yenv = yeoman.createEnv();
+        const resourceDefinitionStr = fs.readFileSync(resourceDefinition);
+        const resourceObject = parseObject(resourceDefinitionStr, options);
+        const generatorOptions = {};
+        generatorOptions[`${this.resourceType}Definition`] = resourceObject;
         yenv.lookup(()=>{
             yenv.run(`@c12e/cortex:marketplace_${this.resourceType}`,
-                { },
+                generatorOptions,
                 (err) => { err ? printError(err) : printSuccess('Done.') });
         });
     }
