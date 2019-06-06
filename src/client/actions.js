@@ -128,6 +128,23 @@ module.exports = class Actions {
             });
     }
 
+    getLogsAction(token, actionName) {
+        const endpoint = `${this.endpointV3}/${actionName}/logs`;
+        debug('getLogsAction(%s) => %s', actionName, endpoint);
+        return request
+            .get(endpoint)
+            .set('Authorization', `Bearer ${token}`)
+            .then((res) => {
+                if (res.ok) {
+                    return {success: true, logs: res.body};
+                }
+                return {success: false, status: res.status, message: res.body};
+            })
+            .catch((err) => {
+                return constructError(err);
+            });
+    }
+
     deleteAction(token, actionName, actionType) {
         let endpoint = `${this.endpointV3}/${actionName}`;
         if (actionType) {

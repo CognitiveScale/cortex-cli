@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
+const _ = require('lodash');
 const fs = require('fs');
 const uuid = require('uuid/v4');
 const debug = require('debug')('cortex:cli');
@@ -343,3 +343,26 @@ module.exports.ListTaskByActivation = class {
     }
 };
 
+module.exports.GetLogsCommand = class {
+    constructor(program) {
+        this.program = program;
+    }
+
+    execute(jobId, options) {
+        const profile = loadProfile(options.profile);
+        debug('%s.getLogsActions (%s, %s)', profile.name, jobId);
+        const actions = new Actions(profile.url);
+        actions.getLogsAction(profile.token, jobId)
+            .then((response) => {
+                if (response.success) {
+                    if (options.json) {
+                        return printSuccess(JSON.stringify(response, null, 2), options);
+                    }
+                    const logsStr = _.get(response,'logs',[]).join('/n');
+                    console.log(logsStr);
+                } else {
+                    printError(`Action get logs failed: ${response.status} ${response.message}`, options);
+                }
+            })
+    }
+};
