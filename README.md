@@ -182,4 +182,23 @@ cortex agents list --query "[].{name: name, title: title}"
     - [ ] list
     - [ ] save [registryName]
     - [ ] delete [registryName]
-
+- [x] profiles
+    - [x] save-schema
+    - [x] list-schemas
+    - [x] describe-schema
+    - [x] delete-schema
+    - [x] list
+    - [x] describe
+    - [x] delete
+    - [x] rebuild
+- [x] graph
+    - [x] find-events
+    - [x] publish
+- [x] experiments
+    - [x] list
+    - [x] describe
+    - [x] delete
+    - [x] list-runs
+    - [x] describe-runs
+    - [x] delete-run
+    - [x] download-artifact

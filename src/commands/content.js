@@ -80,7 +80,7 @@ module.exports.UploadContent = class UploadContent {
         const upload = _.partial(UploadContent.upload, contentClient, profile, options);
 
         if (options.recursive) {
-            getSourceFiles(filePath, (filesDict, err) => {
+            getSourceFiles(filePath, (err, filesDict) => {
                 if (err) {
                     debug(err);
                     printError(`Failed to upload content: ${err.status} ${err.message}`, options);

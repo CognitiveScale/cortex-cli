@@ -24,17 +24,32 @@ const { readConfig, defaultConfig } = require('../config');
 const { printSuccess, printError } = require('./utils');
 
 const DEFAULT_CORTEX_URL = 'https://api.cortex.insights.ai';
+const URL_REGEX=/^(https?):\/\/(-\.)?([^\s/?\.#]+\.?)+(\/[^\s]*)?$/;
+/**
+ * Validate 's'' is not empty, return 's' or throw error
+ * @param s
+ * @param msg
+ * @param regex
+ * @returns {*}
+ * @private
+ */
+function _validate(s, msg, regex=undefined) {
+    if (_.isEmpty(s) || (regex && !regex.test(s))) {
+        console.error(chalk.red(msg));
+        process.exit(1);
+    }
+    return s;
+}
 
 module.exports.ConfigureCommand = class {
 
     constructor(program) {
         this.program = program;
     }
-
     execute(options) {
         const config = readConfig();
         const profileName = options.profile || _.get(config,'currentProfile','default');
-        const profileUrl = this.program.url || _.get(config,'url');
+        const profileUrl = (this.program.url || process.env.CORTEX_URI) || _.get(config,'url');
         const profileAccount = this.program.account || _.get(config ,'account');
         const profileUsername = this.program.username || _.get(config,'username');
         const profilePassword = this.program.password || undefined;
@@ -47,41 +62,22 @@ module.exports.ConfigureCommand = class {
         co(function*(){
             const defaultCortexUrl = profile.url || DEFAULT_CORTEX_URL;
             const defaultAccount = profile.account || '';
-            const defaultUsername = profile.username || '';
-
+            const defaultUsername = profile.username || '';``
             console.log(`Configuring profile ${chalk.green.bold(profileName)}:`);
             let cortexUrl = (profileUrl) ? profileUrl : yield prompt(`Cortex URL [${defaultCortexUrl}]: `);
+            const URL_VALIDATION_MSG=`A valid URL (http[s]://) is required. "${cortexUrl}"`;
+            cortexUrl = _validate(cortexUrl || defaultCortexUrl, URL_VALIDATION_MSG ,URL_REGEX);
+            cortexUrl =cortexUrl.replace(/\/$/, ''); // strip any trailing /
             let account = (profileAccount) ? profileAccount : yield prompt(`Account [${defaultAccount}]: `);
+            account = _validate(account || defaultAccount, 'An account name is required.');
             let username = (profileUsername) ? profileUsername : yield prompt(`Username [${defaultUsername}]: `);
-            const password = (profilePassword) ? profilePassword : yield prompt.password('Password: ');
-
-            cortexUrl = cortexUrl || defaultCortexUrl;
-            cortexUrl = cortexUrl.replace(/\/$/, ''); // strip any trailing /
-            account = account || defaultAccount;
-            username = username || defaultUsername;
+            username = _validate(username || defaultUsername, 'A user name is required.');
+            const password = _validate((profilePassword) ? profilePassword : yield prompt.password('Password: '),
+                'A password is required.');
 
             debug('cortexUrl: %s', cortexUrl);
             debug('account: %s', account);
             debug('username: %s', username);
-
-            if (!cortexUrl.match(/^[a-zA-Z]+:\/\//)) {
-                cortexUrl = 'http://' + cortexUrl;
-            }
-
-            if (!cortexUrl) {
-                console.error(chalk.red('Cortex URL must be provided'));
-                return;
-            }
-
-            if (!account) {
-                console.error(chalk.red('Cortex account name must be provided'));
-                return;
-            }
-
-            if (!username) {
-                console.error(chalk.red('Cortex username must be provided'));
-                return;
-            }
 
             const auth = new Auth(cortexUrl);
             try {

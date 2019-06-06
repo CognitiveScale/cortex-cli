@@ -1,0 +1,162 @@
+#!/usr/bin/env node
+
+/*
+ * Copyright 2019 Cognitive Scale, Inc. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the “License”);
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an “AS IS” BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+const chalk = require('chalk');
+const program = require('../src/commander');
+
+const { withCompatibilityCheck } = require('../src/compatibility');
+
+const {
+    ListExperiments,
+    DescribeExperimentCommand,
+    ListRuns,
+    DescribeRunCommand,
+    DeleteRunCommand,
+    DownloadArtifactCommand,
+} = require('../src/commands/experiments');
+
+program.description('Work with Cortex Experiments');
+
+// List Experiments
+program
+    .command('list')
+    .description('Find experiments')
+    .option('--no-compat', 'Ignore API compatibility checks')
+    .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
+    .option('--profile [profile]', 'The profile to use')
+    .option('--json', 'Output results using JSON')
+    .option('--query [query]', 'A JMESPath query to use in filtering the response data.')
+    .option('--filter [filter]', 'A Mongo style filter to use.')
+    .option('--sort [sort]', 'A Mongo style sort statement to use in the query.')
+    .option('--limit [limit]', 'Limit the number of experiments returned.')
+    .option('--skip [skip]', 'Move the result cursor to this position before returning results.')
+    .action(withCompatibilityCheck((options) => {
+        try {
+            new ListExperiments(program).execute(options);
+        }
+        catch (err) {
+            console.error(chalk.red(err.message));
+        }
+    }));
+
+// Describe Experiment
+program
+    .command('describe <experimentName>')
+    .description('Describe experiment')
+    .option('--no-compat', 'Ignore API compatibility checks')
+    .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
+    .option('--profile [profile]', 'The profile to use')
+    .option('--query [query]', 'A JMESPath query to use in filtering the response data.')
+    .action(withCompatibilityCheck((experimentName, options) => {
+        try {
+            new DescribeExperimentCommand(program).execute(experimentName, options);
+        }
+        catch (err) {
+            console.error(chalk.red(err.message));
+        }
+    }));
+
+// Delete Experiment
+program
+    .command('delete <experimentName>')
+    .description('Delete an experiment')
+    .option('--no-compat', 'Ignore API compatibility checks')
+    .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
+    .option('--profile [profile]', 'The profile to use')
+    .action(withCompatibilityCheck((experimentName, runId, options) => {
+        try {
+            new DeleteExperimentCommand(program).execute(experimentName, options);
+        }
+        catch (err) {
+            console.error(chalk.red(err.message));
+        }
+    }));
+
+// List Runs
+program
+    .command('list-runs <experimentName>')
+    .description('Find runs within an experiment')
+    .option('--no-compat', 'Ignore API compatibility checks')
+    .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
+    .option('--profile [profile]', 'The profile to use')
+    .option('--json', 'Output results using JSON')
+    .option('--query [query]', 'A JMESPath query to use in filtering the response data.')
+    .option('--filter [filter]', 'A Mongo style filter to use.')
+    .option('--sort [sort]', 'A Mongo style sort statement to use in the query.')
+    .option('--limit [limit]', 'Limit the number of experiments returned.')
+    .option('--skip [skip]', 'Move the result cursor to this position before returning results.')
+    .action(withCompatibilityCheck((experimentName, options) => {
+        try {
+            new ListRuns(program).execute(experimentName, options);
+        }
+        catch (err) {
+            console.error(chalk.red(err.message));
+        }
+    }));
+
+// Describe Run
+program
+    .command('describe-run <experimentName> <runId>')
+    .description('Describe run')
+    .option('--no-compat', 'Ignore API compatibility checks')
+    .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
+    .option('--profile [profile]', 'The profile to use')
+    .option('--query [query]', 'A JMESPath query to use in filtering the response data.')
+    .action(withCompatibilityCheck((experimentName, runId, options) => {
+        try {
+            new DescribeRunCommand(program).execute(experimentName, runId, options);
+        }
+        catch (err) {
+            console.error(chalk.red(err.message));
+        }
+    }));
+
+// Delete Run
+program
+    .command('delete-run <experimentName> <runId>')
+    .description('Delete run')
+    .option('--no-compat', 'Ignore API compatibility checks')
+    .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
+    .option('--profile [profile]', 'The profile to use')
+    .action(withCompatibilityCheck((experimentName, runId, options) => {
+        try {
+            new DeleteRunCommand(program).execute(experimentName, runId, options);
+        }
+        catch (err) {
+            console.error(chalk.red(err.message));
+        }
+    }));
+
+// Download Artifact
+program
+    .command('download-artifact <experimentName> <runId> <artifactName>')
+    .description('Download artifact from run')
+    .option('--no-compat', 'Ignore API compatibility checks')
+    .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
+    .option('--profile [profile]', 'The profile to use')
+    .action(withCompatibilityCheck((experimentName, runId, artifactName, options) => {
+        try {
+            new DownloadArtifactCommand(program).execute(experimentName, runId, artifactName, options);
+        }
+        catch (err) {
+            console.error(chalk.red(err.message));
+        }
+    }));
+
+
+program.parse(process.argv);

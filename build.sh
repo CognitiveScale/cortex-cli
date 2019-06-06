@@ -26,6 +26,7 @@ function local_docker(){
 
 # This runs inside a linux docker container
 function docker_build(){
+    npm -v
     npm config set loglevel warn
     npm cache clear --force
     npm install -dd --verbose
@@ -35,9 +36,10 @@ function docker_build(){
     if [[ ${BRANCH} = "master" ]]; then
         rm -rf node_modules
         npm install --silent --only=production
-#        npm publish
-#    elif [[ ${BRANCH} = "develop" ]]; then
-#        npm publish --tag develop
+        npm publish --registry=https://registry.npmjs.com/
+    elif [[ ${BRANCH} = "develop" ]]; then
+        npm config set always-auth true
+        npm publish --tag "${BRANCH}" --registry=https://cognitivescale.jfrog.io/cognitivescale/api/npm/npm-local/
     fi
 }
 
