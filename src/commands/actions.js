@@ -359,7 +359,7 @@ module.exports.GetLogsCommand = class {
                         return printSuccess(JSON.stringify(response, null, 2), options);
                     }
                     const logsStr = _.get(response,'logs',[]).join('/n');
-                    console.log(logsStr);
+                    printSuccess(logsStr, options);
                 } else {
                     printError(`Action get logs failed: ${response.status} ${response.message}`, options);
                 }
