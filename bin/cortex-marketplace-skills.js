@@ -64,7 +64,7 @@ program
     .option('--sort [sort]', 'To sort skills by any field')
     .option('--offset [offset]', 'Skip the number of skills in the response')
     .option('--limit [limit]', 'Limit the number of skills in the response')
-    .option('--private', 'List only private skills', false)
+    .option('--all', 'List all private and public skills', false)
     .action(withCompatibilityCheck((options) => {
         try {
             new ListResourceCommand(program, 'skill').execute(options);
@@ -120,7 +120,7 @@ program
     .option('--sort [sort]', 'To sort skills by any field')
     .option('--offset [offset]', 'Skip the number of skills in the response')
     .option('--limit [limit]', 'Limit the number of skills in the response')
-    .option('--private', 'List only private skills', false)
+    .option('--all', 'Search on all private and public skills', false)
     .action(withCompatibilityCheck((searchString, options) => {
         try {
             new SearchResourceCommand(program, 'skill').execute(searchString, options);

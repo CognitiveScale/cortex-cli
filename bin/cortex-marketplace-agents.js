@@ -64,7 +64,7 @@ program
     .option('--sort [sort]', 'To sort agents by any field')
     .option('--offset [offset]', 'Skip the number of agents in the response')
     .option('--limit [limit]', 'Limit the number of agents in the response')
-    .option('--private', 'List only private agents', false)
+    .option('--all', 'List all private and public agents', false)
     .action(withCompatibilityCheck((options) => {
         try {
             new ListResourceCommand(program, 'agent').execute(options);
@@ -120,7 +120,7 @@ program
     .option('--sort [sort]', 'To sort agents by any field')
     .option('--offset [offset]', 'Skip the number of agents in the response')
     .option('--limit [limit]', 'Limit the number of agents in the response')
-    .option('--private', 'List only private agents', false)
+    .option('--all', 'Search on all private and public agents', false)
     .action(withCompatibilityCheck((searchString, options) => {
         try {
             new SearchResourceCommand(program, 'agent').execute(searchString, options);
