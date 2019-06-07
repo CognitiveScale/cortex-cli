@@ -62,7 +62,7 @@ program
     .option('--sort [sort]', 'To sort connections by any field')
     .option('--offset [offset]', 'Skip the number of connections in the response')
     .option('--limit [limit]', 'Limit the number of connections in the response')
-    .option('--private', 'List only private connections', false)
+    .option('--all', 'List all private and public connections', false)
     .action(withCompatibilityCheck((options) => {
         try {
             new ListResourceCommand(program, 'connection').execute(options);
@@ -118,7 +118,7 @@ program
     .option('--sort [sort]', 'To sort connections by any field')
     .option('--offset [offset]', 'Skip the number of connections in the response')
     .option('--limit [limit]', 'Limit the number of connections in the response')
-    .option('--private', 'List only private connections', false)
+    .option('--all', 'Search on all private and public connections', false)
     .action(withCompatibilityCheck((searchString, options) => {
         try {
             new SearchResourceCommand(program, 'connection').execute(searchString, options);

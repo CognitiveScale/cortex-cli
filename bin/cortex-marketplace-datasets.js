@@ -62,7 +62,7 @@ program
     .option('--sort [sort]', 'To sort datasets by any field')
     .option('--offset [offset]', 'Skip the number of datasets in the response')
     .option('--limit [limit]', 'Limit the number of datasets in the response')
-    .option('--private', 'List only private datasets', false)
+    .option('--all', 'List all private and public datasets', false)
     .action(withCompatibilityCheck((options) => {
         try {
             new ListResourceCommand(program, 'dataset').execute(options);
@@ -118,7 +118,7 @@ program
     .option('--sort [sort]', 'To sort datasets by any field')
     .option('--offset [offset]', 'Skip the number of datasets in the response')
     .option('--limit [limit]', 'Limit the number of datasets in the response')
-    .option('--private', 'List only private datasets', false)
+    .option('--all', 'Search on all private and public datasets', false)
     .action(withCompatibilityCheck((searchString, options) => {
         try {
             new SearchResourceCommand(program, 'dataset').execute(searchString, options);

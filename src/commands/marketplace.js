@@ -93,7 +93,7 @@ module.exports.ListResourceCommand = class ListResourceCommand {
         const sortBy = options.sort || '';
         const offset = options.offset || 0;
         const limit = options.limit || 10;
-        const privateOnly = options.private || false;
+        const privateOnly = !(options.all || false);
 
         const resource = new Resource(profile.url);
         resource.listResourcesByType(this.resourceType, profile.token, privateOnly, sortBy, offset, limit)
@@ -194,7 +194,7 @@ module.exports.SearchResourceCommand = class SearchResourceCommand {
         const sortBy = options.sort || '';
         const offset = options.offset || 0;
         const limit = options.limit || 10;
-        const privateOnly = options.private || false;
+        const privateOnly = !(options.all || false);
 
         const searchObject = {
             _searchString: searchString || '',
