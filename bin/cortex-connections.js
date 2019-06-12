@@ -24,6 +24,7 @@ const { withCompatibilityCheck } = require('../src/compatibility');
 const {
     ListConnections,
     SaveConnectionCommand,
+    QueryConnectionCommand,
     DescribeConnectionCommand,
     TestConnectionCommand,
     ListConnectionsTypes,
@@ -62,6 +63,23 @@ program
     .action(withCompatibilityCheck((connDefinition, options) => {
         try {
             new SaveConnectionCommand(program).execute(connDefinition, options);
+        }
+        catch (err) {
+            console.error(chalk.red(err.message));
+        }
+    }));
+
+// Query Connection
+program
+    .command('query <connectionName>')
+    .description('Query a connection.')
+    .option('--no-compat', 'Ignore API compatibility checks')
+    .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
+    .option('--profile [profile]', 'The profile to use')
+    .option('--query [query]', 'The query to use, "select 1" is default')
+    .action(withCompatibilityCheck((connName, options) => {
+        try {
+            new QueryConnectionCommand(program).execute(connName, options);
         }
         catch (err) {
             console.error(chalk.red(err.message));

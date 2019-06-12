@@ -282,6 +282,38 @@ module.exports.ListConnectionsTypes = class ListConnectionsTypes {
     }
 };
 
+module.exports.QueryConnectionCommand = class QueryConnectionCommand {
+
+    constructor(program) {
+        this.program = program;
+    }
+
+    execute(connectionName, options) {
+        const profile = loadProfile(options.profile);
+        debug('%s.executeQueryConnection(%s)', profile.name, connectionName);
+
+        debug('params: %o', options);
+
+        if(!options.query) {
+            options.query = 'select 1';
+        }
+
+        const connections = new Connections(profile.url);
+        connections.queryConnection(profile.token, connectionName, options)
+            .then((response) => {
+                if (response.success) {
+                    printSuccess(JSON.stringify(response, null, 2), options);
+                }
+                else {
+                    printError(`Failed to query connection: ${response.status} ${response.message}`, options);
+                }
+            })
+            .catch((err) => {
+                printError(`Failed to query connection: ${err.status} ${err.message}`, options);
+            });
+    }
+};
+
 module.exports.GenerateConnectionCommand = class GenerateConnectionCommand {
 
     constructor(program) {
