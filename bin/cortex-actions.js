@@ -142,6 +142,7 @@ program
     .option('--docker [image]', 'Docker image to use as the runner')
     .option('--memory [memory]', 'Action memory limit in megabytes')
     .option('--vcpus [vcpus]', 'Action vcpus limit in integer')
+    .option('--ttl [ttl]', 'Daemon time to live')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
     .option('--actionType [actionType]', 'Type of action')

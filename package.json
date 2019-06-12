@@ -1,6 +1,6 @@
 {
   "name": "cortex-cli",
-  "version": "0.12.17",
+  "version": "0.12.18",
   "description": "Command line tool for CognitiveScale Cortex.",
   "main": "./bin/cortex.js",
   "scripts": {
