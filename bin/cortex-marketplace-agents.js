@@ -34,16 +34,16 @@ program.description('Work with Cortex Marketplace Agents');
 
 // Save agent in marketplace
 program
-    .command('save <agentDefinition>')
+    .command('save <agentName> <agentDefinition>')
     .description('Save agent in marketplace')
     .option('--no-compat', 'Ignore API compatibility checks')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
     .option('-y, --yaml', 'Use YAML for agent definition format')
     .option('-z, --zip <zip>', 'Use zip file to gather the executables')
-    .action(withCompatibilityCheck((agentDefinition, options) => {
+    .action(withCompatibilityCheck((agentDefinition, agentName, options) => {
         try {
-            new SaveResourceCommand(program, 'agent').execute(agentDefinition, options);
+            new SaveResourceCommand(program, 'agent').execute(agentName, agentDefinition, options);
         }
         catch (err) {
             console.error(chalk.red(err.message));

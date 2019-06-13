@@ -35,18 +35,19 @@ program.description('Work with Cortex Marketplace Skills');
 
 // Save Skill in marketplace
 program
-    .command('save <skillDefinition>')
+    .command('save <skillName> <skillDefinition>')
     .description('Save skill in marketplace')
     .option('--no-compat', 'Ignore API compatibility checks')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
     .option('-y, --yaml', 'Use YAML for skill definition format')
     .option('-z, --zip <zip>', 'Use zip file to gather the executables')
-    .action(withCompatibilityCheck((skillDefinition, options) => {
+    .action(withCompatibilityCheck((skillDefinition, skillName, options) => {
         try {
-            new SaveResourceCommand(program, 'skill').execute(skillDefinition, options);
+            new SaveResourceCommand(program, 'skill').execute(skillName, skillDefinition, options);
         }
         catch (err) {
+            console.log(err);
             console.error(chalk.red(err.message));
         }
     }));
