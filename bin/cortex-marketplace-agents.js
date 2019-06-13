@@ -30,7 +30,6 @@ const {
     InstallResourceCommand,
     GenerateResourceCommand,
 } = require('../src/commands/marketplace');
-const { GenerateAgentCommand } = require('../src/commands/marketplace-agents');
 
 program.description('Work with Cortex Marketplace Agents');
 
