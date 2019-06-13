@@ -28,7 +28,7 @@ module.exports = class Resource {
 
     saveResource(resourceType, namespace, resourceName, token, resourceObject, zipFilePath) {
         const endpoint = `${this.marketplaceUrl}/admin/resource/${resourceType}/${namespace}/${resourceName}`;
-        debug('saveResource(%s) => %s', resourceObject.asset.name, endpoint);
+        debug('saveResource(%s) => %s', resourceName, endpoint);
         return request
             .post(endpoint)
             .set('Authorization', `Bearer ${token}`)

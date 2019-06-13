@@ -52,7 +52,7 @@ module.exports.SaveResourceCommand = class SaveResourceCommand {
         return options.zip;
     }
 
-    execute(resourceDefinition, options) {
+    execute(resourceNameWithNamespace, resourceDefinition, options) {
         const profile = loadProfile(options.profile);
         debug('%s.executeSave%s(%s)', profile.name, _.upperFirst(this.resourceType), resourceDefinition);
 
@@ -60,11 +60,7 @@ module.exports.SaveResourceCommand = class SaveResourceCommand {
         const resourceObject = parseObject(resourceDefStr, options);
         const zipFilePath = SaveResourceCommand.getZipFilePath(options);
 
-        if (!resourceObject.asset) {
-            printError(`"asset" field in ${this.resourceType} definition is required`);
-        }
-
-        const [ namespace, resourceName ] = getNamespaceAndResourceName(resourceObject.asset.name);
+        const [ namespace, resourceName ] = getNamespaceAndResourceName(resourceNameWithNamespace);
 
         const resource = new Resource(profile.url);
         resource.saveResource(this.resourceType, namespace, resourceName, profile.token, resourceObject, zipFilePath)
