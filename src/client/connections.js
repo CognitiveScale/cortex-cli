@@ -25,13 +25,13 @@ module.exports = class Connections {
         this.endpoint = `${cortexUrl}/v2/connections`;
     }
 
-    queryConnection(token, connectionName, connObj) {
+    queryConnection(token, connectionName, query) {
         const queryEndpoint = `${this.endpoint}/${connectionName}/query`
-        debug('queryConnection(%s) => %s', connectionName, queryEndpoint);
+        // console.log('queryConnection(%s) => %s', connectionName, queryEndpoint);
         return request
             .post(queryEndpoint)
             .set('Authorization', `Bearer ${token}`)
-            .send(connObj)
+            .send({ query })
             .then((res) => {
                 if (res.ok) {
                     return {success: true, message: res.body};

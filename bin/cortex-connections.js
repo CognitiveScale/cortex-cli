@@ -77,6 +77,7 @@ program
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
     .option('--query [query]', 'The query to use, "select 1" is default')
+    .option('--file [file]', 'Location of file containing query string')
     .action(withCompatibilityCheck((connName, options) => {
         try {
             new QueryConnectionCommand(program).execute(connName, options);

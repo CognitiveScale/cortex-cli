@@ -294,15 +294,19 @@ module.exports.QueryConnectionCommand = class QueryConnectionCommand {
 
         debug('params: %o', options);
 
+        if(options.file) {
+            options.query = fs.readFileSync(options.file, 'UTF-8');
+        }
+
         if(!options.query) {
             options.query = 'select 1';
         }
 
         const connections = new Connections(profile.url);
-        connections.queryConnection(profile.token, connectionName, options)
+        connections.queryConnection(profile.token, connectionName, options.query)
             .then((response) => {
                 if (response.success) {
-                    printSuccess(JSON.stringify(response, null, 2), options);
+                    printSuccess(JSON.stringify(response.message, null, 2), options);
                 }
                 else {
                     printError(`Failed to query connection: ${response.status} ${response.message}`, options);
