@@ -294,6 +294,8 @@ module.exports.QueryConnectionCommand = class QueryConnectionCommand {
 
         debug('params: %o', options);
 
+        let queryObject = {};
+
         if(options.file) {
             options.query = fs.readFileSync(options.file, 'UTF-8');
         }
@@ -302,8 +304,23 @@ module.exports.QueryConnectionCommand = class QueryConnectionCommand {
             options.query = 'select 1';
         }
 
+        try {
+            queryObject = JSON.parse(options.query);
+
+            if(queryObject.filter) {
+                queryObject.filter = JSON.stringify(queryObject.filter);
+            }
+            if(queryObject.sort) {
+                queryObject.sort = JSON.stringify(queryObject.sort);
+            }
+        } catch (err) {
+            queryObject.query = options.query;
+        }
+
+        debug('queryParams: %o', queryObject);
+
         const connections = new Connections(profile.url);
-        connections.queryConnection(profile.token, connectionName, options.query)
+        connections.queryConnection(profile.token, connectionName, queryObject)
             .then((response) => {
                 if (response.success) {
                     printSuccess(JSON.stringify(response.message, null, 2), options);
