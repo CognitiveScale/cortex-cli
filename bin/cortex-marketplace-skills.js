@@ -44,6 +44,17 @@ program
     .option('-z, --zip <zip>', 'Use zip file to gather the executables')
     .action(withCompatibilityCheck((skillDefinition, skillName, options) => {
         try {
+            /* To make sure json file without --yaml option will not swap skillName and skillDefinition.
+            Because, when you run command 'cortex marketplace skills save default/skill1 resource.json',
+            skillDefinition will be 'default/skill1' and skillName will be 'resource.json'.
+
+            When you run command 'cortex marketplace skills save default/skill1 --yaml resource.yaml',
+            skillDefinition will be 'resource.yaml' and skillName will be 'default/skill1'.
+            */
+            if (!options.yaml) {
+                [skillDefinition, skillName] = [skillName, skillDefinition]
+            }
+
             new SaveResourceCommand(program, 'skill').execute(skillName, skillDefinition, options);
         }
         catch (err) {

@@ -43,6 +43,16 @@ program
     .option('-z, --zip <zip>', 'Use zip file to gather the executables')
     .action(withCompatibilityCheck((datasetDefinition, datasetName, options) => {
         try {
+            /* To make sure json file without --yaml option will not swap datasetName and datasetDefinition.
+            Because, when you run command 'cortex marketplace datasets save default/dataset1 resource.json',
+            datasetDefinition will be 'default/dataset1' and datasetName will be 'resource.json'.
+
+            When you run command 'cortex marketplace datasets save default/dataset1 --yaml resource.yaml',
+            datasetDefinition will be 'resource.yaml' and datasetName will be 'default/dataset1'.
+            */
+            if (!options.yaml) {
+                [datasetDefinition, datasetName] = [datasetName, datasetDefinition]
+            }
             new SaveResourceCommand(program, 'dataset').execute(datasetName, datasetDefinition, options);
         }
         catch (err) {
