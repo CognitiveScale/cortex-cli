@@ -44,6 +44,17 @@ program
     .option('-z, --zip <zip>', 'Use zip file to gather the executables')
     .action(withCompatibilityCheck((agentDefinition, agentName, options) => {
         try {
+            /* 
+            To make sure json file without --yaml option will not swap agentName and agentDefinition.
+            Because, when you run command 'cortex marketplace agents save default/agent1 resource.json',
+            agentDefinition will be 'default/agent1' and agentName will be 'resource.json'.
+
+            When you run command 'cortex marketplace agents save default/agent1 --yaml resource.yaml',
+            agentDefinition will be 'resource.yaml' and agentName will be 'default/agent1'.
+            */
+            if (!options.yaml) {
+                [agentDefinition, agentName] = [agentName, agentDefinition]
+            }
             new SaveResourceCommand(program, 'agent').execute(agentName, agentDefinition, options);
         }
         catch (err) {

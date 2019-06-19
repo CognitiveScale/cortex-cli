@@ -24,10 +24,11 @@ module.exports = class Resource {
 
     constructor(baseUrl) {
         this.marketplaceUrl = `${baseUrl}/v3/marketplace`;
+        this.baseUrl = baseUrl;
     }
 
     saveResource(resourceType, namespace, resourceName, token, resourceObject, zipFilePath) {
-        const endpoint = `${this.marketplaceUrl}/admin/resource/${resourceType}/${namespace}/${resourceName}`;
+        const endpoint = `${this.baseUrl}/v3/marketplace/admin/resource/${resourceType}/${namespace}/${resourceName}`;
         debug('saveResource(%s) => %s', resourceName, endpoint);
         return request
             .post(endpoint)

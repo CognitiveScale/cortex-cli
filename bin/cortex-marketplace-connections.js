@@ -44,6 +44,17 @@ program
     .option('-z, --zip <zip>', 'Use zip file to gather the executables')
     .action(withCompatibilityCheck((connectionDefinition, connectionName, options) => {
         try {
+            /* 
+            To make sure json file without --yaml option will not swap connectionName and connectionDefinition.
+            Because, when you run command 'cortex marketplace connections save default/connection1 resource.json',
+            connectionDefinition will be 'default/connection1' and connectionName will be 'resource.json'.
+
+            When you run command 'cortex marketplace connections save default/connection1 --yaml resource.yaml',
+            connectionDefinition will be 'resource.yaml' and connectionName will be 'default/connection1'.
+            */
+            if (!options.yaml) {
+                [connectionDefinition, connectionName] = [connectionName, connectionDefinition]
+            }
             new SaveResourceCommand(program, 'connection').execute(connectionName, connectionDefinition, options);
         }
         catch (err) {
