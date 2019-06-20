@@ -295,17 +295,18 @@ module.exports.QueryConnectionCommand = class QueryConnectionCommand {
         debug('params: %o', options);
 
         let queryObject = {};
+        let queryInput = options.query;
 
         if(options.file) {
-            options.query = fs.readFileSync(options.file, 'UTF-8');
+            queryInput = fs.readFileSync(options.file, 'UTF-8');
         }
 
-        if(!options.query) {
-            options.query = 'select 1';
+        if(!queryInput) {
+            queryInput = 'select 1';
         }
 
         try {
-            queryObject = JSON.parse(options.query);
+            queryObject = JSON.parse(queryInput);
 
             if(queryObject.filter) {
                 queryObject.filter = JSON.stringify(queryObject.filter);
@@ -314,7 +315,7 @@ module.exports.QueryConnectionCommand = class QueryConnectionCommand {
                 queryObject.sort = JSON.stringify(queryObject.sort);
             }
         } catch (err) {
-            queryObject.query = options.query;
+            queryObject.query = queryInput;
         }
 
         debug('queryParams: %o', queryObject);

@@ -27,7 +27,7 @@ module.exports = class Connections {
 
     queryConnection(token, connectionName, queryObject) {
         const queryEndpoint = `${this.endpoint}/${connectionName}/query`
-        // console.log('queryConnection(%s) => %s', connectionName, queryEndpoint);
+        debug('queryConnection(%s) => %s', connectionName, queryEndpoint);
         return request
             .post(queryEndpoint)
             .set('Authorization', `Bearer ${token}`)
