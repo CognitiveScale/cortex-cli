@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-const request = require('superagent');
 const Throttle = require('superagent-throttle');
 const debug = require('debug')('cortex:cli');
 const _ = require('lodash');
 const chalk = require('chalk');
 const { constructError } = require('../commands/utils');
+const { request } = require('../commands/apiutils');
 
 const createEndpoints = (baseUri) => {
     return {
@@ -80,7 +80,7 @@ class Graph {
             .set('Authorization', `Bearer ${token}`)
             .set('x-cortex-proxy-notify', true);
 
-        if (schemaName) req.query({ schema: schemaName });
+        if (schemaName) req.query({ schemaNames: schemaName });
 
         return req.then((res) => {
             if (Boolean(_.get(res, 'headers.x-cortex-proxied', false)))

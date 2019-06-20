@@ -58,7 +58,12 @@ class SaveProfileSchemaCommand {
                 }
             })
             .catch((err) => {
-                printError(`Failed to save profile schema: ${err.status} ${err.response.body.error}`, options);
+                let msg = '';
+                if (err.response && err.response.body) {
+                    msg = err.response.body.error || '';
+                }
+
+                printError(`Failed to save profile schema: ${err.status || err} ${msg}`, options);
             });
     }
 }
