@@ -107,6 +107,10 @@ module.exports = class Content {
                             'Content-Type': contentType,
                         }
                     }, function(err, res, body) {
+                        if (err) {
+                            resolve({success: false, message: err.message});
+                            return;
+                        }
                         if (res.statusCode === 200) {
                             resolve({success: true, message: body});
                             return;
