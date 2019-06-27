@@ -40,29 +40,12 @@ module.exports.SaveResourceCommand = class SaveResourceCommand {
         this.resourceType = resourceType;
     }
 
-    static getZipFilePath(options) {
-        if (!options.zip) {
-            printError('error: option `--zip <zip>` argument missing', options);
-        }
-
-        if (!fs.existsSync(options.zip)) {
-            printError(`Zip file path ${options.zip} does not exist`, options);
-        }
-        return options.zip;
-    }
-
-    execute(resourceNameWithNamespace, resourceDefinition, options) {
+    execute(resourceDefinitionZip, options) {
         const profile = loadProfile(options.profile);
-        debug('%s.executeSave%s(%s)', profile.name, _.upperFirst(this.resourceType), resourceDefinition);
-
-        const resourceDefStr = fs.readFileSync(resourceDefinition);
-        const resourceObject = parseObject(resourceDefStr, options);
-        const zipFilePath = SaveResourceCommand.getZipFilePath(options);
-
-        const [ namespace, resourceName ] = getNamespaceAndResourceName(resourceNameWithNamespace);
+        debug('%s.executeSave%s(%s)', profile.name, _.upperFirst(this.resourceType), resourceDefinitionZip);
 
         const resource = new Resource(profile.url);
-        resource.saveResource(this.resourceType, namespace, resourceName, profile.token, resourceObject, zipFilePath)
+        resource.saveResource(this.resourceType, resourceDefinitionZip, profile.token)
             .then((response) => {
                 if (response.success) {
                     printSuccess(`${_.upperFirst(this.resourceType)} saved`, options);

@@ -24,18 +24,18 @@ module.exports = class Resource {
 
     constructor(baseUrl) {
         this.marketplaceUrl = `${baseUrl}/v3/marketplace`;
+        this.marketplaceUrlV4 = `${baseUrl}/v4/marketplace`;
         this.baseUrl = baseUrl;
     }
 
-    saveResource(resourceType, namespace, resourceName, token, resourceObject, zipFilePath) {
-        const endpoint = `${this.baseUrl}/v3/marketplace/admin/resource/${resourceType}/${namespace}/${resourceName}`;
-        debug('saveResource(%s) => %s', resourceName, endpoint);
+    saveResource(resourceType, zipFilePath, token) {
+        const endpoint = `${this.marketplaceUrlV4}/admin/resource/${resourceType}`;
+        debug('saveResource(%s) => %s', resourceType, endpoint);
         return request
             .post(endpoint)
             .set('Authorization', `Bearer ${token}`)
             .set('x-cortex-proxy-notify', true)
             .accept('application/json')
-            .field('meta', JSON.stringify(resourceObject))
             .attach('content', zipFilePath)
             .then((res) => {
                 if (Boolean(_.get(res, 'headers.x-cortex-proxied', false)))
