@@ -35,26 +35,14 @@ program.description('Work with Cortex Marketplace Datasets');
 
 // Save dataset in marketplace
 program
-    .command('save <datasetName> <datasetDefinition>')
+    .command('save <datasetDefinitionZip>')
     .description('Save dataset in marketplace')
     .option('--no-compat', 'Ignore API compatibility checks')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
-    .option('-y, --yaml', 'Use YAML for dataset definition format')
-    .option('-z, --zip <zip>', 'Use zip file to gather the executables')
-    .action(withCompatibilityCheck((datasetDefinition, datasetName, options) => {
+    .action(withCompatibilityCheck((datasetDefinitionZip, options) => {
         try {
-            /* To make sure json file without --yaml option will not swap datasetName and datasetDefinition.
-            Because, when you run command 'cortex marketplace datasets save default/dataset1 resource.json',
-            datasetDefinition will be 'default/dataset1' and datasetName will be 'resource.json'.
-
-            When you run command 'cortex marketplace datasets save default/dataset1 --yaml resource.yaml',
-            datasetDefinition will be 'resource.yaml' and datasetName will be 'default/dataset1'.
-            */
-            if (!options.yaml) {
-                [datasetDefinition, datasetName] = [datasetName, datasetDefinition]
-            }
-            new SaveResourceCommand(program, 'dataset').execute(datasetName, datasetDefinition, options);
+            new SaveResourceCommand(program, 'dataset').execute(datasetDefinitionZip, options);
         }
         catch (err) {
             console.error(chalk.red(err.message));

@@ -35,27 +35,14 @@ program.description('Work with Cortex Marketplace Connections');
 
 // Save connection in marketplace
 program
-    .command('save <connectionName> <connectionDefinition>')
+    .command('save <connectionDefinitionZip>')
     .description('Save connection in marketplace')
     .option('--no-compat', 'Ignore API compatibility checks')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
-    .option('-y, --yaml', 'Use YAML for connection definition format')
-    .option('-z, --zip <zip>', 'Use zip file to gather the executables')
-    .action(withCompatibilityCheck((connectionDefinition, connectionName, options) => {
+    .action(withCompatibilityCheck((connectionDefinitionZip, options) => {
         try {
-            /* 
-            To make sure json file without --yaml option will not swap connectionName and connectionDefinition.
-            Because, when you run command 'cortex marketplace connections save default/connection1 resource.json',
-            connectionDefinition will be 'default/connection1' and connectionName will be 'resource.json'.
-
-            When you run command 'cortex marketplace connections save default/connection1 --yaml resource.yaml',
-            connectionDefinition will be 'resource.yaml' and connectionName will be 'default/connection1'.
-            */
-            if (!options.yaml) {
-                [connectionDefinition, connectionName] = [connectionName, connectionDefinition]
-            }
-            new SaveResourceCommand(program, 'connection').execute(connectionName, connectionDefinition, options);
+            new SaveResourceCommand(program, 'connection').execute(connectionDefinitionZip, options);
         }
         catch (err) {
             console.error(chalk.red(err.message));
