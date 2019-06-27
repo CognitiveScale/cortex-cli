@@ -139,7 +139,7 @@ module.exports = class Resource {
 
 
     installResource(resourceType, namespace, resourceName, token) {
-        const endpoint = `${this.marketplaceUrl}/resource/${resourceType}/${namespace}/${resourceName}/install`;
+        const endpoint = `${this.marketplaceUrlV4}/resource/${resourceType}/${namespace}/${resourceName}/install`;
         debug('installResource(%s) => %s', resourceName, endpoint);
         return request
             .get(endpoint)
@@ -149,7 +149,7 @@ module.exports = class Resource {
                 if (Boolean(_.get(res, 'headers.x-cortex-proxied', false)))
                     console.error(chalk.blue('Request proxied to cloud.'));
                 if (res.ok) {
-                    return {success: res.body.success, scripts: res.body.response || res.body.scripts };
+                    return res.body; // Response contains success and response attribute. So no need to explicitly provide it.
                 }
                 else {
                     return {success: false, message: res.body.message, status: res.body.status};

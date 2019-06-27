@@ -234,7 +234,7 @@ module.exports.InstallResourceCommand = class InstallResourceCommand {
         const resource = new Resource(profile.url);
         resource.installResource(this.resourceType, namespace, resourceName, profile.token).then((response) => {
             if (response.success) {
-                let result = filterObject(response.scripts, options) || [];
+                let result = filterObject(response, options) || [];
                 printSuccess(JSON.stringify(result, null, 2), options);
             }
             else {
