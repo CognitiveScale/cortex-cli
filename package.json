@@ -39,7 +39,7 @@
     "is-installed-globally": "0.1.0",
     "jmespath": "0.15.0",
     "joi": "13.1.0",
-    "js-yaml": "3.10.0",
+    "js-yaml": "3.13.1",
     "jsonpath": "^1.0.2",
     "jsonwebtoken": "8.3.0",
     "lodash": "4.17.11",
