@@ -41,7 +41,7 @@ module.exports = class Resource {
                 if (Boolean(_.get(res, 'headers.x-cortex-proxied', false)))
                     console.error(chalk.blue('Request proxied to cloud.'));
                 if (res.ok) {
-                    return {success: true, message: res.body};
+                    return {success: true, resource: res.body.resource};
                 }
                 return {success: false, message: res.body, status: res.status};
             })
