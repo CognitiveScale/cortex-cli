@@ -48,7 +48,7 @@ module.exports.SaveResourceCommand = class SaveResourceCommand {
         resource.saveResource(this.resourceType, resourceDefinitionZip, profile.token)
             .then((response) => {
                 if (response.success) {
-                    printSuccess(`${_.upperFirst(this.resourceType)} saved`, options);
+                    printSuccess(`${_.upperFirst(this.resourceType)} '${response.resource.name}' saved`, options);
                 } else {
                     printError(`Failed to save ${this.resourceType}: ${response.status} ${JSON.stringify(response.details || response.message)}`);
                 }
