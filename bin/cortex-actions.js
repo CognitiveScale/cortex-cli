@@ -25,13 +25,14 @@ const {
     ListActionsCommand,
     DescribeActionCommand,
     DeleteActionCommand,
-    InvokeActionCommand,
     DeployActionCommand,
-    TaskLogsActionCommand,
-    TaskCancelActionCommand,
-    TaskStatusActionCommand,
+    GetLogsCommand,
+    InvokeActionCommand,
     JobTaskListActionCommand,
+    TaskCancelActionCommand,
+    TaskLogsActionCommand,
     TaskStatsActionCommand,
+    TaskStatusActionCommand,
 } = require('../src/commands/actions');
 
 program.description('Work with Cortex Actions');
@@ -90,6 +91,23 @@ program
         }
     }));
 
+// Get logs Action
+program
+    .command('logs <actionName>')
+    .description('Get logs for an action')
+    .option('--no-compat', 'Ignore API compatibility checks')
+    .option( '--json', 'Return raw JSON response')
+    .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
+    .option('--profile [profile]', 'The profile to use')
+    .action(withCompatibilityCheck((actionName, options) => {
+        try {
+            new GetLogsCommand(program).execute(actionName, options);
+        }
+        catch (err) {
+            console.error(chalk.red(err.message));
+        }
+    }));
+
 // Invoke Action
 program
     .command('invoke <actionName>')
@@ -124,6 +142,7 @@ program
     .option('--docker [image]', 'Docker image to use as the runner')
     .option('--memory [memory]', 'Action memory limit in megabytes')
     .option('--vcpus [vcpus]', 'Action vcpus limit in integer')
+    .option('--ttl [ttl]', 'Daemon time to live')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
     .option('--actionType [actionType]', 'Type of action')
