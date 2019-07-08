@@ -282,6 +282,60 @@ module.exports.ListConnectionsTypes = class ListConnectionsTypes {
     }
 };
 
+module.exports.QueryConnectionCommand = class QueryConnectionCommand {
+
+    constructor(program) {
+        this.program = program;
+    }
+
+    execute(connectionName, options) {
+        const profile = loadProfile(options.profile);
+        debug('%s.executeQueryConnection(%s)', profile.name, connectionName);
+
+        debug('params: %o', options);
+
+        let queryObject = {};
+        let queryInput = options.query;
+
+        if(options.file) {
+            queryInput = fs.readFileSync(options.file, 'UTF-8');
+        }
+
+        if(!queryInput) {
+            queryInput = 'select 1';
+        }
+
+        try {
+            queryObject = JSON.parse(queryInput);
+
+            if(queryObject.filter) {
+                queryObject.filter = JSON.stringify(queryObject.filter);
+            }
+            if(queryObject.sort) {
+                queryObject.sort = JSON.stringify(queryObject.sort);
+            }
+        } catch (err) {
+            queryObject.query = queryInput;
+        }
+
+        debug('queryParams: %o', queryObject);
+
+        const connections = new Connections(profile.url);
+        connections.queryConnection(profile.token, connectionName, queryObject)
+            .then((response) => {
+                if (response.success) {
+                    printSuccess(JSON.stringify(response.message, null, 2), options);
+                }
+                else {
+                    printError(`Failed to query connection: ${response.status} ${response.message}`, options);
+                }
+            })
+            .catch((err) => {
+                printError(`Failed to query connection: ${err.status} ${err.message}`, options);
+            });
+    }
+};
+
 module.exports.GenerateConnectionCommand = class GenerateConnectionCommand {
 
     constructor(program) {
