@@ -24,6 +24,7 @@ const { withCompatibilityCheck } = require('../src/compatibility');
 const {
     SaveProfileSchemaCommand,
     ListProfileSchemasCommand,
+    ListProfileVersionsCommand,
     DescribeProfileSchemaCommand,
     DeleteProfileSchemaCommand,
     ListProfilesCommand,
@@ -127,6 +128,28 @@ program
             console.error(chalk.red(err.message));
         }
     }));
+
+// List Profile Versions
+program
+    .command('list-versions <profileId> [schemaName]')
+    .description('List Profile Versoins')
+    .option('--no-compat', 'Ignore API compatibility checks')
+    .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
+    .option('--profile [profile]', 'The profile to use')
+    .option('--json', 'Output results using JSON')
+    .option('--query [query]', 'A JMESPath query to use in filtering the response data.')
+    .option('--before [before]', 'Filter versions before a sepcific date.')
+    .option('--after [after]', 'Filter versions after a sepcific date.')
+    .option('--limit [limit]', 'Limit the number of events returned.')
+    .action(withCompatibilityCheck((profileId, schemaName, options) => {
+        try {
+            new ListProfileVersionsCommand(program).execute(profileId, schemaName, options);
+        }
+        catch (err) {
+            console.error(chalk.red(err.message));
+        }
+    }));
+
 
 // Describe Profile
 program

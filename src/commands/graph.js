@@ -22,6 +22,8 @@ const Table = require('tty-table');
 const ProgressBar = require('progress');
 const jp = require('jsonpath');
 const path = require('path');
+const through2 = require('through2');
+
 const { loadProfile } = require('../config');
 const { Graph } = require('../client/graph');
 const { printSuccess, printError, filterObject, countLinesInFile, printTable } = require('./utils');
@@ -177,87 +179,177 @@ class PublishEventsCommand {
         debug('%s.executePublishEvents()', profile.name);
 
         const graph = new Graph(profile.url);
-        let eventCount = 0;
-        const errors = [];
+        const lineCountIsDynamic = (options.transform || options.auto);
 
-        const publishEvent = async (event, bar) => {
-            if (!event) return;
+        const publishEvent = async (events, bar) => {
+            if (_.isEmpty(events)) return;
 
-            debug('publishing event: ', event);
-            eventCount++;
-
+            debug(`publishing ${_.size(events)} events`);
+            debug(`publishing events: ${JSON.stringify(events)}`);
+            
             let rs;
+
             if (options.tracking) {
-                rs = await graph.track(profile.token, event);
+                rs = await graph.track(profile.token, events);
             }
             else {
-                rs = await graph.publishEntities(profile.token, event);
+                rs = await graph.publishEntities(profile.token, events);
             }
 
-            if (!rs.success) errors.push(rs.message);
-            if (bar) bar.tick();
+            if (bar && events.length > 0) bar.tick(events.length);
+
+            if (!rs.success) {
+                throw Error(rs.message);
+            }
         };
 
-        const printEvent = (event, bar) => {
-            if (!event) return;
-            eventCount++;
-            console.log(JSON.stringify(event));
+	// Git conflict - this was not async before ...
+        const printEvent = async (events, bar) => {
+            if (!events) return;
+	    // eventCount++;
+            events.forEach((e) => console.log(JSON.stringify(e)));
         };
+
+        function list_can_handle_element_without_going_over_size(batch_size, element_size, max_size) {
+            const batch_size_delta_if_elem_added = element_size + (batch_size > 2 ? 1 : 0); // 1 for the , if not empty
+            return batch_size + batch_size_delta_if_elem_added <= max_size
+        }
+        
+        function batchElementsUntilSize(max_size) {
+            let batch = [];
+            let batch_size = JSON.stringify(batch).length;
+
+            function handler(event, encoding, callback) {
+                const max_event_size = max_size - 2; // Handling []
+                const event_size = JSON.stringify(event).length;
+                
+                if (event_size > max_event_size) {
+                    debug(`Event too large at ${event_size}B. Max Size: ${max_event_size}B. Event: ${JSON.stringify(event)}`);
+                }
+                else if (list_can_handle_element_without_going_over_size(batch_size, event_size, max_size)) {
+                    batch.push(event);
+                    batch_size += event_size + (batch_size > 2 ? 1 : 0);  // 1 for the , if not empty []
+                }
+                else {
+                    debug(`LIMIT REACHED ${batch_size}, PUSHING ${batch.length} elements.`);
+                    this.push(batch);
+                    batch = [];
+                    batch_size = JSON.stringify(batch).length;
+                }
+                callback();
+            }
+
+            function flusher(callback) {
+                if (!_.isEmpty(batch)) {
+                    this.push(batch);
+                    batch = [];
+                    batch_size = JSON.stringify(batch).length;
+                }
+                callback();
+            }
+            return {
+                batchHandler: handler,
+                batchFlusher: flusher,
+            };
+        }
 
         const processStream = (stream, resolve, reject, bar) => {
+            // Moved here ... we dont know how many events are being pushed ... even if a file is specified ...
+            bar = !_.isEmpty(bar) ? bar : (
+                new ProgressBar(
+                    'publishing [:bar] :current/:total :rate evt/s :elapsed s',
+                    { total: 0, width: 65 }
+                )
+            );
+
             const tasks = [];
-            stream.pipe(split())
-                .on('data', (line) => {
-                    if (_.isEmpty(line)) return;
-
-                    const obj = JSON.parse(line);
-                    let events = [obj];
-                    let eventsPerObj = 1;
-                    
-                    if (options.transform) {
-                        debug('loading templates from: ', path.resolve(options.transform));
-                        const templates = require(path.resolve(options.transform));
-                        debug('loaded templates:', templates);
-                        events = templates.map((t) => applyTemplate(t, obj)).filter(e => e !== null);
-                        eventsPerObj = events.length;
+            const { batchHandler, batchFlusher, } = batchElementsUntilSize(1024 * 100);
+            stream
+                .pipe(split())
+                // Cast to JSONs
+                .pipe(through2.obj(
+                    function (line, encoding, callback){
+                        if (!_.isEmpty(line)) {
+                            this.push(JSON.parse(line));    
+                        } 
+                        callback();
                     }
+                ))
+                // Transform and Expand Auto Attributes ...
+                .pipe(through2.obj(
+                    function (event, encoding, callback) {
+                        let events = [event];
+			let eventsPerObj = 1;
+                        
+                        if (options.transform) {
+                            debug('loading templates from: ', path.resolve(options.transform));
+                            const templates = require(path.resolve(options.transform));
+                            debug('loaded templates:', templates);
+                            // The event gets completely replaced in this case ... since we are saying it needs to be
+                            // transformed ... thats why concat is not used here ...
+                            events = _.map(
+                                templates,
+                                (t) => applyTemplate(t, event),
+                            ).filter(e => e !== null);
+			    eventsPerObj = events.length;
+			    eventsPerObj = events.length;
+                        }
+                        
+                        if (options.auto) {
+                            const autoAttrs = _.flatten(events.map((evt) => autoAttributes(evt)));
+                            debug(`Generated ${autoAttrs.length} attribute events`);
+                            events = events.concat(autoAttrs);
+                        }
 
-                    if (options.auto) {
-                        const autoAttrs = _.flatten(events.map((evt) => autoAttributes(evt)));
-                        debug(`Generated ${autoAttrs.length} attribute events`);
-                        events = events.concat(autoAttrs);
-                        eventsPerObj = events.length;
+                        events.forEach((e) => this.push(e));
+                        callback();
                     }
-
-                    debug('# events to publish:', events.length);
-                    if (bar && tasks.length == 0) bar.total = bar.total * eventsPerObj;
- 
-                    let task = publishEvent;
-                    if (options.dryRun) {
-                        task = printEvent;
+                ))
+                // Batch Based on Size
+                .pipe(through2({ objectMode: true }, batchHandler, batchFlusher))
+                .pipe(through2(
+                    // Only upload 1 batch at a time!
+                    { objectMode: true, highWaterMark: 5 }, 
+                    function (batch_of_events_to_upload, encoding, callback) {
+                        if (lineCountIsDynamic){
+                            bar.total += _.size(batch_of_events_to_upload);
+                        }
+                        let task = options.dryRun ? printEvent : publishEvent;
+                        task(batch_of_events_to_upload, bar)
+                            .then((response) => {
+                                this.push(response);
+                                callback();
+                            })
+                            .catch((error) => {
+                                printError(`Error uploading event batch: ${JSON.stringify(error)}`, options, false);
+                                callback();
+                            });
                     }
-
-                    events.forEach((e) => tasks.push(task(e, bar)));
+                ))
+                .on('data', (response_from_batch_publish) => {
+                    debug(`# Response from events published : ${response_from_batch_publish}`);
                 })
                 .on('error', (err) => reject(err))
-                .on('end', () => Promise.all(tasks).then(() => {
-                    printSuccess(`Processed ${eventCount} events with ${errors.length} errors`);
-                    if (errors.length > 0) {
-                        printError(`First error: ${errors[0]}`, options, false);
-                    }
-                    resolve({ eventCount, errors });
-                }).catch(err => reject(err)));
+                .on('end', () => {
+                    printSuccess(`Finished processing ${bar.total} events in batches.`);
+                    bar.terminate();
+                    resolve({ eventCount: bar.total });
+                });
         };
 
         if (file) {
             return countLinesInFile(file)
                 .then((numLines) => {
-                    printSuccess(`Publishing ${numLines} lines from file ${file}`);
-                    const bar = new ProgressBar(
-                        'publishing [:bar] :current/:total :rate evt/s :elapsed s',
-                        { total: numLines, width: 65 }
-                    );
-
+                    let bar = null;
+                    if (!lineCountIsDynamic) {
+                        bar = new ProgressBar(
+                            'publishing [:bar] :current/:total :rate evt/s :elapsed s',
+                            { total: numLines, width: 65 }
+                        );
+                        printSuccess(`Publishing ${numLines} records from file ${file}`);
+                    } else {
+                        printSuccess(`Publishing ??????????? records from file ${file}`);
+                    }
                     return new Promise((resolve, reject) => {
                         const stream = fs.createReadStream(file);
                         processStream(stream, resolve, reject, bar);

@@ -23,6 +23,7 @@ const { request } = require('../commands/apiutils');
 
 const createEndpoints = (baseUri) => {
     return {
+        profileVersions: `${baseUri}/v3/graph/profile-versions`,
         profiles: `${baseUri}/v3/graph/profiles`,
         schemas: `${baseUri}/v3/graph/profiles/schemas`,
         events: `${baseUri}/v3/graph/events`,
@@ -69,6 +70,30 @@ class Graph {
         .catch((err) => {
             return constructError(err);
         });
+    }
+
+    listProfileVersions(token, profileId, schemaNames, before, after, limit) {
+        const endpoint = `${this.endpoints.profileVersions}/${profileId}`;
+        debug('listProfileVersions(%s) => GET %s', profileId, endpoint);
+        const req = request
+            .get(endpoint)
+            .set('Authorization', `Bearer ${token}`)
+            .set('x-cortex-proxy-notify', true);
+
+        if (schemaNames) req.query({ schemaNames });
+        if (before) req.query({ before });
+        if (after) req.query({ after });
+        if (limit) req.query({ limit });
+
+        return req.then((res) => {
+            if (res.ok) {
+                return { success: true, versions: res.body.versions };
+            }
+            return { success: false, message: res.body, status: res.status };
+        })
+            .catch((err) => {
+                return constructError(err);
+            });
     }
 
     describeProfile(token, profileId, schemaName) {

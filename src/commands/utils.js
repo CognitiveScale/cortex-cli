@@ -209,14 +209,23 @@ function formatServiceInputParameter(inputParameter){
 }
 
 module.exports.countLinesInFile = (filePath) => {
+    // Bug ... this code ignores the final line that does not end with a new line ... thats why leftovers was added
     return new Promise((resolve, reject) => {
         let count = 0;
+        let leftovers = true;
         fs.createReadStream(filePath)
             .on('error', e => reject(e))
             .on('data', chunk => {
-                for (let i=0; i < chunk.length; ++i) if (chunk[i] == 10) count++;
+                for (let i=0; i < chunk.length; ++i) {
+                    if (chunk[i] == 10) {
+                        count++;
+                        leftovers = false;
+                    } else {
+                        leftovers = true;
+                    }
+                }
             })
-            .on('end', () => resolve(count));
+            .on('end', () => leftovers ? resolve(count + 1) : resolve(count) );
     });
 };
 

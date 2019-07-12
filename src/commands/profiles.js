@@ -202,6 +202,51 @@ class ListProfilesCommand {
     }
 }
 
+
+class ListProfileVersionsCommand {
+    constructor(program) {
+        this.program = program;
+    }
+
+    execute(profileId, schemaName, options) {
+        const profile = loadProfile(options.profile);
+        const { before, after, limit } = options;
+        debug(
+            '%s.executeListProfileVersionsCommand(%s) Options:[%s][%s][%s]', 
+            profile.name, profileId, before, after, limit
+        );
+        const graph = new Graph(profile.url);
+        graph.listProfileVersions(profile.token, profileId, schemaName, before, after, limit)
+            .then((response) => {
+                if (response.success) {
+                    let result = response.versions;
+                    if (options.query) {
+                        result = filterObject(result, options);
+                    }
+                    if (options.json) {
+                        printSuccess(JSON.stringify(result, null, 2), options);
+                    }
+                    else {
+                        const tableSpec = [
+                            { column: 'Profile ID', field: 'profileId', width: 50 },
+                            { column: 'Profile Schema', field: 'profileSchema', width: 50 },
+                            { column: 'Version', field: 'version', width: 12 },
+                            { column: 'Created At', field: 'createdAt', width: 40 }
+                        ];
+
+                        printTable(tableSpec, result);
+                    }
+                }
+                else {
+                    printError(`Failed to list profile versions: ${response.status} ${response.message}`, options);
+                }
+            })
+            .catch((err) => {
+                printError(`Failed to list profile versions: ${err.status} ${err.message}`, options);
+            });
+    }
+}
+
 class DescribeProfileCommand {
     constructor(program) {
         this.program = program;
@@ -279,6 +324,7 @@ class RebuildProfilesCommand {
 
 module.exports = {
     SaveProfileSchemaCommand,
+    ListProfileVersionsCommand,
     ListProfileSchemasCommand,
     DescribeProfileSchemaCommand,
     DeleteProfileSchemaCommand,
