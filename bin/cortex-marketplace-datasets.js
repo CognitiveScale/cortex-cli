@@ -35,16 +35,14 @@ program.description('Work with Cortex Marketplace Datasets');
 
 // Save dataset in marketplace
 program
-    .command('save <datasetDefinition>')
+    .command('save <datasetDefinitionZip>')
     .description('Save dataset in marketplace')
     .option('--no-compat', 'Ignore API compatibility checks')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
-    .option('-y, --yaml', 'Use YAML for dataset definition format')
-    .option('-z, --zip <zip>', 'Use zip file to gather the executables')
-    .action(withCompatibilityCheck((datasetDefinition, options) => {
+    .action(withCompatibilityCheck((datasetDefinitionZip, options) => {
         try {
-            new SaveResourceCommand(program, 'dataset').execute(datasetDefinition, options);
+            new SaveResourceCommand(program, 'dataset').execute(datasetDefinitionZip, options);
         }
         catch (err) {
             console.error(chalk.red(err.message));
