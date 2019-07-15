@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
+const _ = require('lodash');
 const fs = require('fs');
 const uuid = require('uuid/v4');
 const debug = require('debug')('cortex:cli');
@@ -105,6 +105,7 @@ module.exports.DeployActionCommand = class {
         const code = options.code;
         const memory = parseInt(options.memory);
         const vcpus = parseInt(options.vcpus);
+        const ttl = options.ttl;
         const actionType = options.actionType;
         const cmd = options.cmd;
         const port = options.port;
@@ -113,7 +114,7 @@ module.exports.DeployActionCommand = class {
         const pushDocker = options.pushDocker;
 
         const actions = new Actions(profile.url);
-        actions.deployAction(profile.token, actionName, dockerImage, kind, code, memory, vcpus, actionType, cmd, port, environment, environmentVariables, pushDocker)
+        actions.deployAction(profile.token, actionName, dockerImage, kind, code, memory, vcpus, ttl, actionType, cmd, port, environment, environmentVariables, pushDocker)
             .then((response) => {
                 if (response.success) {
                     printSuccess(JSON.stringify(response.message, null, 2), options);
@@ -343,3 +344,26 @@ module.exports.ListTaskByActivation = class {
     }
 };
 
+module.exports.GetLogsCommand = class {
+    constructor(program) {
+        this.program = program;
+    }
+
+    execute(jobId, options) {
+        const profile = loadProfile(options.profile);
+        debug('%s.getLogsActions (%s, %s)', profile.name, jobId);
+        const actions = new Actions(profile.url);
+        actions.getLogsAction(profile.token, jobId)
+            .then((response) => {
+                if (response.success) {
+                    if (options.json) {
+                        return printSuccess(JSON.stringify(response, null, 2), options);
+                    }
+                    const logsStr = _.get(response,'logs',[]).join('/n');
+                    printSuccess(logsStr, options);
+                } else {
+                    printError(`Action get logs failed: ${response.status} ${response.message}`, options);
+                }
+            })
+    }
+};

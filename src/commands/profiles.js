@@ -20,7 +20,7 @@ const debug = require('debug')('cortex:cli');
 const { loadProfile } = require('../config');
 const Catalog = require('../client/catalog');
 const { Graph } = require('../client/graph');
-const { printSuccess, printError, filterObject, parseObject, printTable } = require('./utils');
+const { printSuccess, printError, filterObject, parseObject, printTable, formatValidationPath } = require('./utils');
 
 class SaveProfileSchemaCommand {
 
@@ -51,13 +51,19 @@ class SaveProfileSchemaCommand {
                             {column: 'Path', field: 'path', width: 50},
                             {column: 'Message', field: 'message', width: 100},
                         ];
+                        details.map(d => d.path = formatValidationPath(d.path));
                         printTable(tableSpec, details);
                         printError(''); // Just exit
                     }
                 }
             })
             .catch((err) => {
-                printError(`Failed to save profile schema: ${err.status} ${err.response.body.error}`, options);
+                let msg = '';
+                if (err.response && err.response.body) {
+                    msg = err.response.body.error || '';
+                }
+
+                printError(`Failed to save profile schema: ${err.status || err} ${msg}`, options);
             });
     }
 }
