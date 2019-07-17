@@ -329,7 +329,7 @@ module.exports = class Actions {
         const cortexImageUrl = this._cortexRegistryImagePath(registryUrl, imageName, jsonwebtoken.decode(token).tenant);
 
         await callMe(`docker login -u cli --password ${token} ${registryUrl}`);
-        await callMe(`docker pull ${imageClean}`);
+        await callMe(`docker pull ${imageClean} || echo "Docker pull failed using local image"`);
         await callMe(`docker tag ${imageClean} ${cortexImageUrl}`);
         await callMe(`docker push ${cortexImageUrl}`);
         return cortexImageUrl;
