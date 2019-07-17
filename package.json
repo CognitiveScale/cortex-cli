@@ -42,7 +42,7 @@
     "js-yaml": "3.13.1",
     "jsonpath": "1.0.2",
     "jsonwebtoken": "8.5.1",
-    "lodash": "4.17.11",
+    "lodash": "4.17.14",
     "moment": "2.24.0",
     "npm-registry-fetch": "3.9.1",
     "progress": "2.0.3",
@@ -53,7 +53,7 @@
     "superagent-throttle": "1.0.1",
     "tty-table": "2.7.0",
     "uuid": "3.3.2",
-    "yeoman-environment": "2.3.4"
+    "yeoman-environment": "2.4.0"
   },
   "devDependencies": {
     "chai": "4.2.0",
