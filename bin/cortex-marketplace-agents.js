@@ -144,20 +144,4 @@ program
         }
     }));
 
-// Generate agent definition yaml file for marketplace
-program
-    .command('generate <agentDefinition>')
-    .description('Generates the meta definition of an agent')
-    .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
-    .option('-y, --yaml', 'Use YAML for agent definition format')
-    .action((agentDefinition, options) => { // deliberately not using withCompatibilityCheck()
-        try {
-            new GenerateResourceCommand(program, 'agent').execute(agentDefinition, options);
-        }
-        catch (err) {
-            console.error(chalk.red(err.message));
-        }
-    });
-
-
 program.parse(process.argv);

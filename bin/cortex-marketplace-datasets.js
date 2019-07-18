@@ -144,20 +144,4 @@ program
         }
     }));
 
-// Generate dataset definition yaml file for marketplace
-program
-    .command('generate <datasetDefinition>')
-    .description('Generates the meta definition of a dataset')
-    .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
-    .option('-y, --yaml', 'Use YAML for dataset definition format')
-    .action((datasetDefinition, options) => { // deliberately not using withCompatibilityCheck()
-        try {
-            new GenerateResourceCommand(program, 'dataset').execute(datasetDefinition, options);
-        }
-        catch (err) {
-            console.error(chalk.red(err.message));
-        }
-    });
-
-
 program.parse(process.argv);

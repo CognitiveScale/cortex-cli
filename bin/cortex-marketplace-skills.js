@@ -167,19 +167,4 @@ program
         }
     }));
 
-// Generate skill definition yaml file for marketplace
-program
-    .command('generate <skillDefinition>')
-    .description('Generates the meta definition of a skill')
-    .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
-    .option('-y, --yaml', 'Use YAML for skill definition format')
-    .action((skillDefinition, options) => { // deliberately not using withCompatibilityCheck()
-        try {
-            new GenerateResourceCommand(program, 'skill').execute(skillDefinition, options);
-        }
-        catch (err) {
-            console.error(chalk.red(err.message));
-        }
-    });
-
 program.parse(process.argv);
