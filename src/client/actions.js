@@ -54,13 +54,13 @@ module.exports = class Actions {
         });
     }
 
-    async deployAction(token, actionName, docker, kind, code, memory, vcpus, actionType, command, port, environment, environmentVariables, pushDocker) {
+    async deployAction(token, actionName, docker, kind, code, memory, vcpus, ttl, actionType, command, port, environment, environmentVariables, pushDocker) {
         let endpoint = `${this.endpointV3}`;
         if (actionType) {
             endpoint = `${endpoint}?actionType=${actionType}`;
         }
-        debug('deployAction(%s, docker=%s, kind=%s, code=%s, memory=%s, vcpus=%s) => %s',
-            actionName, docker, kind, code, memory, vcpus, endpoint);
+        debug('deployAction(%s, docker=%s, kind=%s, code=%s, memory=%s, vcpus=%s, ttl=%s) => %s',
+            actionName, docker, kind, code, memory, vcpus, ttl, endpoint);
 
         try {
             docker = await this._maybePushDockerImage(docker, token, pushDocker);
@@ -77,6 +77,7 @@ module.exports = class Actions {
         if (kind) req.field('kind', kind);
         if (memory) req.field('memory', memory);
         if (vcpus) req.field('vcpus', vcpus);
+        if (ttl) req.field('ttl', ttl);
         if (code) req.attach('code', code);
         if (command) req.field('command', command);
         if (port) req.field('port', port);
@@ -120,6 +121,23 @@ module.exports = class Actions {
             .then((res) => {
                 if (res.ok) {
                     return {success: true, action: res.body.function};
+                }
+                return {success: false, status: res.status, message: res.body};
+            })
+            .catch((err) => {
+                return constructError(err);
+            });
+    }
+
+    getLogsAction(token, actionName) {
+        const endpoint = `${this.endpointV3}/${actionName}/logs`;
+        debug('getLogsAction(%s) => %s', actionName, endpoint);
+        return request
+            .get(endpoint)
+            .set('Authorization', `Bearer ${token}`)
+            .then((res) => {
+                if (res.ok) {
+                    return {success: true, logs: res.body};
                 }
                 return {success: false, status: res.status, message: res.body};
             })
@@ -311,7 +329,7 @@ module.exports = class Actions {
         const cortexImageUrl = this._cortexRegistryImagePath(registryUrl, imageName, jsonwebtoken.decode(token).tenant);
 
         await callMe(`docker login -u cli --password ${token} ${registryUrl}`);
-        await callMe(`docker pull ${imageClean}`);
+        await callMe(`docker pull ${imageClean} || echo "Docker pull failed using local image"`);
         await callMe(`docker tag ${imageClean} ${cortexImageUrl}`);
         await callMe(`docker push ${cortexImageUrl}`);
         return cortexImageUrl;

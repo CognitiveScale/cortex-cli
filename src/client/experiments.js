@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-const { request } = require('../commands/apiutils');
+const request = require('superagent');
 const debug = require('debug')('cortex:cli');
 const ProgressBar = require('progress');
 const { constructError } = require('../commands/utils');
