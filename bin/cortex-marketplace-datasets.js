@@ -28,7 +28,6 @@ const {
     DeleteResourceCommand,
     SearchResourceCommand,
     InstallResourceCommand,
-    GenerateResourceCommand
 } = require('../src/commands/marketplace');
 
 program.description('Work with Cortex Marketplace Datasets');
