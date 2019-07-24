@@ -28,8 +28,6 @@ const {
     DeleteResourceCommand,
     SearchResourceCommand,
     InstallResourceCommand,
-    ExecuteResourceCommand,
-    GenerateResourceCommand
 } = require('../src/commands/marketplace');
 
 program.description('Work with Cortex Marketplace Skills');
@@ -140,27 +138,6 @@ program
     .action(withCompatibilityCheck((skillName, options) => {
         try {
             new InstallResourceCommand(program, 'skill').execute(skillName, options);
-        }
-        catch (err) {
-            console.error(chalk.red(err.message));
-        }
-    }));
-
-// Execute Skill in marketplace
-program
-    .command('execute <skillName>')
-    .description('Execute a skill in marketplace')
-    .option('--no-compat', 'Ignore API compatibility checks')
-    .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
-    .option('--profile [profile]', 'The profile to use')
-    .option('--query [query]', 'A JMESPath query to use in filtering the response data.')
-    .option('--params [params]', 'JSON params to use as input for execution of skill action')
-    .option('--params-file [paramsFile]', 'A file containing either JSON or YAML formatted params')
-    .option('--route <route>', 'Action name to invoke on execute')
-    .option('-y, --yaml', 'Use YAML for paramsFile option')
-    .action(withCompatibilityCheck((skillName, options) => {
-        try {
-            new ExecuteResourceCommand(program, 'skill').execute(skillName, options);
         }
         catch (err) {
             console.error(chalk.red(err.message));
