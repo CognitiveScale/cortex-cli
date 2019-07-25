@@ -77,7 +77,7 @@ module.exports = class Actions {
         if (kind) req.field('kind', kind);
         if (_.isFinite(memory)) req.field('memory', memory);
         if (_.isFinite(vcpus)) req.field('vcpus', vcpus);
-        if (ttl) req.field('ttl', ttl);
+        if (!_.isNil(ttl)) req.field('ttl', ttl);
         if (code) req.attach('code', code);
         if (command) req.field('command', command);
         if (port) req.field('port', port);
