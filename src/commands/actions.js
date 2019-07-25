@@ -104,7 +104,7 @@ module.exports.DeployActionCommand = class {
         const dockerImage = options.docker;
         const code = options.code;
         const memory = parseInt(options.memory);
-        const vcpus = parseInt(options.vcpus);
+        const vcpus = parseFloat(options.vcpus);
         const ttl = options.ttl;
         const actionType = options.actionType;
         const cmd = options.cmd;
@@ -157,7 +157,7 @@ module.exports.InvokeActionCommand = class {
         if (options.memory)
             params.properties['memory'] =parseInt(options.memory);
         if (options.vcpus)
-            params.properties['vcpus'] =parseInt(options.vcpus);
+            params.properties['vcpus'] =parseFloat(options.vcpus);
 
         // Set the API Endpoint and Token if not specified
         if (!params.apiEndpoint) params.apiEndpoint = profile.url;
