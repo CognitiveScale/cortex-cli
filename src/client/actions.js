@@ -75,8 +75,8 @@ module.exports = class Actions {
 
         if (docker) req.field('docker', docker);
         if (kind) req.field('kind', kind);
-        if (memory) req.field('memory', memory);
-        if (vcpus) req.field('vcpus', vcpus);
+        if (_.isFinite(memory)) req.field('memory', memory);
+        if (_.isFinite(vcpus)) req.field('vcpus', vcpus);
         if (ttl) req.field('ttl', ttl);
         if (code) req.attach('code', code);
         if (command) req.field('command', command);
