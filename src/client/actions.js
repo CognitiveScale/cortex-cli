@@ -137,7 +137,11 @@ module.exports = class Actions {
             .set('Authorization', `Bearer ${token}`)
             .then((res) => {
                 if (res.ok) {
-                    return {success: true, logs: res.body};
+                    if (_.isArray(res.body)) {
+                        // returns plain array for Rancher daemons
+                        return {success: true, logs: res.body};
+                    }
+                    return res.body;
                 }
                 return {success: false, status: res.status, message: res.body};
             })
