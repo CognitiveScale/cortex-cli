@@ -15,7 +15,7 @@
  */
 
 const Throttle = require('superagent-throttle');
-const debug = require('debug')('cortex:cli');
+const debug = require('debug')('cortex:cli:graph');
 const _ = require('lodash');
 const chalk = require('chalk');
 const { constructError } = require('../commands/utils');
@@ -157,6 +157,28 @@ class Graph {
         return request
             .post(this.endpoints.events)
             .use(throttle.plugin())
+            .retry(3, (err, res) => {
+                if (err) {
+                    debug(`retry on error: ${err}`);
+                    return true;
+                }
+
+                if (res) {
+                    // Retry on 502, 503, 504 - gateway errors
+                    if (res.status >= 502 && res.status <= 504) {
+                        debug(`server/gateway error with status ${res.status}, retrying request`);
+                        return true;
+                    }
+
+                    // Retry on 429 - rate limit
+                    if (res.status == 429) {
+                        debug(`retry after rate limit exceeded`);
+                        return true;
+                    }
+                }
+                
+                return false;
+            })
             .set('Authorization', `Bearer ${token}`)
             .set('x-cortex-proxy-notify', true)
             .type('json')
