@@ -200,9 +200,7 @@ class PublishEventsCommand {
 
         const printEvent = (event, bar) => {
             if (!event) return;
-
             eventCount++;
-
             console.log(JSON.stringify(event));
         };
 
@@ -214,22 +212,26 @@ class PublishEventsCommand {
 
                     const obj = JSON.parse(line);
                     let events = [obj];
-
+                    let eventsPerObj = 1;
+                    
                     if (options.transform) {
                         debug('loading templates from: ', path.resolve(options.transform));
                         const templates = require(path.resolve(options.transform));
                         debug('loaded templates:', templates);
                         events = templates.map((t) => applyTemplate(t, obj)).filter(e => e !== null);
+                        eventsPerObj = events.length;
                     }
 
                     if (options.auto) {
                         const autoAttrs = _.flatten(events.map((evt) => autoAttributes(evt)));
                         debug(`Generated ${autoAttrs.length} attribute events`);
                         events = events.concat(autoAttrs);
+                        eventsPerObj = events.length;
                     }
 
                     debug('# events to publish:', events.length);
-
+                    if (bar && tasks.length == 0) bar.total = bar.total * eventsPerObj;
+ 
                     let task = publishEvent;
                     if (options.dryRun) {
                         task = printEvent;
