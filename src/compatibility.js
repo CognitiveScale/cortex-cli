@@ -114,7 +114,6 @@ function getCompatibility(profile) {
 function withCompatibilityCheck(fn) {
     return (...args) => {
         const options = last(args) || {};
-
         if (options.compat) {
             const { profile: profileName } = options;
             const profile = loadProfile(profileName);
@@ -128,12 +127,12 @@ function withCompatibilityCheck(fn) {
                         upgradeAvailable({ current, latest });
                     }
                 })
-                .then(() => fn(...args))
                 .catch((error) => {
-                    printError(error);
-                });
-        }
+                    console.warn(`Warning unable to check for cortex-cli updates: ${error.message}`);
+                })
+                .finally(() => fn(...args))
 
+        }
         return Promise.resolve().then(() => fn(...args));
     };
 };
