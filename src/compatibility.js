@@ -28,7 +28,7 @@ const npmFetch = require('npm-registry-fetch');
 const { request } = require('./commands/apiutils');
 const semver = require('semver');
 const uniq = require('lodash/fp/uniq');
-
+const { printWarning } = require('./commands/utils');
 const { loadProfile } = require('./config');
 const { printError } = require('../src/commands/utils');
 
@@ -128,7 +128,7 @@ function withCompatibilityCheck(fn) {
                     }
                 })
                 .catch((error) => {
-                    console.warn(`Warning unable to check for cortex-cli updates: ${error.message}`);
+                    printWarning(`Warning unable to check for cortex-cli updates: ${error.message}`, options);
                 })
                 .finally(() => fn(...args))
 
