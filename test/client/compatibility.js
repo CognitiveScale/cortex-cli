@@ -100,7 +100,7 @@ describe('compatibility checks', function () {
         });
     });
 
-    describe('when the NPM registry cannot be reached', () => {
+    describe('when the compatibility service cannot be reached', () => {
         let requestMock;
         let revertCompatibilityModule;
 
@@ -127,7 +127,7 @@ describe('compatibility checks', function () {
         });
     });
 
-    describe('when the compatibility API cannot be reached', () => {
+    describe('when the npm cannot be reached', () => {
         let requestMock;
         let revertCompatibilityModule;
 
@@ -149,8 +149,10 @@ describe('compatibility checks', function () {
             requestMock.unmock(superagent);
         });
 
-        it('should reject', () => {
-            return expect(compatibilityModule.getCompatibility(profile)).to.be.rejected;
+        it('should not reject', () => {
+            // should default to current package version...
+            const expected = { current: pkg.version, latest: pkg.version, satisfied: true };
+            return expect(compatibilityModule.getCompatibility(profile)).to.become(expected);
         });
     });
 });

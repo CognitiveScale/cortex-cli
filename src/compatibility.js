@@ -109,7 +109,7 @@ async function getCompatibility(profile) {
             return ({current, latest, satisfied});
         }catch (e) {
             printWarning(`Warning unable to check for cortex-cli update: ${e.message}`);
-            return ({current: '0.0.0', latest: '0.0.0', satisfied});
+            return ({current: pkg.version, latest: pkg.version, satisfied});
         }
     }catch (e) {
         throw new Error(`Unable to contact cortex: ${e.message}`);
