@@ -28,9 +28,8 @@ const npmFetch = require('npm-registry-fetch');
 const { request } = require('./commands/apiutils');
 const semver = require('semver');
 const uniq = require('lodash/fp/uniq');
-
 const { loadProfile } = require('./config');
-const { printError } = require('../src/commands/utils');
+const { printError, printWarning } = require('../src/commands/utils');
 
 const pkg = findPackageJson(__dirname).next().value;
 
@@ -41,7 +40,7 @@ function getAvailableVersions(name) {
         .then(manifest => keys(getOr({}, 'versions', manifest)))
         .then(versions => uniq(concat(versions, pkg.version)))
         .then(versions => versions.sort(semver.compare))
-        .catch((error) => {
+        .catch(_ => {
             throw new Error('Unable to determine CLI available versions');
         });
 }
@@ -92,29 +91,34 @@ function upgradeRequired(args) {
     process.exit(-1);
 }
 
-function getCompatibility(profile) {
+async function getCompatibility(profile) {
     debug('getCompatibility => %s profile', profile.name);
-    return Promise
-        .all([
-            getAvailableVersions(pkg.name),
-            getRequiredVersion(profile)
-        ])
-        .then(([versions, requirements]) => {
+    try{
+        // fail if unable to contact cortex service
+        const requirements = await getRequiredVersion(profile);
+        const satisfied =  semver.satisfies(pkg.version, requirements);
+        try {
+            // warn user but don't fail
+            const versions = await getAvailableVersions(pkg.name);
             debug('getCompatibility => versions: %s, requirements: %s', versions, requirements);
             const compatibleVersions = filter(v => semver.satisfies(v, requirements), versions);
             debug('getCompatibility => compatible versions: %s', compatibleVersions);
-            const { version: current } = pkg;
+            const {version: current} = pkg;
             const latest = last(compatibleVersions);
-            const satisfied = semver.satisfies(pkg.version, requirements);
             debug('getCompatibility => satisfied: %s', satisfied);
-            return ({ current, latest, satisfied });
-        });
-};
+            return ({current, latest, satisfied});
+        }catch (e) {
+            printWarning(`Warning unable to check for cortex-cli update: ${e.message}`);
+            return ({current: pkg.version, latest: pkg.version, satisfied});
+        }
+    }catch (e) {
+        throw new Error(`Unable to contact cortex: ${e.message}`);
+    }
+}
 
 function withCompatibilityCheck(fn) {
     return (...args) => {
         const options = last(args) || {};
-
         if (options.compat) {
             const { profile: profileName } = options;
             const profile = loadProfile(profileName);
@@ -132,13 +136,13 @@ function withCompatibilityCheck(fn) {
                 .catch((error) => {
                     printError(error);
                 });
-        }
 
+        }
         return Promise.resolve().then(() => fn(...args));
     };
-};
+}
 
 module.exports = {
     getCompatibility,
     withCompatibilityCheck
-}
+};
