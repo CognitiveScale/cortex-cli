@@ -155,6 +155,9 @@ program
 program
     .command('describe <profileId> [schemaName]')
     .description('Describe Profile Schema')
+    .option('--historic', 'Describe the historic version of the profile.')
+    .option('--versionLimit [versionLimit]', 'Limit the version of the profile being described.')
+    .option('--attribute [attribute]', 'Describe a specific attribute in the profile.')
     .option('--no-compat', 'Ignore API compatibility checks')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')

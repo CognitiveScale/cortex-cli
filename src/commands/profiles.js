@@ -254,10 +254,11 @@ class DescribeProfileCommand {
 
     execute(profileId, schemaName, options) {
         const profile = loadProfile(options.profile);
-        debug('%s.executeDescribeProfile(%s)', profile.name, profileId);
+        const { historic, versionLimit, attribute } = options;
+        debug(`${profile.name}.executeDescribeProfile(${profileId}) [${historic}][${versionLimit}][${attribute}]`);
 
         const graph = new Graph(profile.url);
-        graph.describeProfile(profile.token, profileId, schemaName)
+        graph.describeProfile(profile.token, profileId, schemaName, historic, versionLimit, attribute)
             .then((response) => {
                 if (response.success) {
                     let result = filterObject(response.profile, options);

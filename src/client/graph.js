@@ -96,7 +96,7 @@ class Graph {
             });
     }
 
-    describeProfile(token, profileId, schemaName) {
+    describeProfile(token, profileId, schemaName, historic, versionLimit, attribute) {
         const endpoint = `${this.endpoints.profiles}/${profileId}`;
         debug('describeProfile(%s) => GET %s', profileId, endpoint);
 
@@ -106,10 +106,11 @@ class Graph {
             .set('x-cortex-proxy-notify', true);
 
         if (schemaName) req.query({ schemaNames: schemaName });
+        if (historic) req.query({ historic });
+        if (versionLimit) req.query({ versionLimit });
+        if (attribute) req.query({ attributes: attribute });
 
         return req.then((res) => {
-            if (Boolean(_.get(res, 'headers.x-cortex-proxied', false)))
-                console.error(chalk.blue('Request proxied to cloud.'));
             if (res.ok) {
                 return {success: true, profile: res.body};
             }

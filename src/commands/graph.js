@@ -331,7 +331,7 @@ class PublishEventsCommand {
                 })
                 .on('error', (err) => reject(err))
                 .on('end', () => {
-                    printSuccess(`Finished processing ${bar.total} events in batches.`);
+                    printError(`Finished processing ${bar.total} events in batches.`, null, false);
                     bar.terminate();
                     resolve({ eventCount: bar.total });
                 });
@@ -346,9 +346,9 @@ class PublishEventsCommand {
                             'publishing [:bar] :current/:total :rate evt/s :elapsed s',
                             { total: numLines, width: 65 }
                         );
-                        printSuccess(`Publishing ${numLines} records from file ${file}`);
+                        printError(`Publishing ${numLines} records from file ${file}`, null, false);
                     } else {
-                        printSuccess(`Publishing ??????????? records from file ${file}`);
+                        printError(`Publishing ??????????? records from file ${file}`, null, false);
                     }
                     return new Promise((resolve, reject) => {
                         const stream = fs.createReadStream(file);
