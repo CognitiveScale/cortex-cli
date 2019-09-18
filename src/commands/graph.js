@@ -34,7 +34,7 @@ const _systemEvents = ['$set', '$unset', '$delete'];
 const applyTemplate = (t, target) => {
     const { $match, $path, $transform, $name } = t;
 
-    debug('applying template to target:', target);
+    debug(`applying template to target: ${JSON.stringify(target, null, 4)}`);
 
     // Match condition, if specified, this must eval to true, otherwise the template is skipped
     if ($match) {
@@ -96,6 +96,33 @@ const fixUnicodeKeys = (obj) => {
     return result;
 };
 
+function castValue(value) {
+    if (_.isNumber(value) || _.isString(value) || _.isBoolean(value)) {
+        return { value };
+    }
+    if (_.isArray(value)) {
+        return {
+            value: _.map(value, castValue)
+        };
+
+    }
+    // Construct Dimensional from Object
+    if (_.isObject(value)) {
+        return {
+            value: _.map(
+                _.entries(value), 
+                entry => {
+                    const [k, v] = entry;
+                    return { 
+                        dimensionId: k,
+                        dimensionValue: castValue(v),
+                    };
+                }
+            )
+        }
+    }
+}
+
 /**
  * Automatically generate attribute events for system events (e.g. $set)
  * @param {object} evt
@@ -117,9 +144,7 @@ const autoAttributes = (evt) => {
             source,
             meta,
             eventLabel,
-            properties: {
-                value: properties[k]
-            }
+            properties: castValue(properties[k]),
         }));
     }
 
@@ -279,7 +304,7 @@ class PublishEventsCommand {
                 .pipe(through2.obj(
                     function (event, encoding, callback) {
                         let events = [event];
-			let eventsPerObj = 1;
+                        let eventsPerObj = 1;
                         
                         if (options.transform) {
                             debug('loading templates from: ', path.resolve(options.transform));
@@ -291,14 +316,14 @@ class PublishEventsCommand {
                                 templates,
                                 (t) => applyTemplate(t, event),
                             ).filter(e => e !== null);
-			    eventsPerObj = events.length;
-			    eventsPerObj = events.length;
+			                eventsPerObj = events.length;
                         }
                         
                         if (options.auto) {
                             const autoAttrs = _.flatten(events.map((evt) => autoAttributes(evt)));
                             debug(`Generated ${autoAttrs.length} attribute events`);
                             events = events.concat(autoAttrs);
+                            eventsPerObj = events.length;
                         }
 
                         events.forEach((e) => this.push(e));
