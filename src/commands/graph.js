@@ -31,6 +31,8 @@ const { printSuccess, printError, filterObject, countLinesInFile, printTable } =
 
 const _reserved = ['$match', '$path', '$transform', '$name'];
 const _systemEvents = ['$set', '$unset', '$delete'];
+const progressBarConfig = 'publishing [:bar] :current/:total :rate evt/s :elapsed s' ;
+
 const applyTemplate = (t, target) => {
     const { $match, $path, $transform, $name } = t;
 
@@ -102,7 +104,7 @@ function castValue(value) {
     }
     if (_.isArray(value)) {
         return {
-            value: _.map(value, castValue)
+            value: _.map(value, (x) => _.isString(x) ? castValue(x) : x)
         };
 
     }
@@ -204,7 +206,8 @@ class PublishEventsCommand {
         debug('%s.executePublishEvents()', profile.name);
 
         const graph = new Graph(profile.url);
-        const lineCountIsDynamic = (options.transform || options.auto);
+        // Multiple Event Transformers can be specified in the same file ...
+        const lineCountIsDynamic = (options.transform || options.auto || _.isEmpty(file));
 
         const publishEvent = async (events, bar) => {
             if (_.isEmpty(events)) return;
@@ -228,10 +231,9 @@ class PublishEventsCommand {
             }
         };
 
-	// Git conflict - this was not async before ...
+        // Git conflict - this was not async before ...
         const printEvent = async (events, bar) => {
             if (!events) return;
-	    // eventCount++;
             events.forEach((e) => console.log(JSON.stringify(e)));
         };
 
@@ -281,13 +283,8 @@ class PublishEventsCommand {
         const processStream = (stream, resolve, reject, bar) => {
             // Moved here ... we dont know how many events are being pushed ... even if a file is specified ...
             bar = !_.isEmpty(bar) ? bar : (
-                new ProgressBar(
-                    'publishing [:bar] :current/:total :rate evt/s :elapsed s',
-                    { total: 0, width: 65 }
-                )
+                new ProgressBar(progressBarConfig, { total: 0, width: 65 })
             );
-
-            const tasks = [];
             const { batchHandler, batchFlusher, } = batchElementsUntilSize(1024 * 100);
             stream
                 .pipe(split())
@@ -304,7 +301,6 @@ class PublishEventsCommand {
                 .pipe(through2.obj(
                     function (event, encoding, callback) {
                         let events = [event];
-                        let eventsPerObj = 1;
                         
                         if (options.transform) {
                             debug('loading templates from: ', path.resolve(options.transform));
@@ -316,16 +312,13 @@ class PublishEventsCommand {
                                 templates,
                                 (t) => applyTemplate(t, event),
                             ).filter(e => e !== null);
-			                eventsPerObj = events.length;
                         }
                         
                         if (options.auto) {
                             const autoAttrs = _.flatten(events.map((evt) => autoAttributes(evt)));
                             debug(`Generated ${autoAttrs.length} attribute events`);
                             events = events.concat(autoAttrs);
-                            eventsPerObj = events.length;
                         }
-
                         events.forEach((e) => this.push(e));
                         callback();
                     }
@@ -346,7 +339,7 @@ class PublishEventsCommand {
                                 callback();
                             })
                             .catch((error) => {
-                                printError(`Error uploading event batch: ${JSON.stringify(error)}`, options, false);
+                                printError(`Error uploading event batch: ${error.message}`, options, false);
                                 callback();
                             });
                     }
@@ -356,7 +349,9 @@ class PublishEventsCommand {
                 })
                 .on('error', (err) => reject(err))
                 .on('end', () => {
-                    printError(`Finished processing ${bar.total} events in batches.`, null, false);
+                    if(!options.dryRun) {
+                        printError(`Finished processing ${bar.total} events in batches.`, null, false);
+                    }
                     bar.terminate();
                     resolve({ eventCount: bar.total });
                 });
@@ -368,8 +363,7 @@ class PublishEventsCommand {
                     let bar = null;
                     if (!lineCountIsDynamic) {
                         bar = new ProgressBar(
-                            'publishing [:bar] :current/:total :rate evt/s :elapsed s',
-                            { total: numLines, width: 65 }
+                            progressBarConfig, { total: numLines, width: 65 }
                         );
                         printError(`Publishing ${numLines} records from file ${file}`, null, false);
                     } else {
@@ -406,9 +400,9 @@ class GetEntityCommand {
             .then((response) => {
                 if (response.success) {
                     let result = response.entity;
-                    if (options.query)
+                    if (options.query) {
                         result = filterObject(result, options);
-
+                    }
                     printSuccess(JSON.stringify(result, null, 2), options);
                 }
                 else {
