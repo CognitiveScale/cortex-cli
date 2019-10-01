@@ -4,6 +4,7 @@ require('superagent-proxy')(superagentRequest);
 const debug = require('debug')('cortex:cli');
 
 const { printWarning } = require('./utils');
+const { getUserAgent } = require('../useragent');
 
 /**
  * makes a request via superagent. proxy methods will be utilized
@@ -27,7 +28,8 @@ function requestWrapper() {
         bothProxiesSet && printWarning(bothProxiesWarning);
         return superagentRequest
             .get(endpoint)
-            .proxy(proxyEnv);
+            .proxy(proxyEnv)
+            .set('User-Agent', getUserAgent());
     };
     this.delete = function(endpoint) {
         if (bypassProxy) return superagentRequest.delete(endpoint);
@@ -36,6 +38,7 @@ function requestWrapper() {
         return superagentRequest
             .delete(endpoint)
             .proxy(proxyEnv)
+            .set('User-Agent', getUserAgent());
     };
     this.post = function(endpoint) {
         if (bypassProxy) return superagentRequest.post(endpoint);
@@ -44,6 +47,7 @@ function requestWrapper() {
         return superagentRequest
             .post(endpoint)
             .proxy(proxyEnv)
+            .set('User-Agent', getUserAgent());
     }
     this.put = function(endpoint) {
         if (bypassProxy) return superagentRequest.put(endpoint);
@@ -52,6 +56,7 @@ function requestWrapper() {
         return superagentRequest
             .put(endpoint)
             .proxy(proxyEnv)
+            .set('User-Agent', getUserAgent());
     }
 }
 
