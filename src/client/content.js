@@ -23,6 +23,7 @@ const ProgressBar = require('progress');
 const  { request } = require('../commands/apiutils');
 const debug = require('debug')('cortex:cli');
 const { constructError } = require('../commands/utils');
+const { getUserAgent } = require('../useragent');
 
 module.exports = class Content {
 
@@ -105,6 +106,7 @@ module.exports = class Content {
                             'Accept': 'application/json',
                             'Authorization': `Bearer ${token}`,
                             'Content-Type': contentType,
+                            'User-Agent': getUserAgent(),
                         }
                     }, function(err, res, body) {
                         if (err) {
