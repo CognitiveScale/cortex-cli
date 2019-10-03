@@ -15,7 +15,7 @@
  */
 
 const Throttle = require('superagent-throttle');
-const debug = require('debug')('cortex:cli');
+const debug = require('debug')('cortex:cli:graph');
 const _ = require('lodash');
 const chalk = require('chalk');
 const { constructError } = require('../commands/utils');
@@ -23,6 +23,7 @@ const { request } = require('../commands/apiutils');
 
 const createEndpoints = (baseUri) => {
     return {
+        profileVersions: `${baseUri}/v3/graph/profile-versions`,
         profiles: `${baseUri}/v3/graph/profiles`,
         schemas: `${baseUri}/v3/graph/profiles/schemas`,
         events: `${baseUri}/v3/graph/events`,
@@ -71,7 +72,31 @@ class Graph {
         });
     }
 
-    describeProfile(token, profileId, schemaName) {
+    listProfileVersions(token, profileId, schemaNames, before, after, limit) {
+        const endpoint = `${this.endpoints.profileVersions}/${profileId}`;
+        debug('listProfileVersions(%s) => GET %s', profileId, endpoint);
+        const req = request
+            .get(endpoint)
+            .set('Authorization', `Bearer ${token}`)
+            .set('x-cortex-proxy-notify', true);
+
+        if (schemaNames) req.query({ schemaNames });
+        if (before) req.query({ before });
+        if (after) req.query({ after });
+        if (limit) req.query({ limit });
+
+        return req.then((res) => {
+            if (res.ok) {
+                return { success: true, versions: res.body.versions };
+            }
+            return { success: false, message: res.body, status: res.status };
+        })
+            .catch((err) => {
+                return constructError(err);
+            });
+    }
+
+    describeProfile(token, profileId, schemaName, historic, versionLimit, attribute) {
         const endpoint = `${this.endpoints.profiles}/${profileId}`;
         debug('describeProfile(%s) => GET %s', profileId, endpoint);
 
@@ -81,10 +106,11 @@ class Graph {
             .set('x-cortex-proxy-notify', true);
 
         if (schemaName) req.query({ schemaNames: schemaName });
+        if (historic) req.query({ historic });
+        if (versionLimit) req.query({ versionLimit });
+        if (attribute) req.query({ attributes: attribute });
 
         return req.then((res) => {
-            if (Boolean(_.get(res, 'headers.x-cortex-proxied', false)))
-                console.error(chalk.blue('Request proxied to cloud.'));
             if (res.ok) {
                 return {success: true, profile: res.body};
             }
@@ -157,6 +183,28 @@ class Graph {
         return request
             .post(this.endpoints.events)
             .use(throttle.plugin())
+            .retry(3, (err, res) => {
+                if (err) {
+                    debug(`retry on error: ${err}`);
+                    return true;
+                }
+
+                if (res) {
+                    // Retry on 502, 503, 504 - gateway errors
+                    if (res.status >= 502 && res.status <= 504) {
+                        debug(`server/gateway error with status ${res.status}, retrying request`);
+                        return true;
+                    }
+
+                    // Retry on 429 - rate limit
+                    if (res.status == 429) {
+                        debug(`retry after rate limit exceeded`);
+                        return true;
+                    }
+                }
+                
+                return false;
+            })
             .set('Authorization', `Bearer ${token}`)
             .set('x-cortex-proxy-notify', true)
             .type('json')

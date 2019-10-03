@@ -75,9 +75,9 @@ module.exports = class Actions {
 
         if (docker) req.field('docker', docker);
         if (kind) req.field('kind', kind);
-        if (memory) req.field('memory', memory);
-        if (vcpus) req.field('vcpus', vcpus);
-        if (ttl) req.field('ttl', ttl);
+        if (_.isFinite(memory)) req.field('memory', memory);
+        if (_.isFinite(vcpus)) req.field('vcpus', vcpus);
+        if (!_.isNil(ttl)) req.field('ttl', ttl);
         if (code) req.attach('code', code);
         if (command) req.field('command', command);
         if (port) req.field('port', port);
@@ -137,7 +137,11 @@ module.exports = class Actions {
             .set('Authorization', `Bearer ${token}`)
             .then((res) => {
                 if (res.ok) {
-                    return {success: true, logs: res.body};
+                    if (_.isArray(res.body)) {
+                        // returns plain array for Rancher daemons
+                        return {success: true, logs: res.body};
+                    }
+                    return res.body;
                 }
                 return {success: false, status: res.status, message: res.body};
             })

@@ -188,6 +188,7 @@ cortex agents list --query "[].{name: name, title: title}"
     - [x] describe-schema
     - [x] delete-schema
     - [x] list
+    - [x] list-versions
     - [x] describe
     - [x] delete
     - [x] rebuild

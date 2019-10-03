@@ -79,6 +79,25 @@ module.exports.ConfigureCommand = class {
             debug('account: %s', account);
             debug('username: %s', username);
 
+            if (!cortexUrl.match(/^[a-zA-Z]+:\/\//)) {
+                cortexUrl = 'http://' + cortexUrl;
+            }
+
+            if (!cortexUrl) {
+                console.error(chalk.red('Cortex URL must be provided'));
+                return;
+            }
+
+            if (!account) {
+                console.error(chalk.red('Cortex account name must be provided'));
+                return;
+            }
+
+            if (!username) {
+                console.error(chalk.red('Cortex username must be provided'));
+                return;
+            }
+
             const auth = new Auth(cortexUrl);
             try {
                 const authResp = yield auth.login(account, username, password);
