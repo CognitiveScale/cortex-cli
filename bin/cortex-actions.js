@@ -150,7 +150,8 @@ program
     .option('--environment [environment]', 'Environment')
     .option('--cmd [cmd]', 'Command to be executed')    //'["--daemon"]'
     .option('--environmentVariables [environmentVariables]', 'Docker container environment variables, only used for daemon action types')
-    .option('--push-docker', 'Push Docker image to the Cortex registry.')    
+    .option('--push-docker', 'Push Docker image to the Cortex registry.')
+    .option('--scaleCount [count]', 'Scale count', 'Scale count, only used for daemon action types')
     .action(withCompatibilityCheck((actionName, options) => {
         try {
             if (!options.kind && !options.docker) {
