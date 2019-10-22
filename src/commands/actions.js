@@ -112,9 +112,10 @@ module.exports.DeployActionCommand = class {
         const environment = options.environment;
         const environmentVariables = options.environmentVariables;
         const pushDocker = options.pushDocker;
+        const scaleCount = parseInt(options.scaleCount);
 
         const actions = new Actions(profile.url);
-        actions.deployAction(profile.token, actionName, dockerImage, kind, code, memory, vcpus, ttl, actionType, cmd, port, environment, environmentVariables, pushDocker)
+        actions.deployAction(profile.token, actionName, dockerImage, kind, code, memory, vcpus, ttl, actionType, cmd, port, environment, environmentVariables, pushDocker, scaleCount)
             .then((response) => {
                 if (response.success) {
                     printSuccess(JSON.stringify(response.message, null, 2), options);
