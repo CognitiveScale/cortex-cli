@@ -161,7 +161,7 @@ module.exports.InvokeActionCommand = class {
             params.properties['vcpus'] =parseFloat(options.vcpus);
 
         // Set the API Endpoint and Token if not specified
-        if (!params.apiEndpoint) params.apiEndpoint = profile.url;
+        // if (!params.apiEndpoint) params.apiEndpoint = profile.url;
         if (!params.token) params.token = profile.token;
 
         debug('params: %o', params);
