@@ -54,16 +54,16 @@ module.exports = class Actions {
         });
     }
 
-    async deployAction(token, actionName, docker, kind, code, memory, vcpus, ttl, actionType, command, port, environment, environmentVariables, pushDocker, scaleCount) {
+    async deployAction(token, actionName, params) {
         let endpoint = `${this.endpointV3}`;
-        if (actionType) {
-            endpoint = `${endpoint}?actionType=${actionType}`;
+        if (params.actionType) {
+            endpoint = `${endpoint}?actionType=${params.actionType}`;
         }
         debug('deployAction(%s, docker=%s, kind=%s, code=%s, memory=%s, vcpus=%s, ttl=%s) => %s',
-            actionName, docker, kind, code, memory, vcpus, ttl, endpoint);
+            actionName, params.docker, params.kind, params.code, params.memory, params.vcpus, params.ttl, endpoint);
 
         try {
-            docker = await this._maybePushDockerImage(docker, token, pushDocker);
+            params.docker = await this._maybePushDockerImage(params.docker, token, params.pushDocker);
         } catch (error) {
             return {success: false, status: 400, message: error.message || error};
         }
@@ -73,17 +73,18 @@ module.exports = class Actions {
             .set('Authorization', `Bearer ${token}`)
             .field('name', actionName);
 
-        if (docker) req.field('docker', docker);
-        if (kind) req.field('kind', kind);
-        if (_.isFinite(memory)) req.field('memory', memory);
-        if (_.isFinite(vcpus)) req.field('vcpus', vcpus);
-        if (!_.isNil(ttl)) req.field('ttl', ttl);
-        if (code) req.attach('code', code);
-        if (command) req.field('command', command);
-        if (port) req.field('port', port);
-        if (environment) req.field('environment', environment);
-        if (environmentVariables) req.field('environmentVariables', environmentVariables);
-        if (_.isFinite(scaleCount)) req.field('scaleCount', scaleCount);
+        if (params.podSpec) req.field('podSpec', params.podSpec);
+        if (params.docker) req.field('docker', params.docker);
+        if (params.kind) req.field('kind', params.kind);
+        if (_.isFinite(params.memory)) req.field('memory', params.memory);
+        if (_.isFinite(params.vcpus)) req.field('vcpus', params.vcpus);
+        if (!_.isNil(params.ttl)) req.field('ttl', params.ttl);
+        if (params.code) req.attach('code', params.code);
+        if (params.command) req.field('command', params.command);
+        if (params.port) req.field('port', params.port);
+        if (params.environment) req.field('environment', params.environment);
+        if (params.environmentVariables) req.field('environmentVariables', params.environmentVariables);
+        if (_.isFinite(params.scaleCount)) req.field('scaleCount', params.scaleCount);
 
         return req.then((res) => {
             if (res.ok) {

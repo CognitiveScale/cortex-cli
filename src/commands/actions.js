@@ -19,7 +19,7 @@ const uuid = require('uuid/v4');
 const debug = require('debug')('cortex:cli');
 const {loadProfile} = require('../config');
 const Actions = require('../client/actions');
-const {printSuccess, printError, filterObject, parseObject, printTable} = require('./utils');
+const {printSuccess, printWarning, printError, filterObject, parseObject, printTable} = require('./utils');
 
 module.exports.ListActionsCommand = class {
 
@@ -100,22 +100,35 @@ module.exports.DeployActionCommand = class {
         const profile = loadProfile(options.profile);
         debug('%s.deployAction(%s)', profile.name, actionName);
 
-        const kind = options.kind;
-        const dockerImage = options.docker;
-        const code = options.code;
-        const memory = parseInt(options.memory);
-        const vcpus = parseFloat(options.vcpus);
-        const ttl = options.ttl;
-        const actionType = options.actionType;
-        const cmd = options.cmd;
-        const port = options.port;
-        const environment = options.environment;
-        const environmentVariables = options.environmentVariables;
-        const pushDocker = options.pushDocker;
-        const scaleCount = parseInt(options.scaleCount);
+        let params = {};
+
+        if (options.podspec) {
+            const paramsStr = fs.readFileSync(options.podspec);
+            params.podSpec = parseObject(paramsStr, options);
+        }
+
+        params.kind = options.kind;
+        params.dockerImage = options.docker;
+        params.code = options.code;
+        params.memory = parseInt(options.memory);
+        if(params.memory){
+            printWarning("The memory option has been deprecated and will be ignored, use the podspec option for setting this value", options);
+        }
+        params.vcpus = parseFloat(options.vcpus);
+        if(params.vcpus){
+            printWarning("The vcpus option has been deprecated and will be ignored, use the podspec option for setting this value", options);
+        }
+        params.ttl = options.ttl;
+        params.actionType = options.actionType;
+        params.cmd = options.cmd;
+        params.port = options.port;
+        params.environment = options.environment;
+        params.environmentVariables = options.environmentVariables;
+        params.pushDocker = options.pushDocker;
+        params.scaleCount = parseInt(options.scaleCount);
 
         const actions = new Actions(profile.url);
-        actions.deployAction(profile.token, actionName, dockerImage, kind, code, memory, vcpus, ttl, actionType, cmd, port, environment, environmentVariables, pushDocker, scaleCount)
+        actions.deployAction(profile.token, actionName, params)
             .then((response) => {
                 if (response.success) {
                     printSuccess(JSON.stringify(response.message, null, 2), options);
