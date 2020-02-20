@@ -112,11 +112,11 @@ module.exports.DeployActionCommand = class {
         params.code = options.code;
         params.memory = parseInt(options.memory);
         if(params.memory){
-            printWarning("The memory option has been deprecated and will be ignored, use the podspec option for setting this value", options);
+            printWarning("The memory option has been deprecated and will be ignored. Use the podspec option for setting this value.", options);
         }
         params.vcpus = parseFloat(options.vcpus);
         if(params.vcpus){
-            printWarning("The vcpus option has been deprecated and will be ignored, use the podspec option for setting this value", options);
+            printWarning("The vcpus option has been deprecated and will be ignored. Use the podspec option for setting this value.", options);
         }
         params.ttl = options.ttl;
         params.actionType = options.actionType;

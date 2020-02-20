@@ -152,7 +152,8 @@ program
     .option('--environmentVariables [environmentVariables]', 'Docker container environment variables, only used for daemon action types')
     .option('--push-docker', 'Push Docker image to the Cortex registry.')
     .option('--scaleCount [count]', 'Scale count', 'Scale count, only used for daemon action types')
-    .option('--podspec [podspec]', 'A file containing either a JSON or YAML formatted pod spec to merge with the action definition')
+    .option('--podspec [podspec]', 'A file containing either a JSON or YAML formatted pod spec to merge with the action definition, '
+        + 'used for specifying resources (like memory, ephemeral storage, CPUs, and GPUs) and tolerations (like allowing pods to be scheduled on tainted nodes).')
     .action(withCompatibilityCheck((actionName, options) => {
         try {
             if (!options.kind && !options.docker) {
