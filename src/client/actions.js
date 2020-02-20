@@ -310,22 +310,16 @@ module.exports = class Actions {
         return _.join([registryUrl, tenant, imageName], '/');
     }
 
-    _stripCortexPullthroughRegistry(image) {
-        return image.replace(/^registry\.cortex.*\.insights\.ai:5000\//, '')
-    }
-
     async _maybePushDockerImage(image, token, pushDocker) {
         if (!image || !pushDocker) {
             return image
         }
-        const imageClean = this._stripCortexPullthroughRegistry(image);
         const registryUrl = await this._cortexRegistryUrl(token);
         const imageName = image.replace(/.+\..+\//, '');
         const cortexImageUrl = this._cortexRegistryImagePath(registryUrl, imageName, jsonwebtoken.decode(token).tenant);
-
         await callMe(`docker login -u cli --password ${token} ${registryUrl}`);
-        await callMe(`docker pull ${imageClean} || echo "Docker pull failed using local image"`);
-        await callMe(`docker tag ${imageClean} ${cortexImageUrl}`);
+        await callMe(`docker pull ${image} || echo "Docker pull failed using local image"`);
+        await callMe(`docker tag ${image} ${cortexImageUrl}`);
         await callMe(`docker push ${cortexImageUrl}`);
         return cortexImageUrl;
     }
