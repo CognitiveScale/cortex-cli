@@ -120,7 +120,7 @@ module.exports.DeployActionCommand = class {
         }
         params.ttl = options.ttl;
         params.actionType = options.actionType;
-        params.cmd = options.cmd;
+        params.command = options.cmd;
         params.port = options.port;
         params.environment = options.environment;
         params.environmentVariables = options.environmentVariables;
