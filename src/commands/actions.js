@@ -110,13 +110,13 @@ module.exports.DeployActionCommand = class {
         params.kind = options.kind;
         params.dockerImage = options.docker;
         params.code = options.code;
-        params.memory = parseInt(options.memory);
-        if(params.memory){
-            printWarning("The memory option has been deprecated and will be ignored. Use the podspec option for setting this value.", options);
+        if(parseInt(options.memory)){
+            printWarning("The memory option has been deprecated and will be ignored." +
+                " Use the podspec option for setting this value.", options);
         }
-        params.vcpus = parseFloat(options.vcpus);
-        if(params.vcpus){
-            printWarning("The vcpus option has been deprecated and will be ignored. Use the podspec option for setting this value.", options);
+        if(parseFloat(options.vcpus)){
+            printWarning("The vcpus option has been deprecated and will be ignored." +
+                " Use the podspec option for setting this value.", options);
         }
         params.ttl = options.ttl;
         params.actionType = options.actionType;
@@ -168,11 +168,14 @@ module.exports.InvokeActionCommand = class {
             params.properties['daemon.method'] = options.method;
         if (options.path)
             params.properties['daemon.path'] = options.path;
-        if (options.memory)
-            params.properties['memory'] =parseInt(options.memory);
-        if (options.vcpus)
-            params.properties['vcpus'] =parseFloat(options.vcpus);
-
+        if(parseInt(options.memory)){
+            printWarning("The memory option has been deprecated and will be ignored." +
+                " Use the deploy command with podspec option for setting this value.", options);
+        }
+        if(parseFloat(options.vcpus)){
+            printWarning("The vcpus option has been deprecated and will be ignored." +
+                " Use the deploy command with podspec option for setting this value.", options);
+        }
         // Set Token if not specified
         if (!params.token) params.token = profile.token;
 
