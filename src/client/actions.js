@@ -59,32 +59,21 @@ module.exports = class Actions {
         if (params.actionType) {
             endpoint = `${endpoint}?actionType=${params.actionType}`;
         }
-        debug('deployAction(%s, docker=%s, kind=%s, code=%s, memory=%s, vcpus=%s, ttl=%s) => %s',
-            actionName, params.docker, params.kind, params.code, params.memory, params.vcpus, params.ttl, endpoint);
+        debug('deployAction(%s, docker=%s, kind=%s, code=%s, ttl=%s) => %s',
+            actionName, params.dockerImage, params.kind, params.code, params.ttl, endpoint);
 
         try {
-            params.docker = await this._maybePushDockerImage(params.docker, token, params.pushDocker);
+            params.docker = await this._maybePushDockerImage(params.dockerImage, token, params.pushDocker);
         } catch (error) {
             return {success: false, status: 400, message: error.message || error};
         }
 
+        params.name = actionName;
+
         const req = request
             .post(endpoint)
             .set('Authorization', `Bearer ${token}`)
-            .field('name', actionName);
-
-        if (params.podSpec) req.field('podSpec', params.podSpec);
-        if (params.docker) req.field('docker', params.docker);
-        if (params.kind) req.field('kind', params.kind);
-        if (_.isFinite(params.memory)) req.field('memory', params.memory);
-        if (_.isFinite(params.vcpus)) req.field('vcpus', params.vcpus);
-        if (!_.isNil(params.ttl)) req.field('ttl', params.ttl);
-        if (params.code) req.attach('code', params.code);
-        if (params.command) req.field('command', params.command);
-        if (params.port) req.field('port', params.port);
-        if (params.environment) req.field('environment', params.environment);
-        if (params.environmentVariables) req.field('environmentVariables', params.environmentVariables);
-        if (_.isFinite(params.scaleCount)) req.field('scaleCount', params.scaleCount);
+            .send(params);
 
         return req.then((res) => {
             if (res.ok) {
