@@ -110,11 +110,11 @@ module.exports.DeployActionCommand = class {
         params.kind = options.kind;
         params.dockerImage = options.docker;
         params.code = options.code;
-        if(parseInt(options.memory)){
+        if(options.memory){
             printWarning("The memory option has been deprecated and will be ignored." +
                 " Use the podspec option for setting this value.", options);
         }
-        if(parseFloat(options.vcpus)){
+        if(options.vcpus){
             printWarning("The vcpus option has been deprecated and will be ignored." +
                 " Use the podspec option for setting this value.", options);
         }
@@ -168,11 +168,11 @@ module.exports.InvokeActionCommand = class {
             params.properties['daemon.method'] = options.method;
         if (options.path)
             params.properties['daemon.path'] = options.path;
-        if(parseInt(options.memory)){
+        if(options.memory){
             printWarning("The memory option has been deprecated and will be ignored." +
                 " Use the deploy command with podspec option for setting this value.", options);
         }
-        if(parseFloat(options.vcpus)){
+        if(options.vcpus){
             printWarning("The vcpus option has been deprecated and will be ignored." +
                 " Use the deploy command with podspec option for setting this value.", options);
         }
