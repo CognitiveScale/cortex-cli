@@ -54,36 +54,26 @@ module.exports = class Actions {
         });
     }
 
-    async deployAction(token, actionName, docker, kind, code, memory, vcpus, ttl, actionType, command, port, environment, environmentVariables, pushDocker, scaleCount) {
+    async deployAction(token, actionName, params) {
         let endpoint = `${this.endpointV3}`;
-        if (actionType) {
-            endpoint = `${endpoint}?actionType=${actionType}`;
+        if (params.actionType) {
+            endpoint = `${endpoint}?actionType=${params.actionType}`;
         }
-        debug('deployAction(%s, docker=%s, kind=%s, code=%s, memory=%s, vcpus=%s, ttl=%s) => %s',
-            actionName, docker, kind, code, memory, vcpus, ttl, endpoint);
+        debug('deployAction(%s, docker=%s, kind=%s, code=%s, ttl=%s) => %s',
+            actionName, params.dockerImage, params.kind, params.code, params.ttl, endpoint);
 
         try {
-            docker = await this._maybePushDockerImage(docker, token, pushDocker);
+            params.docker = await this._maybePushDockerImage(params.dockerImage, token, params.pushDocker);
         } catch (error) {
             return {success: false, status: 400, message: error.message || error};
         }
 
+        params.name = actionName;
+
         const req = request
             .post(endpoint)
             .set('Authorization', `Bearer ${token}`)
-            .field('name', actionName);
-
-        if (docker) req.field('docker', docker);
-        if (kind) req.field('kind', kind);
-        if (_.isFinite(memory)) req.field('memory', memory);
-        if (_.isFinite(vcpus)) req.field('vcpus', vcpus);
-        if (!_.isNil(ttl)) req.field('ttl', ttl);
-        if (code) req.attach('code', code);
-        if (command) req.field('command', command);
-        if (port) req.field('port', port);
-        if (environment) req.field('environment', environment);
-        if (environmentVariables) req.field('environmentVariables', environmentVariables);
-        if (_.isFinite(scaleCount)) req.field('scaleCount', scaleCount);
+            .send(params);
 
         return req.then((res) => {
             if (res.ok) {
