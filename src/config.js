@@ -17,7 +17,7 @@
 const os = require('os');
 const fs = require('fs');
 const path = require('path');
-const Joi = require('joi');
+const Joi = require('@hapi/joi');
 const debug = require('debug')('cortex:config');
 
 module.exports.defaultConfig = defaultConfig = function(){
@@ -69,7 +69,7 @@ class Profile {
     }
 
     validate() {
-        const {error, value} = Joi.validate(this, ProfileSchema,{abortEarly: false});
+        const {error, value} = ProfileSchema.validate(this,{abortEarly: false});
         if (error) {
             throw new Error(`Invalid configuration profile <${this.name}>: ${error.details[0].message}.  Please run "cortex configure".`);
         }
@@ -79,12 +79,6 @@ class Profile {
         return {url: this.url, username: this.username, account: this.account, token: this.token};
     }
 }
-
-const ConfigSchema = Joi.object().keys({
-    version: Joi.string().optional().default('1'),
-    profiles: Joi.object().optional(),
-    currentProfile: Joi.string().optional().default('default')
-});
 
 class Config {
 
