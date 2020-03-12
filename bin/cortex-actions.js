@@ -137,8 +137,8 @@ program
     .command('deploy <actionName>')
     .description('Deploy an action')
     .option('--no-compat', 'Ignore API compatibility checks')
-    .option('--kind [kind]', 'Action runtime kind') // python:3, python:2, nodejs:default
-    .option('--code [code]', 'The code file or code archive to deploy')
+    .option('--kind [kind]', '[Deprecated] Action runtime kind') // python:3, python:2, nodejs:default
+    .option('--code [code]', '[Deprecated] The code file or code archive to deploy')
     .option('--docker [image]', 'Docker image to use as the runner')
     .option('--memory [memory]', '[Deprecated] Action memory limit in megabytes')
     .option('--vcpus [vcpus]', '[Deprecated] Action vcpus limit in integer')
@@ -156,8 +156,8 @@ program
         + 'used for specifying resources (like memory, ephemeral storage, CPUs, and GPUs) and tolerations (like allowing pods to be scheduled on tainted nodes).')
     .action(withCompatibilityCheck((actionName, options) => {
         try {
-            if (!options.kind && !options.docker) {
-                throw new Error('--kind [kind] or --docker [image] required');
+            if (!options.docker) {
+                throw new Error('--docker [image] required');
             }
             // allow kind with docker for blackbox images..
             // if (options.docker && options.kind) {

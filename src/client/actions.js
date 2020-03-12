@@ -59,8 +59,8 @@ module.exports = class Actions {
         if (params.actionType) {
             endpoint = `${endpoint}?actionType=${params.actionType}`;
         }
-        debug('deployAction(%s, docker=%s, kind=%s, code=%s, ttl=%s) => %s',
-            actionName, params.dockerImage, params.kind, params.code, params.ttl, endpoint);
+        debug('deployAction(%s, docker=%s, ttl=%s) => %s',
+            actionName, params.dockerImage, params.ttl, endpoint);
 
         try {
             params.docker = await this._maybePushDockerImage(params.dockerImage, token, params.pushDocker);
