@@ -46,7 +46,6 @@ module.exports.ListActionsCommand = class {
                         const tableSpec = [
                             {column: 'Name', field: 'name', width: 50},
                             {column: 'Image', field: 'image', width: 50},
-                            {column: 'Kind', field: 'kind', width: 25},
                             {column: 'Created On', field: 'createdAt', width: 26}
                         ];
 
@@ -107,9 +106,13 @@ module.exports.DeployActionCommand = class {
             params.podSpec = parseObject(paramsStr, options);
         }
 
-        params.kind = options.kind;
-        params.dockerImage = options.docker;
-        params.code = options.code;
+        if(options.kind){
+            printWarning("The kind option has been deprecated and will be ignored.", options);
+        }
+        if(options.code){
+            printWarning("The code option has been deprecated and will be ignored." +
+                " Use the docker option for setting an existing image to use.", options);
+        }
         if(options.memory){
             printWarning("The memory option has been deprecated and will be ignored." +
                 " Use the podspec option for setting this value.", options);
@@ -118,6 +121,7 @@ module.exports.DeployActionCommand = class {
             printWarning("The vcpus option has been deprecated and will be ignored." +
                 " Use the podspec option for setting this value.", options);
         }
+        params.dockerImage = options.docker;
         params.ttl = options.ttl;
         params.actionType = options.actionType;
         params.command = options.cmd;
