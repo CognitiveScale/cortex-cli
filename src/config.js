@@ -65,9 +65,6 @@ class Profile {
         this.url = process.env.CORTEX_URI || url;
         this.username = username;
         this.account = tenantId || account;
-        if (process.env.CORTEX_TOKEN) {
-          console.error("Using token from environment variable $CORTEX_TOKEN")
-        }
         this.token = process.env.CORTEX_TOKEN || token;
     }
 

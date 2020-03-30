@@ -29,13 +29,13 @@
   "homepage": "https://github.com/CognitiveScale/cortex-cli",
   "dependencies": {
     "@c12e/generator-cortex": "0.3.30",
-    "@hapi/joi": "17.1.0",
+    "@hapi/joi": "17.1.1",
     "boxen": "4.2.0",
     "chalk": "3.0.0",
     "cli-table": "0.3.1",
     "co": "4.6.0",
     "co-prompt": "1.0.0",
-    "commander": "4.1.1",
+    "commander": "5.0.0",
     "debug": "4.1.1",
     "event-stream": "4.0.1",
     "find-package-json": "1.2.0",
@@ -57,15 +57,15 @@
     "superagent-proxy": "2.0.0",
     "superagent-throttle": "1.0.1",
     "through2": "3.0.1",
-    "tty-table": "2.8.12",
-    "uuid": "7.0.1",
-    "yeoman-environment": "2.8.0"
+    "tty-table": "4.1.1",
+    "uuid": "7.0.2",
+    "yeoman-environment": "2.8.1"
   },
   "devDependencies": {
     "chai": "4.2.0",
     "chai-as-promised": "7.1.1",
-    "mocha": "7.1.0",
-    "rewire": "4.0.1",
+    "mocha": "7.1.1",
+    "rewire": "5.0.0",
     "superagent-mocker": "0.5.2"
   }
 }
