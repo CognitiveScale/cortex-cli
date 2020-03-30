@@ -116,8 +116,8 @@ program
     .option('--params [params]', 'JSON params to send to the action')
     .option('--params-file [paramsFile]', 'A file containing either JSON or YAML formatted params')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
-    .option('--memory [memory]', 'Action memory limit in megabytes')
-    .option('--vcpus [vcpus]', 'Action vcpus limit in integer')
+    .option('--memory [memory]', '[Deprecated] Action memory limit in megabytes')
+    .option('--vcpus [vcpus]', '[Deprecated] Action vcpus limit in integer')
     .option('--profile [profile]', 'The profile to use')
     .option('--query [query]', 'A JMESPath query to use in filtering the response data.')
     .option('--actionType [actionType]', 'Type of action')
@@ -137,11 +137,11 @@ program
     .command('deploy <actionName>')
     .description('Deploy an action')
     .option('--no-compat', 'Ignore API compatibility checks')
-    .option('--kind [kind]', 'Action runtime kind') // python:3, python:2, nodejs:default
-    .option('--code [code]', 'The code file or code archive to deploy')
+    .option('--kind [kind]', '[Deprecated] Action runtime kind') // python:3, python:2, nodejs:default
+    .option('--code [code]', '[Deprecated] The code file or code archive to deploy')
     .option('--docker [image]', 'Docker image to use as the runner')
-    .option('--memory [memory]', 'Action memory limit in megabytes')
-    .option('--vcpus [vcpus]', 'Action vcpus limit in integer')
+    .option('--memory [memory]', '[Deprecated] Action memory limit in megabytes')
+    .option('--vcpus [vcpus]', '[Deprecated] Action vcpus limit in integer')
     .option('--ttl [ttl]', 'Daemon time to live')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
@@ -152,10 +152,12 @@ program
     .option('--environmentVariables [environmentVariables]', 'Docker container environment variables, only used for daemon action types')
     .option('--push-docker', 'Push Docker image to the Cortex registry.')
     .option('--scaleCount [count]', 'Scale count', 'Scale count, only used for daemon action types')
+    .option('--podspec [podspec]', 'A file containing either a JSON or YAML formatted pod spec to merge with the action definition, '
+        + 'used for specifying resources (like memory, ephemeral storage, CPUs, and GPUs) and tolerations (like allowing pods to be scheduled on tainted nodes).')
     .action(withCompatibilityCheck((actionName, options) => {
         try {
-            if (!options.kind && !options.docker) {
-                throw new Error('--kind [kind] or --docker [image] required');
+            if (!options.docker) {
+                throw new Error('--docker [image] required');
             }
             // allow kind with docker for blackbox images..
             // if (options.docker && options.kind) {

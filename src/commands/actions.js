@@ -19,7 +19,7 @@ const uuid = require('uuid/v4');
 const debug = require('debug')('cortex:cli');
 const {loadProfile} = require('../config');
 const Actions = require('../client/actions');
-const {printSuccess, printError, filterObject, parseObject, printTable} = require('./utils');
+const {printSuccess, printWarning, printError, filterObject, parseObject, printTable} = require('./utils');
 
 module.exports.ListActionsCommand = class {
 
@@ -46,7 +46,6 @@ module.exports.ListActionsCommand = class {
                         const tableSpec = [
                             {column: 'Name', field: 'name', width: 50},
                             {column: 'Image', field: 'image', width: 50},
-                            {column: 'Kind', field: 'kind', width: 25},
                             {column: 'Created On', field: 'createdAt', width: 26}
                         ];
 
@@ -100,22 +99,40 @@ module.exports.DeployActionCommand = class {
         const profile = loadProfile(options.profile);
         debug('%s.deployAction(%s)', profile.name, actionName);
 
-        const kind = options.kind;
-        const dockerImage = options.docker;
-        const code = options.code;
-        const memory = parseInt(options.memory);
-        const vcpus = parseFloat(options.vcpus);
-        const ttl = options.ttl;
-        const actionType = options.actionType;
-        const cmd = options.cmd;
-        const port = options.port;
-        const environment = options.environment;
-        const environmentVariables = options.environmentVariables;
-        const pushDocker = options.pushDocker;
-        const scaleCount = parseInt(options.scaleCount);
+        let params = {};
+
+        if (options.podspec) {
+            const paramsStr = fs.readFileSync(options.podspec);
+            params.podSpec = parseObject(paramsStr, options);
+        }
+
+        if(options.kind){
+            printWarning("The kind option has been deprecated and will be ignored.", options);
+        }
+        if(options.code){
+            printWarning("The code option has been deprecated and will be ignored." +
+                " Use the docker option for setting an existing image to use.", options);
+        }
+        if(options.memory){
+            printWarning("The memory option has been deprecated and will be ignored." +
+                " Use the podspec option for setting this value.", options);
+        }
+        if(options.vcpus){
+            printWarning("The vcpus option has been deprecated and will be ignored." +
+                " Use the podspec option for setting this value.", options);
+        }
+        params.dockerImage = options.docker;
+        params.ttl = options.ttl;
+        params.actionType = options.actionType;
+        params.command = options.cmd;
+        params.port = options.port;
+        params.environment = options.environment;
+        params.environmentVariables = options.environmentVariables;
+        params.pushDocker = options.pushDocker;
+        params.scaleCount = parseInt(options.scaleCount);
 
         const actions = new Actions(profile.url);
-        actions.deployAction(profile.token, actionName, dockerImage, kind, code, memory, vcpus, ttl, actionType, cmd, port, environment, environmentVariables, pushDocker, scaleCount)
+        actions.deployAction(profile.token, actionName, params)
             .then((response) => {
                 if (response.success) {
                     printSuccess(JSON.stringify(response.message, null, 2), options);
@@ -155,13 +172,15 @@ module.exports.InvokeActionCommand = class {
             params.properties['daemon.method'] = options.method;
         if (options.path)
             params.properties['daemon.path'] = options.path;
-        if (options.memory)
-            params.properties['memory'] =parseInt(options.memory);
-        if (options.vcpus)
-            params.properties['vcpus'] =parseFloat(options.vcpus);
-
-        // Set the API Endpoint and Token if not specified
-        if (!params.apiEndpoint) params.apiEndpoint = profile.url;
+        if(options.memory){
+            printWarning("The memory option has been deprecated and will be ignored." +
+                " Use the deploy command with podspec option for setting this value.", options);
+        }
+        if(options.vcpus){
+            printWarning("The vcpus option has been deprecated and will be ignored." +
+                " Use the deploy command with podspec option for setting this value.", options);
+        }
+        // Set Token if not specified
         if (!params.token) params.token = profile.token;
 
         debug('params: %o', params);
