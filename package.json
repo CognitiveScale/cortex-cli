@@ -6,6 +6,9 @@
   "scripts": {
     "test": "CORTEX_CONFIG_DIR=./test/cortex mocha --recursive"
   },
+  "engines": {
+    "node": ">=10.0.0"
+  },
   "repository": {
     "type": "git",
     "url": "https://github.com/CognitiveScale/cortex-cli.git"
