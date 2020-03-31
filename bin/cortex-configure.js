@@ -25,7 +25,13 @@ const {
     SetProfileCommand
 } = require('../src/commands/configure');
 
-program.description('Configure the Cortex CLI');
+program
+    .option('--url [url]', 'Cortex URL')
+    .option('--account [account]', 'Account')
+    .option('--username [username]', 'Username')
+    .option('--password [password]', 'Password')
+    .option('--profile [profile]', 'The profile to configure')
+    .description('Configure the Cortex CLI');
 
 let cmd = undefined;
 program.command('auth', { isDefault: true})
