@@ -28,14 +28,19 @@ const {
 program.description('Configure the Cortex CLI');
 
 let cmd = undefined;
-
-program
-    .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
-    .option('--profile [profile]', 'The profile to configure')
+program.command('auth', { isDefault: true})
+    .description('Authenticate to cortex (default command)')
     .option('--url [url]', 'Cortex URL')
     .option('--account [account]', 'Account')
     .option('--username [username]', 'Username')
-    .option('--password [password]', 'Password');
+    .option('--password [password]', 'Password')
+    .option('--profile [profile]', 'The profile to configure')
+    .action( (options) => {
+        new ConfigureCommand(program).execute({profile: program.profile, color: program.color});
+    });
+
+program
+    .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
 
 program
     .command('list')
@@ -58,6 +63,4 @@ program
         new SetProfileCommand(program).execute(profileName, {color: program.color});
     });
 
-program.parse(process.argv, { noActionHandler: function() {
-    new ConfigureCommand(program).execute({profile: program.profile, color: program.color});
-}});
+program.parse(process.argv);
