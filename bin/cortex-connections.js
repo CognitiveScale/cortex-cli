@@ -78,6 +78,7 @@ program
     .option('--no-compat', 'Ignore API compatibility checks')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
+    .option('--json', 'Pretty print JSON results')
     .option('--project [project]', 'The project to use')
     .option('--query [query]', 'The query to use, "select 1" is default')
     .option('--file [file]', 'Location of file containing query string')

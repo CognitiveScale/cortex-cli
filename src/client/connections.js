@@ -25,22 +25,22 @@ module.exports = class Connections {
         this.endpoint = `${cortexUrl}/v2/connections`;
     }
 
-    queryConnection(token, connectionName, queryObject) {
+    async queryConnection(token, connectionName, queryObject) {
         const queryEndpoint = `${this.endpoint}/${connectionName}/query`
         debug('queryConnection(%s) => %s', connectionName, queryEndpoint);
-        return request
-            .post(queryEndpoint)
-            .set('Authorization', `Bearer ${token}`)
-            .send(queryObject)
-            .then((res) => {
-                if (res.ok) {
-                    return {success: true, message: res.body};
-                }
-                return {success: false, message: res.body, status: res.status};
-            })
-            .catch((err) => {
-                return constructError(err);
-            });
+        try {
+            const res = await request
+                .post(queryEndpoint)
+                .set('Authorization', `Bearer ${token}`)
+                .responseType('blob')
+                .send(queryObject);
+            if (res.ok) {
+                return {success: true, message: res.body};
+            }
+            return {success: false, message: res.body, status: res.status};
+        } catch (err) {
+            return constructError(err);
+        }
     }
 
     listConnections(token) {

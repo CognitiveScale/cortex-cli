@@ -324,7 +324,13 @@ module.exports.QueryConnectionCommand = class QueryConnectionCommand {
         connections.queryConnection(profile.token, connectionName, queryObject)
             .then((response) => {
                 if (response.success) {
-                    printSuccess(JSON.stringify(response.message, null, 2), options);
+                    if (options.json) {
+                        printSuccess(JSON.stringify(JSON.parse(response.message), null, 2), options);
+                    } else {
+                        // might get images/binaries from S3
+                        printSuccess(response.message, options);
+                    }
+
                 }
                 else {
                     printError(`Failed to query connection: ${response.status} ${response.message}`, options);
