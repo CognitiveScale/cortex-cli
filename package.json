@@ -4,6 +4,7 @@
   "description": "Command line tool for CognitiveScale Cortex.",
   "main": "./bin/cortex.js",
   "scripts": {
+    "preinstall": "npx check-node-version -p --package",
     "test": "CORTEX_CONFIG_DIR=./test/cortex mocha --recursive"
   },
   "engines": {
