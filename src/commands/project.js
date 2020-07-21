@@ -26,10 +26,7 @@ module.exports.GenerateProjectCommand = class GenerateProjectCommand {
 
     execute(options) {
         debug('generateProject()');
-        const yenv = yeoman.createEnv();
-        yenv.register(require.resolve('@c12e/generator-cortex'), 'cortex:app');
-        // TODO: figure out which parameters to bubble up to the CLI,
-        // and plumb the values through to the yeoman generator.
-        yenv.run('cortex:app', { });
+        const repoUrl = 'https://github.com/CognitiveScale/cortex-fabric-examples';
+        printSuccess(`This command is deprecated. See the ${repoUrl} repo for guidance.`, options);
     }
 };
