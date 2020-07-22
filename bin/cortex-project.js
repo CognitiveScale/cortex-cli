@@ -26,7 +26,7 @@ program.description('Work with a related collection of Cortex contributions');
 // Generate Project
 program
     .command('generate')
-    .description('Generates the structure and top level build script for a project')
+    .description('(Deprecated) Generates the structure and top level build script for a project')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .action((options) => {
         try {
