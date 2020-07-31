@@ -152,11 +152,7 @@ module.exports.GenerateSkillCommand = class GenerateSkillCommand {
 
     execute(options) {
         debug('%s.generateSkill()');
-        const yenv = yeoman.createEnv();
-        yenv.lookup(()=>{
-            yenv.run('@c12e/cortex:skill',
-            { },
-            (err) => { err ? printError(err) : printSuccess('Done.') });
-        });
+        const repoUrl = 'https://github.com/CognitiveScale/cortex-fabric-examples';
+        printSuccess(`This command is deprecated. See the ${repoUrl} repo for guidance.`, options);
     }
 };

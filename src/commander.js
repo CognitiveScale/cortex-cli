@@ -46,6 +46,9 @@ commander.Command.prototype.parse = function(argv, options) {
 
     this._parse(argv);
     if (!this.wasActionTaken()) {
+        if (process.env.CORTEX_TOKEN) {
+            console.error("Using token from environment variable $CORTEX_TOKEN")
+        }
         opts.noActionHandler();
     }
 };
