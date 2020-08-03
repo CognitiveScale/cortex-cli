@@ -12,14 +12,18 @@ const outfile = _.get(process.argv,'[3]');
 const rootJson = require(`${sourcedir}/cortex.json`)
 
 // replace /n/t with HTML equivs
-const cleanString = (s) => s.replace(/\n/g, '<br>').replace(/\t/g, '&nbsp;&nbsp;&nbsp;')
+const cleanString = (s) => s
+    .replace(/\n/g, '<br />')
+    .replace(/\t/g, 'nbsp;nbsp;')
+    .replace('<','`<')
+    .replace('>','>`')
 
 // print sub-command flags as string
 const optionRow = (opts) => _.join(
     _.sortBy(opts,['flags']).map(
         (opt) => `\`${opt.flags}\`${ _.isEmpty(opt.defaultValue) ? '' : ` (*default:* \`${opt.defaultValue }\`)`} - ${cleanString(opt.description)}`
     ),
-    '<br>'
+    '<br />'
 )
 
 const subcmdTable = (subcmd) => `| Command | Description | Options |
