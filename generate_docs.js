@@ -41,8 +41,7 @@ cortex ${cmd.name} ${cmd.usage}
 ${cmd.description}  
 `;
 
-const header = `
----
+const header = `---
 title: "Cortex CLI"
 linkTitle: "Cortex CLI"
 description: >
