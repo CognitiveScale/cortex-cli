@@ -15,8 +15,8 @@ const rootJson = require(`${sourcedir}/cortex.json`)
 const cleanString = (s) => s
     .replace(/\n/g, '<br />')
     .replace(/\t/g, 'nbsp;nbsp;')
-    .replace('<','`<')
-    .replace('>','>`')
+    .replace(/</g,'`<')
+    .replace(/>/g,'>`')
 
 // print sub-command flags as string
 const optionRow = (opts) => _.join(
