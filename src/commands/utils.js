@@ -84,7 +84,7 @@ module.exports.parseObject = function(str, options) {
     if (options.yaml) {
         return yaml.safeLoad(str);
     }
-    
+
     return JSON.parse(str);
 };
 
@@ -195,7 +195,7 @@ module.exports.formatAllServiceInputParameters = function(allParameters){
          return `$ref:${allParameters.$ref}`;
      }
      else{
-         return allParameters.map(inputParameters => formatServiceInputParameter(inputParameters)).join('\n');    
+         return allParameters.map(inputParameters => formatServiceInputParameter(inputParameters)).join('\n');
      }
 }
 
@@ -245,4 +245,29 @@ module.exports.formatValidationPath = (p) => {
 
     });
     return res;
+};
+
+module.exports.cleanInternalFields = function(jsobj) {
+    return JSON.stringify(jsobj, function re(a, obj) {
+        if (a.startsWith("_")) {
+            return undefined;
+        }
+        return obj;
+    }, 2);
+};
+
+module.exports.jsonToYaml = function (json) {
+    if (typeof json == 'string') {
+        json = JSON.parse(json);
+    }
+    return yaml.dump(json);
+};
+
+module.exports.writeToFile = function (content, filepath) {
+    const dir = path.dirname(filepath);
+    if (!fs.existsSync(dir)) {
+        fs.mkdirSync(dir, {recursive: true});
+    }
+
+    fs.writeFileSync(filepath, content);
 };

@@ -33,6 +33,7 @@ program
     .command('connections [cmd]', 'Work with Cortex Connections')
     .command('content [cmd]', 'Work with Cortex Managed Content')
     .command('environments [cmd]', 'Work with Cortex Environments')
+    .command('deploy [cmd]', 'Work with Cortex Artifacts export for deployment')
     .command('datasets [cmd]', 'Work with Cortex Datasets')
     .command('docker [cmd]', 'Work with Docker')
     .command('jobs [cmd]', 'Work with Cortex v2 Jobs')
