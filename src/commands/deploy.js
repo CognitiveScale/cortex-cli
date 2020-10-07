@@ -16,7 +16,7 @@
 const debug = require('debug')('cortex:cli');
 const { loadProfile } = require('../config');
 const Agents = require('../client/agents');
-const { printSuccess, printError, filterObject, cleanInternalFields, jsonToYaml, writeToFile } = require('./utils');
+const { printSuccess, printError, filterObject, cleanInternalFields, jsonToYaml, writeToFile, fileExists } = require('./utils');
 
 
 /**
@@ -49,6 +49,10 @@ module.exports.DeploySnapshotCommand = class {
         const exportPath = '.fabric/snapshots/';
         const manifestFile = 'fabric.yaml';
 
+        if (fileExists(exportPath) || fileExists(manifestFile)) {
+            printError(`Export path ${exportPath} or manifest file ${manifestFile} already exists`)
+        }
+
         const profile = loadProfile(options.profile);
         const envName = options.environmentName;
         debug('%s.exportDeploymentSnapshot(%s)', profile.name, snapshotIds);
@@ -60,6 +64,7 @@ module.exports.DeploySnapshotCommand = class {
                 if (response.success) {
                         let result = filterObject(response.result, options);
                         result = cleanInternalFields(result);
+                        //TODO add validation for not exporting tip snapshots, as they don't have all dependencies
                         let filename = snapshotId+".json";
                         if (options.yaml) {
                             result = jsonToYaml(result);

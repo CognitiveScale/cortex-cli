@@ -271,3 +271,7 @@ module.exports.writeToFile = function (content, filepath) {
 
     fs.writeFileSync(filepath, content);
 };
+
+module.exports.fileExists = function (filepath) {
+    return fs.existsSync(filepath)
+};
