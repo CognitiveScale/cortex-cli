@@ -14,9 +14,10 @@
  * limitations under the License.
  */
 const debug = require('debug')('cortex:cli');
-const { loadProfile } = require('../config');
+const {loadProfile} = require('../config');
+const path = require('path');
 const Agents = require('../client/agents');
-const { printSuccess, printError, filterObject, cleanInternalFields, jsonToYaml, writeToFile, fileExists } = require('./utils');
+const {printSuccess, printError, filterObject, cleanInternalFields, jsonToYaml, writeToFile, fileExists, deleteFile} = require('./utils');
 
 
 /**
@@ -36,7 +37,7 @@ const { printSuccess, printError, filterObject, cleanInternalFields, jsonToYaml,
  *          ...
  * fabric.yaml (manifest file)
  *
- * Currently only exporting agent snapshots. This need to be updated for v6.
+ * Currently only exporting agent snapshots.
  *
  * @type {DeploySnapshotCommand}
  */
@@ -46,13 +47,18 @@ module.exports.DeploySnapshotCommand = class {
     }
 
     execute(snapshotIds, options) {
-        const exportPath = '.fabric/snapshots/';
+        const exportPath = '.fabric';
         const manifestFile = 'fabric.yaml';
 
         if (fileExists(exportPath) || fileExists(manifestFile)) {
-            printError(`Export path ${exportPath} or manifest file ${manifestFile} already exists`)
+            if (options.force) {
+                deleteFile(exportPath);
+                deleteFile(manifestFile);
+                printSuccess(`Deleted ${exportPath} and ${manifestFile}`);
+            } else {
+                printError(`Aborting, because export path ${exportPath} or manifest file ${manifestFile} exists. Use -f option to force delete.`);
+            }
         }
-
         const profile = loadProfile(options.profile);
         const envName = options.environmentName;
         debug('%s.exportDeploymentSnapshot(%s)', profile.name, snapshotIds);
@@ -62,29 +68,30 @@ module.exports.DeploySnapshotCommand = class {
         snapshotIds.split(' ').forEach(function (snapshotId) {
             promises.push(agents.describeAgentSnapshot(profile.token, snapshotId, envName).then((response) => {
                 if (response.success) {
-                        let result = filterObject(response.result, options);
-                        result = cleanInternalFields(result);
-                        //TODO add validation for not exporting tip snapshots, as they don't have all dependencies
-                        let filename = snapshotId+".json";
-                        if (options.yaml) {
-                            result = jsonToYaml(result);
-                            filename = snapshotId+".yaml";
-                        }
-                        const filepath = exportPath + filename;
-                        writeToFile(result, filepath);
-                        printSuccess(`Successfully exported agent snapshot ${filepath}`);
-                        return filepath;
+                    let result = filterObject(response.result, options);
+                    result = cleanInternalFields(result);
+                    //TODO add validation for not exporting tip snapshots, as they don't have all dependencies. Should we enforce?
+                    let filename = snapshotId + ".json";
+                    if (options.yaml) {
+                        result = jsonToYaml(result);
+                        filename = snapshotId + ".yaml";
+                    }
+                    const filepath = path.join(exportPath, 'snapshots', filename);
+                    writeToFile(result, filepath);
+                    printSuccess(`Successfully exported agent snapshot ${filepath}`);
+                    return filepath;
                 } else {
                     printError(`Failed to export agent snapshot ${snapshotId}: ${response.message}`, options);
                 }
             }).catch((err) => {
-                    printError(`Failed to export agent snapshot ${snapshotId}: ${err.status} ${err.message}`, options);
+                printError(`Failed to export agent snapshot ${snapshotId}: ${err.status} ${err.message}`, options);
             }));
         });
 
         Promise.all(promises).then(result => {
             const manifest = {
                 "version": 1,
+                "kind": "deployment-manifest",
                 "cortex": {
                     "snapshots": result
                 }

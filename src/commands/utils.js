@@ -275,3 +275,28 @@ module.exports.writeToFile = function (content, filepath) {
 module.exports.fileExists = function (filepath) {
     return fs.existsSync(filepath)
 };
+
+// Alternatively, we can use fs.rmdirSync(<path>, {recursive: true}), but that requires node v12+
+const deleteFolderRecursive = function(filepath) {
+    try {
+        if (fs.existsSync(filepath)) {
+            if (fs.lstatSync(filepath).isDirectory()) {
+                fs.readdirSync(filepath).forEach((file, index) => {
+                    const curPath = path.join(filepath, file);
+                    if (fs.lstatSync(curPath).isDirectory()) { // recurse
+                        deleteFolderRecursive(curPath);
+                    } else { // delete file
+                        fs.unlinkSync(curPath);
+                    }
+                });
+                fs.rmdirSync(filepath);
+            } else {
+                fs.unlinkSync(filepath);
+            }
+        }
+    } catch (e) {
+        console.error(chalk.red(e.message));
+    }
+};
+
+module.exports.deleteFile = deleteFolderRecursive;
