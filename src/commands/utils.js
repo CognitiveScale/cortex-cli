@@ -84,7 +84,7 @@ module.exports.parseObject = function(str, options) {
     if (options.yaml) {
         return yaml.safeLoad(str);
     }
-    
+
     return JSON.parse(str);
 };
 
@@ -195,7 +195,7 @@ module.exports.formatAllServiceInputParameters = function(allParameters){
          return `$ref:${allParameters.$ref}`;
      }
      else{
-         return allParameters.map(inputParameters => formatServiceInputParameter(inputParameters)).join('\n');    
+         return allParameters.map(inputParameters => formatServiceInputParameter(inputParameters)).join('\n');
      }
 }
 
@@ -246,3 +246,57 @@ module.exports.formatValidationPath = (p) => {
     });
     return res;
 };
+
+module.exports.cleanInternalFields = function(jsobj) {
+    return JSON.stringify(jsobj, function re(a, obj) {
+        if (a.startsWith("_")) {
+            return undefined;
+        }
+        return obj;
+    }, 2);
+};
+
+module.exports.jsonToYaml = function (json) {
+    if (typeof json == 'string') {
+        json = JSON.parse(json);
+    }
+    return yaml.dump(json);
+};
+
+module.exports.writeToFile = function (content, filepath) {
+    const dir = path.dirname(filepath);
+    if (!fs.existsSync(dir)) {
+        fs.mkdirSync(dir, {recursive: true});
+    }
+
+    fs.writeFileSync(filepath, content);
+};
+
+module.exports.fileExists = function (filepath) {
+    return fs.existsSync(filepath)
+};
+
+// Alternatively, we can use fs.rmdirSync(<path>, {recursive: true}), but that requires node v12+
+const deleteFolderRecursive = function(filepath) {
+    try {
+        if (fs.existsSync(filepath)) {
+            if (fs.lstatSync(filepath).isDirectory()) {
+                fs.readdirSync(filepath).forEach((file, index) => {
+                    const curPath = path.join(filepath, file);
+                    if (fs.lstatSync(curPath).isDirectory()) { // recurse
+                        deleteFolderRecursive(curPath);
+                    } else { // delete file
+                        fs.unlinkSync(curPath);
+                    }
+                });
+                fs.rmdirSync(filepath);
+            } else {
+                fs.unlinkSync(filepath);
+            }
+        }
+    } catch (e) {
+        console.error(chalk.red(e.message));
+    }
+};
+
+module.exports.deleteFile = deleteFolderRecursive;
