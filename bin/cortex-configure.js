@@ -26,21 +26,17 @@ const {
 } = require('../src/commands/configure');
 
 program
-    .option('--url [url]', 'Cortex URL')
-    .option('--account [account]', 'Account')
-    .option('--username [username]', 'Username')
-    .option('--password [password]', 'Password')
+    .option('--file [file]', 'Personal Access Token file location')
     .option('--profile [profile]', 'The profile to configure')
+    .option('--project [project]', 'The default project to use')
     .description('Configure the Cortex CLI');
 
 let cmd = undefined;
 program.command('auth', { isDefault: true})
     .description('Authenticate to cortex (default command)')
-    .option('--url [url]', 'Cortex URL')
-    .option('--account [account]', 'Account')
-    .option('--username [username]', 'Username')
-    .option('--password [password]', 'Password')
+    .option('--file [file]', 'Personal Access Token file location')
     .option('--profile [profile]', 'The profile to configure')
+    .option('--project [project]', 'The default project')
     .action( (options) => {
         new ConfigureCommand(program).execute({profile: program.profile, color: program.color});
     });

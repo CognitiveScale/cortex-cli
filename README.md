@@ -38,11 +38,12 @@ cortex <command> [sub-command] [options]
 
 ### Getting Started
 ```bash
-cortex configure
-Cortex URL [https://api.cortex.insights.ai]:
-Account []: <your_tenantId>
-Username []: <your_username>
-Password: **********
+cortex configure --file /personal/access/token.json --project defaultProject
+
+or
+
+cortex configure --project defaultProject
+Cortex Personal Access Token: <paste access token>
 ```
 
 Upon successful login, a config file will be saved in your home directory with your authentication token for future use. (**NOTE:** currently, you will have to re-run the configure command when your token expires).

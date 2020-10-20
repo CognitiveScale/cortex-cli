@@ -25,6 +25,7 @@ module.exports = class Accounts {
         this.endpoint = `${cortexUrl}/v2/accounts`;
         this.groupsEndpoint = `${this.endpoint}/groups`;
         this.resourcesEndpoint = `${this.endpoint}/resources`;
+        this.whoAmIEndpoint = `${this.endpoint}/user/whoami`;
     }
 
     listGroups(token) {
@@ -76,6 +77,24 @@ module.exports = class Accounts {
             .set('Authorization', `Bearer ${token}`)
             .set('x-cortex-proxy-notify', true)
             .send(body)
+            .then((res) => {
+                if (res.ok) {
+                    return {success: true, result: res.body};
+                }
+                return {success: false, status: res.status, message: res.body};
+            })
+            .catch((err) => {
+                return constructError(err);
+            });
+    }
+
+
+    whoAmI(token) {
+        const endpoint = this.whoAmIEndpoint;
+        debug('whoAmI => %s', endpoint);
+        return request
+            .get(endpoint)
+            .set('Authorization', `Bearer ${token}`)
             .then((res) => {
                 if (res.ok) {
                     return {success: true, result: res.body};

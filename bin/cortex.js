@@ -44,7 +44,8 @@ program
     .command('variables [cmd]', 'Work with Cortex Secure Variables')
     .command('experiments [cmd]', 'Work with Cortex Experiments')
     .command('profiles [cmd]', 'Work with Cortex Profiles')
-    .command('graph [cmd]', 'Work with the Cortex Graph');
+    .command('graph [cmd]', 'Work with the Cortex Graph')
+    .option('--project [project]', 'The project to use');
 
 program.parse(process.argv, { noActionHandler: function() {
 
