@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Cognitive Scale, Inc. All Rights Reserved.
+ * Copyright 2020 Cognitive Scale, Inc. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the “License”);
  * you may not use this file except in compliance with the License.
@@ -89,7 +89,7 @@ module.exports.ListSkillsCommand = class ListSkillsCommand {
         debug('%s.executeListSkills()', profile.name);
 
         const catalog = new Catalog(profile.url);
-        catalog.listSkills(profile.token).then((response) => {
+        catalog.listSkills(options.projectId || profile.projectId, profile.token).then((response) => {
             if (response.success) {
                 let result = response.skills;
                 if (options.query)
@@ -129,7 +129,7 @@ module.exports.DescribeSkillCommand = class DescribeSkillCommand {
         debug('%s.executeDescribeSkill(%s)', profile.name, skillName);
 
         const catalog = new Catalog(profile.url);
-        catalog.describeSkill(profile.token, skillName).then((response) => {
+        catalog.describeSkill(options.projectId || profile.projectId, profile.token, skillName).then((response) => {
             if (response.success) {
                 let result = filterObject(response.skill, options);
                 printSuccess(JSON.stringify(result, null, 2), options);
@@ -141,18 +141,5 @@ module.exports.DescribeSkillCommand = class DescribeSkillCommand {
         .catch((err) => {
             printError(`Failed to describe skill ${skillName}: ${err.status} ${err.message}`, options);
         });
-    }
-};
-
-module.exports.GenerateSkillCommand = class GenerateSkillCommand {
-
-    constructor(program) {
-        this.program = program;
-    }
-
-    execute(options) {
-        debug('%s.generateSkill()');
-        const repoUrl = 'https://github.com/CognitiveScale/cortex-fabric-examples';
-        printSuccess(`This command is deprecated. See the ${repoUrl} repo for guidance.`, options);
     }
 };

@@ -85,17 +85,4 @@ program
         }
     }));
 
-program
-    .command('generate')
-    .description('(Deprecated) Generates the structure and top level build script for a skill')
-    .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
-    .action((options) => { // deliberately not using withCompatibilityCheck()
-        try {
-            new GenerateSkillCommand(program).execute(options);
-        }
-        catch (err) {
-            console.error(chalk.red(err.message));
-        }
-    });
-
 program.parse(process.argv);

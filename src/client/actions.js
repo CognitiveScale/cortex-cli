@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Cognitive Scale, Inc. All Rights Reserved.
+ * Copyright 2020 Cognitive Scale, Inc. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the “License”);
  * you may not use this file except in compliance with the License.
@@ -13,49 +13,21 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-const url = require('url');
-const chalk = require('chalk');
-const  { request } = require('../commands/apiutils');
-const debug = require('debug')('cortex:cli');
 const _ = require('lodash');
-const jsonwebtoken = require('jsonwebtoken');
-const { constructError, callMe } = require('../commands/utils');
+const chalk = require('chalk');
+const debug = require('debug')('cortex:cli');
+const got = require('got');
+const { constructError, callMe, checkProject } = require('../commands/utils');
 
 module.exports = class Actions {
-
     constructor(cortexUrl) {
         this.cortexUrl = cortexUrl;
-        this.endpoint = `${cortexUrl}/v2/actions`;
-        this.endpointV3 = `${cortexUrl}/v3/actions`;
-        this.endpointJobsV3 = `${cortexUrl}/v3/jobs`;
+        this.endpointV4 = projectId =>`${cortexUrl}/fabric/v4/projects/${projectId}/actions`
     }
 
-    invokeAction(token, actionName, params, actionType) {
-        let endpoint = `${this.endpointV3}/${actionName}/invoke`;
-        if (actionType) {
-            endpoint = `${endpoint}?actionType=${actionType}`
-        }
-        debug('invokeAction(%s) => %s', actionName, endpoint);
-
-        const req = request
-            .post(endpoint)
-            .set('Authorization', `Bearer ${token}`)
-            .send(params);
-
-        return req.then((res) => {
-            if (res.ok) {
-                return {success: true, result: res.body};
-            }
-            return {success: false, status: res.status, message: res.body};
-        })
-            .catch((err) => {
-            return constructError(err);
-        });
-    }
-
-    async deployAction(token, actionName, params) {
-        let endpoint = `${this.endpointV3}`;
+    async deployAction(projectId, token, actionName, params) {
+        checkProject(projectId);
+        let endpoint = this.endpointV4(projectId);
         if (params.actionType) {
             endpoint = `${endpoint}?actionType=${params.actionType}`;
         }
@@ -70,27 +42,29 @@ module.exports = class Actions {
 
         params.name = actionName;
 
-        const req = request
-            .post(endpoint)
-            .set('Authorization', `Bearer ${token}`)
-            .send(params);
-
-        return req.then((res) => {
+        return got
+        .post(endpoint, {
+                   headers: { Authorization: `Bearer ${token}` },
+                   json: params,
+            })
+        .then((res) => {
             if (res.ok) {
                 return {success: true, message: res.body};
             }
             return {success: false, status: res.status, message: res.body};
         })
-            .catch((err) => {
+        .catch((err) => {
             return constructError(err);
         });
     }
 
-    listActions(token) {
+    listActions(projectId, token) {
+        checkProject(projectId);
         debug('listActions() => %s', this.endpointV3);
-        return request
-            .get(this.endpointV3)
-            .set('Authorization', `Bearer ${token}`)
+        return got
+            .get(this.endpointV4(projectId), {
+                headers: {Authorization: `Bearer ${token}`},
+            })
             .then((res) => {
                 if (res.ok) {
                     return {success: true, actions: res.body.functions};
@@ -100,15 +74,14 @@ module.exports = class Actions {
             .catch((err) => {
                 return constructError(err);
             });
-
     }
 
-    describeAction(token, actionName) {
-        const endpoint = `${this.endpointV3}/${actionName}`;
+    describeAction(projectId, token, actionName) {
+        checkProject(projectId);
+        const endpoint = `${this.endpointV4(projectId)}/${actionName}`;
         debug('describeAction(%s) => %s', actionName, endpoint);
-        return request
-            .get(endpoint)
-            .set('Authorization', `Bearer ${token}`)
+        return got
+            .get(endpoint, { headers: {Authorization: `Bearer ${token}` } })
             .then((res) => {
                 if (res.ok) {
                     return {success: true, action: res.body.function};
@@ -120,12 +93,12 @@ module.exports = class Actions {
             });
     }
 
-    getLogsAction(token, actionName) {
-        const endpoint = `${this.endpointV3}/${actionName}/logs`;
+    getLogsAction(projectId, token, actionName) {
+        checkProject(projectId);
+        const endpoint = `${this.endpointV4(projectId)}/${actionName}/logs`;
         debug('getLogsAction(%s) => %s', actionName, endpoint);
-        return request
-            .get(endpoint)
-            .set('Authorization', `Bearer ${token}`)
+        return got
+            .get(endpoint, { headers: {Authorization: `Bearer ${token}` } })
             .then((res) => {
                 if (res.ok) {
                     if (_.isArray(res.body)) {
@@ -141,16 +114,15 @@ module.exports = class Actions {
             });
     }
 
-    deleteAction(token, actionName, actionType) {
-        let endpoint = `${this.endpointV3}/${actionName}`;
+    deleteAction(projectId, token, actionName, actionType) {
+        checkProject(projectId);
+        let endpoint = `${this.endpointV4(projectId)}/${actionName}`;
         if (actionType) {
             endpoint = `${endpoint}?actionType=${actionType}`
         }
         debug('deleteAction(%s, %s) => %s', actionName, actionType, endpoint);
-        return request
-            .delete(endpoint)
-            .set('Authorization', `Bearer ${token}`)
-            .accept('application/json')
+        return got
+            .delete(endpoint, { headers: {Authorization: `Bearer ${token}` } })
             .then((res) => {
                 if (res.ok) {
                     return {success: true, action: res.body.action};
@@ -162,13 +134,12 @@ module.exports = class Actions {
             });
     }
 
-    taskLogs(token, jobId, taskId) {
+    taskLogs(projectId, token, jobId, taskId) {
+        checkProject(projectId);
         const canonicalJobId = Actions.getCanonicalJobId(jobId);
-        const endpoint = `${this.endpointJobsV3}/${canonicalJobId}/tasks/${taskId}/logs`;
-        return request
-            .get(endpoint)
-            .set('Authorization', `Bearer ${token}`)
-            .accept('application/json')
+        const endpoint = `${this.endpointV4(projectId)}/${canonicalJobId}/tasks/${taskId}/logs`;
+        return got
+            .get(endpoint, { headers: {Authorization: `Bearer ${token}` } })
             .then((res) => {
                 if (res.ok) {
                     return res.body;
@@ -180,13 +151,12 @@ module.exports = class Actions {
             });
     }
 
-    taskCancel(token, jobId, taskId) {
+    taskCancel(projectId, token, jobId, taskId) {
+        checkProject(projectId);
         const canonicalJobId = Actions.getCanonicalJobId(jobId);
-        const endpoint = `${this.endpointJobsV3}/${canonicalJobId}/tasks/${taskId}`;
-        return request
-            .delete(endpoint)
-            .set('Authorization', `Bearer ${token}`)
-            .accept('application/json')
+        const endpoint = `${this.endpointV4(projectId)}/${canonicalJobId}/tasks/${taskId}`;
+        return got
+            .delete(endpoint, { headers: {Authorization: `Bearer ${token}` } })
             .then((res) => {
                 if (res.ok) {
                     return res.body;
@@ -198,13 +168,12 @@ module.exports = class Actions {
             });
     }
 
-    taskStatus(token, jobId, taskId) {
+    taskStatus(projectId, token, jobId, taskId) {
+        checkProject(projectId);
         const canonicalJobId = Actions.getCanonicalJobId(jobId);
-        const endpoint = `${this.endpointJobsV3}/${canonicalJobId}/tasks/${taskId}/status`;
-        return request
-            .get(endpoint)
-            .set('Authorization', `Bearer ${token}`)
-            .accept('application/json')
+        const endpoint = `${this.endpointV4(projectId)}/${canonicalJobId}/tasks/${taskId}/status`;
+        return got
+            .get(endpoint, { headers: {Authorization: `Bearer ${token}` } })
             .then((res) => {
                 if (res.ok) {
                     const resBody = res.body;
@@ -219,13 +188,12 @@ module.exports = class Actions {
             });
     }
 
-    jobListTasks(token, jobId) {
+    jobListTasks(projectId, token, jobId) {
+        checkProject(projectId);
         const canonicalJobId = Actions.getCanonicalJobId(jobId);
-        const endpoint = `${this.endpointJobsV3}/${canonicalJobId}/tasks`;
-        return request
-            .get(endpoint)
-            .set('Authorization', `Bearer ${token}`)
-            .accept('application/json')
+        const endpoint = `${this.endpointV4(projectId)}/${canonicalJobId}/tasks`;
+        return got
+            .get(endpoint, { headers: {Authorization: `Bearer ${token}` } })
             .then((res) => {
                 if (res.ok) {
                     return res.body;
@@ -237,13 +205,12 @@ module.exports = class Actions {
             });
     }
 
-    taskStats(token, jobId) {
+    taskStats(projectId, token, jobId) {
+        checkProject(projectId);
         const canonicalJobId = Actions.getCanonicalJobId(jobId);
-        const endpoint = `${this.endpointJobsV3}/${canonicalJobId}/stats`;
-        return request
-            .get(endpoint)
-            .set('Authorization', `Bearer ${token}`)
-            .accept('application/json')
+        const endpoint = `${this.endpointV4(projectId)}/${canonicalJobId}/stats`;
+        return got
+            .get(endpoint, { headers: {Authorization: `Bearer ${token}` } })
             .then((res) => {
                 if (res.ok) {
                     return res.body;
@@ -255,12 +222,11 @@ module.exports = class Actions {
             });
     }
 
-    listTasksByActivation(token, activationId) {
-        const endpoint = `${this.endpointV3}/${activationId}`;
-        return request
-            .get(endpoint)
-            .set('Authorization', `Bearer ${token}`)
-            .accept('application/json')
+    listTasksByActivation(projectId, token, activationId) {
+        checkProject(projectId);
+        const endpoint = `${this.endpointV4(projectId)}/${activationId}`;
+        return got
+            .get(endpoint, { headers: {Authorization: `Bearer ${token}` } })
             .then((res) => {
                 if (res.ok) {
                     return res.body;
@@ -272,10 +238,11 @@ module.exports = class Actions {
             });
     }
 
-    getConfig(token) {
-        return request
-            .get(_.join([this.endpointV3, '_config'], '/'))
-            .set('Authorization', `Bearer ${token}`)
+    getConfig(projectId, token) {
+        checkProject(projectId);
+        const endpoint = _.join([this.endpointV4(projectId), '_config'], '/');
+        return got
+            .get(endpoint, { headers: {Authorization: `Bearer ${token}` } })
             .then((res) => {
                 if (res.ok) {
                     return {success: true, config: res.body.config};

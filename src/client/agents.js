@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Cognitive Scale, Inc. All Rights Reserved.
+ * Copyright 2020 Cognitive Scale, Inc. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the “License”);
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
 const  { request } = require('../commands/apiutils');
 const debug = require('debug')('cortex:cli');
 const _ = require('lodash');
+const got = require('got');
 const chalk = require('chalk');
 const { constructError } = require('../commands/utils');
 

@@ -36,7 +36,7 @@ module.exports.SaveAgentCommand = class SaveAgentCommand {
         debug('%o', agent);
 
         const catalog = new Catalog(profile.url);
-        catalog.saveAgent(profile.token, agent).then((response) => {
+        catalog.saveAgent(options.projectId || profile.projectId, profile.token, agent).then((response) => {
             if (response.success) {
                 printSuccess(`Agent saved`, options);
             }
@@ -61,7 +61,7 @@ module.exports.ListAgentsCommand = class ListAgentsCommand {
         debug('%s.executeListAgents()', profile.name);
 
         const catalog = new Catalog(profile.url);
-        catalog.listAgents(profile.token).then((response) => {
+        catalog.listAgents(options.projectId || profile.projectId, profile.token).then((response) => {
             if (response.success) {
                 let result = response.agents;
                 if (options.query)
@@ -103,7 +103,7 @@ module.exports.DescribeAgentCommand = class DescribeAgentCommand {
         const catalog = new Catalog(profile.url);
         if (options.versions) {
             debug('%s.executeDescribeAgentVersions(%s)', profile.name, agentName);
-            catalog.describeAgentVersions(profile.token, agentName).then((response) => {
+            catalog.describeAgentVersions(options.projectId || profile.projectId, profile.token, agentName).then((response) => {
                 if (response.success) {
                     let result = filterObject(response.agent, options);
                     printSuccess(JSON.stringify(result, null, 2), options);
@@ -157,7 +157,7 @@ module.exports.InvokeAgentServiceCommand = class {
         debug('params: %o', params);
 
         const agents = new Agents(profile.url);
-        agents.invokeAgentService(profile.token, agentName, serviceName, params).then((response) => {
+        agents.invokeAgentService(options.projectId || profile.projectId, profile.token, agentName, serviceName, params).then((response) => {
             if (response.success) {
                 let result = filterObject(response.result, options);
                 printSuccess(JSON.stringify(result, null, 2), options);
@@ -189,7 +189,7 @@ module.exports.GetActivationCommand = class {
         debug('%s.getActivation(%s)', profile.name, activationId);
 
         const agents = new Agents(profile.url);
-        agents.getActivation(profile.token, activationId).then((response) => {
+        agents.getActivation(options.projectId || profile.projectId, profile.token, activationId).then((response) => {
             if (response.success) {
                 let result = filterObject(response.result.activation, options);
                 printSuccess(JSON.stringify(result, null, 2), options);
@@ -216,7 +216,7 @@ module.exports.ListActivationsCommand = class {
         debug('%s.listActivations(%s)', profile.name, instanceId);
 
         const agents = new Agents(profile.url);
-        agents.listActivations(profile.token, instanceId, envName).then((response) => {
+        agents.listActivations(options.projectId || profile.projectId, profile.token, instanceId, envName).then((response) => {
             if (response.success) {
                 let result = response.result.activations;
                 if (options.query)
@@ -260,7 +260,7 @@ module.exports.ListAgentInstancesCommand = class {
         debug('%s.listAgentInstances(%s)', profile.name, agentName);
 
         const agents = new Agents(profile.url);
-        agents.listAgentInstances(profile.token, agentName, envName).then((response) => {
+        agents.listAgentInstances(options.projectId || profile.projectId, profile.token, agentName, envName).then((response) => {
             if (response.success) {
                 let result = response.instances;
                 if (options.query)
@@ -302,7 +302,7 @@ module.exports.ListServicesCommand = class ListServicesCommand{
         debug('%s.listServices(%s)', profile.name, agentName);
         
         const catalog = new Catalog(profile.url);
-        catalog.listServices(profile.token, agentName, profile).then((response) => {
+        catalog.listServices(options.projectId || profile.projectId, profile.token, agentName, profile).then((response) => {
             if (response.success) {
                 let result = filterObject(response.services, options);
                 if (options.json) {
@@ -337,7 +337,7 @@ module.exports.ListAgentSnapshotsCommand = class {
         debug('%s.listAgentSnapshots(%s)', profile.name, agentName);
 
         const agents = new Agents(profile.url);
-        agents.listAgentSnapshots(profile.token, agentName, envName).then((response) => {
+        agents.listAgentSnapshots(options.projectId || profile.projectId, profile.token, agentName, envName).then((response) => {
             if (response.success) {
                 let result = filterObject(response.result.snapshots, options);
                 if (options.json) {
@@ -377,7 +377,7 @@ module.exports.ListSnapshotInstancesCommand = class {
 
         const agents = new Agents(profile.url);
         const envName = options.environmentName;
-        agents.listSnapshotInstances(profile.token, snapshotId, envName).then((response) => {
+        agents.listSnapshotInstances(options.projectId || profile.projectId, profile.token, snapshotId, envName).then((response) => {
             if (response.success) {
                 let result = filterObject(response.instances, options);
                 if (options.json) {
@@ -416,7 +416,7 @@ module.exports.DescribeAgentSnapshotCommand = class {
         debug('%s.describeAgentSnapshot(%s)', profile.name, snapshotId);
 
         const agents = new Agents(profile.url);
-        agents.describeAgentSnapshot(profile.token, snapshotId, envName).then((response) => {
+        agents.describeAgentSnapshot(options.projectId || profile.projectId, profile.token, snapshotId, envName).then((response) => {
             if (response.success) {
                 let result = filterObject(response.result, options);
                 printSuccess(JSON.stringify(result, null, 2), options);
@@ -451,7 +451,7 @@ module.exports.CreateAgentSnapshotCommand = class {
         }
         const agentName = snapshot.agentName;
         const agents = new Agents(profile.url);
-        agents.createAgentSnapshot(profile.token, snapshot).then((response) => {
+        agents.createAgentSnapshot(options.projectId || profile.projectId, profile.token, snapshot).then((response) => {
             if (response.success) {
                 let result = filterObject(response.result, options);
                 printSuccess(JSON.stringify(result, null, 2), options);
@@ -465,134 +465,6 @@ module.exports.CreateAgentSnapshotCommand = class {
             });
     }
 
-};
-
-module.exports.CreateAgentInstanceCommand = class {
-
-    constructor(program) {
-        this.program = program;
-    }
-
-    execute(instanceDefinition, options) {
-        const profile = loadProfile(options.profile);
-        debug('%s.createAgentInstance', profile.name);
-        const agents = new Agents(profile.url);
-        let instance;
-        if (instanceDefinition) {
-            const instanceDefStr = fs.readFileSync(instanceDefinition);
-            instance = parseObject(instanceDefStr, options);
-        } else if ( !_.isEmpty(_.get(options,'snapshotId','')) )  {
-            instance = { snapshotId: options.snapshotId, environmentName: options.environmentName || 'cortex/default'}
-        } else {
-            printError(`Either --snapshotId <..> or a instance definition file must be provided`, options);
-            return;
-        }
-        agents.createAgentInstance(profile.token, instance).then((response) => {
-            if (response.success) {
-                let result = filterObject(response.result, options);
-                printSuccess(JSON.stringify(result, null, 2), options);
-            }
-            else {
-                printError(`Failed to create agent instance : ${response.message}`, options);
-            }
-        })
-        .catch((err) => {
-            printError(`Failed to create agent instance : ${err.status} ${err.message}`, options);
-        });
-    }
-};
-
-module.exports.GetAgentInstanceCommand = class {
-
-    constructor(program) {
-        this.program = program;
-    }
-
-    execute(instanceId, options) {
-        const profile = loadProfile(options.profile);
-        debug('%s.getAgentInstance(%s)', profile.name, instanceId);
-
-        const agents = new Agents(profile.url);
-        agents.getAgentInstance(profile.token, instanceId).then((response) => {
-            if (response.success) {
-                let result = filterObject(response.result, options);
-                if (options.json) {
-                    printSuccess(JSON.stringify(result, null, 2), options);
-                }
-                else {
-                    const tableSpec = [
-                        { column: 'Instance Id', field: '_id', width: 26 },
-                        { column: 'Status', field: 'status', width: 15 },
-                        { column: 'Tenant Id', field: 'tenantId', width: 20 },
-                        { column: 'Snapshot Id', field: 'snapshotId', width: 40 },
-                        { column: 'Environment Id', field: 'environmentId', width: 26 },
-                        { column: 'Created At', field: 'createdAt', width: 26 },
-                        { column: 'Updated At', field: 'updatedAt', width: 26 }
-                    ];
-                    printTable(tableSpec, [result.instance]);
-                }
-
-            }
-            else {
-                printError(`Failed to get agent instance ${instanceId}: ${response.message}`, options);
-            }
-        })
-            .catch((err) => {
-                printError(`Failed to get agent instance ${instanceId}: ${err.status} ${err.message}`, options);
-            });
-    }
-};
-
-module.exports.DeleteAgentInstanceCommand = class {
-
-    constructor(program) {
-        this.program = program;
-    }
-
-    execute(instanceId, options) {
-        const profile = loadProfile(options.profile);
-        debug('%s.deleteAgentInstance(%s)', profile.name, instanceId);
-
-        const agents = new Agents(profile.url);
-        agents.deleteAgentInstance(profile.token, instanceId).then((response) => {
-            if (response.success) {
-                let result = filterObject(response.result, options);
-                printSuccess(JSON.stringify(result, null, 2), options);
-            }
-            else {
-                printError(`Failed to delete agent instance ${instanceId}: ${response.message}`, options);
-            }
-        })
-            .catch((err) => {
-                printError(`Failed to delete agent instance ${instanceId} : ${err.status} ${err.message}`, options);
-            });
-    }
-};
-
-module.exports.StopAgentInstanceCommand = class {
-
-    constructor(program) {
-        this.program = program;
-    }
-
-    execute(instanceId, options) {
-        const profile = loadProfile(options.profile);
-        debug('%s.stopAgentInstance(%s)', profile.name, instanceId);
-
-        const agents = new Agents(profile.url);
-        agents.stopAgentInstance(profile.token, instanceId).then((response) => {
-            if (response.success) {
-                let result = filterObject(response.result, options);
-                printSuccess(JSON.stringify(result, null, 2), options);
-            }
-            else {
-                printError(`Failed to stop agent instance ${instanceId}: ${response.message}`, options);
-            }
-        })
-            .catch((err) => {
-                printError(`Failed to stop agent instance ${instanceId} : ${err.status} ${err.message}`, options);
-            });
-    }
 };
 
 module.exports.ListTriggersCommand = class {

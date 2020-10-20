@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Cognitive Scale, Inc. All Rights Reserved.
+ * Copyright 2020 Cognitive Scale, Inc. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the “License”);
  * you may not use this file except in compliance with the License.
@@ -300,3 +300,10 @@ const deleteFolderRecursive = function(filepath) {
 };
 
 module.exports.deleteFile = deleteFolderRecursive;
+
+module.exports.checkProject = (projectId) => {
+    if(_.isEmpty(projectId)){
+        console.error(chalk.red('\'project\' is required, please provide using \'cortex configure\' or --project'));
+        process.exit(1)
+    }
+}

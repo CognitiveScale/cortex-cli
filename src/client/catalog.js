@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Cognitive Scale, Inc. All Rights Reserved.
+ * Copyright 2020 Cognitive Scale, Inc. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the “License”);
  * you may not use this file except in compliance with the License.
@@ -14,21 +14,18 @@
  * limitations under the License.
  */
 
-const  { request } = require('../commands/apiutils');
 const debug = require('debug')('cortex:cli');
 const _ = require('lodash');
 const chalk = require('chalk');
-const { constructError, formatAllServiceInputParameters } = require('../commands/utils');
-const AGENTS_API_VERSION = 'v3';
+const got = require('got');
+const  { request } = require('../commands/apiutils');
+const { constructError, formatAllServiceInputParameters, checkProject } = require('../commands/utils');
 
 const createEndpoints = (baseUri) => {
     return {
-        catalog: `${baseUri}/v2/catalog`,
-        skills: `${baseUri}/v3/catalog/skills`,
-        agents: `${baseUri}/v3/catalog/agents`,
-        types: `${baseUri}/v3/catalog/types`,
-        agentVersions: `${baseUri}/v3/agents/versions`,
-        profileSchemas: `${baseUri}/v3/graph/profiles/schemas`,
+        skills: projectId => `${baseUri}/fabric/v4/projects/${projectId}/skills`,
+        agents:  projectId => `${baseUri}/fabric/v4/projects/${projectId}/agents`,
+        types:  projectId => `${baseUri}/fabric/v4/projects/${projectId}/types`,
     }
 };
 
@@ -39,13 +36,14 @@ module.exports = class Catalog {
         this.endpoints = createEndpoints(cortexUrl);
     }
 
-    saveSkill(token, skillObj) {
+    saveSkill(projectId,token, skillObj) {
+        checkProject(projectId);
         debug('saveSkill(%s) => %s', skillObj.name, this.endpoints.skills);
-        return request
-            .post(this.endpoints.skills)
-            .set('Authorization', `Bearer ${token}`)
-            .set('x-cortex-proxy-notify', true)
-            .send(skillObj)
+        return got
+            .post(this.endpoints.skills(projectId), {
+                headers: { Authorization: `Bearer ${token}` },
+                json: skillObj,
+            })
             .then((res) => {
                 if (Boolean(_.get(res, 'headers.x-cortex-proxied', false)))
                     console.error(chalk.blue('Request proxied to cloud.'));
@@ -59,15 +57,14 @@ module.exports = class Catalog {
             });
     }
 
-    listSkills(token) {
+    listSkills(projectId, token) {
+        checkProject(projectId);
         debug('listSkills() => %s', this.endpoints.skills);
-        return request
-            .get(this.endpoints.skills)
-            .set('Authorization', `Bearer ${token}`)
-            .set('x-cortex-proxy-notify', true)
+        return got
+            .get(this.endpoints.skills(projectId), {
+                headers: { Authorization: `Bearer ${token}` },
+            })
             .then((res) => {
-                if (Boolean(_.get(res, 'headers.x-cortex-proxied', false)))
-                    console.error(chalk.blue('Request proxied to cloud.'));
                 if (res.ok) {
                     return {success: true, skills: res.body.skills || res.body.processors};
                 }
@@ -78,16 +75,15 @@ module.exports = class Catalog {
             });
     }
 
-    describeSkill(token, skillName) {
-        const endpoint = `${this.endpoints.skills}/${skillName}`;
+    describeSkill(projectId, token, skillName) {
+        checkProject(projectId);
+        const endpoint = `${this.endpoints.skills(projectId)}/${skillName}`;
         debug('describeSkill(%s) => %s', skillName, endpoint);
-        return request
-            .get(endpoint)
-            .set('Authorization', `Bearer ${token}`)
-            .set('x-cortex-proxy-notify', true)
+        return got
+            .get(endpoint, {
+                headers: { Authorization: `Bearer ${token}` },
+            })
             .then((res) => {
-                if (Boolean(_.get(res, 'headers.x-cortex-proxied', false)))
-                    console.error(chalk.blue('Request proxied to cloud.'));
                 if (res.ok) {
                     return {success: true, skill: res.body};
                 }
@@ -100,15 +96,15 @@ module.exports = class Catalog {
             });
     }
 
-    listAgents(token) {
-        debug('listAgents() => %s', this.endpoints.agents);
-        return request
-            .get(this.endpoints.agents)
-            .set('Authorization', `Bearer ${token}`)
-            .set('x-cortex-proxy-notify', true)
+    listAgents(projectId, token) {
+        checkProject(projectId);
+        const endpoint = this.endpoints.agents(projectId);
+        debug('listAgents() => %s', endpoint);
+        return got
+            .get(endpoint, {
+                headers: { Authorization: `Bearer ${token}` },
+            })
             .then((res) => {
-                if (Boolean(_.get(res, 'headers.x-cortex-proxied', false)))
-                    console.error(chalk.blue('Request proxied to cloud.'));
                 if (res.ok) {
                     return {success: true, agents: res.body.agents};
                 }
@@ -119,11 +115,12 @@ module.exports = class Catalog {
             });
     }
 
-    listServices(token, agentName, profile) {
+    listServices(projectId, token, agentName, profile) {
+        checkProject(projectId);
         debug('listServices() using describeAgent');
-        return this.describeAgent(profile.token, agentName).then((response) => {
+        return this.describeAgent(projectId, token, agentName).then((response) => {
             if (response.success) {
-                const urlBase = `${profile.url}/${AGENTS_API_VERSION}/agents/${agentName}/services`;
+                const urlBase =  `${this.endpoints.agents(projectId)}/${agentName}/services`;
                 const servicesList = response.agent.inputs
                     .filter(i => i.signalType === 'Service')
                     .map(i => ({ ...i, url: `${urlBase}/${i.name}` }))
@@ -136,16 +133,16 @@ module.exports = class Catalog {
         });
     }
 
-    saveAgent(token, agentObj) {
-        debug('saveAgent(%s) => %s', agentObj.name, this.endpoints.agents);
-        return request
-            .post(this.endpoints.agents)
-            .set('Authorization', `Bearer ${token}`)
-            .set('x-cortex-proxy-notify', true)
-            .send(agentObj)
+    saveAgent(projectId, token, agentObj) {
+        checkProject(projectId);
+        const endpoint = this.endpoints.agents(projectId);
+        debug('saveAgent(%s) => %s', agentObj.name, endpoint);
+        return got
+            .post(endpoint, {
+                headers: { Authorization: `Bearer ${token}` },
+                json: agentObj
+            })
             .then((res) => {
-                if (Boolean(_.get(res, 'headers.x-cortex-proxied', false)))
-                    console.error(chalk.blue('Request proxied to cloud.'));
                 if (res.ok) {
                     return {success: true, message: res.body};
                 }
@@ -156,16 +153,15 @@ module.exports = class Catalog {
             });
     }
 
-    describeAgent(token, agentName) {
-        const endpoint = `${this.endpoints.agents}/${agentName}`;
+    describeAgent(projectId, token, agentName) {
+        checkProject(projectId);
+        const endpoint = `${this.endpoints.agents(projectId)}/${agentName}`;
         debug('describeAgent(%s) => %s', agentName, endpoint);
-        return request
-            .get(endpoint)
-            .set('Authorization', `Bearer ${token}`)
-            .set('x-cortex-proxy-notify', true)
+        return got
+            .get(endpoint, {
+                headers: { Authorization: `Bearer ${token}` },
+            })
             .then((res) => {
-                if (Boolean(_.get(res, 'headers.x-cortex-proxied', false)))
-                    console.error(chalk.blue('Request proxied to cloud.'));
                 if (res.ok) {
                     return {success: true, agent: res.body};
                 }
@@ -178,17 +174,15 @@ module.exports = class Catalog {
             });
     }
 
-    describeAgentVersions(token, agentName) {
-        const endpoint = `${this.endpoints.agentVersions}/${agentName}`;
+    describeAgentVersions(projectId, token, agentName) {
+        checkProject(projectId);
+        const endpoint = `${this.endpoints.agents(projectId)}/${agentName}/versions`;
         debug('describeAgentVersions(%s) => %s', agentName, endpoint);
-
-        return request
-            .get(endpoint)
-            .set('Authorization', `Bearer ${token}`)
-            .set('x-cortex-proxy-notify', true)
+        return got
+            .get(endpoint, {
+                headers: { Authorization: `Bearer ${token}` },
+            })
             .then((res) => {
-                if (Boolean(_.get(res, 'headers.x-cortex-proxied', false)))
-                    console.error(chalk.blue('Request proxied to cloud.'));
                 if (res.ok) {
                     return {success: true, agent: res.body};
                 }
@@ -201,17 +195,17 @@ module.exports = class Catalog {
             });
     }
 
-    saveType(token, types) {
+    saveType(projectId, token, types) {
+        checkProject(projectId);
+        const endpoint = `${this.endpoints.types(projectId)}`;
         const names = types.types.map((t) => t.name);
         debug('saveType(%s) => %s', JSON.stringify(names), this.endpoints.types);
-        return request
-            .post(this.endpoints.types)
-            .set('Authorization', `Bearer ${token}`)
-            .set('x-cortex-proxy-notify', true)
-            .send(types)
+        return got
+            .post(endpoint, {
+                headers: { Authorization: `Bearer ${token}` },
+                json: types,
+            })
             .then((res) => {
-                if (Boolean(_.get(res, 'headers.x-cortex-proxied', false)))
-                    console.error(chalk.blue('Request proxied to cloud.'));
                 if (res.ok) {
                     return {success: true, message: res.body};
                 }
@@ -222,16 +216,15 @@ module.exports = class Catalog {
             });
     }
 
-    describeType(token, typeName) {
-        const endpoint = `${this.endpoints.types}/${typeName}`;
+    describeType(projectId, token, typeName) {
+        checkProject(projectId);
+        const endpoint = `${this.endpoints.types(projectId)}/${typeName}`;
         debug('describeType(%s) => %s', typeName, endpoint);
-        return request
-            .get(endpoint)
-            .set('Authorization', `Bearer ${token}`)
-            .set('x-cortex-proxy-notify', true)
+        return got
+            .get(endpoint, {
+                headers: { Authorization: `Bearer ${token}` },
+            })
             .then((res) => {
-                if (Boolean(_.get(res, 'headers.x-cortex-proxied', false)))
-                    console.error(chalk.blue('Request proxied to cloud.'));
                 if (res.ok) {
                     return {success: true, type: res.body};
                 }
@@ -244,15 +237,15 @@ module.exports = class Catalog {
             });
     }
 
-    listTypes(token) {
+    listTypes(projectId, token) {
+        checkProject(projectId);
+        const endpoint = `${this.endpoints.types(projectId)}`;
         debug('listTypes() => %s', this.endpoints.types);
-        return request
-            .get(this.endpoints.types)
-            .set('Authorization', `Bearer ${token}`)
-            .set('x-cortex-proxy-notify', true)
+        return got
+            .get(endpoint, {
+                headers: { Authorization: `Bearer ${token}` },
+            })
             .then((res) => {
-                if (Boolean(_.get(res, 'headers.x-cortex-proxied', false)))
-                    console.error(chalk.blue('Request proxied to cloud.'));
                 if (res.ok) {
                     return {success: true, types: res.body.types};
                 }
@@ -263,92 +256,92 @@ module.exports = class Catalog {
             });
     }
 
-    saveProfileSchema(token, schemaObj) {
-        debug('saveProfileSchema(%s) => %s', schemaObj.name, this.endpoints.profileSchemas);
-        return request
-            .post(this.endpoints.profileSchemas)
-            .set('Authorization', `Bearer ${token}`)
-            .set('x-cortex-proxy-notify', true)
-            .send(schemaObj)
-            .then((res) => {
-                if (Boolean(_.get(res, 'headers.x-cortex-proxied', false)))
-                    console.error(chalk.blue('Request proxied to cloud.'));
-                if (res.ok) {
-                    return {success: true, message: res.body};
-                }
-                return {success: false, message: res.body, status: res.status};
-            })
-            .catch((err) => {
-                return constructError(err);
-            });
-    }
-
-    listProfileSchemas(token, filter, sort, limit, skip) {
-        debug('listProfileSchemas() => %s', this.endpoints.profileSchemas);
-        const req = request
-            .get(this.endpoints.profileSchemas)
-            .set('Authorization', `Bearer ${token}`)
-            .set('x-cortex-proxy-notify', true);
-
-        if (filter) req.query({ filter });
-        if (sort) req.query({ sort });
-        if (limit) req.query({ limit });
-        if (skip) req.query({ skip });
-        
-        return req.then((res) => {
-            if (Boolean(_.get(res, 'headers.x-cortex-proxied', false)))
-                console.error(chalk.blue('Request proxied to cloud.'));
-            if (res.ok) {
-                return {success: true, schemas: res.body.schemas};
-            }
-            return {success: false, status: res.status, message: res.body};
-        })
-        .catch((err) => {
-            return constructError(err);
-        });
-    }
-
-    describeProfileSchema(token, schemaName) {
-        const endpoint = `${this.endpoints.profileSchemas}/${schemaName}`;
-        debug('describeProfileSchema(%s) => %s', schemaName, endpoint);
-        return request
-            .get(endpoint)
-            .set('Authorization', `Bearer ${token}`)
-            .set('x-cortex-proxy-notify', true)
-            .then((res) => {
-                if (Boolean(_.get(res, 'headers.x-cortex-proxied', false)))
-                    console.error(chalk.blue('Request proxied to cloud.'));
-                if (res.ok) {
-                    return {success: true, schema: res.body};
-                }
-                else {
-                    return {success: false, message: res.body, status: res.status};
-                }
-            })
-            .catch((err) => {
-                return constructError(err);
-            });
-    }
-
-    deleteProfileSchema(token, schemaName) {
-        const endpoint = `${this.endpoints.profileSchemas}/${schemaName}`;
-        debug('deleteProfileSchema(%s) => %s', schemaName, endpoint);
-        return request
-            .delete(endpoint)
-            .set('Authorization', `Bearer ${token}`)
-            .set('x-cortex-proxy-notify', true)
-            .then((res) => {
-                if (Boolean(_.get(res, 'headers.x-cortex-proxied', false)))
-                    console.error(chalk.blue('Request proxied to cloud.'));
-                if (res.ok) {
-                    return {success: true};
-                }
-                else {
-                    return {success: false, message: res.body, status: res.status};
-                }
-            })
-            .catch((err) => {
-                return constructError(err);
-            });
-    }
+    // saveProfileSchema(projectId, token, schemaObj) {
+    //     debug('saveProfileSchema(%s) => %s', schemaObj.name, this.endpoints.profileSchemas);
+    //     return request
+    //         .post(this.endpoints.profileSchemas)
+    //         .set('Authorization', `Bearer ${token}`)
+    //         .set('x-cortex-proxy-notify', true)
+    //         .send(schemaObj)
+    //         .then((res) => {
+    //             if (Boolean(_.get(res, 'headers.x-cortex-proxied', false)))
+    //                 console.error(chalk.blue('Request proxied to cloud.'));
+    //             if (res.ok) {
+    //                 return {success: true, message: res.body};
+    //             }
+    //             return {success: false, message: res.body, status: res.status};
+    //         })
+    //         .catch((err) => {
+    //             return constructError(err);
+    //         });
+    // }
+    //
+    // listProfileSchemas(projectId, token, filter, sort, limit, skip) {
+    //     debug('listProfileSchemas() => %s', this.endpoints.profileSchemas);
+    //     const req = request
+    //         .get(this.endpoints.profileSchemas)
+    //         .set('Authorization', `Bearer ${token}`)
+    //         .set('x-cortex-proxy-notify', true);
+    //
+    //     if (filter) req.query({ filter });
+    //     if (sort) req.query({ sort });
+    //     if (limit) req.query({ limit });
+    //     if (skip) req.query({ skip });
+    //
+    //     return req.then((res) => {
+    //         if (Boolean(_.get(res, 'headers.x-cortex-proxied', false)))
+    //             console.error(chalk.blue('Request proxied to cloud.'));
+    //         if (res.ok) {
+    //             return {success: true, schemas: res.body.schemas};
+    //         }
+    //         return {success: false, status: res.status, message: res.body};
+    //     })
+    //     .catch((err) => {
+    //         return constructError(err);
+    //     });
+    // }
+    //
+    // describeProfileSchema(projectId, token, schemaName) {
+    //     const endpoint = `${this.endpoints.profileSchemas}/${schemaName}`;
+    //     debug('describeProfileSchema(%s) => %s', schemaName, endpoint);
+    //     return request
+    //         .get(endpoint)
+    //         .set('Authorization', `Bearer ${token}`)
+    //         .set('x-cortex-proxy-notify', true)
+    //         .then((res) => {
+    //             if (Boolean(_.get(res, 'headers.x-cortex-proxied', false)))
+    //                 console.error(chalk.blue('Request proxied to cloud.'));
+    //             if (res.ok) {
+    //                 return {success: true, schema: res.body};
+    //             }
+    //             else {
+    //                 return {success: false, message: res.body, status: res.status};
+    //             }
+    //         })
+    //         .catch((err) => {
+    //             return constructError(err);
+    //         });
+    // }
+    //
+    // deleteProfileSchema(projectId, token, schemaName) {
+    //     const endpoint = `${this.endpoints.profileSchemas}/${schemaName}`;
+    //     debug('deleteProfileSchema(%s) => %s', schemaName, endpoint);
+    //     return request
+    //         .delete(endpoint)
+    //         .set('Authorization', `Bearer ${token}`)
+    //         .set('x-cortex-proxy-notify', true)
+    //         .then((res) => {
+    //             if (Boolean(_.get(res, 'headers.x-cortex-proxied', false)))
+    //                 console.error(chalk.blue('Request proxied to cloud.'));
+    //             if (res.ok) {
+    //                 return {success: true};
+    //             }
+    //             else {
+    //                 return {success: false, message: res.body, status: res.status};
+    //             }
+    //         })
+    //         .catch((err) => {
+    //             return constructError(err);
+    //         });
+    // }
 };
