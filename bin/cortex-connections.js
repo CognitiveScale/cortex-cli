@@ -41,6 +41,7 @@ program
     .option('--no-compat', 'Ignore API compatibility checks')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
+    .option('--project [project]', 'The project to use')
     .option('--json', 'Output results using JSON')
     .option('--query [query]', 'A JMESPath query to use in filtering the response data. Ignored if output format is not JSON.')
     .action(withCompatibilityCheck((options) => {
@@ -59,6 +60,7 @@ program
     .option('--no-compat', 'Ignore API compatibility checks')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
+    .option('--project [project]', 'The project to use')
     .option('-y, --yaml', 'Use YAML for agent definition format')
     .action(withCompatibilityCheck((connDefinition, options) => {
         try {
@@ -76,6 +78,7 @@ program
     .option('--no-compat', 'Ignore API compatibility checks')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
+    .option('--project [project]', 'The project to use')
     .option('--query [query]', 'The query to use, "select 1" is default')
     .option('--file [file]', 'Location of file containing query string')
     .action(withCompatibilityCheck((connName, options) => {
@@ -94,6 +97,7 @@ program
     .option('--no-compat', 'Ignore API compatibility checks')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
+    .option('--project [project]', 'The project to use')
     .option('--query [query]', 'A JMESPath query to use in filtering the response data.')
     .action(withCompatibilityCheck((connectionName, options) => {
         try {
@@ -111,6 +115,7 @@ program
     .option('--no-compat', 'Ignore API compatibility checks')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
+    .option('--project [project]', 'The project to use')
     .option('-y, --yaml', 'Use YAML for agent definition format')
     .action(withCompatibilityCheck((connDefinition, options) => {
         try {
@@ -128,6 +133,7 @@ program
     .option('--no-compat', 'Ignore API compatibility checks')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
+    .option('--project [project]', 'The project to use')
     .option('--json', 'Output results using JSON')
     .option('--query [query]', 'A JMESPath query to use in filtering the response data. Ignored if output format is not JSON.')
     .action(withCompatibilityCheck((options) => {

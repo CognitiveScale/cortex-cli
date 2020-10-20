@@ -41,6 +41,7 @@ program
     .option('--no-compat', 'Ignore API compatibility checks')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
+    .option('--project [project]', 'The project to use')
     .option('--description [description]', 'Group description')
     .action(withCompatibilityCheck((groupName, options) => {
         try {
@@ -58,6 +59,7 @@ program
     .option('--no-compat', 'Ignore API compatibility checks')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
+    .option('--project [project]', 'The project to use')
     .action(withCompatibilityCheck((groupName, members, options) => {
         try {
             new AddMembersToGroupCommand(program).execute(groupName, members, options);
@@ -74,6 +76,7 @@ program
     .option('--no-compat', 'Ignore API compatibility checks')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
+    .option('--project [project]', 'The project to use')
     .action(withCompatibilityCheck((options) => {
         try {
             new ListGroupsCommand(program).execute(options);
@@ -90,6 +93,7 @@ program
     .option('--no-compat', 'Ignore API compatibility checks')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
+    .option('--project [project]', 'The project to use')
     .action(withCompatibilityCheck((groupName, options) => {
         try {
             new DescribeGroupCommand(program).execute(groupName, options);
@@ -106,6 +110,7 @@ program
     .option('--no-compat', 'Ignore API compatibility checks')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
+    .option('--project [project]', 'The project to use')
     .action(withCompatibilityCheck((groupName, options) => {
         try {
             new DeleteGroupCommand(program).execute(groupName, options);
@@ -122,6 +127,7 @@ program
     .option('--no-compat', 'Ignore API compatibility checks')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
+    .option('--project [project]', 'The project to use')
     .action(withCompatibilityCheck((groupName, members, options) => {
         try {
             new RemoveMembersFromGroupCommand(program).execute(groupName, members, options);
@@ -138,6 +144,7 @@ program
     .option('--no-compat', 'Ignore API compatibility checks')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
+    .option('--project [project]', 'The project to use')
     .option('--description [description]', 'Resource description')
     .option('--access [access]', 'Access level of resource [read/write/admin/execute]')
     .action(withCompatibilityCheck((resourceName, options) => {
@@ -156,6 +163,7 @@ program
     .option('--no-compat', 'Ignore API compatibility checks')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
+    .option('--project [project]', 'The project to use')
     .action(withCompatibilityCheck((resourceId, groupName, options) => {
         try {
             new GrantGroupAccessToResourceCommand(program).execute(resourceId, groupName, options);

@@ -37,6 +37,7 @@ program
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--json', 'Output results using JSON')
     .option('--profile [profile]', 'The profile to use')
+    .option('--project [project]', 'The project to use')
     .action(withCompatibilityCheck((options) => {
         try {
             new ListVariablesCommand(program).execute(options);
@@ -54,6 +55,7 @@ program
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--json', 'Output results using JSON')
     .option('--profile [profile]', 'The profile to use')
+    .option('--project [project]', 'The project to use')
     .action(withCompatibilityCheck((keyName, options) => {
         try {
             new ReadVariableCommand(program).execute(keyName, options);
@@ -72,6 +74,7 @@ program
     .option('--data [data]', 'JSON value to save')
     .option('--data-file [dataFile]', 'A file containing either JSON or YAML formatted value to save')
     .option('--profile [profile]', 'The profile to use')
+    .option('--project [project]', 'The project to use')
     .action(withCompatibilityCheck((keyName, value, options) => {
         try {
             new WriteVariableCommand(program).execute(keyName, value, options);

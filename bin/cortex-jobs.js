@@ -38,6 +38,7 @@ program
     .option('--no-compat', 'Ignore API compatibility checks')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
+    .option('--project [project]', 'The project to use')
     .option('--json', 'Output results using JSON')
     .option('--query [query]', 'A JMESPath query to use in filtering the response data. Ignored if output format is not JSON.')
     .action(withCompatibilityCheck((options) => {
@@ -56,6 +57,7 @@ program
     .option('--no-compat', 'Ignore API compatibility checks')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
+    .option('--project [project]', 'The project to use')
     .option('--json', 'Output results using JSON')
     .action(withCompatibilityCheck((jobDefinition, options) => {
         try {
@@ -73,6 +75,7 @@ program
     .option('--no-compat', 'Ignore API compatibility checks')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
+    .option('--project [project]', 'The project to use')
     .option('--json', 'Output results using JSON')
     .action(withCompatibilityCheck((jobDefinition, options) => {
         try {
@@ -91,6 +94,7 @@ program
     .option('--no-compat', 'Ignore API compatibility checks')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
+    .option('--project [project]', 'The project to use')
     .option('-y, --yaml', 'Use YAML for job definition format')
     .option('--push-docker', 'Push Docker image to the Cortex registry.')
     .action(withCompatibilityCheck((jobDefinition, options) => {

@@ -37,6 +37,7 @@ program
     .option('--no-compat', 'Ignore API compatibility checks')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
+    .option('--project [project]', 'The project to use')
     .option('--json', 'Output results using JSON')
     .option('--query [query]', 'A JMESPath query to use in filtering the response data.')
     .option('--filter [filter]', 'A Mongo style filter to use as the event query.')
@@ -59,6 +60,7 @@ program
     .option('--no-compat', 'Ignore API compatibility checks')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
+    .option('--project [project]', 'The project to use')
     .option('--tracking', 'Enable tracking event mode.')
     .option('--transform [templates]', 'Apply transform templates to the input JSON records.')
     .option('--dry-run', "Simulate the publish (but don't actually send events to the server).")
@@ -75,6 +77,7 @@ program
     .option('--no-compat', 'Ignore API compatibility checks')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
+    .option('--project [project]', 'The project to use')
     .action(withCompatibilityCheck(async (entityId, options) => {
         try {
             new GetEntityCommand(program).execute(entityId, options);
@@ -91,6 +94,7 @@ program
     .option('--no-compat', 'Ignore API compatibility checks')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
+    .option('--project [project]', 'The project to use')
     .option('--json', 'Output results using JSON')
     .action(withCompatibilityCheck(async (query, options) => {
         try {

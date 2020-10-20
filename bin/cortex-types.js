@@ -28,7 +28,7 @@ const {
 } = require('../src/commands/types');
 
 program.description('Work with Cortex Types');
-    
+
 // Save Type
 program
     .command('save <typeDefinition>')
@@ -36,6 +36,7 @@ program
     .option('--no-compat', 'Ignore API compatibility checks')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
+    .option('--project [project]', 'The project to use')
     .option('-y, --yaml', 'Use YAML for type definition format')
     .action(withCompatibilityCheck((typeDefinition, options) => {
         try {
@@ -53,6 +54,7 @@ program
     .option('--no-compat', 'Ignore API compatibility checks')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
+    .option('--project [project]', 'The project to use')
     .option('--json', 'Output results using JSON')
     .option('--query [query]', 'A JMESPath query to use in filtering the response data.')
     .action(withCompatibilityCheck((options) => {
@@ -71,6 +73,7 @@ program
     .option('--no-compat', 'Ignore API compatibility checks')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
+    .option('--project [project]', 'The project to use')
     .option('--query [query]', 'A JMESPath query to use in filtering the response data.')
     .action(withCompatibilityCheck((typeName, options) => {
         try {

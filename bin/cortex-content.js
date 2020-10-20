@@ -38,6 +38,7 @@ program
     .option('--no-compat', 'Ignore API compatibility checks')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
+    .option('--project [project]', 'The project to use')
     .option('--json', 'Output results using JSON')
     .option('--query [query]', 'A JMESPath query to use in filtering the response data. Ignored if output format is not JSON.')
     .action(withCompatibilityCheck((options) => {
@@ -59,6 +60,7 @@ program
     .option('--no-compat', 'Ignore API compatibility checks')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
+    .option('--project [project]', 'The project to use')
     .option('--secure', 'Uploads the content securely to the Cortex Vault. \n\t\t\t\tUse this option for keytab files or content that contains sensitive information that is required during Runtime. \n\t\t\t\tTake note of the contentKey you give to this content for future reference.')
     .option('--content-type [MIME type]', 'Sets the \`Content-Type\` or MIME type of the content ( default: application/octet-stream )')
     .option('--chunkSize [int]', 'Number of files to simultaneous upload', 10)
@@ -78,6 +80,7 @@ program
     .option('--no-compat', 'Ignore API compatibility checks')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
+    .option('--project [project]', 'The project to use')
     .action(withCompatibilityCheck((contentKey, options) => {
         try {
             new DeleteContent(program).execute(contentKey, options);
@@ -95,6 +98,7 @@ program
     .option('--no-compat', 'Ignore API compatibility checks')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
+    .option('--project [project]', 'The project to use')
     .option('--secure', 'Downloads the content securely from the Cortex Vault.')
     .action(withCompatibilityCheck((contentKey, options) => {
         try {
