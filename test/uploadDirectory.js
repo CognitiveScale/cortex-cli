@@ -35,11 +35,11 @@ describe('Upload Directory', function () {
         const expectedFileDicts = [
             { canonical: `${__dirname}/cortex/config`,
               relative: 'config',
-              size: 260
+              size: 483
             },
             { canonical: `${__dirname}/cortex/sample/upload/config`,
               relative: 'sample/upload/config',
-              size: 260
+              size: 483
             }
         ];
 
