@@ -34,6 +34,7 @@ program
     .option('--no-compat', 'Ignore API compatibility checks')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
+    .option('--project [project]', 'The project to use')
     .option('-y, --yaml', 'Use YAML for snapshot export format')
     .option('-f, --force', 'Force delete existing exported files')
     .action(withCompatibilityCheck((skillDefinition, options) => {
