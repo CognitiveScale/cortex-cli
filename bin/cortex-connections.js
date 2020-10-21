@@ -28,7 +28,6 @@ const {
     DescribeConnectionCommand,
     TestConnectionCommand,
     ListConnectionsTypes,
-    GenerateConnectionCommand,
 } = require('../src/commands/connections');
 
 program.description('Work with Cortex Connections');

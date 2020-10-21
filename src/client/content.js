@@ -15,14 +15,15 @@
  */
 
 const fs = require('fs');
-const os = require('os');
-const path = require('path');
-const { URL } = require('url');
+const stream = require('stream');
+const got = require('got');
+const { promisify } = require('util');
 
-const ProgressBar = require('progress');
+const pipeline = promisify(stream.pipeline);
+
 const debug = require('debug')('cortex:cli');
-const { constructError } = require('../commands/utils');
-const { getUserAgent } = require('../useragent');
+const { constructError, getUserAgent } = require('../commands/utils');
+const Variables = require('./variables');
 
 module.exports = class Content {
     constructor(cortexUrl) {
@@ -36,192 +37,80 @@ module.exports = class Content {
     }
 
     listContent(projectId, token) {
-        debug('listContent %s', this.endpoint);
-
-        return request
-            .get(this.endpoint(projectId))
-            .set('Authorization', `Bearer ${token}`)
-            .accept('application/json')
-            .then((res) => {
-                if (res.ok) {
-                    return { success: true, message: res.body };
-                }
-                return { success: false, message: res.body, status: res.status };
-            })
+        const endpoint = this.endpoint(projectId);
+        debug('listContent %s', endpoint);
+        return got
+            .get(endpoint, {
+                headers: { Authorization: `Bearer ${token}` },
+                'user-agent': getUserAgent(),
+            }).json()
+            .then(message => ({ success: true, message }))
             .catch(err => constructError(err));
     }
 
-    uploadContent(projectId, token, { content, key }) {
-        debug('uploadContent(%s, %s) => %s', key, content, this.endpoint);
+    // eslint-disable-next-line no-unused-vars
+    async uploadContentStreaming(projectId, token, key, content, showProgress = false, contentType = 'application/octet-stream') {
         const contentKey = this._sanitizeKey(key);
-        return request
-            .post(this.endpoint(projectId))
-            .set('Authorization', `Bearer ${token}`)
-            .accept('application/json')
-            .field('key', contentKey)
-            .attach('content', content)
-            .then((res) => {
-                if (res.ok) {
-                    return { success: true, message: res.body };
-                }
-                return { success: false, message: res.body, status: res.status };
-            })
-            .catch(err => constructError(err));
-    }
-
-    uploadContentStreaming(projectId, token, key, content, showProgress = false, contentType = 'application/octet-stream') {
-        debug('uploadContentStreaming(%s, %s) => %s', key, content, `${this.endpoint}/${key}`);
-
-        // NOTE: superagent only supports uploads via .attach(), which uses multipart forms (@see
-        // https://github.com/visionmedia/superagent/issues/1250).  To perform a streaming upload,
-        // we use requestjs instead.
-        const requestLibRequest = require('request');
-
-        const contentKey = this._sanitizeKey(key);
-        const url = new URL(`${this.endpoint(projectId)}/${contentKey}`);
-
-        let progressBar;
-        if (showProgress) {
-            progressBar = new ProgressBar(
-                '  uploading [:bar] :percent :etas',
-                { renderThrottle: 500, total: fs.statSync(content).size },
+        const endpoint = `${this.endpoint(projectId)}/${contentKey}`;
+        // todo show progress..
+        debug('uploadContentStreaming(%s, %s) => %s', key, content, endpoint);
+        try {
+            const message = await pipeline(
+                fs.createReadStream(content),
+                got.stream.post('https://sindresorhus.com', {
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                        'Content-Type': contentType,
+                    },
+                }),
             );
+            return { success: true, message };
+        } catch (err) {
+            return constructError(err);
         }
-
-        return new Promise((resolve) => {
-            fs
-                .createReadStream(content)
-                .on('data', (chunk) => {
-                    progressBar && progressBar.tick(chunk.length);
-                })
-                .pipe(requestLibRequest
-                    .post({
-                        uri: url,
-                        headers: {
-                            Accept: 'application/json',
-                            Authorization: `Bearer ${token}`,
-                            'Content-Type': contentType,
-                            'User-Agent': getUserAgent(),
-                        },
-                    }, (err, res, body) => {
-                        if (err) {
-                            resolve({ success: false, message: err.message });
-                            return;
-                        }
-                        if (res.statusCode === 200) {
-                            resolve({ success: true, message: body });
-                            return;
-                        }
-                        // NOTE this is using npm request NOT superagent - fields are different
-                        resolve({ success: false, message: body, status: res.statusCode });
-                    }));
-        });
     }
 
-    uploadSecureContent(projectId, token, key, content) {
+    async uploadSecureContent(projectId, token, key, content) {
         const contentKey = this._sanitizeKey(key);
-        const url = `${this.cortexUrl}/v2/tenants/secrets/${contentKey}`;
-        debug('uploadSecureContent(%s) => %s', content, url);
-        return request
-            .post(url)
-            .set('Authorization', `Bearer ${token}`)
-            .send(content)
-            .accept('application/json')
-            .type('json')
-            .then((res) => {
-                if (res.ok) {
-                    return { success: true, message: res.body };
-                }
-                return { success: false, message: res.body, status: res.status };
-            })
-            .catch(err => constructError(err));
+        const vars = new Variables(this.cortextUrl);
+        return vars.writeVariable(projectId, token, contentKey, content);
     }
-
 
     deleteContent(projectId, token, key) {
-        debug('deleteContent(%s) => %s', key, this.endpoint);
         const contentKey = this._sanitizeKey(key);
-        const url = `${this.endpoint(projectId)}/${contentKey}`;
-        return request
-            .delete(url)
-            .set('Authorization', `Bearer ${token}`)
-            .accept('application/json')
-            .then((res) => {
-                if (res.ok) {
-                    return { success: true, message: res.body };
-                }
-                return { success: false, message: res.body, status: res.status };
-            })
+        const endpoint = `${this.endpoint(projectId)}/${contentKey}`;
+        debug('deleteContent => %s', endpoint);
+        return got
+            .delete(endpoint, {
+                headers: { Authorization: `Bearer ${token}` },
+                'user-agent': getUserAgent(),
+            }).json()
+            .then(message => ({ success: true, message }))
             .catch(err => constructError(err));
     }
 
-    downloadContent(projecId, token, key, showProgress = false) {
+    // TODO progress
+    // eslint-disable-next-line no-unused-vars
+    async downloadContent(projecId, token, key, showProgress = false) {
+        const contentKey = this._sanitizeKey(key);
+        const endpoint = `${this.endpoint(projecId)}/${contentKey}`;
         debug('downloadContent(%s) => %s', key, this.endpoint);
-        const contentKey = this._sanitizeKey(key);
-        const url = `${this.endpoint(projecId)}/${contentKey}`;
-
-        const stream = request
-            .get(url)
-            .set('Authorization', `Bearer ${token}`)
-            .use((req) => {
-                if (showProgress) {
-                    req.on('request', (clientReq) => {
-                        clientReq.on('response', (res) => {
-                            const total = +(res.headers['content-length'] || res.headers['Content-Length']);
-                            const progressBar = new ProgressBar(
-                                '  downloading [:bar] :percent :etas',
-                                {
-                                    current: 0,
-                                    renderThrottle: 500,
-                                    total,
-                                },
-                            );
-                        
-                            res.on('data', chunk => progressBar.tick(chunk.length));
-                          });
-                    });
-                }
-            });
-
-        return new Promise((resolve, reject) => {
-            stream.on('response', (response) => {
-                if (response.status !== 200) {
-                    stream.abort();
-                    return resolve({
-                        success: false,
-                        status: stream.response.status,
-                        message: stream.response.error,
-                    });
-                }
-            });
-
-            stream.on('end', () => resolve({
-                    success: true,
-                    message: `\nDownloaded ${contentKey}`,
-                    status: stream.response.status,
-                }));
-
-            stream.on('error', err => resolve(constructError(err)));
-
-            stream.pipe(process.stdout);
-        });
+        try {
+            return pipeline(
+                got.stream(endpoint, {
+                    headers: { Authorization: `Bearer ${token}` },
+                    'user-agent': getUserAgent(),
+                }),
+                process.stdout,
+            );
+        } catch (err) {
+            return constructError(err);
+        }
     }
 
-
-    downloadSecureContent(projectId, token, key) {
+    async downloadSecureContent(projectId, token, key) {
         const contentKey = this._sanitizeKey(key);
-        const url = `${this.cortexUrl}/v2/tenants/secrets/${contentKey}`;
-        debug('downloadContent(%s) => %s', contentKey, url);
-        return request
-            .get(url)
-            .set('Authorization', `Bearer ${token}`)
-            .accept('application/json')
-            .then((res) => {
-                if (res.ok) {
-                    return { success: true, message: res.text };
-                }
-                return { success: false, message: res.body, status: res.status };
-            })
-            .catch(err => constructError(err));
+        const vars = new Variables(this.cortextUrl);
+        return vars.readVariable(projectId, token, contentKey);
     }
 };

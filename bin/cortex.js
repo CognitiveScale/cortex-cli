@@ -26,7 +26,7 @@ const pkg = findPackageJson(__dirname).next().value;
 program
     .version(pkg.version, '-v, --version')
     .description('Cortex CLI')
-    .command('accounts [cmd]', 'Work with Cortex Accounts')
+//    .command('accounts [cmd]', 'Work with Cortex Accounts')
     .command('actions [cmd]', 'Work with Cortex Actions')
     .command('agents [cmd]', 'Work with Cortex Agents')
     .command('configure', 'Configure the Cortex CLI')

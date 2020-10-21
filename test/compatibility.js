@@ -19,8 +19,7 @@ const chaiAsPromised = require('chai-as-promised');
 const findPackageJson = require('find-package-json');
 const rewire = require('rewire');
 const semver = require('semver');
-const superagent = require('superagent');
-const superagentMock = require('superagent-mocker');
+const nock = require('nock');
 
 const compatibilityModule = rewire('../src/compatibility');
 
@@ -33,21 +32,18 @@ describe('compatibility checks', () => {
     const profile = {
         url: 'http://example.com',
         account: 'testAccount',
-        tenantId: 'testTenant',
+        projectId: 'testTenant',
         username: 'testUser',
         token: 'testToken',
     };
 
     describe('with a compatible application version', () => {
-        let requestMock;
         let revertCompatibilityModule;
 
         before(() => {
-            requestMock = superagentMock(superagent);
-            requestMock.get(
-                `${profile.url}/v3/catalog/compatibility/applications/cortex-cli`,
-                () => ({ ok: true, body: { semver: pkg.version } }),
-            );
+            nock(profile.url)
+                .get('/fabric/v4/compatibility/applications/cortex-cli')
+                .reply(200, () => ({ semver: pkg.version }));
             revertCompatibilityModule = compatibilityModule.__set__({
                 npmFetch: {
                     json: () => Promise.resolve({ versions: { [pkg.version]: {} } }),
@@ -57,7 +53,7 @@ describe('compatibility checks', () => {
 
         after(() => {
             revertCompatibilityModule();
-            requestMock.unmock(superagent);
+            nock.restore();
         });
 
         it('should resolve as satisfied', () => {
@@ -68,15 +64,13 @@ describe('compatibility checks', () => {
 
     describe('with an incompatible application version', () => {
         const nextMajorVersion = semver.inc(pkg.version, 'major');
-        let requestMock;
         let revertCompatibilityModule;
 
         before(() => {
-            requestMock = superagentMock(superagent);
-            requestMock.get(
-                `${profile.url}/v3/catalog/compatibility/applications/cortex-cli`,
-                () => ({ ok: true, body: { semver: nextMajorVersion } }),
-            );
+            nock.activate();
+            nock(profile.url)
+                .get('/fabric/v4/compatibility/applications/cortex-cli')
+                .reply(200, () => ({ semver: nextMajorVersion }));
             revertCompatibilityModule = compatibilityModule.__set__({
                 npmFetch: {
                     json: () => Promise.resolve({
@@ -91,7 +85,7 @@ describe('compatibility checks', () => {
 
         after(() => {
             revertCompatibilityModule();
-            requestMock.unmock(superagent);
+            nock.restore();
         });
 
         it('should resolve as unsatisfied', () => {
@@ -101,15 +95,13 @@ describe('compatibility checks', () => {
     });
 
     describe('when the compatibility service cannot be reached', () => {
-        let requestMock;
         let revertCompatibilityModule;
 
         before(() => {
-            requestMock = superagentMock(superagent);
-            requestMock.get(
-                `${profile.url}/v3/catalog/compatibility/applications/cortex-cli`,
-                () => { throw new Error('BOOM!'); },
-            );
+            nock.activate();
+            nock(profile.url)
+                .get('/fabric/v4/compatibility/applications/cortex-cli')
+                .reply(500, () => ('BOOM'));
             revertCompatibilityModule = compatibilityModule.__set__({
                 npmFetch: {
                     json: () => Promise.resolve({ versions: { [pkg.version]: {} } }),
@@ -119,22 +111,19 @@ describe('compatibility checks', () => {
 
         after(() => {
             revertCompatibilityModule();
-            requestMock.unmock(superagent);
+            nock.restore();
         });
 
         it('should reject', () => expect(compatibilityModule.getCompatibility(profile)).to.be.rejected);
     });
 
     describe('when the npm cannot be reached', () => {
-        let requestMock;
         let revertCompatibilityModule;
-
         before(() => {
-            requestMock = superagentMock(superagent);
-            requestMock.get(
-                `${profile.url}/v3/catalog/compatibility/applications/cortex-cli`,
-                () => ({ ok: true, body: { semver: pkg.version } }),
-            );
+            nock.activate();
+            nock(profile.url)
+                .get('/fabric/v4/compatibility/applications/cortex-cli')
+                .reply(200, () => ({ semver: pkg.version }));
             revertCompatibilityModule = compatibilityModule.__set__({
                 npmFetch: {
                     json: () => Promise.reject(new Error('BOOM!')),
@@ -144,7 +133,7 @@ describe('compatibility checks', () => {
 
         after(() => {
             revertCompatibilityModule();
-            requestMock.unmock(superagent);
+            nock.restore();
         });
 
         it('should not reject', () => {

@@ -29,7 +29,7 @@ const npmFetch = require('npm-registry-fetch');
 const semver = require('semver');
 const uniq = require('lodash/fp/uniq');
 const { loadProfile } = require('./config');
-const { printError, printWarning } = require('../src/commands/utils');
+const { printError, printWarning, getUserAgent } = require('../src/commands/utils');
 
 const pkg = findPackageJson(__dirname).next().value;
 
@@ -50,9 +50,10 @@ function getRequiredVersion(profile) {
     debug('getRequiredVersion => %s', endpoint);
     return got
         .get(endpoint, {
- headers: {
-            Authorization: `Bearer ${profile.token}`,
-        }, 
+             headers: {
+                Authorization: `Bearer ${profile.token}`,
+                'user-agent': getUserAgent(),
+         },
 })
         .json()
         .then((res) => {

@@ -16,17 +16,17 @@
 
 const debug = require('debug')('cortex:cli:graph');
 const got = require('got');
-const { constructError } = require('../commands/utils');
+const { constructError, getUserAgent } = require('../commands/utils');
 
 const createEndpoints = baseUri => ({
-        profileVersions: projectId => `${baseUri}/fabric/v4/projects/${projectId}/profile-versions`,
-        profiles: projectId => `${baseUri}/fabric/v4/projects/${projectId}/profiles`,
-        schemas: projectId => `${baseUri}/fabric/v4/projects/${projectId}/profiles/schemas`,
-        events: projectId => `${baseUri}/fabric/v4/projects/${projectId}/events`,
-        entities: projectId => `${baseUri}/fabric/v4/projects/${projectId}/entities`,
-        track: projectId => `${baseUri}/fabric/v4/projects/${projectId}/events/track`,
-        query: projectId => `${baseUri}/fabric/v4/projects/${projectId}/query`,
-    });
+    profileVersions: projectId => `${baseUri}/fabric/v4/projects/${projectId}/profile-versions`,
+    profiles: projectId => `${baseUri}/fabric/v4/projects/${projectId}/profiles`,
+    schemas: projectId => `${baseUri}/fabric/v4/projects/${projectId}/profiles/schemas`,
+    events: projectId => `${baseUri}/fabric/v4/projects/${projectId}/events`,
+    entities: projectId => `${baseUri}/fabric/v4/projects/${projectId}/entities`,
+    track: projectId => `${baseUri}/fabric/v4/projects/${projectId}/events/track`,
+    query: projectId => `${baseUri}/fabric/v4/projects/${projectId}/query`,
+});
 
 class Graph {
     constructor(cortexUrl) {
@@ -44,7 +44,8 @@ class Graph {
         return got
             .get(this.endpoints.profiles(projectId), {
                 headers: { Authorization: `Bearer ${token}` },
-              searchParams: { query },
+                'user-agent': getUserAgent(),
+                searchParams: { query },
             }).json()
             .then(profiles => ({ success: true, profiles }))
             .catch(err => constructError(err));
@@ -63,7 +64,8 @@ class Graph {
         return got
             .get(endpoint, {
                 headers: { Authorization: `Bearer ${token}` },
-              searchParams: { query },
+                'user-agent': getUserAgent(),
+                searchParams: { query },
             }).json()
             .then(versions => ({ success: true, versions }))
             .catch(err => constructError(err));
@@ -81,7 +83,8 @@ class Graph {
         return got
             .get(endpoint, {
                 headers: { Authorization: `Bearer ${token}` },
-              searchParams: { query },
+                'user-agent': getUserAgent(),
+                searchParams: { query },
             }).json()
             .then(profile => ({ success: true, profile }))
             .catch(err => constructError(err));
@@ -95,6 +98,7 @@ class Graph {
         return got
             .delete(endpoint, {
                 headers: { Authorization: `Bearer ${token}` },
+                'user-agent': getUserAgent(),
                 searchParams: { query },
             }).json()
             .then(() => ({ success: true }))
@@ -115,7 +119,8 @@ class Graph {
         return got
             .get(endpoint, {
                 headers: { Authorization: `Bearer ${token}` },
-              searchParams: { query },
+                'user-agent': getUserAgent(),
+                searchParams: { query },
             }).json()
             .then(events => ({ success: true, events }))
             .catch(err => constructError(err));
@@ -126,6 +131,7 @@ class Graph {
         return got
             .post(this.endpoints.events(projectId), {
                 headers: { Authorization: `Bearer ${token}` },
+                'user-agent': getUserAgent(),
                 json: entityEvents,
             }).json()
             .then(message => ({ success: true, message }))
@@ -139,6 +145,7 @@ class Graph {
         return got
             .post(endpoint, {
                 headers: { Authorization: `Bearer ${token}` },
+                'user-agent': getUserAgent(),
                 json: event,
             }).json()
             .then(message => ({ success: true, message }))
@@ -160,7 +167,8 @@ class Graph {
         return got
             .put(endpoint, {
                 headers: { Authorization: `Bearer ${token}` },
-              searchParams: { query },
+                'user-agent': getUserAgent(),
+                searchParams: { query },
             }).json()
             .then(message => ({ success: true, message }))
             .catch(err => constructError(err));
@@ -173,6 +181,7 @@ class Graph {
         return got
             .get(endpoint, {
                 headers: { Authorization: `Bearer ${token}` },
+                'user-agent': getUserAgent(),
             }).json()
             .then(entity => ({ success: true, entity }))
             .catch(err => constructError(err));
@@ -185,6 +194,7 @@ class Graph {
         return got
             .post(endpoint, {
                 headers: { Authorization: `Bearer ${token}` },
+                'user-agent': getUserAgent(),
                 json: { query },
             }).json()
             .then(result => ({ success: true, result }))

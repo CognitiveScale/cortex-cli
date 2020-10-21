@@ -16,7 +16,9 @@
 
 const debug = require('debug')('cortex:cli');
 const got = require('got');
-const { constructError, formatAllServiceInputParameters, checkProject } = require('../commands/utils');
+const {
+ constructError, formatAllServiceInputParameters, checkProject, getUserAgent, 
+} = require('../commands/utils');
 
 const createEndpoints = baseUri => ({
         skills: projectId => `${baseUri}/fabric/v4/projects/${projectId}/skills`,
@@ -36,6 +38,7 @@ module.exports = class Catalog {
         return got
             .post(this.endpoints.skills(projectId), {
                 headers: { Authorization: `Bearer ${token}` },
+                'user-agent': getUserAgent(),
                 json: skillObj,
             }).json()
             .then(res => ({ success: true, message: res.body }))
@@ -48,6 +51,7 @@ module.exports = class Catalog {
         return got
             .get(this.endpoints.skills(projectId), {
                 headers: { Authorization: `Bearer ${token}` },
+                'user-agent': getUserAgent(),
             }).json()
             .then(skills => ({ success: true, ...skills }))
             .catch(err => constructError(err));
@@ -60,6 +64,7 @@ module.exports = class Catalog {
         return got
             .get(endpoint, {
                 headers: { Authorization: `Bearer ${token}` },
+                'user-agent': getUserAgent(),
             }).json()
             .then(res => ({ success: true, skill: res.body }))
             .catch(err => constructError(err));
@@ -72,6 +77,7 @@ module.exports = class Catalog {
         return got
             .get(endpoint, {
                 headers: { Authorization: `Bearer ${token}` },
+                'user-agent': getUserAgent(),
             })
             .json()
             .then(agentResp => ({ success: true, ...agentResp }))
@@ -88,11 +94,7 @@ module.exports = class Catalog {
                 const servicesList = response.agent.inputs
                     .filter(i => i.signalType === 'Service')
                     .map(i => ({ ...i, url: `${urlBase}/${i.name}` }))
-                    .map(i => ({
- ...i,
-formatted_types:
-                    formatAllServiceInputParameters(i.parameters), 
-}));
+                    .map(i => ({ ...i, formatted_types: formatAllServiceInputParameters(i.parameters) }));
                 return { success: true, services: servicesList };
             } 
                 return response;
@@ -106,6 +108,7 @@ formatted_types:
         return got
             .post(endpoint, {
                 headers: { Authorization: `Bearer ${token}` },
+                'user-agent': getUserAgent(),
                 json: agentObj,
             }).json()
             .then(res => ({ success: true, message: res.body }))
@@ -119,6 +122,7 @@ formatted_types:
         return got
             .get(endpoint, {
                 headers: { Authorization: `Bearer ${token}` },
+                'user-agent': getUserAgent(),
             }).json()
             .then(agent => ({ success: true, agent }))
             .catch(err => constructError(err));
@@ -131,6 +135,7 @@ formatted_types:
         return got
             .get(endpoint, {
                 headers: { Authorization: `Bearer ${token}` },
+                'user-agent': getUserAgent(),
             })
             .json()
             .then(agent => ({ success: true, agent }))
@@ -145,6 +150,7 @@ formatted_types:
         return got
             .post(endpoint, {
                 headers: { Authorization: `Bearer ${token}` },
+                'user-agent': getUserAgent(),
                 json: types,
             })
             .json()
@@ -159,6 +165,7 @@ formatted_types:
         return got
             .get(endpoint, {
                 headers: { Authorization: `Bearer ${token}` },
+                'user-agent': getUserAgent(),
             })
             .json()
             .then(type => ({ success: true, type }))
@@ -172,6 +179,7 @@ formatted_types:
         return got
             .get(endpoint, {
                 headers: { Authorization: `Bearer ${token}` },
+                'user-agent': getUserAgent(),
             })
             .json()
             .then(types => ({ success: true, types }))

@@ -16,7 +16,7 @@
 
 const debug = require('debug')('cortex:cli');
 const got = require('got');
-const { constructError } = require('../commands/utils');
+const { constructError, getUserAgent } = require('../commands/utils');
 
 module.exports = class Datasets {
     constructor(cortexUrl) {
@@ -29,6 +29,7 @@ module.exports = class Datasets {
         return got
             .get(endpoint, {
                 headers: { Authorization: `Bearer ${token}` },
+                'user-agent': getUserAgent(),
             }).json()
             .then(result => ({ success: true, result }))
             .catch(err => constructError(err));
@@ -40,6 +41,7 @@ module.exports = class Datasets {
         return got
             .post(endpoint, {
                 headers: { Authorization: `Bearer ${token}` },
+                'user-agent': getUserAgent(),
                 json: dsObject,
             }).json()
             .then(res => ({ success: true, message: res }))
@@ -52,6 +54,7 @@ module.exports = class Datasets {
         return got
             .get(endpoint, {
                 headers: { Authorization: `Bearer ${token}` },
+                'user-agent': getUserAgent(),
             }).json()
             .then(result => ({ success: true, result }))
             .catch(err => constructError(err)); 
@@ -63,6 +66,7 @@ module.exports = class Datasets {
         return got
             .get(endpoint, {
                 headers: { Authorization: `Bearer ${token}` },
+                'user-agent': getUserAgent(),
             }).json()
             .then(result => ({ success: true, result }))
             .catch(err => constructError(err));
@@ -74,6 +78,7 @@ module.exports = class Datasets {
         return got
             .get(endpoint, {
                 headers: { Authorization: `Bearer ${token}` },
+                'user-agent': getUserAgent(),
             }).json()
             .then(result => ({ success: true, result }))
             .catch(err => constructError(err));

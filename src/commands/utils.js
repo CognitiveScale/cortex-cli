@@ -14,16 +14,20 @@
  * limitations under the License.
  */
 
-const chalk = require('chalk');
-const path = require('path');
-const fs = require('fs');
 const _ = require('lodash');
-const jmsepath = require('jmespath');
-const glob = require('glob');
-const yaml = require('js-yaml');
+const chalk = require('chalk');
 const debug = require('debug')('cortex:cli');
+const findPackageJson = require('find-package-json');
+const fs = require('fs');
+const glob = require('glob');
+const jmsepath = require('jmespath');
+const os = require('os');
+const osName = require('os-name');
+const path = require('path');
 const Table = require('cli-table');
+const yaml = require('js-yaml');
 const { exec } = require('child_process');
+
 
 module.exports.constructError = (error) => {
     // fallback to text in message or standard error message
@@ -294,4 +298,9 @@ module.exports.checkProject = (projectId) => {
         console.error(chalk.red('\'project\' is required, please provide using \'cortex configure\' or --project'));
         process.exit(1);
     }
+};
+
+const pkg = findPackageJson(__dirname).next().value;
+module.exports.getUserAgent = function getUserAgent() {
+    return `${pkg.name}/${pkg.version} (${os.platform()}; ${os.arch()}; ${os.release()}; ${osName()})`;
 };

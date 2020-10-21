@@ -16,7 +16,7 @@
 
 const debug = require('debug')('cortex:cli');
 const got = require('got');
-const { constructError } = require('../commands/utils');
+const { constructError, getUserAgent } = require('../commands/utils');
 
 module.exports = class Connections {
     constructor(cortexUrl) {
@@ -30,6 +30,7 @@ module.exports = class Connections {
             const message = await got
                 .post(endpoint, {
                     headers: { Authorization: `Bearer ${token}` },
+                    'user-agent': getUserAgent(),
                     json: queryObject,
             }).json();
             return { success: true, message };
@@ -43,6 +44,7 @@ module.exports = class Connections {
         return got
             .get(endpoint, {
                 headers: { Authorization: `Bearer ${token}` },
+                'user-agent': getUserAgent(),
             }).json()
             .then(result => ({ success: true, result }))
             .catch(err => constructError(err));
@@ -55,6 +57,7 @@ module.exports = class Connections {
             const message = await got
             .post(endpoint, {
                 headers: { Authorization: `Bearer ${token}` },
+                'user-agent': getUserAgent(),
                 json: connObj,
             }).json();
             return { success: true, message };
@@ -69,6 +72,7 @@ module.exports = class Connections {
         return got
             .get(endpoint, {
                 headers: { Authorization: `Bearer ${token}` },
+                'user-agent': getUserAgent(),
             }).json()
             .then(result => ({ success: true, result }))
             .catch(err => constructError(err));
@@ -83,6 +87,7 @@ module.exports = class Connections {
             const message = await got
                 .post(url, {
                     headers: { Authorization: `Bearer ${token}` },
+                    'user-agent': getUserAgent(),
                     json: {
                         name, title, description, connectionType, allowWrite, tags, params,
                     },
@@ -98,6 +103,7 @@ module.exports = class Connections {
         return got
             .get(endpoint, {
                 headers: { Authorization: `Bearer ${token}` },
+                'user-agent': getUserAgent(),
             }).json()
             .then(result => ({ success: true, result }))
             .catch(err => constructError(err));

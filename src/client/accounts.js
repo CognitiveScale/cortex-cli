@@ -16,7 +16,7 @@
 
 const debug = require('debug')('cortex:cli');
 const got = require('got');
-const { constructError } = require('../commands/utils');
+const { constructError, getUserAgent } = require('../commands/utils');
 
 module.exports = class Accounts {
     constructor(cortexUrl) {
@@ -31,6 +31,7 @@ module.exports = class Accounts {
         return got
             .get(endpoint, {
                 headers: { Authorization: `Bearer ${token}` },
+                'user-agent': getUserAgent(),
             }).json()
             .then(result => ({ success: true, result }))
             .catch(err => constructError(err));

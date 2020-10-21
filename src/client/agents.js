@@ -16,7 +16,7 @@
 
 const debug = require('debug')('cortex:cli');
 const got = require('got');
-const { constructError } = require('../commands/utils');
+const { constructError, getUserAgent } = require('../commands/utils');
 
 module.exports = class Agents {
     constructor(cortexUrl) {
@@ -30,6 +30,7 @@ module.exports = class Agents {
         return got
             .post(endpoint, {
                 headers: { Authorization: `Bearer ${token}` },
+                'user-agent': getUserAgent(),
             }).json()
            .then(result => ({ success: true, result }))
             .catch(err => constructError(err));
@@ -41,6 +42,7 @@ module.exports = class Agents {
         return got
             .get(endpoint, {
                 headers: { Authorization: `Bearer ${token}` },
+                'user-agent': getUserAgent(),
             }).json()
             .then(result => ({ success: true, result }))
             .catch(err => constructError(err));
@@ -53,6 +55,7 @@ module.exports = class Agents {
         return got
             .get(endpoint, {
                 headers: { Authorization: `Bearer ${token}` },
+                'user-agent': getUserAgent(),
             }).json()
             .then(result => ({ success: true, result }))
             .catch(err => constructError(err));
@@ -65,6 +68,7 @@ module.exports = class Agents {
         return got
             .get(endpoint, {
                 headers: { Authorization: `Bearer ${token}` },
+                'user-agent': getUserAgent(),
             }).json()
             .then(result => ({ success: true, result }))
             .catch(err => constructError(err));
@@ -77,6 +81,7 @@ module.exports = class Agents {
         return got
             .get(endpoint, {
                 headers: { Authorization: `Bearer ${token}` },
+                'user-agent': getUserAgent(),
             }).json()
             .then(result => ({ success: true, result }))
             .catch(err => constructError(err));
@@ -88,6 +93,7 @@ module.exports = class Agents {
         return got
             .post(endpoint, {
                 headers: { Authorization: `Bearer ${token}` },
+                'user-agent': getUserAgent(),
                 json: snapshot,
             }).json()
             .then(result => ({ success: true, result }))
@@ -100,6 +106,7 @@ module.exports = class Agents {
         return got
             .get(endpoint, {
                 headers: { Authorization: `Bearer ${token}` },
+                'user-agent': getUserAgent(),
             }).json()
             .then(result => ({ success: true, result }))
             .catch(err => constructError(err));

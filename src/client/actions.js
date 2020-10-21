@@ -18,7 +18,9 @@ const chalk = require('chalk');
 const debug = require('debug')('cortex:cli');
 const got = require('got');
 const jose = require('jose');
-const { constructError, callMe, checkProject } = require('../commands/utils');
+const {
+ constructError, callMe, checkProject, getUserAgent, 
+} = require('../commands/utils');
 
 module.exports = class Actions {
     constructor(cortexUrl) {
@@ -46,6 +48,7 @@ module.exports = class Actions {
         return got
         .post(endpoint, {
                    headers: { Authorization: `Bearer ${token}` },
+                    'user-agent': getUserAgent(),
                    json: body,
             }).json()
         .then(res => ({ success: true, message: res }))
@@ -58,6 +61,7 @@ module.exports = class Actions {
         return got
             .get(this.endpointV4(projectId), {
                 headers: { Authorization: `Bearer ${token}` },
+                'user-agent': getUserAgent(),
             }).json()
             .then(actions => actions)
             .catch(err => constructError(err));
@@ -79,7 +83,10 @@ module.exports = class Actions {
         const endpoint = `${this.endpointV4(projectId)}/${actionName}/logs`;
         debug('getLogsAction(%s) => %s', actionName, endpoint);
         return got
-            .get(endpoint, { headers: { Authorization: `Bearer ${token}` } })
+            .get(endpoint, {
+                headers: { Authorization: `Bearer ${token}` },
+                'user-agent': getUserAgent(),
+            })
             .json()
             .then((logs) => {
                     if (_.isArray(logs)) {
@@ -99,7 +106,10 @@ module.exports = class Actions {
         }
         debug('deleteAction(%s, %s) => %s', actionName, actionType, endpoint);
         return got
-            .delete(endpoint, { headers: { Authorization: `Bearer ${token}` } })
+            .delete(endpoint, {
+                headers: { Authorization: `Bearer ${token}` },
+                'user-agent': getUserAgent(),
+            })
             .json()
             .then(action => ({ success: true, action }))
             .catch(err => constructError(err));
@@ -110,7 +120,10 @@ module.exports = class Actions {
         const canonicalJobId = Actions.getCanonicalJobId(jobId);
         const endpoint = `${this.endpointV4(projectId)}/${canonicalJobId}/tasks/${taskId}/logs`;
         return got
-            .get(endpoint, { headers: { Authorization: `Bearer ${token}` } })
+            .get(endpoint, {
+                headers: { Authorization: `Bearer ${token}` },
+                'user-agent': getUserAgent(),
+            })
             .json()
             .then(res => res)
             .catch(err => constructError(err));
@@ -121,7 +134,10 @@ module.exports = class Actions {
         const canonicalJobId = Actions.getCanonicalJobId(jobId);
         const endpoint = `${this.endpointV4(projectId)}/${canonicalJobId}/tasks/${taskId}`;
         return got
-            .delete(endpoint, { headers: { Authorization: `Bearer ${token}` } })
+            .delete(endpoint, {
+                headers: { Authorization: `Bearer ${token}` },
+                'user-agent': getUserAgent(),
+            })
             .json()
             .then(res => res)
             .catch(err => constructError(err));
@@ -132,7 +148,10 @@ module.exports = class Actions {
         const canonicalJobId = Actions.getCanonicalJobId(jobId);
         const endpoint = `${this.endpointV4(projectId)}/${canonicalJobId}/tasks/${taskId}/status`;
         return got
-            .get(endpoint, { headers: { Authorization: `Bearer ${token}` } })
+            .get(endpoint, {
+                headers: { Authorization: `Bearer ${token}` },
+                'user-agent': getUserAgent(),
+            })
             .json()
             .then((res) => {
                     debug('resBody (with provider status as well): %s', res);
@@ -146,7 +165,10 @@ module.exports = class Actions {
         const canonicalJobId = Actions.getCanonicalJobId(jobId);
         const endpoint = `${this.endpointV4(projectId)}/${canonicalJobId}/tasks`;
         return got
-            .get(endpoint, { headers: { Authorization: `Bearer ${token}` } })
+            .get(endpoint, {
+                headers: { Authorization: `Bearer ${token}` },
+                'user-agent': getUserAgent(),
+            })
             .json()
             .then(res => res)
             .catch(err => constructError(err));
@@ -157,7 +179,10 @@ module.exports = class Actions {
         const canonicalJobId = Actions.getCanonicalJobId(jobId);
         const endpoint = `${this.endpointV4(projectId)}/${canonicalJobId}/stats`;
         return got
-            .get(endpoint, { headers: { Authorization: `Bearer ${token}` } })
+            .get(endpoint, {
+                headers: { Authorization: `Bearer ${token}` },
+                'user-agent': getUserAgent(),
+            })
             .json()
             .then(res => res)
             .catch(err => constructError(err));
@@ -167,7 +192,10 @@ module.exports = class Actions {
         checkProject(projectId);
         const endpoint = `${this.endpointV4(projectId)}/${activationId}`;
         return got
-            .get(endpoint, { headers: { Authorization: `Bearer ${token}` } })
+            .get(endpoint, {
+                headers: { Authorization: `Bearer ${token}` },
+                'user-agent': getUserAgent(),
+            })
             .json()
             .then(res => res)
             .catch(err => constructError(err));
@@ -177,7 +205,10 @@ module.exports = class Actions {
         checkProject(projectId);
         const endpoint = _.join([this.endpointV4(projectId), '_config'], '/');
         return got
-            .get(endpoint, { headers: { Authorization: `Bearer ${token}` } })
+            .get(endpoint, {
+                headers: { Authorization: `Bearer ${token}` },
+                'user-agent': getUserAgent(),
+            })
             .json()
             .then(config => ({ success: true, config }))
             .catch(err => constructError(err));

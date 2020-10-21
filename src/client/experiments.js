@@ -16,8 +16,8 @@
 
 const debug = require('debug')('cortex:cli');
 const got = require('got');
-const ProgressBar = require('progress');
-const { constructError } = require('../commands/utils');
+const { constructError, getUserAgent } = require('../commands/utils');
+const Content = require('./content');
 
 module.exports = class Experiments {
     constructor(cortexUrl) {
@@ -31,6 +31,7 @@ module.exports = class Experiments {
         return got
             .get(endpoint, {
                 headers: { Authorization: `Bearer ${token}` },
+                'user-agent': getUserAgent(),
             }).json()
             .then(result => ({ success: true, result }))
             .catch(err => constructError(err));
@@ -42,6 +43,7 @@ module.exports = class Experiments {
         return got
             .get(endpoint, {
                 headers: { Authorization: `Bearer ${token}` },
+                'user-agent': getUserAgent(),
             }).json()
             .then(result => ({ success: true, result }))
             .catch(err => constructError(err));
@@ -53,6 +55,7 @@ module.exports = class Experiments {
         return got
             .delete(endpoint, {
                 headers: { Authorization: `Bearer ${token}` },
+                'user-agent': getUserAgent(),
             }).json()
             .then(result => ({ success: true, result }))
             .catch(err => constructError(err));
@@ -68,6 +71,7 @@ module.exports = class Experiments {
         return got
             .get(endpoint, {
                 headers: { Authorization: `Bearer ${token}` },
+                'user-agent': getUserAgent(),
               searchParams: { query },
             }).json()
             .then(result => ({ success: true, result }))
@@ -80,6 +84,7 @@ module.exports = class Experiments {
         return got
             .get(endpoint, {
                 headers: { Authorization: `Bearer ${token}` },
+                'user-agent': getUserAgent(),
             }).json()
             .then(result => ({ success: true, result }))
             .catch(err => constructError(err));
@@ -91,66 +96,27 @@ module.exports = class Experiments {
         return got
             .delete(endpoint, {
                 headers: { Authorization: `Bearer ${token}` },
+                'user-agent': getUserAgent(),
             }).json()
             .then(result => ({ success: true, result }))
             .catch(err => constructError(err));
     }
 
-    // TODO https://www.npmjs.com/package/got#streams
-    downloadArtifact(projectId, token, experimentName, runId, artifactName, showProgress = false) {
-        const endpoint = `${this.endpoint(projectId)}/${experimentName}/runs/${runId}/artifacts/${artifactName}`;
-        debug('downloadArtifact(%s) => %s', artifactName, endpoint);
-        return got
-            .get(endpoint, {
-                headers: { Authorization: `Bearer ${token}` },
-            }).json()
-            .then(result => ({ success: true, result }))
-            .catch(err => constructError(err));
+    _artifactKey(experimentName, runId, artifact) {
+        return `experiments/${experimentName}/${runId}/artifacts/${artifact}`;
+    }
 
-        const stream = request
-            .get(endpoint)
-            .set('Authorization', `Bearer ${token}`)
-            .use((req) => {
-                if (showProgress) {
-                    req.on('request', (clientReq) => {
-                        clientReq.on('response', (res) => {
-                            const total = +(res.headers['content-length'] || res.headers['Content-Length']);
-                            const progressBar = new ProgressBar(
-                                '  downloading [:bar] :percent :etas',
-                                {
-                                    current: 0,
-                                    renderThrottle: 500,
-                                    total,
-                                },
-                            );
-                        
-                            res.on('data', chunk => progressBar.tick(chunk.length));
-                          });
-                    });
-                }
-            });
-
-        return new Promise((resolve, reject) => {
-            stream.on('response', (response) => {
-                if (response.status !== 200) {
-                    stream.abort();
-                    return resolve({
-                        success: false,
-                        status: stream.response.status,
-                        message: stream.response.error,
-                    });
-                }
-            });
-
-            stream.on('end', () => resolve({
-                    success: true,
-                    message: `\nDownloaded ${artifactName}`,
-                    status: stream.response.status,
-                }));
-
-            stream.on('error', err => resolve(constructError(err)));
-
-            stream.pipe(process.stdout);
-        });
+    // eslint-disable-next-line no-unused-vars
+    async downloadArtifact(projectId, token, experimentName, runId, artifactName, showProgress = false) {
+        try {
+            // Check if run exists..
+            await this.describeRun(projectId, token, experimentName, runId);
+            // just generate the key and avoid hop to managed content..
+            const key = this._artifactKey(experimentName, runId, artifactName);
+            const cont = new Content(this.cortexUrl);
+            return cont.downloadContent(projectId, token, key, showProgress);
+        } catch (err) {
+            return constructError(err);
+        }
     }
 };
