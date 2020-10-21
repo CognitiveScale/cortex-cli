@@ -22,26 +22,19 @@ const Joi = require('@hapi/joi');
 const debug = require('debug')('cortex:config');
 const { JWT, JWK } = require('jose');
 const { printError } = require('./commands/utils');
-process.env['NODE_TLS_REJECT_UNAUTHORIZED'] = 0;
-
-const leeway = 120; //2 minute leeway for JWT issuance
 
 function generateJwt(profile) {
     const { username, issuer, audience,jwk } = profile;
     const jwtSigner = JWK.asKey(jwk);
-    const issuedAt = Math.floor(Date.now() / 1000) - leeway;
     const payload = {
-        tenant: 'cortex',
-        iat: issuedAt,
-        exp: issuedAt + (leeway * 2), //2 minute exp time for req, is replaced at gateway with internal token
     };
     return JWT.sign(payload, jwtSigner, {
         issuer: issuer,
         audience: audience,
         subject: username,
+        expiresIn: '2m',
     });
 }
-
 
 module.exports.defaultConfig = defaultConfig = function(){
   return new Config({});
