@@ -29,7 +29,7 @@ module.exports = class Content {
 
     constructor(cortexUrl) {
         this.cortexUrl = cortexUrl;
-        this.endpoint = `${cortexUrl}/v2/content`;
+        this.endpoint = projectId => `${cortexUrl}/fabric/v4/projects/${projectId}/content`;
     }
 
     _sanitizeKey(key) {
@@ -37,10 +37,11 @@ module.exports = class Content {
         return key.replace(/^\//, '');
     }
 
-    listContent(token) {
+    listContent(projectId, token) {
         debug('listContent %s', this.endpoint);
+
         return request
-            .get(this.endpoint)
+            .get(this.endpoint(projectId))
             .set('Authorization', `Bearer ${token}`)
             .accept('application/json')
             .then((res) => {
@@ -54,11 +55,11 @@ module.exports = class Content {
             });
     }
 
-    uploadContent(token, {content, key}) {
+    uploadContent(projectId, token, {content, key}) {
         debug('uploadContent(%s, %s) => %s', key, content, this.endpoint);
         const contentKey = this._sanitizeKey(key);
         return request
-            .post(this.endpoint)
+            .post(this.endpoint(projectId))
             .set('Authorization', `Bearer ${token}`)
             .accept('application/json')
             .field('key', contentKey)
@@ -74,7 +75,7 @@ module.exports = class Content {
             });
     }
 
-    uploadContentStreaming(token, key, content, showProgress = false, contentType='application/octet-stream') {
+    uploadContentStreaming(projectId, token, key, content, showProgress = false, contentType='application/octet-stream') {
         debug('uploadContentStreaming(%s, %s) => %s', key, content, `${this.endpoint}/${key}`);
 
         // NOTE: superagent only supports uploads via .attach(), which uses multipart forms (@see
@@ -83,7 +84,7 @@ module.exports = class Content {
         const requestLibRequest = require('request');
 
         const contentKey = this._sanitizeKey(key);
-        const url = new URL(`${this.endpoint}/${contentKey}`);
+        const url = new URL(`${this.endpoint(projectId)}/${contentKey}`);
 
         let progressBar;
         if (showProgress) {
@@ -124,7 +125,7 @@ module.exports = class Content {
         });
     }
 
-    uploadSecureContent(token, key, content) {
+    uploadSecureContent(projectId, token, key, content) {
         const contentKey = this._sanitizeKey(key);
         const url = `${this.cortexUrl}/v2/tenants/secrets/${contentKey}`;
         debug('uploadSecureContent(%s) => %s', content, url);
@@ -146,10 +147,10 @@ module.exports = class Content {
     }
 
 
-    deleteContent(token, key) {
+    deleteContent(projectId, token, key) {
         debug('deleteContent(%s) => %s', key, this.endpoint);
         const contentKey = this._sanitizeKey(key);
-        const url = `${this.endpoint}/${contentKey}`;
+        const url = `${this.endpoint(projectId)}/${contentKey}`;
         return request
             .delete(url)
             .set('Authorization', `Bearer ${token}`)
@@ -165,10 +166,10 @@ module.exports = class Content {
             });
     }
 
-    downloadContent(token, key, showProgress = false) {
+    downloadContent(projecId, token, key, showProgress = false) {
         debug('downloadContent(%s) => %s', key, this.endpoint);
         const contentKey = this._sanitizeKey(key);
-        const url = `${this.endpoint}/${contentKey}`;
+        const url = `${this.endpoint(projecId)}/${contentKey}`;
 
         const stream = request
             .get(url)
@@ -222,7 +223,7 @@ module.exports = class Content {
     }
 
 
-    downloadSecureContent(token, key) {
+    downloadSecureContent(projectId, token, key) {
         const contentKey = this._sanitizeKey(key);
         const url = `${this.cortexUrl}/v2/tenants/secrets/${contentKey}`;
         debug('downloadContent(%s) => %s', contentKey, url);

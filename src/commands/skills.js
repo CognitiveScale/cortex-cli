@@ -54,7 +54,7 @@ module.exports.SaveSkillCommand = class SaveSkillCommand {
         const skill = parseObject(skillDefStr, options);
 
         const catalog = new Catalog(profile.url);
-        catalog.saveSkill(profile.token, skill).then((response) => {
+        catalog.saveSkill(options.project || profile.project, profile.token, skill).then((response) => {
             if (response.success) {
                 printSuccess(`Skill saved`, options);
             } else {
@@ -89,7 +89,7 @@ module.exports.ListSkillsCommand = class ListSkillsCommand {
         debug('%s.executeListSkills()', profile.name);
 
         const catalog = new Catalog(profile.url);
-        catalog.listSkills(options.projectId || profile.projectId, profile.token).then((response) => {
+        catalog.listSkills(options.project || profile.project, profile.token).then((response) => {
             if (response.success) {
                 let result = response.skills;
                 if (options.query)
@@ -129,7 +129,7 @@ module.exports.DescribeSkillCommand = class DescribeSkillCommand {
         debug('%s.executeDescribeSkill(%s)', profile.name, skillName);
 
         const catalog = new Catalog(profile.url);
-        catalog.describeSkill(options.projectId || profile.projectId, profile.token, skillName).then((response) => {
+        catalog.describeSkill(options.project || profile.project, profile.token, skillName).then((response) => {
             if (response.success) {
                 let result = filterObject(response.skill, options);
                 printSuccess(JSON.stringify(result, null, 2), options);

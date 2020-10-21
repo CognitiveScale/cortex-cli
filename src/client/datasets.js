@@ -22,94 +22,76 @@ module.exports = class Datasets {
 
     constructor(cortexUrl) {
         this.cortexUrl = cortexUrl;
-        this.endpoint = `${cortexUrl}/v3/datasets`;
+        this.endpoint = projectId => `${cortexUrl}/fabric/projects/${projectId}/datasets`;
     }
 
-    listDatasets(token) {
-        const endpoint = `${this.endpoint}`;
-        return request
-            .get(endpoint)
-            .set('Authorization', `Bearer ${token}`)
-            .then((res) => {
-                if (res.ok) {
-                    return {success: true, result: res.body};
-                }
-                return {success: false, status: res.status, message: res.body};
+    listDatasets(projectId, token) {
+        const endpoint = `${this.endpoint(projectId)}`;
+        return got
+            .get(endpoint, {
+                headers: { Authorization: `Bearer ${token}` },
+            }).json()
+            .then((result) => {
+                return {success: true, result};
             })
             .catch((err) => {
                 return constructError(err);
             });
     }
 
-    saveDatasets(token,dsObject) {
+    saveDatasets(projectId, token,dsObject) {
         debug('saveConnection(%s) => %s', dsObject.name, this.endpoint);
-        return request
-            .post(this.endpoint)
-            .set('Authorization', `Bearer ${token}`)
-            .send(dsObject)
+        return got
+            .post(endpoint, {
+                headers: { Authorization: `Bearer ${token}` },
+                json: dsObject,
+            }).json()
             .then((res) => {
-                if (res.ok) {
-                    return {success: true, message: res.body};
-                }
-                return {success: false, message: res.body, status: res.status}; // don't think we ever hit this
+                return {success: true, message: res};
             })
             .catch((err) => {
                 return constructError(err);
             });
     }
 
-    describeDataset(token, datasetName) {
-        const endpoint = `${this.endpoint}/${datasetName}`;
+    describeDataset(projectId, token, datasetName) {
+        const endpoint = `${this.endpoint(projectId)}/${datasetName}`;
         debug('describeConnection(%s) => %s', datasetName, endpoint);
-        return request
-            .get(endpoint)
-            .set('Authorization', `Bearer ${token}`)
-            .then((res) => {
-                if (res.ok) {
-                    return {success: true, result: res.body};
-                }
-                else {
-                    return {success: false, message: res.body, status: res.status};
-                }
+        return got
+            .get(endpoint, {
+                headers: { Authorization: `Bearer ${token}` },
+            }).json()
+            .then((result) => {
+                return {success: true, result};
+            })
+            .catch((err) => {
+                return constructError(err);
+            });    }
+
+    getDataframe (projectId, token, datasetName) {
+        const endpoint = `${this.endpoint(projectId)}/${datasetName}/dataframe`;
+        debug('describeConnection(%s) => %s', datasetName, endpoint);
+        return got
+            .get(endpoint, {
+                headers: { Authorization: `Bearer ${token}` },
+            }).json()
+            .then((result) => {
+                return {success: true, result};
             })
             .catch((err) => {
                 return constructError(err);
             });
     }
 
-    getDataframe (token, datasetName) {
-        const endpoint = `${this.endpoint}/${datasetName}/dataframe`;
+    streamDataset(projectId, token, datasetName) {
+        const endpoint = `${this.endpoint(projectId)}/${datasetName}/stream`;
         debug('describeConnection(%s) => %s', datasetName, endpoint);
-        return request
-            .get(endpoint)
-            .set('Authorization', `Bearer ${token}`)
-            .then((res) => {
-                if (res.ok) {
-                    return {success: true, result: res.body};
-                }
-                else {
-                    return {success: false, message: res.body, status: res.status};
-                }
-            })
-            .catch((err) => {
-                return constructError(err);
-            });
-    }
-
-    streamDataset(token, datasetName) {
-        const endpoint = `${this.endpoint}/${datasetName}/stream`;
-        debug('describeConnection(%s) => %s', datasetName, endpoint);
-        return request
-            .get(endpoint)
-            .set('Authorization', `Bearer ${token}`)
-            .buffer()
-            .then((res) => {
-                if (res.ok) {
-                    return {success: true, result: res};
-                }
-                else {
-                    return {success: false, message: res.body, status: res.status};
-                }
+        return got
+            .get(endpoint, {
+                headers: { Authorization: `Bearer ${token}` },
+            }).json()
+            .then((result) => {
+                return {success: true, result};
             })
             .catch((err) => {
                 return constructError(err);

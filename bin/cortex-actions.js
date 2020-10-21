@@ -59,6 +59,7 @@ program
 // Describe Action
 program
     .command('describe <actionName>')
+    .alias('get')
     .description('Describe an action')
     .option('--no-compat', 'Ignore API compatibility checks')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
@@ -140,13 +141,10 @@ program
 // Deploy Action
 program
     .command('deploy <actionName>')
+    .alias('save')
     .description('Deploy an action')
     .option('--no-compat', 'Ignore API compatibility checks')
-    .option('--kind [kind]', '[Deprecated] Action runtime kind') // python:3, python:2, nodejs:default
-    .option('--code [code]', '[Deprecated] The code file or code archive to deploy')
     .option('--docker [image]', 'Docker image to use as the runner')
-    .option('--memory [memory]', '[Deprecated] Action memory limit in megabytes')
-    .option('--vcpus [vcpus]', '[Deprecated] Action vcpus limit in integer')
     .option('--ttl [ttl]', 'Daemon time to live')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')

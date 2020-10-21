@@ -25,7 +25,6 @@ const {
     SaveSkillCommand,
     ListSkillsCommand,
     DescribeSkillCommand,
-    GenerateSkillCommand
 } = require('../src/commands/skills');
 
 program.description('Work with Cortex Skills');

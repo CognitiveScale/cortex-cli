@@ -21,11 +21,11 @@ const debug = require('debug')('cortex:cli');
 const filter = require('lodash/fp/filter');
 const findPackageJson = require('find-package-json');
 const getOr = require('lodash/fp/getOr');
+const got = require('got');
 const isInstalledGlobally = require('is-installed-globally');
 const keys = require('lodash/fp/keys');
 const last = require('lodash/fp/last');
 const npmFetch = require('npm-registry-fetch');
-const { request } = require('./commands/apiutils');
 const semver = require('semver');
 const uniq = require('lodash/fp/uniq');
 const { loadProfile } = require('./config');
@@ -46,16 +46,18 @@ function getAvailableVersions(name) {
 }
 
 function getRequiredVersion(profile) {
-    const endpoint = `${profile.url}/v3/catalog/compatibility/applications/cortex-cli`;
+    const endpoint = `${profile.url}/fabric/v4/compatibility/applications/cortex-cli`;
     debug('getRequiredVersion => %s', endpoint);
-    return request
-        .get(endpoint)
-        .set('Authorization', `Bearer ${profile.token}`)
-        .set('x-cortex-proxy-notify', true)
+    return got
+        .get(endpoint, { headers: {
+            Authorization: `Bearer ${profile.token}`
+        }})
+        .json()
         .then((res) => {
-            if (!res.ok) {  throw new Error('Unable to fetch compatibility'); }
-            const { semver } = res.body;
+            const { semver } = res;
             return semver;
+        }).catch((err) => {
+            throw new Error(`Unable to fetch compatibility: ${err.message}`);
         });
 }
 

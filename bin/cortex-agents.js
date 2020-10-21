@@ -66,6 +66,7 @@ program
 program
     .command('list')
     .description('List agent definitions')
+    .alias('l')
     .option('--no-compat', 'Ignore API compatibility checks')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
@@ -85,6 +86,7 @@ program
 program
     .command('describe <agentName>')
     .description('Describe agent')
+    .alias('get')
     .option('--no-compat', 'Ignore API compatibility checks')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
@@ -217,6 +219,7 @@ program
 
 program
     .command('describe-snapshot <snapshotId>')
+    .alias('get-snapshot')
     .description('Describe agent snapshot')
     .option('--no-compat', 'Ignore API compatibility checks')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')

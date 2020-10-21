@@ -46,12 +46,9 @@ module.exports = class Actions {
         .post(endpoint, {
                    headers: { Authorization: `Bearer ${token}` },
                    json: params,
-            })
+            }).json()
         .then((res) => {
-            if (res.ok) {
-                return {success: true, message: res.body};
-            }
-            return {success: false, status: res.status, message: res.body};
+                return {success: true, message: res};
         })
         .catch((err) => {
             return constructError(err);
@@ -64,12 +61,9 @@ module.exports = class Actions {
         return got
             .get(this.endpointV4(projectId), {
                 headers: {Authorization: `Bearer ${token}`},
-            })
-            .then((res) => {
-                if (res.ok) {
-                    return {success: true, actions: res.body.functions};
-                }
-                return {success: false, status: res.status, message: res.body};
+            }).json()
+            .then((actions) => {
+                    return actions;
             })
             .catch((err) => {
                 return constructError(err);
@@ -82,11 +76,9 @@ module.exports = class Actions {
         debug('describeAction(%s) => %s', actionName, endpoint);
         return got
             .get(endpoint, { headers: {Authorization: `Bearer ${token}` } })
-            .then((res) => {
-                if (res.ok) {
-                    return {success: true, action: res.body.function};
-                }
-                return {success: false, status: res.status, message: res.body};
+            .json()
+            .then((action) => {
+                    return action;
             })
             .catch((err) => {
                 return constructError(err);
@@ -99,15 +91,13 @@ module.exports = class Actions {
         debug('getLogsAction(%s) => %s', actionName, endpoint);
         return got
             .get(endpoint, { headers: {Authorization: `Bearer ${token}` } })
-            .then((res) => {
-                if (res.ok) {
-                    if (_.isArray(res.body)) {
+            .json()
+            .then((logs) => {
+                    if (_.isArray(logs)) {
                         // returns plain array for Rancher daemons
-                        return {success: true, logs: res.body};
+                        return {success: true, logs};
                     }
-                    return res.body;
-                }
-                return {success: false, status: res.status, message: res.body};
+                    return logs;
             })
             .catch((err) => {
                 return constructError(err);
@@ -123,11 +113,9 @@ module.exports = class Actions {
         debug('deleteAction(%s, %s) => %s', actionName, actionType, endpoint);
         return got
             .delete(endpoint, { headers: {Authorization: `Bearer ${token}` } })
-            .then((res) => {
-                if (res.ok) {
-                    return {success: true, action: res.body.action};
-                }
-                return {success: false, status: res.status, message: res.body};
+            .json()
+            .then((action) => {
+                    return {success: true, action};
             })
             .catch((err) => {
                 return constructError(err);
@@ -140,11 +128,9 @@ module.exports = class Actions {
         const endpoint = `${this.endpointV4(projectId)}/${canonicalJobId}/tasks/${taskId}/logs`;
         return got
             .get(endpoint, { headers: {Authorization: `Bearer ${token}` } })
+            .json()
             .then((res) => {
-                if (res.ok) {
-                    return res.body;
-                }
-                return {success: false, status: res.status, message: res.body};
+                    return res;
             })
             .catch((err) => {
                 return constructError(err);
@@ -157,11 +143,9 @@ module.exports = class Actions {
         const endpoint = `${this.endpointV4(projectId)}/${canonicalJobId}/tasks/${taskId}`;
         return got
             .delete(endpoint, { headers: {Authorization: `Bearer ${token}` } })
+            .json()
             .then((res) => {
-                if (res.ok) {
-                    return res.body;
-                }
-                return {success: false, status: res.status, message: res.body};
+                    return res;
             })
             .catch((err) => {
                 return constructError(err);
@@ -174,14 +158,11 @@ module.exports = class Actions {
         const endpoint = `${this.endpointV4(projectId)}/${canonicalJobId}/tasks/${taskId}/status`;
         return got
             .get(endpoint, { headers: {Authorization: `Bearer ${token}` } })
+            .json()
             .then((res) => {
-                if (res.ok) {
-                    const resBody = res.body;
-                    debug('resBody (with provider status as well): %s', resBody);
-                    const respBodyNoProviderField = _.omit(resBody, '_providerStatus');
+                    debug('resBody (with provider status as well): %s', res);
+                    const respBodyNoProviderField = _.omit(res, '_providerStatus');
                     return respBodyNoProviderField;
-                }
-                return {success: false, status: res.status, message: res.body};
             })
             .catch((err) => {
                 return constructError(err);
@@ -194,10 +175,9 @@ module.exports = class Actions {
         const endpoint = `${this.endpointV4(projectId)}/${canonicalJobId}/tasks`;
         return got
             .get(endpoint, { headers: {Authorization: `Bearer ${token}` } })
+            .json()
             .then((res) => {
-                if (res.ok) {
-                    return res.body;
-                }
+                    return res;
                 return {success: false, status: res.status, message: res.body};
             })
             .catch((err) => {
@@ -211,11 +191,9 @@ module.exports = class Actions {
         const endpoint = `${this.endpointV4(projectId)}/${canonicalJobId}/stats`;
         return got
             .get(endpoint, { headers: {Authorization: `Bearer ${token}` } })
+            .json()
             .then((res) => {
-                if (res.ok) {
-                    return res.body;
-                }
-                return {success: false, status: res.status, message: res.body};
+                    return res;
             })
             .catch((err) => {
                 return constructError(err);
@@ -227,11 +205,9 @@ module.exports = class Actions {
         const endpoint = `${this.endpointV4(projectId)}/${activationId}`;
         return got
             .get(endpoint, { headers: {Authorization: `Bearer ${token}` } })
+            .json()
             .then((res) => {
-                if (res.ok) {
-                    return res.body;
-                }
-                return {success: false, status: res.status, message: res.body};
+                    return res;
             })
             .catch((err) => {
                 return constructError(err);
@@ -243,11 +219,9 @@ module.exports = class Actions {
         const endpoint = _.join([this.endpointV4(projectId), '_config'], '/');
         return got
             .get(endpoint, { headers: {Authorization: `Bearer ${token}` } })
-            .then((res) => {
-                if (res.ok) {
-                    return {success: true, config: res.body.config};
-                }
-                return {success: false, status: res.status, message: res.body};
+            .json()
+            .then((config) => {
+                    return {success: true, config };
             })
             .catch((err) => {
                 return constructError(err);

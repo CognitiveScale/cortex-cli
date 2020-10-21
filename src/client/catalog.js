@@ -43,14 +43,9 @@ module.exports = class Catalog {
             .post(this.endpoints.skills(projectId), {
                 headers: { Authorization: `Bearer ${token}` },
                 json: skillObj,
-            })
+            }).json()
             .then((res) => {
-                if (Boolean(_.get(res, 'headers.x-cortex-proxied', false)))
-                    console.error(chalk.blue('Request proxied to cloud.'));
-                if (res.ok) {
                     return {success: true, message: res.body};
-                }
-                return {success: false, message: res.body, status: res.status};
             })
             .catch((err) => {
                 return constructError(err);
@@ -63,12 +58,9 @@ module.exports = class Catalog {
         return got
             .get(this.endpoints.skills(projectId), {
                 headers: { Authorization: `Bearer ${token}` },
-            })
-            .then((res) => {
-                if (res.ok) {
-                    return {success: true, skills: res.body.skills || res.body.processors};
-                }
-                return {success: false, status: res.status, message: res.body};
+            }).json()
+            .then((skills) => {
+                    return {success: true, ...skills};
             })
             .catch((err) => {
                 return constructError(err);
@@ -82,14 +74,9 @@ module.exports = class Catalog {
         return got
             .get(endpoint, {
                 headers: { Authorization: `Bearer ${token}` },
-            })
+            }).json()
             .then((res) => {
-                if (res.ok) {
                     return {success: true, skill: res.body};
-                }
-                else {
-                    return {success: false, message: res.body, status: res.status};
-                }
             })
             .catch((err) => {
                 return constructError(err);
@@ -104,12 +91,8 @@ module.exports = class Catalog {
             .get(endpoint, {
                 headers: { Authorization: `Bearer ${token}` },
             })
-            .then((res) => {
-                if (res.ok) {
-                    return {success: true, agents: res.body.agents};
-                }
-                return {success: false, status: res.status, message: res.body};
-            })
+            .json()
+            .then((agentResp) => { return {success: true, ...agentResp} })
             .catch((err) => {
                 return constructError(err);
             });
@@ -141,12 +124,9 @@ module.exports = class Catalog {
             .post(endpoint, {
                 headers: { Authorization: `Bearer ${token}` },
                 json: agentObj
-            })
+            }).json()
             .then((res) => {
-                if (res.ok) {
                     return {success: true, message: res.body};
-                }
-                return {success: false, message: res.body, status: res.status};
             })
             .catch((err) => {
                 return constructError(err);
@@ -160,14 +140,9 @@ module.exports = class Catalog {
         return got
             .get(endpoint, {
                 headers: { Authorization: `Bearer ${token}` },
-            })
-            .then((res) => {
-                if (res.ok) {
-                    return {success: true, agent: res.body};
-                }
-                else {
-                    return {success: false, message: res.body, status: res.status};
-                }
+            }).json()
+            .then((agent) => {
+                    return {success: true, agent};
             })
             .catch((err) => {
                 return constructError(err);
@@ -182,13 +157,9 @@ module.exports = class Catalog {
             .get(endpoint, {
                 headers: { Authorization: `Bearer ${token}` },
             })
-            .then((res) => {
-                if (res.ok) {
-                    return {success: true, agent: res.body};
-                }
-                else {
-                    return {success: false, message: res.body, status: res.status};
-                }
+            .json()
+            .then((agent) => {
+                    return {success: true, agent};
             })
             .catch((err) => {
                 return constructError(err);
@@ -205,11 +176,9 @@ module.exports = class Catalog {
                 headers: { Authorization: `Bearer ${token}` },
                 json: types,
             })
-            .then((res) => {
-                if (res.ok) {
-                    return {success: true, message: res.body};
-                }
-                return {success: false, message: res.body, status: res.status};
+            .json()
+            .then((message) => {
+                    return {success: true, message};
             })
             .catch((err) => {
                 return constructError(err);
@@ -224,13 +193,9 @@ module.exports = class Catalog {
             .get(endpoint, {
                 headers: { Authorization: `Bearer ${token}` },
             })
-            .then((res) => {
-                if (res.ok) {
-                    return {success: true, type: res.body};
-                }
-                else {
-                    return {success: false, message: res.body, status: res.status};
-                }
+            .json()
+            .then((type) => {
+                    return {success: true, type};
             })
             .catch((err) => {
                 return constructError(err);
@@ -245,11 +210,9 @@ module.exports = class Catalog {
             .get(endpoint, {
                 headers: { Authorization: `Bearer ${token}` },
             })
-            .then((res) => {
-                if (res.ok) {
-                    return {success: true, types: res.body.types};
-                }
-                return {success: false, status: res.status, message: res.body};
+            .json()
+            .then((types) => {
+                    return {success: true, types};
             })
             .catch((err) => {
                 return constructError(err);

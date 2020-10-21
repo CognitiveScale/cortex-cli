@@ -66,7 +66,7 @@ module.exports.DeploySnapshotCommand = class {
         const agents = new Agents(profile.url);
         const promises = [];
         snapshotIds.split(' ').forEach(function (snapshotId) {
-            promises.push(agents.describeAgentSnapshot(profile.token, snapshotId, envName).then((response) => {
+            promises.push(agents.describeAgentSnapshot(options.project || profile.project, profile.token, snapshotId, envName).then((response) => {
                 if (response.success) {
                     let result = filterObject(response.result, options);
                     result = cleanInternalFields(result);

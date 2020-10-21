@@ -164,7 +164,7 @@ class FindEventsCommand {
         debug('%s.executeFindEvents()', profile.name);
 
         const graph = new Graph(profile.url);
-        graph.findEvents(profile.token, options.filter, options.sort, options.limit, options.skip)
+        graph.findEvents(options.project || profile.project, profile.token, options.filter, options.sort, options.limit, options.skip)
             .then((response) => {
                 if (response.success) {
                     let result = response.events;
@@ -218,10 +218,10 @@ class PublishEventsCommand {
             let rs;
 
             if (options.tracking) {
-                rs = await graph.track(profile.token, events);
+                rs = await graph.track(options.project || profile.project, profile.token, events);
             }
             else {
-                rs = await graph.publishEntities(profile.token, events);
+                rs = await graph.publishEntities(options.project || profile.project, profile.token, events);
             }
 
             if (bar && events.length > 0) bar.tick(events.length);
@@ -396,7 +396,7 @@ class GetEntityCommand {
         debug('%s.executeGetEntity(%s)', profile.name, entityId);
 
         const graph = new Graph(profile.url);
-        graph.getEntity(profile.token, entityId)
+        graph.getEntity(options.project || profile.project, profile.token, entityId)
             .then((response) => {
                 if (response.success) {
                     let result = response.entity;
@@ -426,7 +426,7 @@ class QueryGraphCommand {
         debug('%s.executeQueryGraph(%s)', profile.name, query);
 
         const graph = new Graph(profile.url);
-        graph.query(profile.token, query)
+        graph.query(options.project || profile.project, profile.token, query)
             .then((response) => {
                 if (response.success) {
                     const result = response.result;

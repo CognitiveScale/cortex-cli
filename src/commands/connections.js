@@ -33,7 +33,7 @@ module.exports.ListConnections = class ListConnections {
         debug('%s.listConnections()', profile.name);
 
         const conns = new Connections(profile.url);
-        conns.listConnections(profile.token).then((response) => {
+        conns.listConnections(options.project || profile.project, profile.token).then((response) => {
             if (response.success) {
                 let result = response.result.connections;
                 if (options.query)
@@ -101,12 +101,12 @@ module.exports.SaveConnectionCommand = class SaveConnectionCommand {
            const content = new Content(profile.url);
            const connection = new Connections(profile.url);
 
-           content.uploadContentStreaming(profile.token, contentKey, jdbcJarFilePath).then((response) => {
+           content.uploadContentStreaming(options.project || profile.project, profile.token, contentKey, jdbcJarFilePath).then((response) => {
 
                let marshaledConnObj = connObj;
                marshaledConnObj.params = this.stripJarPathFromParams(marshaledConnObj.params);
 
-               connection.saveConnection(profile.token, marshaledConnObj).then((response) => {
+               connection.saveConnection(options.project || profile.project, profile.token, marshaledConnObj).then((response) => {
                    if (response.success) {
                        printSuccess(`Connection saved`, options);
                    }
@@ -124,7 +124,7 @@ module.exports.SaveConnectionCommand = class SaveConnectionCommand {
        } else {
 
            const connection = new Connections(profile.url);
-           connection.saveConnection(profile.token, connObj).then((response) => {
+           connection.saveConnection(options.project || profile.project, profile.token, connObj).then((response) => {
                if (response.success) {
                    printSuccess(`Connection saved`, options);
                }
@@ -150,7 +150,7 @@ module.exports.DescribeConnectionCommand = class DescribeConnectionCommand {
         debug('%s.executeDescribeConnection(%s)', profile.name, connectionName);
 
         const connection = new Connections(profile.url);
-        connection.describeConnection(profile.token, connectionName).then((response) => {
+        connection.describeConnection(options.project || profile.project, profile.token, connectionName).then((response) => {
             if (response.success) {
                 let result = filterObject(response.result, options);
                 printSuccess(JSON.stringify(result, null, 2), options);
@@ -200,13 +200,13 @@ module.exports.TestConnectionCommand = class TestConnectionCommand {
            const content = new Content(profile.url);
            const connection = new Connections(profile.url);
 
-           content.uploadContentStreaming(profile.token, contentKey, jdbcJarFilePath).then((response) => {
+           content.uploadContentStreaming(options.project || profile.project, profile.token, contentKey, jdbcJarFilePath).then((response) => {
                const connection = new Connections(profile.url);
 
                let marshaledConnObj = connObj;
                marshaledConnObj.params = this.stripJarPathFromParams(marshaledConnObj.params);
 
-               connection.testConnection(profile.token, marshaledConnObj).then((response) => {
+               connection.testConnection(options.project || profile.project, profile.token, marshaledConnObj).then((response) => {
                    if (response.success) {
                        printSuccess(`Connection successfully tested`, options);
                    }
@@ -224,7 +224,7 @@ module.exports.TestConnectionCommand = class TestConnectionCommand {
 
        } else {
            const connection = new Connections(profile.url);
-           connection.testConnection(profile.token, connObj).then((response) => {
+           connection.testConnection(options.project || profile.project, profile.token, connObj).then((response) => {
                if (response.success) {
                    printSuccess(`Connection successfully tested`, options);
                }
@@ -250,7 +250,7 @@ module.exports.ListConnectionsTypes = class ListConnectionsTypes {
         debug('%s.listConnectionsTypes()', profile.name);
 
         const conns = new Connections(profile.url);
-        conns.listConnectionsTypes(profile.token).then((response) => {
+        conns.listConnectionsTypes(options.project || profile.project, profile.token).then((response) => {
             if (response.success) {
                 let result = response.result.connectionTypes;
                 if (options.query)
@@ -321,7 +321,7 @@ module.exports.QueryConnectionCommand = class QueryConnectionCommand {
         debug('queryParams: %o', queryObject);
 
         const connections = new Connections(profile.url);
-        connections.queryConnection(profile.token, connectionName, queryObject)
+        connections.queryConnection(options.project || profile.project, profile.token, connectionName, queryObject)
             .then((response) => {
                 if (response.success) {
                     if (options.json) {

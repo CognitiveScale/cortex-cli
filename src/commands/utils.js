@@ -28,7 +28,7 @@ const { exec } = require('child_process');
 module.exports.constructError = function(error) {
     // fallback to text in message or standard error message
     let errResp = error.response;
-    let errorText = (errResp && errResp.text) || error.message;
+    let errorText = _.get(errResp, 'body', error.message);
     let details;
 
     // if JSON was returned, look for either a message or error in it

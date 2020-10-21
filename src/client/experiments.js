@@ -23,119 +23,117 @@ module.exports = class Experiments {
 
     constructor(cortexUrl) {
         this.cortexUrl = cortexUrl;
-        this.endpoint = `${cortexUrl}/v2/experiments`;
+        this.endpoint = projectId => `${cortexUrl}/fabric/projects/${projectId}/experiments`;
     }
 
-    listExperiments(token) {
-        const endpoint = `${this.endpoint}`;
+    listExperiments(projectId, token) {
+        const endpoint = `${this.endpoint(projectId)}`;
         debug('listExperiments() => %s', endpoint);
-        return request
-            .get(endpoint)
-            .set('Authorization', `Bearer ${token}`)
-            .then((res) => {
-                if (res.ok) {
-                    return {success: true, result: res.body};
-                }
-                return {success: false, status: res.status, message: res.body};
+        return got
+            .get(endpoint, {
+                headers: { Authorization: `Bearer ${token}` },
+            }).json()
+            .then((result) => {
+                return {success: true, result};
             })
             .catch((err) => {
                 return constructError(err);
             });
     }
 
-    describeExperiment(token, name) {
-        const endpoint = `${this.endpoint}/${name}`;
+    describeExperiment(projectId, token, name) {
+        const endpoint = `${this.endpoint(projectId)}/${name}`;
         debug('describeExperiment(%s) => %s', name, endpoint);
-        return request
-            .get(endpoint)
-            .set('Authorization', `Bearer ${token}`)
-            .then((res) => {
-                if (res.ok) {
-                    return {success: true, result: res.body};
-                }
-                return {success: false, status: res.status, message: res.body};
+        return got
+            .get(endpoint, {
+                headers: { Authorization: `Bearer ${token}` },
+            }).json()
+            .then((result) => {
+                return {success: true, result};
             })
             .catch((err) => {
                 return constructError(err);
             });
     }
 
-    deleteExperiment(token, name) {
-        const endpoint = `${this.endpoint}/${name}`;
+    deleteExperiment(projectId, token, name) {
+        const endpoint = `${this.endpoint(projectId)}/${name}`;
         debug('deleteExperiment(%s) => %s', name, endpoint);
-        return request
-            .delete(endpoint)
-            .set('Authorization', `Bearer ${token}`)
-            .then((res) => {
-                if (res.ok) {
-                    return {success: true, result: res.body};
-                }
-                return {success: false, status: res.status, message: res.body};
+        return got
+            .delete(endpoint, {
+                headers: { Authorization: `Bearer ${token}` },
+            }).json()
+            .then((result) => {
+                return {success: true, result};
             })
             .catch((err) => {
                 return constructError(err);
             });
     }
 
-    listRuns(token, experimentName, filter, limit, sort) {
-        const endpoint = `${this.endpoint}/${experimentName}/runs`;
+    listRuns(projectId, token, experimentName, filter, limit, sort) {
+        const endpoint = `${this.endpoint(projectId)}/${experimentName}/runs`;
         debug('listRuns(%s) => %s', experimentName, endpoint);
-        const req = request
-            .get(endpoint)
-            .set('Authorization', `Bearer ${token}`);
-
-        if (filter) req.query({filter});
-        if (limit) req.query({limit});
-        if (sort) req.query({sort});
-
-        return req.then((res) => {
-                if (res.ok) {
-                    return {success: true, result: res.body};
-                }
-                return {success: false, status: res.status, message: res.body};
+        const query = {}
+        if (filter) query.filter = filter;
+        if (limit) query.limit = limit;
+        if (sort) query.sort = sort;
+        return got
+            .get(endpoint, {
+                headers: { Authorization: `Bearer ${token}` },
+                query,
+            }).json()
+            .then((result) => {
+                return {success: true, result};
             })
             .catch((err) => {
                 return constructError(err);
             });
     }
 
-    describeRun(token, experimentName, runId) {
-        const endpoint = `${this.endpoint}/${experimentName}/runs/${runId}`;
+    describeRun(projectId, token, experimentName, runId) {
+        const endpoint = `${this.endpoint(projectId)}/${experimentName}/runs/${runId}`;
         debug('describeRun(%s) => %s', runId, endpoint);
-        return request
-            .get(endpoint)
-            .set('Authorization', `Bearer ${token}`)
-            .then((res) => {
-                if (res.ok) {
-                    return {success: true, result: res.body};
-                }
-                return {success: false, status: res.status, message: res.body};
+        return got
+            .get(endpoint, {
+                headers: { Authorization: `Bearer ${token}` },
+            }).json()
+            .then((result) => {
+                return {success: true, result};
             })
             .catch((err) => {
                 return constructError(err);
             });
     }
 
-    deleteRun(token, experimentName, runId) {
-        const endpoint = `${this.endpoint}/${experimentName}/runs/${runId}`;
+    deleteRun(projectId, token, experimentName, runId) {
+        const endpoint = `${this.endpoint(projectId)}/${experimentName}/runs/${runId}`;
         debug('deleteRun(%s) => %s', runId, endpoint);
-        return request
-            .delete(endpoint)
-            .set('Authorization', `Bearer ${token}`)
-            .then((res) => {
-                if (res.ok) {
-                    return {success: true, result: res.body};
-                }
-                return {success: false, status: res.status, message: res.body};
+        return got
+            .delete(endpoint, {
+                headers: { Authorization: `Bearer ${token}` },
+            }).json()
+            .then((result) => {
+                return {success: true, result};
             })
             .catch((err) => {
                 return constructError(err);
             });
     }
-
-    downloadArtifact(token, experimentName, runId, artifactName, showProgress = false) {
-        const endpoint = `${this.endpoint}/${experimentName}/runs/${runId}/artifacts/${artifactName}`;
+    // TODO https://www.npmjs.com/package/got#streams
+    downloadArtifact(projectId, token, experimentName, runId, artifactName, showProgress = false) {
+        const endpoint = `${this.endpoint(projectId)}/${experimentName}/runs/${runId}/artifacts/${artifactName}`;
         debug('downloadArtifact(%s) => %s', artifactName, endpoint);
+        return got
+            .get(endpoint, {
+                headers: { Authorization: `Bearer ${token}` },
+            }).json()
+            .then((result) => {
+                return {success: true, result};
+            })
+            .catch((err) => {
+                return constructError(err);
+            });
 
         const stream = request
             .get(endpoint)

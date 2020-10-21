@@ -23,13 +23,13 @@ const { request } = require('../commands/apiutils');
 
 const createEndpoints = (baseUri) => {
     return {
-        profileVersions: `${baseUri}/v3/graph/profile-versions`,
-        profiles: `${baseUri}/v3/graph/profiles`,
-        schemas: `${baseUri}/v3/graph/profiles/schemas`,
-        events: `${baseUri}/v3/graph/events`,
-        entities: `${baseUri}/v3/graph/entities`,
-        track: `${baseUri}/v3/graph/events/track`,
-        query: `${baseUri}/v3/graph/query`,
+        profileVersions: projectId => `${baseUri}/fabric/v4/projects/${projectId}/profile-versions`,
+        profiles: projectId => `${baseUri}/fabric/v4/projects/${projectId}/profiles`,
+        schemas: projectId => `${baseUri}/fabric/v4/projects/${projectId}/profiles/schemas`,
+        events: projectId => `${baseUri}/fabric/v4/projects/${projectId}/events`,
+        entities: projectId => `${baseUri}/fabric/v4/projects/${projectId}/entities`,
+        track: projectId => `${baseUri}/fabric/v4/projects/${projectId}/events/track`,
+        query: projectId => `${baseUri}/fabric/v4/projects/${projectId}/query`,
     }
 };
 
@@ -48,28 +48,23 @@ class Graph {
     }
 
     listProfiles(token, filter, sort, limit, skip) {
-        debug('listProfiles() => GET %s', this.endpoints.profiles);
-        const req = request
-            .get(this.endpoints.profiles)
-            .set('Authorization', `Bearer ${token}`)
-            .set('x-cortex-proxy-notify', true);
-        
-        if (filter) req.query({ filter });
-        if (sort) req.query({ sort });
-        if (limit) req.query({ limit });
-        if (skip) req.query({ skip });
-        
-        return req.then((res) => {
-            if (Boolean(_.get(res, 'headers.x-cortex-proxied', false)))
-                console.error(chalk.blue('Request proxied to cloud.'));
-            if (res.ok) {
-                return {success: true, profiles: res.body.profiles};
-            }
-            return {success: false, message: res.body, status: res.status};
-        })
-        .catch((err) => {
-            return constructError(err);
-        });
+        debug('listProfiles() => GET %s', this.endpoints.profiles(projectId));
+        const query = {}
+        if (filter) query.filter = filter;
+        if (limit) query.limit = limit;
+        if (sort) query.sort = sort;
+        if (skip) query.sort = skip;
+        return got
+            .get(this.endpoints.profiles(projectId), {
+                headers: { Authorization: `Bearer ${token}` },
+                query,
+            }).json()
+            .then((profiles) => {
+                return {success: true, profiles};
+            })
+            .catch((err) => {
+                return constructError(err);
+            });
     }
 
     listProfileVersions(token, profileId, schemaNames, before, after, limit) {
@@ -97,7 +92,7 @@ class Graph {
     }
 
     describeProfile(token, profileId, schemaName, historic, versionLimit, attribute) {
-        const endpoint = `${this.endpoints.profiles}/${profileId}`;
+        const endpoint = `${this.endpoints.profiles(projectId)}/${profileId}`;
         debug('describeProfile(%s) => GET %s', profileId, endpoint);
 
         const req = request
@@ -122,7 +117,7 @@ class Graph {
     }
 
     deleteProfile(token, profileId, schemaName) {
-        const endpoint = `${this.endpoints.profiles}/${profileId}`;
+        const endpoint = `${this.endpoints.profiles(projectId)}/${profileId}`;
         debug('deleteProfile(%s) => DELETE %s', profileId, endpoint);
 
         const req = request

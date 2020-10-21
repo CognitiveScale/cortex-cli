@@ -33,7 +33,7 @@ module.exports.ListDatasets = class ListDatasets {
         debug('%s.listDatasets()', profile.name);
 
         const datasets = new Datasets(profile.url);
-        datasets.listDatasets(profile.token).then((response) => {
+        datasets.listDatasets(options.project || profile.project, profile.token).then((response) => {
             if (response.success) {
                 let result = response.result;
                 if (options.query) {
@@ -81,7 +81,7 @@ module.exports.SaveDatasetsCommand = class SaveDatasetsCommand {
        debug('%o', connObj);
 
        const datasets = new Datasets(profile.url);
-       datasets.saveDatasets(profile.token, connObj).then((response) => {
+       datasets.saveDatasets(options.project || profile.project, profile.token, connObj).then((response) => {
            if (response.success) {
                printSuccess(`Dataset saved`, options);
            }
@@ -106,7 +106,7 @@ module.exports.DescribeDatasetCommand = class DescribeDatasetCommand {
         debug('%s.executeDescribeDataset(%s)', profile.name, datasetName);
 
         const dataset = new Datasets(profile.url);
-        dataset.describeDataset(profile.token, datasetName).then((response) => {
+        dataset.describeDataset(options.project || profile.project, profile.token, datasetName).then((response) => {
             if (response.success) {
                 let result = filterObject(response.result, options);
                 printSuccess(JSON.stringify(result, null, 2), options);
@@ -132,7 +132,7 @@ module.exports.GetDataframeCommand = class GetDataframeCommand {
         debug('%s.executeGetDataframe(%s)', profile.name, datasetName);
 
         const dataset = new Datasets(profile.url);
-        dataset.getDataframe(profile.token, datasetName).then((response) => {
+        dataset.getDataframe(options.project || profile.project, profile.token, datasetName).then((response) => {
             if (response.success) {
                 printSuccess(JSON.stringify(response.result, null, 2), options);
             }
@@ -157,7 +157,7 @@ module.exports.StreamDatasetCommand = class StreamDatasetCommand {
         debug('%s.executeStreamDataset(%s)', profile.name, datasetName);
 
         const dataset = new Datasets(profile.url);
-        dataset.streamDataset(profile.token, datasetName).then((response) => {
+        dataset.streamDataset(options.project || profile.project, profile.token, datasetName).then((response) => {
             if (response.success) {
                 let stream = new es.Stream.PassThrough();
                 stream.write(response.result.text);

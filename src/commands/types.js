@@ -41,7 +41,7 @@ module.exports.SaveTypeCommand = class SaveTypeCommand {
             normalizedType = type;
 
         const catalog = new Catalog(profile.url);
-        catalog.saveType(profile.token, normalizedType).then((response) => {
+        catalog.saveType(options.project || profile.project, profile.token, normalizedType).then((response) => {
             if (response.success) {
                 printSuccess(`Type definition saved`, options);
             }
@@ -66,7 +66,7 @@ module.exports.ListTypesCommand = class ListTypesCommand {
         debug('%s.executeListTypes()', profile.name);
 
         const catalog = new Catalog(profile.url);
-        catalog.listTypes(profile.token).then((response) => {
+        catalog.listTypes(options.project || profile.project, profile.token).then((response) => {
             if (response.success) {
                 let result = response.types;
                 if (options.query)
@@ -106,7 +106,7 @@ module.exports.DescribeTypeCommand = class DescribeTypeCommand {
         debug('%s.executeDescribeType(%s)', profile.name, typeName);
 
         const catalog = new Catalog(profile.url);
-        catalog.describeType(profile.token, typeName).then((response) => {
+        catalog.describeType(options.project || profile.project, profile.token, typeName).then((response) => {
             if (response.success) {
                 let result = filterObject(response.type, options);
                 printSuccess(JSON.stringify(result, null, 2), options);

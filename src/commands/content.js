@@ -33,7 +33,7 @@ module.exports.ListContent = class ListContent {
         debug('%s.listContent()', profile.name);
 
         const content = new Content(profile.url);
-        content.listContent(profile.token).then((response) => {
+        content.listContent(options.project || profile.project, profile.token).then((response) => {
             if (response.success) {
                 if (options.query || options.json) {
                     let result = filterObject(response.message, options);
@@ -129,7 +129,7 @@ module.exports.UploadContent = class UploadContent {
 
         const secureContent = {};
         secureContent[fileBaseName] = new Buffer(fileContent).toString('base64');
-        contentClient.uploadSecureContent(profile.token, contentKey, secureContent).then((response) => {
+        contentClient.uploadSecureContent(options.project || profile.project, profile.token, contentKey, secureContent).then((response) => {
             if (response.success) {
                 printSuccess(`Secure content successfully uploaded.`, options);
             }
@@ -142,7 +142,7 @@ module.exports.UploadContent = class UploadContent {
     static upload(contentClient, profile, options, contentKey, filePath) {
         const showProgress = !!options.progress;
         const contentType = _.get(options, 'contentType', 'application/octet-stream');
-        return contentClient.uploadContentStreaming(profile.token, contentKey, filePath, showProgress, contentType).then((response) => {
+        return contentClient.uploadContentStreaming(options.project || profile.project, profile.token, contentKey, filePath, showProgress, contentType).then((response) => {
             if (response.success) {
                 printSuccess(`Content successfully uploaded.`, options);
             }
@@ -168,7 +168,7 @@ module.exports.DeleteContent = class DeleteContent {
         debug('%s.deleteContent()', profile.name);
 
         const content = new Content(profile.url);
-        content.deleteContent(profile.token, contentKey).then((response) => {
+        content.deleteContent(options.project || profile.project, profile.token, contentKey).then((response) => {
             if (response.success) {
                printSuccess(`Content successfully deleted.`, options);
             }
@@ -198,7 +198,7 @@ module.exports.DownloadContent = class DownloadContent {
 
         // To download content from Secrets
         if (options.secure) {
-            content.downloadSecureContent(profile.token, contentKey).then((response) => {
+            content.downloadSecureContent(options.project || profile.project, profile.token, contentKey).then((response) => {
                 if (response.success) {
                     printSuccess(response.message, options);
                 }
@@ -212,7 +212,7 @@ module.exports.DownloadContent = class DownloadContent {
                 });
         }
         else {
-            content.downloadContent(profile.token, contentKey, showProgress).then((response) => {
+            content.downloadContent(options.project || profile.project, profile.token, contentKey, showProgress).then((response) => {
                 if (response.success) {
                     // messages need to be on stderr as content is streamed to stdout
                     console.error(response.message);

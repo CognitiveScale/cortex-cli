@@ -34,7 +34,7 @@ class ListExperiments {
         debug('%s.listExperiments()', profile.name);
 
         const exp = new Experiments(profile.url);
-        exp.listExperiments(profile.token).then((response) => {
+        exp.listExperiments(options.project || profile.project, profile.token).then((response) => {
             if (response.success) {
                 let result = response.result;
                 if (options.query) {
@@ -76,7 +76,7 @@ class DescribeExperimentCommand {
         debug('%s.executeDescribeExperiment(%s)', profile.name, experimentName);
 
         const exp = new Experiments(profile.url);
-        exp.describeExperiment(profile.token, experimentName).then((response) => {
+        exp.describeExperiment(options.project || profile.project, profile.token, experimentName).then((response) => {
             if (response.success) {
                 let result = filterObject(response.result, options);
                 printSuccess(JSON.stringify(result, null, 2), options);
@@ -102,7 +102,7 @@ class DeleteExperimentCommand {
         debug('%s.executeDeleteExperiment(%s)', profile.name, experimentName);
 
         const exp = new Experiments(profile.url);
-        exp.deleteExperiment(profile.token, experimentName).then((response) => {
+        exp.deleteExperiment(options.project || profile.project, profile.token, experimentName).then((response) => {
             if (response.success) {
                 let result = filterObject(response.result, options);
                 printSuccess(JSON.stringify(result, null, 2), options);
@@ -130,7 +130,7 @@ class ListRuns {
         const exp = new Experiments(profile.url);
         const sort = options.sort || JSON.stringify({ startTime: -1 });
 
-        exp.listRuns(profile.token, experimentName, options.filter, options.limit, sort).then((response) => {
+        exp.listRuns(options.project || profile.project, profile.token, experimentName, options.filter, options.limit, sort).then((response) => {
             if (response.success) {
                 let result = response.result;
                 if (options.query) {
@@ -176,7 +176,7 @@ class DescribeRunCommand {
         debug('%s.executeDescribeRun(%s)', profile.name, runId);
 
         const exp = new Experiments(profile.url);
-        exp.describeRun(profile.token, experimentName, runId).then((response) => {
+        exp.describeRun(options.project || profile.project, profile.token, experimentName, runId).then((response) => {
             if (response.success) {
                 let result = filterObject(response.result, options);
                 printSuccess(JSON.stringify(result, null, 2), options);
@@ -202,7 +202,7 @@ class DeleteRunCommand {
         debug('%s.executeDeleteRun(%s)', profile.name, runId);
 
         const exp = new Experiments(profile.url);
-        exp.deleteRun(profile.token, experimentName, runId).then((response) => {
+        exp.deleteRun(options.project || profile.project, profile.token, experimentName, runId).then((response) => {
             if (response.success) {
                 printSuccess(`Run ${runId} in experiment ${experimentName} deleted`, options);
             }
@@ -230,7 +230,7 @@ class DownloadArtifactCommand {
         const showProgress = !!options.progress;
 
         // To download content from Secrets
-        exp.downloadArtifact(profile.token, experimentName, runId, artifactName, showProgress).then((response) => {
+        exp.downloadArtifact(options.project || profile.project, profile.token, experimentName, runId, artifactName, showProgress).then((response) => {
             if (response.success) {
                 // messages need to be on stderr as content is streamed to stdout
                 console.error(response.message);

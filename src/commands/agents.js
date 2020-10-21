@@ -36,7 +36,7 @@ module.exports.SaveAgentCommand = class SaveAgentCommand {
         debug('%o', agent);
 
         const catalog = new Catalog(profile.url);
-        catalog.saveAgent(options.projectId || profile.projectId, profile.token, agent).then((response) => {
+        catalog.saveAgent(options.project || profile.project, profile.token, agent).then((response) => {
             if (response.success) {
                 printSuccess(`Agent saved`, options);
             }
@@ -61,7 +61,7 @@ module.exports.ListAgentsCommand = class ListAgentsCommand {
         debug('%s.executeListAgents()', profile.name);
 
         const catalog = new Catalog(profile.url);
-        catalog.listAgents(options.projectId || profile.projectId, profile.token).then((response) => {
+        catalog.listAgents(options.project || profile.project, profile.token).then((response) => {
             if (response.success) {
                 let result = response.agents;
                 if (options.query)
@@ -77,7 +77,6 @@ module.exports.ListAgentsCommand = class ListAgentsCommand {
                         { column: 'Description', field: 'description', width: 50 },
                         { column: 'Created On', field: 'createdAt', width: 26 }
                     ];
-
                     printTable(tableSpec, result);
                 }
             }
@@ -103,7 +102,7 @@ module.exports.DescribeAgentCommand = class DescribeAgentCommand {
         const catalog = new Catalog(profile.url);
         if (options.versions) {
             debug('%s.executeDescribeAgentVersions(%s)', profile.name, agentName);
-            catalog.describeAgentVersions(options.projectId || profile.projectId, profile.token, agentName).then((response) => {
+            catalog.describeAgentVersions(options.project || profile.project, profile.token, agentName).then((response) => {
                 if (response.success) {
                     let result = filterObject(response.agent, options);
                     printSuccess(JSON.stringify(result, null, 2), options);
@@ -119,7 +118,7 @@ module.exports.DescribeAgentCommand = class DescribeAgentCommand {
 
         else {
             debug('%s.executeDescribeAgent(%s)', profile.name, agentName);
-            catalog.describeAgent(profile.token, agentName).then((response) => {
+            catalog.describeAgent(options.project|| profile.project, profile.token, agentName).then((response) => {
                 if (response.success) {
                     let result = filterObject(response.agent, options);
                     printSuccess(JSON.stringify(result, null, 2), options);
@@ -157,7 +156,7 @@ module.exports.InvokeAgentServiceCommand = class {
         debug('params: %o', params);
 
         const agents = new Agents(profile.url);
-        agents.invokeAgentService(options.projectId || profile.projectId, profile.token, agentName, serviceName, params).then((response) => {
+        agents.invokeAgentService(options.project || profile.project, profile.token, agentName, serviceName, params).then((response) => {
             if (response.success) {
                 let result = filterObject(response.result, options);
                 printSuccess(JSON.stringify(result, null, 2), options);
@@ -189,7 +188,7 @@ module.exports.GetActivationCommand = class {
         debug('%s.getActivation(%s)', profile.name, activationId);
 
         const agents = new Agents(profile.url);
-        agents.getActivation(options.projectId || profile.projectId, profile.token, activationId).then((response) => {
+        agents.getActivation(options.project || profile.project, profile.token, activationId).then((response) => {
             if (response.success) {
                 let result = filterObject(response.result.activation, options);
                 printSuccess(JSON.stringify(result, null, 2), options);
@@ -216,7 +215,7 @@ module.exports.ListActivationsCommand = class {
         debug('%s.listActivations(%s)', profile.name, instanceId);
 
         const agents = new Agents(profile.url);
-        agents.listActivations(options.projectId || profile.projectId, profile.token, instanceId, envName).then((response) => {
+        agents.listActivations(options.project || profile.project, profile.token, instanceId, envName).then((response) => {
             if (response.success) {
                 let result = response.result.activations;
                 if (options.query)
@@ -260,7 +259,7 @@ module.exports.ListAgentInstancesCommand = class {
         debug('%s.listAgentInstances(%s)', profile.name, agentName);
 
         const agents = new Agents(profile.url);
-        agents.listAgentInstances(options.projectId || profile.projectId, profile.token, agentName, envName).then((response) => {
+        agents.listAgentInstances(options.project || profile.project, profile.token, agentName, envName).then((response) => {
             if (response.success) {
                 let result = response.instances;
                 if (options.query)
@@ -302,7 +301,7 @@ module.exports.ListServicesCommand = class ListServicesCommand{
         debug('%s.listServices(%s)', profile.name, agentName);
         
         const catalog = new Catalog(profile.url);
-        catalog.listServices(options.projectId || profile.projectId, profile.token, agentName, profile).then((response) => {
+        catalog.listServices(options.project || profile.project, profile.token, agentName, profile).then((response) => {
             if (response.success) {
                 let result = filterObject(response.services, options);
                 if (options.json) {
@@ -337,7 +336,8 @@ module.exports.ListAgentSnapshotsCommand = class {
         debug('%s.listAgentSnapshots(%s)', profile.name, agentName);
 
         const agents = new Agents(profile.url);
-        agents.listAgentSnapshots(options.projectId || profile.projectId, profile.token, agentName, envName).then((response) => {
+        agents.listAgentSnapshots(options.project || profile.project, profile.token, agentName, envName)
+            .then((response) => {
             if (response.success) {
                 let result = filterObject(response.result.snapshots, options);
                 if (options.json) {
@@ -377,7 +377,7 @@ module.exports.ListSnapshotInstancesCommand = class {
 
         const agents = new Agents(profile.url);
         const envName = options.environmentName;
-        agents.listSnapshotInstances(options.projectId || profile.projectId, profile.token, snapshotId, envName).then((response) => {
+        agents.listSnapshotInstances(options.project || profile.project, profile.token, snapshotId, envName).then((response) => {
             if (response.success) {
                 let result = filterObject(response.instances, options);
                 if (options.json) {
@@ -416,7 +416,7 @@ module.exports.DescribeAgentSnapshotCommand = class {
         debug('%s.describeAgentSnapshot(%s)', profile.name, snapshotId);
 
         const agents = new Agents(profile.url);
-        agents.describeAgentSnapshot(options.projectId || profile.projectId, profile.token, snapshotId, envName).then((response) => {
+        agents.describeAgentSnapshot(options.project || profile.project, profile.token, snapshotId, envName).then((response) => {
             if (response.success) {
                 let result = filterObject(response.result, options);
                 printSuccess(JSON.stringify(result, null, 2), options);
@@ -451,7 +451,7 @@ module.exports.CreateAgentSnapshotCommand = class {
         }
         const agentName = snapshot.agentName;
         const agents = new Agents(profile.url);
-        agents.createAgentSnapshot(options.projectId || profile.projectId, profile.token, snapshot).then((response) => {
+        agents.createAgentSnapshot(options.project || profile.project, profile.token, snapshot).then((response) => {
             if (response.success) {
                 let result = filterObject(response.result, options);
                 printSuccess(JSON.stringify(result, null, 2), options);

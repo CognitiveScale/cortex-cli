@@ -32,7 +32,7 @@ module.exports.ListActionsCommand = class {
         debug('%s.executeListActions()', profile.name);
 
         const actions = new Actions(profile.url);
-        actions.listActions(profile.token)
+        actions.listActions(options.project || profile.project, profile.token)
             .then((response) => {
                 if (response.success) {
                     let result = response.actions;
@@ -73,7 +73,7 @@ module.exports.DescribeActionCommand = class {
         debug('%s.executeDescribeAction(%s)', profile.name, actionName);
 
         const actions = new Actions(profile.url);
-        actions.describeAction(profile.token, actionName)
+        actions.describeAction(options.project || profile.project, profile.token, actionName)
             .then((response) => {
                 if (response.success) {
                     let result = filterObject(response.action, options);
@@ -132,7 +132,7 @@ module.exports.DeployActionCommand = class {
         params.scaleCount = parseInt(options.scaleCount);
 
         const actions = new Actions(profile.url);
-        actions.deployAction(profile.token, actionName, params)
+        actions.deployAction(options.project || profile.project, profile.token, actionName, params)
             .then((response) => {
                 if (response.success) {
                     printSuccess(JSON.stringify(response.message, null, 2), options);
@@ -186,7 +186,7 @@ module.exports.InvokeActionCommand = class {
         debug('params: %o', params);
 
         const actions = new Actions(profile.url);
-        actions.invokeAction(profile.token, actionName, params, actionType)
+        actions.invokeAction(options.project || profile.project, profile.token, actionName, params, actionType)
             .then((response) => {
                 if (response.success) {
                     let result = filterObject(response.result, options);
@@ -214,7 +214,7 @@ module.exports.DeleteActionCommand = class {
         debug('%s.executeDeleteAction(%s)', profile.name, actionName);
         const actionType = options.actionType;
         const actions = new Actions(profile.url);
-        actions.deleteAction(profile.token, actionName, actionType)
+        actions.deleteAction(options.project || profile.project, profile.token, actionName, actionType)
             .then((response) => {
                 if (response.success) {
                     let result = filterObject(response, options);
@@ -239,7 +239,7 @@ module.exports.TaskLogsActionCommand = class {
         const profile = loadProfile(options.profile);
         debug('%s.taskLogsActions (%s, %s)', profile.name, jobId, taskId);
         const actions = new Actions(profile.url);
-        actions.taskLogs(profile.token, jobId, taskId)
+        actions.taskLogs(options.project || profile.project, profile.token, jobId, taskId)
             .then((response) => {
                 if (response.success) {
                     const result = filterObject(response, options);
@@ -261,7 +261,7 @@ module.exports.TaskCancelActionCommand = class {
         const profile = loadProfile(options.profile);
         debug('%s.taskCancelActions (%s, %s)', profile.name, jobId, taskId);
         const actions = new Actions(profile.url);
-        actions.taskCancel(profile.token, jobId, taskId)
+        actions.taskCancel(options.project || profile.project, profile.token, jobId, taskId)
             .then((response) => {
                 if (response.success) {
                     const result = filterObject(response, options);
@@ -283,7 +283,7 @@ module.exports.TaskStatusActionCommand = class {
         const profile = loadProfile(options.profile);
         debug('%s.taskStatusActions (%s, %s)', profile.name, jobId, taskId);
         const actions = new Actions(profile.url);
-        actions.taskStatus(profile.token, jobId, taskId)
+        actions.taskStatus(options.project || profile.project, profile.token, jobId, taskId)
             .then((response) => {
                 if (response.success) {
                     const result = filterObject(response, options);
@@ -305,7 +305,7 @@ module.exports.JobTaskListActionCommand = class {
         const profile = loadProfile(options.profile);
         debug('%s.jobTaskListActions (%s, %s)', profile.name, jobId);
         const actions = new Actions(profile.url);
-        actions.jobListTasks(profile.token, jobId)
+        actions.jobListTasks(options.project || profile.project, profile.token, jobId)
             .then((response) => {
                 if (response.success) {
                     const result = filterObject(response, options);
@@ -328,7 +328,7 @@ module.exports.TaskStatsActionCommand = class {
         const profile = loadProfile(options.profile);
         debug('%s.taskStatsActions (%s, %s)', profile.name, jobId);
         const actions = new Actions(profile.url);
-        actions.taskStats(profile.token, jobId)
+        actions.taskStats(options.project || profile.project, profile.token, jobId)
             .then((response) => {
                 if (response.success) {
                     const result = filterObject(response, options);
@@ -351,7 +351,7 @@ module.exports.ListTaskByActivation = class {
         const profile = loadProfile(options.profile);
         debug('%s.listTasksByActivation (%s, %s)', profile.name, activationId);
         const actions = new Actions(profile.url);
-        actions.listTasksByActivation(profile.token, activationId)
+        actions.listTasksByActivation(options.project || profile.project, profile.token, activationId)
             .then((response) => {
                 if (response.success) {
                     const result = filterObject(response, options);
@@ -373,7 +373,7 @@ module.exports.GetLogsCommand = class {
         const profile = loadProfile(options.profile);
         debug('%s.getLogsActions (%s, %s)', profile.name, jobId);
         const actions = new Actions(profile.url);
-        actions.getLogsAction(profile.token, jobId)
+        actions.getLogsAction(options.project || profile.project, profile.token, jobId)
             .then((response) => {
                 if (response.success) {
                     if (options.json) {

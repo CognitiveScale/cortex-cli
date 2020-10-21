@@ -36,7 +36,7 @@ class SaveProfileSchemaCommand {
         const schema = parseObject(schemaStr, options);
 
         const catalog = new Catalog(profile.url);
-        catalog.saveProfileSchema(profile.token, schema)
+        catalog.saveProfileSchema(options.project || profile.project, profile.token, schema)
             .then((response) => {
                 if (response.success) {
                     printSuccess(`Profile Schema saved`, options);
@@ -80,7 +80,7 @@ class ListProfileSchemasCommand {
         
         const { filter, sort, limit, skip } = options;
         const catalog = new Catalog(profile.url);
-        catalog.listProfileSchemas(profile.token, filter, sort, limit, skip)
+        catalog.listProfileSchemas(options.project || profile.project, profile.token, filter, sort, limit, skip)
             .then((response) => {
                 if (response.success) {
                     let result = response.schemas;
@@ -119,7 +119,7 @@ class DescribeProfileSchemaCommand {
         debug('%s.executeDescribeProfileSchema(%s)', profile.name, schemaName);
 
         const catalog = new Catalog(profile.url);
-        catalog.describeProfileSchema(profile.token, schemaName)
+        catalog.describeProfileSchema(options.project || profile.project, profile.token, schemaName)
             .then((response) => {
                 if (response.success) {
                     let result = filterObject(response.schema, options);
@@ -145,7 +145,7 @@ class DeleteProfileSchemaCommand {
         debug('%s.executeDeleteProfileSchema(%s)', profile.name, schemaName);
 
         const catalog = new Catalog(profile.url);
-        catalog.deleteProfileSchema(profile.token, schemaName)
+        catalog.deleteProfileSchema(options.project || profile.project, profile.token, schemaName)
             .then((response) => {
                 if (response.success) {
                     debug(response.message);
@@ -171,7 +171,7 @@ class ListProfilesCommand {
 
         const { filter, sort, limit, skip } = options;
         const graph = new Graph(profile.url);
-        graph.listProfiles(profile.token, filter, sort, limit, skip)
+        graph.listProfiles(options.project || profile.project, profile.token, filter, sort, limit, skip)
             .then((response) => {
                 if (response.success) {
                     let result = response.profiles;
@@ -216,7 +216,7 @@ class ListProfileVersionsCommand {
             profile.name, profileId, before, after, limit
         );
         const graph = new Graph(profile.url);
-        graph.listProfileVersions(profile.token, profileId, schemaName, before, after, limit)
+        graph.listProfileVersions(options.project || profile.project, profile.token, profileId, schemaName, before, after, limit)
             .then((response) => {
                 if (response.success) {
                     let result = response.versions;
@@ -258,7 +258,7 @@ class DescribeProfileCommand {
         debug(`${profile.name}.executeDescribeProfile(${profileId}) [${historic}][${versionLimit}][${attribute}]`);
 
         const graph = new Graph(profile.url);
-        graph.describeProfile(profile.token, profileId, schemaName, historic, versionLimit, attribute)
+        graph.describeProfile(options.project || profile.project, profile.token, profileId, schemaName, historic, versionLimit, attribute)
             .then((response) => {
                 if (response.success) {
                     let result = filterObject(response.profile, options);
@@ -284,7 +284,7 @@ class DeleteProfileCommand {
         debug('%s.executeDeleteProfile(%s)', profile.name, profileId);
 
         const graph = new Graph(profile.url);
-        graph.deleteProfile(profile.token, profileId, schemaName)
+        graph.deleteProfile(options.project || profile.project, profile.token, profileId, schemaName)
             .then((response) => {
                 if (response.success) {
                     printSuccess(`Profile deleted.`, options);
@@ -309,7 +309,7 @@ class RebuildProfilesCommand {
         debug('%s.executeRebuildProfiles(%s)', profile.name, schemaName);
 
         const graph = new Graph(profile.url);
-        graph.rebuildProfiles(profile.token, schemaName, profileId, options.filter, options.sort, options.limit, options.skip)
+        graph.rebuildProfiles(options.project || profile.project, profile.token, schemaName, profileId, options.filter, options.sort, options.limit, options.skip)
             .then((response) => {
                 if (response.success) {
                     printSuccess(response.message, options);

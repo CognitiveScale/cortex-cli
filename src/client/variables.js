@@ -15,7 +15,6 @@
  */
 
 const debug = require('debug')('cortex:cli');
-const  { request } = require('../commands/apiutils');
 
 const { constructError } = require('../commands/utils');
 
@@ -23,11 +22,11 @@ module.exports = class Variables {
 
     constructor(cortexUrl) {
         this.cortexUrl = cortexUrl;
-        this.endpoint = `${cortexUrl}/v2/tenants/secrets/variables`;
+        this.endpoint = projectId => `${cortexUrl}/fabric/projects/${projectId}/secrets`;
     }
 
-    listVariables(token) {
-        const endpoint = `${this.endpoint}?list=true`;
+    listVariables(projectId, token) {
+        const endpoint = `${this.endpoint(projectId)}?list=true`;
         debug('listVariables => %s', endpoint);
         return request
             .get(endpoint)
@@ -44,8 +43,8 @@ module.exports = class Variables {
             });
     }
 
-    readVariable(token, keyName) {
-        const endpoint = `${this.endpoint}/${keyName}`;
+    readVariable(projectId, token, keyName) {
+        const endpoint = `${this.endpoint(projectId)}/${keyName}`;
         const body = {}
         debug('readVariable($s) => %s', keyName, endpoint);
         return request
@@ -63,8 +62,8 @@ module.exports = class Variables {
             });
     }
 
-    writeVariable(token, keyName, value) {
-        const endpoint = `${this.endpoint}/${keyName}`;
+    writeVariable(projectId, token, keyName, value) {
+        const endpoint = `${this.endpoint(projectId)}/${keyName}`;
         debug('writeVariable(%s) => %s', keyName, endpoint);
         const body = { value };
         return request

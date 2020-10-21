@@ -31,7 +31,7 @@ module.exports.DockerLoginCommand = class {
         debug('%s.executeDockerLogin()', profile.name);
 
         const action = new Actions(profile.url);
-        const registryUrl = await action._cortexRegistryUrl(profile.token);
+        const registryUrl = await action._cortexRegistryUrl(options.project || profile.project, profile.token);
         try {
             await callMe(`docker login -u cli --password ${profile.token} ${registryUrl}`);
             printSuccess(JSON.stringify('Login Succeeded', null, 2), options);
