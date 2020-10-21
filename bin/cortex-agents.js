@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 /*
- * Copyright 2018 Cognitive Scale, Inc. All Rights Reserved.
+ * Copyright 2020 Cognitive Scale, Inc. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the “License”);
  * you may not use this file except in compliance with the License.
@@ -33,14 +33,12 @@ const {
     ListServicesCommand,
     ListAgentSnapshotsCommand,
     DescribeAgentSnapshotCommand,
-    CreateAgentSnapshotCommand
+    CreateAgentSnapshotCommand,
 } = require('../src/commands/agents');
 
 const {
     ListTaskByActivation,
 } = require('../src/commands/actions');
-
-const { printError } = require('../src/commands/utils');
 
 program.description('Work with Cortex Agents');
 
@@ -56,8 +54,7 @@ program
     .action(withCompatibilityCheck((agentDefinition, options) => {
         try {
             new SaveAgentCommand(program).execute(agentDefinition, options);
-        }
-        catch (err) {
+        } catch (err) {
             console.error(chalk.red(err.message));
         }
     }));
@@ -76,8 +73,7 @@ program
     .action(withCompatibilityCheck((options) => {
         try {
             new ListAgentsCommand(program).execute(options);
-        }
-        catch (err) {
+        } catch (err) {
             console.error(chalk.red(err.message));
         }
     }));
@@ -96,8 +92,7 @@ program
     .action(withCompatibilityCheck((agentName, options) => {
         try {
             new DescribeAgentCommand(program).execute(agentName, options);
-        }
-        catch (err) {
+        } catch (err) {
             console.error(chalk.red(err.message));
         }
     }));
@@ -115,8 +110,7 @@ program
     .action(withCompatibilityCheck((agentName, serviceName, options) => {
         try {
             new InvokeAgentServiceCommand(program).execute(agentName, serviceName, options);
-        }
-        catch (err) {
+        } catch (err) {
             console.error(chalk.red(err.message));
         }
     }));
@@ -133,8 +127,7 @@ program
     .action(withCompatibilityCheck((activationId, options) => {
         try {
             new GetActivationCommand(program).execute(activationId, options);
-        }
-        catch (err) {
+        } catch (err) {
             console.error(chalk.red(err.message));
         }
     }));
@@ -152,8 +145,7 @@ program
     .action(withCompatibilityCheck((instanceId, options) => {
         try {
             new ListActivationsCommand(program).execute(instanceId, options);
-        }
-        catch (err) {
+        } catch (err) {
             console.error(chalk.red(err.message));
         }
     }));
@@ -171,10 +163,8 @@ program
     .action(withCompatibilityCheck((agentName, options) => {
         try {
             new ListServicesCommand(program).execute(agentName, options);
-        }
-        catch (err) {
+        } catch (err) {
             console.error(chalk.red(err.message));
-
         }
     }));
 
@@ -191,13 +181,12 @@ program
     .action(withCompatibilityCheck((agentName, options) => {
         try {
             new ListAgentSnapshotsCommand(program).execute(agentName, options);
-        }
-        catch (err) {
+        } catch (err) {
             console.error(chalk.red(err.message));
         }
     }));
 
-//List snapshot instances
+// List snapshot instances
 program
     .command('list-snapshot-instances <snapshotId>')
     .description('List snapshot instances  ')
@@ -211,8 +200,7 @@ program
     .action(withCompatibilityCheck((snapshotId, options) => {
         try {
             new ListSnapshotInstancesCommand(program).execute(snapshotId, options);
-        }
-        catch (err) {
+        } catch (err) {
             console.error(chalk.red(err.message));
         }
     }));
@@ -229,13 +217,12 @@ program
     .action(withCompatibilityCheck((snapshotId, options) => {
         try {
             new DescribeAgentSnapshotCommand(program).execute(snapshotId, options);
-        }
-        catch (err) {
+        } catch (err) {
             console.error(chalk.red(err.message));
         }
     }));
 
-//Create Agent Snapshot
+// Create Agent Snapshot
 program
     .command('create-snapshot [snapshotDefinition]')
     .description('Create an agent snapshot')
@@ -248,13 +235,12 @@ program
     .action(withCompatibilityCheck((snapshotDefinition, options) => {
         try {
             new CreateAgentSnapshotCommand(program).execute(snapshotDefinition, options);
-        }
-        catch (err) {
+        } catch (err) {
             console.error(chalk.red(err.message));
         }
     }));
 
-//List triggers
+// List triggers
 program
     .command('list-triggers')
     .description('List of triggers for the current tenant')
@@ -265,13 +251,12 @@ program
     .action(withCompatibilityCheck((options) => {
         try {
             new ListTriggersCommand(program).execute(options);
-        }
-        catch (err) {
+        } catch (err) {
             console.error(chalk.red(err.message));
         }
     }));
 
-//List Tasks
+// List Tasks
 program
     .command('list-tasks <activationId>')
     .description('List tasks associated with a given activationId')
@@ -282,8 +267,7 @@ program
     .action(withCompatibilityCheck((activationId, options) => {
         try {
             new ListTaskByActivation(program).execute(activationId, options);
-        }
-        catch (err) {
+        } catch (err) {
             console.error(chalk.red(err.message));
         }
     }));

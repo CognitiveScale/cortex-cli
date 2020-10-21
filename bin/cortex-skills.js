@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 /*
- * Copyright 2018 Cognitive Scale, Inc. All Rights Reserved.
+ * Copyright 2020 Cognitive Scale, Inc. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the “License”);
  * you may not use this file except in compliance with the License.
@@ -41,8 +41,7 @@ program
     .action(withCompatibilityCheck((skillDefinition, options) => {
         try {
             new SaveSkillCommand(program).execute(skillDefinition, options);
-        }
-        catch (err) {
+        } catch (err) {
             console.error(chalk.red(err.message));
         }
     }));
@@ -60,8 +59,7 @@ program
     .action(withCompatibilityCheck((options) => {
         try {
             new ListSkillsCommand(program).execute(options);
-        }
-        catch (err) {
+        } catch (err) {
             console.error(chalk.red(err.message));
         }
     }));
@@ -78,8 +76,7 @@ program
     .action(withCompatibilityCheck((skillName, options) => {
         try {
             new DescribeSkillCommand(program).execute(skillName, options);
-        }
-        catch (err) {
+        } catch (err) {
             console.error(chalk.red(err.message));
         }
     }));

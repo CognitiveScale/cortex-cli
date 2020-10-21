@@ -14,58 +14,48 @@
  * limitations under the License.
  */
 
-const  { request } = require('../commands/apiutils');
 const debug = require('debug')('cortex:cli');
-const _ = require('lodash');
 const got = require('got');
-const chalk = require('chalk');
 const { constructError } = require('../commands/utils');
 
 module.exports = class Agents {
-
     constructor(cortexUrl) {
         this.cortexUrl = cortexUrl;
         this.endpointV4 = projectId => `${cortexUrl}/fabric/v4/projects/${projectId}`;
     }
 
-    invokeAgentService(projectId, token, agentName, serviceName, params) {
+    invokeAgentService(projectId, token, agentName, serviceName) {
         const endpoint = `${this.endpointV4(projectId)}/agents/${agentName}/services/${serviceName}`;
         debug('invokeAgentService(%s, %s) => %s', agentName, serviceName, endpoint);
         return got
             .post(endpoint, {
                 headers: { Authorization: `Bearer ${token}` },
             }).json()
-           .then((result) => { return { success: true, result }; })
-            .catch((err) => {
-                return constructError(err);
-            });
+           .then(result => ({ success: true, result }))
+            .catch(err => constructError(err));
     }
 
     getActivation(projectId, token, activationId) {
         const endpoint = `${this.endpointV4(projectId)}/activations/${activationId}`;
-        debug('getActivation(%s) => %s', activationId, endpoint)
+        debug('getActivation(%s) => %s', activationId, endpoint);
         return got
             .get(endpoint, {
                 headers: { Authorization: `Bearer ${token}` },
             }).json()
-            .then((result) => { return { success: true, result }; })
-            .catch((err) => {
-                return constructError(err);
-            });
+            .then(result => ({ success: true, result }))
+            .catch(err => constructError(err));
     }
 
     listActivations(projectId, token, snapshotId, environmentName) {
         let endpoint = `${this.endpointV4(projectId)}/snapshots/${snapshotId}/activations`;
-        debug('listActivations(%s, %s) => %s', instanceId, environmentName, endpoint);
+        debug('listActivations(%s, %s) => %s', snapshotId, environmentName, endpoint);
         if (environmentName) endpoint = `${endpoint}?environmentName=${environmentName}`;
         return got
             .get(endpoint, {
                 headers: { Authorization: `Bearer ${token}` },
             }).json()
-            .then((result) => {return { success: true, result }; })
-            .catch((err) => {
-                return constructError(err);
-            });
+            .then(result => ({ success: true, result }))
+            .catch(err => constructError(err));
     }
 
     listAgentSnapshots(projectId, token, agentName, environmentName) {
@@ -76,10 +66,8 @@ module.exports = class Agents {
             .get(endpoint, {
                 headers: { Authorization: `Bearer ${token}` },
             }).json()
-            .then((result) => {return { success: true, result }; })
-            .catch((err) => {
-                return constructError(err);
-            });
+            .then(result => ({ success: true, result }))
+            .catch(err => constructError(err));
     }
 
     describeAgentSnapshot(projectId, token, snapshotId, environmentName) {
@@ -90,10 +78,8 @@ module.exports = class Agents {
             .get(endpoint, {
                 headers: { Authorization: `Bearer ${token}` },
             }).json()
-            .then((result) => {return { success: true, result }; })
-            .catch((err) => {
-                return constructError(err);
-            });
+            .then(result => ({ success: true, result }))
+            .catch(err => constructError(err));
     }
 
     createAgentSnapshot(projectId, token, snapshot) {
@@ -102,12 +88,10 @@ module.exports = class Agents {
         return got
             .post(endpoint, {
                 headers: { Authorization: `Bearer ${token}` },
-                json: snapshot
+                json: snapshot,
             }).json()
-            .then((result) => {return { success: true, result }; })
-            .catch((err) => {
-                return constructError(err);
-            });
+            .then(result => ({ success: true, result }))
+            .catch(err => constructError(err));
     }
 
     listTriggers(projectId, token) {
@@ -117,9 +101,7 @@ module.exports = class Agents {
             .get(endpoint, {
                 headers: { Authorization: `Bearer ${token}` },
             }).json()
-            .then((result) => {return { success: true, result }; })
-            .catch((err) => {
-                return constructError(err);
-            });
+            .then(result => ({ success: true, result }))
+            .catch(err => constructError(err));
     }
 };

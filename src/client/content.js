@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Cognitive Scale, Inc. All Rights Reserved.
+ * Copyright 2020 Cognitive Scale, Inc. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the “License”);
  * you may not use this file except in compliance with the License.
@@ -20,13 +20,11 @@ const path = require('path');
 const { URL } = require('url');
 
 const ProgressBar = require('progress');
-const  { request } = require('../commands/apiutils');
 const debug = require('debug')('cortex:cli');
 const { constructError } = require('../commands/utils');
 const { getUserAgent } = require('../useragent');
 
 module.exports = class Content {
-
     constructor(cortexUrl) {
         this.cortexUrl = cortexUrl;
         this.endpoint = projectId => `${cortexUrl}/fabric/v4/projects/${projectId}/content`;
@@ -46,16 +44,14 @@ module.exports = class Content {
             .accept('application/json')
             .then((res) => {
                 if (res.ok) {
-                    return {success: true, message: res.body};
+                    return { success: true, message: res.body };
                 }
-                return {success: false, message: res.body, status: res.status};
+                return { success: false, message: res.body, status: res.status };
             })
-            .catch((err) => {
-                return constructError(err);
-            });
+            .catch(err => constructError(err));
     }
 
-    uploadContent(projectId, token, {content, key}) {
+    uploadContent(projectId, token, { content, key }) {
         debug('uploadContent(%s, %s) => %s', key, content, this.endpoint);
         const contentKey = this._sanitizeKey(key);
         return request
@@ -66,16 +62,14 @@ module.exports = class Content {
             .attach('content', content)
             .then((res) => {
                 if (res.ok) {
-                    return {success: true, message: res.body};
+                    return { success: true, message: res.body };
                 }
-                return {success: false, message: res.body, status: res.status};
+                return { success: false, message: res.body, status: res.status };
             })
-            .catch((err) => {
-                return constructError(err);
-            });
+            .catch(err => constructError(err));
     }
 
-    uploadContentStreaming(projectId, token, key, content, showProgress = false, contentType='application/octet-stream') {
+    uploadContentStreaming(projectId, token, key, content, showProgress = false, contentType = 'application/octet-stream') {
         debug('uploadContentStreaming(%s, %s) => %s', key, content, `${this.endpoint}/${key}`);
 
         // NOTE: superagent only supports uploads via .attach(), which uses multipart forms (@see
@@ -90,7 +84,7 @@ module.exports = class Content {
         if (showProgress) {
             progressBar = new ProgressBar(
                 '  uploading [:bar] :percent :etas',
-                { renderThrottle: 500, total: fs.statSync(content).size }
+                { renderThrottle: 500, total: fs.statSync(content).size },
             );
         }
 
@@ -104,24 +98,23 @@ module.exports = class Content {
                     .post({
                         uri: url,
                         headers: {
-                            'Accept': 'application/json',
-                            'Authorization': `Bearer ${token}`,
+                            Accept: 'application/json',
+                            Authorization: `Bearer ${token}`,
                             'Content-Type': contentType,
                             'User-Agent': getUserAgent(),
-                        }
-                    }, function(err, res, body) {
+                        },
+                    }, (err, res, body) => {
                         if (err) {
-                            resolve({success: false, message: err.message});
+                            resolve({ success: false, message: err.message });
                             return;
                         }
                         if (res.statusCode === 200) {
-                            resolve({success: true, message: body});
+                            resolve({ success: true, message: body });
                             return;
                         }
                         // NOTE this is using npm request NOT superagent - fields are different
-                        resolve({success: false, message: body, status: res.statusCode});
-                    })
-                );
+                        resolve({ success: false, message: body, status: res.statusCode });
+                    }));
         });
     }
 
@@ -137,13 +130,11 @@ module.exports = class Content {
             .type('json')
             .then((res) => {
                 if (res.ok) {
-                    return {success: true, message: res.body};
+                    return { success: true, message: res.body };
                 }
-                return {success: false, message: res.body, status: res.status};
+                return { success: false, message: res.body, status: res.status };
             })
-            .catch((err) => {
-                return constructError(err);
-            });
+            .catch(err => constructError(err));
     }
 
 
@@ -157,13 +148,11 @@ module.exports = class Content {
             .accept('application/json')
             .then((res) => {
                 if (res.ok) {
-                    return {success: true, message: res.body};
+                    return { success: true, message: res.body };
                 }
-                return {success: false, message: res.body, status: res.status};
+                return { success: false, message: res.body, status: res.status };
             })
-            .catch((err) => {
-                return constructError(err);
-            });
+            .catch(err => constructError(err));
     }
 
     downloadContent(projecId, token, key, showProgress = false) {
@@ -177,46 +166,42 @@ module.exports = class Content {
             .use((req) => {
                 if (showProgress) {
                     req.on('request', (clientReq) => {
-                        clientReq.on('response', function(res) {
+                        clientReq.on('response', (res) => {
                             const total = +(res.headers['content-length'] || res.headers['Content-Length']);
                             const progressBar = new ProgressBar(
                                 '  downloading [:bar] :percent :etas',
                                 {
                                     current: 0,
                                     renderThrottle: 500,
-                                    total: total,
-                                }
+                                    total,
+                                },
                             );
                         
-                            res.on('data', (chunk) => progressBar.tick(chunk.length));
+                            res.on('data', chunk => progressBar.tick(chunk.length));
                           });
                     });
                 }
             });
 
         return new Promise((resolve, reject) => {
-            stream.on('response', function(response) {
+            stream.on('response', (response) => {
                 if (response.status !== 200) {
                     stream.abort();
                     return resolve({
                         success: false,
                         status: stream.response.status,
-                        message: stream.response.error
+                        message: stream.response.error,
                     });
                 }
             });
 
-            stream.on('end', () => {
-                return resolve({
+            stream.on('end', () => resolve({
                     success: true,
                     message: `\nDownloaded ${contentKey}`,
-                    status: stream.response.status
-                });
-            });
+                    status: stream.response.status,
+                }));
 
-            stream.on('error', (err) => {
-                return resolve(constructError(err));
-            });
+            stream.on('error', err => resolve(constructError(err)));
 
             stream.pipe(process.stdout);
         });
@@ -233,14 +218,10 @@ module.exports = class Content {
             .accept('application/json')
             .then((res) => {
                 if (res.ok) {
-                    return {success: true, message: res.text};
+                    return { success: true, message: res.text };
                 }
-                return {success: false, message: res.body, status: res.status};
+                return { success: false, message: res.body, status: res.status };
             })
-            .catch((err) => {
-                return constructError(err);
-            });
+            .catch(err => constructError(err));
     }
-
 };
-

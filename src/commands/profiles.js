@@ -14,16 +14,16 @@
  * limitations under the License.
  */
 
-const _ = require('lodash');
 const fs = require('fs');
 const debug = require('debug')('cortex:cli');
 const { loadProfile } = require('../config');
 const Catalog = require('../client/catalog');
 const { Graph } = require('../client/graph');
-const { printSuccess, printError, filterObject, parseObject, printTable, formatValidationPath } = require('./utils');
+const {
+ printSuccess, printError, filterObject, parseObject, printTable, formatValidationPath, 
+} = require('./utils');
 
 class SaveProfileSchemaCommand {
-
     constructor(program) {
         this.program = program;
     }
@@ -39,17 +39,17 @@ class SaveProfileSchemaCommand {
         catalog.saveProfileSchema(options.project || profile.project, profile.token, schema)
             .then((response) => {
                 if (response.success) {
-                    printSuccess(`Profile Schema saved`, options);
+                    printSuccess('Profile Schema saved', options);
                 } else {
-                    const {message, details} = response;
+                    const { message, details } = response;
                     debug(`Failed to save profile schema: ${response.status} - ${message}`);
                     debug(response);
                     printError('Failed to save profile schema.', options, false);
                     if (details) {
                         printError('The following issues were found:', options, false);
                         const tableSpec = [
-                            {column: 'Path', field: 'path', width: 50},
-                            {column: 'Message', field: 'message', width: 100},
+                            { column: 'Path', field: 'path', width: 50 },
+                            { column: 'Message', field: 'message', width: 100 },
                         ];
                         details.map(d => d.path = formatValidationPath(d.path));
                         printTable(tableSpec, details);
@@ -69,7 +69,6 @@ class SaveProfileSchemaCommand {
 }
 
 class ListProfileSchemasCommand {
-
     constructor(program) {
         this.program = program;
     }
@@ -78,22 +77,23 @@ class ListProfileSchemasCommand {
         const profile = loadProfile(options.profile);
         debug('%s.executeListProfileSchemas()', profile.name);
         
-        const { filter, sort, limit, skip } = options;
+        const {
+ filter, sort, limit, skip, 
+} = options;
         const catalog = new Catalog(profile.url);
         catalog.listProfileSchemas(options.project || profile.project, profile.token, filter, sort, limit, skip)
             .then((response) => {
                 if (response.success) {
                     let result = response.schemas;
-                    if (options.query)
-                        result = filterObject(result, options);
+                    if (options.query) result = filterObject(result, options);
 
                     if (options.json) {
                         printSuccess(JSON.stringify(result, null, 2), options);
                     } else {
                         const tableSpec = [
-                            {column: 'Title', field: 'title', width: 50},
-                            {column: 'Name', field: 'name', width: 50},
-                            {column: 'Version', field: '_version', width: 12}
+                            { column: 'Title', field: 'title', width: 50 },
+                            { column: 'Name', field: 'name', width: 50 },
+                            { column: 'Version', field: '_version', width: 12 },
                         ];
 
                         printTable(tableSpec, result);
@@ -109,7 +109,6 @@ class ListProfileSchemasCommand {
 }
 
 class DescribeProfileSchemaCommand {
-
     constructor(program) {
         this.program = program;
     }
@@ -122,7 +121,7 @@ class DescribeProfileSchemaCommand {
         catalog.describeProfileSchema(options.project || profile.project, profile.token, schemaName)
             .then((response) => {
                 if (response.success) {
-                    let result = filterObject(response.schema, options);
+                    const result = filterObject(response.schema, options);
                     printSuccess(JSON.stringify(result, null, 2), options);
                 } else {
                     printError(`Failed to describe profile schema ${schemaName}: ${response.message}`, options);
@@ -135,7 +134,6 @@ class DescribeProfileSchemaCommand {
 }
 
 class DeleteProfileSchemaCommand {
-
     constructor(program) {
         this.program = program;
     }
@@ -149,7 +147,7 @@ class DeleteProfileSchemaCommand {
             .then((response) => {
                 if (response.success) {
                     debug(response.message);
-                    printSuccess(`Profile Schema deleted.`, options);
+                    printSuccess('Profile Schema deleted.', options);
                 } else {
                     printError(`Failed to delete profile schema ${schemaName}: ${response.message}`, options);
                 }
@@ -169,30 +167,29 @@ class ListProfilesCommand {
         const profile = loadProfile(options.profile);
         debug('%s.executeListProfiles()', profile.name);
 
-        const { filter, sort, limit, skip } = options;
+        const {
+ filter, sort, limit, skip, 
+} = options;
         const graph = new Graph(profile.url);
         graph.listProfiles(options.project || profile.project, profile.token, filter, sort, limit, skip)
             .then((response) => {
                 if (response.success) {
                     let result = response.profiles;
-                    if (options.query)
-                        result = filterObject(result, options);
+                    if (options.query) result = filterObject(result, options);
 
                     if (options.json) {
                         printSuccess(JSON.stringify(result, null, 2), options);
-                    }
-                    else {
+                    } else {
                         const tableSpec = [
-                            {column: 'Profile ID', field: 'profileId', width: 50},
-                            {column: 'Profile Schema', field: 'profileSchema', width: 50},
-                            {column: 'Version', field: 'version', width: 12},
-                            {column: 'Last Updated', field: 'updatedAt', width: 40}
+                            { column: 'Profile ID', field: 'profileId', width: 50 },
+                            { column: 'Profile Schema', field: 'profileSchema', width: 50 },
+                            { column: 'Version', field: 'version', width: 12 },
+                            { column: 'Last Updated', field: 'updatedAt', width: 40 },
                         ];
 
                         printTable(tableSpec, result);
                     }
-                }
-                else {
+                } else {
                     printError(`Failed to list profiles: ${response.status} ${response.message}`, options);
                 }
             })
@@ -213,7 +210,7 @@ class ListProfileVersionsCommand {
         const { before, after, limit } = options;
         debug(
             '%s.executeListProfileVersionsCommand(%s) Options:[%s][%s][%s]', 
-            profile.name, profileId, before, after, limit
+            profile.name, profileId, before, after, limit,
         );
         const graph = new Graph(profile.url);
         graph.listProfileVersions(options.project || profile.project, profile.token, profileId, schemaName, before, after, limit)
@@ -225,19 +222,17 @@ class ListProfileVersionsCommand {
                     }
                     if (options.json) {
                         printSuccess(JSON.stringify(result, null, 2), options);
-                    }
-                    else {
+                    } else {
                         const tableSpec = [
                             { column: 'Profile ID', field: 'profileId', width: 50 },
                             { column: 'Profile Schema', field: 'profileSchema', width: 50 },
                             { column: 'Version', field: 'version', width: 12 },
-                            { column: 'Created At', field: 'createdAt', width: 40 }
+                            { column: 'Created At', field: 'createdAt', width: 40 },
                         ];
 
                         printTable(tableSpec, result);
                     }
-                }
-                else {
+                } else {
                     printError(`Failed to list profile versions: ${response.status} ${response.message}`, options);
                 }
             })
@@ -261,7 +256,7 @@ class DescribeProfileCommand {
         graph.describeProfile(options.project || profile.project, profile.token, profileId, schemaName, historic, versionLimit, attribute)
             .then((response) => {
                 if (response.success) {
-                    let result = filterObject(response.profile, options);
+                    const result = filterObject(response.profile, options);
                     printSuccess(JSON.stringify(result, null, 2), options);
                 } else {
                     printError(`Failed to describe profile ${schemaName}: ${response.message}`, options);
@@ -274,7 +269,6 @@ class DescribeProfileCommand {
 }
 
 class DeleteProfileCommand {
-
     constructor(program) {
         this.program = program;
     }
@@ -287,7 +281,7 @@ class DeleteProfileCommand {
         graph.deleteProfile(options.project || profile.project, profile.token, profileId, schemaName)
             .then((response) => {
                 if (response.success) {
-                    printSuccess(`Profile deleted.`, options);
+                    printSuccess('Profile deleted.', options);
                 } else {
                     printError(`Failed to delete profile ${schemaName}: ${response.message}`, options);
                 }
@@ -299,7 +293,6 @@ class DeleteProfileCommand {
 }
 
 class RebuildProfilesCommand {
-
     constructor(program) {
         this.program = program;
     }

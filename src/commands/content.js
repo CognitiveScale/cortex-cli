@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Cognitive Scale, Inc. All Rights Reserved.
+ * Copyright 2020 Cognitive Scale, Inc. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the “License”);
  * you may not use this file except in compliance with the License.
@@ -16,14 +16,14 @@
 const _ = require('lodash');
 const fs = require('fs');
 const path = require('path');
-const yeoman = require('yeoman-environment');
 const debug = require('debug')('cortex:cli');
 const { loadProfile } = require('../config');
 const Content = require('../client/content');
-const { printSuccess, printError, filterObject, parseObject, printTable, getSourceFiles, humanReadableFileSize } = require('./utils');
+const {
+ printSuccess, printError, filterObject, printTable, getSourceFiles, humanReadableFileSize,
+} = require('./utils');
 
 module.exports.ListContent = class ListContent {
-
     constructor(program) {
         this.program = program;
     }
@@ -36,22 +36,20 @@ module.exports.ListContent = class ListContent {
         content.listContent(options.project || profile.project, profile.token).then((response) => {
             if (response.success) {
                 if (options.query || options.json) {
-                    let result = filterObject(response.message, options);
+                    const result = filterObject(response.message, options);
                     printSuccess(JSON.stringify(result, null, 2), options);
-                }
-                else {
-                    let tableSpec = [
+                } else {
+                    const tableSpec = [
                         { column: 'Key', field: 'Key', width: 70 },
                         { column: 'Content Type', field: 'ContentType', width: 30 },
                         { column: 'Last Modified', field: 'LastModified', width: 30 },
-                        { column: 'Size (bytes)', field: 'Size', width: 20 }
+                        { column: 'Size (bytes)', field: 'Size', width: 20 },
                     ];
 
 
                     printTable(tableSpec, response.message);
                 }
-            }
-            else {
+            } else {
                 printError(`Failed to list content: ${response.status} ${response.message}`, options);
             }
         })
@@ -63,7 +61,6 @@ module.exports.ListContent = class ListContent {
 };
 
 module.exports.UploadContent = class UploadContent {
-
     constructor(program) {
         this.program = program;
     }
@@ -74,8 +71,8 @@ module.exports.UploadContent = class UploadContent {
 
         const contentClient = new Content(profile.url);
 
-        const chunkSize = parseInt(options.chunkSize);
-        //const chunkSize = parseInt(options.chunkSize);
+        const chunkSize = parseInt(options.chunkSize, 10);
+        // const chunkSize = parseInt(options.chunkSize);
         const uploadSecure = _.partial(UploadContent.uploadSecure, contentClient, profile, options);
         const upload = _.partial(UploadContent.upload, contentClient, profile, options);
 
@@ -99,10 +96,9 @@ module.exports.UploadContent = class UploadContent {
                         .reduce((promise, currentChunk) => promise
                             .then(() => {
                                 debug(`working on chunk of files: ${JSON.stringify(currentChunk)}`);
-                                const promises = currentChunk.map((item) => upload(`${contentKey}/${item.relative}`, item.canonical));
+                                const promises = currentChunk.map(item => upload(`${contentKey}/${item.relative}`, item.canonical));
                                 return Promise.all(promises);
-                            }), Promise.resolve()
-                        );
+                            }), Promise.resolve());
                 } else {
                     console.log('Test option set. Nothing uploaded.');
                 }
@@ -112,14 +108,11 @@ module.exports.UploadContent = class UploadContent {
                     cbTest(filesDict);
                 }
             });
-        } else {
-            if (options.secure) {
+        } else if (options.secure) {
                 uploadSecure(contentKey, filePath);
-            }
-            else {
+            } else {
                 upload(contentKey, filePath);
             }
-        }
     }
 
 
@@ -128,15 +121,14 @@ module.exports.UploadContent = class UploadContent {
         const fileBaseName = path.basename(filePath);
 
         const secureContent = {};
-        secureContent[fileBaseName] = new Buffer(fileContent).toString('base64');
+        secureContent[fileBaseName] = Buffer.from(fileContent).toString('base64');
         contentClient.uploadSecureContent(options.project || profile.project, profile.token, contentKey, secureContent).then((response) => {
             if (response.success) {
-                printSuccess(`Secure content successfully uploaded.`, options);
-            }
-            else {
+                printSuccess('Secure content successfully uploaded.', options);
+            } else {
                 printError(`Failed to upload secure content: ${response.status} ${response.message}`, options);
             }
-        })
+        });
     }
 
     static upload(contentClient, profile, options, contentKey, filePath) {
@@ -144,9 +136,8 @@ module.exports.UploadContent = class UploadContent {
         const contentType = _.get(options, 'contentType', 'application/octet-stream');
         return contentClient.uploadContentStreaming(options.project || profile.project, profile.token, contentKey, filePath, showProgress, contentType).then((response) => {
             if (response.success) {
-                printSuccess(`Content successfully uploaded.`, options);
-            }
-            else {
+                printSuccess('Content successfully uploaded.', options);
+            } else {
                 printError(`Failed to upload content: ${response.status} ${response.message}`, options);
             }
         })
@@ -158,7 +149,6 @@ module.exports.UploadContent = class UploadContent {
 };
 
 module.exports.DeleteContent = class DeleteContent {
-
     constructor(program) {
         this.program = program;
     }
@@ -170,9 +160,8 @@ module.exports.DeleteContent = class DeleteContent {
         const content = new Content(profile.url);
         content.deleteContent(options.project || profile.project, profile.token, contentKey).then((response) => {
             if (response.success) {
-               printSuccess(`Content successfully deleted.`, options);
-            }
-            else {
+               printSuccess('Content successfully deleted.', options);
+            } else {
                 printError(`Failed to delete content: ${response.status} ${response.message}`, options);
             }
         })
@@ -184,7 +173,6 @@ module.exports.DeleteContent = class DeleteContent {
 };
 
 module.exports.DownloadContent = class DownloadContent {
-
     constructor(program) {
         this.program = program;
     }
@@ -201,8 +189,7 @@ module.exports.DownloadContent = class DownloadContent {
             content.downloadSecureContent(options.project || profile.project, profile.token, contentKey).then((response) => {
                 if (response.success) {
                     printSuccess(response.message, options);
-                }
-                else {
+                } else {
                     printError(`Failed to download secure content: ${response.status} ${response.message}`, options);
                 }
             })
@@ -210,14 +197,12 @@ module.exports.DownloadContent = class DownloadContent {
                     debug(err);
                     printError(`Failed to download secure content: ${err.status} ${err.message}`, options);
                 });
-        }
-        else {
+        } else {
             content.downloadContent(options.project || profile.project, profile.token, contentKey, showProgress).then((response) => {
                 if (response.success) {
                     // messages need to be on stderr as content is streamed to stdout
                     console.error(response.message);
-                }
-                else {
+                } else {
                     printError(`Failed to download content: ${response.status} ${response.message}`, options);
                 }
             }).catch((err) => {
@@ -225,6 +210,5 @@ module.exports.DownloadContent = class DownloadContent {
                     printError(`Failed to download content: ${err.status} ${err.message}`, options);
             });
         }
-
     }
 };

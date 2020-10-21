@@ -47,8 +47,7 @@ program
     .action(withCompatibilityCheck((options) => {
         try {
             new FindEventsCommand(program).execute(options);
-        }
-        catch (err) {
+        } catch (err) {
             console.error(chalk.red(err.message));
         }
     }));
@@ -64,7 +63,7 @@ program
     .option('--tracking', 'Enable tracking event mode.')
     .option('--transform [templates]', 'Apply transform templates to the input JSON records.')
     .option('--dry-run', "Simulate the publish (but don't actually send events to the server).")
-    .option('--auto', "Enable auto attribute creation using each entity property as an attribute value.")
+    .option('--auto', 'Enable auto attribute creation using each entity property as an attribute value.')
     .action(withCompatibilityCheck(async (file, options) => {
         await new PublishEventsCommand(program).execute(file, options)
             .catch(err => console.error(chalk.red(err.message)));
@@ -81,8 +80,7 @@ program
     .action(withCompatibilityCheck(async (entityId, options) => {
         try {
             new GetEntityCommand(program).execute(entityId, options);
-        }
-        catch (err) {
+        } catch (err) {
             console.error(chalk.red(err.message));
         }
     }));
@@ -99,8 +97,7 @@ program
     .action(withCompatibilityCheck(async (query, options) => {
         try {
             new QueryGraphCommand(program).execute(query, options);
-        }
-        catch (err) {
+        } catch (err) {
             console.error(chalk.red(err.message));
         }
     }));

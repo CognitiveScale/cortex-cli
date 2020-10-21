@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 /*
- * Copyright 2018 Cognitive Scale, Inc. All Rights Reserved.
+ * Copyright 2020 Cognitive Scale, Inc. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the “License”);
  * you may not use this file except in compliance with the License.
@@ -27,7 +27,7 @@ const {
     DescribeDatasetCommand,
     GetDataframeCommand,
     StreamDatasetCommand,
-    GenerateDatasetCommand
+    GenerateDatasetCommand,
 } = require('../src/commands/datasets');
 
 program.description('Work with Cortex Connections');
@@ -46,8 +46,7 @@ program
     .action(withCompatibilityCheck((options) => {
         try {
             new ListDatasets(program).execute(options);
-        }
-        catch (err) {
+        } catch (err) {
             console.error(chalk.red(err.message));
         }
     }));
@@ -64,8 +63,7 @@ program
     .action(withCompatibilityCheck((datasetDef, options) => {
         try {
             new SaveDatasetsCommand(program).execute(datasetDef, options);
-        }
-        catch (err) {
+        } catch (err) {
             console.error(chalk.red(err.message));
         }
     }));
@@ -82,8 +80,7 @@ program
     .action(withCompatibilityCheck((datasetName, options) => {
         try {
             new DescribeDatasetCommand(program).execute(datasetName, options);
-        }
-        catch (err) {
+        } catch (err) {
             console.error(chalk.red(err.message));
         }
     }));
@@ -99,8 +96,7 @@ program
     .action(withCompatibilityCheck((datasetName, options) => {
         try {
             new GetDataframeCommand(program).execute(datasetName, options);
-        }
-        catch (err) {
+        } catch (err) {
             console.error(chalk.red(err.message));
         }
     }));
@@ -116,8 +112,7 @@ program
     .action(withCompatibilityCheck((datasetName, options) => {
         try {
             new StreamDatasetCommand(program).execute(datasetName, options);
-        }
-        catch (err) {
+        } catch (err) {
             console.error(chalk.red(err.message));
         }
     }));
@@ -128,11 +123,10 @@ program
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use', 'default')
     .option('--project [project]', 'The project to use')
-    .action((options) => {  // deliberately not using withCompatibilityCheck()
+    .action((options) => { // deliberately not using withCompatibilityCheck()
         try {
             new GenerateDatasetCommand(program).execute(options);
-        }
-        catch (err) {
+        } catch (err) {
             console.error(chalk.red(err.message));
         }
     });

@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Cognitive Scale, Inc. All Rights Reserved.
+ * Copyright 2020 Cognitive Scale, Inc. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the “License”);
  * you may not use this file except in compliance with the License.
@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-const chai = require("chai");
-const chaiAsPromised = require("chai-as-promised");
+const chai = require('chai');
+const chaiAsPromised = require('chai-as-promised');
 const findPackageJson = require('find-package-json');
 const rewire = require('rewire');
 const semver = require('semver');
@@ -25,42 +25,42 @@ const superagentMock = require('superagent-mocker');
 const compatibilityModule = rewire('../src/compatibility');
 
 chai.use(chaiAsPromised);
-const expect = chai.expect;
+const { expect } = chai;
 
 const pkg = findPackageJson(__dirname).next().value;
 
-describe('compatibility checks', function () {
+describe('compatibility checks', () => {
     const profile = {
         url: 'http://example.com',
         account: 'testAccount',
         tenantId: 'testTenant',
         username: 'testUser',
-        token: 'testToken'
+        token: 'testToken',
     };
 
-    describe('with a compatible application version', function () {
+    describe('with a compatible application version', () => {
         let requestMock;
         let revertCompatibilityModule;
 
-        before(function () {
+        before(() => {
             requestMock = superagentMock(superagent);
             requestMock.get(
                 `${profile.url}/v3/catalog/compatibility/applications/cortex-cli`,
-                () => ({ ok: true, body: { semver: pkg.version } })
+                () => ({ ok: true, body: { semver: pkg.version } }),
             );
             revertCompatibilityModule = compatibilityModule.__set__({
                 npmFetch: {
-                    json: () => Promise.resolve({ versions: { [pkg.version]: {} } })
+                    json: () => Promise.resolve({ versions: { [pkg.version]: {} } }),
                 },
             });
         });
 
-        after(function () {
+        after(() => {
             revertCompatibilityModule();
             requestMock.unmock(superagent);
         });
 
-        it('should resolve as satisfied', function () {
+        it('should resolve as satisfied', () => {
             const expected = { current: pkg.version, latest: pkg.version, satisfied: true };
             return expect(compatibilityModule.getCompatibility(profile)).to.become(expected);
         });
@@ -75,16 +75,16 @@ describe('compatibility checks', function () {
             requestMock = superagentMock(superagent);
             requestMock.get(
                 `${profile.url}/v3/catalog/compatibility/applications/cortex-cli`,
-                () => ({ ok: true, body: { semver: nextMajorVersion } })
+                () => ({ ok: true, body: { semver: nextMajorVersion } }),
             );
             revertCompatibilityModule = compatibilityModule.__set__({
                 npmFetch: {
                     json: () => Promise.resolve({
                         versions: {
                             [pkg.version]: {},
-                            [nextMajorVersion]: {}
-                        }
-                    })
+                            [nextMajorVersion]: {},
+                        },
+                    }),
                 },
             });
         });
@@ -108,11 +108,11 @@ describe('compatibility checks', function () {
             requestMock = superagentMock(superagent);
             requestMock.get(
                 `${profile.url}/v3/catalog/compatibility/applications/cortex-cli`,
-                () => { throw new Error('BOOM!'); }
+                () => { throw new Error('BOOM!'); },
             );
             revertCompatibilityModule = compatibilityModule.__set__({
                 npmFetch: {
-                    json: () => Promise.resolve({ versions: { [pkg.version]: {} } })
+                    json: () => Promise.resolve({ versions: { [pkg.version]: {} } }),
                 },
             });
         });
@@ -122,9 +122,7 @@ describe('compatibility checks', function () {
             requestMock.unmock(superagent);
         });
 
-        it('should reject', () => {
-            return expect(compatibilityModule.getCompatibility(profile)).to.be.rejected;
-        });
+        it('should reject', () => expect(compatibilityModule.getCompatibility(profile)).to.be.rejected);
     });
 
     describe('when the npm cannot be reached', () => {
@@ -135,11 +133,11 @@ describe('compatibility checks', function () {
             requestMock = superagentMock(superagent);
             requestMock.get(
                 `${profile.url}/v3/catalog/compatibility/applications/cortex-cli`,
-                () => ({ ok: true, body: { semver: pkg.version } })
+                () => ({ ok: true, body: { semver: pkg.version } }),
             );
             revertCompatibilityModule = compatibilityModule.__set__({
                 npmFetch: {
-                    json: () => Promise.reject(new Error('BOOM!'))
+                    json: () => Promise.reject(new Error('BOOM!')),
                 },
             });
         });

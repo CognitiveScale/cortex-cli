@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 /*
- * Copyright 2018 Cognitive Scale, Inc. All Rights Reserved.
+ * Copyright 2020 Cognitive Scale, Inc. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the “License”);
  * you may not use this file except in compliance with the License.
@@ -50,8 +50,7 @@ program
     .action(withCompatibilityCheck((options) => {
         try {
             new ListActionsCommand(program).execute(options);
-        }
-        catch (err) {
+        } catch (err) {
             console.error(chalk.red(err.message));
         }
     }));
@@ -70,8 +69,7 @@ program
     .action(withCompatibilityCheck((actionName, options) => {
         try {
             new DescribeActionCommand(program).execute(actionName, options);
-        }
-        catch (err) {
+        } catch (err) {
             console.error(chalk.red(err.message));
         }
     }));
@@ -89,8 +87,7 @@ program
     .action(withCompatibilityCheck((actionName, options) => {
         try {
             new DeleteActionCommand(program).execute(actionName, options);
-        }
-        catch (err) {
+        } catch (err) {
             console.error(chalk.red(err.message));
         }
     }));
@@ -100,15 +97,14 @@ program
     .command('logs <actionName>')
     .description('Get logs for an action')
     .option('--no-compat', 'Ignore API compatibility checks')
-    .option( '--json', 'Return raw JSON response')
+    .option('--json', 'Return raw JSON response')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
     .option('--project [project]', 'The project to use')
     .action(withCompatibilityCheck((actionName, options) => {
         try {
             new GetLogsCommand(program).execute(actionName, options);
-        }
-        catch (err) {
+        } catch (err) {
             console.error(chalk.red(err.message));
         }
     }));
@@ -128,12 +124,11 @@ program
     .option('--query [query]', 'A JMESPath query to use in filtering the response data.')
     .option('--actionType [actionType]', 'Type of action')
     .option('--path [path]', 'Path to the daemon service url being invoked', '')
-    .option('--method [method]', 'HTTP method')                                         // GET, POST ...
+    .option('--method [method]', 'HTTP method') // GET, POST ...
     .action(withCompatibilityCheck((actionName, options) => {
         try {
             new InvokeActionCommand(program).execute(actionName, options);
-        }
-        catch (err) {
+        } catch (err) {
             console.error(chalk.red(err.message));
         }
     }));
@@ -150,9 +145,9 @@ program
     .option('--profile [profile]', 'The profile to use')
     .option('--project [project]', 'The project to use')
     .option('--actionType [actionType]', 'Type of action')
-    .option('--port [port]', 'Docker port')                  //'9091'
+    .option('--port [port]', 'Docker port') // '9091'
     .option('--environment [environment]', 'Environment')
-    .option('--cmd [cmd]', 'Command to be executed')    //'["--daemon"]'
+    .option('--cmd [cmd]', 'Command to be executed') // '["--daemon"]'
     .option('--environmentVariables [environmentVariables]', 'Docker container environment variables, only used for daemon action types')
     .option('--push-docker', 'Push Docker image to the Cortex registry.')
     .option('--scaleCount [count]', 'Scale count', 'Scale count, only used for daemon action types')
@@ -169,8 +164,7 @@ program
             // }
 
             new DeployActionCommand(program).execute(actionName, options);
-        }
-        catch (err) {
+        } catch (err) {
             console.error(chalk.red(err.message));
         }
     }));
@@ -187,8 +181,7 @@ program
     .action(withCompatibilityCheck((jobId, taskId, options) => {
         try {
             new TaskLogsActionCommand(program).execute(jobId, taskId, options);
-        }
-        catch (err) {
+        } catch (err) {
             console.error(chalk.red(err.message));
         }
     }));
@@ -205,8 +198,7 @@ program
     .action(withCompatibilityCheck((jobId, taskId, options) => {
         try {
             new TaskCancelActionCommand(program).execute(jobId, taskId, options);
-        }
-        catch (err) {
+        } catch (err) {
             console.error(chalk.red(err.message));
         }
     }));
@@ -223,8 +215,7 @@ program
     .action(withCompatibilityCheck((jobId, taskId, options) => {
         try {
             new TaskStatusActionCommand(program).execute(jobId, taskId, options);
-        }
-        catch (err) {
+        } catch (err) {
             console.error(chalk.red(err.message));
         }
     }));
@@ -237,13 +228,12 @@ program
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
     .option('--project [project]', 'The project to use')
-    .option('--query [query]', 'A JMESPath query to use in filtering the response data. Ignored if output format is not JSON.' +
-        ' Example to query for status [PENDING, SUBMITTED, STARTING, RUNNING, SUCCEEDED, FAILED] tasks: --query "data[?status == \'FAILED\'].taskId"')
+    .option('--query [query]', 'A JMESPath query to use in filtering the response data. Ignored if output format is not JSON.'
+        + ' Example to query for status [PENDING, SUBMITTED, STARTING, RUNNING, SUCCEEDED, FAILED] tasks: --query "data[?status == \'FAILED\'].taskId"')
     .action(withCompatibilityCheck((jobId, options) => {
         try {
             new JobTaskListActionCommand(program).execute(jobId, options);
-        }
-        catch (err) {
+        } catch (err) {
             console.error(chalk.red(err.message));
         }
     }));
@@ -260,8 +250,7 @@ program
     .action(withCompatibilityCheck((jobId, options) => {
         try {
             new TaskStatsActionCommand(program).execute(jobId, options);
-        }
-        catch (err) {
+        } catch (err) {
             console.error(chalk.red(err.message));
         }
     }));

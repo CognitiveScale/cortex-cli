@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 /*
- * Copyright 2018 Cognitive Scale, Inc. All Rights Reserved.
+ * Copyright 2020 Cognitive Scale, Inc. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the “License”);
  * you may not use this file except in compliance with the License.
@@ -41,8 +41,7 @@ program
     .action(withCompatibilityCheck((options) => {
         try {
             new ListVariablesCommand(program).execute(options);
-        }
-        catch (err) {
+        } catch (err) {
             console.error(chalk.red(err.message));
         }
     }));
@@ -59,8 +58,7 @@ program
     .action(withCompatibilityCheck((keyName, options) => {
         try {
             new ReadVariableCommand(program).execute(keyName, options);
-        }
-        catch (err) {
+        } catch (err) {
             console.error(chalk.red(err.message));
         }
     }));
@@ -78,8 +76,7 @@ program
     .action(withCompatibilityCheck((keyName, value, options) => {
         try {
             new WriteVariableCommand(program).execute(keyName, value, options);
-        }
-        catch (err) {
+        } catch (err) {
             console.error(chalk.red(err.message));
         }
     }));

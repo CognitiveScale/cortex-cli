@@ -14,15 +14,11 @@
  * limitations under the License.
  */
 
-const Throttle = require('superagent-throttle');
 const debug = require('debug')('cortex:cli:graph');
-const _ = require('lodash');
-const chalk = require('chalk');
+const got = require('got');
 const { constructError } = require('../commands/utils');
-const { request } = require('../commands/apiutils');
 
-const createEndpoints = (baseUri) => {
-    return {
+const createEndpoints = baseUri => ({
         profileVersions: projectId => `${baseUri}/fabric/v4/projects/${projectId}/profile-versions`,
         profiles: projectId => `${baseUri}/fabric/v4/projects/${projectId}/profiles`,
         schemas: projectId => `${baseUri}/fabric/v4/projects/${projectId}/profiles/schemas`,
@@ -30,26 +26,17 @@ const createEndpoints = (baseUri) => {
         entities: projectId => `${baseUri}/fabric/v4/projects/${projectId}/entities`,
         track: projectId => `${baseUri}/fabric/v4/projects/${projectId}/events/track`,
         query: projectId => `${baseUri}/fabric/v4/projects/${projectId}/query`,
-    }
-};
-
-const throttle = new Throttle({
-    active: true,
-    concurrent: 20,
-    rate: 500,
-    ratePer: 1000,
-});
+    });
 
 class Graph {
-
     constructor(cortexUrl) {
         this.cortexUrl = cortexUrl;
         this.endpoints = createEndpoints(cortexUrl);
     }
 
-    listProfiles(token, filter, sort, limit, skip) {
+    listProfiles(projectId, token, filter, sort, limit, skip) {
         debug('listProfiles() => GET %s', this.endpoints.profiles(projectId));
-        const query = {}
+        const query = {};
         if (filter) query.filter = filter;
         if (limit) query.limit = limit;
         if (sort) query.sort = sort;
@@ -57,266 +44,151 @@ class Graph {
         return got
             .get(this.endpoints.profiles(projectId), {
                 headers: { Authorization: `Bearer ${token}` },
-                query,
+              searchParams: { query },
             }).json()
-            .then((profiles) => {
-                return {success: true, profiles};
-            })
-            .catch((err) => {
-                return constructError(err);
-            });
+            .then(profiles => ({ success: true, profiles }))
+            .catch(err => constructError(err));
     }
 
-    listProfileVersions(token, profileId, schemaNames, before, after, limit) {
+    listProfileVersions(projectId, token, profileId, schemaNames, before, after, limit) {
         const endpoint = `${this.endpoints.profileVersions}/${profileId}`;
         debug('listProfileVersions(%s) => GET %s', profileId, endpoint);
-        const req = request
-            .get(endpoint)
-            .set('Authorization', `Bearer ${token}`)
-            .set('x-cortex-proxy-notify', true);
+        const query = {};
+        if (schemaNames) query.schemaNames = schemaNames;
+        if (before) query.before = before;
+        if (after) query.after = after;
+        query.limit = 100;
+        if (limit) query.limit = limit;
 
-        if (schemaNames) req.query({ schemaNames });
-        if (before) req.query({ before });
-        if (after) req.query({ after });
-        if (limit) req.query({ limit });
-
-        return req.then((res) => {
-            if (res.ok) {
-                return { success: true, versions: res.body.versions };
-            }
-            return { success: false, message: res.body, status: res.status };
-        })
-            .catch((err) => {
-                return constructError(err);
-            });
+        return got
+            .get(endpoint, {
+                headers: { Authorization: `Bearer ${token}` },
+              searchParams: { query },
+            }).json()
+            .then(versions => ({ success: true, versions }))
+            .catch(err => constructError(err));
     }
 
-    describeProfile(token, profileId, schemaName, historic, versionLimit, attribute) {
+    describeProfile(projectId, token, profileId, schemaName, historic, versionLimit, attribute) {
         const endpoint = `${this.endpoints.profiles(projectId)}/${profileId}`;
         debug('describeProfile(%s) => GET %s', profileId, endpoint);
+        const query = {};
+        if (schemaName) query.schemaName = schemaName;
+        if (historic) query.historic = historic;
+        if (versionLimit) query.versionLimit = versionLimit;
+        if (attribute) query.attribute = attribute;
 
-        const req = request
-            .get(endpoint)
-            .set('Authorization', `Bearer ${token}`)
-            .set('x-cortex-proxy-notify', true);
-
-        if (schemaName) req.query({ schemaNames: schemaName });
-        if (historic) req.query({ historic });
-        if (versionLimit) req.query({ versionLimit });
-        if (attribute) req.query({ attributes: attribute });
-
-        return req.then((res) => {
-            if (res.ok) {
-                return {success: true, profile: res.body};
-            }
-            return {success: false, message: res.body, status: res.status};
-        })
-        .catch((err) => {
-            return constructError(err);
-        });
+        return got
+            .get(endpoint, {
+                headers: { Authorization: `Bearer ${token}` },
+              searchParams: { query },
+            }).json()
+            .then(profile => ({ success: true, profile }))
+            .catch(err => constructError(err));
     }
 
-    deleteProfile(token, profileId, schemaName) {
+    deleteProfile(projectId, token, profileId, schemaName) {
         const endpoint = `${this.endpoints.profiles(projectId)}/${profileId}`;
         debug('deleteProfile(%s) => DELETE %s', profileId, endpoint);
-
-        const req = request
-            .delete(endpoint)
-            .set('Authorization', `Bearer ${token}`)
-            .set('x-cortex-proxy-notify', true);
-
-        if (schemaName) req.query({ schema: schemaName });
-
-        return req.then((res) => {
-                if (Boolean(_.get(res, 'headers.x-cortex-proxied', false)))
-                    console.error(chalk.blue('Request proxied to cloud.'));
-                if (res.ok) {
-                    return {success: true,};
-                }
-                return {success: false, message: res.body, status: res.status};
-            })
-            .catch((err) => {
-                return constructError(err);
-            });
+        const query = {};
+        if (schemaName) query.schema = schemaName;
+        return got
+            .delete(endpoint, {
+                headers: { Authorization: `Bearer ${token}` },
+                searchParams: { query },
+            }).json()
+            .then(() => ({ success: true }))
+            .catch(err => constructError(err));
     }
 
-    findEvents(token, filter, sort, limit, skip) {
-        debug('findEvents() => GET %s', this.endpoints.events);
+    findEvents(projectId, token, filter, sort, limit, skip) {
+        const endpoint = this.endpoints.events(projectId);
+        debug('findEvents() => GET %s', endpoint);
+        const query = {};
+        if (filter) query.filter = filter;
+        if (sort) query.sort = sort;
+        // ?? if (versionLimit) query.versionLimit = versionLimit;
+        if (skip) query.skip = skip;
+        query.limit = 50;
+        if (limit) query.limit = limit;
 
-        const req = request
-            .get(this.endpoints.events)
-            .set('Authorization', `Bearer ${token}`)
-            .set('x-cortex-proxy-notify', true);
-
-        if (filter) req.query({ filter });
-        if (sort) req.query({ sort });
-
-        if (limit) {
-            req.query({ limit });
-        }
-        else {
-            req.query({ limit: 50 });
-        }
-
-        if (skip) req.query({ skip });
-
-        return req.then((res) => {
-            if (Boolean(_.get(res, 'headers.x-cortex-proxied', false)))
-                console.error(chalk.blue('Request proxied to cloud.'));
-            if (res.ok) {
-                return {success: true, events: res.body.events};
-            }
-            return {success: false, message: res.body, status: res.status};
-        })
-        .catch((err) => {
-            return constructError(err);
-        });
+        return got
+            .get(endpoint, {
+                headers: { Authorization: `Bearer ${token}` },
+              searchParams: { query },
+            }).json()
+            .then(events => ({ success: true, events }))
+            .catch(err => constructError(err));
     }
 
-    publishEntities(token, entityEvents) {
-        debug('publishEntities() => POST %s', this.endpoints.events);
-
-        return request
-            .post(this.endpoints.events)
-            .use(throttle.plugin())
-            .retry(3, (err, res) => {
-                if (err) {
-                    debug(`retry on error: ${err}`);
-                    return true;
-                }
-
-                if (res) {
-                    // Retry on 502, 503, 504 - gateway errors
-                    if (res.status >= 502 && res.status <= 504) {
-                        debug(`server/gateway error with status ${res.status}, retrying request`);
-                        return true;
-                    }
-
-                    // Retry on 429 - rate limit
-                    if (res.status == 429) {
-                        debug(`retry after rate limit exceeded`);
-                        return true;
-                    }
-                }
-                
-                return false;
-            })
-            .set('Authorization', `Bearer ${token}`)
-            .set('x-cortex-proxy-notify', true)
-            .type('json')
-            .send(entityEvents)
-            .then((res) => {
-                if (Boolean(_.get(res, 'headers.x-cortex-proxied', false)))
-                    console.error(chalk.blue('Request proxied to cloud.'));
-                if (res.ok) {
-                    return {success: true, message: res.body.message || res.body};
-                }
-                return {success: false, message: res.body, status: res.status};
-            })
-            .catch((err) => {
-                return constructError(err);
-            });
+    publishEntities(projectId, token, entityEvents) {
+        debug('publishEntities() => POST %s', this.endpoints.events(projectId));
+        return got
+            .post(this.endpoints.events(projectId), {
+                headers: { Authorization: `Bearer ${token}` },
+                json: entityEvents,
+            }).json()
+            .then(message => ({ success: true, message }))
+            .catch(err => constructError(err));
     }
 
-    track(token, event) {
-        debug('track() => POST %s', this.endpoints.track);
-
-        return request
-            .post(this.endpoints.track)
-            .use(throttle.plugin())
-            .set('Authorization', `Bearer ${token}`)
-            .set('x-cortex-proxy-notify', true)
-            .type('json')
-            .send(event)
-            .then((res) => {
-                if (Boolean(_.get(res, 'headers.x-cortex-proxied', false)))
-                    console.error(chalk.blue('Request proxied to cloud.'));
-
-                if (res.ok) {
-                    return {success: true, message: res.body.message || res.body};
-                }
-
-                return {success: false, message: res.body, status: res.status};
-            })
-            .catch((err) => {
-                const e = constructError(err);
-                debug(e);
-                return e;
-            });
+    track(projectId, token, event) {
+        // TODO re-enable throttling
+        const endpoint = this.endpoints.track(projectId);
+        debug('track() => POST %s', endpoint);
+        return got
+            .post(endpoint, {
+                headers: { Authorization: `Bearer ${token}` },
+                json: event,
+            }).json()
+            .then(message => ({ success: true, message }))
+            .catch(err => constructError(err));
     }
 
-    rebuildProfiles(token, schemaName, profileId, filter, sort, limit, skip) {
+    rebuildProfiles(projectId, token, schemaName, profileId, filter, sort, limit, skip) {
         const endpoint = `${this.endpoints.schemas}/${schemaName}/rebuild`;
         debug('rebuildProfiles() => PUT %s', endpoint);
 
-        const req = request
-            .put(endpoint)
-            .set('Authorization', `Bearer ${token}`)
-            .set('x-cortex-proxy-notify', true);
+        const query = {};
+        query.filter = filter || {};
 
-        req.query({ filter: filter ? filter : {} });
+        if (profileId) query.profileId = profileId;
+        if (sort) query.sort = sort;
+        if (limit) query.limit = limit;
+        if (skip) query.skip = skip;
 
-        if (profileId) req.query({ profileId });
-        if (sort) req.query({ sort });
-        if (limit) req.query({ limit });
-        if (skip) req.query({ skip });
-
-        return req.then((res) => {
-            if (Boolean(_.get(res, 'headers.x-cortex-proxied', false)))
-                console.error(chalk.blue('Request proxied to cloud.'));
-            if (res.ok) {
-                return {success: true, message: res.body.message || res.body};
-            }
-            return {success: false, message: res.body, status: res.status};
-        })
-        .catch((err) => {
-            return constructError(err);
-        });
+        return got
+            .put(endpoint, {
+                headers: { Authorization: `Bearer ${token}` },
+              searchParams: { query },
+            }).json()
+            .then(message => ({ success: true, message }))
+            .catch(err => constructError(err));
     }
 
-    getEntity(token, entityId) {
+    getEntity(projectId, token, entityId) {
         const endpoint = `${this.endpoints.entities}/${entityId}`;
         debug('getEntity(%s) => GET %s', entityId, endpoint);
 
-        const req = request
-            .get(endpoint)
-            .set('Authorization', `Bearer ${token}`)
-            .set('x-cortex-proxy-notify', true);
-
-        return req.then((res) => {
-            if (Boolean(_.get(res, 'headers.x-cortex-proxied', false)))
-                console.error(chalk.blue('Request proxied to cloud.'));
-            if (res.ok) {
-                return {success: true, entity: res.body};
-            }
-            return {success: false, message: res.body, status: res.status};
-        })
-        .catch((err) => {
-            return constructError(err);
-        });
+        return got
+            .get(endpoint, {
+                headers: { Authorization: `Bearer ${token}` },
+            }).json()
+            .then(entity => ({ success: true, entity }))
+            .catch(err => constructError(err));
     }
 
-    query(token, query) {
+    query(projectId, token, query) {
         const endpoint = this.endpoints.query;
         debug('queryGraph(%s) => POST %s', query, endpoint);
 
-        const req = request
-            .post(endpoint)
-            .set('Authorization', `Bearer ${token}`)
-            .set('x-cortex-proxy-notify', true)
-            .send({ query })
-
-        return req.then((res) => {
-            if (Boolean(_.get(res, 'headers.x-cortex-proxied', false)))
-                console.error(chalk.blue('Request proxied to cloud.'));
-            if (res.ok) {
-                return {success: true, result: res.body};
-            }
-            return {success: false, message: res.body, status: res.status};
-        })
-        .catch((err) => {
-            return constructError(err);
-        });
+        return got
+            .post(endpoint, {
+                headers: { Authorization: `Bearer ${token}` },
+                json: { query },
+            }).json()
+            .then(result => ({ success: true, result }))
+            .catch(err => constructError(err));
     }
 }
 

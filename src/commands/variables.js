@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Cognitive Scale, Inc. All Rights Reserved.
+ * Copyright 2020 Cognitive Scale, Inc. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the “License”);
  * you may not use this file except in compliance with the License.
@@ -22,10 +22,11 @@ const map = require('lodash/fp/map');
 
 const { loadProfile } = require('../config');
 const Variables = require('../client/variables');
-const { printSuccess, printError, filterObject, parseObject, printTable } = require('./utils');
+const {
+ printSuccess, printError, filterObject, parseObject, printTable, 
+} = require('./utils');
 
 module.exports.ListVariablesCommand = class {
-
     constructor(program) {
         this.program = program;
     }
@@ -39,16 +40,14 @@ module.exports.ListVariablesCommand = class {
             .then((response) => {
                 if (response.success) {
                     const result = filterObject(response.result, options);
-                    if (options.json)
-                        printSuccess(JSON.stringify(result, null, 2), options);
+                    if (options.json) printSuccess(JSON.stringify(result, null, 2), options);
                     else {
                         const tableSpec = [
                             { column: 'Variable Key Name', field: 'keyName', width: 50 },
                         ];
                         printTable(tableSpec, map(x => ({ keyName: x }), result));
                     }
-                }
-                else {
+                } else {
                     printError(`Failed to list variables: ${response.message}`, options);
                 }
             })
@@ -59,7 +58,6 @@ module.exports.ListVariablesCommand = class {
 };
 
 module.exports.ReadVariableCommand = class {
-
     constructor(program) {
         this.program = program;
     }
@@ -72,17 +70,15 @@ module.exports.ReadVariableCommand = class {
         variables.readVariable(profile.token, keyName).then((response) => {
             if (response.success) {
                 const result = filterObject(response.result, options);
-                if (options.json)
-                    printSuccess(JSON.stringify(result, null, 2), options);
+                if (options.json) printSuccess(JSON.stringify(result, null, 2), options);
                 else {
                     const tableSpec = [
                         { column: 'Variable Key Name', field: 'keyName', width: 50 },
-                        { column: 'Value', field: 'value', width: 50 }
+                        { column: 'Value', field: 'value', width: 50 },
                     ];
-                    printTable(tableSpec, [{ keyName, value: JSON.stringify(getOr(undefined, 'value', result), null, 2)}]);
+                    printTable(tableSpec, [{ keyName, value: JSON.stringify(getOr(undefined, 'value', result), null, 2) }]);
                 }
-            }
-            else {
+            } else {
                 printError(`Failed to read secure variable : ${response.message}`, options);
             }
         })
@@ -93,7 +89,6 @@ module.exports.ReadVariableCommand = class {
 };
 
 module.exports.WriteVariableCommand = class {
-
     constructor(program) {
         this.program = program;
     }
@@ -105,8 +100,7 @@ module.exports.WriteVariableCommand = class {
         let data = value;
         if (options.data) {
             data = parseObject(options.data, options);
-        }
-        else if (options.dataFile) {
+        } else if (options.dataFile) {
             const dataStr = fs.readFileSync(options.dataFile);
             data = parseObject(dataStr, options);
         }
@@ -116,17 +110,15 @@ module.exports.WriteVariableCommand = class {
         }
 
         const variables = new Variables(profile.url);
-        variables.writeVariable(profile.token, keyName, data).then((response) => {
+        return variables.writeVariable(profile.token, keyName, data).then((response) => {
             if (response.success) {
-                let result = filterObject(response.result, options);
+                const result = filterObject(response.result, options);
                 printSuccess(result.message, options);
             }
-            else {
-                printError(`Failed to write secure variable : ${response.message}`, options);
-            }
+            printError(`Failed to write secure variable : ${response.message}`, options);
         })
-            .catch((err) => {
-                printError(`Failed to write secure variable : ${err.status} ${err.message}`, options);
-            });
+        .catch((err) => {
+            printError(`Failed to write secure variable : ${err.status} ${err.message}`, options);
+        });
     }
 };

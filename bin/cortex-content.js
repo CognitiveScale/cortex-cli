@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 /*
- * Copyright 2018 Cognitive Scale, Inc. All Rights Reserved.
+ * Copyright 2020 Cognitive Scale, Inc. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the “License”);
  * you may not use this file except in compliance with the License.
@@ -25,7 +25,7 @@ const {
     ListContent,
     UploadContent,
     DeleteContent,
-    DownloadContent
+    DownloadContent,
 } = require('../src/commands/content');
 
 program.description('Work with Cortex Contents');
@@ -44,8 +44,7 @@ program
     .action(withCompatibilityCheck((options) => {
         try {
             new ListContent(program).execute(options);
-        }
-        catch (err) {
+        } catch (err) {
             console.error(chalk.red(err.message));
         }
     }));
@@ -62,13 +61,12 @@ program
     .option('--profile [profile]', 'The profile to use')
     .option('--project [project]', 'The project to use')
     .option('--secure', 'Uploads the content securely to the Cortex Vault. \n\t\t\t\tUse this option for keytab files or content that contains sensitive information that is required during Runtime. \n\t\t\t\tTake note of the contentKey you give to this content for future reference.')
-    .option('--content-type [MIME type]', 'Sets the \`Content-Type\` or MIME type of the content ( default: application/octet-stream )')
+    .option('--content-type [MIME type]', 'Sets the `Content-Type` or MIME type of the content ( default: application/octet-stream )')
     .option('--chunkSize [int]', 'Number of files to simultaneous upload', 10)
     .action(withCompatibilityCheck((contentKey, filePath, options) => {
         try {
             new UploadContent(program).execute(contentKey, filePath, options);
-        }
-        catch (err) {
+        } catch (err) {
             console.error(chalk.red(err.message));
         }
     }));
@@ -84,8 +82,7 @@ program
     .action(withCompatibilityCheck((contentKey, options) => {
         try {
             new DeleteContent(program).execute(contentKey, options);
-        }
-        catch (err) {
+        } catch (err) {
             console.error(chalk.red(err.message));
         }
     }));
@@ -103,8 +100,7 @@ program
     .action(withCompatibilityCheck((contentKey, options) => {
         try {
             new DownloadContent(program).execute(contentKey, options);
-        }
-        catch (err) {
+        } catch (err) {
             console.error(chalk.red(err.message));
         }
     }));

@@ -14,31 +14,25 @@
  * limitations under the License.
  */
 
-const  { request } = require('../commands/apiutils');
 const debug = require('debug')('cortex:cli');
+const got = require('got');
 const { constructError } = require('../commands/utils');
 
 module.exports = class Accounts {
-
     constructor(cortexUrl) {
         this.cortexUrl = cortexUrl;
-        this.endpoint = `${cortexUrl}/fabric/v4`;
+        this.endpoint = `${cortexUrl}/v2/accounts`;
         this.whoAmIEndpoint = `${this.endpoint}/user/whoami`;
     }
 
     whoAmI(token) {
         const endpoint = this.whoAmIEndpoint;
         debug('whoAmI => %s', endpoint);
-        return request
-            .get(endpoint)
-            .set('Authorization', `Bearer ${token}`)
-            .json()
-            .then((results) => {
-                    return {success: true, result};
-            })
-            .catch((err) => {
-                return constructError(err);
-            });
+        return got
+            .get(endpoint, {
+                headers: { Authorization: `Bearer ${token}` },
+            }).json()
+            .then(result => ({ success: true, result }))
+            .catch(err => constructError(err));
     }
-
 };

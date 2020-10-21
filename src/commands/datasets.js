@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Cognitive Scale, Inc. All Rights Reserved.
+ * Copyright 2020 Cognitive Scale, Inc. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the “License”);
  * you may not use this file except in compliance with the License.
@@ -17,13 +17,13 @@
 const fs = require('fs');
 const debug = require('debug')('cortex:cli');
 const es = require('event-stream');
-const yeoman = require('yeoman-environment');
 const { loadProfile } = require('../config');
 const Datasets = require('../client/datasets');
-const { printSuccess, printError, filterObject, parseObject, printTable } = require('./utils');
+const {
+ printSuccess, printError, filterObject, parseObject, printTable, 
+} = require('./utils');
 
 module.exports.ListDatasets = class ListDatasets {
-
     constructor(program) {
         this.program = program;
     }
@@ -35,15 +35,14 @@ module.exports.ListDatasets = class ListDatasets {
         const datasets = new Datasets(profile.url);
         datasets.listDatasets(options.project || profile.project, profile.token).then((response) => {
             if (response.success) {
-                let result = response.result;
+                let { result } = response;
                 if (options.query) {
                     result = filterObject(response.result, options);
                 }
                 if (options.json) {
                     printSuccess(JSON.stringify(result, null, 2), options);
-                }
-                else {
-                    let tableSpec = [
+                } else {
+                    const tableSpec = [
                         { column: 'Name', field: 'name', width: 40 },
                         { column: 'Title', field: 'title', width: 50 },
                         { column: 'Connection Name', field: 'connectionName', width: 25 },
@@ -54,8 +53,7 @@ module.exports.ListDatasets = class ListDatasets {
 
                     printTable(tableSpec, result.datasets);
                 }
-            }
-            else {
+            } else {
                 printError(`Failed to list datasets: ${response.status} ${response.message}`, options);
             }
         })
@@ -67,7 +65,6 @@ module.exports.ListDatasets = class ListDatasets {
 };
 
 module.exports.SaveDatasetsCommand = class SaveDatasetsCommand {
-
     constructor(program) {
         this.program = program;
     }
@@ -83,9 +80,8 @@ module.exports.SaveDatasetsCommand = class SaveDatasetsCommand {
        const datasets = new Datasets(profile.url);
        datasets.saveDatasets(options.project || profile.project, profile.token, connObj).then((response) => {
            if (response.success) {
-               printSuccess(`Dataset saved`, options);
-           }
-           else {
+               printSuccess('Dataset saved', options);
+           } else {
                printError(`Failed to save Dataset: ${response.status} ${response.message}`, options);
            }
        })
@@ -96,7 +92,6 @@ module.exports.SaveDatasetsCommand = class SaveDatasetsCommand {
 };
 
 module.exports.DescribeDatasetCommand = class DescribeDatasetCommand {
-
     constructor(program) {
         this.program = program;
     }
@@ -108,10 +103,9 @@ module.exports.DescribeDatasetCommand = class DescribeDatasetCommand {
         const dataset = new Datasets(profile.url);
         dataset.describeDataset(options.project || profile.project, profile.token, datasetName).then((response) => {
             if (response.success) {
-                let result = filterObject(response.result, options);
+                const result = filterObject(response.result, options);
                 printSuccess(JSON.stringify(result, null, 2), options);
-            }
-            else {
+            } else {
                 printError(`Failed to describe dataset ${datasetName}: ${response.message}`, options);
             }
         })
@@ -122,7 +116,6 @@ module.exports.DescribeDatasetCommand = class DescribeDatasetCommand {
 };
 
 module.exports.GetDataframeCommand = class GetDataframeCommand {
-
     constructor(program) {
         this.program = program;
     }
@@ -135,8 +128,7 @@ module.exports.GetDataframeCommand = class GetDataframeCommand {
         dataset.getDataframe(options.project || profile.project, profile.token, datasetName).then((response) => {
             if (response.success) {
                 printSuccess(JSON.stringify(response.result, null, 2), options);
-            }
-            else {
+            } else {
                 printError(`Failed to get dataframe ${datasetName}: ${response.message}`, options);
             }
         })
@@ -147,7 +139,6 @@ module.exports.GetDataframeCommand = class GetDataframeCommand {
 };
 
 module.exports.StreamDatasetCommand = class StreamDatasetCommand {
-
     constructor(program) {
         this.program = program;
     }
@@ -159,35 +150,16 @@ module.exports.StreamDatasetCommand = class StreamDatasetCommand {
         const dataset = new Datasets(profile.url);
         dataset.streamDataset(options.project || profile.project, profile.token, datasetName).then((response) => {
             if (response.success) {
-                let stream = new es.Stream.PassThrough();
+                const stream = new es.Stream.PassThrough();
                 stream.write(response.result.text);
                 stream.end();
-                stream.pipe(process.stdout)
-            }
-            else {
+                stream.pipe(process.stdout);
+            } else {
                 printError(`Failed to stream dataset ${datasetName}: ${response.message}`, options);
             }
         })
         .catch((err) => {
             printError(`Failed to stream dataset ${datasetName}: ${err.status} ${err.message}`, options);
-        });
-    }
-};
-
-module.exports.GenerateDatasetCommand = class GenerateDatasetCommand {
-
-    constructor(program) {
-        this.program = program;
-    }
-
-    execute(options) {
-        debug('%s.generateDataset()', options.profile);
-        const yenv = yeoman.createEnv();
-        const profile = options.profile;
-        yenv.lookup(()=>{
-            yenv.run('@c12e/cortex:datasets',
-                {'cortexProfile': profile },
-                (err) => { err ? printError(err) : printSuccess('Done.') });
         });
     }
 };

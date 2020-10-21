@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Cognitive Scale, Inc. All Rights Reserved.
+ * Copyright 2020 Cognitive Scale, Inc. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the “License”);
  * you may not use this file except in compliance with the License.
@@ -14,10 +14,12 @@
  * limitations under the License.
  */
 const debug = require('debug')('cortex:cli');
-const {loadProfile} = require('../config');
 const path = require('path');
+const { loadProfile } = require('../config');
 const Agents = require('../client/agents');
-const {printSuccess, printError, filterObject, cleanInternalFields, jsonToYaml, writeToFile, fileExists, deleteFile} = require('./utils');
+const {
+ printSuccess, printError, filterObject, cleanInternalFields, jsonToYaml, writeToFile, fileExists, deleteFile, 
+} = require('./utils');
 
 
 /**
@@ -65,36 +67,35 @@ module.exports.DeploySnapshotCommand = class {
 
         const agents = new Agents(profile.url);
         const promises = [];
-        snapshotIds.split(' ').forEach(function (snapshotId) {
+        snapshotIds.split(' ').forEach((snapshotId) => {
             promises.push(agents.describeAgentSnapshot(options.project || profile.project, profile.token, snapshotId, envName).then((response) => {
                 if (response.success) {
                     let result = filterObject(response.result, options);
                     result = cleanInternalFields(result);
-                    //TODO add validation for not exporting tip snapshots, as they don't have all dependencies. Should we enforce?
-                    let filename = snapshotId + ".json";
+                    // TODO add validation for not exporting tip snapshots, as they don't have all dependencies. Should we enforce?
+                    let filename = `${snapshotId}.json`;
                     if (options.yaml) {
                         result = jsonToYaml(result);
-                        filename = snapshotId + ".yaml";
+                        filename = `${snapshotId}.yaml`;
                     }
                     const filepath = path.join(exportPath, 'snapshots', filename);
                     writeToFile(result, filepath);
                     printSuccess(`Successfully exported agent snapshot ${filepath}`);
                     return filepath;
-                } else {
-                    printError(`Failed to export agent snapshot ${snapshotId}: ${response.message}`, options);
-                }
+                } 
+                    return printError(`Failed to export agent snapshot ${snapshotId}: ${response.message}`, options);
             }).catch((err) => {
                 printError(`Failed to export agent snapshot ${snapshotId}: ${err.status} ${err.message}`, options);
             }));
         });
 
-        Promise.all(promises).then(result => {
+        Promise.all(promises).then((result) => {
             const manifest = {
-                "version": 1,
-                "kind": "deployment-manifest",
-                "cortex": {
-                    "snapshots": result
-                }
+                version: 1,
+                kind: 'deployment-manifest',
+                cortex: {
+                    snapshots: result,
+                },
             };
             writeToFile(jsonToYaml(manifest), manifestFile);
             printSuccess(`Successfully generated manifest file ${manifestFile}`);

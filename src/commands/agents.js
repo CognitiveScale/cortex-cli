@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Cognitive Scale, Inc. All Rights Reserved.
+ * Copyright 2020 Cognitive Scale, Inc. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the “License”);
  * you may not use this file except in compliance with the License.
@@ -16,13 +16,15 @@
 
 const fs = require('fs');
 const debug = require('debug')('cortex:cli');
+const _ = require('lodash');
 const { loadProfile } = require('../config');
 const Catalog = require('../client/catalog');
 const Agents = require('../client/agents');
-const _ = require('lodash');
-const { printSuccess, printError, filterObject, parseObject, printTable } = require('./utils');
-module.exports.SaveAgentCommand = class SaveAgentCommand {
+const {
+ printSuccess, printError, filterObject, parseObject, printTable, 
+} = require('./utils');
 
+module.exports.SaveAgentCommand = class SaveAgentCommand {
     constructor(program) {
         this.program = program;
     }
@@ -38,9 +40,8 @@ module.exports.SaveAgentCommand = class SaveAgentCommand {
         const catalog = new Catalog(profile.url);
         catalog.saveAgent(options.project || profile.project, profile.token, agent).then((response) => {
             if (response.success) {
-                printSuccess(`Agent saved`, options);
-            }
-            else {
+                printSuccess('Agent saved', options);
+            } else {
                 printError(`Failed to save agent: ${response.status} ${response.message}`, options);
             }
         })
@@ -51,7 +52,6 @@ module.exports.SaveAgentCommand = class SaveAgentCommand {
 };
 
 module.exports.ListAgentsCommand = class ListAgentsCommand {
-
     constructor(program) {
         this.program = program;
     }
@@ -64,23 +64,20 @@ module.exports.ListAgentsCommand = class ListAgentsCommand {
         catalog.listAgents(options.project || profile.project, profile.token).then((response) => {
             if (response.success) {
                 let result = response.agents;
-                if (options.query)
-                    result = filterObject(result, options);
+                if (options.query) result = filterObject(result, options);
 
                 if (options.json) {
                     printSuccess(JSON.stringify(result, null, 2), options);
-                }
-                else {
+                } else {
                     const tableSpec = [
                         { column: 'Name', field: 'name', width: 50 },
                         { column: 'Title', field: 'title', width: 25 },
                         { column: 'Description', field: 'description', width: 50 },
-                        { column: 'Created On', field: 'createdAt', width: 26 }
+                        { column: 'Created On', field: 'createdAt', width: 26 },
                     ];
                     printTable(tableSpec, result);
                 }
-            }
-            else {
+            } else {
                 printError(`Failed to list agents: ${response.status} ${response.message}`, options);
             }
         })
@@ -92,7 +89,6 @@ module.exports.ListAgentsCommand = class ListAgentsCommand {
 };
 
 module.exports.DescribeAgentCommand = class DescribeAgentCommand {
-
     constructor(program) {
         this.program = program;
     }
@@ -104,26 +100,22 @@ module.exports.DescribeAgentCommand = class DescribeAgentCommand {
             debug('%s.executeDescribeAgentVersions(%s)', profile.name, agentName);
             catalog.describeAgentVersions(options.project || profile.project, profile.token, agentName).then((response) => {
                 if (response.success) {
-                    let result = filterObject(response.agent, options);
+                    const result = filterObject(response.agent, options);
                     printSuccess(JSON.stringify(result, null, 2), options);
-                }
-                else {
+                } else {
                     printError(`Failed to describe agent versions ${agentName}: ${response.message}`, options);
                 }
             })
             .catch((err) => {
                 printError(`Failed to describe agent versions ${agentName}: ${err.status} ${err.message}`, options);
             });
-        }
-
-        else {
+        } else {
             debug('%s.executeDescribeAgent(%s)', profile.name, agentName);
-            catalog.describeAgent(options.project|| profile.project, profile.token, agentName).then((response) => {
+            catalog.describeAgent(options.project || profile.project, profile.token, agentName).then((response) => {
                 if (response.success) {
-                    let result = filterObject(response.agent, options);
+                    const result = filterObject(response.agent, options);
                     printSuccess(JSON.stringify(result, null, 2), options);
-                }
-                else {
+                } else {
                     printError(`Failed to describe agent ${agentName}: ${response.message}`, options);
                 }
             })
@@ -135,7 +127,6 @@ module.exports.DescribeAgentCommand = class DescribeAgentCommand {
 };
 
 module.exports.InvokeAgentServiceCommand = class {
-    
     constructor(program) {
         this.program = program;
     }
@@ -147,8 +138,7 @@ module.exports.InvokeAgentServiceCommand = class {
         let params = {};
         if (options.params) {
             params = parseObject(options.params, options);
-        }
-        else if (options.paramsFile) {
+        } else if (options.paramsFile) {
             const paramsStr = fs.readFileSync(options.paramsFile);
             params = parseObject(paramsStr, options);
         }
@@ -158,10 +148,9 @@ module.exports.InvokeAgentServiceCommand = class {
         const agents = new Agents(profile.url);
         agents.invokeAgentService(options.project || profile.project, profile.token, agentName, serviceName, params).then((response) => {
             if (response.success) {
-                let result = filterObject(response.result, options);
+                const result = filterObject(response.result, options);
                 printSuccess(JSON.stringify(result, null, 2), options);
-            }
-            else {
+            } else {
                 printError(`Invocation failed: ${response.status} ${response.message}`, options);
             }
         })
@@ -169,8 +158,7 @@ module.exports.InvokeAgentServiceCommand = class {
             if (err.response && err.response.body) {
                 debug('Raw error response: %o', err.response.body);
                 printError(`Failed to invoke agent service (${err.status} ${err.message}): ${err.response.body.error}`, options);
-            }
-            else {
+            } else {
                 printError(`Failed to invoke agent service: ${err.status} ${err.message}`, options);
             }
         });
@@ -178,7 +166,6 @@ module.exports.InvokeAgentServiceCommand = class {
 };
 
 module.exports.GetActivationCommand = class {
-
     constructor(program) {
         this.program = program;
     }
@@ -190,10 +177,9 @@ module.exports.GetActivationCommand = class {
         const agents = new Agents(profile.url);
         agents.getActivation(options.project || profile.project, profile.token, activationId).then((response) => {
             if (response.success) {
-                let result = filterObject(response.result.activation, options);
+                const result = filterObject(response.result.activation, options);
                 printSuccess(JSON.stringify(result, null, 2), options);
-            }
-            else {
+            } else {
                 printError(`Failed to get activation ${activationId}: ${response.message}`, options);
             }
         })
@@ -204,7 +190,6 @@ module.exports.GetActivationCommand = class {
 };
 
 module.exports.ListActivationsCommand = class {
-
     constructor(program) {
         this.program = program;
     }
@@ -218,13 +203,11 @@ module.exports.ListActivationsCommand = class {
         agents.listActivations(options.project || profile.project, profile.token, instanceId, envName).then((response) => {
             if (response.success) {
                 let result = response.result.activations;
-                if (options.query)
-                    result = filterObject(result, options);
+                if (options.query) result = filterObject(result, options);
 
                 if (options.json) {
                     printSuccess(JSON.stringify(result, null, 2), options);
-                }
-                else {
+                } else {
                     const tableSpec = [
                         { column: 'Activation Id', field: 'activationId', width: 38 },
                         { column: 'Type', field: 'type', width: 20 },
@@ -236,8 +219,7 @@ module.exports.ListActivationsCommand = class {
 
                     printTable(tableSpec, result);
                 }
-            }
-            else {
+            } else {
                 printError(`Failed to list activations for instance ${instanceId}: ${response.message}`, options);
             }
         })
@@ -247,51 +229,7 @@ module.exports.ListActivationsCommand = class {
     }
 };
 
-module.exports.ListAgentInstancesCommand = class {
-
-    constructor(program) {
-        this.program = program;
-    }
-
-    execute(agentName, options) {
-        const profile = loadProfile(options.profile);
-        const envName = options.environmentName;
-        debug('%s.listAgentInstances(%s)', profile.name, agentName);
-
-        const agents = new Agents(profile.url);
-        agents.listAgentInstances(options.project || profile.project, profile.token, agentName, envName).then((response) => {
-            if (response.success) {
-                let result = response.instances;
-                if (options.query)
-                    result = filterObject(result, options);
-
-                if (options.json) {
-                    printSuccess(JSON.stringify(result, null, 2), options);
-                }
-                else {
-                    const tableSpec = [
-                        { column: 'Instance Id', field: 'id', width: 26 },
-                        { column: 'Status', field: 'status', width: 15 },
-                        { column: 'Snapshot Id', field: 'snapshotId', width: 40 },
-                        { column: 'Agent Version', field: 'agentVersion', width: 15 },
-                        { column: 'Environment', field: 'environmentName', width: 26 },
-                        { column: 'Created At', field: 'createdAt', width: 26 },
-                    ];
-
-                    printTable(tableSpec, result);
-                }
-            }
-            else {
-                printError(`Failed to list agent instances ${agentName}: ${response.message}`, options);
-            }
-        })
-            .catch((err) => {
-                printError(`Failed to list agent instances ${agentName}: ${err.status} ${err.message}`, options);
-            });
-    }
-};
-
-module.exports.ListServicesCommand = class ListServicesCommand{ 
+module.exports.ListServicesCommand = class ListServicesCommand { 
     constructor(program) {
         this.program = program;
     }
@@ -303,27 +241,25 @@ module.exports.ListServicesCommand = class ListServicesCommand{
         const catalog = new Catalog(profile.url);
         catalog.listServices(options.project || profile.project, profile.token, agentName, profile).then((response) => {
             if (response.success) {
-                let result = filterObject(response.services, options);
+                const result = filterObject(response.services, options);
                 if (options.json) {
                     printSuccess(JSON.stringify(result, null, 2), options);
-                }
-                else {
+                } else {
                     const tableSpec = [
-                        {column: 'Service Name', field: 'name', width: 25},
-                        {column: 'Service Endpoint URL', field: 'url', width: 115},
-                        {column: 'Parameters', field: 'formatted_types', width: 65}
+                        { column: 'Service Name', field: 'name', width: 25 },
+                        { column: 'Service Endpoint URL', field: 'url', width: 115 },
+                        { column: 'Parameters', field: 'formatted_types', width: 65 },
                     ];
                     printTable(tableSpec, result);
                 }
-            }
-            else {
+            } else {
                 printError(`Failed to return agent service information: ${agentName}: ${response.message}`, options);
             }
         }).catch((err) => {
             printError(`Failed to return agent service information: ${agentName}: ${err.status} ${err.message}`, options);
         });
     }
-}
+};
 
 module.exports.ListAgentSnapshotsCommand = class {
     constructor(program) {
@@ -339,22 +275,20 @@ module.exports.ListAgentSnapshotsCommand = class {
         agents.listAgentSnapshots(options.project || profile.project, profile.token, agentName, envName)
             .then((response) => {
             if (response.success) {
-                let result = filterObject(response.result.snapshots, options);
+                const result = filterObject(response.result.snapshots, options);
                 if (options.json) {
                     printSuccess(JSON.stringify(result, null, 2), options);
-                }
-                else {
+                } else {
                     const tableSpec = [
                         { column: 'Snapshot ID', field: 'id', width: 40 },
                         { column: 'Title', field: 'title', width: 30 },
                         { column: 'Agent Version', field: 'agentVersion', width: 15 },
                         { column: 'Environment', field: 'environmentName', width: 30 },
-                        { column: 'Created On', field: 'createdAt', width: 26 }
+                        { column: 'Created On', field: 'createdAt', width: 26 },
                     ];
                     printTable(tableSpec, result);
                 }
-            }
-            else {
+            } else {
                 printError(`Failed to list agent snapshots ${agentName}: ${response.message}`, options);
             }
         })
@@ -364,46 +298,6 @@ module.exports.ListAgentSnapshotsCommand = class {
             });
     }
 };
-
-module.exports.ListSnapshotInstancesCommand = class {
-
-    constructor(program) {
-        this.program = program;
-    }
-
-    execute(snapshotId, options) {
-        const profile = loadProfile(options.profile);
-        debug('%s.listSnapshotInstances(%s)', profile.name, snapshotId);
-
-        const agents = new Agents(profile.url);
-        const envName = options.environmentName;
-        agents.listSnapshotInstances(options.project || profile.project, profile.token, snapshotId, envName).then((response) => {
-            if (response.success) {
-                let result = filterObject(response.instances, options);
-                if (options.json) {
-                    printSuccess(JSON.stringify(result, null, 2), options);
-                }
-                else {
-                    const tableSpec = [
-                        { column: 'Instance Id', field: 'instanceId', width: 26 },
-                        { column: 'Status', field: 'status', width: 15 },
-                        { column: 'Environment Id', field: 'environmentName', width: 26 },
-                        { column: 'Created At', field: 'createdAt', width: 26 },
-                    ];
-                    printTable(tableSpec, result);
-                }
-
-            }
-            else {
-                printError(`Failed to list instances for snapshot ${snapshotId}: ${response.message}`, options);
-            }
-        })
-            .catch((err) => {
-                printError(`Failed to list instances for snapshot ${snapshotId}: ${err.status} ${err.message}`, options);
-            });
-    }
-};
-
 
 module.exports.DescribeAgentSnapshotCommand = class {
     constructor(program) {
@@ -418,10 +312,9 @@ module.exports.DescribeAgentSnapshotCommand = class {
         const agents = new Agents(profile.url);
         agents.describeAgentSnapshot(options.project || profile.project, profile.token, snapshotId, envName).then((response) => {
             if (response.success) {
-                let result = filterObject(response.result, options);
+                const result = filterObject(response.result, options);
                 printSuccess(JSON.stringify(result, null, 2), options);
-            }
-            else {
+            } else {
                 printError(`Failed to describe agent snapshot ${snapshotId}: ${response.message}`, options);
             }
         }).catch((err) => {
@@ -431,7 +324,6 @@ module.exports.DescribeAgentSnapshotCommand = class {
 };
 
 module.exports.CreateAgentSnapshotCommand = class {
-
     constructor(program) {
         this.program = program;
     }
@@ -443,20 +335,19 @@ module.exports.CreateAgentSnapshotCommand = class {
             debug('%s.createAgentSnapshot(%s)', profile.name, snapshotDefinition);
             const snapshotDefStr = fs.readFileSync(snapshotDefinition);
             snapshot = parseObject(snapshotDefStr, options);
-        } else if ( _.get(options,'title','').length > 0 && _.get(options,'agentName','').length > 0)  {
-            snapshot = { agentName: options.agentName, title: options.title }
+        } else if (_.get(options, 'title', '').length > 0 && _.get(options, 'agentName', '').length > 0) {
+            snapshot = { agentName: options.agentName, title: options.title };
         } else {
-            printError(`Either --title <..> and --agentName <..> or a snapshot definition file must be provided`, options);
+            printError('Either --title <..> and --agentName <..> or a snapshot definition file must be provided', options);
             return;
         }
-        const agentName = snapshot.agentName;
+        const { agentName } = snapshot;
         const agents = new Agents(profile.url);
         agents.createAgentSnapshot(options.project || profile.project, profile.token, snapshot).then((response) => {
             if (response.success) {
-                let result = filterObject(response.result, options);
+                const result = filterObject(response.result, options);
                 printSuccess(JSON.stringify(result, null, 2), options);
-            }
-            else {
+            } else {
                 printError(`Failed to create agent snapshot ${agentName}: ${response.message}`, options);
             }
         })
@@ -464,31 +355,28 @@ module.exports.CreateAgentSnapshotCommand = class {
                 printError(`Failed to create agent snapshot ${agentName}: ${err.status} ${err.message}`, options);
             });
     }
-
 };
 
-module.exports.ListTriggersCommand = class {
-
-    constructor(program) {
-        this.program = program;
-    }
-
-    execute(options) {
-        const profile = loadProfile(options.profile);
-        debug('%s.listTriggers', profile.name);
-
-        const agents = new Agents(profile.url);
-        agents.listTriggers(profile.token).then((response) => {
-            if (response.success) {
-                let result = filterObject(response.result, options);
-                printSuccess(JSON.stringify(result, null, 2), options);
-            }
-            else {
-                printError(`Failed to list triggers ${instanceId}: ${response.message}`, options);
-            }
-        })
-            .catch((err) => {
-                printError(`Failed to list triggers ${instanceId} : ${err.status} ${err.message}`, options);
-            });
-    }
-};
+// module.exports.ListTriggersCommand = class {
+//     constructor(program) {
+//         this.program = program;
+//     }
+//
+//     execute(options) {
+//         const profile = loadProfile(options.profile);
+//         debug('%s.listTriggers', profile.name);
+//
+//         const agents = new Agents(profile.url);
+//         agents.listTriggers(profile.token).then((response) => {
+//             if (response.success) {
+//                 const result = filterObject(response.result, options);
+//                 printSuccess(JSON.stringify(result, null, 2), options);
+//             } else {
+//                 printError(`Failed to list triggers ${instanceId}: ${response.message}`, options);
+//             }
+//         })
+//             .catch((err) => {
+//                 printError(`Failed to list triggers ${instanceId} : ${err.status} ${err.message}`, options);
+//             });
+//     }
+// };

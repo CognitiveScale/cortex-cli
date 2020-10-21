@@ -15,28 +15,22 @@
  */
 
 const debug = require('debug')('cortex:cli');
-const _ = require('lodash');
-const chalk = require('chalk');
 const got = require('got');
-const  { request } = require('../commands/apiutils');
 const { constructError, formatAllServiceInputParameters, checkProject } = require('../commands/utils');
 
-const createEndpoints = (baseUri) => {
-    return {
+const createEndpoints = baseUri => ({
         skills: projectId => `${baseUri}/fabric/v4/projects/${projectId}/skills`,
-        agents:  projectId => `${baseUri}/fabric/v4/projects/${projectId}/agents`,
-        types:  projectId => `${baseUri}/fabric/v4/projects/${projectId}/types`,
-    }
-};
+        agents: projectId => `${baseUri}/fabric/v4/projects/${projectId}/agents`,
+        types: projectId => `${baseUri}/fabric/v4/projects/${projectId}/types`,
+    });
 
 module.exports = class Catalog {
-
     constructor(cortexUrl) {
         this.cortexUrl = cortexUrl;
         this.endpoints = createEndpoints(cortexUrl);
     }
 
-    saveSkill(projectId,token, skillObj) {
+    saveSkill(projectId, token, skillObj) {
         checkProject(projectId);
         debug('saveSkill(%s) => %s', skillObj.name, this.endpoints.skills);
         return got
@@ -44,12 +38,8 @@ module.exports = class Catalog {
                 headers: { Authorization: `Bearer ${token}` },
                 json: skillObj,
             }).json()
-            .then((res) => {
-                    return {success: true, message: res.body};
-            })
-            .catch((err) => {
-                return constructError(err);
-            });
+            .then(res => ({ success: true, message: res.body }))
+            .catch(err => constructError(err));
     }
 
     listSkills(projectId, token) {
@@ -59,12 +49,8 @@ module.exports = class Catalog {
             .get(this.endpoints.skills(projectId), {
                 headers: { Authorization: `Bearer ${token}` },
             }).json()
-            .then((skills) => {
-                    return {success: true, ...skills};
-            })
-            .catch((err) => {
-                return constructError(err);
-            });
+            .then(skills => ({ success: true, ...skills }))
+            .catch(err => constructError(err));
     }
 
     describeSkill(projectId, token, skillName) {
@@ -75,12 +61,8 @@ module.exports = class Catalog {
             .get(endpoint, {
                 headers: { Authorization: `Bearer ${token}` },
             }).json()
-            .then((res) => {
-                    return {success: true, skill: res.body};
-            })
-            .catch((err) => {
-                return constructError(err);
-            });
+            .then(res => ({ success: true, skill: res.body }))
+            .catch(err => constructError(err));
     }
 
     listAgents(projectId, token) {
@@ -92,27 +74,28 @@ module.exports = class Catalog {
                 headers: { Authorization: `Bearer ${token}` },
             })
             .json()
-            .then((agentResp) => { return {success: true, ...agentResp} })
-            .catch((err) => {
-                return constructError(err);
-            });
+            .then(agentResp => ({ success: true, ...agentResp }))
+            .catch(err => constructError(err));
     }
 
-    listServices(projectId, token, agentName, profile) {
+    listServices(projectId, token, agentName) {
+        // TODO removed profile should I use that as the URL ??
         checkProject(projectId);
         debug('listServices() using describeAgent');
         return this.describeAgent(projectId, token, agentName).then((response) => {
             if (response.success) {
-                const urlBase =  `${this.endpoints.agents(projectId)}/${agentName}/services`;
+                const urlBase = `${this.endpoints.agents(projectId)}/${agentName}/services`;
                 const servicesList = response.agent.inputs
                     .filter(i => i.signalType === 'Service')
                     .map(i => ({ ...i, url: `${urlBase}/${i.name}` }))
-                    .map(i => ({ ...i, formatted_types:
-                    formatAllServiceInputParameters(i.parameters)}));
+                    .map(i => ({
+ ...i,
+formatted_types:
+                    formatAllServiceInputParameters(i.parameters), 
+}));
                 return { success: true, services: servicesList };
-            } else {
+            } 
                 return response;
-            }
         });
     }
 
@@ -123,14 +106,10 @@ module.exports = class Catalog {
         return got
             .post(endpoint, {
                 headers: { Authorization: `Bearer ${token}` },
-                json: agentObj
+                json: agentObj,
             }).json()
-            .then((res) => {
-                    return {success: true, message: res.body};
-            })
-            .catch((err) => {
-                return constructError(err);
-            });
+            .then(res => ({ success: true, message: res.body }))
+            .catch(err => constructError(err));
     }
 
     describeAgent(projectId, token, agentName) {
@@ -141,12 +120,8 @@ module.exports = class Catalog {
             .get(endpoint, {
                 headers: { Authorization: `Bearer ${token}` },
             }).json()
-            .then((agent) => {
-                    return {success: true, agent};
-            })
-            .catch((err) => {
-                return constructError(err);
-            });
+            .then(agent => ({ success: true, agent }))
+            .catch(err => constructError(err));
     }
 
     describeAgentVersions(projectId, token, agentName) {
@@ -158,18 +133,14 @@ module.exports = class Catalog {
                 headers: { Authorization: `Bearer ${token}` },
             })
             .json()
-            .then((agent) => {
-                    return {success: true, agent};
-            })
-            .catch((err) => {
-                return constructError(err);
-            });
+            .then(agent => ({ success: true, agent }))
+            .catch(err => constructError(err));
     }
 
     saveType(projectId, token, types) {
         checkProject(projectId);
         const endpoint = `${this.endpoints.types(projectId)}`;
-        const names = types.types.map((t) => t.name);
+        const names = types.types.map(t => t.name);
         debug('saveType(%s) => %s', JSON.stringify(names), this.endpoints.types);
         return got
             .post(endpoint, {
@@ -177,12 +148,8 @@ module.exports = class Catalog {
                 json: types,
             })
             .json()
-            .then((message) => {
-                    return {success: true, message};
-            })
-            .catch((err) => {
-                return constructError(err);
-            });
+            .then(message => ({ success: true, message }))
+            .catch(err => constructError(err));
     }
 
     describeType(projectId, token, typeName) {
@@ -194,12 +161,8 @@ module.exports = class Catalog {
                 headers: { Authorization: `Bearer ${token}` },
             })
             .json()
-            .then((type) => {
-                    return {success: true, type};
-            })
-            .catch((err) => {
-                return constructError(err);
-            });
+            .then(type => ({ success: true, type }))
+            .catch(err => constructError(err));
     }
 
     listTypes(projectId, token) {
@@ -211,12 +174,8 @@ module.exports = class Catalog {
                 headers: { Authorization: `Bearer ${token}` },
             })
             .json()
-            .then((types) => {
-                    return {success: true, types};
-            })
-            .catch((err) => {
-                return constructError(err);
-            });
+            .then(types => ({ success: true, types }))
+            .catch(err => constructError(err));
     }
 
     // saveProfileSchema(projectId, token, schemaObj) {

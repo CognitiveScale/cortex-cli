@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 /*
- * Copyright 2018 Cognitive Scale, Inc. All Rights Reserved.
+ * Copyright 2020 Cognitive Scale, Inc. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the “License”);
  * you may not use this file except in compliance with the License.
@@ -28,7 +28,7 @@ const {
     DescribeConnectionCommand,
     TestConnectionCommand,
     ListConnectionsTypes,
-    GenerateConnectionCommand
+    GenerateConnectionCommand,
 } = require('../src/commands/connections');
 
 program.description('Work with Cortex Connections');
@@ -47,8 +47,7 @@ program
     .action(withCompatibilityCheck((options) => {
         try {
             new ListConnections(program).execute(options);
-        }
-        catch (err) {
+        } catch (err) {
             console.error(chalk.red(err.message));
         }
     }));
@@ -65,8 +64,7 @@ program
     .action(withCompatibilityCheck((connDefinition, options) => {
         try {
             new SaveConnectionCommand(program).execute(connDefinition, options);
-        }
-        catch (err) {
+        } catch (err) {
             console.error(chalk.red(err.message));
         }
     }));
@@ -85,8 +83,7 @@ program
     .action(withCompatibilityCheck((connName, options) => {
         try {
             new QueryConnectionCommand(program).execute(connName, options);
-        }
-        catch (err) {
+        } catch (err) {
             console.error(chalk.red(err.message));
         }
     }));
@@ -103,8 +100,7 @@ program
     .action(withCompatibilityCheck((connectionName, options) => {
         try {
             new DescribeConnectionCommand(program).execute(connectionName, options);
-        }
-        catch (err) {
+        } catch (err) {
             console.error(chalk.red(err.message));
         }
     }));
@@ -121,8 +117,7 @@ program
     .action(withCompatibilityCheck((connDefinition, options) => {
         try {
             new TestConnectionCommand(program).execute(connDefinition, options);
-        }
-        catch (err) {
+        } catch (err) {
             console.error(chalk.red(err.message));
         }
     }));
@@ -140,25 +135,9 @@ program
     .action(withCompatibilityCheck((options) => {
         try {
             new ListConnectionsTypes(program).execute(options);
-        }
-        catch (err) {
+        } catch (err) {
             console.error(chalk.red(err.message));
         }
     }));
-
-
-// Generate Connections
-program
-    .command('generate')
-    .description('Generates the structure of the connection payload')
-    .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
-    .action((options) => { // deliberately not using withCompatibilityCheck()
-        try {
-            new GenerateConnectionCommand(program).execute(options);
-        }
-        catch (err) {
-            console.error(chalk.red(err.message));
-        }
-    });
 
 program.parse(process.argv);

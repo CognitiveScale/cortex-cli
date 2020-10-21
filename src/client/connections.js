@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Cognitive Scale, Inc. All Rights Reserved.
+ * Copyright 2020 Cognitive Scale, Inc. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the “License”);
  * you may not use this file except in compliance with the License.
@@ -14,54 +14,50 @@
  * limitations under the License.
  */
 
-const  { request } = require('../commands/apiutils');
 const debug = require('debug')('cortex:cli');
+const got = require('got');
 const { constructError } = require('../commands/utils');
 
 module.exports = class Connections {
-
     constructor(cortexUrl) {
         this.endpoint = projectId => `${cortexUrl}/fabric/v4/projects/${projectId}/connections`;
     }
 
     async queryConnection(projectId, token, connectionName, queryObject) {
-        const queryEndpoint = `${this.endpoint(projectId)}/${connectionName}/query`
-        debug('queryConnection(%s) => %s', connectionName, queryEndpoint);
+        const endpoint = `${this.endpoint(projectId)}/${connectionName}/query`;
+        debug('queryConnection(%s) => %s', connectionName, endpoint);
         try {
             const message = await got
                 .post(endpoint, {
                     headers: { Authorization: `Bearer ${token}` },
-                    json: queryObject
-            }).json()
-            return {success: true, message};
+                    json: queryObject,
+            }).json();
+            return { success: true, message };
         } catch (err) {
             return constructError(err);
         }
     }
 
-    listConnections(token) {
+    listConnections(projectId, token) {
         const endpoint = `${this.endpoint(projectId)}`;
         return got
             .get(endpoint, {
                 headers: { Authorization: `Bearer ${token}` },
             }).json()
-            .then((result) => {
-                    return {success: true, result};
-            })
-            .catch((err) => {
-                return constructError(err);
-            });
+            .then(result => ({ success: true, result }))
+            .catch(err => constructError(err));
     }
 
     async saveConnection(projectId, token, connObj) {
+        const endpoint = `${this.endpoint(projectId)}`;
         debug('saveConnection(%s) => %s', connObj.name, this.endpoint(projectId));
         try {
             const message = await got
             .post(endpoint, {
                 headers: { Authorization: `Bearer ${token}` },
-                json: connObj
-            }).json()
-            return {success: true, message};
+                json: connObj,
+            }).json();
+            return { success: true, message };
         } catch (err) {
             return constructError(err);
         }
@@ -74,42 +70,36 @@ module.exports = class Connections {
             .get(endpoint, {
                 headers: { Authorization: `Bearer ${token}` },
             }).json()
-            .then((result) => {
-                return {success: true, result};
-            })
-            .catch((err) => {
-                return constructError(err);
-            });
+            .then(result => ({ success: true, result }))
+            .catch(err => constructError(err));
     }
 
-    async testConnection(projectId, token, {name, title, description, connectionType, allowWrite, tags, params}) {
-        const url = this.endpoint(projectId) + '/test';
+    async testConnection(projectId, token, {
+         name, title, description, connectionType, allowWrite, tags, params,
+    }) {
+        const url = `${this.endpoint(projectId)}/test`;
         debug('saveConnection(%s) => %s', name, url);
         try {
             const message = await got
                 .post(url, {
                     headers: { Authorization: `Bearer ${token}` },
-                    json: {name, title, description, connectionType, allowWrite, tags, params}
-                }).json()
-            return {success: true, message};
+                    json: {
+                        name, title, description, connectionType, allowWrite, tags, params,
+                    },
+                }).json();
+            return { success: true, message };
         } catch (err) {
             return constructError(err);
         }
     }
 
-    listConnectionsTypes(token) {
+    listConnectionsTypes(projectId, token) {
         const endpoint = `${this.endpoint(projectId)}/types`;
         return got
             .get(endpoint, {
                 headers: { Authorization: `Bearer ${token}` },
             }).json()
-            .then((result) => {
-                return {success: true, result};
-            })
-            .catch((err) => {
-                return constructError(err);
-            });
+            .then(result => ({ success: true, result }))
+            .catch(err => constructError(err));
     }
-
 };
-

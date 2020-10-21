@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Cognitive Scale, Inc. All Rights Reserved.
+ * Copyright 2020 Cognitive Scale, Inc. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the “License”);
  * you may not use this file except in compliance with the License.
@@ -14,13 +14,12 @@
  * limitations under the License.
  */
 
-const  { request } = require('../commands/apiutils');
 const debug = require('debug')('cortex:cli');
+const got = require('got');
 const ProgressBar = require('progress');
 const { constructError } = require('../commands/utils');
 
 module.exports = class Experiments {
-
     constructor(cortexUrl) {
         this.cortexUrl = cortexUrl;
         this.endpoint = projectId => `${cortexUrl}/fabric/projects/${projectId}/experiments`;
@@ -33,12 +32,8 @@ module.exports = class Experiments {
             .get(endpoint, {
                 headers: { Authorization: `Bearer ${token}` },
             }).json()
-            .then((result) => {
-                return {success: true, result};
-            })
-            .catch((err) => {
-                return constructError(err);
-            });
+            .then(result => ({ success: true, result }))
+            .catch(err => constructError(err));
     }
 
     describeExperiment(projectId, token, name) {
@@ -48,12 +43,8 @@ module.exports = class Experiments {
             .get(endpoint, {
                 headers: { Authorization: `Bearer ${token}` },
             }).json()
-            .then((result) => {
-                return {success: true, result};
-            })
-            .catch((err) => {
-                return constructError(err);
-            });
+            .then(result => ({ success: true, result }))
+            .catch(err => constructError(err));
     }
 
     deleteExperiment(projectId, token, name) {
@@ -63,32 +54,24 @@ module.exports = class Experiments {
             .delete(endpoint, {
                 headers: { Authorization: `Bearer ${token}` },
             }).json()
-            .then((result) => {
-                return {success: true, result};
-            })
-            .catch((err) => {
-                return constructError(err);
-            });
+            .then(result => ({ success: true, result }))
+            .catch(err => constructError(err));
     }
 
     listRuns(projectId, token, experimentName, filter, limit, sort) {
         const endpoint = `${this.endpoint(projectId)}/${experimentName}/runs`;
         debug('listRuns(%s) => %s', experimentName, endpoint);
-        const query = {}
+        const query = {};
         if (filter) query.filter = filter;
         if (limit) query.limit = limit;
         if (sort) query.sort = sort;
         return got
             .get(endpoint, {
                 headers: { Authorization: `Bearer ${token}` },
-                query,
+              searchParams: { query },
             }).json()
-            .then((result) => {
-                return {success: true, result};
-            })
-            .catch((err) => {
-                return constructError(err);
-            });
+            .then(result => ({ success: true, result }))
+            .catch(err => constructError(err));
     }
 
     describeRun(projectId, token, experimentName, runId) {
@@ -98,12 +81,8 @@ module.exports = class Experiments {
             .get(endpoint, {
                 headers: { Authorization: `Bearer ${token}` },
             }).json()
-            .then((result) => {
-                return {success: true, result};
-            })
-            .catch((err) => {
-                return constructError(err);
-            });
+            .then(result => ({ success: true, result }))
+            .catch(err => constructError(err));
     }
 
     deleteRun(projectId, token, experimentName, runId) {
@@ -113,13 +92,10 @@ module.exports = class Experiments {
             .delete(endpoint, {
                 headers: { Authorization: `Bearer ${token}` },
             }).json()
-            .then((result) => {
-                return {success: true, result};
-            })
-            .catch((err) => {
-                return constructError(err);
-            });
+            .then(result => ({ success: true, result }))
+            .catch(err => constructError(err));
     }
+
     // TODO https://www.npmjs.com/package/got#streams
     downloadArtifact(projectId, token, experimentName, runId, artifactName, showProgress = false) {
         const endpoint = `${this.endpoint(projectId)}/${experimentName}/runs/${runId}/artifacts/${artifactName}`;
@@ -128,12 +104,8 @@ module.exports = class Experiments {
             .get(endpoint, {
                 headers: { Authorization: `Bearer ${token}` },
             }).json()
-            .then((result) => {
-                return {success: true, result};
-            })
-            .catch((err) => {
-                return constructError(err);
-            });
+            .then(result => ({ success: true, result }))
+            .catch(err => constructError(err));
 
         const stream = request
             .get(endpoint)
@@ -141,46 +113,42 @@ module.exports = class Experiments {
             .use((req) => {
                 if (showProgress) {
                     req.on('request', (clientReq) => {
-                        clientReq.on('response', function(res) {
+                        clientReq.on('response', (res) => {
                             const total = +(res.headers['content-length'] || res.headers['Content-Length']);
                             const progressBar = new ProgressBar(
                                 '  downloading [:bar] :percent :etas',
                                 {
                                     current: 0,
                                     renderThrottle: 500,
-                                    total: total,
-                                }
+                                    total,
+                                },
                             );
                         
-                            res.on('data', (chunk) => progressBar.tick(chunk.length));
+                            res.on('data', chunk => progressBar.tick(chunk.length));
                           });
                     });
                 }
             });
 
         return new Promise((resolve, reject) => {
-            stream.on('response', function(response) {
+            stream.on('response', (response) => {
                 if (response.status !== 200) {
                     stream.abort();
                     return resolve({
                         success: false,
                         status: stream.response.status,
-                        message: stream.response.error
+                        message: stream.response.error,
                     });
                 }
             });
 
-            stream.on('end', () => {
-                return resolve({
+            stream.on('end', () => resolve({
                     success: true,
                     message: `\nDownloaded ${artifactName}`,
-                    status: stream.response.status
-                });
-            });
+                    status: stream.response.status,
+                }));
 
-            stream.on('error', (err) => {
-                return resolve(constructError(err));
-            });
+            stream.on('error', err => resolve(constructError(err)));
 
             stream.pipe(process.stdout);
         });
