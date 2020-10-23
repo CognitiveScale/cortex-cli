@@ -21,7 +21,7 @@ const { constructError, getUserAgent } = require('../commands/utils');
 module.exports = class Datasets {
     constructor(cortexUrl) {
         this.cortexUrl = cortexUrl;
-        this.endpoint = projectId => `${cortexUrl}/fabric/projects/${projectId}/datasets`;
+        this.endpoint = projectId => `${cortexUrl}/fabric/v4/projects/${projectId}/datasets`;
     }
 
     listDatasets(projectId, token) {

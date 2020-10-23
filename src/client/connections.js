@@ -21,6 +21,7 @@ const { constructError, getUserAgent } = require('../commands/utils');
 module.exports = class Connections {
     constructor(cortexUrl) {
         this.endpoint = projectId => `${cortexUrl}/fabric/v4/projects/${projectId}/connections`;
+        this.cortexUrl = cortexUrl;
     }
 
     async queryConnection(projectId, token, connectionName, queryObject) {
@@ -81,7 +82,7 @@ module.exports = class Connections {
     async testConnection(projectId, token, {
          name, title, description, connectionType, allowWrite, tags, params,
     }) {
-        const url = `${this.endpoint(projectId)}/test`;
+        const url = `${this.cortexUrl}/fabric/v4/projects/${projectId}/connectiontest`;
         debug('saveConnection(%s) => %s', name, url);
         try {
             const message = await got
@@ -98,9 +99,9 @@ module.exports = class Connections {
         }
     }
 
-    listConnectionsTypes(projectId, token) {
-        const endpoint = `${this.endpoint(projectId)}/types`;
-        return got
+    listConnectionsTypes(token) {
+        const endpoint = `${this.cortexUrl}/fabric/v4/connectiontypes`;
+          return got
             .get(endpoint, {
                 headers: { Authorization: `Bearer ${token}` },
                 'user-agent': getUserAgent(),

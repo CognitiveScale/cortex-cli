@@ -231,7 +231,7 @@ module.exports.ListConnectionsTypes = class ListConnectionsTypes {
         debug('%s.listConnectionsTypes()', profile.name);
 
         const conns = new Connections(profile.url);
-        conns.listConnectionsTypes(options.project || profile.project, profile.token).then((response) => {
+        conns.listConnectionsTypes(profile.token).then((response) => {
             if (response.success) {
                 let result = response.result.connectionTypes;
                 if (options.query) result = filterObject(result, options);

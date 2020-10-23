@@ -21,7 +21,7 @@ const { constructError, getUserAgent } = require('../commands/utils');
 module.exports = class Variables {
     constructor(cortexUrl) {
         this.cortexUrl = cortexUrl;
-        this.endpoint = projectId => `${cortexUrl}/fabric/projects/${projectId}/secrets`;
+        this.endpoint = projectId => `${cortexUrl}/fabric/v4/projects/${projectId}/secrets`;
     }
 
     listVariables(projectId, token) {
