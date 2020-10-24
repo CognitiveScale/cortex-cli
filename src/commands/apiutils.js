@@ -8,7 +8,7 @@ const { getUserAgent } = require('../useragent');
 
 function handleAuthError(res, req) {
     if (res.headers['x-auth-error']) {
-        res.statusCode = 403;
+        res.statusCode = 401;
         this.callback(new Error(`Auth Error: ${res.headers['x-auth-error']}`));
     }
 }
