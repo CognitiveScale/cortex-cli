@@ -57,7 +57,7 @@ module.exports = class Content {
         try {
             const message = await pipeline(
                 fs.createReadStream(content),
-                got.stream.post('https://sindresorhus.com', {
+                got.stream.post(endpoint, {
                     headers: {
                         Authorization: `Bearer ${token}`,
                         'Content-Type': contentType,
@@ -103,7 +103,7 @@ module.exports = class Content {
                 }),
                 process.stdout,
             );
-        } catch (err) {
+        } catch     (err) {
             return constructError(err);
         }
     }
