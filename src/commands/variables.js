@@ -36,7 +36,7 @@ module.exports.ListVariablesCommand = class {
         debug('%s.listVariables(%s)', profile.name);
 
         const variables = new Variables(profile.url);
-        variables.listVariables(profile.token)
+        variables.listVariables(options.project || profile.project, profile.token)
             .then((response) => {
                 if (response.success) {
                     const result = filterObject(response.result, options);
@@ -67,7 +67,7 @@ module.exports.ReadVariableCommand = class {
         debug('%s.readVariable(%s)', profile.name, keyName);
 
         const variables = new Variables(profile.url);
-        variables.readVariable(profile.token, keyName).then((response) => {
+        variables.readVariable(options.project || profile.project, profile.token, keyName).then((response) => {
             if (response.success) {
                 const result = filterObject(response.result, options);
                 if (options.json) printSuccess(JSON.stringify(result, null, 2), options);
@@ -110,12 +110,9 @@ module.exports.WriteVariableCommand = class {
         }
 
         const variables = new Variables(profile.url);
-        return variables.writeVariable(profile.token, keyName, data).then((response) => {
-            if (response.success) {
+        return variables.writeVariable(options.project || profile.project, profile.token, keyName, data).then((response) => {
                 const result = filterObject(response.result, options);
                 printSuccess(result.message, options);
-            }
-            printError(`Failed to write secure variable : ${response.message}`, options);
         })
         .catch((err) => {
             printError(`Failed to write secure variable : ${err.status} ${err.message}`, options);

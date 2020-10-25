@@ -41,7 +41,7 @@ module.exports = class Catalog {
                 'user-agent': getUserAgent(),
                 json: skillObj,
             }).json()
-            .then(res => ({ success: true, message: res.body }))
+            .then(res => ({ success: true, message: res }))
             .catch(err => constructError(err));
     }
 
@@ -66,7 +66,7 @@ module.exports = class Catalog {
                 headers: { Authorization: `Bearer ${token}` },
                 'user-agent': getUserAgent(),
             }).json()
-            .then(res => ({ success: true, skill: res.body }))
+            .then(res => ({ success: true, skill: res }))
             .catch(err => constructError(err));
     }
 
@@ -111,7 +111,7 @@ module.exports = class Catalog {
                 'user-agent': getUserAgent(),
                 json: agentObj,
             }).json()
-            .then(res => ({ success: true, message: res.body }))
+            .then(res => ({ success: true, message: res }))
             .catch(err => constructError(err));
     }
 

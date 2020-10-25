@@ -32,12 +32,15 @@ const { exec } = require('child_process');
 module.exports.constructError = (error) => {
     // fallback to text in message or standard error message
     const errResp = error.response;
-    let errorText = _.get(errResp, 'body', error.message);
+    let errorText = _.get(errResp, 'body');
+    if (_.isEmpty(errorText)) {
+        errorText = error.message;
+    }
     let details;
 
     // if JSON was returned, look for either a message or error in it
     try {
-        const resp = errResp ? JSON.parse(errResp.text) : {};
+        const resp = errResp ? JSON.parse(errorText) : {};
         if (resp.message || resp.error) errorText = resp.message || resp.error;
         // eslint-disable-next-line prefer-destructuring
         details = resp.details;

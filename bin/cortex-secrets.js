@@ -27,7 +27,7 @@ const {
     WriteVariableCommand,
 } = require('../src/commands/variables');
 
-program.description('Work with Cortex Secure Variables');
+program.description('Work with Cortex Secrets');
 
 // List Secure Variable Keys
 program

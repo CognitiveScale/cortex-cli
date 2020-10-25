@@ -37,11 +37,11 @@ program
     .command('datasets [cmd]', 'Work with Cortex Datasets')
     .command('docker [cmd]', 'Work with Docker')
     .command('jobs [cmd]', 'Work with Cortex v2 Jobs')
-    .command('project [cmd]', 'Work with a related collection of Cortex contributions')
+    .command('projects [cmd]', 'Work with a related collection of Cortex contributions')
     .command('skills [cmd]', 'Work with Cortex Skills')
     .command('tasks [cmd]', 'Work with Cortex v2 Tasks')
     .command('types [cmd]', 'Work with Cortex Types')
-    .command('variables [cmd]', 'Work with Cortex Secure Variables')
+    .command('secrets [cmd]', 'Work with Cortex Secrets')
     .command('experiments [cmd]', 'Work with Cortex Experiments')
     .command('profiles [cmd]', 'Work with Cortex Profiles')
     .command('graph [cmd]', 'Work with the Cortex Graph');
