@@ -182,7 +182,7 @@ module.exports = class Catalog {
                 'user-agent': getUserAgent(),
             })
             .json()
-            .then(types => ({ success: true, types }))
+            .then(types => ({ success: true, ...types }))
             .catch(err => constructError(err));
     }
 
