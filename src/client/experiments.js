@@ -22,7 +22,7 @@ const Content = require('./content');
 module.exports = class Experiments {
     constructor(cortexUrl) {
         this.cortexUrl = cortexUrl;
-        this.endpoint = projectId => `${cortexUrl}/fabric/projects/${projectId}/experiments`;
+        this.endpoint = projectId => `${cortexUrl}/fabric/v4/projects/${projectId}/experiments`;
     }
 
     listExperiments(projectId, token) {
