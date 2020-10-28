@@ -29,7 +29,7 @@ const {
 
 program.description('Work with Cortex Projects');
 
-// Save Project
+// Create Project
 program
     .command('create [projectDefinition]')
     .description('Save a project definition')
@@ -66,7 +66,7 @@ program
         }
     }));
 
-// Describe Project
+// Get|Describe Project
 program
     .command('describe <projectName>')
     .alias('get')

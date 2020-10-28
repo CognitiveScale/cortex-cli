@@ -16,14 +16,13 @@
 
 const fs = require('fs');
 const stream = require('stream');
-const { got } = require('./apiutils');
 const { promisify } = require('util');
-
-const pipeline = promisify(stream.pipeline);
-
 const debug = require('debug')('cortex:cli');
+const { got } = require('./apiutils');
 const { constructError, getUserAgent } = require('../commands/utils');
 const Variables = require('./variables');
+
+const pipeline = promisify(stream.pipeline);
 
 module.exports = class Content {
     constructor(cortexUrl) {

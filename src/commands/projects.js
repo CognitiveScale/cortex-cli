@@ -22,22 +22,6 @@ const {
  printSuccess, printError, filterObject, parseObject, printTable, 
 } = require('./utils');
 
-function _formatpath(p) {
-    let cnt = 0; let 
-res = '';
-    const len = p.length;
-    p.forEach((s) => {
-        if (_.isNumber(s)) {
-            res += `[${s}]`;
-        } else
-            if (cnt < len) res += s;
-            else res += s;
-        if (cnt < len - 1 && !_.isNumber(p[cnt + 1])) res += '.';
-        cnt += 1;
-    });
-    return res;
-}
-
 module.exports.CreateProjectCommand = class CreateProjectCommand {
     constructor(program) {
         this.program = program;
@@ -62,19 +46,7 @@ module.exports.CreateProjectCommand = class CreateProjectCommand {
                 title: options.title || project.title,
                 description: options.description || project.description,
             });
-            if (response.name) {
-                printSuccess(`Project ${response.name} saved`, options);
-            } else if (response.details) {
-                console.log(`Failed to save project: ${response.status} ${response.message}`);
-                console.log('The following issues were found:');
-                const tableSpec = [
-                    { column: 'Path', field: 'path', width: 50 },
-                    { column: 'Message', field: 'message', width: 100 },
-                ];
-                response.details.map(d => d.path = _formatpath(d.path));
-                printTable(tableSpec, response.details);
-                printError(''); // Just exit
-            }
+            printSuccess(`Project ${response.name} saved`, options);
         } catch (err) {
             printError(`Failed to save project: ${err.message}`, options);
         }
