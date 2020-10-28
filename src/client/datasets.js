@@ -15,7 +15,7 @@
  */
 
 const debug = require('debug')('cortex:cli');
-const got = require('got');
+const { got } = require('./apiutils');
 const { constructError, getUserAgent } = require('../commands/utils');
 
 module.exports = class Datasets {

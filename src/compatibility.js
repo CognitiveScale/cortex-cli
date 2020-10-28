@@ -21,13 +21,13 @@ const debug = require('debug')('cortex:cli');
 const filter = require('lodash/fp/filter');
 const findPackageJson = require('find-package-json');
 const getOr = require('lodash/fp/getOr');
-const got = require('got');
 const isInstalledGlobally = require('is-installed-globally');
 const keys = require('lodash/fp/keys');
 const last = require('lodash/fp/last');
 const npmFetch = require('npm-registry-fetch');
 const semver = require('semver');
 const uniq = require('lodash/fp/uniq');
+const { got } = require('./client/apiutils');
 const { loadProfile } = require('./config');
 const { printError, printWarning, getUserAgent } = require('../src/commands/utils');
 

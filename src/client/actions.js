@@ -16,8 +16,8 @@
 const _ = require('lodash');
 const chalk = require('chalk');
 const debug = require('debug')('cortex:cli');
-const got = require('got');
 const jose = require('jose');
+const { got } = require('./apiutils');
 const {
  constructError, callMe, checkProject, getUserAgent, 
 } = require('../commands/utils');

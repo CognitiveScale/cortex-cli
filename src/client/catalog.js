@@ -15,7 +15,7 @@
  */
 
 const debug = require('debug')('cortex:cli');
-const got = require('got');
+const { got } = require('./apiutils');
 const {
  constructError, formatAllServiceInputParameters, checkProject, getUserAgent, 
 } = require('../commands/utils');

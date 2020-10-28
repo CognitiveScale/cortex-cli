@@ -16,7 +16,7 @@
 
 const fs = require('fs');
 const stream = require('stream');
-const got = require('got');
+const { got } = require('./apiutils');
 const { promisify } = require('util');
 
 const pipeline = promisify(stream.pipeline);

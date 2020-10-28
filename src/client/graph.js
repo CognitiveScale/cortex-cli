@@ -15,7 +15,7 @@
  */
 
 const debug = require('debug')('cortex:cli:graph');
-const got = require('got');
+const { got } = require('./apiutils');
 const { constructError, getUserAgent } = require('../commands/utils');
 
 const createEndpoints = baseUri => ({
