@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Cognitive Scale, Inc. All Rights Reserved.
+ * Copyright 2020 Cognitive Scale, Inc. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the “License”);
  * you may not use this file except in compliance with the License.
@@ -15,71 +15,50 @@
  */
 
 const debug = require('debug')('cortex:cli');
-const  { request } = require('../commands/apiutils');
-
-const { constructError } = require('../commands/utils');
+const { got } = require('./apiutils');
+const { constructError, getUserAgent } = require('../commands/utils');
 
 module.exports = class Variables {
-
     constructor(cortexUrl) {
         this.cortexUrl = cortexUrl;
-        this.endpoint = `${cortexUrl}/v2/tenants/secrets/variables`;
+        this.endpoint = projectId => `${cortexUrl}/fabric/v4/projects/${projectId}/secrets`;
     }
 
-    listVariables(token) {
-        const endpoint = `${this.endpoint}?list=true`;
+    listVariables(projectId, token) {
+        const endpoint = `${this.endpoint(projectId)}?list=true`;
         debug('listVariables => %s', endpoint);
-        return request
-            .get(endpoint)
-            .set('Authorization', `Bearer ${token}`)
-            .set('x-cortex-proxy-notify', true)
-            .then((res) => {
-                if (res.ok) {
-                    return {success: true, result: res.body};
-                }
-                return {success: false, status: res.status, message: res.body};
-            })
-            .catch((err) => {
-                return constructError(err);
-            });
+        return got
+            .get(endpoint, {
+                headers: { Authorization: `Bearer ${token}` },
+                'user-agent': getUserAgent(),
+            }).json()
+            .then(result => ({ success: true, result }))
+            .catch(err => constructError(err));
     }
 
-    readVariable(token, keyName) {
-        const endpoint = `${this.endpoint}/${keyName}`;
-        const body = {}
+    readVariable(projectId, token, keyName) {
+        const endpoint = `${this.endpoint(projectId)}/${keyName}`;
         debug('readVariable($s) => %s', keyName, endpoint);
-        return request
-            .get(endpoint)
-            .set('Authorization', `Bearer ${token}`)
-            .set('x-cortex-proxy-notify', true)
-            .then((res) => {
-                if (res.ok) {
-                    return {success: true, result: res.body};
-                }
-                return {success: false, status: res.status, message: res.body};
-            })
-            .catch((err) => {
-                return constructError(err);
-            });
+        return got
+            .get(endpoint, {
+                headers: { Authorization: `Bearer ${token}` },
+                'user-agent': getUserAgent(),
+            }).json()
+            .then(result => ({ success: true, result }))
+            .catch(err => constructError(err));
     }
 
-    writeVariable(token, keyName, value) {
-        const endpoint = `${this.endpoint}/${keyName}`;
+    writeVariable(projectId, token, keyName, value) {
+        const endpoint = `${this.endpoint(projectId)}/${keyName}`;
         debug('writeVariable(%s) => %s', keyName, endpoint);
         const body = { value };
-        return request
-            .post(endpoint)
-            .set('Authorization', `Bearer ${token}`)
-            .set('x-cortex-proxy-notify', true)
-            .send(body)
-            .then((res) => {
-                if (res.ok) {
-                    return {success: true, result: res.body};
-                }
-                return {success: false, status: res.status, message: res.body};
-            })
-            .catch((err) => {
-                return constructError(err);
-            });
+        return got
+            .post(endpoint, {
+                headers: { Authorization: `Bearer ${token}` },
+                'user-agent': getUserAgent(),
+                json: body,
+            }).json()
+            .then(result => ({ success: true, result }))
+            .catch(err => constructError(err));
     }
 };

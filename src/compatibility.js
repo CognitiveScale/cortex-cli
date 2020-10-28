@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Cognitive Scale, Inc. All Rights Reserved.
+ * Copyright 2020 Cognitive Scale, Inc. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the “License”);
  * you may not use this file except in compliance with the License.
@@ -25,11 +25,11 @@ const isInstalledGlobally = require('is-installed-globally');
 const keys = require('lodash/fp/keys');
 const last = require('lodash/fp/last');
 const npmFetch = require('npm-registry-fetch');
-const { request } = require('./commands/apiutils');
 const semver = require('semver');
 const uniq = require('lodash/fp/uniq');
+const { got } = require('./client/apiutils');
 const { loadProfile } = require('./config');
-const { printError, printWarning } = require('../src/commands/utils');
+const { printError, printWarning, getUserAgent } = require('../src/commands/utils');
 
 const pkg = findPackageJson(__dirname).next().value;
 
@@ -40,22 +40,27 @@ function getAvailableVersions(name) {
         .then(manifest => keys(getOr({}, 'versions', manifest)))
         .then(versions => uniq(concat(versions, pkg.version)))
         .then(versions => versions.sort(semver.compare))
-        .catch(_ => {
+        .catch((_) => {
             throw new Error('Unable to determine CLI available versions');
         });
 }
 
 function getRequiredVersion(profile) {
-    const endpoint = `${profile.url}/v3/catalog/compatibility/applications/cortex-cli`;
+    const endpoint = `${profile.url}/fabric/v4/compatibility/applications/cortex-cli`;
     debug('getRequiredVersion => %s', endpoint);
-    return request
-        .get(endpoint)
-        .set('Authorization', `Bearer ${profile.token}`)
-        .set('x-cortex-proxy-notify', true)
+    return got
+        .get(endpoint, {
+             headers: {
+                Authorization: `Bearer ${profile.token}`,
+                'user-agent': getUserAgent(),
+         },
+})
+        .json()
         .then((res) => {
-            if (!res.ok) {  throw new Error('Unable to fetch compatibility'); }
-            const { semver } = res.body;
+            const { semver } = res;
             return semver;
+        }).catch((err) => {
+            throw new Error(`Unable to fetch compatibility: ${err.message}`);
         });
 }
 
@@ -65,17 +70,16 @@ function notifyUpdate({ required = false, current, latest }) {
         margin: 1,
         align: 'center',
         borderColor: 'yellow',
-        borderStyle: 'round'
+        borderStyle: 'round',
     };
 
-    const message =
-        `Update ${required ? chalk.bold('required') : 'available'} ` +
-        chalk.dim(current) +
-        chalk.reset(' → ') +
-        chalk.green(latest) +
-        '\nRun ' +
-        chalk.cyan(`npm i ${isInstalledGlobally ? '-g ' : ''}${pkg.name}@${latest}`) +
-        ' to update';
+    const message = `Update ${required ? chalk.bold('required') : 'available'} ${
+         chalk.dim(current)
+         }${chalk.reset(' → ')
+         }${chalk.green(latest)
+         }\nRun ${
+         chalk.cyan(`npm i ${isInstalledGlobally ? '-g ' : ''}${pkg.name}@${latest}`)
+         } to update`;
 
     console.warn(boxen(message, opts));
 }
@@ -93,25 +97,25 @@ function upgradeRequired(args) {
 
 async function getCompatibility(profile) {
     debug('getCompatibility => %s profile', profile.name);
-    try{
+    try {
         // fail if unable to contact cortex service
         const requirements = await getRequiredVersion(profile);
-        const satisfied =  semver.satisfies(pkg.version, requirements);
+        const satisfied = semver.satisfies(pkg.version, requirements);
         try {
             // warn user but don't fail
             const versions = await getAvailableVersions(pkg.name);
             debug('getCompatibility => versions: %s, requirements: %s', versions, requirements);
             const compatibleVersions = filter(v => semver.satisfies(v, requirements), versions);
             debug('getCompatibility => compatible versions: %s', compatibleVersions);
-            const {version: current} = pkg;
+            const { version: current } = pkg;
             const latest = last(compatibleVersions);
             debug('getCompatibility => satisfied: %s', satisfied);
-            return ({current, latest, satisfied});
-        }catch (e) {
+            return ({ current, latest, satisfied });
+        } catch (e) {
             printWarning(`Warning unable to check for cortex-cli update: ${e.message}`);
-            return ({current: pkg.version, latest: pkg.version, satisfied});
+            return ({ current: pkg.version, latest: pkg.version, satisfied });
         }
-    }catch (e) {
+    } catch (e) {
         throw new Error(`Unable to contact cortex: ${e.message}`);
     }
 }
@@ -127,8 +131,7 @@ function withCompatibilityCheck(fn) {
                 .then(({ current, latest, satisfied }) => {
                     if (!satisfied) {
                         upgradeRequired({ current, latest });
-                    }
-                    else if (semver.gt(latest, current)) {
+                    } else if (semver.gt(latest, current)) {
                         upgradeAvailable({ current, latest });
                     }
                 })
@@ -136,7 +139,6 @@ function withCompatibilityCheck(fn) {
                 .catch((error) => {
                     printError(error);
                 });
-
         }
         return Promise.resolve().then(() => fn(...args));
     };
@@ -144,5 +146,5 @@ function withCompatibilityCheck(fn) {
 
 module.exports = {
     getCompatibility,
-    withCompatibilityCheck
+    withCompatibilityCheck,
 };

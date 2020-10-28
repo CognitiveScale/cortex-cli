@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Cognitive Scale, Inc. All Rights Reserved.
+ * Copyright 2020 Cognitive Scale, Inc. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the “License”);
  * you may not use this file except in compliance with the License.
@@ -15,13 +15,12 @@
  */
 
 const debug = require('debug')('cortex:cli');
-const {loadProfile} = require('../config');
-const {printSuccess, printError} = require('./utils');
+const { loadProfile } = require('../config');
+const { printSuccess, printError } = require('./utils');
 const Actions = require('../client/actions');
 const { callMe } = require('../commands/utils');
 
 module.exports.DockerLoginCommand = class {
-
     constructor(program) {
         this.program = program;
     }
@@ -31,7 +30,7 @@ module.exports.DockerLoginCommand = class {
         debug('%s.executeDockerLogin()', profile.name);
 
         const action = new Actions(profile.url);
-        const registryUrl = await action._cortexRegistryUrl(profile.token);
+        const registryUrl = await action._cortexRegistryUrl(options.project || profile.project, profile.token);
         try {
             await callMe(`docker login -u cli --password ${profile.token} ${registryUrl}`);
             printSuccess(JSON.stringify('Login Succeeded', null, 2), options);

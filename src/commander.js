@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Cognitive Scale, Inc. All Rights Reserved.
+ * Copyright 2020 Cognitive Scale, Inc. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the “License”);
  * you may not use this file except in compliance with the License.
@@ -22,24 +22,24 @@ const { exportDoc } = require('./commands/utils.js');
 
 // Monkey-patch `commander` library to keep track of when an action executes
 commander.Command.prototype._action = commander.Command.prototype.action;
-commander.Command.prototype.action = function(fn) {
+commander.Command.prototype.action = function (fn) {
     return this._action(function wrapped(...args) {
         (this.parent || this)._actionTaken = true;
         fn(...args);
     });
 };
 
-commander.Command.prototype.wasActionTaken = function() {
+commander.Command.prototype.wasActionTaken = function () {
     return (this.parent || this)._actionTaken || false;
 };
 
-commander.Command.prototype.helpAndExit = function() {
+commander.Command.prototype.helpAndExit = function () {
     this.outputHelp(identity);
     process.exit(1);
 };
 
 commander.Command.prototype._parse = commander.Command.prototype.parse;
-commander.Command.prototype.parse = function(argv, options) {
+commander.Command.prototype.parse = function (argv, options) {
     const defaultOpts = { noActionHandler: this.helpAndExit.bind(this) };
     const opts = merge(defaultOpts, options || {});
     process.env.DOC && exportDoc(this);
@@ -47,7 +47,7 @@ commander.Command.prototype.parse = function(argv, options) {
     this._parse(argv);
     if (!this.wasActionTaken()) {
         if (process.env.CORTEX_TOKEN) {
-            console.error("Using token from environment variable $CORTEX_TOKEN")
+            console.error('Using token from environment variable $CORTEX_TOKEN');
         }
         opts.noActionHandler();
     }

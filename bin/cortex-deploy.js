@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 /*
- * Copyright 2018 Cognitive Scale, Inc. All Rights Reserved.
+ * Copyright 2020 Cognitive Scale, Inc. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the “License”);
  * you may not use this file except in compliance with the License.
@@ -22,7 +22,7 @@ const program = require('../src/commander');
 const { withCompatibilityCheck } = require('../src/compatibility');
 
 const {
-    DeploySnapshotCommand
+    DeploySnapshotCommand,
 } = require('../src/commands/deploy');
 
 program.description('Export Cortex artifacts for deployment');
@@ -40,8 +40,7 @@ program
     .action(withCompatibilityCheck((skillDefinition, options) => {
         try {
             new DeploySnapshotCommand(program).execute(skillDefinition, options);
-        }
-        catch (err) {
+        } catch (err) {
             console.error(chalk.red(err.message));
         }
     }));

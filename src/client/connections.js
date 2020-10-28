@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Cognitive Scale, Inc. All Rights Reserved.
+ * Copyright 2020 Cognitive Scale, Inc. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the “License”);
  * you may not use this file except in compliance with the License.
@@ -14,120 +14,99 @@
  * limitations under the License.
  */
 
-const  { request } = require('../commands/apiutils');
 const debug = require('debug')('cortex:cli');
-const { constructError } = require('../commands/utils');
+const { got } = require('./apiutils');
+const { constructError, getUserAgent } = require('../commands/utils');
 
 module.exports = class Connections {
-
     constructor(cortexUrl) {
+        this.endpoint = projectId => `${cortexUrl}/fabric/v4/projects/${projectId}/connections`;
         this.cortexUrl = cortexUrl;
-        this.endpoint = `${cortexUrl}/v2/connections`;
     }
 
-    queryConnection(token, connectionName, queryObject) {
-        const queryEndpoint = `${this.endpoint}/${connectionName}/query`
-        debug('queryConnection(%s) => %s', connectionName, queryEndpoint);
-        return request
-            .post(queryEndpoint)
-            .set('Authorization', `Bearer ${token}`)
-            .send(queryObject)
-            .then((res) => {
-                if (res.ok) {
-                    return {success: true, message: res.body};
-                }
-                return {success: false, message: res.body, status: res.status};
-            })
-            .catch((err) => {
-                return constructError(err);
-            });
+    async queryConnection(projectId, token, connectionName, queryObject) {
+        const endpoint = `${this.endpoint(projectId)}/${connectionName}/query`;
+        debug('queryConnection(%s) => %s', connectionName, endpoint);
+        try {
+            const message = await got
+                .post(endpoint, {
+                    headers: { Authorization: `Bearer ${token}` },
+                    'user-agent': getUserAgent(),
+                    json: queryObject,
+            }).json();
+            return { success: true, message };
+        } catch (err) {
+            return constructError(err);
+        }
     }
 
-    listConnections(token) {
-        const endpoint = `${this.endpoint}`;
-        return request
-            .get(endpoint)
-            .set('Authorization', `Bearer ${token}`)
-            .then((res) => {
-                if (res.ok) {
-                    return {success: true, result: res.body};
-                }
-                return {success: false, status: res.status, message: res.body};
-            })
-            .catch((err) => {
-                return constructError(err);
-            });
+    listConnections(projectId, token) {
+        const endpoint = `${this.endpoint(projectId)}`;
+        return got
+            .get(endpoint, {
+                headers: { Authorization: `Bearer ${token}` },
+                'user-agent': getUserAgent(),
+            }).json()
+            .then(result => ({ success: true, result }))
+            .catch(err => constructError(err));
     }
 
-    saveConnection(token, connObj) {
-        debug('saveConnection(%s) => %s', connObj.name, this.endpoint);
-        return request
-            .post(this.endpoint)
-            .set('Authorization', `Bearer ${token}`)
-            .send(connObj)
-            .then((res) => {
-                if (res.ok) {
-                    return {success: true, message: res.body};
-                }
-                return {success: false, message: res.body, status: res.status};
-            })
-            .catch((err) => {
-                return constructError(err);
-            });
+    async saveConnection(projectId, token, connObj) {
+        const endpoint = `${this.endpoint(projectId)}`;
+        debug('saveConnection(%s) => %s', connObj.name, this.endpoint(projectId));
+        try {
+            const message = await got
+            .post(endpoint, {
+                headers: { Authorization: `Bearer ${token}` },
+                'user-agent': getUserAgent(),
+                json: connObj,
+            }).json();
+            return { success: true, message };
+        } catch (err) {
+            return constructError(err);
+        }
     }
 
-    describeConnection(token, connectionName) {
-        const endpoint = `${this.endpoint}/${connectionName}`;
+    describeConnection(projectId, token, connectionName) {
+        const endpoint = `${this.endpoint(projectId)}/${connectionName}`;
         debug('describeConnection(%s) => %s', connectionName, endpoint);
-        return request
-            .get(endpoint)
-            .set('Authorization', `Bearer ${token}`)
-            .then((res) => {
-                if (res.ok) {
-                    return {success: true, result: res.body};
-                }
-                else {
-                    return {success: false, message: res.body, status: res.status};
-                }
-            })
-            .catch((err) => {
-                return constructError(err);
-            });
+        return got
+            .get(endpoint, {
+                headers: { Authorization: `Bearer ${token}` },
+                'user-agent': getUserAgent(),
+            }).json()
+            .then(result => ({ success: true, result }))
+            .catch(err => constructError(err));
     }
 
-    testConnection(token, {name, title, description, connectionType, allowWrite, tags, params}) {
-        const url = this.endpoint + '/test';
+    async testConnection(projectId, token, {
+         name, title, description, connectionType, allowWrite, tags, params,
+    }) {
+        const url = `${this.cortexUrl}/fabric/v4/projects/${projectId}/connectiontest`;
         debug('saveConnection(%s) => %s', name, url);
-        return request
-            .post(url)
-            .set('Authorization', `Bearer ${token}`)
-            .send({name, title, description, connectionType, allowWrite, tags, params})
-            .then((res) => {
-                if (res.ok) {
-                    return {success: true, message: res.body};
-                }
-                return {success: false, message: res.message, status: res.status};
-            })
-            .catch((err) => {
-                return constructError(err);
-            });
+        try {
+            const message = await got
+                .post(url, {
+                    headers: { Authorization: `Bearer ${token}` },
+                    'user-agent': getUserAgent(),
+                    json: {
+                        name, title, description, connectionType, allowWrite, tags, params,
+                    },
+                }).json();
+            return { success: true, message };
+        } catch (err) {
+            return constructError(err);
+        }
     }
 
     listConnectionsTypes(token) {
-        const endpoint = `${this.endpoint}/types`;
-        return request
-            .get(endpoint)
-            .set('Authorization', `Bearer ${token}`)
-            .then((res) => {
-                if (res.ok) {
-                    return {success: true, result: res.body};
-                }
-                return {success: false, status: res.status, message: res.body};
-            })
-            .catch((err) => {
-                return constructError(err);
-            });
+        const endpoint = `${this.cortexUrl}/fabric/v4/connectiontypes`;
+          return got
+            .get(endpoint, {
+                headers: { Authorization: `Bearer ${token}` },
+                'user-agent': getUserAgent(),
+            }).json()
+            .then(result => ({ success: true, result }))
+            .catch(err => constructError(err));
     }
-
 };
-

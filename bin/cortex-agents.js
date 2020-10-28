@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 /*
- * Copyright 2018 Cognitive Scale, Inc. All Rights Reserved.
+ * Copyright 2020 Cognitive Scale, Inc. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the “License”);
  * you may not use this file except in compliance with the License.
@@ -28,24 +28,17 @@ const {
     InvokeAgentServiceCommand,
     GetActivationCommand,
     ListActivationsCommand,
-    ListAgentInstancesCommand,
     ListSnapshotInstancesCommand,
-    CreateAgentInstanceCommand,
-    GetAgentInstanceCommand,
-    DeleteAgentInstanceCommand,
-    StopAgentInstanceCommand,
     ListTriggersCommand,
     ListServicesCommand,
     ListAgentSnapshotsCommand,
     DescribeAgentSnapshotCommand,
-    CreateAgentSnapshotCommand
+    CreateAgentSnapshotCommand,
 } = require('../src/commands/agents');
 
 const {
     ListTaskByActivation,
 } = require('../src/commands/actions');
-
-const { printError } = require('../src/commands/utils');
 
 program.description('Work with Cortex Agents');
 
@@ -61,8 +54,7 @@ program
     .action(withCompatibilityCheck((agentDefinition, options) => {
         try {
             new SaveAgentCommand(program).execute(agentDefinition, options);
-        }
-        catch (err) {
+        } catch (err) {
             console.error(chalk.red(err.message));
         }
     }));
@@ -71,6 +63,7 @@ program
 program
     .command('list')
     .description('List agent definitions')
+    .alias('l')
     .option('--no-compat', 'Ignore API compatibility checks')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
@@ -80,8 +73,7 @@ program
     .action(withCompatibilityCheck((options) => {
         try {
             new ListAgentsCommand(program).execute(options);
-        }
-        catch (err) {
+        } catch (err) {
             console.error(chalk.red(err.message));
         }
     }));
@@ -90,6 +82,7 @@ program
 program
     .command('describe <agentName>')
     .description('Describe agent')
+    .alias('get')
     .option('--no-compat', 'Ignore API compatibility checks')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
@@ -99,8 +92,7 @@ program
     .action(withCompatibilityCheck((agentName, options) => {
         try {
             new DescribeAgentCommand(program).execute(agentName, options);
-        }
-        catch (err) {
+        } catch (err) {
             console.error(chalk.red(err.message));
         }
     }));
@@ -118,30 +110,11 @@ program
     .action(withCompatibilityCheck((agentName, serviceName, options) => {
         try {
             new InvokeAgentServiceCommand(program).execute(agentName, serviceName, options);
-        }
-        catch (err) {
+        } catch (err) {
             console.error(chalk.red(err.message));
         }
     }));
 
-//Get Agent Service Activation
-program
-    .command('get-service-activation <activationId>')
-    .description('Get service activation')
-    .option('--no-compat', 'Ignore API compatibility checks')
-    .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
-    .option('--profile [profile]', 'The profile to use')
-    .option('--project [project]', 'The project to use')
-    .option('--query [query]', 'A JMESPath query to use in filtering the response data.')
-    .action(withCompatibilityCheck((activationId, options) => {
-        try {
-            printError('DEPRECATED.  This command will be removed in a future version.  Use get-activation instead.', options, false);
-            new GetActivationCommand(program).execute(activationId, options);
-        }
-        catch (err) {
-            console.error(chalk.red(err.message));
-        }
-    }));
 
 program
     .command('get-activation <activationId>')
@@ -154,8 +127,7 @@ program
     .action(withCompatibilityCheck((activationId, options) => {
         try {
             new GetActivationCommand(program).execute(activationId, options);
-        }
-        catch (err) {
+        } catch (err) {
             console.error(chalk.red(err.message));
         }
     }));
@@ -173,8 +145,7 @@ program
     .action(withCompatibilityCheck((instanceId, options) => {
         try {
             new ListActivationsCommand(program).execute(instanceId, options);
-        }
-        catch (err) {
+        } catch (err) {
             console.error(chalk.red(err.message));
         }
     }));
@@ -192,10 +163,8 @@ program
     .action(withCompatibilityCheck((agentName, options) => {
         try {
             new ListServicesCommand(program).execute(agentName, options);
-        }
-        catch (err) {
+        } catch (err) {
             console.error(chalk.red(err.message));
-
         }
     }));
 
@@ -212,13 +181,12 @@ program
     .action(withCompatibilityCheck((agentName, options) => {
         try {
             new ListAgentSnapshotsCommand(program).execute(agentName, options);
-        }
-        catch (err) {
+        } catch (err) {
             console.error(chalk.red(err.message));
         }
     }));
 
-//List snapshot instances
+// List snapshot instances
 program
     .command('list-snapshot-instances <snapshotId>')
     .description('List snapshot instances  ')
@@ -232,14 +200,14 @@ program
     .action(withCompatibilityCheck((snapshotId, options) => {
         try {
             new ListSnapshotInstancesCommand(program).execute(snapshotId, options);
-        }
-        catch (err) {
+        } catch (err) {
             console.error(chalk.red(err.message));
         }
     }));
 
 program
     .command('describe-snapshot <snapshotId>')
+    .alias('get-snapshot')
     .description('Describe agent snapshot')
     .option('--no-compat', 'Ignore API compatibility checks')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
@@ -249,13 +217,12 @@ program
     .action(withCompatibilityCheck((snapshotId, options) => {
         try {
             new DescribeAgentSnapshotCommand(program).execute(snapshotId, options);
-        }
-        catch (err) {
+        } catch (err) {
             console.error(chalk.red(err.message));
         }
     }));
 
-//Create Agent Snapshot
+// Create Agent Snapshot
 program
     .command('create-snapshot [snapshotDefinition]')
     .description('Create an agent snapshot')
@@ -268,105 +235,12 @@ program
     .action(withCompatibilityCheck((snapshotDefinition, options) => {
         try {
             new CreateAgentSnapshotCommand(program).execute(snapshotDefinition, options);
-        }
-        catch (err) {
+        } catch (err) {
             console.error(chalk.red(err.message));
         }
     }));
 
-
-//List agent instances
-program
-    .command('list-instances <agentName>')
-    .description('List agent instances  ')
-    .option('--no-compat', 'Ignore API compatibility checks')
-    .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
-    .option('--profile [profile]', 'The profile to use')
-    .option('--project [project]', 'The project to use')
-    .option('--environmentName [environmentName]', 'The environment to list or \'all\'')
-    .option('--json', 'Output results using JSON')
-    .option('--query [query]', 'A JMESPath query to use in filtering the response data. Ignored if output format is not JSON.')
-    .action(withCompatibilityCheck((agentName, options) => {
-        try {
-            new ListAgentInstancesCommand(program).execute(agentName, options);
-        }
-        catch (err) {
-            console.error(chalk.red(err.message));
-        }
-    }));
-
-//Create agent instances
-program
-    .command('create-instance [instanceDefinition]')
-    .description('Create agent instance')
-    .option('--no-compat', 'Ignore API compatibility checks')
-    .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
-    .option('--environmentName [environmentName]', 'The environment to use')
-    .option('--profile [profile]', 'The profile to use')
-    .option('--project [project]', 'The project to use')
-    .option('--snapshotId [snapshotId]', 'The name of the agent to snapshot')
-    .action(withCompatibilityCheck((instanceDefinition, options) => {
-        try {
-            new CreateAgentInstanceCommand(program).execute(instanceDefinition, options);
-        }
-        catch (err) {
-            console.error(chalk.red(err.message));
-        }
-    }));
-
-//Get agent instance
-program
-    .command('get-instance <instanceId>')
-    .description('Get agent instance')
-    .option('--no-compat', 'Ignore API compatibility checks')
-    .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
-    .option('--profile [profile]', 'The profile to use')
-    .option('--project [project]', 'The project to use')
-    .option('--json', 'Output results using JSON')
-    .action(withCompatibilityCheck((instanceId, options) => {
-        try {
-            new GetAgentInstanceCommand(program).execute(instanceId, options);
-        }
-        catch (err) {
-            console.error(chalk.red(err.message));
-        }
-    }));
-
-//Delete agent instance
-program
-    .command('delete-instance <instanceId>')
-    .description('Delete agent instance')
-    .option('--no-compat', 'Ignore API compatibility checks')
-    .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
-    .option('--profile [profile]', 'The profile to use')
-    .option('--project [project]', 'The project to use')
-    .action(withCompatibilityCheck((instanceId, options) => {
-        try {
-            new DeleteAgentInstanceCommand(program).execute(instanceId, options);
-        }
-        catch (err) {
-            console.error(chalk.red(err.message));
-        }
-    }));
-
-//Stop agent instance
-program
-    .command('stop-instance <instanceId>')
-    .description('Stop agent instance')
-    .option('--no-compat', 'Ignore API compatibility checks')
-    .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
-    .option('--profile [profile]', 'The profile to use')
-    .option('--project [project]', 'The project to use')
-    .action(withCompatibilityCheck((instanceId, options) => {
-        try {
-            new StopAgentInstanceCommand(program).execute(instanceId, options);
-        }
-        catch (err) {
-            console.error(chalk.red(err.message));
-        }
-    }));
-
-//List triggers
+// List triggers
 program
     .command('list-triggers')
     .description('List of triggers for the current tenant')
@@ -377,13 +251,12 @@ program
     .action(withCompatibilityCheck((options) => {
         try {
             new ListTriggersCommand(program).execute(options);
-        }
-        catch (err) {
+        } catch (err) {
             console.error(chalk.red(err.message));
         }
     }));
 
-//List Tasks
+// List Tasks
 program
     .command('list-tasks <activationId>')
     .description('List tasks associated with a given activationId')
@@ -394,8 +267,7 @@ program
     .action(withCompatibilityCheck((activationId, options) => {
         try {
             new ListTaskByActivation(program).execute(activationId, options);
-        }
-        catch (err) {
+        } catch (err) {
             console.error(chalk.red(err.message));
         }
     }));
