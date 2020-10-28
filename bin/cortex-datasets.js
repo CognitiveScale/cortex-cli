@@ -27,7 +27,6 @@ const {
     DescribeDatasetCommand,
     GetDataframeCommand,
     StreamDatasetCommand,
-    GenerateDatasetCommand,
 } = require('../src/commands/datasets');
 
 program.description('Work with Cortex Connections');

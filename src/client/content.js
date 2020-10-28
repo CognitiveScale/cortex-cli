@@ -103,7 +103,7 @@ module.exports = class Content {
                 }),
                 process.stdout,
             );
-        } catch     (err) {
+        } catch (err) {
             return constructError(err);
         }
     }
