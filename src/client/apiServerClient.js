@@ -10,7 +10,7 @@ module.exports = class ApiServerClient {
     _client(token) {
         return new GraphQLClient(this.endpoint, {
             headers: {
-                Authorization: `Bearer: ${token}`,
+                Authorization: `bearer ${token}`,
             },
             redirect: 'error',
         });

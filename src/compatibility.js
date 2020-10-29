@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+const _ = require('lodash');
 const boxen = require('boxen');
 const chalk = require('chalk');
 const concat = require('lodash/fp/concat');
@@ -25,7 +26,7 @@ const isInstalledGlobally = require('is-installed-globally');
 const keys = require('lodash/fp/keys');
 const last = require('lodash/fp/last');
 const npmFetch = require('npm-registry-fetch');
-const semver = require('semver');
+const Semver = require('semver');
 const uniq = require('lodash/fp/uniq');
 const { got } = require('./client/apiutils');
 const { loadProfile } = require('./config');
@@ -39,8 +40,8 @@ function getAvailableVersions(name) {
         .json(pkg.name)
         .then(manifest => keys(getOr({}, 'versions', manifest)))
         .then(versions => uniq(concat(versions, pkg.version)))
-        .then(versions => versions.sort(semver.compare))
-        .catch((_) => {
+        .then(versions => versions.sort(Semver.compare))
+        .catch(() => {
             throw new Error('Unable to determine CLI available versions');
         });
 }
@@ -100,12 +101,12 @@ async function getCompatibility(profile) {
     try {
         // fail if unable to contact cortex service
         const requirements = await getRequiredVersion(profile);
-        const satisfied = semver.satisfies(pkg.version, requirements);
+        const satisfied = Semver.satisfies(pkg.version, requirements);
         try {
             // warn user but don't fail
             const versions = await getAvailableVersions(pkg.name);
             debug('getCompatibility => versions: %s, requirements: %s', versions, requirements);
-            const compatibleVersions = filter(v => semver.satisfies(v, requirements), versions);
+            const compatibleVersions = filter(v => Semver.satisfies(v, requirements), versions);
             debug('getCompatibility => compatible versions: %s', compatibleVersions);
             const { version: current } = pkg;
             const latest = last(compatibleVersions);
@@ -124,14 +125,14 @@ function withCompatibilityCheck(fn) {
     return (...args) => {
         const command = last(args);
         const options = command.opts();
-        if (options.compat) {
+        if (options.compat && !_.toLower(process.env.CORTEX_NO_COMPAT) === 'true') {
             const { profile: profileName } = options;
             const profile = loadProfile(profileName);
             return getCompatibility(profile)
                 .then(({ current, latest, satisfied }) => {
                     if (!satisfied) {
                         upgradeRequired({ current, latest });
-                    } else if (semver.gt(latest, current)) {
+                    } else if (Semver.gt(latest, current)) {
                         upgradeAvailable({ current, latest });
                     }
                 })
