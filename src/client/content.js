@@ -16,6 +16,7 @@
 
 const fs = require('fs');
 const stream = require('stream');
+
 const { promisify } = require('util');
 const debug = require('debug')('cortex:cli');
 const { got } = require('./apiutils');
