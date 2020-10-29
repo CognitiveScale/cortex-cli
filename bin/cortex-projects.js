@@ -31,7 +31,7 @@ program.description('Work with Cortex Projects');
 
 // Create Project
 program
-    .command('create [projectDefinition]')
+    .command('save [projectDefinition]')
     .description('Save a project definition')
     .storeOptionsAsProperties(false)
     .option('--no-compat', 'Ignore API compatibility checks')

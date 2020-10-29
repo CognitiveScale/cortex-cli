@@ -90,6 +90,7 @@ program
 // Describe Connection
 program
     .command('describe <connectionName>')
+    .alias('get')
     .description('Describe connection')
     .option('--no-compat', 'Ignore API compatibility checks')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')

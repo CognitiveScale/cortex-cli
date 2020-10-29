@@ -47,6 +47,7 @@ program.command('list')
     }));
 
 program.command('describe <role>')
+    .alias('get')
     .description('Describe role grants and users')
     .option('--no-compat', 'Ignore API compatibility checks')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')

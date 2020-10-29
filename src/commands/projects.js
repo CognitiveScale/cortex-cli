@@ -32,14 +32,14 @@ module.exports.CreateProjectCommand = class CreateProjectCommand {
         const profile = loadProfile(options.profile);
         debug('%s.executeSaveProject(%s)', profile.name, projectDefinition);
         let project = {};
-        if (projectDefinition) {
-            const projectDefStr = fs.readFileSync(projectDefinition);
-            project = parseObject(projectDefStr, options);
-        }
-        if (_.isEmpty(options.name || project.name)) {
-            printError('`name` must be provided', options);
-        }
         try {
+            if (projectDefinition) {
+                const projectDefStr = fs.readFileSync(projectDefinition);
+                project = parseObject(projectDefStr, options);
+            }
+            if (_.isEmpty(options.name || project.name)) {
+                printError('`name` must be provided', options);
+            }
             const cli = new ApiServerClient(profile.url);
             const response = await cli.createProject(profile.token, {
                 name: options.name || project.name,
