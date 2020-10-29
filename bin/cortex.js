@@ -40,7 +40,7 @@ program
     .command('jobs [cmd]', 'Work with Cortex v2 Jobs')
     .command('users [cmd]', 'Work with a Cortex Users')
     .command('roles [cmd]', 'Work with a Cortex Roles')
-    .command('projects [cmd]', 'Work with a related collection of Cortex contributions')
+    .command('projects [cmd]', 'Work with Cortex projects')
     .command('skills [cmd]', 'Work with Cortex Skills')
     .command('tasks [cmd]', 'Work with Cortex v2 Tasks')
     .command('types [cmd]', 'Work with Cortex Types')

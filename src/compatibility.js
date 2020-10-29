@@ -122,11 +122,11 @@ async function getCompatibility(profile) {
 
 function withCompatibilityCheck(fn) {
     return (...args) => {
-        const options = last(args) || {};
+        const command = last(args);
+        const options = command.opts();
         if (options.compat) {
             const { profile: profileName } = options;
             const profile = loadProfile(profileName);
-
             return getCompatibility(profile)
                 .then(({ current, latest, satisfied }) => {
                     if (!satisfied) {
