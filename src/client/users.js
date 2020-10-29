@@ -13,10 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-const  { request } = require('../commands/apiutils');
+const { got } = require('./apiutils');
 const debug = require('debug')('cortex:cli');
-const { constructError } = require('../commands/utils');
+const { constructError, getUserAgent } = require('../commands/utils');
 
 module.exports = class Users {
 
@@ -45,56 +44,38 @@ module.exports = class Users {
     describeUser(token) {
         let endpoint = `${this.usersEndpoint}/${this.flags}`;
         debug('listForUser => %s', endpoint);
-        return request
-            .get(endpoint)
-            .set('Authorization', `Bearer ${token}`)
-            .set('x-cortex-proxy-notify', true)
-            .then((res) => {
-                if (res.ok) {
-                    return {success: true, result: res.body};
-                }
-                return {success: false, status: res.status, message: res.body};
-            })
-            .catch((err) => {
-                return constructError(err);
-            });
+        return got
+            .get(endpoint, {
+                headers: { Authorization: `Bearer ${token}` },
+                'user-agent': getUserAgent(),
+            }).json()
+            .then(res => ({ success: true, result: res }))
+            .catch(err => constructError(err));
     }
 
     createGrantForUser(token, body) {
         const endpoint = this.usersEndpoint;
         debug('createGrantForUser => %s', endpoint);
-        return request
-            .post(endpoint)
-            .set('Authorization', `Bearer ${token}`)
-            .set('x-cortex-proxy-notify', true)
-            .send(body)
-            .then((res) => {
-                if (res.ok) {
-                    return {success: true, result: res.body};
-                }
-                return {success: false, status: res.status, message: res.body};
-            })
-            .catch((err) => {
-                return constructError(err);
-            });
+        return got
+            .post(endpoint, {
+                headers: { Authorization: `Bearer ${token}` },
+                'user-agent': getUserAgent(),
+                json: body,
+            }).json()
+            .then(res => ({ success: true, result: res }))
+            .catch(err => constructError(err));
     }
 
     removeGrantFromUser(token, body) {
         const endpoint = this.usersEndpoint;
         debug('removeGrantFromUser => %s', endpoint);
-        return request
-            .delete(endpoint)
-            .set('Authorization', `Bearer ${token}`)
-            .set('x-cortex-proxy-notify', true)
-            .send(body)
-            .then((res) => {
-                if (res.ok) {
-                    return {success: true, result: res.body};
-                }
-                return {success: false, status: res.status, message: res.body};
-            })
-            .catch((err) => {
-                return constructError(err);
-            });
+        return got
+            .delete(endpoint, {
+                headers: { Authorization: `Bearer ${token}` },
+                'user-agent': getUserAgent(),
+                json: body,
+            }).json()
+            .then(res => ({ success: true, result: res }))
+            .catch(err => constructError(err));
     }
 };

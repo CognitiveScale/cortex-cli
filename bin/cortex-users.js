@@ -71,19 +71,19 @@ const {
     UserGrantCommand,
 } = require('../src/commands/users');
 
-program.description('Work with Cortex Roles');
+program.description('Work with Cortex User');
 
 program.command('describe')
-    .description('List roles by project and user')
+    .description('Describe a users grants and roles')
     .option('--no-compat', 'Ignore API compatibility checks')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
     .option('--user [user]', 'The user to describe, self for default')
     .option('--roles', 'Include roles for user')
-    .option('--grants', 'Include grants for user')
+    .option('--no-grants', 'Ignore grants for user')
     .action(withCompatibilityCheck((options) => {
         try {
-            new UserDescribeCommand(program).execute(null, options);
+            new UserDescribeCommand(program).execute(options);
         }
         catch (err) {
             console.error(chalk.red(err.message));
@@ -91,15 +91,18 @@ program.command('describe')
     }));
 
 
-program.command('grant <user> <project> <resource> <actions...>')
-    .description('List the grants and users for a role')
+program.command('grant <user>')
+    .description('Manage user grants')
     .option('--no-compat', 'Ignore API compatibility checks')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
+    .requiredOption('--project <project>', 'Grant project')
+    .requiredOption('--resource <resource>', 'Grant resource')
+    .requiredOption('--actions <actions...>', 'Grant actions read | write | execute | deny | *')
     .option('--profile [profile]', 'The profile to use')
     .option('--delete', 'Remove grant from user')
-    .action(withCompatibilityCheck((user, project, resource, actions, options) => {
+    .action(withCompatibilityCheck((user, options) => {
         try {
-            new UserGrantCommand(program).execute(user, {project, resource, actions}, options);
+            new UserGrantCommand(program).execute(user, options);
         }
         catch (err) {
             console.error(chalk.red(err.message));

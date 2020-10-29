@@ -19,16 +19,24 @@ const { loadProfile } = require('../config');
 const Users = require('../client/users');
 const { printSuccess, printError, filterObject, parseObject, printTable } = require('./utils');
 
+function createGrant(options) {
+    return {
+        project: options.project,
+        resource: options.resource,
+        actions: options.actions
+    };
+}
+
 module.exports.UserGrantCommand = class {
 
     constructor(program) {
         this.program = program;
     }
 
-    execute(user, form, options) {
+    execute(user, options) {
         const profile = loadProfile(options.profile);
+        const form = createGrant(options);
         debug('%s.grantUser=%s', profile.name, user || 'self');
-
         const client = new Users(profile.url, user);
         const call = (deleteFlag, token, form) => {
             if(deleteFlag) {
@@ -44,11 +52,13 @@ module.exports.UserGrantCommand = class {
                 printSuccess(JSON.stringify(result, null, 2), options);
             }
             else {
-                printError(`Failed to assign to user : ${response.message}`, options);
+                const func = (deleteFlag) ? 'delete' : 'create';
+                printError(`Failed to ${func} grant for user : ${response.message}`, options);
             }
         })
             .catch((err) => {
-                printError(`Failed to assign to user : ${err.status} ${err.message}`, options);
+                const func = (deleteFlag) ? 'delete' : 'create';
+                printError(`Failed to ${func} grant for user : ${err.status} ${err.message}`, options);
             });
     }
 };
@@ -59,7 +69,7 @@ module.exports.UserDescribeCommand = class {
         this.program = program;
     }
 
-    execute(user, options) {
+    execute(options) {
         const profile = loadProfile(options.profile);
         debug('%s.describeForUser=%s', profile.name, options.user || 'self');
 

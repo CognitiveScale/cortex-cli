@@ -82,8 +82,8 @@ program.command('list')
     .option('--no-compat', 'Ignore API compatibility checks')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
-    .option('--users', 'User to list roles for')
-    .option('--projects', 'Project to list roles for')
+    .option('--user [user]', 'User to list roles for')
+    .option('--project [project', 'Project to list roles for')
     .action(withCompatibilityCheck((options) => {
         try {
             new RoleListCommand(program).execute(options);
@@ -94,12 +94,12 @@ program.command('list')
     }));
 
 program.command('describe <role>')
-    .description('List the grants and users for a role')
+    .description('Describe role grants and users')
     .option('--no-compat', 'Ignore API compatibility checks')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
-    .option('--users [users]', 'List users associated with role')
-    .option('--grants [grants]', 'List grants associated with role')
+    .option('--users', 'List users associated with role')
+    .option('--no-grants', 'Ignore grants associated with role')
     .action(withCompatibilityCheck((role, options) => {
         try {
             new RoleDescribeCommand(program).execute(role, options);
@@ -111,11 +111,10 @@ program.command('describe <role>')
 
 
 program.command('delete <role>')
-    .description('List the grants and users for a role')
+    .description('Delete a role and remove grants/assignments')
     .option('--no-compat', 'Ignore API compatibility checks')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
-    .option('--role [role]', 'Role to list')
     .action(withCompatibilityCheck((role, options) => {
         try {
             new RoleDeleteCommand(program).execute(role, options);
@@ -125,83 +124,55 @@ program.command('delete <role>')
         }
     }));
 
-program.command('create <role> <project> <resource> <actions...>')
+program.command('create <role>')
     .description('Create a role with the given grant')
     .option('--no-compat', 'Ignore API compatibility checks')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
-    .action(withCompatibilityCheck((role, project, resource, actions, options) => {
+    .requiredOption('--project <project>', 'Grant project')
+    .requiredOption('--resource <resource>', 'Grant resource')
+    .requiredOption('--actions <actions...>', 'Grant actions read | write | execute | deny | *')
+    .action(withCompatibilityCheck((role, options) => {
         try {
-            new RoleCreateCommand(program).execute({role, project, resource, actions}, options);
+            new RoleCreateCommand(program).execute(role, options);
         }
         catch (err) {
             console.error(chalk.red(err.message));
         }
     }));
 
-program.command('grant <role> <project> <resource> <actions...>')
-    .description('Create a grant on an existing role')
+program.command('grant <role>')
+    .description('Manage grants on an existing role')
     .option('--no-compat', 'Ignore API compatibility checks')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
+    .requiredOption('--project <project>', 'Grant project')
+    .requiredOption('--resource <resource>', 'Grant resource')
+    .requiredOption('--actions <actions...>', 'Grant actions read | write | execute | deny | *')
     .option('--delete', 'Remove grant from role')
-    .action(withCompatibilityCheck((role, project, resource, actions, options) => {
+    .action(withCompatibilityCheck((role, options) => {
         try {
-            new RoleGrantCommand(program).execute(role, {project, resource, actions}, options);
+            new RoleGrantCommand(program).execute(role, options);
         }
         catch (err) {
             console.error(chalk.red(err.message));
         }
     }));
 
-program.command('assign <role> <users...>')
-    .description('List the grants and users for a role')
+program.command('assign <role>')
+    .description('Manage a list of user assignments on a role')
     .option('--no-compat', 'Ignore API compatibility checks')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
+    .requiredOption('--users <users...>', 'Users to add/remove on role')
     .option('--delete', 'Unassign users from role')
-    .action(withCompatibilityCheck((role, users, options) => {
+    .action(withCompatibilityCheck((role, options) => {
         try {
-            new RoleAssignCommand(program).execute(role, users, options);
+            new RoleAssignCommand(program).execute(role, options);
         }
         catch (err) {
             console.error(chalk.red(err.message));
         }
     }));
-
-
-program.command('mapping <role> <externalGroup>')
-    .description('List the grants and users for a role')
-    .option('--no-compat', 'Ignore API compatibility checks')
-    .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
-    .option('--profile [profile]', 'The profile to use')
-    .option('--role [role]', 'Role to list')
-    .option('--delete', 'Role to list')
-    .action(withCompatibilityCheck((options) => {
-        try {
-            new RbacRoleListCommand(program).execute(options);
-        }
-        catch (err) {
-            console.error(chalk.red(err.message));
-        }
-    }));
-
-
-program.command('list-mappings')
-    .description('List the grants and users for a role')
-    .option('--no-compat', 'Ignore API compatibility checks')
-    .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
-    .option('--profile [profile]', 'The profile to use')
-    .option('--role [role]', 'Role to list')
-    .option('--external-group [externalGroup]', 'Role to list')
-    .action(withCompatibilityCheck((options) => {
-        try {
-            new RbacRoleListCommand(program).execute(options);
-        }
-        catch (err) {
-            console.error(chalk.red(err.message));
-        }
-    }));
-
 
 program.parse(process.argv);

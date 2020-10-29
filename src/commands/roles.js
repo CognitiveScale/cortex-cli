@@ -19,6 +19,14 @@ const { loadProfile } = require('../config');
 const Roles = require('../client/roles');
 const { printSuccess, printError, filterObject, parseObject, printTable } = require('./utils');
 
+function createGrant(options) {
+    return {
+        project: options.project,
+        resource: options.resource,
+        actions: options.actions
+    };
+}
+
 module.exports.RoleDeleteCommand = class {
 
     constructor(program) {
@@ -37,11 +45,11 @@ module.exports.RoleDeleteCommand = class {
                 printSuccess(JSON.stringify(result, null, 2), options);
             }
             else {
-                printError(`Failed to assign to user : ${response.message}`, options);
+                printError(`Failed to delete role : ${response.message}`, options);
             }
         })
             .catch((err) => {
-                printError(`Failed to assign to user : ${err.status} ${err.message}`, options);
+                printError(`Failed to delete role : ${err.status} ${err.message}`, options);
             });
     }
 };
@@ -52,8 +60,10 @@ module.exports.RoleCreateCommand = class {
         this.program = program;
     }
 
-    execute(form, options) {
+    execute(role, options) {
         const profile = loadProfile(options.profile);
+        const form = createGrant(options);
+        form.role = role;
         debug('%s.createRole=%s', profile.name);
 
         const client = new Roles(profile.url);
@@ -64,11 +74,11 @@ module.exports.RoleCreateCommand = class {
                 printSuccess(JSON.stringify(result, null, 2), options);
             }
             else {
-                printError(`Failed to assign to user : ${response.message}`, options);
+                printError(`Failed to create role : ${response.message}`, options);
             }
         })
             .catch((err) => {
-                printError(`Failed to assign to user : ${err.status} ${err.message}`, options);
+                printError(`Failed to create role : ${err.status} ${err.message}`, options);
             });
     }
 };
@@ -79,7 +89,7 @@ module.exports.RoleAssignCommand = class {
         this.program = program;
     }
 
-    execute(role, users, options) {
+    execute(role, options) {
         const profile = loadProfile(options.profile);
         debug('%s.grantRoler=%s', profile.name, role);
 
@@ -92,17 +102,19 @@ module.exports.RoleAssignCommand = class {
             }
         };
 
-        call(options.delete, profile.token, users).then((response) => {
+        call(options.delete, profile.token, options.users).then((response) => {
             if (response.success) {
                 let result = filterObject(response.result, options);
                 printSuccess(JSON.stringify(result, null, 2), options);
             }
             else {
-                printError(`Failed to assign to user : ${response.message}`, options);
+                const func = (deleteFlag) ? 'unassign' : 'assign';
+                printError(`Failed to ${func} user from role : ${response.message}`, options);
             }
         })
             .catch((err) => {
-                printError(`Failed to assign to user : ${err.status} ${err.message}`, options);
+                const func = (deleteFlag) ? 'unassign' : 'assign';
+                printError(`Failed to ${func} user from role : ${err.status} ${err.message}`, options);
             });
     }
 };
@@ -113,8 +125,9 @@ module.exports.RoleGrantCommand = class {
         this.program = program;
     }
 
-    execute(role, form, options) {
+    execute(role, options) {
         const profile = loadProfile(options.profile);
+        const form = createGrant(options);
         debug('%s.grantRoler=%s', profile.name, role);
 
         const client = new Roles(profile.url, role);
@@ -132,11 +145,13 @@ module.exports.RoleGrantCommand = class {
                 printSuccess(JSON.stringify(result, null, 2), options);
             }
             else {
-                printError(`Failed to assign to user : ${response.message}`, options);
+                const func = (deleteFlag) ? 'delete' : 'create';
+                printError(`Failed to ${func} grant for role : ${response.message}`, options);
             }
         })
             .catch((err) => {
-                printError(`Failed to assign to user : ${err.status} ${err.message}`, options);
+                const func = (deleteFlag) ? 'delete' : 'create';
+                printError(`Failed to ${func} grant for role : ${err.status} ${err.message}`, options);
             });
     }
 };
@@ -166,11 +181,11 @@ module.exports.RoleDescribeCommand = class {
                 printSuccess(JSON.stringify(result, null, 2), options);
             }
             else {
-                printError(`Failed to describe user : ${response.message}`, options);
+                printError(`Failed to describe role : ${response.message}`, options);
             }
         })
             .catch((err) => {
-                printError(`Failed to describe user : ${err.status} ${err.message}`, options);
+                printError(`Failed to describe role : ${err.status} ${err.message}`, options);
             });
     }
 };
@@ -188,17 +203,17 @@ module.exports.RoleListCommand = class {
         const flags = [];
 
         const client = new Roles(profile.url, flags);
-        client.describeRole(profile.token).then((response) => {
+        client.listRoles(profile.token, options.project).then((response) => {
             if (response.success) {
                 let result = filterObject(response.result, options);
                 printSuccess(JSON.stringify(result, null, 2), options);
             }
             else {
-                printError(`Failed to describe user : ${response.message}`, options);
+                printError(`Failed to list roles : ${response.message}`, options);
             }
         })
             .catch((err) => {
-                printError(`Failed to describe user : ${err.status} ${err.message}`, options);
+                printError(`Failed to list roles : ${err.status} ${err.message}`, options);
             });
     }
 };
