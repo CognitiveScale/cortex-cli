@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 /*
- * Copyright 2018 Cognitive Scale, Inc. All Rights Reserved.
+ * Copyright 2020 Cognitive Scale, Inc. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the “License”);
  * you may not use this file except in compliance with the License.
@@ -24,7 +24,7 @@ const { withCompatibilityCheck } = require('../src/compatibility');
 const {
     SaveTypeCommand,
     ListTypesCommand,
-    DescribeTypeCommand
+    DescribeTypeCommand,
 } = require('../src/commands/types');
 
 program.description('Work with Cortex Types');
@@ -41,8 +41,7 @@ program
     .action(withCompatibilityCheck((typeDefinition, options) => {
         try {
             new SaveTypeCommand(program).execute(typeDefinition, options);
-        }
-        catch (err) {
+        } catch (err) {
             console.error(chalk.red(err.message));
         }
     }));
@@ -60,8 +59,7 @@ program
     .action(withCompatibilityCheck((options) => {
         try {
             new ListTypesCommand(program).execute(options);
-        }
-        catch (err) {
+        } catch (err) {
             console.error(chalk.red(err.message));
         }
     }));
@@ -78,8 +76,7 @@ program
     .action(withCompatibilityCheck((typeName, options) => {
         try {
             new DescribeTypeCommand(program).execute(typeName, options);
-        }
-        catch (err) {
+        } catch (err) {
             console.error(chalk.red(err.message));
         }
     }));

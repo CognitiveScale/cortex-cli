@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 /*
- * Copyright 2018 Cognitive Scale, Inc. All Rights Reserved.
+ * Copyright 2020 Cognitive Scale, Inc. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the “License”);
  * you may not use this file except in compliance with the License.
@@ -22,7 +22,7 @@ const {
     ConfigureCommand,
     DescribeProfileCommand,
     ListProfilesCommand,
-    SetProfileCommand
+    SetProfileCommand,
 } = require('../src/commands/configure');
 
 program
@@ -31,38 +31,37 @@ program
     .option('--project [project]', 'The default project to use')
     .description('Configure the Cortex CLI');
 
-let cmd = undefined;
-program.command('auth', { isDefault: true})
+program.command('auth', { isDefault: true })
     .description('Authenticate to cortex (default command)')
     .option('--file [file]', 'Personal Access Token file location')
     .option('--profile [profile]', 'The profile to configure')
     .option('--project [project]', 'The default project')
-    .action( (options) => {
-        new ConfigureCommand(program).execute({profile: program.profile, color: program.color});
+    .action(() => {
+        new ConfigureCommand(program).execute({ profile: program.profile, color: program.color });
     });
 
 program
-    .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
+    .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on');
 
 program
     .command('list')
     .description('List configured profiles')
-    .action((options) => {
-        new ListProfilesCommand(program).execute({color: program.color});
+    .action(() => {
+        new ListProfilesCommand(program).execute({ color: program.color });
     });
 
 program
     .command('describe <profileName>')
     .description('Describe a configured profile')
-    .action((profileName, options) => {
-        new DescribeProfileCommand(program).execute({profile: profileName, color: program.color});
+    .action((profileName) => {
+        new DescribeProfileCommand(program).execute({ profile: profileName, color: program.color });
     });
 
 program
     .command('set-profile <profileName>')
     .description('Sets the current profile.')
-    .action((profileName, options) => {
-        new SetProfileCommand(program).execute(profileName, {color: program.color});
+    .action((profileName) => {
+        new SetProfileCommand(program).execute(profileName, { color: program.color });
     });
 
 program.parse(process.argv);

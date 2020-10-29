@@ -47,8 +47,7 @@ program
     .action(withCompatibilityCheck((profileSchema, options) => {
         try {
             new SaveProfileSchemaCommand(program).execute(profileSchema, options);
-        }
-        catch (err) {
+        } catch (err) {
             console.error(chalk.red(err.message));
         }
     }));
@@ -70,8 +69,7 @@ program
     .action(withCompatibilityCheck((options) => {
         try {
             new ListProfileSchemasCommand(program).execute(options);
-        }
-        catch (err) {
+        } catch (err) {
             console.error(chalk.red(err.message));
         }
     }));
@@ -88,8 +86,7 @@ program
     .action(withCompatibilityCheck((schemaName, options) => {
         try {
             new DescribeProfileSchemaCommand(program).execute(schemaName, options);
-        }
-        catch (err) {
+        } catch (err) {
             console.error(chalk.red(err.message));
         }
     }));
@@ -105,8 +102,7 @@ program
     .action(withCompatibilityCheck((schemaName, options) => {
         try {
             new DeleteProfileSchemaCommand(program).execute(schemaName, options);
-        }
-        catch (err) {
+        } catch (err) {
             console.error(chalk.red(err.message));
         }
     }));
@@ -128,8 +124,7 @@ program
     .action(withCompatibilityCheck((options) => {
         try {
             new ListProfilesCommand(program).execute(options);
-        }
-        catch (err) {
+        } catch (err) {
             console.error(chalk.red(err.message));
         }
     }));
@@ -150,8 +145,7 @@ program
     .action(withCompatibilityCheck((profileId, schemaName, options) => {
         try {
             new ListProfileVersionsCommand(program).execute(profileId, schemaName, options);
-        }
-        catch (err) {
+        } catch (err) {
             console.error(chalk.red(err.message));
         }
     }));
@@ -172,8 +166,7 @@ program
     .action(withCompatibilityCheck((profileId, schemaName, options) => {
         try {
             new DescribeProfileCommand(program).execute(profileId, schemaName, options);
-        }
-        catch (err) {
+        } catch (err) {
             console.error(chalk.red(err.message));
         }
     }));
@@ -189,8 +182,7 @@ program
     .action(withCompatibilityCheck((profileId, schemaName, options) => {
         try {
             new DeleteProfileCommand(program).execute(profileId, schemaName, options);
-        }
-        catch (err) {
+        } catch (err) {
             console.error(chalk.red(err.message));
         }
     }));
@@ -210,8 +202,7 @@ program
     .action(withCompatibilityCheck((schemaName, profileId, options) => {
         try {
             new RebuildProfilesCommand(program).execute(schemaName, profileId, options);
-        }
-        catch (err) {
+        } catch (err) {
             console.error(chalk.red(err.message));
         }
     }));

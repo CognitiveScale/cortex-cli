@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Cognitive Scale, Inc. All Rights Reserved.
+ * Copyright 2020 Cognitive Scale, Inc. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the “License”);
  * you may not use this file except in compliance with the License.
@@ -20,71 +20,55 @@ const _ = require('lodash');
 const prompt = require('co-prompt');
 const chalk = require('chalk');
 const fs = require('fs');
-const { readConfig, defaultConfig, Profile } = require('../config');
+const { readConfig, defaultConfig } = require('../config');
 const { printSuccess, printError, filterObject } = require('./utils');
 const Accounts = require('../client/accounts');
 
-/**
- * Validate 's'' is not empty, return 's' or throw error
- * @param s
- * @param msg
- * @param regex
- * @returns {*}
- * @private
- */
-function _validate(s, msg, regex=undefined) {
-    if (_.isEmpty(s) || (regex && !regex.test(s))) {
-        console.error(chalk.red(msg));
-        process.exit(1);
-    }
-    return s;
-}
-
 function _validatePatFile(patFile) {
-    if(!fs.existsSync(patFile)) {
+    if (!fs.existsSync(patFile)) {
         printError(`Personal Access Token file does not exist at: ${patFile}`);
     }
-
-    const patData = JSON.parse(fs.readFileSync(patFile));
-
-    return patData;
+    return JSON.parse(fs.readFileSync(patFile));
 }
 
-
 module.exports.ConfigureCommand = class {
-
     constructor(program) {
         this.program = program;
     }
+
     execute(options) {
         const config = readConfig();
-        const profileName = options.profile || _.get(config,'currentProfile','default');
+        const profileName = options.profile || _.get(config, 'currentProfile', 'default');
         const patFile = this.program.file;
 
         debug('configuring profile: %s', profileName);
         console.log(`Configuring profile ${chalk.green.bold(profileName)}:`);
 
         const cmd = this;
-        co(function*(){
+        co(function* () {
             try {
                 let patData = null;
                 if (patFile) {
                     patData = _validatePatFile(patFile);
                 } else {
-                    patData = JSON.parse(yield prompt(`Cortex Personal Access Token: `));
+                    patData = JSON.parse(yield prompt('Cortex Personal Access Token: '));
                 }
                 cmd.saveConfig(config, profileName, patData, cmd.program.project);
                 console.log(`Configuration for profile ${chalk.green.bold(profileName)} saved.`);
-                process.exit(1)
-            }catch (err) {
+                process.exit(1);
+            } catch (err) {
                 printError(err);
             }
         });
     }
-    saveConfig(config, profileName, {url, username, issuer, audience, jwk}, project) {
-        if(!config)
-          config = defaultConfig();
-        config.setProfile(profileName, {url, username, issuer, audience, jwk, project});
+
+    saveConfig(config, profileName, {
+         url, username, issuer, audience, jwk,
+    }, project) {
+        if (!config) config = defaultConfig();
+        config.setProfile(profileName, {
+            url, username, issuer, audience, jwk, project,
+        });
         config.currentProfile = profileName;
         config.save();
     }
@@ -94,6 +78,7 @@ module.exports.SetProfileCommand = class {
     constructor(program) {
         this.program = program;
     }
+
     execute(profileName, options) {
         const config = readConfig();
         const profile = config.getProfile(profileName);
@@ -110,7 +95,6 @@ module.exports.SetProfileCommand = class {
 };
 
 module.exports.DescribeProfileCommand = class {
-
     constructor(program) {
         this.program = program;
     }
@@ -118,7 +102,7 @@ module.exports.DescribeProfileCommand = class {
     execute(options) {
         const config = readConfig();
         if (config === undefined) {
-            printError(`Configuration not found.  Please run "cortex configure".`);
+            printError('Configuration not found.  Please run "cortex configure".');
             return;
         }
 
@@ -140,10 +124,9 @@ module.exports.DescribeProfileCommand = class {
         const accounts = new Accounts(profile.url);
         accounts.whoAmI(profile.token).then((response) => {
             if (response.success) {
-                let result = filterObject(response.result, options);
+                const result = filterObject(response.result, options);
                 printSuccess(JSON.stringify(result, null, 2), options);
-            }
-            else {
+            } else {
                 printError(`Failed to describe profile : ${response.message}`, options);
             }
         })
@@ -161,23 +144,21 @@ module.exports.ListProfilesCommand = class {
     execute(options) {
         const config = readConfig();
         if (config === undefined) {
-            printError(`Configuration not found.  Please run "cortex configure".`,options);
+            printError('Configuration not found.  Please run "cortex configure".', options);
             return;
         }
 
         const profiles = Object.keys(config.profiles);
-        for (let name of profiles) {
+        profiles.forEach((name) => {
             if (name === config.currentProfile) {
                 if (options.color === 'on') {
                     console.log(chalk.green.bold(name));
-                }
-                else {
+                } else {
                     console.log(`${name} [active]`);
                 }
-            }
-            else {
+            } else {
                 console.log(name);
             }
-        }
+        });
     }
 };

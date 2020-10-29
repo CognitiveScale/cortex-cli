@@ -27,6 +27,7 @@ const {
     ListRuns,
     DescribeRunCommand,
     DeleteRunCommand,
+    DeleteExperimentCommand,
     DownloadArtifactCommand,
 } = require('../src/commands/experiments');
 
@@ -49,8 +50,7 @@ program
     .action(withCompatibilityCheck((options) => {
         try {
             new ListExperiments(program).execute(options);
-        }
-        catch (err) {
+        } catch (err) {
             console.error(chalk.red(err.message));
         }
     }));
@@ -67,8 +67,7 @@ program
     .action(withCompatibilityCheck((experimentName, options) => {
         try {
             new DescribeExperimentCommand(program).execute(experimentName, options);
-        }
-        catch (err) {
+        } catch (err) {
             console.error(chalk.red(err.message));
         }
     }));
@@ -84,8 +83,7 @@ program
     .action(withCompatibilityCheck((experimentName, runId, options) => {
         try {
             new DeleteExperimentCommand(program).execute(experimentName, options);
-        }
-        catch (err) {
+        } catch (err) {
             console.error(chalk.red(err.message));
         }
     }));
@@ -107,8 +105,7 @@ program
     .action(withCompatibilityCheck((experimentName, options) => {
         try {
             new ListRuns(program).execute(experimentName, options);
-        }
-        catch (err) {
+        } catch (err) {
             console.error(chalk.red(err.message));
         }
     }));
@@ -125,8 +122,7 @@ program
     .action(withCompatibilityCheck((experimentName, runId, options) => {
         try {
             new DescribeRunCommand(program).execute(experimentName, runId, options);
-        }
-        catch (err) {
+        } catch (err) {
             console.error(chalk.red(err.message));
         }
     }));
@@ -142,8 +138,7 @@ program
     .action(withCompatibilityCheck((experimentName, runId, options) => {
         try {
             new DeleteRunCommand(program).execute(experimentName, runId, options);
-        }
-        catch (err) {
+        } catch (err) {
             console.error(chalk.red(err.message));
         }
     }));
@@ -159,8 +154,7 @@ program
     .action(withCompatibilityCheck((experimentName, runId, artifactName, options) => {
         try {
             new DownloadArtifactCommand(program).execute(experimentName, runId, artifactName, options);
-        }
-        catch (err) {
+        } catch (err) {
             console.error(chalk.red(err.message));
         }
     }));

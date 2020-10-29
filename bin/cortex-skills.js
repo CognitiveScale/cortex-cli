@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 /*
- * Copyright 2018 Cognitive Scale, Inc. All Rights Reserved.
+ * Copyright 2020 Cognitive Scale, Inc. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the “License”);
  * you may not use this file except in compliance with the License.
@@ -25,7 +25,6 @@ const {
     SaveSkillCommand,
     ListSkillsCommand,
     DescribeSkillCommand,
-    GenerateSkillCommand
 } = require('../src/commands/skills');
 
 program.description('Work with Cortex Skills');
@@ -42,8 +41,7 @@ program
     .action(withCompatibilityCheck((skillDefinition, options) => {
         try {
             new SaveSkillCommand(program).execute(skillDefinition, options);
-        }
-        catch (err) {
+        } catch (err) {
             console.error(chalk.red(err.message));
         }
     }));
@@ -61,8 +59,7 @@ program
     .action(withCompatibilityCheck((options) => {
         try {
             new ListSkillsCommand(program).execute(options);
-        }
-        catch (err) {
+        } catch (err) {
             console.error(chalk.red(err.message));
         }
     }));
@@ -79,23 +76,9 @@ program
     .action(withCompatibilityCheck((skillName, options) => {
         try {
             new DescribeSkillCommand(program).execute(skillName, options);
-        }
-        catch (err) {
+        } catch (err) {
             console.error(chalk.red(err.message));
         }
     }));
-
-program
-    .command('generate')
-    .description('(Deprecated) Generates the structure and top level build script for a skill')
-    .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
-    .action((options) => { // deliberately not using withCompatibilityCheck()
-        try {
-            new GenerateSkillCommand(program).execute(options);
-        }
-        catch (err) {
-            console.error(chalk.red(err.message));
-        }
-    });
 
 program.parse(process.argv);

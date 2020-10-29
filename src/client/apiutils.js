@@ -1,24 +1,27 @@
+const got = require('got');
 
-const superagentRequest = require('superagent');
-require('superagent-proxy')(superagentRequest);
-const debug = require('debug')('cortex:cli');
-
-const { printWarning } = require('./utils');
-const { getUserAgent } = require('../useragent');
-
-function handleAuthError(res, req) {
-    if (res.headers['x-auth-error']) {
-        res.statusCode = 401;
-        this.callback(new Error(`Auth Error: ${res.headers['x-auth-error']}`));
-    }
-}
+module.exports.got = got.extend({
+    followRedirect: false,
+    hooks: {
+        afterResponse: [
+            (res) => {
+                if (res.headers['x-auth-error']) {
+                    res.statusCode = 401;
+                    throw new Error(`Auth Error: ${res.headers['x-auth-error']}`);
+                }
+                return res;
+            },
+        ],
+    }, 
+});
 /**
  * makes a request via superagent. proxy methods will be utilized
  * if the user (i.e. person running cli commands) has set environment
  * variables for their proxy (this is assuming ofc they have a proxy). if
  * no env variables set, the request just keeps piping through.
  */
-
+// TODO for proxies https://github.com/gajus/global-agent
+/**
 function requestWrapper() {
     // @tutorial: https://stackoverflow.com/questions/22156326/private-properties-in-javascript-es6-classes
     // below are private variables
@@ -83,3 +86,4 @@ function requestWrapper() {
 }
 
 module.exports.request = new requestWrapper();
+* */
