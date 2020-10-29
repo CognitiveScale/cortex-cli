@@ -21,8 +21,7 @@ const prompt = require('co-prompt');
 const chalk = require('chalk');
 const fs = require('fs');
 const { readConfig, defaultConfig } = require('../config');
-const { printSuccess, printError, filterObject } = require('./utils');
-const Accounts = require('../client/accounts');
+const { printSuccess, printError } = require('./utils');
 
 function _validatePatFile(patFile) {
     if (!fs.existsSync(patFile)) {
@@ -120,19 +119,6 @@ module.exports.DescribeProfileCommand = class {
         printSuccess(`Username: ${profile.username}`, options);
         printSuccess(`JWK: ${JSON.stringify(profile.jwk)}`, options);
         printSuccess(`Project: ${profile.project || 'undefined'}`, options);
-
-        const accounts = new Accounts(profile.url);
-        accounts.whoAmI(profile.token).then((response) => {
-            if (response.success) {
-                const result = filterObject(response.result, options);
-                printSuccess(JSON.stringify(result, null, 2), options);
-            } else {
-                printError(`Failed to describe profile : ${response.message}`, options);
-            }
-        })
-        .catch((err) => {
-            printError(`Failed to describe profile : ${err.status} ${err.message}`, options);
-        });
     }
 };
 
