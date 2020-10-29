@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Cognitive Scale, Inc. All Rights Reserved.
+ * Copyright 2020 Cognitive Scale, Inc. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the “License”);
  * you may not use this file except in compliance with the License.
@@ -13,22 +13,22 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-const _ = require("lodash")
 const debug = require('debug')('cortex:cli');
 const { loadProfile } = require('../config');
 const Users = require('../client/users');
-const { printSuccess, printError, filterObject, parseObject, printTable } = require('./utils');
+const {
+ printSuccess, printError, filterObject,
+} = require('./utils');
 
 function createGrant(options) {
     return {
         project: options.project,
         resource: options.resource,
-        actions: options.actions
+        actions: options.actions,
     };
 }
 
 module.exports.UserGrantCommand = class {
-
     constructor(program) {
         this.program = program;
     }
@@ -38,33 +38,30 @@ module.exports.UserGrantCommand = class {
         const form = createGrant(options);
         debug('%s.grantUser=%s', profile.name, user || 'self');
         const client = new Users(profile.url, user);
-        const call = (deleteFlag, token, form) => {
-            if(deleteFlag) {
-                return client.removeGrantFromUser(token, form);
-            } else {
-                return client.createGrantForUser(token, form);
+        const call = (deleteFlag, token, body) => {
+            if (deleteFlag) {
+                return client.removeGrantFromUser(token, body);
             }
+                return client.createGrantForUser(token, body);
         };
 
         call(options.delete, profile.token, form).then((response) => {
             if (response.success) {
-                let result = filterObject(response.result, options);
+                const result = filterObject(response.result, options);
                 printSuccess(JSON.stringify(result, null, 2), options);
-            }
-            else {
-                const func = (deleteFlag) ? 'delete' : 'create';
+            } else {
+                const func = (options.delete) ? 'delete' : 'create';
                 printError(`Failed to ${func} grant for user : ${response.message}`, options);
             }
         })
             .catch((err) => {
-                const func = (deleteFlag) ? 'delete' : 'create';
+                const func = (options.delete) ? 'delete' : 'create';
                 printError(`Failed to ${func} grant for user : ${err.status} ${err.message}`, options);
             });
     }
 };
 
 module.exports.UserDescribeCommand = class {
-
     constructor(program) {
         this.program = program;
     }
@@ -75,19 +72,18 @@ module.exports.UserDescribeCommand = class {
 
         const flags = [];
 
-        if(options.grants) {
+        if (options.grants) {
             flags.push('grants');
         }
-        if(options.roles) {
+        if (options.roles) {
             flags.push('roles');
         }
         const client = new Users(profile.url, options.user, flags);
         client.describeUser(profile.token).then((response) => {
             if (response.success) {
-                let result = filterObject(response.result, options);
+                const result = filterObject(response.result, options);
                 printSuccess(JSON.stringify(result, null, 2), options);
-            }
-            else {
+            } else {
                 printError(`Failed to describe user : ${response.message}`, options);
             }
         })

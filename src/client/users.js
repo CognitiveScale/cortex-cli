@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Cognitive Scale, Inc. All Rights Reserved.
+ * Copyright 2020 Cognitive Scale, Inc. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the “License”);
  * you may not use this file except in compliance with the License.
@@ -13,36 +13,36 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-const { got } = require('./apiutils');
+
 const debug = require('debug')('cortex:cli');
+const { got } = require('./apiutils');
 const { constructError, getUserAgent } = require('../commands/utils');
 
 module.exports = class Users {
-
     constructor(cortexUrl, user, flags = []) {
         this.cortexUrl = cortexUrl;
         this.endpoint = `${cortexUrl}/fabric/v4`;
         this.flags = '';
 
-        if(user) {
+        if (user) {
             this.usersEndpoint = `${this.endpoint}/usergrants/${user}`;
         } else {
             this.usersEndpoint = `${this.endpoint}/usergrants`;
         }
-        if(flags.length > 0) {
+        if (flags.length > 0) {
             this.flags = `${flags.reduce((flagString, flag) => {
                 if (flagString) {
-                    flagString += `&${flag}=true`
+                    flagString += `&${flag}=true`;
                 } else {
-                    flagString += `?${flag}=true`
+                    flagString += `?${flag}=true`;
                 }
                 return flagString;
-            }, '')}`
+            }, '')}`;
         }
     }
 
     describeUser(token) {
-        let endpoint = `${this.usersEndpoint}/${this.flags}`;
+        const endpoint = `${this.usersEndpoint}/${this.flags}`;
         debug('listForUser => %s', endpoint);
         return got
             .get(endpoint, {

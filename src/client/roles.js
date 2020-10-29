@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Cognitive Scale, Inc. All Rights Reserved.
+ * Copyright 2020 Cognitive Scale, Inc. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the “License”);
  * you may not use this file except in compliance with the License.
@@ -13,18 +13,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-const { got } = require('./apiutils');
 const debug = require('debug')('cortex:cli');
+const { got } = require('./apiutils');
 const { constructError, getUserAgent } = require('../commands/utils');
 
 module.exports = class Roles {
-
     constructor(cortexUrl, role, flags = []) {
         this.cortexUrl = cortexUrl;
         this.endpoint = `${cortexUrl}/fabric/v4`;
         this.flags = '';
 
-        if(role) {
+        if (role) {
             this.rolesEndpoint = `${this.endpoint}/roles/${role}`;
         } else {
             this.rolesEndpoint = `${this.endpoint}/roles`;
@@ -32,20 +31,20 @@ module.exports = class Roles {
         this.rolesUsersEndpoint = `${this.rolesEndpoint}/users`;
         this.rolesGrantsEndpoint = `${this.rolesEndpoint}/grants`;
 
-        if(flags.length > 0) {
+        if (flags.length > 0) {
             this.flags = `${flags.reduce((flagString, flag) => {
                 if (flagString) {
-                    flagString += `&${flag}=true`
+                    flagString += `&${flag}=true`;
                 } else {
-                    flagString += `?${flag}=true`
+                    flagString += `?${flag}=true`;
                 }
                 return flagString;
-            }, '')}`
+            }, '')}`;
         }
     }
 
     describeRole(token) {
-        let endpoint = this.rolesEndpoint+this.flags;
+        const endpoint = this.rolesEndpoint + this.flags;
         debug('describeRole => %s', endpoint);
         return got
             .get(endpoint, {
@@ -90,7 +89,7 @@ module.exports = class Roles {
             .post(endpoint, {
                 headers: { Authorization: `Bearer ${token}` },
                 'user-agent': getUserAgent(),
-                json: {users},
+                json: { users },
             }).json()
             .then(res => ({ success: true, result: res }))
             .catch(err => constructError(err));
@@ -103,7 +102,7 @@ module.exports = class Roles {
             .delete(endpoint, {
                 headers: { Authorization: `Bearer ${token}` },
                 'user-agent': getUserAgent(),
-                json: {users},
+                json: { users },
             }).json()
             .then(res => ({ success: true, result: res }))
             .catch(err => constructError(err));
@@ -136,7 +135,6 @@ module.exports = class Roles {
     }
 
     listRoles(token, project) {
-
         let endpoint = this.rolesEndpoint;
         if (project) {
             endpoint += `?project=${project}`;

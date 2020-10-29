@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Cognitive Scale, Inc. All Rights Reserved.
+ * Copyright 2020 Cognitive Scale, Inc. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the “License”);
  * you may not use this file except in compliance with the License.
@@ -13,22 +13,22 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-const _ = require("lodash")
 const debug = require('debug')('cortex:cli');
 const { loadProfile } = require('../config');
 const Roles = require('../client/roles');
-const { printSuccess, printError, filterObject, parseObject, printTable } = require('./utils');
+const {
+ printSuccess, printError, filterObject,
+} = require('./utils');
 
 function createGrant(options) {
     return {
         project: options.project,
         resource: options.resource,
-        actions: options.actions
+        actions: options.actions,
     };
 }
 
 module.exports.RoleDeleteCommand = class {
-
     constructor(program) {
         this.program = program;
     }
@@ -41,10 +41,9 @@ module.exports.RoleDeleteCommand = class {
 
         client.deleteRole(profile.token).then((response) => {
             if (response.success) {
-                let result = filterObject(response.result, options);
+                const result = filterObject(response.result, options);
                 printSuccess(JSON.stringify(result, null, 2), options);
-            }
-            else {
+            } else {
                 printError(`Failed to delete role : ${response.message}`, options);
             }
         })
@@ -55,7 +54,6 @@ module.exports.RoleDeleteCommand = class {
 };
 
 module.exports.RoleCreateCommand = class {
-
     constructor(program) {
         this.program = program;
     }
@@ -70,10 +68,9 @@ module.exports.RoleCreateCommand = class {
 
         client.createRole(profile.token, form).then((response) => {
             if (response.success) {
-                let result = filterObject(response.result, options);
+                const result = filterObject(response.result, options);
                 printSuccess(JSON.stringify(result, null, 2), options);
-            }
-            else {
+            } else {
                 printError(`Failed to create role : ${response.message}`, options);
             }
         })
@@ -84,7 +81,6 @@ module.exports.RoleCreateCommand = class {
 };
 
 module.exports.RoleAssignCommand = class {
-
     constructor(program) {
         this.program = program;
     }
@@ -95,32 +91,29 @@ module.exports.RoleAssignCommand = class {
 
         const client = new Roles(profile.url, role);
         const call = (deleteFlag, token, users) => {
-            if(deleteFlag) {
+            if (deleteFlag) {
                 return client.removeUsersFromRole(token, users);
-            } else {
-                return client.addUsersToRole(token, users);
             }
+                return client.addUsersToRole(token, users);
         };
 
         call(options.delete, profile.token, options.users).then((response) => {
             if (response.success) {
-                let result = filterObject(response.result, options);
+                const result = filterObject(response.result, options);
                 printSuccess(JSON.stringify(result, null, 2), options);
-            }
-            else {
-                const func = (deleteFlag) ? 'unassign' : 'assign';
+            } else {
+                const func = (options.delete) ? 'unassign' : 'assign';
                 printError(`Failed to ${func} user from role : ${response.message}`, options);
             }
         })
             .catch((err) => {
-                const func = (deleteFlag) ? 'unassign' : 'assign';
+                const func = (options.delete) ? 'unassign' : 'assign';
                 printError(`Failed to ${func} user from role : ${err.status} ${err.message}`, options);
             });
     }
 };
 
 module.exports.RoleGrantCommand = class {
-
     constructor(program) {
         this.program = program;
     }
@@ -131,33 +124,30 @@ module.exports.RoleGrantCommand = class {
         debug('%s.grantRoler=%s', profile.name, role);
 
         const client = new Roles(profile.url, role);
-        const call = (deleteFlag, token, form) => {
-            if(deleteFlag) {
-                return client.removeGrantFromRole(token, form);
-            } else {
-                return client.createGrantForRole(token, form);
+        const call = (deleteFlag, token, body) => {
+            if (deleteFlag) {
+                return client.removeGrantFromRole(token, body);
             }
+                return client.createGrantForRole(token, body);
         };
 
         call(options.delete, profile.token, form).then((response) => {
             if (response.success) {
-                let result = filterObject(response.result, options);
+                const result = filterObject(response.result, options);
                 printSuccess(JSON.stringify(result, null, 2), options);
-            }
-            else {
-                const func = (deleteFlag) ? 'delete' : 'create';
+            } else {
+                const func = (options.delete) ? 'delete' : 'create';
                 printError(`Failed to ${func} grant for role : ${response.message}`, options);
             }
         })
             .catch((err) => {
-                const func = (deleteFlag) ? 'delete' : 'create';
+                const func = (options.delete) ? 'delete' : 'create';
                 printError(`Failed to ${func} grant for role : ${err.status} ${err.message}`, options);
             });
     }
 };
 
 module.exports.RoleDescribeCommand = class {
-
     constructor(program) {
         this.program = program;
     }
@@ -168,19 +158,18 @@ module.exports.RoleDescribeCommand = class {
 
         const flags = [];
 
-        if(options.grants) {
+        if (options.grants) {
             flags.push('grants');
         }
-        if(options.users) {
+        if (options.users) {
             flags.push('users');
         }
         const client = new Roles(profile.url, role, flags);
         client.describeRole(profile.token).then((response) => {
             if (response.success) {
-                let result = filterObject(response.result, options);
+                const result = filterObject(response.result, options);
                 printSuccess(JSON.stringify(result, null, 2), options);
-            }
-            else {
+            } else {
                 printError(`Failed to describe role : ${response.message}`, options);
             }
         })
@@ -191,7 +180,6 @@ module.exports.RoleDescribeCommand = class {
 };
 
 module.exports.RoleListCommand = class {
-
     constructor(program) {
         this.program = program;
     }
@@ -205,10 +193,9 @@ module.exports.RoleListCommand = class {
         const client = new Roles(profile.url, flags);
         client.listRoles(profile.token, options.project).then((response) => {
             if (response.success) {
-                let result = filterObject(response.result, options);
+                const result = filterObject(response.result, options);
                 printSuccess(JSON.stringify(result, null, 2), options);
-            }
-            else {
+            } else {
                 printError(`Failed to list roles : ${response.message}`, options);
             }
         })

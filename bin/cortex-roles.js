@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 /*
- * Copyright 2018 Cognitive Scale, Inc. All Rights Reserved.
+ * Copyright 2020 Cognitive Scale, Inc. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the “License”);
  * you may not use this file except in compliance with the License.
@@ -15,52 +15,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-
-/*Grant resource + actions to user
-Grant resource + actions to role
-Assign user to fabric role ( alternative to external groups )
-Remove user from fabric role
-Remove grant from user
-Remove grant from fabric  role
-Get my permissions ( using JWT )
-Get someone else’s permission ( can’t account for external groups..)
-List fabric roles
-Get role’s permissions
-
-
-cortex roles create|grant
---role = The entity that is being granted access
---project = The project this applies to ( * for all projects )
---resource = The resource <type>.<name> that that grant is against ( * for all resource )
---actions = READ|WRITE|EXECUTE|DENY … DENY trumps all ( * for all actions )
-Create or update a role
-
-Cortex roles assign --role --project --assignee[]  --project [--delete]
-Assign/UnAssign user(s) to role
-
-Cortex roles list [--project] [--user]
-List roles by project and/or user
-
-Cortex role describe --role --project
-Dump role’s permissions and assignees
-
-Cortex roles delete --role --project
-Remove a role and all assignments
-
-Cortex roles mapping --role --external-group [--delete]
-Manage group role mappings
-Or delete..
-
-Cortex roles list-mappings
-List role external group mappings
-
-Cortex users grant --project --actions --resource
-Grant user permission to a resource
-
-Cortex users l [--user]
-List grants for a user (admin) or myself by default*/
-
 const chalk = require('chalk');
 const program = require('../src/commander');
 
@@ -87,8 +41,7 @@ program.command('list')
     .action(withCompatibilityCheck((options) => {
         try {
             new RoleListCommand(program).execute(options);
-        }
-        catch (err) {
+        } catch (err) {
             console.error(chalk.red(err.message));
         }
     }));
@@ -103,8 +56,7 @@ program.command('describe <role>')
     .action(withCompatibilityCheck((role, options) => {
         try {
             new RoleDescribeCommand(program).execute(role, options);
-        }
-        catch (err) {
+        } catch (err) {
             console.error(chalk.red(err.message));
         }
     }));
@@ -118,8 +70,7 @@ program.command('delete <role>')
     .action(withCompatibilityCheck((role, options) => {
         try {
             new RoleDeleteCommand(program).execute(role, options);
-        }
-        catch (err) {
+        } catch (err) {
             console.error(chalk.red(err.message));
         }
     }));
@@ -135,8 +86,7 @@ program.command('create <role>')
     .action(withCompatibilityCheck((role, options) => {
         try {
             new RoleCreateCommand(program).execute(role, options);
-        }
-        catch (err) {
+        } catch (err) {
             console.error(chalk.red(err.message));
         }
     }));
@@ -153,8 +103,7 @@ program.command('grant <role>')
     .action(withCompatibilityCheck((role, options) => {
         try {
             new RoleGrantCommand(program).execute(role, options);
-        }
-        catch (err) {
+        } catch (err) {
             console.error(chalk.red(err.message));
         }
     }));
@@ -169,8 +118,7 @@ program.command('assign <role>')
     .action(withCompatibilityCheck((role, options) => {
         try {
             new RoleAssignCommand(program).execute(role, options);
-        }
-        catch (err) {
+        } catch (err) {
             console.error(chalk.red(err.message));
         }
     }));
