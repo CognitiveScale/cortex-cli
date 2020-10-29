@@ -27,29 +27,27 @@ module.exports.SaveTypeCommand = class SaveTypeCommand {
         this.program = program;
     }
 
-    execute(typeDefinition, options) {
+    async execute(typeDefinition, options) {
         const profile = loadProfile(options.profile);
         debug('%s.executeSaveType(%s)', profile.name, typeDefinition);
+        try {
+            const typeDefStr = fs.readFileSync(typeDefinition);
+            const type = parseObject(typeDefStr, options);
+            debug('%o', type);
 
-        const typeDefStr = fs.readFileSync(typeDefinition);
-        const type = parseObject(typeDefStr, options);
-        debug('%o', type);
+            let normalizedType = {};
+            if (!('types' in type)) normalizedType.types = [type];
+            else normalizedType = type;
 
-        let normalizedType = {};
-        if (!('types' in type)) normalizedType.types = [type];
-        else normalizedType = type;
-
-        const catalog = new Catalog(profile.url);
-        catalog.saveType(options.project || profile.project, profile.token, normalizedType).then((response) => {
+            const catalog = new Catalog(profile.url);
+            const response = await catalog.saveType(options.project || profile.project, profile.token, normalizedType);
             if (response.success) {
-                printSuccess('Type definition saved', options);
-            } else {
-                printError(`Failed to save type: ${response.status} ${response.message}`, options);
+                return printSuccess('Type definition saved', options);
             }
-        })
-        .catch((err) => {
-            printError(`Failed to save type: ${err.status} ${err.response.body.error}`, options);
-        });
+            return printError(`${response.message}: ${JSON.stringify(response.details || '')} `);
+        } catch (err) {
+            return printError(`Failed to save type: ${err.status} ${err.message}`, options);
+        }
     }
 };
 

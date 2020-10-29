@@ -70,6 +70,7 @@ program
 // Describe Dataset
 program
     .command('describe <datasetName>')
+    .alias('get')
     .description('Describe dataset')
     .option('--no-compat', 'Ignore API compatibility checks')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
