@@ -67,6 +67,7 @@ program
 // Describe Skill
 program
     .command('describe <skillName>')
+    .alias('get')
     .description('Describe skill')
     .option('--no-compat', 'Ignore API compatibility checks')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')

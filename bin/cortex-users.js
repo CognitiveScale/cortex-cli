@@ -28,6 +28,7 @@ const {
 program.description('Work with Cortex User');
 
 program.command('describe')
+    .alias('get')
     .description('Describe a users grants and roles')
     .option('--no-compat', 'Ignore API compatibility checks')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
