@@ -20,7 +20,13 @@ const _ = require('lodash');
 const prompt = require('co-prompt');
 const chalk = require('chalk');
 const fs = require('fs');
-const { readConfig, defaultConfig } = require('../config');
+
+const {
+    readConfig,
+    defaultConfig,
+    generateJwt,
+    loadProfile,
+} = require('../config');
 const { printSuccess, printError } = require('./utils');
 
 function _validatePatFile(patFile) {
@@ -50,7 +56,7 @@ module.exports.ConfigureCommand = class {
                 if (patFile) {
                     patData = _validatePatFile(patFile);
                 } else {
-                    patData = JSON.parse(yield prompt('Cortex Personal Access Token: '));
+                    patData = JSON.parse(yield prompt('Cortex Personal Access Config: '));
                 }
                 cmd.saveConfig(config, profileName, patData, cmd.program.project);
                 console.log(`Configuration for profile ${chalk.green.bold(profileName)} saved.`);
@@ -146,5 +152,18 @@ module.exports.ListProfilesCommand = class {
                 console.log(name);
             }
         });
+    }
+};
+
+module.exports.GetAccessToken = class {
+    constructor(program) {
+        this.program = program;
+    }
+
+    execute(options) {
+        const profile = loadProfile(options.profile);
+        debug('%s.getAccesToken', profile.name);
+        const jwt = generateJwt(profile, '1d');
+        return printSuccess(jwt, options);
     }
 };

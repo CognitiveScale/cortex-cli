@@ -23,21 +23,36 @@ const {
     DescribeProfileCommand,
     ListProfilesCommand,
     SetProfileCommand,
+    GetAccessToken,
 } = require('../src/commands/configure');
 
 program
-    .option('--file [file]', 'Personal Access Token file location')
+    .option('--file [file]', 'Personal access config file location')
     .option('--profile [profile]', 'The profile to configure')
     .option('--project [project]', 'The default project to use')
     .description('Configure the Cortex CLI');
 
-program.command('auth', { isDefault: true })
+program.command('create', { isDefault: true })
     .description('Authenticate to cortex (default command)')
-    .option('--file [file]', 'Personal Access Token file location')
+    .option('--file [file]', 'Personal access config file location')
     .option('--profile [profile]', 'The profile to configure')
     .option('--project [project]', 'The default project')
     .action(() => {
         new ConfigureCommand(program).execute({ profile: program.profile, color: program.color });
+    });
+
+program
+    .command('token')
+    .description('Create access token')
+    .option('--profile [profile]', 'The profile to use')
+    .option('--project [project]', 'The project to use')
+    .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
+    .action(() => {
+        new GetAccessToken(program).execute({
+            profile: program.profile,
+            project: program.project,
+            color: program.color,
+        });
     });
 
 program
