@@ -36,7 +36,6 @@ program.command('list')
     .option('--no-compat', 'Ignore API compatibility checks')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
-    .option('--user [user]', 'User to list roles for')
     .option('--project [project', 'Project to list roles for')
     .action(withCompatibilityCheck((options) => {
         try {

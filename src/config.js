@@ -23,7 +23,7 @@ const debug = require('debug')('cortex:config');
 const { JWT, JWK } = require('jose');
 const { printError } = require('./commands/utils');
 
-function generateJwt(profile) {
+module.exports.generateJwt = generateJwt = function(profile, expiresIn = '2m') {
     const {
          username, issuer, audience, jwk,
     } = profile;
@@ -34,7 +34,7 @@ function generateJwt(profile) {
         issuer,
         audience,
         subject: username,
-        expiresIn: '2m',
+        expiresIn,
     });
 }
 
