@@ -20,7 +20,7 @@ const _ = require('lodash');
 const prompt = require('co-prompt');
 const chalk = require('chalk');
 const fs = require('fs');
-const { readConfig, defaultConfig } = require('../config');
+const { readConfig, defaultConfig, loadProfile } = require('../config');
 const { printSuccess, printError, filterObject } = require('./utils');
 const Accounts = require('../client/accounts');
 
@@ -162,3 +162,19 @@ module.exports.ListProfilesCommand = class {
         });
     }
 };
+
+module.exports.TokenCommand = class {
+    constructor(program) {
+        this.program = program;
+    }
+
+    execute(profileName, options) {
+        const profile = loadProfile(_.get(options,'profile'));
+        if (profile === undefined) {
+            printError(`No profile named ${profileName}.  Run cortex configure --profile ${profileName} to create it.`, options);
+            return;
+        }
+        console.log(profile.token);
+    }
+};
+

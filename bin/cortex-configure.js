@@ -23,6 +23,7 @@ const {
     DescribeProfileCommand,
     ListProfilesCommand,
     SetProfileCommand,
+    TokenCommand,
 } = require('../src/commands/configure');
 
 program
@@ -63,5 +64,12 @@ program
     .action((profileName) => {
         new SetProfileCommand(program).execute(profileName, { color: program.color });
     });
+
+program.command('token')
+    .option('--profile [profile]', 'The profile to use for token generation')
+    .action(() => {
+        new TokenCommand(program).execute(program.opts());
+    });
+
 
 program.parse(process.argv);
