@@ -15,7 +15,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
+const chalk = require('chalk');
 const program = require('../src/commander');
 
 const {
@@ -48,11 +48,15 @@ program
     .option('--project [project]', 'The project to use')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .action(() => {
-        new GetAccessToken(program).execute({
-            profile: program.profile,
-            project: program.project,
-            color: program.color,
-        });
+        try {
+            new GetAccessToken(program).execute({
+                profile: program.profile,
+                project: program.project,
+                color: program.color,
+            });
+        } catch (err) {
+            console.error(chalk.red(err.message));
+        }
     });
 
 program
