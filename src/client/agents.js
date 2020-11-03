@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Cognitive Scale, Inc. All Rights Reserved.
+ * Copyright 2020 Cognitive Scale, Inc. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the “License”);
  * you may not use this file except in compliance with the License.
@@ -14,291 +14,101 @@
  * limitations under the License.
  */
 
-const  { request } = require('../commands/apiutils');
 const debug = require('debug')('cortex:cli');
-const _ = require('lodash');
-const chalk = require('chalk');
-const { constructError } = require('../commands/utils');
+const { got } = require('./apiutils');
+const { constructError, getUserAgent } = require('../commands/utils');
 
 module.exports = class Agents {
-
     constructor(cortexUrl) {
         this.cortexUrl = cortexUrl;
-        this.endpoint = `${cortexUrl}/v2/agents`;
-        this.endpointV3 = `${cortexUrl}/v3/agents`;
+        this.endpointV4 = projectId => `${cortexUrl}/fabric/v4/projects/${projectId}`;
     }
 
-    invokeAgentService(token, agentName, serviceName, params) {
-        const endpoint = `${this.endpointV3}/${agentName}/services/${serviceName}`;
+    invokeAgentService(projectId, token, agentName, serviceName) {
+        const endpoint = `${this.endpointV4(projectId)}/agents/${agentName}/services/${serviceName}`;
         debug('invokeAgentService(%s, %s) => %s', agentName, serviceName, endpoint);
-        return request
-            .post(endpoint)
-            .set('Authorization', `Bearer ${token}`)
-            .set('x-cortex-proxy-notify', true)
-            .send(params)
-            .then((res) => {
-                if (Boolean(_.get(res, 'headers.x-cortex-proxied', false)))
-                    console.error(chalk.blue('Request proxied to cloud.'));
-                if (res.ok) {
-                    return {success: true, result: res.body};
-                }
-                return {success: false, status: res.status, message: res.body};
-            })
-            .catch((err) => {
-                return constructError(err);
-            });
+        return got
+            .post(endpoint, {
+                headers: { Authorization: `Bearer ${token}` },
+                'user-agent': getUserAgent(),
+            }).json()
+           .then(result => ({ success: true, result }))
+            .catch(err => constructError(err));
     }
 
-    getActivation(token, activationId) {
-        const endpoint = `${this.endpointV3}/activations/${activationId}`;
+    getActivation(projectId, token, activationId) {
+        const endpoint = `${this.endpointV4(projectId)}/activations/${activationId}`;
         debug('getActivation(%s) => %s', activationId, endpoint);
-        return request
-            .get(endpoint)
-            .set('Authorization', `Bearer ${token}`)
-            .set('x-cortex-proxy-notify', true)
-            .then((res) => {
-                if (Boolean(_.get(res, 'headers.x-cortex-proxied', false)))
-                    console.error(chalk.blue('Request proxied to cloud.'));
-                if (res.ok) {
-                    return {success: true, result: res.body};
-                }
-                return {success: false, status: res.status, message: res.body};
-            })
-            .catch((err) => {
-                return constructError(err);
-            });
+        return got
+            .get(endpoint, {
+                headers: { Authorization: `Bearer ${token}` },
+                'user-agent': getUserAgent(),
+            }).json()
+            .then(result => ({ success: true, result }))
+            .catch(err => constructError(err));
     }
 
-    listActivations(token, instanceId, environmentName) {
-        let endpoint = `${this.endpointV3}/instances/${instanceId}/activations`;
-        debug('listActivations(%s, %s) => %s', instanceId, environmentName, endpoint);
+    listActivations(projectId, token, snapshotId, environmentName) {
+        let endpoint = `${this.endpointV4(projectId)}/snapshots/${snapshotId}/activations`;
+        debug('listActivations(%s, %s) => %s', snapshotId, environmentName, endpoint);
         if (environmentName) endpoint = `${endpoint}?environmentName=${environmentName}`;
-        return request
-            .get(endpoint)
-            .set('Authorization', `Bearer ${token}`)
-            .set('x-cortex-proxy-notify', true)
-            .then((res) => {
-                if (Boolean(_.get(res, 'headers.x-cortex-proxied', false)))
-                    console.error(chalk.blue('Request proxied to cloud.'));
-                if (res.ok) {
-                    return {success: true, result: res.body};
-                }
-                return {success: false, status: res.status, message: res.body};
-            })
-            .catch((err) => {
-                return constructError(err);
-            });
+        return got
+            .get(endpoint, {
+                headers: { Authorization: `Bearer ${token}` },
+                'user-agent': getUserAgent(),
+            }).json()
+            .then(result => ({ success: true, result }))
+            .catch(err => constructError(err));
     }
 
-    listAgentSnapshots(token, agentName, environmentName) {
-        let endpoint = `${this.endpoint}/snapshots/${agentName}`;
+    listAgentSnapshots(projectId, token, agentName, environmentName) {
+        let endpoint = `${this.endpointV4(projectId)}/agents/${agentName}/snapshots`;
         debug('listAgentSnapshots(%s, %s) => %s', agentName, environmentName, endpoint);
         if (environmentName) endpoint = `${endpoint}?environmentName=${environmentName}`;
-        return request
-            .get(endpoint)
-            .set('Authorization', `Bearer ${token}`)
-            .set('x-cortex-proxy-notify', true)
-            .then((res) => {
-                if (Boolean(_.get(res, 'headers.x-cortex-proxied', false)))
-                    console.error(chalk.blue('Request proxied to cloud.'));
-                if (res.ok) {
-                    return {success: true, result: res.body};
-                }
-                return {success: false, status: res.status, message: res.body};
-            })
-            .catch((err) => {
-                return constructError(err);
-            });
+        return got
+            .get(endpoint, {
+                headers: { Authorization: `Bearer ${token}` },
+                'user-agent': getUserAgent(),
+            }).json()
+            .then(result => ({ success: true, result }))
+            .catch(err => constructError(err));
     }
 
-
-    listSnapshotInstances(token, snapshotId, environmentName) {
-        let endpoint = `${this.endpoint}/instances?snapshotId=${snapshotId}`;
-        debug('listSnapshotInstances(%s, %s) => (%s)', snapshotId, environmentName, endpoint);
-        if (environmentName) endpoint = `${endpoint}&environmentName=${environmentName}`;
-
-        return request
-            .get(endpoint)
-            .set('Authorization', `Bearer ${token}`)
-            .set('x-cortex-proxy-notify', true)
-            .then((res) => {
-                if (Boolean(_.get(res, 'headers.x-cortex-proxied', false)))
-                    console.error(chalk.blue('Request proxied to cloud.'));
-                if (res.ok) {
-                    return {success: true, instances: res.body.instances};
-                }
-                return {success: false, status: res.status, message: res.body};
-            })
-            .catch((err) => {
-                return constructError(err);
-            });
-    }
-
-    describeAgentSnapshot(token, snapshotId, environmentName) {
-        let endpoint = `${this.endpoint}/snapshots/${snapshotId}?deps=true`;
+    describeAgentSnapshot(projectId, token, snapshotId, environmentName) {
+        let endpoint = `${this.endpointV4(projectId)}/snapshots/${snapshotId}?deps=true`;
         debug('describeAgentSnapshot(%s, %s) => %s', snapshotId, environmentName, endpoint);
         if (environmentName) endpoint = `${endpoint}&environmentName=${environmentName}`;
-        return request
-            .get(endpoint)
-            .set('Authorization', `Bearer ${token}`)
-            .set('x-cortex-proxy-notify', true)
-            .then((res) => {
-                if (Boolean(_.get(res, 'headers.x-cortex-proxied', false)))
-                    console.error(chalk.blue('Request proxied to cloud.'));
-                if (res.ok) {
-                    return {success: true, result: res.body};
-                }
-                return {success: false, status: res.status, message: res.body};
-            })
-            .catch((err) => {
-                return constructError(err);
-            });
+        return got
+            .get(endpoint, {
+                headers: { Authorization: `Bearer ${token}` },
+                'user-agent': getUserAgent(),
+            }).json()
+            .then(result => ({ success: true, result }))
+            .catch(err => constructError(err));
     }
 
-    createAgentSnapshot(token, snapshot) {
-        const endpoint = `${this.endpoint}/snapshots`;
+    createAgentSnapshot(projectId, token, snapshot) {
+        const endpoint = `${this.endpointV4(projectId)}/agents/${snapshot.agentName}/snapshots`;
         debug('getAgentSnapshot=> %s', endpoint);
-        return request
-            .post(endpoint)
-            .set('Authorization', `Bearer ${token}`)
-            .set('x-cortex-proxy-notify', true)
-            .send(snapshot)
-            .then((res) => {
-                if (Boolean(_.get(res, 'headers.x-cortex-proxied', false)))
-                    console.error(chalk.blue('Request proxied to cloud.'));
-                if (res.ok) {
-                    return {success: true, result: res.body};
-                }
-                return {success: false, status: res.status, message: res.body};
-            })
-            .catch((err) => {
-                return constructError(err);
-            });
+        return got
+            .post(endpoint, {
+                headers: { Authorization: `Bearer ${token}` },
+                'user-agent': getUserAgent(),
+                json: snapshot,
+            }).json()
+            .then(result => ({ success: true, result }))
+            .catch(err => constructError(err));
     }
 
-    listAgentInstances(token, agentName, environmentName) {
-        let endpoint = `${this.endpoint}/instances/${agentName}`;
-        debug('getAgentInstances(%s, %s) => %s', agentName, environmentName, endpoint);
-        if (environmentName) endpoint = `${endpoint}?environmentName=${environmentName}`;
-
-        return request
-            .get(endpoint)
-            .set('Authorization', `Bearer ${token}`)
-            .set('x-cortex-proxy-notify', true)
-            .then((res) => {
-                if (Boolean(_.get(res, 'headers.x-cortex-proxied', false)))
-                    console.error(chalk.blue('Request proxied to cloud.'));
-                if (res.ok) {
-                    return {success: true, instances: res.body.instances};
-                }
-                return {success: false, status: res.status, message: res.body};
-            })
-            .catch((err) => {
-                return constructError(err);
-            });
-    }
-
-
-    createAgentInstance(token, instance) {
-        const endpoint = `${this.endpoint}/instances`;
-        debug('createAgentInstance => %s', endpoint);
-        return request
-            .post(endpoint)
-            .set('Authorization', `Bearer ${token}`)
-            .set('x-cortex-proxy-notify', true)
-            .send(instance)
-            .type('json')
-            .then((res) => {
-                if (Boolean(_.get(res, 'headers.x-cortex-proxied', false)))
-                    console.error(chalk.blue('Request proxied to cloud.'));
-                if (res.ok) {
-                    return {success: true, result: res.body};
-                }
-                return {success: false, status: res.status, message: res.body};
-            })
-            .catch((err) => {
-                return constructError(err);
-            });
-    }
-
-    getAgentInstance(token, instanceId) {
-        const endpoint = `${this.endpoint}/instances/${instanceId}`;
-        debug('getAgentInstance => %s', endpoint);
-        return request
-            .get(endpoint)
-            .set('Authorization', `Bearer ${token}`)
-            .set('x-cortex-proxy-notify', true)
-            .then((res) => {
-                if (Boolean(_.get(res, 'headers.x-cortex-proxied', false)))
-                    console.error(chalk.blue('Request proxied to cloud.'));
-                if (res.ok) {
-                    return {success: true, result: res.body};
-                }
-                return {success: false, status: res.status, message: res.body};
-            })
-            .catch((err) => {
-                return constructError(err);
-            });
-    }
-
-    deleteAgentInstance(token, instanceId) {
-        const endpoint = `${this.endpoint}/instances/${instanceId}`;
-        debug('deleteAgentInstance => %s', endpoint);
-        return request
-            .delete(endpoint)
-            .set('Authorization', `Bearer ${token}`)
-            .set('x-cortex-proxy-notify', true)
-            .then((res) => {
-                if (Boolean(_.get(res, 'headers.x-cortex-proxied', false)))
-                    console.error(chalk.blue('Request proxied to cloud.'));
-                if (res.ok) {
-                    return {success: true, result: res.body};
-                }
-                return {success: false, status: res.status, message: res.body};
-            })
-            .catch((err) => {
-                return constructError(err);
-            });
-    }
-
-    stopAgentInstance(token, instanceId) {
-        const endpoint = `${this.endpoint}/instances/${instanceId}/stop`;
-        debug('stopAgentInstance => %s', endpoint);
-        return request
-            .post(endpoint)
-            .set('Authorization', `Bearer ${token}`)
-            .set('x-cortex-proxy-notify', true)
-            .then((res) => {
-                if (Boolean(_.get(res, 'headers.x-cortex-proxied', false)))
-                    console.error(chalk.blue('Request proxied to cloud.'));
-                if (res.ok) {
-                    return {success: true, result: res.body};
-                }
-                return {success: false, status: res.status, message: res.body};
-            })
-            .catch((err) => {
-                return constructError(err);
-            });
-    }
-
-
-    listTriggers(token) {
-        const endpoint = `${this.endpoint}/triggers`;
+    listTriggers(projectId, token) {
+        const endpoint = `${this.endpointV4(projectId)}/triggers`;
         debug('listTriggers => %s', endpoint);
-        return request
-            .get(endpoint)
-            .set('Authorization', `Bearer ${token}`)
-            .set('x-cortex-proxy-notify', true)
-            .then((res) => {
-                if (Boolean(_.get(res, 'headers.x-cortex-proxied', false)))
-                    console.error(chalk.blue('Request proxied to cloud.'));
-                if (res.ok) {
-                    return {success: true, result: res.body};
-                }
-                return {success: false, status: res.status, message: res.body};
-            })
-            .catch((err) => {
-                return constructError(err);
-            });
+        return got
+            .get(endpoint, {
+                headers: { Authorization: `Bearer ${token}` },
+                'user-agent': getUserAgent(),
+            }).json()
+            .then(result => ({ success: true, result }))
+            .catch(err => constructError(err));
     }
 };

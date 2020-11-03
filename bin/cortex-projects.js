@@ -22,61 +22,62 @@ const program = require('../src/commander');
 const { withCompatibilityCheck } = require('../src/compatibility');
 
 const {
-    SaveSkillCommand,
-    ListSkillsCommand,
-    DescribeSkillCommand,
-} = require('../src/commands/skills');
+    CreateProjectCommand,
+    ListProjectsCommand,
+    DescribeProjectCommand,
+} = require('../src/commands/projects');
 
-program.description('Work with Cortex Skills');
+program.description('Work with Cortex Projects');
 
-// Save Skill
+// Create Project
 program
-    .command('save <skillDefinition>')
-    .description('Save a skill definition')
+    .command('save [projectDefinition]')
+    .description('Save a project definition')
+    .storeOptionsAsProperties(false)
     .option('--no-compat', 'Ignore API compatibility checks')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
-    .option('--project [project]', 'The project to use')
-    .option('-y, --yaml', 'Use YAML for skill definition format')
-    .action(withCompatibilityCheck((skillDefinition, options) => {
+    .option('-n, --name <string>', 'The project name')
+    .option('-t, --title [string]', 'The project title')
+    .option('-d, --description [string]', 'The project description')
+    .option('-y, --yaml', 'Use YAML for project definition format')
+    .action(withCompatibilityCheck((projectDefinition, options) => {
         try {
-            new SaveSkillCommand(program).execute(skillDefinition, options);
+            new CreateProjectCommand(program).execute(projectDefinition, options);
         } catch (err) {
             console.error(chalk.red(err.message));
         }
     }));
 
-// List Skills
+// List Projects
 program
     .command('list')
-    .description('List skill definitions')
+    .description('List project definitions')
     .option('--no-compat', 'Ignore API compatibility checks')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
-    .option('--project [project]', 'The project to use')
     .option('--json', 'Output results using JSON')
     .option('--query [query]', 'A JMESPath query to use in filtering the response data.')
     .action(withCompatibilityCheck((options) => {
         try {
-            new ListSkillsCommand(program).execute(options);
+            new ListProjectsCommand(program).execute(options);
         } catch (err) {
             console.error(chalk.red(err.message));
         }
     }));
 
-// Describe Skill
+// Get|Describe Project
 program
-    .command('describe <skillName>')
+    .command('describe <projectName>')
     .alias('get')
-    .description('Describe skill')
+    .description('Describe project')
     .option('--no-compat', 'Ignore API compatibility checks')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
-    .option('--project [project]', 'The project to use')
     .option('--query [query]', 'A JMESPath query to use in filtering the response data.')
-    .action(withCompatibilityCheck((skillName, options) => {
+    .action(withCompatibilityCheck((projectName, options) => {
         try {
-            new DescribeSkillCommand(program).execute(skillName, options);
+            new DescribeProjectCommand(program).execute(projectName, options);
         } catch (err) {
             console.error(chalk.red(err.message));
         }

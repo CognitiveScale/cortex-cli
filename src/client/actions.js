@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Cognitive Scale, Inc. All Rights Reserved.
+ * Copyright 2020 Cognitive Scale, Inc. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the “License”);
  * you may not use this file except in compliance with the License.
@@ -13,278 +13,205 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-const url = require('url');
-const chalk = require('chalk');
-const  { request } = require('../commands/apiutils');
-const debug = require('debug')('cortex:cli');
 const _ = require('lodash');
-const jsonwebtoken = require('jsonwebtoken');
-const { constructError, callMe } = require('../commands/utils');
+const chalk = require('chalk');
+const debug = require('debug')('cortex:cli');
+const jose = require('jose');
+const { got } = require('./apiutils');
+const {
+ constructError, callMe, checkProject, getUserAgent, 
+} = require('../commands/utils');
 
 module.exports = class Actions {
-
     constructor(cortexUrl) {
         this.cortexUrl = cortexUrl;
-        this.endpoint = `${cortexUrl}/v2/actions`;
-        this.endpointV3 = `${cortexUrl}/v3/actions`;
-        this.endpointJobsV3 = `${cortexUrl}/v3/jobs`;
+        this.endpointV4 = projectId => `${cortexUrl}/fabric/v4/projects/${projectId}/actions`;
     }
 
-    invokeAction(token, actionName, params, actionType) {
-        let endpoint = `${this.endpointV3}/${actionName}/invoke`;
-        if (actionType) {
-            endpoint = `${endpoint}?actionType=${actionType}`
-        }
-        debug('invokeAction(%s) => %s', actionName, endpoint);
-
-        const req = request
-            .post(endpoint)
-            .set('Authorization', `Bearer ${token}`)
-            .send(params);
-
-        return req.then((res) => {
-            if (res.ok) {
-                return {success: true, result: res.body};
-            }
-            return {success: false, status: res.status, message: res.body};
-        })
-            .catch((err) => {
-            return constructError(err);
-        });
-    }
-
-    async deployAction(token, actionName, params) {
-        let endpoint = `${this.endpointV3}`;
+    async deployAction(projectId, token, actionName, params) {
+        checkProject(projectId);
+        let endpoint = this.endpointV4(projectId);
         if (params.actionType) {
             endpoint = `${endpoint}?actionType=${params.actionType}`;
         }
         debug('deployAction(%s, docker=%s, ttl=%s) => %s',
             actionName, params.dockerImage, params.ttl, endpoint);
-
+        const body = { ...params };
         try {
-            params.docker = await this._maybePushDockerImage(params.dockerImage, token, params.pushDocker);
+            body.docker = await this._maybePushDockerImage(params.dockerImage, token, params.pushDocker);
         } catch (error) {
-            return {success: false, status: 400, message: error.message || error};
+            return { success: false, status: 400, message: error.message || error };
         }
 
-        params.name = actionName;
+        body.name = actionName;
 
-        const req = request
-            .post(endpoint)
-            .set('Authorization', `Bearer ${token}`)
-            .send(params);
-
-        return req.then((res) => {
-            if (res.ok) {
-                return {success: true, message: res.body};
-            }
-            return {success: false, status: res.status, message: res.body};
-        })
-            .catch((err) => {
-            return constructError(err);
-        });
+        return got
+        .post(endpoint, {
+                   headers: { Authorization: `Bearer ${token}` },
+                    'user-agent': getUserAgent(),
+                   json: body,
+            }).json()
+        .then(res => ({ success: true, message: res }))
+        .catch(err => constructError(err));
     }
 
-    listActions(token) {
+    listActions(projectId, token) {
+        checkProject(projectId);
         debug('listActions() => %s', this.endpointV3);
-        return request
-            .get(this.endpointV3)
-            .set('Authorization', `Bearer ${token}`)
-            .then((res) => {
-                if (res.ok) {
-                    return {success: true, actions: res.body.functions};
-                }
-                return {success: false, status: res.status, message: res.body};
-            })
-            .catch((err) => {
-                return constructError(err);
-            });
-
+        return got
+            .get(this.endpointV4(projectId), {
+                headers: { Authorization: `Bearer ${token}` },
+                'user-agent': getUserAgent(),
+            }).json()
+            .then(actions => actions)
+            .catch(err => constructError(err));
     }
 
-    describeAction(token, actionName) {
-        const endpoint = `${this.endpointV3}/${actionName}`;
+    describeAction(projectId, token, actionName) {
+        checkProject(projectId);
+        const endpoint = `${this.endpointV4(projectId)}/${actionName}`;
         debug('describeAction(%s) => %s', actionName, endpoint);
-        return request
-            .get(endpoint)
-            .set('Authorization', `Bearer ${token}`)
-            .then((res) => {
-                if (res.ok) {
-                    return {success: true, action: res.body.function};
-                }
-                return {success: false, status: res.status, message: res.body};
-            })
-            .catch((err) => {
-                return constructError(err);
-            });
+        return got
+            .get(endpoint, { headers: { Authorization: `Bearer ${token}` } })
+            .json()
+            .then(action => action)
+            .catch(err => constructError(err));
     }
 
-    getLogsAction(token, actionName) {
-        const endpoint = `${this.endpointV3}/${actionName}/logs`;
+    getLogsAction(projectId, token, actionName) {
+        checkProject(projectId);
+        const endpoint = `${this.endpointV4(projectId)}/${actionName}/logs`;
         debug('getLogsAction(%s) => %s', actionName, endpoint);
-        return request
-            .get(endpoint)
-            .set('Authorization', `Bearer ${token}`)
-            .then((res) => {
-                if (res.ok) {
-                    if (_.isArray(res.body)) {
-                        // returns plain array for Rancher daemons
-                        return {success: true, logs: res.body};
-                    }
-                    return res.body;
-                }
-                return {success: false, status: res.status, message: res.body};
+        return got
+            .get(endpoint, {
+                headers: { Authorization: `Bearer ${token}` },
+                'user-agent': getUserAgent(),
             })
-            .catch((err) => {
-                return constructError(err);
-            });
+            .json()
+            .then((logs) => {
+                    if (_.isArray(logs)) {
+                        // returns plain array for Rancher daemons
+                        return { success: true, logs };
+                    }
+                    return logs;
+            })
+            .catch(err => constructError(err));
     }
 
-    deleteAction(token, actionName, actionType) {
-        let endpoint = `${this.endpointV3}/${actionName}`;
+    deleteAction(projectId, token, actionName, actionType) {
+        checkProject(projectId);
+        let endpoint = `${this.endpointV4(projectId)}/${actionName}`;
         if (actionType) {
-            endpoint = `${endpoint}?actionType=${actionType}`
+            endpoint = `${endpoint}?actionType=${actionType}`;
         }
         debug('deleteAction(%s, %s) => %s', actionName, actionType, endpoint);
-        return request
-            .delete(endpoint)
-            .set('Authorization', `Bearer ${token}`)
-            .accept('application/json')
-            .then((res) => {
-                if (res.ok) {
-                    return {success: true, action: res.body.action};
-                }
-                return {success: false, status: res.status, message: res.body};
+        return got
+            .delete(endpoint, {
+                headers: { Authorization: `Bearer ${token}` },
+                'user-agent': getUserAgent(),
             })
-            .catch((err) => {
-                return constructError(err);
-            });
+            .json()
+            .then(action => ({ success: true, action }))
+            .catch(err => constructError(err));
     }
 
-    taskLogs(token, jobId, taskId) {
+    taskLogs(projectId, token, jobId, taskId) {
+        checkProject(projectId);
         const canonicalJobId = Actions.getCanonicalJobId(jobId);
-        const endpoint = `${this.endpointJobsV3}/${canonicalJobId}/tasks/${taskId}/logs`;
-        return request
-            .get(endpoint)
-            .set('Authorization', `Bearer ${token}`)
-            .accept('application/json')
-            .then((res) => {
-                if (res.ok) {
-                    return res.body;
-                }
-                return {success: false, status: res.status, message: res.body};
+        const endpoint = `${this.endpointV4(projectId)}/${canonicalJobId}/tasks/${taskId}/logs`;
+        return got
+            .get(endpoint, {
+                headers: { Authorization: `Bearer ${token}` },
+                'user-agent': getUserAgent(),
             })
-            .catch((err) => {
-                return constructError(err);
-            });
+            .json()
+            .then(res => res)
+            .catch(err => constructError(err));
     }
 
-    taskCancel(token, jobId, taskId) {
+    taskCancel(projectId, token, jobId, taskId) {
+        checkProject(projectId);
         const canonicalJobId = Actions.getCanonicalJobId(jobId);
-        const endpoint = `${this.endpointJobsV3}/${canonicalJobId}/tasks/${taskId}`;
-        return request
-            .delete(endpoint)
-            .set('Authorization', `Bearer ${token}`)
-            .accept('application/json')
-            .then((res) => {
-                if (res.ok) {
-                    return res.body;
-                }
-                return {success: false, status: res.status, message: res.body};
+        const endpoint = `${this.endpointV4(projectId)}/${canonicalJobId}/tasks/${taskId}`;
+        return got
+            .delete(endpoint, {
+                headers: { Authorization: `Bearer ${token}` },
+                'user-agent': getUserAgent(),
             })
-            .catch((err) => {
-                return constructError(err);
-            });
+            .json()
+            .then(res => res)
+            .catch(err => constructError(err));
     }
 
-    taskStatus(token, jobId, taskId) {
+    taskStatus(projectId, token, jobId, taskId) {
+        checkProject(projectId);
         const canonicalJobId = Actions.getCanonicalJobId(jobId);
-        const endpoint = `${this.endpointJobsV3}/${canonicalJobId}/tasks/${taskId}/status`;
-        return request
-            .get(endpoint)
-            .set('Authorization', `Bearer ${token}`)
-            .accept('application/json')
-            .then((res) => {
-                if (res.ok) {
-                    const resBody = res.body;
-                    debug('resBody (with provider status as well): %s', resBody);
-                    const respBodyNoProviderField = _.omit(resBody, '_providerStatus');
-                    return respBodyNoProviderField;
-                }
-                return {success: false, status: res.status, message: res.body};
+        const endpoint = `${this.endpointV4(projectId)}/${canonicalJobId}/tasks/${taskId}/status`;
+        return got
+            .get(endpoint, {
+                headers: { Authorization: `Bearer ${token}` },
+                'user-agent': getUserAgent(),
             })
-            .catch((err) => {
-                return constructError(err);
-            });
+            .json()
+            .then((res) => {
+                    debug('resBody (with provider status as well): %s', res);
+                    return _.omit(res, '_providerStatus');
+            })
+            .catch(err => constructError(err));
     }
 
-    jobListTasks(token, jobId) {
+    jobListTasks(projectId, token, jobId) {
+        checkProject(projectId);
         const canonicalJobId = Actions.getCanonicalJobId(jobId);
-        const endpoint = `${this.endpointJobsV3}/${canonicalJobId}/tasks`;
-        return request
-            .get(endpoint)
-            .set('Authorization', `Bearer ${token}`)
-            .accept('application/json')
-            .then((res) => {
-                if (res.ok) {
-                    return res.body;
-                }
-                return {success: false, status: res.status, message: res.body};
+        const endpoint = `${this.endpointV4(projectId)}/${canonicalJobId}/tasks`;
+        return got
+            .get(endpoint, {
+                headers: { Authorization: `Bearer ${token}` },
+                'user-agent': getUserAgent(),
             })
-            .catch((err) => {
-                return constructError(err);
-            });
+            .json()
+            .then(res => res)
+            .catch(err => constructError(err));
     }
 
-    taskStats(token, jobId) {
+    taskStats(projectId, token, jobId) {
+        checkProject(projectId);
         const canonicalJobId = Actions.getCanonicalJobId(jobId);
-        const endpoint = `${this.endpointJobsV3}/${canonicalJobId}/stats`;
-        return request
-            .get(endpoint)
-            .set('Authorization', `Bearer ${token}`)
-            .accept('application/json')
-            .then((res) => {
-                if (res.ok) {
-                    return res.body;
-                }
-                return {success: false, status: res.status, message: res.body};
+        const endpoint = `${this.endpointV4(projectId)}/${canonicalJobId}/stats`;
+        return got
+            .get(endpoint, {
+                headers: { Authorization: `Bearer ${token}` },
+                'user-agent': getUserAgent(),
             })
-            .catch((err) => {
-                return constructError(err);
-            });
+            .json()
+            .then(res => res)
+            .catch(err => constructError(err));
     }
 
-    listTasksByActivation(token, activationId) {
-        const endpoint = `${this.endpointV3}/${activationId}`;
-        return request
-            .get(endpoint)
-            .set('Authorization', `Bearer ${token}`)
-            .accept('application/json')
-            .then((res) => {
-                if (res.ok) {
-                    return res.body;
-                }
-                return {success: false, status: res.status, message: res.body};
+    listTasksByActivation(projectId, token, activationId) {
+        checkProject(projectId);
+        const endpoint = `${this.endpointV4(projectId)}/${activationId}`;
+        return got
+            .get(endpoint, {
+                headers: { Authorization: `Bearer ${token}` },
+                'user-agent': getUserAgent(),
             })
-            .catch((err) => {
-                return constructError(err);
-            });
+            .json()
+            .then(res => res)
+            .catch(err => constructError(err));
     }
 
-    getConfig(token) {
-        return request
-            .get(_.join([this.endpointV3, '_config'], '/'))
-            .set('Authorization', `Bearer ${token}`)
-            .then((res) => {
-                if (res.ok) {
-                    return {success: true, config: res.body.config};
-                }
-                return {success: false, status: res.status, message: res.body};
+    getConfig(projectId, token) {
+        checkProject(projectId);
+        const endpoint = _.join([this.endpointV4(projectId), '_config'], '/');
+        return got
+            .get(endpoint, {
+                headers: { Authorization: `Bearer ${token}` },
+                'user-agent': getUserAgent(),
             })
-            .catch((err) => {
-                return constructError(err);
-            });
+            .json()
+            .then(config => ({ success: true, config }))
+            .catch(err => constructError(err));
     }
 
     static getCanonicalJobId(jobId) {
@@ -292,17 +219,15 @@ module.exports = class Actions {
         const namespaceProvided = /\w\/\w/.test(jobId);
         if (!namespaceProvided) {
             canonicalJobId = `default/${jobId}`;
-            console.warn(chalk.yellow(`Namespace not given in jobId, assuming 'default'`));
+            console.warn(chalk.yellow('Namespace not given in jobId, assuming \'default\''));
         }
         return canonicalJobId;
     }
 
     async _cortexRegistryUrl(token) {
         const res = await this.getConfig(token);
-        if (res.success)
-            return res.config.dockerPrivateRegistryUrl
-        else
-            throw res
+        if (res.success) return res.config.dockerPrivateRegistryUrl;
+        throw res;
     }
 
     _cortexRegistryImagePath(registryUrl, imageRepo, tenant) {
@@ -312,11 +237,11 @@ module.exports = class Actions {
 
     async _maybePushDockerImage(image, token, pushDocker) {
         if (!image || !pushDocker) {
-            return image
+            return image;
         }
         const registryUrl = await this._cortexRegistryUrl(token);
         const imageName = image.replace(/.+\..+\//, '');
-        const cortexImageUrl = this._cortexRegistryImagePath(registryUrl, imageName, jsonwebtoken.decode(token).tenant);
+        const cortexImageUrl = this._cortexRegistryImagePath(registryUrl, imageName, jose.JWT.decode(token).tenant);
         await callMe(`docker login -u cli --password ${token} ${registryUrl}`);
         await callMe(`docker pull ${image} || echo "Docker pull failed using local image"`);
         await callMe(`docker tag ${image} ${cortexImageUrl}`);

@@ -27,6 +27,7 @@ const {
     ListRuns,
     DescribeRunCommand,
     DeleteRunCommand,
+    DeleteExperimentCommand,
     DownloadArtifactCommand,
 } = require('../src/commands/experiments');
 
@@ -39,6 +40,7 @@ program
     .option('--no-compat', 'Ignore API compatibility checks')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
+    .option('--project [project]', 'The project to use')
     .option('--json', 'Output results using JSON')
     .option('--query [query]', 'A JMESPath query to use in filtering the response data.')
     .option('--filter [filter]', 'A Mongo style filter to use.')
@@ -48,8 +50,7 @@ program
     .action(withCompatibilityCheck((options) => {
         try {
             new ListExperiments(program).execute(options);
-        }
-        catch (err) {
+        } catch (err) {
             console.error(chalk.red(err.message));
         }
     }));
@@ -61,12 +62,12 @@ program
     .option('--no-compat', 'Ignore API compatibility checks')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
+    .option('--project [project]', 'The project to use')
     .option('--query [query]', 'A JMESPath query to use in filtering the response data.')
     .action(withCompatibilityCheck((experimentName, options) => {
         try {
             new DescribeExperimentCommand(program).execute(experimentName, options);
-        }
-        catch (err) {
+        } catch (err) {
             console.error(chalk.red(err.message));
         }
     }));
@@ -78,11 +79,11 @@ program
     .option('--no-compat', 'Ignore API compatibility checks')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
+    .option('--project [project]', 'The project to use')
     .action(withCompatibilityCheck((experimentName, runId, options) => {
         try {
             new DeleteExperimentCommand(program).execute(experimentName, options);
-        }
-        catch (err) {
+        } catch (err) {
             console.error(chalk.red(err.message));
         }
     }));
@@ -94,6 +95,7 @@ program
     .option('--no-compat', 'Ignore API compatibility checks')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
+    .option('--project [project]', 'The project to use')
     .option('--json', 'Output results using JSON')
     .option('--query [query]', 'A JMESPath query to use in filtering the response data.')
     .option('--filter [filter]', 'A Mongo style filter to use.')
@@ -103,8 +105,7 @@ program
     .action(withCompatibilityCheck((experimentName, options) => {
         try {
             new ListRuns(program).execute(experimentName, options);
-        }
-        catch (err) {
+        } catch (err) {
             console.error(chalk.red(err.message));
         }
     }));
@@ -116,12 +117,12 @@ program
     .option('--no-compat', 'Ignore API compatibility checks')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
+    .option('--project [project]', 'The project to use')
     .option('--query [query]', 'A JMESPath query to use in filtering the response data.')
     .action(withCompatibilityCheck((experimentName, runId, options) => {
         try {
             new DescribeRunCommand(program).execute(experimentName, runId, options);
-        }
-        catch (err) {
+        } catch (err) {
             console.error(chalk.red(err.message));
         }
     }));
@@ -133,11 +134,11 @@ program
     .option('--no-compat', 'Ignore API compatibility checks')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
+    .option('--project [project]', 'The project to use')
     .action(withCompatibilityCheck((experimentName, runId, options) => {
         try {
             new DeleteRunCommand(program).execute(experimentName, runId, options);
-        }
-        catch (err) {
+        } catch (err) {
             console.error(chalk.red(err.message));
         }
     }));
@@ -149,11 +150,11 @@ program
     .option('--no-compat', 'Ignore API compatibility checks')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
+    .option('--project [project]', 'The project to use')
     .action(withCompatibilityCheck((experimentName, runId, artifactName, options) => {
         try {
             new DownloadArtifactCommand(program).execute(experimentName, runId, artifactName, options);
-        }
-        catch (err) {
+        } catch (err) {
             console.error(chalk.red(err.message));
         }
     }));

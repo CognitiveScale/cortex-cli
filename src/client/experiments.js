@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Cognitive Scale, Inc. All Rights Reserved.
+ * Copyright 2020 Cognitive Scale, Inc. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the “License”);
  * you may not use this file except in compliance with the License.
@@ -14,177 +14,109 @@
  * limitations under the License.
  */
 
-const  { request } = require('../commands/apiutils');
 const debug = require('debug')('cortex:cli');
-const ProgressBar = require('progress');
-const { constructError } = require('../commands/utils');
+const { got } = require('./apiutils');
+const { constructError, getUserAgent } = require('../commands/utils');
+const Content = require('./content');
 
 module.exports = class Experiments {
-
     constructor(cortexUrl) {
         this.cortexUrl = cortexUrl;
-        this.endpoint = `${cortexUrl}/v2/experiments`;
+        this.endpoint = projectId => `${cortexUrl}/fabric/v4/projects/${projectId}/experiments`;
     }
 
-    listExperiments(token) {
-        const endpoint = `${this.endpoint}`;
+    listExperiments(projectId, token) {
+        const endpoint = `${this.endpoint(projectId)}`;
         debug('listExperiments() => %s', endpoint);
-        return request
-            .get(endpoint)
-            .set('Authorization', `Bearer ${token}`)
-            .then((res) => {
-                if (res.ok) {
-                    return {success: true, result: res.body};
-                }
-                return {success: false, status: res.status, message: res.body};
-            })
-            .catch((err) => {
-                return constructError(err);
-            });
+        return got
+            .get(endpoint, {
+                headers: { Authorization: `Bearer ${token}` },
+                'user-agent': getUserAgent(),
+            }).json()
+            .then(result => ({ success: true, result }))
+            .catch(err => constructError(err));
     }
 
-    describeExperiment(token, name) {
-        const endpoint = `${this.endpoint}/${name}`;
+    describeExperiment(projectId, token, name) {
+        const endpoint = `${this.endpoint(projectId)}/${name}`;
         debug('describeExperiment(%s) => %s', name, endpoint);
-        return request
-            .get(endpoint)
-            .set('Authorization', `Bearer ${token}`)
-            .then((res) => {
-                if (res.ok) {
-                    return {success: true, result: res.body};
-                }
-                return {success: false, status: res.status, message: res.body};
-            })
-            .catch((err) => {
-                return constructError(err);
-            });
+        return got
+            .get(endpoint, {
+                headers: { Authorization: `Bearer ${token}` },
+                'user-agent': getUserAgent(),
+            }).json()
+            .then(result => ({ success: true, result }))
+            .catch(err => constructError(err));
     }
 
-    deleteExperiment(token, name) {
-        const endpoint = `${this.endpoint}/${name}`;
+    deleteExperiment(projectId, token, name) {
+        const endpoint = `${this.endpoint(projectId)}/${name}`;
         debug('deleteExperiment(%s) => %s', name, endpoint);
-        return request
-            .delete(endpoint)
-            .set('Authorization', `Bearer ${token}`)
-            .then((res) => {
-                if (res.ok) {
-                    return {success: true, result: res.body};
-                }
-                return {success: false, status: res.status, message: res.body};
-            })
-            .catch((err) => {
-                return constructError(err);
-            });
+        return got
+            .delete(endpoint, {
+                headers: { Authorization: `Bearer ${token}` },
+                'user-agent': getUserAgent(),
+            }).json()
+            .then(result => ({ success: true, result }))
+            .catch(err => constructError(err));
     }
 
-    listRuns(token, experimentName, filter, limit, sort) {
-        const endpoint = `${this.endpoint}/${experimentName}/runs`;
+    listRuns(projectId, token, experimentName, filter, limit, sort) {
+        const endpoint = `${this.endpoint(projectId)}/${experimentName}/runs`;
         debug('listRuns(%s) => %s', experimentName, endpoint);
-        const req = request
-            .get(endpoint)
-            .set('Authorization', `Bearer ${token}`);
-
-        if (filter) req.query({filter});
-        if (limit) req.query({limit});
-        if (sort) req.query({sort});
-
-        return req.then((res) => {
-                if (res.ok) {
-                    return {success: true, result: res.body};
-                }
-                return {success: false, status: res.status, message: res.body};
-            })
-            .catch((err) => {
-                return constructError(err);
-            });
+        const query = {};
+        if (filter) query.filter = filter;
+        if (limit) query.limit = limit;
+        if (sort) query.sort = sort;
+        return got
+            .get(endpoint, {
+                headers: { Authorization: `Bearer ${token}` },
+                'user-agent': getUserAgent(),
+              searchParams: { query },
+            }).json()
+            .then(result => ({ success: true, result }))
+            .catch(err => constructError(err));
     }
 
-    describeRun(token, experimentName, runId) {
-        const endpoint = `${this.endpoint}/${experimentName}/runs/${runId}`;
+    describeRun(projectId, token, experimentName, runId) {
+        const endpoint = `${this.endpoint(projectId)}/${experimentName}/runs/${runId}`;
         debug('describeRun(%s) => %s', runId, endpoint);
-        return request
-            .get(endpoint)
-            .set('Authorization', `Bearer ${token}`)
-            .then((res) => {
-                if (res.ok) {
-                    return {success: true, result: res.body};
-                }
-                return {success: false, status: res.status, message: res.body};
-            })
-            .catch((err) => {
-                return constructError(err);
-            });
+        return got
+            .get(endpoint, {
+                headers: { Authorization: `Bearer ${token}` },
+                'user-agent': getUserAgent(),
+            }).json()
+            .then(result => ({ success: true, result }))
+            .catch(err => constructError(err));
     }
 
-    deleteRun(token, experimentName, runId) {
-        const endpoint = `${this.endpoint}/${experimentName}/runs/${runId}`;
+    deleteRun(projectId, token, experimentName, runId) {
+        const endpoint = `${this.endpoint(projectId)}/${experimentName}/runs/${runId}`;
         debug('deleteRun(%s) => %s', runId, endpoint);
-        return request
-            .delete(endpoint)
-            .set('Authorization', `Bearer ${token}`)
-            .then((res) => {
-                if (res.ok) {
-                    return {success: true, result: res.body};
-                }
-                return {success: false, status: res.status, message: res.body};
-            })
-            .catch((err) => {
-                return constructError(err);
-            });
+        return got
+            .delete(endpoint, {
+                headers: { Authorization: `Bearer ${token}` },
+                'user-agent': getUserAgent(),
+            }).json()
+            .then(result => ({ success: true, result }))
+            .catch(err => constructError(err));
     }
 
-    downloadArtifact(token, experimentName, runId, artifactName, showProgress = false) {
-        const endpoint = `${this.endpoint}/${experimentName}/runs/${runId}/artifacts/${artifactName}`;
-        debug('downloadArtifact(%s) => %s', artifactName, endpoint);
+    _artifactKey(experimentName, runId, artifact) {
+        return `experiments/${experimentName}/${runId}/artifacts/${artifact}`;
+    }
 
-        const stream = request
-            .get(endpoint)
-            .set('Authorization', `Bearer ${token}`)
-            .use((req) => {
-                if (showProgress) {
-                    req.on('request', (clientReq) => {
-                        clientReq.on('response', function(res) {
-                            const total = +(res.headers['content-length'] || res.headers['Content-Length']);
-                            const progressBar = new ProgressBar(
-                                '  downloading [:bar] :percent :etas',
-                                {
-                                    current: 0,
-                                    renderThrottle: 500,
-                                    total: total,
-                                }
-                            );
-                        
-                            res.on('data', (chunk) => progressBar.tick(chunk.length));
-                          });
-                    });
-                }
-            });
-
-        return new Promise((resolve, reject) => {
-            stream.on('response', function(response) {
-                if (response.status !== 200) {
-                    stream.abort();
-                    return resolve({
-                        success: false,
-                        status: stream.response.status,
-                        message: stream.response.error
-                    });
-                }
-            });
-
-            stream.on('end', () => {
-                return resolve({
-                    success: true,
-                    message: `\nDownloaded ${artifactName}`,
-                    status: stream.response.status
-                });
-            });
-
-            stream.on('error', (err) => {
-                return resolve(constructError(err));
-            });
-
-            stream.pipe(process.stdout);
-        });
+    // eslint-disable-next-line no-unused-vars
+    async downloadArtifact(projectId, token, experimentName, runId, artifactName, showProgress = false) {
+        try {
+            // Check if run exists..
+            await this.describeRun(projectId, token, experimentName, runId);
+            // just generate the key and avoid hop to managed content..
+            const key = this._artifactKey(experimentName, runId, artifactName);
+            const cont = new Content(this.cortexUrl);
+            return cont.downloadContent(projectId, token, key, showProgress);
+        } catch (err) {
+            return constructError(err);
+        }
     }
 };
