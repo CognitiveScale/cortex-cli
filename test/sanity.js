@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Cognitive Scale, Inc. All Rights Reserved.
+ * Copyright 2020 Cognitive Scale, Inc. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the “License”);
  * you may not use this file except in compliance with the License.
@@ -17,11 +17,11 @@
 const commander = require('commander');
 const { ListProfilesCommand } = require('../src/commands/configure');
 
-describe('sanity check', function () {
-    it('lists profiles', function sanity(done) {
+describe('sanity check', () => {
+    it('lists profiles', (done) => {
         const program = new commander.Command();
         const command = new ListProfilesCommand(program);
-        command.execute({color: 'on'});
+        command.execute({ color: 'on' });
         done();
     });
 });

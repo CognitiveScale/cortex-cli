@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Cognitive Scale, Inc. All Rights Reserved.
+ * Copyright 2020 Cognitive Scale, Inc. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the “License”);
  * you may not use this file except in compliance with the License.
@@ -14,105 +14,73 @@
  * limitations under the License.
  */
 
-const  { request } = require('../commands/apiutils');
 const debug = require('debug')('cortex:cli');
-const { constructError } = require('../commands/utils');
+const { got } = require('./apiutils');
+const { constructError, getUserAgent } = require('../commands/utils');
 
 module.exports = class Datasets {
-
     constructor(cortexUrl) {
         this.cortexUrl = cortexUrl;
-        this.endpoint = `${cortexUrl}/v3/datasets`;
+        this.endpoint = projectId => `${cortexUrl}/fabric/v4/projects/${projectId}/datasets`;
     }
 
-    listDatasets(token) {
-        const endpoint = `${this.endpoint}`;
-        return request
-            .get(endpoint)
-            .set('Authorization', `Bearer ${token}`)
-            .then((res) => {
-                if (res.ok) {
-                    return {success: true, result: res.body};
-                }
-                return {success: false, status: res.status, message: res.body};
-            })
-            .catch((err) => {
-                return constructError(err);
-            });
+    listDatasets(projectId, token) {
+        const endpoint = `${this.endpoint(projectId)}`;
+        return got
+            .get(endpoint, {
+                headers: { Authorization: `Bearer ${token}` },
+                'user-agent': getUserAgent(),
+            }).json()
+            .then(result => ({ success: true, result }))
+            .catch(err => constructError(err));
     }
 
-    saveDatasets(token,dsObject) {
+    saveDatasets(projectId, token, dsObject) {
+        const endpoint = `${this.endpoint(projectId)}`;
         debug('saveConnection(%s) => %s', dsObject.name, this.endpoint);
-        return request
-            .post(this.endpoint)
-            .set('Authorization', `Bearer ${token}`)
-            .send(dsObject)
-            .then((res) => {
-                if (res.ok) {
-                    return {success: true, message: res.body};
-                }
-                return {success: false, message: res.body, status: res.status}; // don't think we ever hit this
-            })
-            .catch((err) => {
-                return constructError(err);
-            });
+        return got
+            .post(endpoint, {
+                headers: { Authorization: `Bearer ${token}` },
+                'user-agent': getUserAgent(),
+                json: dsObject,
+            }).json()
+            .then(res => ({ success: true, message: res }))
+            .catch(err => constructError(err));
     }
 
-    describeDataset(token, datasetName) {
-        const endpoint = `${this.endpoint}/${datasetName}`;
+    describeDataset(projectId, token, datasetName) {
+        const endpoint = `${this.endpoint(projectId)}/${datasetName}`;
         debug('describeConnection(%s) => %s', datasetName, endpoint);
-        return request
-            .get(endpoint)
-            .set('Authorization', `Bearer ${token}`)
-            .then((res) => {
-                if (res.ok) {
-                    return {success: true, result: res.body};
-                }
-                else {
-                    return {success: false, message: res.body, status: res.status};
-                }
-            })
-            .catch((err) => {
-                return constructError(err);
-            });
+        return got
+            .get(endpoint, {
+                headers: { Authorization: `Bearer ${token}` },
+                'user-agent': getUserAgent(),
+            }).json()
+            .then(result => ({ success: true, result }))
+            .catch(err => constructError(err)); 
+}
+
+    getDataframe(projectId, token, datasetName) {
+        const endpoint = `${this.endpoint(projectId)}/${datasetName}/dataframe`;
+        debug('describeConnection(%s) => %s', datasetName, endpoint);
+        return got
+            .get(endpoint, {
+                headers: { Authorization: `Bearer ${token}` },
+                'user-agent': getUserAgent(),
+            }).json()
+            .then(result => ({ success: true, result }))
+            .catch(err => constructError(err));
     }
 
-    getDataframe (token, datasetName) {
-        const endpoint = `${this.endpoint}/${datasetName}/dataframe`;
+    streamDataset(projectId, token, datasetName) {
+        const endpoint = `${this.endpoint(projectId)}/${datasetName}/stream`;
         debug('describeConnection(%s) => %s', datasetName, endpoint);
-        return request
-            .get(endpoint)
-            .set('Authorization', `Bearer ${token}`)
-            .then((res) => {
-                if (res.ok) {
-                    return {success: true, result: res.body};
-                }
-                else {
-                    return {success: false, message: res.body, status: res.status};
-                }
-            })
-            .catch((err) => {
-                return constructError(err);
-            });
-    }
-
-    streamDataset(token, datasetName) {
-        const endpoint = `${this.endpoint}/${datasetName}/stream`;
-        debug('describeConnection(%s) => %s', datasetName, endpoint);
-        return request
-            .get(endpoint)
-            .set('Authorization', `Bearer ${token}`)
-            .buffer()
-            .then((res) => {
-                if (res.ok) {
-                    return {success: true, result: res};
-                }
-                else {
-                    return {success: false, message: res.body, status: res.status};
-                }
-            })
-            .catch((err) => {
-                return constructError(err);
-            });
+        return got
+            .get(endpoint, {
+                headers: { Authorization: `Bearer ${token}` },
+                'user-agent': getUserAgent(),
+            }).json()
+            .then(result => ({ success: true, result }))
+            .catch(err => constructError(err));
     }
 };

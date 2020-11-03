@@ -26,15 +26,19 @@ const through2 = require('through2');
 
 const { loadProfile } = require('../config');
 const { Graph } = require('../client/graph');
-const { printSuccess, printError, filterObject, countLinesInFile, printTable } = require('./utils');
+const {
+ printSuccess, printError, filterObject, countLinesInFile, printTable, 
+} = require('./utils');
 
 
 const _reserved = ['$match', '$path', '$transform', '$name'];
 const _systemEvents = ['$set', '$unset', '$delete'];
-const progressBarConfig = 'publishing [:bar] :current/:total :rate evt/s :elapsed s' ;
+const progressBarConfig = 'publishing [:bar] :current/:total :rate evt/s :elapsed s';
 
 const applyTemplate = (t, target) => {
-    const { $match, $path, $transform, $name } = t;
+    const {
+ $match, $path, $transform, $name, 
+} = t;
 
     debug(`applying template to target: ${JSON.stringify(target, null, 4)}`);
 
@@ -43,10 +47,10 @@ const applyTemplate = (t, target) => {
         debug(`checking $match for ${$name}: ${$match}`);
         let match = true;
         const queryTarget = [target];
-        for (let m of $match) {
+        ($match).forEach((m) => {
             const paths = jp.query(queryTarget, m);
             match = paths && paths.length > 0;
-        }
+        });
 
         if (!match) return null;
         if ($name) debug(`Matched template ${$name}: ${$match}`);
@@ -69,18 +73,16 @@ const applyTemplate = (t, target) => {
         debug('q:', q);
 
         // Hardcoded event using a system event type
-        if (k == 'event' && _systemEvents.indexOf(q) !== -1) {
+        if (k === 'event' && _systemEvents.indexOf(q) !== -1) {
             result[k] = q;
             return;
         }
 
         if (_.isObject(q)) {
             result[k] = applyTemplate(q, target);
-        }
-        else if (q.startsWith('$')) {
+        } else if (q.startsWith('$')) {
             result[k] = jp.value(target, q);
-        }
-        else {
+        } else {
             result[k] = q;
         }
     });
@@ -88,41 +90,28 @@ const applyTemplate = (t, target) => {
     return result;
 };
 
-const fixUnicodeKeys = (obj) => {
-    const keys = Object.keys(obj);
-    const result = {};
-    keys.forEach((k) => {
-        const newKey = k.replace(/\\u002e/, '_').replace(/@/, '_');
-        result[newKey] = obj[k];
-    });
-    return result;
-};
-
 function castValue(value) {
-    if (_.isNumber(value) || _.isString(value) || _.isBoolean(value)) {
-        return { value };
-    }
     if (_.isArray(value)) {
         return {
-            value: _.map(value, (x) => _.isString(x) ? castValue(x) : x)
+            value: _.map(value, x => (_.isString(x) ? castValue(x) : x)),
         };
-
     }
     // Construct Dimensional from Object
     if (_.isObject(value)) {
         return {
             value: _.map(
                 _.entries(value), 
-                entry => {
+                (entry) => {
                     const [k, v] = entry;
                     return { 
                         dimensionId: k,
                         dimensionValue: castValue(v),
                     };
-                }
-            )
-        }
+                },
+            ),
+        };
     }
+    return { value };
 }
 
 /**
@@ -135,10 +124,12 @@ const autoAttributes = (evt) => {
     // Skip relationship events
     if (evt.targetEntityId) return attrs;
 
-    const { event, properties, entityId, entityType, eventTime, source, meta, eventLabel } = evt;
+    const {
+ event, properties, entityId, entityType, eventTime, source, meta, eventLabel, 
+} = evt;
 
-    if (event == '$set') {
-        attrs = Object.keys(properties).map((k) => ({
+    if (event === '$set') {
+        attrs = Object.keys(properties).map(k => ({
             event: k,
             entityId,
             entityType,
@@ -154,7 +145,6 @@ const autoAttributes = (evt) => {
 };
 
 class FindEventsCommand {
-
     constructor(program) {
         this.program = program;
     }
@@ -164,29 +154,26 @@ class FindEventsCommand {
         debug('%s.executeFindEvents()', profile.name);
 
         const graph = new Graph(profile.url);
-        graph.findEvents(profile.token, options.filter, options.sort, options.limit, options.skip)
+        graph.findEvents(options.project || profile.project, profile.token, options.filter, options.sort, options.limit, options.skip)
             .then((response) => {
                 if (response.success) {
                     let result = response.events;
-                    if (options.query)
-                        result = filterObject(result, options);
+                    if (options.query) result = filterObject(result, options);
 
                     if (options.json) {
                         printSuccess(JSON.stringify(result, null, 2), options);
-                    }
-                    else {
+                    } else {
                         const tableSpec = [
-                            {column: 'Entity ID', field: 'entityId', width: 40},
-                            {column: 'Entity Type', field: 'entityType', width: 30},
-                            {column: 'Event', field: 'event', width: 30},
-                            {column: 'Event Label', field: 'eventLabel', width: 30},
-                            {column: 'Event Time', field: 'eventTime', width: 20},
+                            { column: 'Entity ID', field: 'entityId', width: 40 },
+                            { column: 'Entity Type', field: 'entityType', width: 30 },
+                            { column: 'Event', field: 'event', width: 30 },
+                            { column: 'Event Label', field: 'eventLabel', width: 30 },
+                            { column: 'Event Time', field: 'eventTime', width: 20 },
                         ];
 
                         printTable(tableSpec, result);
                     }
-                }
-                else {
+                } else {
                     printError(`Failed to find entities: ${response.status} ${response.message}`, options);
                 }
             })
@@ -218,10 +205,9 @@ class PublishEventsCommand {
             let rs;
 
             if (options.tracking) {
-                rs = await graph.track(profile.token, events);
-            }
-            else {
-                rs = await graph.publishEntities(profile.token, events);
+                rs = await graph.track(options.project || profile.project, profile.token, events);
+            } else {
+                rs = await graph.publishEntities(options.project || profile.project, profile.token, events);
             }
 
             if (bar && events.length > 0) bar.tick(events.length);
@@ -232,14 +218,14 @@ class PublishEventsCommand {
         };
 
         // Git conflict - this was not async before ...
-        const printEvent = async (events, bar) => {
+        const printEvent = async (events) => {
             if (!events) return;
-            events.forEach((e) => console.log(JSON.stringify(e)));
+            events.forEach(e => console.log(JSON.stringify(e)));
         };
 
         function list_can_handle_element_without_going_over_size(batch_size, element_size, max_size) {
             const batch_size_delta_if_elem_added = element_size + (batch_size > 2 ? 1 : 0); // 1 for the , if not empty
-            return batch_size + batch_size_delta_if_elem_added <= max_size
+            return batch_size + batch_size_delta_if_elem_added <= max_size;
         }
         
         function batchElementsUntilSize(max_size) {
@@ -252,12 +238,10 @@ class PublishEventsCommand {
                 
                 if (event_size > max_event_size) {
                     debug(`Event too large at ${event_size}B. Max Size: ${max_event_size}B. Event: ${JSON.stringify(event)}`);
-                }
-                else if (list_can_handle_element_without_going_over_size(batch_size, event_size, max_size)) {
+                } else if (list_can_handle_element_without_going_over_size(batch_size, event_size, max_size)) {
                     batch.push(event);
-                    batch_size += event_size + (batch_size > 2 ? 1 : 0);  // 1 for the , if not empty []
-                }
-                else {
+                    batch_size += event_size + (batch_size > 2 ? 1 : 0); // 1 for the , if not empty []
+                } else {
                     debug(`LIMIT REACHED ${batch_size}, PUSHING ${batch.length} elements.`);
                     this.push(batch);
                     batch = [];
@@ -285,17 +269,17 @@ class PublishEventsCommand {
             bar = !_.isEmpty(bar) ? bar : (
                 new ProgressBar(progressBarConfig, { total: 0, width: 65 })
             );
-            const { batchHandler, batchFlusher, } = batchElementsUntilSize(1024 * 100);
+            const { batchHandler, batchFlusher } = batchElementsUntilSize(1024 * 100);
             stream
                 .pipe(split())
                 // Cast to JSONs
                 .pipe(through2.obj(
-                    function (line, encoding, callback){
+                    function (line, encoding, callback) {
                         if (!_.isEmpty(line)) {
                             this.push(JSON.parse(line));    
                         } 
                         callback();
-                    }
+                    },
                 ))
                 // Transform and Expand Auto Attributes ...
                 .pipe(through2.obj(
@@ -304,24 +288,25 @@ class PublishEventsCommand {
                         
                         if (options.transform) {
                             debug('loading templates from: ', path.resolve(options.transform));
+                            // eslint-disable-next-line import/no-dynamic-require
                             const templates = require(path.resolve(options.transform));
                             debug('loaded templates:', templates);
                             // The event gets completely replaced in this case ... since we are saying it needs to be
                             // transformed ... thats why concat is not used here ...
                             events = _.map(
                                 templates,
-                                (t) => applyTemplate(t, event),
+                                t => applyTemplate(t, event),
                             ).filter(e => e !== null);
                         }
                         
                         if (options.auto) {
-                            const autoAttrs = _.flatten(events.map((evt) => autoAttributes(evt)));
+                            const autoAttrs = _.flatten(events.map(evt => autoAttributes(evt)));
                             debug(`Generated ${autoAttrs.length} attribute events`);
                             events = events.concat(autoAttrs);
                         }
-                        events.forEach((e) => this.push(e));
+                        events.forEach(e => this.push(e));
                         callback();
-                    }
+                    },
                 ))
                 // Batch Based on Size
                 .pipe(through2({ objectMode: true }, batchHandler, batchFlusher))
@@ -329,10 +314,10 @@ class PublishEventsCommand {
                     // Only upload 1 batch at a time!
                     { objectMode: true, highWaterMark: 5 }, 
                     function (batch_of_events_to_upload, encoding, callback) {
-                        if (lineCountIsDynamic){
+                        if (lineCountIsDynamic) {
                             bar.total += _.size(batch_of_events_to_upload);
                         }
-                        let task = options.dryRun ? printEvent : publishEvent;
+                        const task = options.dryRun ? printEvent : publishEvent;
                         task(batch_of_events_to_upload, bar)
                             .then((response) => {
                                 this.push(response);
@@ -342,14 +327,14 @@ class PublishEventsCommand {
                                 printError(`Error uploading event batch: ${error.message}`, options, false);
                                 callback();
                             });
-                    }
+                    },
                 ))
                 .on('data', (response_from_batch_publish) => {
                     debug(`# Response from events published : ${response_from_batch_publish}`);
                 })
-                .on('error', (err) => reject(err))
+                .on('error', err => reject(err))
                 .on('end', () => {
-                    if(!options.dryRun) {
+                    if (!options.dryRun) {
                         printError(`Finished processing ${bar.total} events in batches.`, null, false);
                     }
                     bar.terminate();
@@ -363,7 +348,7 @@ class PublishEventsCommand {
                     let bar = null;
                     if (!lineCountIsDynamic) {
                         bar = new ProgressBar(
-                            progressBarConfig, { total: numLines, width: 65 }
+                            progressBarConfig, { total: numLines, width: 65 },
                         );
                         printError(`Publishing ${numLines} records from file ${file}`, null, false);
                     } else {
@@ -375,18 +360,16 @@ class PublishEventsCommand {
                     });
                 });
         }
-        else {
+        
             return new Promise((resolve, reject) => {
                 process.stdin.resume();
                 process.stdin.setEncoding('utf8');
                 processStream(process.stdin, resolve, reject);
             });
-        }
     }
 }
 
 class GetEntityCommand {
-
     constructor(program) {
         this.program = program;
     }
@@ -396,7 +379,7 @@ class GetEntityCommand {
         debug('%s.executeGetEntity(%s)', profile.name, entityId);
 
         const graph = new Graph(profile.url);
-        graph.getEntity(profile.token, entityId)
+        graph.getEntity(options.project || profile.project, profile.token, entityId)
             .then((response) => {
                 if (response.success) {
                     let result = response.entity;
@@ -404,8 +387,7 @@ class GetEntityCommand {
                         result = filterObject(result, options);
                     }
                     printSuccess(JSON.stringify(result, null, 2), options);
-                }
-                else {
+                } else {
                     printError(`Failed to get entity: ${response.status} ${response.message}`, options);
                 }
             })
@@ -416,7 +398,6 @@ class GetEntityCommand {
 }
 
 class QueryGraphCommand {
-
     constructor(program) {
         this.program = program;
     }
@@ -426,30 +407,29 @@ class QueryGraphCommand {
         debug('%s.executeQueryGraph(%s)', profile.name, query);
 
         const graph = new Graph(profile.url);
-        graph.query(profile.token, query)
+        graph.query(options.project || profile.project, profile.token, query)
             .then((response) => {
                 if (response.success) {
-                    const result = response.result;
+                    const { result } = response;
                     const rows = result.values || [];
 
                     debug('query result:', result);
 
                     if (options.json) {
                         printSuccess(JSON.stringify(result, null, 2), options);
-                    }
-                    else {
+                    } else {
                         const table = new Table(
-                            result.columns.map(c => ({ value: c, headerColor : 'cyan', })), 
+                            result.columns.map(c => ({ value: c, headerColor: 'cyan' })), 
                             rows,
-                            { defaultValue: '---'});
+                            { defaultValue: '---' },
+);
                         
                         printSuccess(query);
                         console.log(table.render());
                         console.log();
                         printSuccess(`Found ${rows.length} results in ${result.took} milliseconds`, options); 
                     }
-                }
-                else {
+                } else {
                     printError(`Failed to execute query: ${response.status} ${response.message}`, options);
                 }
             })

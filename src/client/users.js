@@ -18,47 +18,64 @@ const debug = require('debug')('cortex:cli');
 const { got } = require('./apiutils');
 const { constructError, getUserAgent } = require('../commands/utils');
 
-module.exports = class Variables {
-    constructor(cortexUrl) {
+module.exports = class Users {
+    constructor(cortexUrl, user, flags = []) {
         this.cortexUrl = cortexUrl;
-        this.endpoint = projectId => `${cortexUrl}/fabric/v4/projects/${projectId}/secrets`;
+        this.endpoint = `${cortexUrl}/fabric/v4`;
+        this.flags = '';
+
+        if (user) {
+            this.usersEndpoint = `${this.endpoint}/usergrants/${user}`;
+        } else {
+            this.usersEndpoint = `${this.endpoint}/usergrants`;
+        }
+        if (flags.length > 0) {
+            this.flags = `${flags.reduce((flagString, flag) => {
+                if (flagString) {
+                    flagString += `&${flag}=true`;
+                } else {
+                    flagString += `?${flag}=true`;
+                }
+                return flagString;
+            }, '')}`;
+        }
     }
 
-    listVariables(projectId, token) {
-        const endpoint = `${this.endpoint(projectId)}?list=true`;
-        debug('listVariables => %s', endpoint);
+    describeUser(token) {
+        const endpoint = `${this.usersEndpoint}/${this.flags}`;
+        debug('listForUser => %s', endpoint);
         return got
             .get(endpoint, {
                 headers: { Authorization: `Bearer ${token}` },
                 'user-agent': getUserAgent(),
             }).json()
-            .then(result => ({ success: true, result }))
+            .then(res => ({ success: true, result: res }))
             .catch(err => constructError(err));
     }
 
-    readVariable(projectId, token, keyName) {
-        const endpoint = `${this.endpoint(projectId)}/${keyName}`;
-        debug('readVariable($s) => %s', keyName, endpoint);
-        return got
-            .get(endpoint, {
-                headers: { Authorization: `Bearer ${token}` },
-                'user-agent': getUserAgent(),
-            }).json()
-            .then(result => ({ success: true, result }))
-            .catch(err => constructError(err));
-    }
-
-    writeVariable(projectId, token, keyName, value) {
-        const endpoint = `${this.endpoint(projectId)}/${keyName}`;
-        debug('writeVariable(%s) => %s', keyName, endpoint);
-        const body = { value };
+    createGrantForUser(token, body) {
+        const endpoint = this.usersEndpoint;
+        debug('createGrantForUser => %s', endpoint);
         return got
             .post(endpoint, {
                 headers: { Authorization: `Bearer ${token}` },
                 'user-agent': getUserAgent(),
                 json: body,
             }).json()
-            .then(result => ({ success: true, result }))
+            .then(res => ({ success: true, result: res }))
+            .catch(err => constructError(err));
+    }
+
+    removeGrantFromUser(token, body) {
+        const endpoint = this.usersEndpoint;
+        debug('removeGrantFromUser => %s', endpoint);
+        return got
+            .delete(endpoint, {
+                headers: { Authorization: `Bearer ${token}` },
+                'user-agent': getUserAgent(),
+                json: body,
+            }).json()
+            .then(res => ({ success: true, result: res }))
             .catch(err => constructError(err));
     }
 };

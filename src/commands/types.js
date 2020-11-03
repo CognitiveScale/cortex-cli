@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Cognitive Scale, Inc. All Rights Reserved.
+ * Copyright 2020 Cognitive Scale, Inc. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the “License”);
  * you may not use this file except in compliance with the License.
@@ -18,45 +18,40 @@ const fs = require('fs');
 const debug = require('debug')('cortex:cli');
 const { loadProfile } = require('../config');
 const Catalog = require('../client/catalog');
-const { printSuccess, printError, filterObject, parseObject, printTable } = require('./utils');
+const {
+ printSuccess, printError, filterObject, parseObject, printTable, 
+} = require('./utils');
 
 module.exports.SaveTypeCommand = class SaveTypeCommand {
-
     constructor(program) {
         this.program = program;
     }
 
-    execute(typeDefinition, options) {
+    async execute(typeDefinition, options) {
         const profile = loadProfile(options.profile);
         debug('%s.executeSaveType(%s)', profile.name, typeDefinition);
+        try {
+            const typeDefStr = fs.readFileSync(typeDefinition);
+            const type = parseObject(typeDefStr, options);
+            debug('%o', type);
 
-        const typeDefStr = fs.readFileSync(typeDefinition);
-        const type = parseObject(typeDefStr, options);
-        debug('%o', type);
+            let normalizedType = {};
+            if (!('types' in type)) normalizedType.types = [type];
+            else normalizedType = type;
 
-        let normalizedType = {};
-        if ( !('types' in type) )
-            normalizedType["types"] = [type];
-        else
-            normalizedType = type;
-
-        const catalog = new Catalog(profile.url);
-        catalog.saveType(profile.token, normalizedType).then((response) => {
+            const catalog = new Catalog(profile.url);
+            const response = await catalog.saveType(options.project || profile.project, profile.token, normalizedType);
             if (response.success) {
-                printSuccess(`Type definition saved`, options);
+                return printSuccess('Type definition saved', options);
             }
-            else {
-                printError(`Failed to save type: ${response.status} ${response.message}`, options);
-            }
-        })
-        .catch((err) => {
-            printError(`Failed to save type: ${err.status} ${err.response.body.error}`, options);
-        });
+            return printError(`${response.message}: ${JSON.stringify(response.details || '')} `);
+        } catch (err) {
+            return printError(`Failed to save type: ${err.status} ${err.message}`, options);
+        }
     }
 };
 
 module.exports.ListTypesCommand = class ListTypesCommand {
-
     constructor(program) {
         this.program = program;
     }
@@ -66,26 +61,23 @@ module.exports.ListTypesCommand = class ListTypesCommand {
         debug('%s.executeListTypes()', profile.name);
 
         const catalog = new Catalog(profile.url);
-        catalog.listTypes(profile.token).then((response) => {
+        catalog.listTypes(options.project || profile.project, profile.token).then((response) => {
             if (response.success) {
                 let result = response.types;
-                if (options.query)
-                    result = filterObject(result, options);
+                if (options.query) result = filterObject(result, options);
 
                 if (options.json) {
                     printSuccess(JSON.stringify(result, null, 2), options);
-                }
-                else {
+                } else {
                     const tableSpec = [
                         { column: 'Title', field: 'title', width: 50 },
                         { column: 'Name', field: 'name', width: 50 },
-                        { column: 'Version', field: '_version', width: 12 }
+                        { column: 'Version', field: '_version', width: 12 },
                     ];
 
                     printTable(tableSpec, result);
                 }
-            }
-            else {
+            } else {
                 printError(`Failed to list types: ${response.status} ${response.message}`, options);
             }
         })
@@ -96,7 +88,6 @@ module.exports.ListTypesCommand = class ListTypesCommand {
 };
 
 module.exports.DescribeTypeCommand = class DescribeTypeCommand {
-
     constructor(program) {
         this.program = program;
     }
@@ -106,12 +97,11 @@ module.exports.DescribeTypeCommand = class DescribeTypeCommand {
         debug('%s.executeDescribeType(%s)', profile.name, typeName);
 
         const catalog = new Catalog(profile.url);
-        catalog.describeType(profile.token, typeName).then((response) => {
+        catalog.describeType(options.project || profile.project, profile.token, typeName).then((response) => {
             if (response.success) {
-                let result = filterObject(response.type, options);
+                const result = filterObject(response.type, options);
                 printSuccess(JSON.stringify(result, null, 2), options);
-            }
-            else {
+            } else {
                 printError(`Failed to describe type ${typeName}: ${response.message}`, options);
             }
         })
@@ -120,4 +110,3 @@ module.exports.DescribeTypeCommand = class DescribeTypeCommand {
         });
     }
 };
-

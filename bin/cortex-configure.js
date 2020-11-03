@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 /*
- * Copyright 2018 Cognitive Scale, Inc. All Rights Reserved.
+ * Copyright 2020 Cognitive Scale, Inc. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the “License”);
  * you may not use this file except in compliance with the License.
@@ -15,58 +15,72 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
+const chalk = require('chalk');
 const program = require('../src/commander');
 
 const {
     ConfigureCommand,
     DescribeProfileCommand,
     ListProfilesCommand,
-    SetProfileCommand
+    SetProfileCommand,
+    GetAccessToken,
 } = require('../src/commands/configure');
 
 program
-    .option('--url [url]', 'Cortex URL')
-    .option('--account [account]', 'Account')
-    .option('--username [username]', 'Username')
-    .option('--password [password]', 'Password')
+    .option('--file [file]', 'Personal access config file location')
     .option('--profile [profile]', 'The profile to configure')
+    .option('--project [project]', 'The default project to use')
     .description('Configure the Cortex CLI');
 
-let cmd = undefined;
-program.command('auth', { isDefault: true})
+program.command('create', { isDefault: true })
     .description('Authenticate to cortex (default command)')
-    .option('--url [url]', 'Cortex URL')
-    .option('--account [account]', 'Account')
-    .option('--username [username]', 'Username')
-    .option('--password [password]', 'Password')
+    .option('--file [file]', 'Personal access config file location')
     .option('--profile [profile]', 'The profile to configure')
-    .action( (options) => {
-        new ConfigureCommand(program).execute({profile: program.profile, color: program.color});
+    .option('--project [project]', 'The default project')
+    .action(() => {
+        new ConfigureCommand(program).execute({ profile: program.profile, color: program.color });
     });
 
 program
+    .command('token')
+    .description('Create access token')
+    .option('--profile [profile]', 'The profile to use')
+    .option('--project [project]', 'The project to use')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
+    .action(() => {
+        try {
+            new GetAccessToken(program).execute({
+                profile: program.profile,
+                project: program.project,
+                color: program.color,
+            });
+        } catch (err) {
+            console.error(chalk.red(err.message));
+        }
+    });
+
+program
+    .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on');
 
 program
     .command('list')
     .description('List configured profiles')
-    .action((options) => {
-        new ListProfilesCommand(program).execute({color: program.color});
+    .action(() => {
+        new ListProfilesCommand(program).execute({ color: program.color });
     });
 
 program
     .command('describe <profileName>')
     .description('Describe a configured profile')
-    .action((profileName, options) => {
-        new DescribeProfileCommand(program).execute({profile: profileName, color: program.color});
+    .action((profileName) => {
+        new DescribeProfileCommand(program).execute({ profile: profileName, color: program.color });
     });
 
 program
     .command('set-profile <profileName>')
     .description('Sets the current profile.')
-    .action((profileName, options) => {
-        new SetProfileCommand(program).execute(profileName, {color: program.color});
+    .action((profileName) => {
+        new SetProfileCommand(program).execute(profileName, { color: program.color });
     });
 
 program.parse(process.argv);

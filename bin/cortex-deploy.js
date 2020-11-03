@@ -22,22 +22,24 @@ const program = require('../src/commander');
 const { withCompatibilityCheck } = require('../src/compatibility');
 
 const {
-    DockerLoginCommand,
-} = require('../src/commands/docker');
+    DeploySnapshotCommand,
+} = require('../src/commands/deploy');
 
-program.description('Work with Docker');
+program.description('Export Cortex artifacts for deployment');
 
-// Login
+// Export Agent Snapshot. Provide snapshotIds in quotes separated by space like "snapshotId1 snapshotId2". This is to support multiple agents in one deployment manifest file.
 program
-    .command('login')
-    .description('Docker login to the Cortex registry with your jwt token')
+    .command('snapshots <snapshotIds>')
+    .description('Export Agent(s) snapshots(s) for deployment. Provide snapshotIds separated by space, as <"snapshotId1 snapshotId2 ...">')
     .option('--no-compat', 'Ignore API compatibility checks')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
     .option('--project [project]', 'The project to use')
-    .action(withCompatibilityCheck((options) => {
+    .option('-y, --yaml', 'Use YAML for snapshot export format')
+    .option('-f, --force', 'Force delete existing exported files')
+    .action(withCompatibilityCheck((skillDefinition, options) => {
         try {
-            new DockerLoginCommand(program).execute(options);
+            new DeploySnapshotCommand(program).execute(skillDefinition, options);
         } catch (err) {
             console.error(chalk.red(err.message));
         }
