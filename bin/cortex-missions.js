@@ -22,37 +22,34 @@ const program = require('../src/commander');
 const { withCompatibilityCheck } = require('../src/compatibility');
 
 const {
-    CreateProjectCommand,
-    ListProjectsCommand,
-    DescribeProjectCommand,
-} = require('../src/commands/projects');
+    CreateMissionCommand,
+    ListMissionsCommand,
+    DescribeMissionCommand,
+} = require('../src/commands/missions');
 
-program.description('Work with Cortex Projects');
+program.description('Work with Cortex Missions');
 
-// Create Project
+// Create Mission
 program
-    .command('save [projectDefinition]')
-    .description('Save/Create a project')
+    .command('save <campaignName> [missionDefinition]')
+    .description('Save a mission definition')
     .storeOptionsAsProperties(false)
     .option('--no-compat', 'Ignore API compatibility checks')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
-    .option('-n, --name <string>', 'The project name')
-    .option('-t, --title [string]', 'The project title')
-    .option('-d, --description [string]', 'The project description')
-    .option('-y, --yaml', 'Use YAML for project definition format')
-    .action(withCompatibilityCheck((projectDefinition, options) => {
+    .option('-y, --yaml', 'Use YAML for mission definition format')
+    .action(withCompatibilityCheck((missionDefinition, options) => {
         try {
-            new CreateProjectCommand(program).execute(projectDefinition, options);
+            new CreateMissionCommand(program).execute(missionDefinition, options);
         } catch (err) {
             console.error(chalk.red(err.message));
         }
     }));
 
-// List Projects
+// List Missions
 program
-    .command('list')
-    .description('List project')
+    .command('list <campaignName>')
+    .description('List mission definitions')
     .option('--no-compat', 'Ignore API compatibility checks')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
@@ -60,24 +57,24 @@ program
     .option('--query [query]', 'A JMESPath query to use in filtering the response data.')
     .action(withCompatibilityCheck((options) => {
         try {
-            new ListProjectsCommand(program).execute(options);
+            new ListMissionsCommand(program).execute(options);
         } catch (err) {
             console.error(chalk.red(err.message));
         }
     }));
 
-// Get|Describe Project
+// Get|Describe Mission
 program
-    .command('describe <projectName>')
+    .command('describe <campaignName> <missionName>')
     .alias('get')
-    .description('Describe project')
+    .description('Describe mission')
     .option('--no-compat', 'Ignore API compatibility checks')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
     .option('--query [query]', 'A JMESPath query to use in filtering the response data.')
-    .action(withCompatibilityCheck((projectName, options) => {
+    .action(withCompatibilityCheck((missionName, options) => {
         try {
-            new DescribeProjectCommand(program).execute(projectName, options);
+            new DescribeMissionCommand(program).execute(missionName, options);
         } catch (err) {
             console.error(chalk.red(err.message));
         }

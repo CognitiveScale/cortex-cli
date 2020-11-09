@@ -22,37 +22,34 @@ const program = require('../src/commander');
 const { withCompatibilityCheck } = require('../src/compatibility');
 
 const {
-    CreateProjectCommand,
-    ListProjectsCommand,
-    DescribeProjectCommand,
-} = require('../src/commands/projects');
+    CreateCampaignCommand,
+    ListCampaignsCommand,
+    DescribeCampaignCommand,
+} = require('../src/commands/campaigns');
 
-program.description('Work with Cortex Projects');
+program.description('Work with Cortex Campaigns');
 
-// Create Project
+// Create Campaign
 program
-    .command('save [projectDefinition]')
-    .description('Save/Create a project')
+    .command('save [CampaignDefinition]')
+    .description('Save a Campaign definition')
     .storeOptionsAsProperties(false)
     .option('--no-compat', 'Ignore API compatibility checks')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
-    .option('-n, --name <string>', 'The project name')
-    .option('-t, --title [string]', 'The project title')
-    .option('-d, --description [string]', 'The project description')
-    .option('-y, --yaml', 'Use YAML for project definition format')
-    .action(withCompatibilityCheck((projectDefinition, options) => {
+    .option('-y, --yaml', 'Use YAML for Campaign definition format')
+    .action(withCompatibilityCheck((campaignDefinition, options) => {
         try {
-            new CreateProjectCommand(program).execute(projectDefinition, options);
+            new CreateCampaignCommand(program).execute(campaignDefinition, options);
         } catch (err) {
             console.error(chalk.red(err.message));
         }
     }));
 
-// List Projects
+// List Campaigns
 program
     .command('list')
-    .description('List project')
+    .description('List Campaigns')
     .option('--no-compat', 'Ignore API compatibility checks')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
@@ -60,24 +57,24 @@ program
     .option('--query [query]', 'A JMESPath query to use in filtering the response data.')
     .action(withCompatibilityCheck((options) => {
         try {
-            new ListProjectsCommand(program).execute(options);
+            new ListCampaignsCommand(program).execute(options);
         } catch (err) {
             console.error(chalk.red(err.message));
         }
     }));
 
-// Get|Describe Project
+// Get|Describe Campaign
 program
-    .command('describe <projectName>')
+    .command('describe <campaignName>')
     .alias('get')
-    .description('Describe project')
+    .description('Describe Campaign')
     .option('--no-compat', 'Ignore API compatibility checks')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
     .option('--query [query]', 'A JMESPath query to use in filtering the response data.')
-    .action(withCompatibilityCheck((projectName, options) => {
+    .action(withCompatibilityCheck((campaignName, options) => {
         try {
-            new DescribeProjectCommand(program).execute(projectName, options);
+            new DescribeCampaignCommand(program).execute(campaignName, options);
         } catch (err) {
             console.error(chalk.red(err.message));
         }
