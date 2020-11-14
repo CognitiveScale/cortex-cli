@@ -214,6 +214,7 @@ program
     .option('--profile [profile]', 'The profile to use')
     .option('--project [project]', 'The project to use')
     .option('--environmentName [environmentName]', 'The environment to list or \'all\'')
+    .option('--output [json|yaml|k8s]', 'Format output as yaml or k8s resources')
     .action(withCompatibilityCheck((snapshotId, options) => {
         try {
             new DescribeAgentSnapshotCommand(program).execute(snapshotId, options);
