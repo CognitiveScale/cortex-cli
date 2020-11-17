@@ -15,7 +15,6 @@
  */
 const _ = require('lodash');
 const fs = require('fs');
-const yeoman = require('yeoman-environment');
 const debug = require('debug')('cortex:cli');
 const { loadProfile } = require('../config');
 const Catalog = require('../client/catalog');
@@ -129,23 +128,6 @@ module.exports.DescribeSkillCommand = class DescribeSkillCommand {
         })
         .catch((err) => {
             printError(`Failed to describe skill ${skillName}: ${err.status} ${err.message}`, options);
-        });
-    }
-};
-
-module.exports.GenerateSkillCommand = class GenerateSkillCommand {
-
-    constructor(program) {
-        this.program = program;
-    }
-
-    execute(options) {
-        debug('%s.generateSkill()');
-        const yenv = yeoman.createEnv();
-        yenv.lookup(()=>{
-            yenv.run('@c12e/cortex:skill',
-            { },
-            (err) => { err ? printError(err) : printSuccess('Done.') });
         });
     }
 };
