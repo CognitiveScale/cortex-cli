@@ -1,0 +1,26 @@
+#!/usr/bin/env bash
+
+set -eux;
+
+SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+IMAGE=c12e/{{name}}
+DOCKER_IMAGE_TAG=$(git describe --long --always)
+
+PROFILE=$(jq -r .currentProfile ~/.cortex/config)
+PROJECT=$(jq -r .profiles.${PROFILE}.project ~/.cortex/config)
+URL=$(jq -r .profiles.${PROFILE}.url ~/.cortex/config)
+
+# TODO fix docker registry and action deployment once v6 supports this. Also skill and action deployment will be one command.
+DOCKERREG=`curl -s -H "Authorization: Bearer ${TOKEN}" ${URL}/v3/actions/_config | jq -r .config.dockerPrivateRegistryUrl`
+echo $DOCKERREG
+
+DOCKER_IMAGE=${DOCKERREG}/${PROJECT}/${IMAGE}:${DOCKER_IMAGE_TAG}
+cd $SCRIPT_DIR
+
+docker build -t ${IMAGE}:${DOCKER_IMAGE_TAG}  -f ${SCRIPT_DIR}/Dockerfile .
+docker tag ${IMAGE}:${DOCKER_IMAGE_TAG} ${DOCKER_IMAGE}
+cortex docker login
+docker push ${DOCKER_IMAGE}
+cortex actions deploy ${IMAGE} --actionType job --docker ${DOCKER_IMAGE} --cmd '["python", "/app/__main__.py"]'
+sleep 10
+cortex actions describe ${IMAGE}

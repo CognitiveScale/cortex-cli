@@ -1,0 +1,40 @@
+camel: 1.0.0
+name: c12e/{{dashCase name}}
+title: {{name}}
+description: {{name}}
+inputs:
+  - name: request
+    title: API Request
+    parameters:
+      - name: params
+        type: object
+        description: Request Parameters
+        required: true
+    routing:
+      all:
+        action  : c12e/{{dashCase name}}
+        runtime: cortex/functions
+        output: response
+
+outputs:
+  - name: response
+    title: API Response
+    parameters:
+      - name: result
+        type: object
+        description: API Response
+        required: true
+
+properties:
+  - name: daemon.method
+    title: Daemon method
+    description: method
+    required: true
+    type: String
+    defaultValue: POST
+  - name: daemon.path
+    title: Daemon path
+    description: path
+    required: true
+    type: String
+    defaultValue: invoke

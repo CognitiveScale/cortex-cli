@@ -20,10 +20,11 @@ module.exports = plop => {
             {
                 type: 'addMany',
                 // Current directory for the new files
-                destination: path.join(path.resolve('.'), 'src/{{name}}/'),
+                destination: path.join(path.resolve('.'), '{{ dashCase name }}'),
                 // Handlebars template used to generate content of project files
-                base: path.join(path.dirname(require.resolve('@c12e/generator-cortex/generators/skill/{{type}}'))),
-                templateFiles: path.join(path.dirname(require.resolve('@c12e/generator-cortex/generators/skill/{{type}}')), '**/*.js.hbs'),
+                base: 'assets/templates/skill/{{dashCase type}}',
+                //Note: Unlike other files, this doesn't strip hbs extension from Dockerfile, because this doesn't have any extension. So not using hbs extension in Dockerfile and picking all files in directory
+                templateFiles: path.join('assets/templates/skill/{{dashCase type}}', '**/*'),
                 abortOnFail: true,
                 // Must not overwrite files with scaffolding template if already exists
                 // force: true,
