@@ -31,7 +31,6 @@
   "homepage": "https://github.com/CognitiveScale/cortex-cli",
   "dependencies": {
     "plop": "2.7.4",
-    "@c12e/generator-cortex": "0.3.30",
     "@hapi/joi": "17.1.1",
     "boxen": "4.2.0",
     "chalk": "4.0.0",
