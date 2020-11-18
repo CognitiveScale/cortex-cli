@@ -27,7 +27,7 @@ program.description('Scaffolding Cortex Components');
 
 program
     .command('skill')
-    .description('Generates the structure and top level build script for a skill')
+    .description('Generates the structure and top level build script for a skill in current directory')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .action((options) => { // deliberately not using withCompatibilityCheck()
         try {
