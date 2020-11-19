@@ -309,9 +309,12 @@ module.exports.DescribeAgentSnapshotCommand = class {
         debug('%s.describeAgentSnapshot(%s)', profile.name, snapshotId);
 
         const agents = new Agents(profile.url);
-        const output = options.output || 'json';
+        const output = _.get(options,'output', 'json');
         try {
             const response = await agents.describeAgentSnapshot(options.project || profile.project, profile.token, snapshotId, output);
+            if (response.success === false) {
+                return printError(`Failed to describe agent snapshot ${snapshotId}: ${response.message}`);
+            }
             if (output.toLowerCase() === 'json') {
                 const result = filterObject(JSON.parse(response), options);
                 return printSuccess(JSON.stringify(result, null, 2), options);
