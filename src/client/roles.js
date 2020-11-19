@@ -30,6 +30,9 @@ module.exports = class Roles {
         }
         this.rolesUsersEndpoint = `${this.rolesEndpoint}/users`;
         this.rolesGrantsEndpoint = `${this.rolesEndpoint}/grants`;
+        this.rolesProjectsEndpoint = `${this.rolesEndpoint}/projects`;
+
+        this.rolesMappingsEndpoint = `${this.rolesEndpoint}/mappings`;
 
         if (flags.length > 0) {
             this.flags = `${flags.reduce((flagString, flag) => {
@@ -142,6 +145,92 @@ module.exports = class Roles {
         debug('listRoles => %s', endpoint);
         return got
             .get(endpoint, {
+                headers: { Authorization: `Bearer ${token}` },
+                'user-agent': getUserAgent(),
+            }).json()
+            .then(res => ({ success: true, result: res }))
+            .catch(err => constructError(err));
+    }
+
+    addRolesToProject(token, project, roles) {
+        const endpoint = `${this.rolesProjectsEndpoint}`;
+        debug('addRolesToProject => %s', endpoint);
+        return got
+            .post(endpoint, {
+                headers: { Authorization: `Bearer ${token}` },
+                'user-agent': getUserAgent(),
+                json: { project, roles },
+            }).json()
+            .then(res => ({ success: true, result: res }))
+            .catch(err => constructError(err));
+    }
+
+    removeRolesFromProject(token, project, roles) {
+        const endpoint = `${this.rolesProjectsEndpoint}`;
+        debug('removeRolesFromProject => %s', endpoint);
+        return got
+            .delete(endpoint, {
+                headers: { Authorization: `Bearer ${token}` },
+                'user-agent': getUserAgent(),
+                json: { project, roles },
+            }).json()
+            .then(res => ({ success: true, result: res }))
+            .catch(err => constructError(err));
+    }
+
+    listExternalGroups(token) {
+        let endpoint = this.rolesMappingsEndpoint;
+        debug('listExternalGroups => %s', endpoint);
+        return got
+            .get(endpoint, {
+                headers: { Authorization: `Bearer ${token}` },
+                'user-agent': getUserAgent(),
+            }).json()
+            .then(res => ({ success: true, result: res }))
+            .catch(err => constructError(err));
+    }
+
+    describeExternalGroup(token, externalGroup) {
+        const endpoint = `${this.rolesMappingsEndpoint}/${externalGroup}${this.flags}`;
+        debug('describeExternalGroup => %s', endpoint);
+        return got
+            .get(endpoint, {
+                headers: { Authorization: `Bearer ${token}` },
+                'user-agent': getUserAgent(),
+            }).json()
+            .then(res => ({ success: true, result: res }))
+            .catch(err => constructError(err));
+    }
+
+    deleteExternalGroup(token, externalGroup) {
+        const endpoint = `${this.rolesMappingsEndpoint}/${externalGroup}`;
+        debug('deleteExternalGroup => %s', endpoint);
+        return got
+            .delete(endpoint, {
+                headers: { Authorization: `Bearer ${token}` },
+                'user-agent': getUserAgent(),
+            }).json()
+            .then(res => ({ success: true, result: res }))
+            .catch(err => constructError(err));
+    }
+
+    addExternalGroupToRole(token, externalGroup) {
+        const endpoint = `${this.rolesMappingsEndpoint}/${externalGroup}`;
+        debug('addExternalGroupToRole => %s', endpoint);
+        return got
+            .post(endpoint, {
+                headers: { Authorization: `Bearer ${token}` },
+                'user-agent': getUserAgent(),
+            }).json()
+            .then(res => ({ success: true, result: res }))
+            .catch(err => constructError(err));
+    }
+
+    removeExternalGroupFromRole(token, externalGroup) {
+        const endpoint = `${this.rolesMappingsEndpoint}/${externalGroup}`;
+        debug('removeExternalGroupFromRole => %s', endpoint);
+        return got
+            .delete(endpoint, {
                 headers: { Authorization: `Bearer ${token}` },
                 'user-agent': getUserAgent(),
             }).json()
