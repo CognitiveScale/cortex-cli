@@ -104,11 +104,11 @@ module.exports.UserProjectAssignCommand = class {
         debug('%s.assignUserProject=%s', profile.name, project);
 
         const client = new Users(profile.url, null);
-        const call = (deleteFlag, token, project, users) => {
+        const call = (deleteFlag, token, assignProject, users) => {
             if (deleteFlag) {
-                return client.removeUsersFromProject(token, project, users);
+                return client.removeUsersFromProject(token, assignProject, users);
             }
-            return client.addUsersToProject(token, project, users);
+            return client.addUsersToProject(token, assignProject, users);
         };
 
         call(options.delete, profile.token, project, options.users).then((response) => {

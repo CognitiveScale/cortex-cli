@@ -73,7 +73,7 @@ program.command('project <project>')
     .option('--delete', 'Unassign users from project')
     .action(withCompatibilityCheck((project, options) => {
         try {
-            new RoleProjectAssignCommand(program).execute(project, options);
+            new UserProjectAssignCommand(program).execute(project, options);
         } catch (err) {
             console.error(chalk.red(err.message));
         }

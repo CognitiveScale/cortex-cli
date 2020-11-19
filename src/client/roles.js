@@ -179,7 +179,7 @@ module.exports = class Roles {
     }
 
     listExternalGroups(token) {
-        let endpoint = this.rolesMappingsEndpoint;
+        const endpoint = this.rolesMappingsEndpoint;
         debug('listExternalGroups => %s', endpoint);
         return got
             .get(endpoint, {

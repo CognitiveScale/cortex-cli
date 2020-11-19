@@ -216,11 +216,11 @@ module.exports.RoleProjectAssignCommand = class {
         debug('%s.assignRoleProject=%s', profile.name, project);
 
         const client = new Roles(profile.url, null);
-        const call = (deleteFlag, token, project, roles) => {
+        const call = (deleteFlag, token, assignProject, roles) => {
             if (deleteFlag) {
-                return client.removeRolesFromProject(token, project, roles);
+                return client.removeRolesFromProject(token, assignProject, roles);
             }
-            return client.addRolesToProject(token, project, roles);
+            return client.addRolesToProject(token, assignProject, roles);
         };
 
         call(options.delete, profile.token, project, options.roles).then((response) => {
@@ -248,7 +248,7 @@ module.exports.ExternalGroupListCommand = class {
         const profile = loadProfile(options.profile);
         debug('%s.listExternalGroup=%s', profile.name);
 
-        const client = new Roles(profile.url, null, flags);
+        const client = new Roles(profile.url, null);
         client.listExternalGroups(profile.token).then((response) => {
             if (response.success) {
                 const result = filterObject(response.result, options);
@@ -349,7 +349,8 @@ module.exports.ExternalGroupAssignCommand = class {
             .catch((err) => {
                 const func = (options.delete) ? 'unassign' : 'assign';
                 printError(
-                    `Failed to ${func} external group from role : ${err.status} ${err.message}`, options);
+                    `Failed to ${func} external group from role : ${err.status} ${err.message}`, options,
+                );
             });
     }
 };
