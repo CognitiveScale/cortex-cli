@@ -25,6 +25,7 @@ function createGrant(options) {
         project: options.project,
         resource: options.resource,
         actions: options.actions,
+        effect: options.deny ? 'deny' : 'allow',
     };
 }
 
@@ -89,6 +90,39 @@ module.exports.UserDescribeCommand = class {
         })
             .catch((err) => {
                 printError(`Failed to describe user : ${err.status} ${err.message}`, options);
+            });
+    }
+};
+
+module.exports.UserProjectAssignCommand = class {
+    constructor(program) {
+        this.program = program;
+    }
+
+    execute(project, options) {
+        const profile = loadProfile(options.profile);
+        debug('%s.assignUserProject=%s', profile.name, project);
+
+        const client = new Users(profile.url, null);
+        const call = (deleteFlag, token, assignProject, users) => {
+            if (deleteFlag) {
+                return client.removeUsersFromProject(token, assignProject, users);
+            }
+            return client.addUsersToProject(token, assignProject, users);
+        };
+
+        call(options.delete, profile.token, project, options.users).then((response) => {
+            if (response.success) {
+                const result = filterObject(response.result, options);
+                printSuccess(JSON.stringify(result, null, 2), options);
+            } else {
+                const func = (options.delete) ? 'unassign' : 'assign';
+                printError(`Failed to ${func} users from project : ${response.message}`, options);
+            }
+        })
+            .catch((err) => {
+                const func = (options.delete) ? 'unassign' : 'assign';
+                printError(`Failed to ${func} users from project : ${err.status} ${err.message}`, options);
             });
     }
 };
