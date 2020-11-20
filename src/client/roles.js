@@ -215,12 +215,13 @@ module.exports = class Roles {
     }
 
     addExternalGroupToRole(token, externalGroup) {
-        const endpoint = `${this.rolesMappingsEndpoint}/${externalGroup}`;
+        const endpoint = `${this.rolesMappingsEndpoint}`;
         debug('addExternalGroupToRole => %s', endpoint);
         return got
             .post(endpoint, {
                 headers: { Authorization: `Bearer ${token}` },
                 'user-agent': getUserAgent(),
+                json: { externalGroup },
             }).json()
             .then(res => ({ success: true, result: res }))
             .catch(err => constructError(err));

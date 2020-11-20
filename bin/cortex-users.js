@@ -35,8 +35,7 @@ program.command('describe')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
     .option('--user [user]', 'The user to describe, self for default')
-    .option('--roles', 'Include roles for user')
-    .option('--no-grants', 'Ignore grants for user')
+    .option('--roles', 'Include grant inheritance from roles')
     .action(withCompatibilityCheck((options) => {
         try {
             new UserDescribeCommand(program).execute(options);
