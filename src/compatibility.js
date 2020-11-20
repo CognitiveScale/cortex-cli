@@ -123,7 +123,7 @@ async function getCompatibility(profile) {
 
 function withCompatibilityCheck(fn) {
     return (...args) => {
-        const command = args.find(a => typeof a.opts === 'function');
+        const command = args.find(a => a !== undefined && typeof a.opts === 'function');
         const options = command.opts();
         if (options.compat && !_.toLower(process.env.CORTEX_NO_COMPAT) === 'true') {
             const { profile: profileName } = options;

@@ -213,7 +213,7 @@ program
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
     .option('--project [project]', 'The project to use')
-    .option('-o, --output [json|yaml|k8s]', 'Format output as yaml or k8s resources')
+    .option('-o, --output <json|yaml|k8s>', 'Format output as yaml or k8s resources')
     .action(withCompatibilityCheck((snapshotId, options) => {
         try {
             new DescribeAgentSnapshotCommand(program).execute(snapshotId, options);
