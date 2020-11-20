@@ -304,22 +304,25 @@ module.exports.DescribeAgentSnapshotCommand = class {
         this.program = program;
     }
 
-    execute(snapshotId, options) {
+    async execute(snapshotId, options) {
         const profile = loadProfile(options.profile);
-        const envName = options.environmentName;
         debug('%s.describeAgentSnapshot(%s)', profile.name, snapshotId);
 
         const agents = new Agents(profile.url);
-        agents.describeAgentSnapshot(options.project || profile.project, profile.token, snapshotId, envName).then((response) => {
-            if (response.success) {
-                const result = filterObject(response.result, options);
-                printSuccess(JSON.stringify(result, null, 2), options);
-            } else {
-                printError(`Failed to describe agent snapshot ${snapshotId}: ${response.message}`, options);
+        const output = _.get(options,'output', 'json');
+        try {
+            const response = await agents.describeAgentSnapshot(options.project || profile.project, profile.token, snapshotId, output);
+            if (response.success === false) {
+                return printError(`Failed to describe agent snapshot ${snapshotId}: ${response.message}`);
             }
-        }).catch((err) => {
+            if (output.toLowerCase() === 'json') {
+                const result = filterObject(JSON.parse(response), options);
+                return printSuccess(JSON.stringify(result, null, 2), options);
+            }
+            return printSuccess(response);
+        } catch (err) {
             printError(`Failed to describe agent snapshot ${snapshotId}: ${err.status} ${err.message}`, options);
-        });
+        }
     }
 };
 
