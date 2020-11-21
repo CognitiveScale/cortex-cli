@@ -75,7 +75,7 @@ module.exports = class Agents {
     }
 
     describeAgentSnapshot(projectId, token, snapshotId, output) {
-        let endpoint = `${this.endpointV4(projectId)}/snapshots/${snapshotId}?deps=true`;
+        const endpoint = `${this.endpointV4(projectId)}/snapshots/${snapshotId}?deps=true`;
         debug('describeAgentSnapshot(%s, %s) => %s', snapshotId, endpoint);
         return got
             .get(endpoint, {
