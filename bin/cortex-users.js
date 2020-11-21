@@ -21,6 +21,7 @@ const program = require('../src/commander');
 const { withCompatibilityCheck } = require('../src/compatibility');
 
 const {
+    UserProjectAssignCommand,
     UserDescribeCommand,
     UserGrantCommand,
 } = require('../src/commands/users');
@@ -34,8 +35,7 @@ program.command('describe')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
     .option('--user [user]', 'The user to describe, self for default')
-    .option('--roles', 'Include roles for user')
-    .option('--no-grants', 'Ignore grants for user')
+    .option('--roles', 'Include grant inheritance from roles')
     .action(withCompatibilityCheck((options) => {
         try {
             new UserDescribeCommand(program).execute(options);
@@ -51,9 +51,10 @@ program.command('grant <user>')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .requiredOption('--project <project>', 'Grant project')
     .requiredOption('--resource <resource>', 'Grant resource')
-    .requiredOption('--actions <actions...>', 'Grant actions read | write | execute | deny | *')
+    .requiredOption('--actions <actions...>', 'Grant actions read | write | execute | *')
     .option('--profile [profile]', 'The profile to use')
     .option('--delete', 'Remove grant from user')
+    .option('--deny', 'Explicit deny of action(s)')
     .action(withCompatibilityCheck((user, options) => {
         try {
             new UserGrantCommand(program).execute(user, options);
@@ -62,5 +63,19 @@ program.command('grant <user>')
         }
     }));
 
+program.command('project <project>')
+    .description('Manage a list of user assignments on a project')
+    .option('--no-compat', 'Ignore API compatibility checks')
+    .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
+    .option('--profile [profile]', 'The profile to use')
+    .requiredOption('--users <uesrs...>', 'Uesrs to add/remove on project')
+    .option('--delete', 'Unassign users from project')
+    .action(withCompatibilityCheck((project, options) => {
+        try {
+            new UserProjectAssignCommand(program).execute(project, options);
+        } catch (err) {
+            console.error(chalk.red(err.message));
+        }
+    }));
 
 program.parse(process.argv);
