@@ -55,7 +55,7 @@ module.exports = class ApiServerClient {
     async createProject(token, projDef) {
         try {
             const fetched = await this._client(token)
-                .request(gql`mutation NewProject($input: ProjectInput!) { createProject(input: $input){name}}`, { input: projDef });
+                .request(gql`mutation NewProject($input: CreateProjectInput!) { createProject(input: $input){name}}`, { input: projDef });
             return _.get(fetched, 'createProject', {});
         } catch (err) {
             throw err;
