@@ -69,7 +69,7 @@ module.exports.SaveConnectionCommand = class SaveConnectionCommand {
     }
 
    getParamsValue(connectionDefinition, paramName) {
-       const results = _.get(connectionDefinition, 'params', []).filter(item => item.name === paramName);
+       const results = _.filter(_.get(connectionDefinition, 'params', []),item => item.name === paramName);
        if (results && results.length) {
             return results[0].value;
        } 
@@ -160,7 +160,7 @@ module.exports.TestConnectionCommand = class TestConnectionCommand {
     }
 
     getParamsValue(connectionDefinition, paramName) {
-        const results = _.get(connectionDefinition, 'params', []).filter(item => item.name === paramName);
+        const results = _.filter(_.get(connectionDefinition, 'params', []),item => item.name === paramName);
         if (results && results.length) {
              return results[0].value;
         } 
