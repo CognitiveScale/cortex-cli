@@ -74,16 +74,15 @@ module.exports = class Agents {
             .catch(err => constructError(err));
     }
 
-    describeAgentSnapshot(projectId, token, snapshotId, environmentName) {
-        let endpoint = `${this.endpointV4(projectId)}/snapshots/${snapshotId}?deps=true`;
-        debug('describeAgentSnapshot(%s, %s) => %s', snapshotId, environmentName, endpoint);
-        if (environmentName) endpoint = `${endpoint}&environmentName=${environmentName}`;
+    describeAgentSnapshot(projectId, token, snapshotId, output) {
+        const endpoint = `${this.endpointV4(projectId)}/snapshots/${snapshotId}?deps=true`;
+        debug('describeAgentSnapshot(%s, %s) => %s', snapshotId, endpoint);
         return got
             .get(endpoint, {
                 headers: { Authorization: `Bearer ${token}` },
                 'user-agent': getUserAgent(),
-            }).json()
-            .then(result => ({ success: true, result }))
+                searchParams: { output, deps: true },
+            }).text()
             .catch(err => constructError(err));
     }
 

@@ -69,7 +69,7 @@ module.exports.SaveConnectionCommand = class SaveConnectionCommand {
     }
 
    getParamsValue(connectionDefinition, paramName) {
-       const results = connectionDefinition.params.filter(item => item.name === paramName);
+       const results = _.get(connectionDefinition, 'params', []).filter(item => item.name === paramName);
        if (results && results.length) {
             return results[0].value;
        } 

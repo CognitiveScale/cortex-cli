@@ -21,7 +21,7 @@ const { loadProfile } = require('../config');
 const Catalog = require('../client/catalog');
 const Agents = require('../client/agents');
 const {
- printSuccess, printError, filterObject, parseObject, printTable, 
+ printSuccess, printError, filterObject, parseObject, printTable,
 } = require('./utils');
 
 module.exports.SaveAgentCommand = class SaveAgentCommand {
@@ -229,7 +229,7 @@ module.exports.ListActivationsCommand = class {
     }
 };
 
-module.exports.ListServicesCommand = class ListServicesCommand { 
+module.exports.ListServicesCommand = class ListServicesCommand {
     constructor(program) {
         this.program = program;
     }
@@ -237,7 +237,7 @@ module.exports.ListServicesCommand = class ListServicesCommand {
     execute(agentName, options) {
         const profile = loadProfile(options.profile);
         debug('%s.listServices(%s)', profile.name, agentName);
-        
+
         const catalog = new Catalog(profile.url);
         catalog.listServices(options.project || profile.project, profile.token, agentName, profile).then((response) => {
             if (response.success) {
@@ -304,22 +304,25 @@ module.exports.DescribeAgentSnapshotCommand = class {
         this.program = program;
     }
 
-    execute(snapshotId, options) {
+    async execute(snapshotId, options) {
         const profile = loadProfile(options.profile);
-        const envName = options.environmentName;
         debug('%s.describeAgentSnapshot(%s)', profile.name, snapshotId);
 
         const agents = new Agents(profile.url);
-        agents.describeAgentSnapshot(options.project || profile.project, profile.token, snapshotId, envName).then((response) => {
-            if (response.success) {
-                const result = filterObject(response.result, options);
-                printSuccess(JSON.stringify(result, null, 2), options);
-            } else {
-                printError(`Failed to describe agent snapshot ${snapshotId}: ${response.message}`, options);
+        const output = _.get(options, 'output', 'json');
+        try {
+            const response = await agents.describeAgentSnapshot(options.project || profile.project, profile.token, snapshotId, output);
+            if (response.success === false) {
+                return printError(`Failed to describe agent snapshot ${snapshotId}: ${response.message}`);
             }
-        }).catch((err) => {
-            printError(`Failed to describe agent snapshot ${snapshotId}: ${err.status} ${err.message}`, options);
-        });
+            if (output.toLowerCase() === 'json') {
+                const result = filterObject(JSON.parse(response), options);
+                return printSuccess(JSON.stringify(result, null, 2), options);
+            }
+            return printSuccess(response);
+        } catch (err) {
+            return printError(`Failed to describe agent snapshot ${snapshotId}: ${err.status} ${err.message}`, options);
+        }
     }
 };
 
