@@ -13,7 +13,7 @@ module.exports = plop => {
                 type: 'list',
                 name: 'type',
                 message: 'Skill Type?',
-                choices: ['Daemon', 'Job', 'REST API']
+                choices: ['Daemon', 'Job', 'External API']
             }
         ],
         actions: [
