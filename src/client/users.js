@@ -29,6 +29,7 @@ module.exports = class Users {
         } else {
             this.usersEndpoint = `${this.endpoint}/usergrants`;
         }
+        this.usersProjectsEndpoint = `${this.usersEndpoint}/projects`;
         if (flags.length > 0) {
             this.flags = `${flags.reduce((flagString, flag) => {
                 if (flagString) {
@@ -74,6 +75,32 @@ module.exports = class Users {
                 headers: { Authorization: `Bearer ${token}` },
                 'user-agent': getUserAgent(),
                 json: body,
+            }).json()
+            .then(res => ({ success: true, result: res }))
+            .catch(err => constructError(err));
+    }
+
+    addUsersToProject(token, project, users) {
+        const endpoint = `${this.usersProjectsEndpoint}`;
+        debug('addUsersToProject => %s', endpoint);
+        return got
+            .post(endpoint, {
+                headers: { Authorization: `Bearer ${token}` },
+                'user-agent': getUserAgent(),
+                json: { project, users },
+            }).json()
+            .then(res => ({ success: true, result: res }))
+            .catch(err => constructError(err));
+    }
+
+    removeUsersFromProject(token, project, users) {
+        const endpoint = `${this.usersProjectsEndpoint}`;
+        debug('removeUsersFromProject => %s', endpoint);
+        return got
+            .delete(endpoint, {
+                headers: { Authorization: `Bearer ${token}` },
+                'user-agent': getUserAgent(),
+                json: { project, users },
             }).json()
             .then(res => ({ success: true, result: res }))
             .catch(err => constructError(err));

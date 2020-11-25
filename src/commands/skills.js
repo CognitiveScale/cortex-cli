@@ -19,11 +19,11 @@ const debug = require('debug')('cortex:cli');
 const { loadProfile } = require('../config');
 const Catalog = require('../client/catalog');
 const {
- printSuccess, printError, filterObject, parseObject, printTable,
+ printSuccess, printError, filterObject, parseObject, printTable, 
 } = require('./utils');
 
 function _formatpath(p) {
-    let cnt = 0; let
+    let cnt = 0; let 
 res = '';
     const len = p.length;
     p.forEach((s) => {
