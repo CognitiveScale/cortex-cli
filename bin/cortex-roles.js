@@ -165,7 +165,7 @@ program.command('describe-external <externalGroup>')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
     .option('--users', 'List users associated with external group')
-    .option('--roles', 'List roless associated with external group')
+    .option('--roles', 'List roles associated with external group')
     .action(withCompatibilityCheck((externalGroup, options) => {
         try {
             new ExternalGroupDescribeCommand(program).execute(externalGroup, options);
