@@ -68,7 +68,7 @@ program.command('project <project>')
     .option('--no-compat', 'Ignore API compatibility checks')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
-    .requiredOption('--users <uesrs...>', 'Uesrs to add/remove on project')
+    .requiredOption('--users <users...>', 'Users to add/remove on project')
     .option('--delete', 'Unassign users from project')
     .action(withCompatibilityCheck((project, options) => {
         try {
