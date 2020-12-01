@@ -13,30 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-const _ = require('lodash');
 const fs = require('fs');
 const debug = require('debug')('cortex:cli');
 const { loadProfile } = require('../config');
 const Catalog = require('../client/catalog');
 const {
- printSuccess, printError, filterObject, parseObject, printTable, 
+ printSuccess, printError, filterObject, parseObject, printTable, formatValidationPath,
 } = require('./utils');
-
-function _formatpath(p) {
-    let cnt = 0; let 
-res = '';
-    const len = p.length;
-    p.forEach((s) => {
-        if (_.isNumber(s)) {
-            res += `[${s}]`;
-        } else
-            if (cnt < len) res += s;
-            else res += s;
-        if (cnt < len - 1 && !_.isNumber(p[cnt + 1])) res += '.';
-        cnt += 1;
-    });
-    return res;
-}
 
 module.exports.SaveSkillCommand = class SaveSkillCommand {
     constructor(program) {
@@ -61,7 +44,7 @@ module.exports.SaveSkillCommand = class SaveSkillCommand {
                         { column: 'Path', field: 'path', width: 50 },
                         { column: 'Message', field: 'message', width: 100 },
                     ];
-                    response.details.map(d => d.path = _formatpath(d.path));
+                    response.details.map(d => d.path = formatValidationPath(d.path));
                     printTable(tableSpec, response.details);
                     printError(''); // Just exit
                 }
