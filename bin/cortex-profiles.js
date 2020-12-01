@@ -139,8 +139,8 @@ program
     .option('--project [project]', 'The project to use')
     .option('--json', 'Output results using JSON')
     .option('--query [query]', 'A JMESPath query to use in filtering the response data.')
-    .option('--before [before]', 'Filter versions before a spcific date.')
-    .option('--after [after]', 'Filter versions after a spcific date.')
+    .option('--before [before]', 'Filter versions before a specific date.')
+    .option('--after [after]', 'Filter versions after a specific date.')
     .option('--limit [limit]', 'Limit the number of events returned.')
     .action(withCompatibilityCheck((profileId, schemaName, options) => {
         try {
