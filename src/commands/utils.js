@@ -307,3 +307,4 @@ const pkg = findPackageJson(__dirname).next().value;
 module.exports.getUserAgent = function getUserAgent() {
     return `${pkg.name}/${pkg.version} (${os.platform()}; ${os.arch()}; ${os.release()}; ${osName()})`;
 };
+

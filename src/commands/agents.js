@@ -21,7 +21,7 @@ const { loadProfile } = require('../config');
 const Catalog = require('../client/catalog');
 const Agents = require('../client/agents');
 const {
- printSuccess, printError, filterObject, parseObject, printTable,
+ printSuccess, printError, filterObject, parseObject, printTable, formatValidationPath
 } = require('./utils');
 
 module.exports.SaveAgentCommand = class SaveAgentCommand {
@@ -41,10 +41,17 @@ module.exports.SaveAgentCommand = class SaveAgentCommand {
         catalog.saveAgent(options.project || profile.project, profile.token, agent).then((response) => {
             if (response.success) {
                 printSuccess('Agent saved', options);
-            } else {
-                printError(`Failed to save agent: ${response.status} ${response.message}`, options);
-            }
-        })
+            } else if (response.details) {
+            console.log(`Failed to save agent: ${response.status} ${response.message}`);
+            console.log('The following issues were found:');
+            const tableSpec = [
+                { column: 'Path', field: 'path', width: 50 },
+                { column: 'Message', field: 'message', width: 100 },
+            ];
+            response.details.map(d => d.path = formatValidationPath(d.path));
+            printTable(tableSpec, response.details);
+            printError(''); // Just exit
+        }})
         .catch((err) => {
             printError(`Failed to save agent: ${err.status} ${err.message}`, options);
         });
