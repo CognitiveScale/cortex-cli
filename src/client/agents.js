@@ -48,10 +48,9 @@ module.exports = class Agents {
             .catch(err => constructError(err));
     }
 
-    listActivations(projectId, token, snapshotId, environmentName) {
-        let endpoint = `${this.endpointV4(projectId)}/snapshots/${snapshotId}/activations`;
-        debug('listActivations(%s, %s) => %s', snapshotId, environmentName, endpoint);
-        if (environmentName) endpoint = `${endpoint}?environmentName=${environmentName}`;
+    listActivations(projectId, token, snapshotId) {
+        const endpoint = `${this.endpointV4(projectId)}/snapshots/${snapshotId}/activations`;
+        debug('listActivations(%s, %s) => %s', snapshotId, endpoint);
         return got
             .get(endpoint, {
                 headers: { Authorization: `Bearer ${token}` },
@@ -61,10 +60,9 @@ module.exports = class Agents {
             .catch(err => constructError(err));
     }
 
-    listAgentSnapshots(projectId, token, agentName, environmentName) {
-        let endpoint = `${this.endpointV4(projectId)}/agents/${agentName}/snapshots`;
-        debug('listAgentSnapshots(%s, %s) => %s', agentName, environmentName, endpoint);
-        if (environmentName) endpoint = `${endpoint}?environmentName=${environmentName}`;
+    listAgentSnapshots(projectId, token, agentName) {
+        const endpoint = `${this.endpointV4(projectId)}/agents/${agentName}/snapshots`;
+        debug('listAgentSnapshots(%s, %s) => %s', agentName, endpoint);
         return got
             .get(endpoint, {
                 headers: { Authorization: `Bearer ${token}` },

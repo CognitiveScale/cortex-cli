@@ -146,7 +146,6 @@ program
     .option('--project [project]', 'The project to use')
     .option('--actionType [actionType]', 'Type of action')
     .option('--port [port]', 'Docker port') // '9091'
-    .option('--environment [environment]', 'Environment')
     .option('--cmd [cmd]', 'Command to be executed') // '["--daemon"]'
     .option('--environmentVariables [environmentVariables]', 'Docker container environment variables, only used for daemon action types')
     .option('--push-docker', 'Push Docker image to the Cortex registry.')

@@ -120,7 +120,6 @@ module.exports.DeployActionCommand = class {
         params.actionType = options.actionType;
         params.command = options.cmd;
         params.port = options.port;
-        params.environment = options.environment;
         params.environmentVariables = options.environmentVariables;
         params.pushDocker = options.pushDocker;
         params.scaleCount = parseInt(options.scaleCount, 10);
