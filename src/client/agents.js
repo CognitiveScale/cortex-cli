@@ -25,7 +25,7 @@ module.exports = class Agents {
     }
 
     invokeAgentService(projectId, token, agentName, serviceName) {
-        const endpoint = `${this.endpointV4(projectId)}/agents/${agentName}/services/${serviceName}`;
+        const endpoint = `${this.endpointV4(projectId)}/agentinvoke/${agentName}/services/${serviceName}`;
         debug('invokeAgentService(%s, %s) => %s', agentName, serviceName, endpoint);
         return got
             .post(endpoint, {
@@ -33,6 +33,18 @@ module.exports = class Agents {
                 'user-agent': getUserAgent(),
             }).json()
            .then(result => ({ success: true, result }))
+            .catch(err => constructError(err));
+    }
+
+    invokeSkill(projectId, token, skillName, inputName) {
+        const endpoint = `${this.endpointV4(projectId)}/skillinvoke/${skillName}/inputs/${inputName}`;
+        debug('invokeSkill(%s, %s) => %s', skillName, inputName, endpoint);
+        return got
+            .post(endpoint, {
+                headers: { Authorization: `Bearer ${token}` },
+                'user-agent': getUserAgent(),
+            }).json()
+            .then(result => ({ success: true, result }))
             .catch(err => constructError(err));
     }
 

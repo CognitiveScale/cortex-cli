@@ -17,6 +17,7 @@ const fs = require('fs');
 const debug = require('debug')('cortex:cli');
 const { loadProfile } = require('../config');
 const Catalog = require('../client/catalog');
+const Agent = require('../client/agents');
 const {
  printSuccess, printError, filterObject, parseObject, printTable, formatValidationPath,
 } = require('./utils');
@@ -112,5 +113,42 @@ module.exports.DescribeSkillCommand = class DescribeSkillCommand {
         .catch((err) => {
             printError(`Failed to describe skill ${skillName}: ${err.status} ${err.message}`, options);
         });
+    }
+};
+
+module.exports.InvokeSkillCommand = class InvokeSkillCommand {
+    constructor(program) {
+        this.program = program;
+    }
+
+    execute(skillName, inputName, options) {
+        const profile = loadProfile(options.profile);
+        debug('%s.executeInvokeSkill(%s/%s)', profile.name, skillName, inputName);
+
+        let params = {};
+        if (options.params) {
+            params = parseObject(options.params, options);
+        } else if (options.paramsFile) {
+            const paramsStr = fs.readFileSync(options.paramsFile);
+            params = parseObject(paramsStr, options);
+        }
+
+        const agent = new Agent(profile.url);
+        agent.InvokeSkill(options.project || profile.project, profile.token, skillName, inputName, params).then((response) => {
+            if (response.success) {
+                const result = filterObject(response.skill, options);
+                printSuccess(JSON.stringify(result, null, 2), options);
+            } else {
+                printError(`Skill invoke failed: ${response.message}`, options);
+            }
+        })
+            .catch((err) => {
+                if (err.response && err.response.body) {
+                    debug('Raw error response: %o', err.response.body);
+                    printError(`Failed to invoke skill(${err.status} ${err.message}): ${err.response.body.error}`, options);
+                } else {
+                    printError(`Failed to invoke skill: ${err.status} ${err.message}`, options);
+                }
+            });
     }
 };

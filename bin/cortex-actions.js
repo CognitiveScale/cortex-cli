@@ -26,13 +26,14 @@ const {
     DescribeActionCommand,
     DeleteActionCommand,
     DeployActionCommand,
-    GetLogsCommand,
+    // TODO readd logs/task calls
+    // GetLogsCommand,
     InvokeActionCommand,
-    JobTaskListActionCommand,
-    TaskCancelActionCommand,
-    TaskLogsActionCommand,
-    TaskStatsActionCommand,
-    TaskStatusActionCommand,
+    // JobTaskListActionCommand,
+    // TaskCancelActionCommand,
+    // TaskLogsActionCommand,
+    // TaskStatsActionCommand,
+    // TaskStatusActionCommand,
 } = require('../src/commands/actions');
 
 program.description('Work with Cortex Actions');
@@ -92,22 +93,22 @@ program
         }
     }));
 
-// Get logs Action
-program
-    .command('logs <actionName>')
-    .description('Get logs for an action')
-    .option('--no-compat', 'Ignore API compatibility checks')
-    .option('--json', 'Return raw JSON response')
-    .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
-    .option('--profile [profile]', 'The profile to use')
-    .option('--project [project]', 'The project to use')
-    .action(withCompatibilityCheck((actionName, options) => {
-        try {
-            new GetLogsCommand(program).execute(actionName, options);
-        } catch (err) {
-            console.error(chalk.red(err.message));
-        }
-    }));
+// // Get logs Action
+// program
+//     .command('logs <actionName>')
+//     .description('Get logs for an action')
+//     .option('--no-compat', 'Ignore API compatibility checks')
+//     .option('--json', 'Return raw JSON response')
+//     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
+//     .option('--profile [profile]', 'The profile to use')
+//     .option('--project [project]', 'The project to use')
+//     .action(withCompatibilityCheck((actionName, options) => {
+//         try {
+//             new GetLogsCommand(program).execute(actionName, options);
+//         } catch (err) {
+//             console.error(chalk.red(err.message));
+//         }
+//     }));
 
 // Invoke Action
 program
@@ -168,90 +169,90 @@ program
         }
     }));
 
-// Get Tasks logs
-program
-    .command('task-logs <jobId> <taskId>')
-    .description('Get Tasks logs')
-    .option('--no-compat', 'Ignore API compatibility checks')
-    .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
-    .option('--profile [profile]', 'The profile to use')
-    .option('--project [project]', 'The project to use')
-    .option('--query [query]', 'A JMESPath query to use in filtering the response data. Ignored if output format is not JSON.')
-    .action(withCompatibilityCheck((jobId, taskId, options) => {
-        try {
-            new TaskLogsActionCommand(program).execute(jobId, taskId, options);
-        } catch (err) {
-            console.error(chalk.red(err.message));
-        }
-    }));
-
-// Cancel Tasks
-program
-    .command('task-cancel <jobId> <taskId>')
-    .description('Cancel Task')
-    .option('--no-compat', 'Ignore API compatibility checks')
-    .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
-    .option('--profile [profile]', 'The profile to use')
-    .option('--project [project]', 'The project to use')
-    .option('--query [query]', 'A JMESPath query to use in filtering the response data. Ignored if output format is not JSON.')
-    .action(withCompatibilityCheck((jobId, taskId, options) => {
-        try {
-            new TaskCancelActionCommand(program).execute(jobId, taskId, options);
-        } catch (err) {
-            console.error(chalk.red(err.message));
-        }
-    }));
-
-// Get Tasks Status
-program
-    .command('task-status <jobId> <taskId>')
-    .description('Get Task\'s status')
-    .option('--no-compat', 'Ignore API compatibility checks')
-    .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
-    .option('--profile [profile]', 'The profile to use')
-    .option('--project [project]', 'The project to use')
-    .option('--query [query]', 'A JMESPath query to use in filtering the response data. Ignored if output format is not JSON.')
-    .action(withCompatibilityCheck((jobId, taskId, options) => {
-        try {
-            new TaskStatusActionCommand(program).execute(jobId, taskId, options);
-        } catch (err) {
-            console.error(chalk.red(err.message));
-        }
-    }));
-
-// List Job tasks
-program
-    .command('task-list <jobId>')
-    .description('List Job\'s tasks status')
-    .option('--no-compat', 'Ignore API compatibility checks')
-    .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
-    .option('--profile [profile]', 'The profile to use')
-    .option('--project [project]', 'The project to use')
-    .option('--query [query]', 'A JMESPath query to use in filtering the response data. Ignored if output format is not JSON.'
-        + ' Example to query for status [PENDING, SUBMITTED, STARTING, RUNNING, SUCCEEDED, FAILED] tasks: --query "data[?status == \'FAILED\'].taskId"')
-    .action(withCompatibilityCheck((jobId, options) => {
-        try {
-            new JobTaskListActionCommand(program).execute(jobId, options);
-        } catch (err) {
-            console.error(chalk.red(err.message));
-        }
-    }));
-
-// Get Job Stats
-program
-    .command('task-stats <jobId>')
-    .description('Get Task\'s stats for a given Job')
-    .option('--no-compat', 'Ignore API compatibility checks')
-    .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
-    .option('--profile [profile]', 'The profile to use')
-    .option('--project [project]', 'The project to use')
-    .option('--query [query]', 'A JMESPath query to use in filtering the response data. Ignored if output format is not JSON.')
-    .action(withCompatibilityCheck((jobId, options) => {
-        try {
-            new TaskStatsActionCommand(program).execute(jobId, options);
-        } catch (err) {
-            console.error(chalk.red(err.message));
-        }
-    }));
+// // Get Tasks logs
+// program
+//     .command('task-logs <jobId> <taskId>')
+//     .description('Get Tasks logs')
+//     .option('--no-compat', 'Ignore API compatibility checks')
+//     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
+//     .option('--profile [profile]', 'The profile to use')
+//     .option('--project [project]', 'The project to use')
+//     .option('--query [query]', 'A JMESPath query to use in filtering the response data. Ignored if output format is not JSON.')
+//     .action(withCompatibilityCheck((jobId, taskId, options) => {
+//         try {
+//             new TaskLogsActionCommand(program).execute(jobId, taskId, options);
+//         } catch (err) {
+//             console.error(chalk.red(err.message));
+//         }
+//     }));
+//
+// // Cancel Tasks
+// program
+//     .command('task-cancel <jobId> <taskId>')
+//     .description('Cancel Task')
+//     .option('--no-compat', 'Ignore API compatibility checks')
+//     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
+//     .option('--profile [profile]', 'The profile to use')
+//     .option('--project [project]', 'The project to use')
+//     .option('--query [query]', 'A JMESPath query to use in filtering the response data. Ignored if output format is not JSON.')
+//     .action(withCompatibilityCheck((jobId, taskId, options) => {
+//         try {
+//             new TaskCancelActionCommand(program).execute(jobId, taskId, options);
+//         } catch (err) {
+//             console.error(chalk.red(err.message));
+//         }
+//     }));
+//
+// // Get Tasks Status
+// program
+//     .command('task-status <jobId> <taskId>')
+//     .description('Get Task\'s status')
+//     .option('--no-compat', 'Ignore API compatibility checks')
+//     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
+//     .option('--profile [profile]', 'The profile to use')
+//     .option('--project [project]', 'The project to use')
+//     .option('--query [query]', 'A JMESPath query to use in filtering the response data. Ignored if output format is not JSON.')
+//     .action(withCompatibilityCheck((jobId, taskId, options) => {
+//         try {
+//             new TaskStatusActionCommand(program).execute(jobId, taskId, options);
+//         } catch (err) {
+//             console.error(chalk.red(err.message));
+//         }
+//     }));
+//
+// // List Job tasks
+// program
+//     .command('task-list <jobId>')
+//     .description('List Job\'s tasks status')
+//     .option('--no-compat', 'Ignore API compatibility checks')
+//     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
+//     .option('--profile [profile]', 'The profile to use')
+//     .option('--project [project]', 'The project to use')
+//     .option('--query [query]', 'A JMESPath query to use in filtering the response data. Ignored if output format is not JSON.'
+//         + ' Example to query for status [PENDING, SUBMITTED, STARTING, RUNNING, SUCCEEDED, FAILED] tasks: --query "data[?status == \'FAILED\'].taskId"')
+//     .action(withCompatibilityCheck((jobId, options) => {
+//         try {
+//             new JobTaskListActionCommand(program).execute(jobId, options);
+//         } catch (err) {
+//             console.error(chalk.red(err.message));
+//         }
+//     }));
+//
+// // Get Job Stats
+// program
+//     .command('task-stats <jobId>')
+//     .description('Get Task\'s stats for a given Job')
+//     .option('--no-compat', 'Ignore API compatibility checks')
+//     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
+//     .option('--profile [profile]', 'The profile to use')
+//     .option('--project [project]', 'The project to use')
+//     .option('--query [query]', 'A JMESPath query to use in filtering the response data. Ignored if output format is not JSON.')
+//     .action(withCompatibilityCheck((jobId, options) => {
+//         try {
+//             new TaskStatsActionCommand(program).execute(jobId, options);
+//         } catch (err) {
+//             console.error(chalk.red(err.message));
+//         }
+//     }));
 
 program.parse(process.argv);
