@@ -134,7 +134,7 @@ module.exports.InvokeSkillCommand = class InvokeSkillCommand {
         }
 
         const agent = new Agent(profile.url);
-        agent.InvokeSkill(options.project || profile.project, profile.token, skillName, inputName, params).then((response) => {
+        agent.invokeSkill(options.project || profile.project, profile.token, skillName, inputName, params).then((response) => {
             if (response.success) {
                 const result = filterObject(response.skill, options);
                 printSuccess(JSON.stringify(result, null, 2), options);
