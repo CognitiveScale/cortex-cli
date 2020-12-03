@@ -96,16 +96,4 @@ module.exports = class Agents {
             .then(result => ({ success: true, result }))
             .catch(err => constructError(err));
     }
-
-    listTriggers(projectId, token) {
-        const endpoint = `${this.endpointV4(projectId)}/triggers`;
-        debug('listTriggers => %s', endpoint);
-        return got
-            .get(endpoint, {
-                headers: { Authorization: `Bearer ${token}` },
-                'user-agent': getUserAgent(),
-            }).json()
-            .then(result => ({ success: true, result }))
-            .catch(err => constructError(err));
-    }
 };

@@ -29,7 +29,6 @@ const {
     GetActivationCommand,
     ListActivationsCommand,
     ListSnapshotInstancesCommand,
-    ListTriggersCommand,
     ListServicesCommand,
     ListAgentSnapshotsCommand,
     DescribeAgentSnapshotCommand,
@@ -232,22 +231,6 @@ program
     .action(withCompatibilityCheck((snapshotDefinition, options) => {
         try {
             new CreateAgentSnapshotCommand(program).execute(snapshotDefinition, options);
-        } catch (err) {
-            console.error(chalk.red(err.message));
-        }
-    }));
-
-// List triggers
-program
-    .command('list-triggers')
-    .description('List of triggers for the current tenant')
-    .option('--no-compat', 'Ignore API compatibility checks')
-    .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
-    .option('--profile [profile]', 'The profile to use')
-    .option('--project [project]', 'The project to use')
-    .action(withCompatibilityCheck((options) => {
-        try {
-            new ListTriggersCommand(program).execute(options);
         } catch (err) {
             console.error(chalk.red(err.message));
         }
