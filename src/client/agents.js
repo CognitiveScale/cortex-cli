@@ -25,7 +25,7 @@ module.exports = class Agents {
     }
 
     invokeAgentService(projectId, token, agentName, serviceName) {
-        const endpoint = `${this.endpointV4(projectId)}/agentinvoke/${agentName}/services/${serviceName}`;
+        const endpoint = `${this.endpointV4(projectId)}/agentinvoke/${encodeURIComponent(agentName)}/services/${serviceName}`;
         debug('invokeAgentService(%s, %s) => %s', agentName, serviceName, endpoint);
         return got
             .post(endpoint, {
@@ -37,7 +37,7 @@ module.exports = class Agents {
     }
 
     invokeSkill(projectId, token, skillName, inputName) {
-        const endpoint = `${this.endpointV4(projectId)}/skillinvoke/${skillName}/inputs/${inputName}`;
+        const endpoint = `${this.endpointV4(projectId)}/skillinvoke/${encodeURIComponent(skillName)}/inputs/${inputName}`;
         debug('invokeSkill(%s, %s) => %s', skillName, inputName, endpoint);
         return got
             .post(endpoint, {
