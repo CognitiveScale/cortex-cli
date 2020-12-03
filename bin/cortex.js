@@ -31,7 +31,6 @@ program
     .command('configure', 'Configure the Cortex CLI')
     .command('connections [cmd]', 'Work with Cortex Connections')
     .command('content [cmd]', 'Work with Cortex Managed Content')
-    .command('datasets [cmd]', 'Work with Cortex Datasets')
     .command('deploy [cmd]', 'Work with Cortex Artifacts export for deployment')
     .command('docker [cmd]', 'Work with Docker')
     .command('experiments [cmd]', 'Work with Cortex Experiments')

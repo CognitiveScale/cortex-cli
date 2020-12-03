@@ -24,9 +24,7 @@ const { withCompatibilityCheck } = require('../src/compatibility');
 const {
     ListConnections,
     SaveConnectionCommand,
-    QueryConnectionCommand,
     DescribeConnectionCommand,
-    TestConnectionCommand,
     ListConnectionsTypes,
 } = require('../src/commands/connections');
 
@@ -68,25 +66,6 @@ program
         }
     }));
 
-// Query Connection
-program
-    .command('query <connectionName>')
-    .description('Query a connection.')
-    .option('--no-compat', 'Ignore API compatibility checks')
-    .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
-    .option('--profile [profile]', 'The profile to use')
-    .option('--json', 'Pretty print JSON results')
-    .option('--project [project]', 'The project to use')
-    .option('--query [query]', 'The query to use, "select 1" is default')
-    .option('--file [file]', 'Location of file containing query string')
-    .action(withCompatibilityCheck((connName, options) => {
-        try {
-            new QueryConnectionCommand(program).execute(connName, options);
-        } catch (err) {
-            console.error(chalk.red(err.message));
-        }
-    }));
-
 // Describe Connection
 program
     .command('describe <connectionName>')
@@ -100,23 +79,6 @@ program
     .action(withCompatibilityCheck((connectionName, options) => {
         try {
             new DescribeConnectionCommand(program).execute(connectionName, options);
-        } catch (err) {
-            console.error(chalk.red(err.message));
-        }
-    }));
-
-// Test Connections
-program
-    .command('test <connectionDefinition>')
-    .description('Test a connections definition before saving. Takes JSON file by default.')
-    .option('--no-compat', 'Ignore API compatibility checks')
-    .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
-    .option('--profile [profile]', 'The profile to use')
-    .option('--project [project]', 'The project to use')
-    .option('-y, --yaml', 'Use YAML for agent definition format')
-    .action(withCompatibilityCheck((connDefinition, options) => {
-        try {
-            new TestConnectionCommand(program).execute(connDefinition, options);
         } catch (err) {
             console.error(chalk.red(err.message));
         }
