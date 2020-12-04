@@ -24,7 +24,8 @@ const { withCompatibilityCheck } = require('../src/compatibility');
 const {
     SaveSkillCommand,
     ListSkillsCommand,
-    DescribeSkillCommand
+    DescribeSkillCommand,
+    InvokeSkillCommand
 } = require('../src/commands/skills');
 
 program.description('Work with Cortex Skills');
@@ -77,6 +78,24 @@ program
     .action(withCompatibilityCheck((skillName, options) => {
         try {
             new DescribeSkillCommand(program).execute(skillName, options);
+        } catch (err) {
+            console.error(chalk.red(err.message));
+        }
+    }));
+
+// Invoke Skill
+program
+    .command('invoke <skillName> <inputName>')
+    .description('Invoke a skill')
+    .option('--no-compat', 'Ignore API compatibility checks')
+    .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
+    .option('--profile [profile]', 'The profile to use')
+    .option('--project [project]', 'The project to use')
+    .option('--params [params]', 'JSON params to send to the action')
+    .option('--params-file [paramsFile]', 'A file containing either JSON or YAML formatted params')
+    .action(withCompatibilityCheck((skillName, inputName, options) => {
+        try {
+            new InvokeSkillCommand(program).execute(skillName, inputName, options);
         } catch (err) {
             console.error(chalk.red(err.message));
         }
