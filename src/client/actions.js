@@ -37,6 +37,11 @@ module.exports = class Actions {
         debug('deployAction(%s, docker=%s, ttl=%s) => %s',
             actionInst.name, actionInst.dockerImage, actionInst.ttl, endpoint);
         const body = { ...actionInst };
+        // image & docker floating around fixup just in case..
+        if (body.docker) {
+            body.image = body.docker;
+            delete body.docker;
+        }
         try {
             body.docker = await this._maybePushDockerImage(actionInst.dockerImage, token, actionInst.pushDocker);
         } catch (error) {

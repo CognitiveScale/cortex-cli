@@ -152,6 +152,7 @@ program
     .option('--project [project]', 'The project to use')
     .option('--push-docker', 'Push Docker image to the Cortex registry.')
     .option('--scaleCount [count]', 'Scale count, only used for daemon action types')
+    .option('-y, --yaml', 'Use YAML format')
     .action(withCompatibilityCheck((actionName, options) => {
         try {
             new DeployActionCommand(program).execute(actionName, options);

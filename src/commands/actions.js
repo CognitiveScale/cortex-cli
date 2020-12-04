@@ -109,7 +109,7 @@ module.exports.DeployActionCommand = class {
             const paramsStr = fs.readFileSync(options.podspec);
             actionInst.podSpec = parseObject(paramsStr, options);
         }
-        if (options.docker) { actionInst.image = options.docker; }
+        if (options.docker) { actionInst.docker = options.docker; }
         if (options.actionType) { actionInst.actionType = options.actionType; }
         if (options.cmd) { actionInst.command = options.cmd; }
         if (options.port) {
