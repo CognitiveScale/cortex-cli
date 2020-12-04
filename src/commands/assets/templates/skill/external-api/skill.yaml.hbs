@@ -1,0 +1,38 @@
+camel: 1.0.0
+name: c12e/{{dashCase name}}
+title: {{name}}
+description: {{name}}
+properties:
+  - name: url
+    title: URL to invoke
+    description: http[s]://host:port
+    required: true
+    type: String
+  - name: path
+    title: API path
+    description: API Path (optional)
+    type: String
+  - name: headers.content-type
+    title: Authorization header
+    description: Header as an individual property (optional)
+    defaultValue: 'application/json'
+    type: String
+  - name: headers.authorization
+    title: Authorization header
+    description: Header as an individual property (optional)
+    type: String
+  - name: method
+    title: HTTP Method
+    description: (optional)
+    defaultValue: POST
+    type: String
+inputs:
+  - name: input
+    title: input
+    routing:
+      all:
+        output: output
+        runtime: cortex/external-api
+outputs:
+  - name: output
+    title: response
