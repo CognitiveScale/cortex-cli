@@ -32,8 +32,7 @@ module.exports = class Agents {
                 headers: { Authorization: `Bearer ${token}` },
                 'user-agent': getUserAgent(),
                 json: params,
-                responseType: 'json',
-            })
+            }).json()
            .then(result => ({ success: true, result }))
             .catch(err => constructError(err));
     }
@@ -46,8 +45,7 @@ module.exports = class Agents {
                 headers: { Authorization: `Bearer ${token}` },
                 'user-agent': getUserAgent(),
                 json: params,
-                responseType: 'json',
-            })
+            }).json()
             .then(result => ({ success: true, result }))
             .catch(err => constructError(err));
     }
