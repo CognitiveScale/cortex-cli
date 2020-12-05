@@ -20,7 +20,7 @@ const chalk = require('chalk');
 const program = require('../src/commander');
 
 const {
-    GenerateSkillCommand
+    GenerateSkillCommand,
 } = require('../src/commands/generate');
 
 program.description('Scaffolding Cortex Components');
@@ -32,8 +32,7 @@ program
     .action((options) => { // deliberately not using withCompatibilityCheck()
         try {
             new GenerateSkillCommand(program).execute(options);
-        }
-        catch (err) {
+        } catch (err) {
             console.error(chalk.red(err.message));
         }
     });
