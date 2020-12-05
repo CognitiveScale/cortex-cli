@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+const Table = require('cli-table');
 const _ = require('lodash');
 const chalk = require('chalk');
 const debug = require('debug')('cortex:cli');
@@ -24,7 +25,7 @@ const jmsepath = require('jmespath');
 const os = require('os');
 const osName = require('os-name');
 const path = require('path');
-const Table = require('cli-table');
+const unquote = require('unquote');
 const yaml = require('js-yaml');
 const { exec } = require('child_process');
 
@@ -89,10 +90,10 @@ module.exports.filterObject = (obj, options) => {
 
 module.exports.parseObject = (str, options) => {
     if (options.yaml) {
-        return yaml.safeLoad(str);
+        return yaml.safeLoad(unquote(str));
     }
 
-    return JSON.parse(str);
+    return JSON.parse(unquote(str));
 };
 
 function _extractValues(fields, obj) {
