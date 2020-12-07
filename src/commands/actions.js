@@ -19,7 +19,7 @@ const debug = require('debug')('cortex:cli');
 const { loadProfile } = require('../config');
 const Actions = require('../client/actions');
 const {
- printSuccess, printWarning, printError, filterObject, parseObject, printTable, 
+ printSuccess, printError, filterObject, parseObject, printTable,
 } = require('./utils');
 
 module.exports.ListActionsCommand = class {
@@ -84,49 +84,51 @@ module.exports.DescribeActionCommand = class {
     }
 };
 
+function isNumeric(value) {
+    return /^-?\d+$/.test(value);
+}
+
 module.exports.DeployActionCommand = class {
     constructor(program) {
         this.program = program;
     }
 
-    execute(actionName, options) {
+    execute(actionDefinition, options) {
         const profile = loadProfile(options.profile);
-        debug('%s.deployAction(%s)', profile.name, actionName);
 
-        const params = {};
-
+        let actionInst = {};
+        if (actionDefinition) {
+            debug('%s.createAgentSnapshot(%s)', profile.name, actionDefinition);
+            const actionDefStr = fs.readFileSync(actionDefinition);
+            actionInst = parseObject(actionDefStr, options);
+        }
+        if (options.actionName) {
+            actionInst.name = options.actionName;
+        }
         if (options.podspec) {
             const paramsStr = fs.readFileSync(options.podspec);
-            params.podSpec = parseObject(paramsStr, options);
+            actionInst.podSpec = parseObject(paramsStr, options);
         }
-
-        if (options.kind) {
-            printWarning('The kind option has been deprecated and will be ignored.', options);
+        if (options.docker) { actionInst.docker = options.docker; }
+        if (options.actionType) { actionInst.actionType = options.actionType; }
+        if (options.cmd) { actionInst.command = options.cmd; }
+        if (options.port) {
+            if (!isNumeric(options.port)) {
+                printError('--port must be a number', options);
+            }
+            actionInst.port = options.port;
         }
-        if (options.code) {
-            printWarning('The code option has been deprecated and will be ignored.'
-                + ' Use the docker option for setting an existing image to use.', options);
+        if (options.environmentVariables) { actionInst.environmentVariables = options.environmentVariables; }
+        if (options.pushDocker) { actionInst.pushDocker = options.pushDocker; }
+        if (options.scaleCount) {
+            if (!isNumeric(options.scaleCount)) {
+                printError('--scaleCount must be a number', options);
+            }
+            actionInst.scaleCount = parseInt(options.scaleCount, 10);
         }
-        if (options.memory) {
-            printWarning('The memory option has been deprecated and will be ignored.'
-                + ' Use the podspec option for setting this value.', options);
-        }
-        if (options.vcpus) {
-            printWarning('The vcpus option has been deprecated and will be ignored.'
-                + ' Use the podspec option for setting this value.', options);
-        }
-        params.dockerImage = options.docker;
-        params.ttl = options.ttl;
-        params.actionType = options.actionType;
-        params.command = options.cmd;
-        params.port = options.port;
-        params.environment = options.environment;
-        params.environmentVariables = options.environmentVariables;
-        params.pushDocker = options.pushDocker;
-        params.scaleCount = parseInt(options.scaleCount, 10);
 
         const actions = new Actions(profile.url);
-        actions.deployAction(options.project || profile.project, profile.token, actionName, params)
+        actions.deployAction(options.project || profile.project, profile.token, actionInst)
             .then((response) => {
                 if (response.success) {
                     printSuccess(JSON.stringify(response.message, null, 2), options);

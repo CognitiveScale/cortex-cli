@@ -18,57 +18,42 @@ const fs = require('fs');
 const debug = require('debug')('cortex:cli');
 const { loadProfile } = require('../config');
 const Catalog = require('../client/catalog');
+const Agent = require('../client/agents');
 const {
- printSuccess, printError, filterObject, parseObject, printTable, 
+ printSuccess, printError, filterObject, parseObject, printTable, formatValidationPath,
 } = require('./utils');
-
-function _formatpath(p) {
-    let cnt = 0; let 
-res = '';
-    const len = p.length;
-    p.forEach((s) => {
-        if (_.isNumber(s)) {
-            res += `[${s}]`;
-        } else
-            if (cnt < len) res += s;
-            else res += s;
-        if (cnt < len - 1 && !_.isNumber(p[cnt + 1])) res += '.';
-        cnt += 1;
-    });
-    return res;
-}
 
 module.exports.SaveSkillCommand = class SaveSkillCommand {
     constructor(program) {
         this.program = program;
     }
 
-    execute(skillDefinition, options) {
+    async execute(skillDefinition, options) {
         const profile = loadProfile(options.profile);
         debug('%s.executeSaveSkill(%s)', profile.name, skillDefinition);
-
-        const skillDefStr = fs.readFileSync(skillDefinition);
-        const skill = parseObject(skillDefStr, options);
-
-        const catalog = new Catalog(profile.url);
-        catalog.saveSkill(options.project || profile.project, profile.token, skill).then((response) => {
+        try {
+            const skillDefStr = fs.readFileSync(skillDefinition);
+            const skill = parseObject(skillDefStr, options);
+            const catalog = new Catalog(profile.url);
+            const response = await catalog.saveSkill(options.project || profile.project, profile.token, skill);
             if (response.success) {
                 printSuccess('Skill saved', options);
-            } else if (response.details) {
-                    console.log(`Failed to save skill: ${response.status} ${response.message}`);
-                    console.log('The following issues were found:');
-                    const tableSpec = [
-                        { column: 'Path', field: 'path', width: 50 },
-                        { column: 'Message', field: 'message', width: 100 },
-                    ];
-                    response.details.map(d => d.path = _formatpath(d.path));
-                    printTable(tableSpec, response.details);
+            } else {
+                    console.log(`Failed to save skill: ${response.message}`);
+                    if (response.details) {
+                        console.log('The following issues were found:');
+                        const tableSpec = [
+                            { column: 'Path', field: 'path', width: 50 },
+                            { column: 'Message', field: 'message', width: 100 },
+                        ];
+                        response.details.map(d => d.path = formatValidationPath(d.path));
+                        printTable(tableSpec, response.details);
+                    }
                     printError(''); // Just exit
                 }
-        })
-        .catch((err) => {
-            printError(`Failed to save skill: ${err.status} ${err.response.body.error}`, options);
-        });
+        } catch (err) {
+            printError(`Failed to save skill: ${_.get(err, 'status', '')} ${_.get(err, 'response.body.error', err.message)}`, options);
+        }
     }
 };
 
@@ -129,5 +114,42 @@ module.exports.DescribeSkillCommand = class DescribeSkillCommand {
         .catch((err) => {
             printError(`Failed to describe skill ${skillName}: ${err.status} ${err.message}`, options);
         });
+    }
+};
+
+module.exports.InvokeSkillCommand = class InvokeSkillCommand {
+    constructor(program) {
+        this.program = program;
+    }
+
+    execute(skillName, inputName, options) {
+        const profile = loadProfile(options.profile);
+        debug('%s.executeInvokeSkill(%s/%s)', profile.name, skillName, inputName);
+
+        let params = {};
+        if (options.params) {
+            params = parseObject(options.params, options);
+        } else if (options.paramsFile) {
+            const paramsStr = fs.readFileSync(options.paramsFile);
+            params = parseObject(paramsStr, options);
+        }
+
+        const agent = new Agent(profile.url);
+        agent.invokeSkill(options.project || profile.project, profile.token, skillName, inputName, params).then((response) => {
+            if (response.success) {
+                const result = filterObject(response.result, options);
+                printSuccess(JSON.stringify(result, null, 2), options);
+            } else {
+                printError(`Skill invoke failed: ${response.message}`, options);
+            }
+        })
+            .catch((err) => {
+                if (err.response && err.response.body) {
+                    debug('Raw error response: %o', err.response.body);
+                    printError(`Failed to invoke skill(${err.status} ${err.message}): ${err.response.body.error}`, options);
+                } else {
+                    printError(`Failed to invoke skill: ${err.status} ${err.message}`, options);
+                }
+            });
     }
 };

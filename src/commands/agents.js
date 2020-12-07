@@ -21,7 +21,7 @@ const { loadProfile } = require('../config');
 const Catalog = require('../client/catalog');
 const Agents = require('../client/agents');
 const {
- printSuccess, printError, filterObject, parseObject, printTable,
+ printSuccess, printError, filterObject, parseObject, printTable, formatValidationPath,
 } = require('./utils');
 
 module.exports.SaveAgentCommand = class SaveAgentCommand {
@@ -41,9 +41,17 @@ module.exports.SaveAgentCommand = class SaveAgentCommand {
         catalog.saveAgent(options.project || profile.project, profile.token, agent).then((response) => {
             if (response.success) {
                 printSuccess('Agent saved', options);
-            } else {
-                printError(`Failed to save agent: ${response.status} ${response.message}`, options);
-            }
+            } else if (response.details) {
+            console.log(`Failed to save agent: ${response.status} ${response.message}`);
+            console.log('The following issues were found:');
+            const tableSpec = [
+                { column: 'Path', field: 'path', width: 50 },
+                { column: 'Message', field: 'message', width: 100 },
+            ];
+            response.details.map(d => d.path = formatValidationPath(d.path));
+            printTable(tableSpec, response.details);
+            printError(''); // Just exit
+        }
         })
         .catch((err) => {
             printError(`Failed to save agent: ${err.status} ${err.message}`, options);
@@ -177,7 +185,7 @@ module.exports.GetActivationCommand = class {
         const agents = new Agents(profile.url);
         agents.getActivation(options.project || profile.project, profile.token, activationId).then((response) => {
             if (response.success) {
-                const result = filterObject(response.result.activation, options);
+                const result = filterObject(response.result, options);
                 printSuccess(JSON.stringify(result, null, 2), options);
             } else {
                 printError(`Failed to get activation ${activationId}: ${response.message}`, options);
@@ -196,11 +204,10 @@ module.exports.ListActivationsCommand = class {
 
     execute(instanceId, options) {
         const profile = loadProfile(options.profile);
-        const envName = options.environmentName;
         debug('%s.listActivations(%s)', profile.name, instanceId);
 
         const agents = new Agents(profile.url);
-        agents.listActivations(options.project || profile.project, profile.token, instanceId, envName).then((response) => {
+        agents.listActivations(options.project || profile.project, profile.token, instanceId).then((response) => {
             if (response.success) {
                 let result = response.result.activations;
                 if (options.query) result = filterObject(result, options);
@@ -268,11 +275,10 @@ module.exports.ListAgentSnapshotsCommand = class {
 
     execute(agentName, options) {
         const profile = loadProfile(options.profile);
-        const envName = options.environmentName;
         debug('%s.listAgentSnapshots(%s)', profile.name, agentName);
 
         const agents = new Agents(profile.url);
-        agents.listAgentSnapshots(options.project || profile.project, profile.token, agentName, envName)
+        agents.listAgentSnapshots(options.project || profile.project, profile.token, agentName)
             .then((response) => {
             if (response.success) {
                 const result = filterObject(response.result.snapshots, options);
@@ -283,7 +289,6 @@ module.exports.ListAgentSnapshotsCommand = class {
                         { column: 'Snapshot ID', field: 'id', width: 40 },
                         { column: 'Title', field: 'title', width: 30 },
                         { column: 'Agent Version', field: 'agentVersion', width: 15 },
-                        { column: 'Environment', field: 'environmentName', width: 30 },
                         { column: 'Created On', field: 'createdAt', width: 26 },
                     ];
                     printTable(tableSpec, result);
@@ -359,27 +364,3 @@ module.exports.CreateAgentSnapshotCommand = class {
             });
     }
 };
-
-// module.exports.ListTriggersCommand = class {
-//     constructor(program) {
-//         this.program = program;
-//     }
-//
-//     execute(options) {
-//         const profile = loadProfile(options.profile);
-//         debug('%s.listTriggers', profile.name);
-//
-//         const agents = new Agents(profile.url);
-//         agents.listTriggers(profile.token).then((response) => {
-//             if (response.success) {
-//                 const result = filterObject(response.result, options);
-//                 printSuccess(JSON.stringify(result, null, 2), options);
-//             } else {
-//                 printError(`Failed to list triggers ${instanceId}: ${response.message}`, options);
-//             }
-//         })
-//             .catch((err) => {
-//                 printError(`Failed to list triggers ${instanceId} : ${err.status} ${err.message}`, options);
-//             });
-//     }
-// };

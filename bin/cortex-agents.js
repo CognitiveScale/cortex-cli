@@ -28,17 +28,11 @@ const {
     InvokeAgentServiceCommand,
     GetActivationCommand,
     ListActivationsCommand,
-    ListSnapshotInstancesCommand,
-    ListTriggersCommand,
     ListServicesCommand,
     ListAgentSnapshotsCommand,
     DescribeAgentSnapshotCommand,
     CreateAgentSnapshotCommand,
 } = require('../src/commands/agents');
-
-const {
-    ListTaskByActivation,
-} = require('../src/commands/actions');
 
 program.description('Work with Cortex Agents');
 
@@ -133,18 +127,17 @@ program
     }));
 
 program
-    .command('list-activations <instanceId>')
-    .description('List agent instance activations')
+    .command('list-activations <snapshotId>')
+    .description('List agent activations')
     .option('--no-compat', 'Ignore API compatibility checks')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
     .option('--project [project]', 'The project to use')
-    .option('--environmentName [environmentName]', 'The environment to list or \'all\'')
     .option('--json', 'Output results using JSON')
     .option('--query [query]', 'A JMESPath query to use in filtering the response data.')
-    .action(withCompatibilityCheck((instanceId, options) => {
+    .action(withCompatibilityCheck((snapshotId, options) => {
         try {
-            new ListActivationsCommand(program).execute(instanceId, options);
+            new ListActivationsCommand(program).execute(snapshotId, options);
         } catch (err) {
             console.error(chalk.red(err.message));
         }
@@ -175,31 +168,11 @@ program
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
     .option('--project [project]', 'The project to use')
-    .option('--environmentName [environmentName]', 'The environment to list or \'all\'')
     .option('--json', 'Output results using JSON')
     .option('--query [query]', 'A JMESPath query to use in filtering the response data.')
     .action(withCompatibilityCheck((agentName, options) => {
         try {
             new ListAgentSnapshotsCommand(program).execute(agentName, options);
-        } catch (err) {
-            console.error(chalk.red(err.message));
-        }
-    }));
-
-// List snapshot instances
-program
-    .command('list-snapshot-instances <snapshotId>')
-    .description('List snapshot instances  ')
-    .option('--no-compat', 'Ignore API compatibility checks')
-    .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
-    .option('--profile [profile]', 'The profile to use')
-    .option('--project [project]', 'The project to use')
-    .option('--environmentName [environmentName]', 'The environment to list or \'all\'')
-    .option('--json', 'Output results using JSON')
-    .option('--query [query]', 'A JMESPath query to use in filtering the response data. Ignored if output format is not JSON.')
-    .action(withCompatibilityCheck((snapshotId, options) => {
-        try {
-            new ListSnapshotInstancesCommand(program).execute(snapshotId, options);
         } catch (err) {
             console.error(chalk.red(err.message));
         }
@@ -235,38 +208,6 @@ program
     .action(withCompatibilityCheck((snapshotDefinition, options) => {
         try {
             new CreateAgentSnapshotCommand(program).execute(snapshotDefinition, options);
-        } catch (err) {
-            console.error(chalk.red(err.message));
-        }
-    }));
-
-// List triggers
-program
-    .command('list-triggers')
-    .description('List of triggers for the current tenant')
-    .option('--no-compat', 'Ignore API compatibility checks')
-    .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
-    .option('--profile [profile]', 'The profile to use')
-    .option('--project [project]', 'The project to use')
-    .action(withCompatibilityCheck((options) => {
-        try {
-            new ListTriggersCommand(program).execute(options);
-        } catch (err) {
-            console.error(chalk.red(err.message));
-        }
-    }));
-
-// List Tasks
-program
-    .command('list-tasks <activationId>')
-    .description('List tasks associated with a given activationId')
-    .option('--no-compat', 'Ignore API compatibility checks')
-    .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
-    .option('--profile [profile]', 'The profile to use')
-    .option('--project [project]', 'The project to use')
-    .action(withCompatibilityCheck((activationId, options) => {
-        try {
-            new ListTaskByActivation(program).execute(activationId, options);
         } catch (err) {
             console.error(chalk.red(err.message));
         }
