@@ -68,6 +68,7 @@ module.exports.DeploySnapshotCommand = class {
         const promises = [];
         snapshotIds.split(' ').forEach((snapshotId) => {
             promises.push(agents.describeAgentSnapshot(options.project || profile.project, profile.token, snapshotId).then((result) => {
+                result = JSON.parse(result);
                 result = cleanInternalFields(result);
                 let filename = `${snapshotId}.json`;
                 if (options.yaml) {
