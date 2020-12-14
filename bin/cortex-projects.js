@@ -32,7 +32,7 @@ program.description('Work with Cortex Projects');
 // Create Project
 program
     .command('save [projectDefinition]')
-    .description('Save/Create a project')
+    .description('Save a project definition')
     .storeOptionsAsProperties(false)
     .option('--no-compat', 'Ignore API compatibility checks')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
@@ -52,7 +52,7 @@ program
 // List Projects
 program
     .command('list')
-    .description('List project')
+    .description('List project definitions')
     .option('--no-compat', 'Ignore API compatibility checks')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
