@@ -24,25 +24,27 @@ module.exports = class Agents {
         this.endpointV4 = projectId => `${cortexUrl}/fabric/v4/projects/${projectId}`;
     }
 
-    invokeAgentService(projectId, token, agentName, serviceName) {
+    invokeAgentService(projectId, token, agentName, serviceName, params) {
         const endpoint = `${this.endpointV4(projectId)}/agentinvoke/${encodeURIComponent(agentName)}/services/${serviceName}`;
         debug('invokeAgentService(%s, %s) => %s', agentName, serviceName, endpoint);
         return got
             .post(endpoint, {
                 headers: { Authorization: `Bearer ${token}` },
                 'user-agent': getUserAgent(),
+                json: params,
             }).json()
            .then(result => ({ success: true, result }))
             .catch(err => constructError(err));
     }
 
-    invokeSkill(projectId, token, skillName, inputName) {
+    invokeSkill(projectId, token, skillName, inputName, params) {
         const endpoint = `${this.endpointV4(projectId)}/skillinvoke/${encodeURIComponent(skillName)}/inputs/${inputName}`;
         debug('invokeSkill(%s, %s) => %s', skillName, inputName, endpoint);
         return got
             .post(endpoint, {
                 headers: { Authorization: `Bearer ${token}` },
                 'user-agent': getUserAgent(),
+                json: params,
             }).json()
             .then(result => ({ success: true, result }))
             .catch(err => constructError(err));

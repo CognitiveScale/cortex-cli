@@ -18,7 +18,7 @@ const path = require('path');
 const { loadProfile } = require('../config');
 const Agents = require('../client/agents');
 const {
- printSuccess, printError, filterObject, cleanInternalFields, jsonToYaml, writeToFile, fileExists, deleteFile, 
+ printSuccess, printError, filterObject, cleanInternalFields, jsonToYaml, writeToFile, fileExists, deleteFile,
 } = require('./utils');
 
 
@@ -67,22 +67,18 @@ module.exports.DeploySnapshotCommand = class {
         const agents = new Agents(profile.url);
         const promises = [];
         snapshotIds.split(' ').forEach((snapshotId) => {
-            promises.push(agents.describeAgentSnapshot(options.project || profile.project, profile.token, snapshotId).then((response) => {
-                if (response.success) {
-                    let result = filterObject(response.result, options);
-                    result = cleanInternalFields(result);
-                    // TODO add validation for not exporting tip snapshots, as they don't have all dependencies. Should we enforce?
-                    let filename = `${snapshotId}.json`;
-                    if (options.yaml) {
-                        result = jsonToYaml(result);
-                        filename = `${snapshotId}.yaml`;
-                    }
-                    const filepath = path.join(exportPath, 'snapshots', filename);
-                    writeToFile(result, filepath);
-                    printSuccess(`Successfully exported agent snapshot ${filepath}`);
-                    return filepath;
-                } 
-                    return printError(`Failed to export agent snapshot ${snapshotId}: ${response.message}`, options);
+            promises.push(agents.describeAgentSnapshot(options.project || profile.project, profile.token, snapshotId).then((result) => {
+                result = JSON.parse(result);
+                result = cleanInternalFields(result);
+                let filename = `${snapshotId}.json`;
+                if (options.yaml) {
+                    result = jsonToYaml(result);
+                    filename = `${snapshotId}.yaml`;
+                }
+                const filepath = path.join(exportPath, 'snapshots', filename);
+                writeToFile(result, filepath);
+                printSuccess(`Successfully exported agent snapshot ${filepath}`);
+                return filepath;
             }).catch((err) => {
                 printError(`Failed to export agent snapshot ${snapshotId}: ${err.status} ${err.message}`, options);
             }));

@@ -185,7 +185,7 @@ module.exports.GetActivationCommand = class {
         const agents = new Agents(profile.url);
         agents.getActivation(options.project || profile.project, profile.token, activationId).then((response) => {
             if (response.success) {
-                const result = filterObject(response.result.activation, options);
+                const result = filterObject(response.result, options);
                 printSuccess(JSON.stringify(result, null, 2), options);
             } else {
                 printError(`Failed to get activation ${activationId}: ${response.message}`, options);

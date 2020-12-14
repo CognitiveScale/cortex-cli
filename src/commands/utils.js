@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+const Table = require('cli-table');
 const _ = require('lodash');
 const chalk = require('chalk');
 const debug = require('debug')('cortex:cli');
@@ -24,7 +25,6 @@ const jmsepath = require('jmespath');
 const os = require('os');
 const osName = require('os-name');
 const path = require('path');
-const Table = require('cli-table');
 const yaml = require('js-yaml');
 const { exec } = require('child_process');
 

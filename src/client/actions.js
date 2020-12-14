@@ -28,22 +28,25 @@ module.exports = class Actions {
         this.endpointV4 = projectId => `${cortexUrl}/fabric/v4/projects/${projectId}/actions`;
     }
 
-    async deployAction(projectId, token, actionName, params) {
+    async deployAction(projectId, token, actionInst) {
         checkProject(projectId);
         let endpoint = this.endpointV4(projectId);
-        if (params.actionType) {
-            endpoint = `${endpoint}?actionType=${params.actionType}`;
+        if (actionInst.actionType) {
+            endpoint = `${endpoint}?actionType=${actionInst.actionType}`;
         }
         debug('deployAction(%s, docker=%s, ttl=%s) => %s',
-            actionName, params.dockerImage, params.ttl, endpoint);
-        const body = { ...params };
+            actionInst.name, actionInst.dockerImage, actionInst.ttl, endpoint);
+        const body = { ...actionInst };
+        // image & docker floating around fixup just in case..
+        if (body.docker) {
+            body.image = body.docker;
+            delete body.docker;
+        }
         try {
-            body.docker = await this._maybePushDockerImage(params.dockerImage, token, params.pushDocker);
+            body.docker = await this._maybePushDockerImage(actionInst.dockerImage, token, actionInst.pushDocker);
         } catch (error) {
             return { success: false, status: 400, message: error.message || error };
         }
-
-        body.name = actionName;
 
         return got
         .post(endpoint, {
