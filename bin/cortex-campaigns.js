@@ -25,6 +25,8 @@ const {
     CreateCampaignCommand,
     ListCampaignsCommand,
     DescribeCampaignCommand,
+    ExportCampaignCommand,
+    ImportCampaignCommand,
 } = require('../src/commands/campaigns');
 
 program.description('Work with Cortex Campaigns');
@@ -37,6 +39,7 @@ program
     .option('--no-compat', 'Ignore API compatibility checks')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
+    .option('--project [project]', 'The project to use')
     .option('-y, --yaml', 'Use YAML for Campaign definition format')
     .action(withCompatibilityCheck((campaignDefinition, options) => {
         try {
@@ -53,6 +56,7 @@ program
     .option('--no-compat', 'Ignore API compatibility checks')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
+    .option('--project [project]', 'The project to use')
     .option('--json', 'Output results using JSON')
     .option('--query [query]', 'A JMESPath query to use in filtering the response data.')
     .action(withCompatibilityCheck((options) => {
@@ -71,10 +75,46 @@ program
     .option('--no-compat', 'Ignore API compatibility checks')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
+    .option('--project [project]', 'The project to use')
     .option('--query [query]', 'A JMESPath query to use in filtering the response data.')
     .action(withCompatibilityCheck((campaignName, options) => {
         try {
             new DescribeCampaignCommand(program).execute(campaignName, options);
+        } catch (err) {
+            console.error(chalk.red(err.message));
+        }
+    }));
+
+program
+    .command('export <campaignName>')
+    .description('Export Campaign Archive')
+    .option('--no-compat', 'Ignore API compatibility checks')
+    .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
+    .option('--profile [profile]', 'The profile to use')
+    .option('--project [project]', 'The project to use')
+    .option('--deployable [deployable]', 'Export only deployable missions', true)
+    .option('--o [output]', 'Export file name')
+    .action(withCompatibilityCheck((campaignName, options) => {
+        try {
+            new ExportCampaignCommand(program).execute(campaignName, options);
+        } catch (err) {
+            console.error(chalk.red(err.message));
+        }
+    }));
+
+program
+    .command('import <campaignName>')
+    .description('Import Campaign Archive')
+    .option('--no-compat', 'Ignore API compatibility checks')
+    .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
+    .option('--profile [profile]', 'The profile to use')
+    .option('--project [project]', 'The project to use')
+    .option('--filepath [filepath]', 'Exported Campaign file path to import')
+    .option('--deploy [deploy]', 'Set missions status Ready To Deploy', true)
+    .option('--overwrite [overwrite]', 'Overwrite existing deployed missions with the imported one', false)
+    .action(withCompatibilityCheck((campaignName, options) => {
+        try {
+            new ImportCampaignCommand(program).execute(campaignName, options);
         } catch (err) {
             console.error(chalk.red(err.message));
         }

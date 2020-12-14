@@ -18,6 +18,7 @@ const fs = require('fs');
 const debug = require('debug')('cortex:cli');
 const { loadProfile } = require('../config');
 const ApiServerClient = require('../client/apiServerClient');
+const Catalog = require('../client/catalog');
 const {
  printSuccess, printError, filterObject, parseObject, printTable, checkProject
 } = require('./utils');
@@ -98,6 +99,44 @@ module.exports.DescribeCampaignCommand = class DescribeCampaignCommand {
             printSuccess(JSON.stringify(result, null, 2), options);
         } catch (err) {
             printError(`Failed to describe campaign: ${err.status} ${err.message}`, options);
+        }
+    }
+};
+
+module.exports.ExportCampaignCommand = class ExportCampaignCommand {
+    constructor(program) {
+        this.program = program;
+    }
+
+    execute(campaignName, cmd) {
+        const options = cmd.opts();
+        const profile = loadProfile(options.profile);
+        debug('%s.executeExportCampaignCommand(%s)', profile.name, campaignName);
+        const cli = new Catalog(profile.url);
+
+        try {
+            cli.exportCampaign(options.project || profile.project, profile.token, campaignName, options.deployable, options.o);
+        } catch (err) {
+            printError(`Failed to export campaign: ${err.status} ${err.message}`, options);
+        }
+    }
+};
+
+module.exports.ImportCampaignCommand = class ImportCampaignCommand {
+    constructor(program) {
+        this.program = program;
+    }
+
+    execute(campaignFilepath, cmd) {
+        const options = cmd.opts();
+        const profile = loadProfile(options.profile);
+        debug('%s.executeImportCampaignCommand(%s)', profile.name, campaignFilepath);
+        const cli = new Catalog(profile.url);
+
+        try {
+            cli.importCampaign(options.project || profile.project, profile.token, campaignFilepath, options.deploy, options.overwrite);
+        } catch (err) {
+            printError(`Failed to import campaign: ${err.status} ${err.message}`, options);
         }
     }
 };
