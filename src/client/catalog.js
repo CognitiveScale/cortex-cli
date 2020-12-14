@@ -230,7 +230,11 @@ module.exports = class Catalog {
 
         form.pipe(req)
             .on('response', function (response) {
-                printSuccess(response.statusMessage)
+                if (response.statusCode == 200 || response.statusCode == 201) {
+                    printSuccess("Campaign imported successfully")
+                } else {
+                    printError()
+                }
             }).on('error', function (err) {
                 printError(err)
             });

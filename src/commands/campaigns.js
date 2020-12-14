@@ -23,35 +23,6 @@ const {
  printSuccess, printError, filterObject, parseObject, printTable, checkProject
 } = require('./utils');
 
-module.exports.CreateCampaignCommand = class CreateCampaignCommand {
-    constructor(program) {
-        this.program = program;
-    }
-
-    async execute(campaignDefinition, command) {
-        const options = command.opts();
-        const profile = loadProfile(options.profile);
-        checkProject(options.project || profile.project);
-        debug('%s.executeSaveCampaign(%s)', profile.name, campaignDefinition);
-        let campaign = {};
-        try {
-            if (campaignDefinition) {
-                const campaignDefStr = fs.readFileSync(campaignDefinition);
-                campaign = parseObject(campaignDefStr, options);
-            }
-            const cli = new ApiServerClient(profile.url);
-            const response = await cli.createCampaign(
-                options.project || profile.project,
-                profile.token,
-                _.get(campaign, 'spec', campaign),
-                );
-            printSuccess(`Campaign ${response.name} saved`, options);
-        } catch (err) {
-            printError(`Failed to save campaign: ${err.message}`, options);
-        }
-    }
-};
-
 module.exports.ListCampaignsCommand = class ListCampaignsCommand {
     constructor(program) {
         this.program = program;

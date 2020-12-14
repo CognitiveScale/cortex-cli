@@ -22,7 +22,6 @@ const program = require('../src/commander');
 const { withCompatibilityCheck } = require('../src/compatibility');
 
 const {
-    CreateCampaignCommand,
     ListCampaignsCommand,
     DescribeCampaignCommand,
     ExportCampaignCommand,
@@ -30,24 +29,6 @@ const {
 } = require('../src/commands/campaigns');
 
 program.description('Work with Cortex Campaigns');
-
-// Create Campaign
-program
-    .command('save [CampaignDefinition]')
-    .description('Save a Campaign definition')
-    .storeOptionsAsProperties(false)
-    .option('--no-compat', 'Ignore API compatibility checks')
-    .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
-    .option('--profile [profile]', 'The profile to use')
-    .option('--project [project]', 'The project to use')
-    .option('-y, --yaml', 'Use YAML for Campaign definition format')
-    .action(withCompatibilityCheck((campaignDefinition, options) => {
-        try {
-            new CreateCampaignCommand(program).execute(campaignDefinition, options);
-        } catch (err) {
-            console.error(chalk.red(err.message));
-        }
-    }));
 
 // List Campaigns
 program
