@@ -28,13 +28,19 @@ outputs:
 properties:
   - name: daemon.method
     title: Daemon method
-    description: method
+    description: Update default value to HTTP method supported by endpoint
     required: true
     type: String
     defaultValue: POST
   - name: daemon.path
     title: Daemon path
-    description: path
+    description: Update default value to HTTP endpoint path in container
     required: true
     type: String
     defaultValue: invoke
+  - name: daemon.port
+    title: Daemon Port
+    description: Update default value to port on which app will be running
+    required: true
+    type: String
+    defaultValue: 5000
