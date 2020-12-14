@@ -16,14 +16,18 @@
 
 const debug = require('debug')('cortex:cli');
 const { got } = require('./apiutils');
+const FormData = require('form-data');
+const http = require('https');
+const fs = require('fs');
 const {
- constructError, formatAllServiceInputParameters, checkProject, getUserAgent, 
+ constructError, formatAllServiceInputParameters, checkProject, getUserAgent, printSuccess, printError
 } = require('../commands/utils');
 
 const createEndpoints = baseUri => ({
         skills: projectId => `${baseUri}/fabric/v4/projects/${projectId}/skills`,
         agents: projectId => `${baseUri}/fabric/v4/projects/${projectId}/agents`,
         types: projectId => `${baseUri}/fabric/v4/projects/${projectId}/types`,
+        campaigns: (projectId) => `${baseUri}/fabric/v4/projects/${projectId}/campaigns/`,
     });
 
 module.exports = class Catalog {
@@ -96,7 +100,7 @@ module.exports = class Catalog {
                     .map(i => ({ ...i, url: `${urlBase}/${i.name}` }))
                     .map(i => ({ ...i, formatted_types: formatAllServiceInputParameters(i.parameters) }));
                 return { success: true, services: servicesList };
-            } 
+            }
                 return response;
         });
     }
@@ -184,6 +188,60 @@ module.exports = class Catalog {
             .json()
             .then(types => ({ success: true, ...types }))
             .catch(err => constructError(err));
+    }
+
+    exportCampaign(projectId, token, campaignName, deployable, outputFileName) {
+        checkProject(projectId);
+        debug('exportCampaign(%s) => %s', campaignName, this.endpoints.campaigns);
+
+        const path = './'+(outputFileName || campaignName+'.amp');
+        const url = this.endpoints.campaigns(projectId) + `${campaignName}/export?deployable=${deployable}`;
+        const file = fs.createWriteStream(path);
+        return http.get(url,
+            {headers: { Authorization: `Bearer ${token}` }},
+            function(response) {
+            if (response.statusCode == 200 || response.statusCode == 201) {
+                response.pipe(file);
+                printSuccess(`Successfully exported Campaign ${campaignName} from project ${projectId} to file ${path}`)
+            } else {
+                printError(`Failed to export Campaign ${campaignName} from project ${projectId}. Error: [${response.statusCode}] ${response.statusMessage}`)
+            }
+        }).on('error', function(e) {
+            printError(e)
+        });
+    }
+
+    importCampaign(projectId, token, filepath, deploy, overwrite) {
+        checkProject(projectId);
+        debug('importCampaign(%s)', this.endpoints.campaigns);
+        const importUrl = this.endpoints.campaigns(projectId) + `import?deployable=${deploy}&overwrite=${overwrite}`;
+        if (!fs.existsSync(filepath) || !fs.lstatSync(filepath).isFile() ) {
+            printError(`Campaign export file ${filepath} doesn't exists or not a valid export file`)
+        }
+        const readStream = fs.createReadStream(filepath);
+
+        const form = new FormData();
+        form.append('file', readStream);
+
+        const headers = form.getHeaders();
+        headers["Authorization"] = `Bearer ${token}`;
+
+        const req = http.request(importUrl, {
+            method   : 'POST',
+            headers: headers,
+        });
+
+        form.pipe(req)
+            .on('response', function (response) {
+                if (response.statusCode == 200 || response.statusCode == 201) {
+                    printSuccess("Campaign imported successfully")
+                } else {
+                    printError(`Campaign file ${filepath} import failed with error: [${response.statusCode}] ${response.statusMessage}`)
+                }
+            }).on('error', function (err) {
+                printError(err)
+            });
+
     }
 
     // saveProfileSchema(projectId, token, schemaObj) {

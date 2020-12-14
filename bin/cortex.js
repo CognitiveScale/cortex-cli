@@ -28,6 +28,7 @@ program
     .description('Cortex CLI')
     .command('actions [cmd]', 'Work with Cortex Actions')
     .command('agents [cmd]', 'Work with Cortex Agents')
+    .command('campaigns [cmd]', 'Work with Cortex Campaigns')
     .command('configure', 'Configure the Cortex CLI')
     .command('connections [cmd]', 'Work with Cortex Connections')
     .command('content [cmd]', 'Work with Cortex Managed Content')
