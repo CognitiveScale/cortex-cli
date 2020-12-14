@@ -215,6 +215,9 @@ module.exports = class Catalog {
         checkProject(projectId);
         debug('importCampaign(%s)', this.endpoints.campaigns);
         const importUrl = this.endpoints.campaigns(projectId) + `import?deployable=${deploy}&overwrite=${overwrite}`;
+        if (!fs.existsSync(filepath) || !fs.lstatSync(filepath).isFile() ) {
+            printError(`Campaign export file ${filepath} doesn't exists or not a valid export file`)
+        }
         const readStream = fs.createReadStream(filepath);
 
         const form = new FormData();
@@ -233,7 +236,7 @@ module.exports = class Catalog {
                 if (response.statusCode == 200 || response.statusCode == 201) {
                     printSuccess("Campaign imported successfully")
                 } else {
-                    printError()
+                    printError(`Campaign file ${filepath} import failed with error: [${response.statusCode}] ${response.statusMessage}`)
                 }
             }).on('error', function (err) {
                 printError(err)
