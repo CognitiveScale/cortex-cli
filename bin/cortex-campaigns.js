@@ -103,7 +103,7 @@ program
     }));
 
 program
-    .command('import <campaignName>')
+    .command('import <campaignExportFilepath>')
     .description('Import Campaign Archive')
     .option('--no-compat', 'Ignore API compatibility checks')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')

@@ -194,7 +194,7 @@ module.exports = class Catalog {
         checkProject(projectId);
         debug('exportCampaign(%s) => %s', campaignName, this.endpoints.campaigns);
 
-        const path = './'+(outputFileName || campaignName+'.zip');
+        const path = './'+(outputFileName || campaignName+'.amp');
         const url = this.endpoints.campaigns(projectId) + `${campaignName}/export?deployable=${deployable}`;
         const file = fs.createWriteStream(path);
         return http.get(url,
