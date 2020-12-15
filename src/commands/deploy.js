@@ -18,7 +18,7 @@ const path = require('path');
 const { loadProfile } = require('../config');
 const Agents = require('../client/agents');
 const {
- printSuccess, printError, filterObject, cleanInternalFields, jsonToYaml, writeToFile, fileExists, deleteFile,
+ printSuccess, printError, cleanInternalFields, jsonToYaml, writeToFile, fileExists, deleteFile,
 } = require('./utils');
 
 
