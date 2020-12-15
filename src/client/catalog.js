@@ -194,13 +194,15 @@ module.exports = class Catalog {
         checkProject(projectId);
         debug('exportCampaign(%s) => %s', campaignName, this.endpoints.campaigns);
 
-        const path = './'+(outputFileName || campaignName+'.amp');
+
         const url = this.endpoints.campaigns(projectId) + `${campaignName}/export?deployable=${deployable}`;
-        const file = fs.createWriteStream(path);
+
         return http.get(url,
             {headers: { Authorization: `Bearer ${token}` }},
             function(response) {
             if (response.statusCode == 200 || response.statusCode == 201) {
+                const path = './'+(outputFileName || campaignName+'.amp');
+                const file = fs.createWriteStream(path);
                 response.pipe(file);
                 printSuccess(`Successfully exported Campaign ${campaignName} from project ${projectId} to file ${path}`)
             } else {
