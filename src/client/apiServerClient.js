@@ -61,4 +61,36 @@ module.exports = class ApiServerClient {
             throw err;
         }
     }
+
+    /**
+     * Fetch campaign using graphql
+     * @paa
+     * @param campaignId
+     * @return {Promise<any>}
+     */
+    async getCampaign(projectId, token, campaignId) {
+        try {
+            const fetched = await this._client(token)
+                .request(gql`query { campaignByName( project: "${projectId}", name: "${campaignId}" ){name, title, description}}`);
+            return _.get(fetched, 'campaignByName');
+        } catch (err) {
+            throw err;
+        }
+    }
+
+
+    /**
+     * Query campaign using graphql
+     * @param campaignId
+     * @return {Promise<any>}
+     */
+    async listCampaigns(projectId, token) {
+        try {
+            const fetched = await this._client(token)
+                .request(gql`{ campaigns ( project: "${projectId}" ) { name, title, description} }`);
+            return _.get(fetched, 'campaigns', []);
+        } catch (err) {
+            throw err;
+        }
+    }
 };
