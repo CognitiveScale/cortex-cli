@@ -13,14 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-const _ = require('lodash');
-const fs = require('fs');
 const debug = require('debug')('cortex:cli');
 const { loadProfile } = require('../config');
 const ApiServerClient = require('../client/apiServerClient');
 const Catalog = require('../client/catalog');
 const {
- printSuccess, printError, filterObject, parseObject, printTable, checkProject
+ printSuccess, printError, filterObject, printTable,
 } = require('./utils');
 
 module.exports.ListCampaignsCommand = class ListCampaignsCommand {
