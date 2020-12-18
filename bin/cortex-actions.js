@@ -28,7 +28,6 @@ const {
     DeployActionCommand,
     // TODO readd logs/task calls
     // GetLogsCommand,
-    InvokeActionCommand,
     // JobTaskListActionCommand,
     // TaskCancelActionCommand,
     // TaskLogsActionCommand,
@@ -109,30 +108,6 @@ program
 //             console.error(chalk.red(err.message));
 //         }
 //     }));
-
-// Invoke Action
-program
-    .command('invoke <actionName>')
-    .description('Invoke an action')
-    .option('--no-compat', 'Ignore API compatibility checks')
-    .option('--params [params]', 'JSON params to send to the action')
-    .option('--params-file [paramsFile]', 'A file containing either JSON or YAML formatted params')
-    .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
-    .option('--memory [memory]', '[Deprecated] Action memory limit in megabytes')
-    .option('--vcpus [vcpus]', '[Deprecated] Action vcpus limit in integer')
-    .option('--profile [profile]', 'The profile to use')
-    .option('--project [project]', 'The project to use')
-    .option('--query [query]', 'A JMESPath query to use in filtering the response data.')
-    .option('--actionType [actionType]', 'Type of action')
-    .option('--path [path]', 'Path to the daemon service url being invoked', '')
-    .option('--method [method]', 'HTTP method') // GET, POST ...
-    .action(withCompatibilityCheck((actionName, options) => {
-        try {
-            new InvokeActionCommand(program).execute(actionName, options);
-        } catch (err) {
-            console.error(chalk.red(err.message));
-        }
-    }));
 
 // Deploy Action
 program
