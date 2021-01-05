@@ -93,7 +93,8 @@ module.exports.DeployActionCommand = class {
         this.program = program;
     }
 
-    execute(actionDefinition, options) {
+    execute(actionDefinition, command) {
+        const options = command.opts();
         const profile = loadProfile(options.profile);
 
         let actionInst = {};
@@ -104,6 +105,9 @@ module.exports.DeployActionCommand = class {
         }
         if (options.actionName) {
             actionInst.name = options.actionName;
+        }
+        if (options.name) {
+            actionInst.name = options.name;
         }
         if (options.podspec) {
             const paramsStr = fs.readFileSync(options.podspec);
