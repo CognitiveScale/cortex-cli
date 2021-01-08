@@ -128,7 +128,11 @@ module.exports.InvokeSkillCommand = class InvokeSkillCommand {
 
         let params = {};
         if (options.params) {
-            params = parseObject(options.params, options);
+            try {
+                params = parseObject(options.params, options);
+            } catch (e) {
+                printError(`Failed to parse params: ${options.params} Error: ${e}`, options);
+            }
         } else if (options.paramsFile) {
             const paramsStr = fs.readFileSync(options.paramsFile);
             params = parseObject(paramsStr, options);

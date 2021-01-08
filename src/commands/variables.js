@@ -23,7 +23,7 @@ const map = require('lodash/fp/map');
 const { loadProfile } = require('../config');
 const Variables = require('../client/variables');
 const {
- printSuccess, printError, filterObject, parseObject, printTable, 
+ printSuccess, printError, filterObject, parseObject, printTable,
 } = require('./utils');
 
 module.exports.ListVariablesCommand = class {
@@ -99,7 +99,11 @@ module.exports.WriteVariableCommand = class {
 
         let data = value;
         if (options.data) {
-            data = parseObject(options.data, options);
+            try {
+                data = parseObject(options.data, options);
+            } catch (e) {
+                printError(`Failed to parse data: ${options.data} Error: ${e}`, options);
+            }
         } else if (options.dataFile) {
             const dataStr = fs.readFileSync(options.dataFile);
             data = parseObject(dataStr, options);
