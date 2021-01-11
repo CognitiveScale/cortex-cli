@@ -73,7 +73,7 @@ program
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
     .option('--project [project]', 'The project to use')
-    .option('--deployable [deployable]', 'Export only deployable missions', true)
+    .option('--deployable [boolean]', 'Export only deployable missions', true)
     .option('--o [output]', 'Export file name')
     .action(withCompatibilityCheck((campaignName, options) => {
         try {
@@ -91,8 +91,8 @@ program
     .option('--profile [profile]', 'The profile to use')
     .option('--project [project]', 'The project to use')
     .option('--filepath [filepath]', 'Exported Campaign file path to import')
-    .option('--deploy [deploy]', 'Set missions status Ready To Deploy', true)
-    .option('--overwrite [overwrite]', 'Overwrite existing deployed missions with the imported one', false)
+    .option('--deploy [boolean]', 'Set missions status Ready To Deploy', true)
+    .option('--overwrite [boolean]', 'Overwrite existing deployed missions with the imported one', false)
     .action(withCompatibilityCheck((campaignName, options) => {
         try {
             new ImportCampaignCommand(program).execute(campaignName, options);
