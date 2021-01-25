@@ -2,24 +2,44 @@
 
 Background job running Cortex skill
 
-#### Files generated:
+#### Files generated
 * `skill.yaml` Skill definition
 * `main.py` Python3 code implementing job's business logic
 * `requirements.txt` Python3 libraries dependencies
 * `Dockerfile` to build Docker image for this skill
 
-#### Next Steps:
-* Add input/output parameters and properties in skill.yaml as per requirement 
-* Update `main.py` with the business logic this skill will implement.
-* Add required libraries to `requirements.txt` 
-* Make changes to Dockerfile if required 
+#### Steps
+1. Modify the main executable (`main.py` by default) run by the action image's entrypoint/command to handle the action's custom logic.
+2. Modify the `requirements.txt` file to provide packages or libraries that the action requires.
+3. Build the docker image (uses the `main.py` file)
+  ```
+  docker build -t <image-name>:<version> .
+  ```
+4. Push the docker image to a registry that is connected to your Kubernetes cluster.
+  ```
+  docker push <image-name>:<version>
+  ```
 
-#### Deployment Steps
-* Build the docker image and push to registry accessible to Cortex DCI
-    ```bash
-        docker build -t <SKILL_NAME>:<DOCKER_IMAGE_TAG>  -f Dockerfile .
-        docker tag <SKILL_NAME>:<DOCKER_IMAGE_TAG> <DOCKER_IMAGE_URL_IN_REGISTRY>
-        docker push <DOCKER_IMAGE_URL_IN_REGISTRY>
-    ```
-* Save Cortex Action `cortex actions deploy <SKILL_NAME> --actionType job --docker <DOCKER_IMAGE> --cmd '["python", "/app/main.py"]'  --project <Project Name>`
-* Deploy this Skill `cortex skills save -y skill.yaml --project <Project Name>`
+  **(Optionally) Retag an image**
+  ```
+  docker tag <existing-image-name>:<existing-version> <new-image-name>:<new-version>
+  ```
+5. Deploy the action.
+  ```
+  cortex actions deploy <SKILL_NAME> \
+  --actionType daemon \
+  --docker <DOCKER_IMAGE> \
+  --port '5000'  \
+  --project <Project Name>
+  ```
+6. Modify the `skills.yaml` file.
+7. Save/deploy the Skill.
+  ```
+  cortex skills save -y skill.yaml --project <Project Name>
+  ```
+
+   The Skill is added to the Cortex Fabric catalog and is available for selection when building interventions or Agents.
+
+   Skills that are deployed may be invoked (run) either independently or within an agent.
+
+For more details about how to build skills go to [Cortex Fabric Documentation - Build Skills - Define Skills](https://cognitivescale.github.io/cortex-fabric/docs/build-skills/define-skills)
