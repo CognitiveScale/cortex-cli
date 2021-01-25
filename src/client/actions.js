@@ -72,7 +72,7 @@ module.exports = class Actions {
 
     describeAction(projectId, token, actionName) {
         checkProject(projectId);
-        const endpoint = `${this.endpointV4(projectId)}/${actionName}`;
+        const endpoint = `${this.endpointV4(projectId)}/${encodeURIComponent(actionName)}`;
         debug('describeAction(%s) => %s', actionName, endpoint);
         return got
             .get(endpoint, { headers: { Authorization: `Bearer ${token}` } })
@@ -83,7 +83,7 @@ module.exports = class Actions {
 
     getLogsAction(projectId, token, actionName) {
         checkProject(projectId);
-        const endpoint = `${this.endpointV4(projectId)}/${actionName}/logs`;
+        const endpoint = `${this.endpointV4(projectId)}/${encodeURIComponent(actionName)}/logs`;
         debug('getLogsAction(%s) => %s', actionName, endpoint);
         return got
             .get(endpoint, {
@@ -103,7 +103,7 @@ module.exports = class Actions {
 
     deleteAction(projectId, token, actionName, actionType) {
         checkProject(projectId);
-        let endpoint = `${this.endpointV4(projectId)}/${actionName}`;
+        let endpoint = `${this.endpointV4(projectId)}/${encodeURIComponent(actionName)}`;
         if (actionType) {
             endpoint = `${endpoint}?actionType=${actionType}`;
         }
@@ -220,9 +220,8 @@ module.exports = class Actions {
     static getCanonicalJobId(jobId) {
         let canonicalJobId = jobId;
         const namespaceProvided = /\w\/\w/.test(jobId);
-        if (!namespaceProvided) {
-            canonicalJobId = `default/${jobId}`;
-            console.warn(chalk.yellow('Namespace not given in jobId, assuming \'default\''));
+        if (namespaceProvided) {
+            canonicalJobId = encodeURIComponent(jobId);
         }
         return canonicalJobId;
     }

@@ -38,7 +38,7 @@ module.exports = class Experiments {
     }
 
     describeExperiment(projectId, token, name) {
-        const endpoint = `${this.endpoint(projectId)}/${name}`;
+        const endpoint = `${this.endpoint(projectId)}/${encodeURIComponent(name)}`;
         debug('describeExperiment(%s) => %s', name, endpoint);
         return got
             .get(endpoint, {
@@ -50,7 +50,7 @@ module.exports = class Experiments {
     }
 
     deleteExperiment(projectId, token, name) {
-        const endpoint = `${this.endpoint(projectId)}/${name}`;
+        const endpoint = `${this.endpoint(projectId)}/${encodeURIComponent(name)}`;
         debug('deleteExperiment(%s) => %s', name, endpoint);
         return got
             .delete(endpoint, {
@@ -62,7 +62,7 @@ module.exports = class Experiments {
     }
 
     listRuns(projectId, token, experimentName, filter, limit, sort) {
-        const endpoint = `${this.endpoint(projectId)}/${experimentName}/runs`;
+        const endpoint = `${this.endpoint(projectId)}/${encodeURIComponent(experimentName)}/runs`;
         debug('listRuns(%s) => %s', experimentName, endpoint);
         const query = {};
         if (filter) query.filter = filter;
@@ -79,7 +79,7 @@ module.exports = class Experiments {
     }
 
     describeRun(projectId, token, experimentName, runId) {
-        const endpoint = `${this.endpoint(projectId)}/${experimentName}/runs/${runId}`;
+        const endpoint = `${this.endpoint(projectId)}/${encodeURIComponent(experimentName)}/runs/${runId}`;
         debug('describeRun(%s) => %s', runId, endpoint);
         return got
             .get(endpoint, {
@@ -91,7 +91,7 @@ module.exports = class Experiments {
     }
 
     deleteRun(projectId, token, experimentName, runId) {
-        const endpoint = `${this.endpoint(projectId)}/${experimentName}/runs/${runId}`;
+        const endpoint = `${this.endpoint(projectId)}/${encodeURIComponent(experimentName)}/runs/${runId}`;
         debug('deleteRun(%s) => %s', runId, endpoint);
         return got
             .delete(endpoint, {

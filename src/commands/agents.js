@@ -51,6 +51,8 @@ module.exports.SaveAgentCommand = class SaveAgentCommand {
             response.details.map(d => d.path = formatValidationPath(d.path));
             printTable(tableSpec, response.details);
             printError(''); // Just exit
+        } else {
+            printError(JSON.stringify(response));
         }
         })
         .catch((err) => {

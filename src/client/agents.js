@@ -75,7 +75,7 @@ module.exports = class Agents {
     }
 
     listAgentSnapshots(projectId, token, agentName) {
-        const endpoint = `${this.endpointV4(projectId)}/agents/${agentName}/snapshots`;
+        const endpoint = `${this.endpointV4(projectId)}/agents/${encodeURIComponent(agentName)}/snapshots`;
         debug('listAgentSnapshots(%s, %s) => %s', agentName, endpoint);
         return got
             .get(endpoint, {
@@ -99,7 +99,7 @@ module.exports = class Agents {
     }
 
     createAgentSnapshot(projectId, token, snapshot) {
-        const endpoint = `${this.endpointV4(projectId)}/agents/${snapshot.agentName}/snapshots`;
+        const endpoint = `${this.endpointV4(projectId)}/agents/${encodeURIComponent(snapshot.agentName)}/snapshots`;
         debug('getAgentSnapshot=> %s', endpoint);
         return got
             .post(endpoint, {

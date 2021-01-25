@@ -25,7 +25,7 @@ module.exports = class Connections {
     }
 
     async queryConnection(projectId, token, connectionName, queryObject) {
-        const endpoint = `${this.endpoint(projectId)}/${connectionName}/query`;
+        const endpoint = `${this.endpoint(projectId)}/${encodeURIComponent(connectionName)}/query`;
         debug('queryConnection(%s) => %s', connectionName, endpoint);
         try {
             const message = await got
@@ -68,7 +68,7 @@ module.exports = class Connections {
     }
 
     describeConnection(projectId, token, connectionName) {
-        const endpoint = `${this.endpoint(projectId)}/${connectionName}`;
+        const endpoint = `${this.endpoint(projectId)}/${encodeURIComponent(connectionName)}`;
         debug('describeConnection(%s) => %s', connectionName, endpoint);
         return got
             .get(endpoint, {

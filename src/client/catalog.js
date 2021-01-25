@@ -63,7 +63,7 @@ module.exports = class Catalog {
 
     describeSkill(projectId, token, skillName) {
         checkProject(projectId);
-        const endpoint = `${this.endpoints.skills(projectId)}/${skillName}`;
+        const endpoint = `${this.endpoints.skills(projectId)}/${encodeURIComponent(skillName)}`;
         debug('describeSkill(%s) => %s', skillName, endpoint);
         return got
             .get(endpoint, {
@@ -94,7 +94,7 @@ module.exports = class Catalog {
         debug('listServices() using describeAgent');
         return this.describeAgent(projectId, token, agentName).then((response) => {
             if (response.success) {
-                const urlBase = `${this.endpoints.agents(projectId)}/${agentName}/services`;
+                const urlBase = `${this.endpoints.agents(projectId)}/${encodeURIComponent(agentName)}/services`;
                 const servicesList = response.agent.inputs
                     .filter(i => i.signalType === 'Service')
                     .map(i => ({ ...i, url: `${urlBase}/${i.name}` }))
@@ -121,7 +121,7 @@ module.exports = class Catalog {
 
     describeAgent(projectId, token, agentName) {
         checkProject(projectId);
-        const endpoint = `${this.endpoints.agents(projectId)}/${agentName}`;
+        const endpoint = `${this.endpoints.agents(projectId)}/${encodeURIComponent(agentName)}`;
         debug('describeAgent(%s) => %s', agentName, endpoint);
         return got
             .get(endpoint, {
@@ -134,7 +134,7 @@ module.exports = class Catalog {
 
     describeAgentVersions(projectId, token, agentName) {
         checkProject(projectId);
-        const endpoint = `${this.endpoints.agents(projectId)}/${agentName}/versions`;
+        const endpoint = `${this.endpoints.agents(projectId)}/${encodeURIComponent(agentName)}/versions`;
         debug('describeAgentVersions(%s) => %s', agentName, endpoint);
         return got
             .get(endpoint, {
@@ -164,7 +164,7 @@ module.exports = class Catalog {
 
     describeType(projectId, token, typeName) {
         checkProject(projectId);
-        const endpoint = `${this.endpoints.types(projectId)}/${typeName}`;
+        const endpoint = `${this.endpoints.types(projectId)}/${encodeURIComponent(typeName)}`;
         debug('describeType(%s) => %s', typeName, endpoint);
         return got
             .get(endpoint, {
