@@ -1,4 +1,4 @@
-### Daemon Skill
+### Daemon Skill type
 
 Long running Cortex skill serving REST API requests
 
@@ -36,7 +36,7 @@ Note:
   --port '5000'  \
   --project <Project Name>
   ```
-6. Modify the `skills.yaml` file.
+6. Modify the `skill.yaml` file.
 7. Save/deploy the Skill.
   ```
   cortex skills save -y skill.yaml --project <Project Name>

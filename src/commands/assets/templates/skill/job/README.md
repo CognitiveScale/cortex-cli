@@ -1,6 +1,6 @@
-### Daemon Skill
+### Job Skill type
 
-Background job running Cortex skill
+Cortex skill that runs a background job.
 
 #### Files generated
 * `skill.yaml` Skill definition
@@ -32,7 +32,7 @@ Background job running Cortex skill
   --port '5000'  \
   --project <Project Name>
   ```
-6. Modify the `skills.yaml` file.
+6. Modify the `skill.yaml` file.
 7. Save/deploy the Skill.
   ```
   cortex skills save -y skill.yaml --project <Project Name>

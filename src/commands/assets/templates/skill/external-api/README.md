@@ -1,9 +1,9 @@
-### External API Skill
+### External API Skill type
 
-This Cortex skill is to wrap an external REST API as a skill
+This skill type allows users to wrap an external REST API as a Cortex Fabric Skill.
 
 1. Update `skill.yaml` with `HTTP Method`, `URL`, `Path` and `headers` per the targeted external API
-2. Deploy either Skill `cortex skills save -y skill.yaml --project <Project Name>`
+2. Deploy the Skill `cortex skills save -y skill.yaml --project <Project Name>`
 
 The Skill is added to the Cortex Fabric catalog and is available for selection when building interventions or Agents.
 
