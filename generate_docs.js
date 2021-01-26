@@ -52,6 +52,7 @@ Interface (Cortex CLI). See [CLI](getting-started/use-cli.md) for
 help getting started using the CLI.
 ## Notation
 The following table describes the common notation used in this reference guide.
+
 | Notation | Description  | Example                                       |
 | -------- | -----------  | -------                                       |
 | \`< >\`    | Required     | \`<value>\` denotes a required value.      |
