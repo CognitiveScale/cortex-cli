@@ -13,8 +13,8 @@ const rootJson = require(`${sourcedir}/cortex.json`)
 
 // replace /n/t with HTML equivs
 const cleanString = (s) => s
-    .replace(/\n/g, '<br />')
-    .replace(/\t/g, 'nbsp;nbsp;')
+    .replace(/\n/g, '')
+    .replace(/\t/g, '')
     .replace(/</g,'`<')
     .replace(/>/g,'>`')
 
