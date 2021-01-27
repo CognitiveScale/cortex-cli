@@ -1,5 +1,5 @@
 camel: 1.0.0
-name: c12e/{{dashCase name}}
+name: {{dashCase name}}
 title: {{name}}
 description: {{name}}
 inputs:
@@ -12,7 +12,7 @@ inputs:
         required: true
     routing:
       all:
-        action  : c12e/{{dashCase name}}
+        action  : {{dashCase name}}
         runtime: cortex/jobs
         output: response
 
