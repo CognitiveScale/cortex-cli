@@ -72,7 +72,7 @@ module.exports = class Experiments {
             .get(endpoint, {
                 headers: { Authorization: `Bearer ${token}` },
                 'user-agent': getUserAgent(),
-              searchParams: { query },
+                searchParams: query,
             }).json()
             .then(result => ({ success: true, result }))
             .catch(err => constructError(err));
