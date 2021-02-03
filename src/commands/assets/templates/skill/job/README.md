@@ -27,7 +27,7 @@ Cortex skill that runs a background job.
 5. Deploy the action.
   ```
   cortex actions deploy <SKILL_NAME> \
-  --actionType daemon \
+  --actionType job \
   --docker <DOCKER_IMAGE> \
   --port '5000'  \
   --project <Project Name>
