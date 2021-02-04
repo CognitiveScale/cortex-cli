@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 const _ = require('lodash');
-const chalk = require('chalk');
 const debug = require('debug')('cortex:cli');
 const jose = require('jose');
 const { got } = require('./apiutils');
