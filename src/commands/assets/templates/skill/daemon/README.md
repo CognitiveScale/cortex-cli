@@ -30,7 +30,7 @@ Note:
   ```
 5. Deploy the action.
   ```
-  cortex actions deploy <SKILL_NAME> \
+  cortex actions deploy --actionName <SKILL_NAME> \
   --actionType daemon \
   --docker <DOCKER_IMAGE> \
   --port '5000'  \
