@@ -46,4 +46,4 @@ Note:
 
    Skills that are deployed may be invoked (run) either independently or within an agent.
 
-For more details about how to build skills go to [Cortex Fabric Documentation - Build Skills - Define Skills](https://cognitivescale.github.io/cortex-fabric/docs/build-skills/define-skills)
+For more details about how to build skills go to [Cortex Fabric Documentation - Development - Develop Skills](https://cognitivescale.github.io/cortex-fabric/docs/development/define-skills)
