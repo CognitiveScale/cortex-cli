@@ -36,8 +36,6 @@ program
     .command('docker [cmd]', 'Work with Docker')
     .command('experiments [cmd]', 'Work with Cortex Experiments')
     .command('generate [cmd]', 'Scaffold Cortex Components')
-    .command('graph [cmd]', 'Work with the Cortex Graph')
-    .command('profiles [cmd]', 'Work with Cortex Profiles')
     .command('projects [cmd]', 'Work with Cortex Projects')
     .command('roles [cmd]', 'Work with a Cortex Roles')
     .command('secrets [cmd]', 'Work with Cortex Secrets')
