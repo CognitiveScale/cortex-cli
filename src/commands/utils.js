@@ -33,7 +33,7 @@ module.exports.constructError = (error) => {
     // fallback to text in message or standard error message
     const errResp = error.response;
     let errorText = _.get(errResp, 'body');
-    if (_.isEmpty(errorText)) {
+    if (_.isEmpty(errorText) || error.name === 'RequestError') {
         errorText = error.message;
     }
     let details;
