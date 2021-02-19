@@ -24,7 +24,7 @@ module.exports = (plop) => {
                 // Handlebars template used to generate content of project files
                 base: 'assets/templates/skill/{{dashCase type}}',
                 // Note: Unlike other files, this doesn't strip hbs extension from Dockerfile, because this doesn't have any extension. So not using hbs extension in Dockerfile and picking all files in directory
-                templateFiles: path.join('assets/templates/skill/{{dashCase type}}', '**/*'),
+                templateFiles: 'assets/templates/skill/{{dashCase type}}/**/*',
                 abortOnFail: true,
                 // Must not overwrite files with scaffolding template if already exists
                 // force: true,
