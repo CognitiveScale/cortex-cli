@@ -1,0 +1,13 @@
+[{
+  "path": "/containers/0/resources",
+  "value": {
+    "limits": {
+      "memory":"1G",
+      "cpu":"1"
+    },
+    "requests": {
+      "memory":"0.5G",
+      "cpu":"1"
+    }
+  }
+}]
