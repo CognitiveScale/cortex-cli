@@ -100,8 +100,12 @@ module.exports.DeployActionCommand = class {
         let actionInst = {};
         if (actionDefinition) {
             debug('%s.createAgentSnapshot(%s)', profile.name, actionDefinition);
-            const actionDefStr = fs.readFileSync(actionDefinition);
-            actionInst = parseObject(actionDefStr, options);
+            try {
+                const actionDefStr = fs.readFileSync(actionDefinition);
+                actionInst = parseObject(actionDefStr, options);
+            } catch (err) {
+                printError(`Failed to deploy action: ${err.message}`, options);
+            }
         }
         if (options.actionName) {
             actionInst.name = options.actionName;
