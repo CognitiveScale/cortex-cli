@@ -99,6 +99,7 @@ module.exports.DeployActionCommand = class {
 
         let actionInst = {};
         if (actionDefinition) {
+            debug('%s.createAgentSnapshot(%s)', profile.name, actionDefinition);
             try {
                 const actionDefStr = fs.readFileSync(actionDefinition);
                 actionInst = parseObject(actionDefStr, options);
