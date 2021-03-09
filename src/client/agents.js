@@ -62,9 +62,9 @@ module.exports = class Agents {
             .catch(err => constructError(err));
     }
 
-    listActivations(projectId, token, snapshotId) {
-        const endpoint = `${this.endpointV4(projectId)}/snapshots/${snapshotId}/activations`;
-        debug('listActivations(%s, %s) => %s', snapshotId, endpoint);
+    listActivations(projectId, token, agentName) {
+        const endpoint = `${this.endpointV4(projectId)}/agentinvoke/${agentName}/activations`;
+        debug('listActivations(%s, %s) => %s', agentName, endpoint);
         return got
             .get(endpoint, {
                 headers: { Authorization: `Bearer ${token}` },
