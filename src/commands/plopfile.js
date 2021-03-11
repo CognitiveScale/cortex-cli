@@ -8,6 +8,9 @@ module.exports = (plop) => {
                 type: 'input',
                 name: 'name',
                 message: 'Skill Name?',
+                validate: (value, { elementType }) => {
+                    return Boolean(value)
+                }
             },
             {
                 type: 'list',

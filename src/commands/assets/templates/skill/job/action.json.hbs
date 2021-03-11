@@ -1,8 +1,7 @@
 {
     "name":"{{dashCase name}}",
     "actionType":"job",
-    "docker":"ljhacs/daemon:v2",
+    "docker":"{{dashCase name}}:latest",
     "environmentVariables":"\"TEST\"=\"value\"",
-    "command": ["python", "/app/main.py"],
-    "podspec": "podspec.json"
+    "command": ["python", "/app/main.py"]
 }
