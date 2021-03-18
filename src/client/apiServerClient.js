@@ -1,3 +1,19 @@
+/*
+ * Copyright 2021 Cognitive Scale, Inc. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the “License”);
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an “AS IS” BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 const _ = require('lodash');
 const { GraphQLClient, gql } = require('graphql-request');
 
@@ -71,7 +87,18 @@ module.exports = class ApiServerClient {
     async getCampaign(projectId, token, campaignId) {
         try {
             const fetched = await this._client(token)
-                .request(gql`query { campaignByName( project: "${projectId}", name: "${campaignId}" ){name, title, description}}`);
+                .request(gql`
+                query { campaignByName( project: "${projectId}", name: "${campaignId}" ) 
+                    { name, title, description, 
+                        missions { 
+                            name, 
+                            interventions { 
+                                name, 
+                                action { 
+                                ...on AgentActionSpec { agent { name } }
+                                ...on SkillActionSpec { skill { name } }
+                                ...on ScriptActionSpec { language, script }
+                            } } } } }`);
             return _.get(fetched, 'campaignByName');
         } catch (err) {
             throw err;

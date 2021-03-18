@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Cognitive Scale, Inc. All Rights Reserved.
+ * Copyright 2021 Cognitive Scale, Inc. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the “License”);
  * you may not use this file except in compliance with the License.
@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+const _ = require('lodash');
 const debug = require('debug')('cortex:cli');
 const { loadProfile } = require('../config');
 const ApiServerClient = require('../client/apiServerClient');
@@ -63,7 +64,7 @@ module.exports.DescribeCampaignCommand = class DescribeCampaignCommand {
         const cli = new ApiServerClient(profile.url);
 
         try {
-                const response = await cli.getCampaign(options.project || profile.project, profile.token, campaignName);
+            const response = await cli.getCampaign(options.project || profile.project, profile.token, campaignName);
             const result = filterObject(response, options);
             printSuccess(JSON.stringify(result, null, 2), options);
         } catch (err) {
