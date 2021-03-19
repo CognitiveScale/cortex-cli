@@ -30,11 +30,7 @@ Note:
   ```
 5. Deploy the action.
   ```
-  cortex actions deploy --actionName <SKILL_NAME> \
-  --actionType daemon \
-  --docker <DOCKER_IMAGE> \
-  --port '5000'  \
-  --project <Project Name>
+  cortex actions deploy action.json --docker <image-name>:<version> --project <Project Name>
   ```
 6. Modify the `skill.yaml` file.
 7. Save/deploy the Skill.

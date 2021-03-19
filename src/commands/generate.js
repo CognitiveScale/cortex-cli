@@ -13,11 +13,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
+const _ = require('lodash');
 const path = require('path');
 const { Plop, run } = require('plop');
+const nodePlop = require('node-plop');
 const fs = require('fs');
-const mkdirp = require('mkdirp');
+const { loadProfile } = require('../config');
+const ApiServerClient = require('../client/apiServerClient');
+const {
+    printSuccess, printError, // printTable,
+} = require('./utils');
 
 module.exports.GenerateSkillCommand = class GenerateSkillCommand {
     constructor(program) {
@@ -41,6 +46,8 @@ module.exports.GenerateCampaignCommand = class GenerateCampaignCommand {
         const options = cmd.opts();
         const profile = loadProfile(options.profile);
         const cli = new ApiServerClient(profile.url);
+        const plopGen = nodePlop(path.join(__dirname, 'plopfile.js'));
+        const skillGen = plopGen.getGenerator('skill');
         const repoPath = _.get(options, 'path', '.');
         if (!fs.existsSync(repoPath)) {
             printError(`ERROR: Path "${repoPath}" doesn't exist`);
@@ -49,21 +56,22 @@ module.exports.GenerateCampaignCommand = class GenerateCampaignCommand {
         try {
             const campaign = await cli.getCampaign(options.project || profile.project, profile.token, campaignName);
             printSuccess(`Generating skeleton project for ${campaign.name}`);
-            const skills = new Set();
+            const skills = [];
             campaign.missions.forEach((m) => {
                 printSuccess(` Mission ${m.name}`);
                 m.interventions.forEach((i) => {
                     if (_.has(i, 'action.skill')) {
                         printSuccess(`    Intervention ${i.name} => Skill: ${i.action.skill.name}`);
-                        skills.add(i.action.skill.name);
+                        skills.push(i.action.skill.name);
                     }
                 });
             });
-            skills.forEach((s) => {
+            // In case a skill is used more than once
+            const gens = _.uniq(skills).map(async (s) => {
                 const skillName = s.replace('/', '-');
-                mkdirp.sync(path.join(skillPath, skillName));
+                skillGen.runActions({ name: skillName, type: 'Daemon'});
             });
-            console.log(JSON.stringify(campaign));
+            await Promise.all(gens);
         } catch (err) {
             printError(`Failed to generate campaign resources: ${err.status} ${err.message}`, options);
         }

@@ -42,8 +42,9 @@ program
     }));
 
 program
-    .command('generate <CampaignName>')
-    .description('Import Campaign Archive')
+    // TODO remove hidden flag when ready to release
+    .command('campaign <CampaignName>', { hidden: true })
+    .description('Generate Campaign/Mission skills')
     .option('--no-compat', 'Ignore API compatibility checks')
     .option('--profile [profile]', 'The profile to use')
     .option('--project [project]', 'The project to use')
