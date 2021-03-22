@@ -7,10 +7,8 @@ module.exports = (plop) => {
             {
                 type: 'input',
                 name: 'name',
-                message: 'Skill Name?',
-                validate: (value, { elementType }) => {
-                    return Boolean(value)
-                }
+                message: 'Skill Name? (Must be alphanumeric)',
+                validate: (value, {}) => /^[0-9a-zA-Z][0-9a-zA-Z_\- ]{0,18}[0-9a-zA-Z]$/.test(value)
             },
             {
                 type: 'list',
