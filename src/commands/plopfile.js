@@ -8,7 +8,7 @@ module.exports = (plop) => {
                 type: 'input',
                 name: 'name',
                 message: 'Skill Name? (Must be alphanumeric)',
-                validate: (value, {}) => /^[0-9a-zA-Z][0-9a-zA-Z_\- ]{0,18}[0-9a-zA-Z]$/.test(value)
+                validate: value => /^[0-9a-zA-Z][0-9a-zA-Z_\- ]{0,18}[0-9a-zA-Z]$/.test(value),
             },
             {
                 type: 'list',
@@ -24,7 +24,8 @@ module.exports = (plop) => {
                 destination: path.join(path.resolve('.'), '{{ dashCase name }}'),
                 // Handlebars template used to generate content of project files
                 base: 'assets/templates/skill/{{dashCase type}}',
-                // Note: Unlike other files, this doesn't strip hbs extension from Dockerfile, because this doesn't have any extension. So not using hbs extension in Dockerfile and picking all files in directory
+                // Note: Unlike other files, this doesn't strip hbs extension from Dockerfile, because this doesn't have any extension.
+                // So not using hbs extension in Dockerfile and picking all files in directory
                 templateFiles: 'assets/templates/skill/{{dashCase type}}/**/*',
                 abortOnFail: true,
                 // Must not overwrite files with scaffolding template if already exists
