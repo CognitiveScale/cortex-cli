@@ -1,4 +1,3 @@
-IMAGE_TAG=latest
 SKILL_NAME=$(notdir $(CURDIR))
 
 deploy: check-env

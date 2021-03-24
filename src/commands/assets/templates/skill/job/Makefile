@@ -1,14 +1,15 @@
 IMAGE_TAG=latest
 SKILL_NAME=$(notdir $(CURDIR))
+DOCKER_IMAGE_URL=${DOCKER_PREGISTRY_URL}/${SKILL_NAME}:${IMAGE_TAG}
 
 build: check-env
-	docker build -t ${DOCKER_PREGISTRY_URL}/${SKILL_NAME}:${IMAGE_TAG} .
+	docker build -t ${DOCKER_IMAGE_URL} .
 
 push: check-env
-	docker push ${DOCKER_PREGISTRY_URL}/${SKILL_NAME}:${IMAGE_TAG}
+	docker push ${DOCKER_IMAGE_URL}
 
 deploy: check-env
-	cortex actions deploy action.json --project ${PROJECT_NAME}
+	cortex actions deploy action.json --project ${PROJECT_NAME} --docker ${DOCKER_IMAGE_URL}
 	cortex skills save -y skill.yaml --project ${PROJECT_NAME}
 	sleep 10s # wait for action containers to pull and deploy
 
@@ -22,7 +23,7 @@ get: check-env
 
 check-env:
 ifndef DOCKER_PREGISTRY_URL
-	$(error environment variable DOCKER_PREGISTRY_URL is not set. Set it like <docker-registry-url>/<namespace-org>.)
+	$(error environment variable DOCKER_PREGISTRY_URL is not set. Set it like <docker-registry-url>/<namespace-org>)
 endif
 ifndef PROJECT_NAME
 	$(error environment variable PROJECT_NAME is not set. Set this to Cortex project name.)
