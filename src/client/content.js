@@ -110,7 +110,7 @@ module.exports = class Content {
 
     async downloadSecureContent(projectId, token, key) {
         const contentKey = this._sanitizeKey(key);
-        const vars = new Variables(this.cortextUrl);
+        const vars = new Variables(this.cortexUrl);
         return vars.readVariable(projectId, token, contentKey);
     }
 };
