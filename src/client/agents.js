@@ -50,14 +50,18 @@ module.exports = class Agents {
             .catch(err => constructError(err));
     }
 
-    getActivation(projectId, token, activationId) {
+    getActivation(projectId, token, activationId, verbose) {
         const endpoint = `${this.endpointV4(projectId)}/activations/${activationId}`;
         debug('getActivation(%s) => %s', activationId, endpoint);
+        const opts = {
+            headers: { Authorization: `Bearer ${token}` },
+            'user-agent': getUserAgent(),
+        };
+        if (verbose) {
+            opts.searchParams = { verbose: true };
+        }
         return got
-            .get(endpoint, {
-                headers: { Authorization: `Bearer ${token}` },
-                'user-agent': getUserAgent(),
-            }).json()
+            .get(endpoint, opts).json()
             .then(result => ({ success: true, result }))
             .catch(err => constructError(err));
     }
