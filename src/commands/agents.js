@@ -187,9 +187,9 @@ module.exports.GetActivationCommand = class {
     execute(activationId, options) {
         const profile = loadProfile(options.profile);
         debug('%s.getActivation(%s)', profile.name, activationId);
-
+        const { verbose, project } = options;
         const agents = new Agents(profile.url);
-        agents.getActivation(options.project || profile.project, profile.token, activationId).then((response) => {
+        agents.getActivation(project || profile.project, profile.token, activationId, verbose).then((response) => {
             if (response.success) {
                 const result = filterObject(response.result, options);
                 printSuccess(JSON.stringify(result, null, 2), options);
