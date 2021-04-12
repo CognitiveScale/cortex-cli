@@ -61,7 +61,7 @@ module.exports = class Catalog {
             .catch(err => constructError(err));
     }
 
-    describeSkill(projectId, token, skillName) {
+    describeSkill(projectId, token, skillName, verbose = false) {
         checkProject(projectId);
         const endpoint = `${this.endpoints.skills(projectId)}/${encodeURIComponent(skillName)}`;
         debug('describeSkill(%s) => %s', skillName, endpoint);
@@ -69,6 +69,7 @@ module.exports = class Catalog {
             .get(endpoint, {
                 headers: { Authorization: `Bearer ${token}` },
                 'user-agent': getUserAgent(),
+                searchParams: { verbose },
             }).json()
             .then(res => ({ success: true, skill: res }))
             .catch(err => constructError(err));
@@ -119,7 +120,7 @@ module.exports = class Catalog {
             .catch(err => constructError(err));
     }
 
-    describeAgent(projectId, token, agentName) {
+    describeAgent(projectId, token, agentName, verbose) {
         checkProject(projectId);
         const endpoint = `${this.endpoints.agents(projectId)}/${encodeURIComponent(agentName)}`;
         debug('describeAgent(%s) => %s', agentName, endpoint);
@@ -127,6 +128,7 @@ module.exports = class Catalog {
             .get(endpoint, {
                 headers: { Authorization: `Bearer ${token}` },
                 'user-agent': getUserAgent(),
+                searchParams: { verbose },
             }).json()
             .then(agent => ({ success: true, agent }))
             .catch(err => constructError(err));

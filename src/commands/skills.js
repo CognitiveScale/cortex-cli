@@ -103,7 +103,7 @@ module.exports.DescribeSkillCommand = class DescribeSkillCommand {
         debug('%s.executeDescribeSkill(%s)', profile.name, skillName);
 
         const catalog = new Catalog(profile.url);
-        catalog.describeSkill(options.project || profile.project, profile.token, skillName).then((response) => {
+        catalog.describeSkill(options.project || profile.project, profile.token, skillName, options.verbose).then((response) => {
             if (response.success) {
                 const result = filterObject(response.skill, options);
                 printSuccess(JSON.stringify(result, null, 2), options);
