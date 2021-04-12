@@ -162,7 +162,7 @@ module.exports.getSourceFiles = (source, cb) => {
         } else {
             const results = files.filter(fpath => fs.lstatSync(fpath).isFile()).map(fpath => ({
                     canonical: fpath,
-                    relative: fpath.slice(normalizedSource.length),
+                    relative: path.relative(normalizedSource, fpath),
                     size: fs.lstatSync(fpath).size,
                 }));
             cb(null, results);
