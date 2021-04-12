@@ -72,7 +72,7 @@ module.exports = class Content {
 
     async uploadSecureContent(projectId, token, key, content) {
         const contentKey = this._sanitizeKey(key);
-        const vars = new Variables(this.cortextUrl);
+        const vars = new Variables(this.cortexUrl);
         return vars.writeVariable(projectId, token, contentKey, content);
     }
 
