@@ -75,6 +75,7 @@ program
     .option('--profile [profile]', 'The profile to use')
     .option('--project [project]', 'The project to use')
     .option('--query [query]', 'A JMESPath query to use in filtering the response data.')
+    .option('--verbose', 'Verbose output')
     .action(withCompatibilityCheck((skillName, options) => {
         try {
             new DescribeSkillCommand(program).execute(skillName, options);

@@ -83,6 +83,7 @@ program
     .option('--project [project]', 'The project to use')
     .option('--query [query]', 'A JMESPath query to use in filtering the response data.')
     .option('--versions', 'To get list of versions of an agent')
+    .option('--verbose', 'Verbose output')
     .action(withCompatibilityCheck((agentName, options) => {
         try {
             new DescribeAgentCommand(program).execute(agentName, options);

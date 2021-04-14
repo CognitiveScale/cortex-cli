@@ -121,7 +121,7 @@ module.exports.DescribeAgentCommand = class DescribeAgentCommand {
             });
         } else {
             debug('%s.executeDescribeAgent(%s)', profile.name, agentName);
-            catalog.describeAgent(options.project || profile.project, profile.token, agentName).then((response) => {
+            catalog.describeAgent(options.project || profile.project, profile.token, agentName, options.verbose).then((response) => {
                 if (response.success) {
                     const result = filterObject(response.agent, options);
                     printSuccess(JSON.stringify(result, null, 2), options);
