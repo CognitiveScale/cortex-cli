@@ -19,6 +19,7 @@ const chalk = require('chalk');
 const program = require('../src/commander');
 
 const { withCompatibilityCheck } = require('../src/compatibility');
+const { nonEmptyStringParser } = require('../src/parsers');
 
 const {
     ExternalGroupAssignCommand,
@@ -120,7 +121,7 @@ program.command('assign <role>')
     .option('--no-compat', 'Ignore API compatibility checks')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
-    .requiredOption('--users <users...>', 'Users to add/remove on role')
+    .requiredOption('--users <users...>', 'Users to add/remove on role', nonEmptyStringParser('user names must not be empty'))
     .option('--delete', 'Unassign users from role')
     .action(withCompatibilityCheck((role, options) => {
         try {
