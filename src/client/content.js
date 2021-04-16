@@ -21,7 +21,6 @@ const { promisify } = require('util');
 const debug = require('debug')('cortex:cli');
 const { got } = require('./apiutils');
 const { constructError, getUserAgent } = require('../commands/utils');
-const Variables = require('./variables');
 
 const pipeline = promisify(stream.pipeline);
 
@@ -70,12 +69,6 @@ module.exports = class Content {
         }
     }
 
-    async uploadSecureContent(projectId, token, key, content) {
-        const contentKey = this._sanitizeKey(key);
-        const vars = new Variables(this.cortexUrl);
-        return vars.writeVariable(projectId, token, contentKey, content);
-    }
-
     deleteContent(projectId, token, key) {
         const contentKey = this._sanitizeKey(key);
         const endpoint = `${this.endpoint(projectId)}/${contentKey}`;
@@ -106,11 +99,5 @@ module.exports = class Content {
         } catch (err) {
             return constructError(err);
         }
-    }
-
-    async downloadSecureContent(projectId, token, key) {
-        const contentKey = this._sanitizeKey(key);
-        const vars = new Variables(this.cortexUrl);
-        return vars.readVariable(projectId, token, contentKey);
     }
 };
