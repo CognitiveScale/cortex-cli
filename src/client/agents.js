@@ -66,14 +66,18 @@ module.exports = class Agents {
             .catch(err => constructError(err));
     }
 
-    listActivations(projectId, token, agentName) {
+    listActivations(projectId, token, agentName, params) {
         const endpoint = `${this.endpointV4(projectId)}/agentinvoke/${agentName}/activations`;
         debug('listActivations(%s, %s) => %s', agentName, endpoint);
+        const opts = {
+            headers: { Authorization: `Bearer ${token}` },
+            'user-agent': getUserAgent(),
+        };
+        if (params) {
+            opts.searchParams = params;
+        }
         return got
-            .get(endpoint, {
-                headers: { Authorization: `Bearer ${token}` },
-                'user-agent': getUserAgent(),
-            }).json()
+            .get(endpoint, opts).json()
             .then(result => ({ success: true, result }))
             .catch(err => constructError(err));
     }

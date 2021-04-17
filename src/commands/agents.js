@@ -208,12 +208,19 @@ module.exports.ListActivationsCommand = class {
         this.program = program;
     }
 
-    execute(instanceId, options) {
+    execute(agentName, options) {
         const profile = loadProfile(options.profile);
-        debug('%s.listActivations(%s)', profile.name, instanceId);
+        debug('%s.listActivations(%s)', profile.name, agentName);
 
         const agents = new Agents(profile.url);
-        agents.listActivations(options.project || profile.project, profile.token, instanceId).then((response) => {
+        // TODO validate param types?
+        const queryParams = {};
+        if (options.startBefore) queryParams.startBefore = options.startBefore;
+        if (options.startAfter) queryParams.startAfter = options.startAfter;
+        if (options.endBefore) queryParams.endBefore = options.endBefore;
+        if (options.endAfter) queryParams.endAfter = options.endAfter;
+        if (options.status) queryParams.status = options.status;
+        agents.listActivations(options.project || profile.project, profile.token, agentName, queryParams).then((response) => {
             if (response.success) {
                 let result = response.result.activations;
                 if (options.query) result = filterObject(result, options);
@@ -233,11 +240,11 @@ module.exports.ListActivationsCommand = class {
                     printTable(tableSpec, result);
                 }
             } else {
-                printError(`Failed to list activations for instance ${instanceId}: ${response.message}`, options);
+                printError(`Failed to list activations for instance ${agentName}: ${response.message}`, options);
             }
         })
             .catch((err) => {
-                printError(`Failed to list activations for instance ${instanceId}: ${err.status} ${err.message}`, options);
+                printError(`Failed to list activations for instance ${agentName}: ${err.status} ${err.message}`, options);
             });
     }
 };

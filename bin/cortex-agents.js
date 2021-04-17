@@ -128,18 +128,24 @@ program
         }
     }));
 
+// List activations
 program
-    .command('list-activations <snapshotId>')
-    .description('List agent activations')
+    .command('list-activations <agentName>')
+    .description('List activations for an agent')
     .option('--no-compat', 'Ignore API compatibility checks')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
     .option('--project [project]', 'The project to use')
     .option('--json', 'Output results using JSON')
     .option('--query [query]', 'A JMESPath query to use in filtering the response data.')
-    .action(withCompatibilityCheck((snapshotId, options) => {
+    .option('--startBefore [timestamp]', 'A timestamp that activations must have started before.')
+    .option('--startAfter [timestamp]', 'A timestamp that activations must have started after.')
+    .option('--endBefore [timestamp]', 'A timestamp that activations must have ended before.')
+    .option('--endAfter [timestamp]', 'A timestamp that activations must have ended after.')
+    .option('--status [status]', 'Filter activations by status [complete|failed].')
+    .action(withCompatibilityCheck((agentName, options) => {
         try {
-            new ListActivationsCommand(program).execute(snapshotId, options);
+            new ListActivationsCommand(program).execute(agentName, options);
         } catch (err) {
             console.error(chalk.red(err.message));
         }
