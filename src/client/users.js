@@ -44,7 +44,7 @@ module.exports = class Users {
 
     describeUser(token) {
         const endpoint = `${this.usersEndpoint}/${this.flags}`;
-        debug('listForUser => %s', endpoint);
+        debug('describeUser => %s', endpoint);
         return got
             .get(endpoint, {
                 headers: { Authorization: `Bearer ${token}` },

@@ -38,7 +38,7 @@ module.exports = class Variables {
 
     readVariable(projectId, token, keyName) {
         const endpoint = `${this.endpoint(projectId)}/${keyName}`;
-        debug('readVariable($s) => %s', keyName, endpoint);
+        debug('readVariable(%s) => %s', keyName, endpoint);
         return got
             .get(endpoint, {
                 headers: { Authorization: `Bearer ${token}` },
