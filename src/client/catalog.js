@@ -96,7 +96,7 @@ module.exports = class Catalog {
         return this.describeAgent(projectId, token, agentName).then((response) => {
             if (response.success) {
                 const urlBase = `${this.endpoints.agents(projectId)}/${encodeURIComponent(agentName)}/services`;
-                debug('listServices(%s) => %s', agentName ,urlBase);
+                debug('listServices(%s) => %s', agentName, urlBase);
                 const servicesList = response.agent.inputs
                     .filter(i => i.signalType === 'Service')
                     .map(i => ({ ...i, url: `${urlBase}/${i.name}` }))

@@ -54,7 +54,7 @@ module.exports = class Connections {
 
     async saveConnection(projectId, token, connObj) {
         const endpoint = `${this.endpoint(projectId)}`;
-        debug('saveConnection(%s) => %s', connObj.name, endpoint;
+        debug('saveConnection(%s) => %s', connObj.name, endpoint);
         try {
             const message = await got
             .post(endpoint, {

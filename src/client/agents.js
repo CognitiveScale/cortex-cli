@@ -104,7 +104,7 @@ module.exports = class Agents {
 
     createAgentSnapshot(projectId, token, snapshot) {
         const endpoint = `${this.endpointV4(projectId)}/agents/${encodeURIComponent(snapshot.agentName)}/snapshots`;
-        debug('createAgentSnapshot(%s)=> %s',snapshot, endpoint);
+        debug('createAgentSnapshot(%s)=> %s', snapshot, endpoint);
         return got
             .post(endpoint, {
                 headers: { Authorization: `Bearer ${token}` },
