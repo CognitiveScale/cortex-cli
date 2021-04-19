@@ -231,7 +231,7 @@ module.exports.ListActivationsCommand = class {
                     const tableSpec = [
                         { column: 'Activation Id', field: 'activationId', width: 38 },
                     ];
-                    printTable(tableSpec, _.map(result, r => ({ 'activationId': r })));
+                    printTable(tableSpec, _.map(result, r => ({ activationId: r })));
                 }
             } else {
                 printError(`Failed to list activations for instance ${agentName}: ${response.message}`, options);
