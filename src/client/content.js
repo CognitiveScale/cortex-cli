@@ -37,7 +37,7 @@ module.exports = class Content {
 
     listContent(projectId, token) {
         const endpoint = this.endpoint(projectId);
-        debug('listContent %s', endpoint);
+        debug('listContent() => %s', endpoint);
         return got
             .get(endpoint, {
                 headers: { Authorization: `Bearer ${token}` },
@@ -72,7 +72,7 @@ module.exports = class Content {
     deleteContent(projectId, token, key) {
         const contentKey = this._sanitizeKey(key);
         const endpoint = `${this.endpoint(projectId)}/${contentKey}`;
-        debug('deleteContent => %s', endpoint);
+        debug('deleteContent() => %s', endpoint);
         return got
             .delete(endpoint, {
                 headers: { Authorization: `Bearer ${token}` },
@@ -84,10 +84,10 @@ module.exports = class Content {
 
     // TODO progress
     // eslint-disable-next-line no-unused-vars
-    async downloadContent(projecId, token, key, showProgress = false) {
+    async downloadContent(projectId, token, key, showProgress = false) {
         const contentKey = this._sanitizeKey(key);
-        const endpoint = `${this.endpoint(projecId)}/${contentKey}`;
-        debug('downloadContent(%s) => %s', key, this.endpoint);
+        const endpoint = `${this.endpoint(projectId)}/${contentKey}`;
+        debug('downloadContent() => %s', endpoint);
         try {
             return pipeline(
                 got.stream(endpoint, {
