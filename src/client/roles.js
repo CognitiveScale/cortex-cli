@@ -154,7 +154,7 @@ module.exports = class Roles {
 
     addRolesToProject(token, project, roles) {
         const endpoint = `${this.rolesProjectsEndpoint}`;
-        debug('addRolesToProject => %s', endpoint);
+        debug('addRolesToProject(%s) => %s', roles, endpoint);
         return got
             .post(endpoint, {
                 headers: { Authorization: `Bearer ${token}` },
@@ -216,7 +216,7 @@ module.exports = class Roles {
 
     addExternalGroupToRole(token, externalGroup) {
         const endpoint = `${this.rolesMappingsEndpoint}`;
-        debug('addExternalGroupToRole => %s', endpoint);
+        debug('addExternalGroupToRole(%s) => %s', externalGroup, endpoint);
         return got
             .post(endpoint, {
                 headers: { Authorization: `Bearer ${token}` },

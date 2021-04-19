@@ -68,7 +68,7 @@ module.exports = class Agents {
 
     listActivations(projectId, token, agentName, params) {
         const endpoint = `${this.endpointV4(projectId)}/agentinvoke/${agentName}/activations`;
-        debug('listActivations(%s, %s) => %s', agentName, endpoint);
+        debug('listActivations(%s) => %s', agentName, endpoint);
         const opts = {
             headers: { Authorization: `Bearer ${token}` },
             'user-agent': getUserAgent(),
@@ -84,7 +84,7 @@ module.exports = class Agents {
 
     listAgentSnapshots(projectId, token, agentName) {
         const endpoint = `${this.endpointV4(projectId)}/agents/${encodeURIComponent(agentName)}/snapshots`;
-        debug('listAgentSnapshots(%s, %s) => %s', agentName, endpoint);
+        debug('listAgentSnapshots(%s) => %s', agentName, endpoint);
         return got
             .get(endpoint, {
                 headers: { Authorization: `Bearer ${token}` },
@@ -96,7 +96,7 @@ module.exports = class Agents {
 
     describeAgentSnapshot(projectId, token, snapshotId, output) {
         const endpoint = `${this.endpointV4(projectId)}/snapshots/${snapshotId}?deps=true`;
-        debug('describeAgentSnapshot(%s, %s) => %s', snapshotId, endpoint);
+        debug('describeAgentSnapshot(%s) => %s', snapshotId, endpoint);
         return got
             .get(endpoint, {
                 headers: { Authorization: `Bearer ${token}` },
@@ -108,7 +108,7 @@ module.exports = class Agents {
 
     createAgentSnapshot(projectId, token, snapshot) {
         const endpoint = `${this.endpointV4(projectId)}/agents/${encodeURIComponent(snapshot.agentName)}/snapshots`;
-        debug('getAgentSnapshot=> %s', endpoint);
+        debug('createAgentSnapshot(%s)=> %s', snapshot, endpoint);
         return got
             .post(endpoint, {
                 headers: { Authorization: `Bearer ${token}` },

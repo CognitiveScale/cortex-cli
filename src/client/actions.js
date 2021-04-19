@@ -59,7 +59,7 @@ module.exports = class Actions {
 
     listActions(projectId, token) {
         checkProject(projectId);
-        debug('listActions() => %s', this.endpointV3);
+        debug('listActions() => %s', this.endpointV4(projectId));
         return got
             .get(this.endpointV4(projectId), {
                 headers: { Authorization: `Bearer ${token}` },
@@ -121,6 +121,7 @@ module.exports = class Actions {
         checkProject(projectId);
         const canonicalJobId = Actions.getCanonicalJobId(jobId);
         const endpoint = `${this.endpointV4(projectId)}/${canonicalJobId}/tasks/${taskId}/logs`;
+        debug('taskLogs(%s, %s) => %s', jobId, taskId, endpoint);
         return got
             .get(endpoint, {
                 headers: { Authorization: `Bearer ${token}` },
@@ -135,6 +136,7 @@ module.exports = class Actions {
         checkProject(projectId);
         const canonicalJobId = Actions.getCanonicalJobId(jobId);
         const endpoint = `${this.endpointV4(projectId)}/${canonicalJobId}/tasks/${taskId}`;
+        debug('taskCancel(%s, %s) => %s', jobId, taskId, endpoint);
         return got
             .delete(endpoint, {
                 headers: { Authorization: `Bearer ${token}` },
@@ -149,6 +151,7 @@ module.exports = class Actions {
         checkProject(projectId);
         const canonicalJobId = Actions.getCanonicalJobId(jobId);
         const endpoint = `${this.endpointV4(projectId)}/${canonicalJobId}/tasks/${taskId}/status`;
+        debug('taskStatus(%s, %s) => %s', jobId, taskId, endpoint);
         return got
             .get(endpoint, {
                 headers: { Authorization: `Bearer ${token}` },
@@ -166,6 +169,7 @@ module.exports = class Actions {
         checkProject(projectId);
         const canonicalJobId = Actions.getCanonicalJobId(jobId);
         const endpoint = `${this.endpointV4(projectId)}/${canonicalJobId}/tasks`;
+        debug('jobListTasks(%s) => %s', jobId, endpoint);
         return got
             .get(endpoint, {
                 headers: { Authorization: `Bearer ${token}` },
@@ -180,6 +184,7 @@ module.exports = class Actions {
         checkProject(projectId);
         const canonicalJobId = Actions.getCanonicalJobId(jobId);
         const endpoint = `${this.endpointV4(projectId)}/${canonicalJobId}/stats`;
+        debug('taskStats(%s) => %s', jobId, endpoint);
         return got
             .get(endpoint, {
                 headers: { Authorization: `Bearer ${token}` },
@@ -193,6 +198,7 @@ module.exports = class Actions {
     listTasksByActivation(projectId, token, activationId) {
         checkProject(projectId);
         const endpoint = `${this.endpointV4(projectId)}/${activationId}`;
+        debug('listTasksByActivation(%s) => %s', activationId, endpoint);
         return got
             .get(endpoint, {
                 headers: { Authorization: `Bearer ${token}` },
@@ -206,6 +212,7 @@ module.exports = class Actions {
     getConfig(projectId, token) {
         checkProject(projectId);
         const endpoint = _.join([this.endpointV4(projectId), '_config'], '/');
+        debug('getConfig() => %s', endpoint);
         return got
             .get(endpoint, {
                 headers: { Authorization: `Bearer ${token}` },

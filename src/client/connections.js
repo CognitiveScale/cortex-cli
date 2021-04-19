@@ -42,6 +42,7 @@ module.exports = class Connections {
 
     listConnections(projectId, token) {
         const endpoint = `${this.endpoint(projectId)}`;
+        debug('listConnections() => %s', endpoint);
         return got
             .get(endpoint, {
                 headers: { Authorization: `Bearer ${token}` },
@@ -53,7 +54,7 @@ module.exports = class Connections {
 
     async saveConnection(projectId, token, connObj) {
         const endpoint = `${this.endpoint(projectId)}`;
-        debug('saveConnection(%s) => %s', connObj.name, this.endpoint(projectId));
+        debug('saveConnection(%s) => %s', connObj.name, endpoint);
         try {
             const message = await got
             .post(endpoint, {
@@ -83,7 +84,7 @@ module.exports = class Connections {
          name, title, description, connectionType, allowWrite, tags, params,
     }) {
         const url = `${this.cortexUrl}/fabric/v4/projects/${projectId}/connectiontest`;
-        debug('saveConnection(%s) => %s', name, url);
+        debug('testConnection(%s) => %s', name, url);
         try {
             const message = await got
                 .post(url, {
@@ -101,6 +102,7 @@ module.exports = class Connections {
 
     listConnectionsTypes(token) {
         const endpoint = `${this.cortexUrl}/fabric/v4/connectiontypes`;
+        debug('listConnectionsTypes() => %s', endpoint);
           return got
             .get(endpoint, {
                 headers: { Authorization: `Bearer ${token}` },

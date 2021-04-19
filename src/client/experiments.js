@@ -92,7 +92,7 @@ module.exports = class Experiments {
 
     deleteRun(projectId, token, experimentName, runId) {
         const endpoint = `${this.endpoint(projectId)}/${encodeURIComponent(experimentName)}/runs/${runId}`;
-        debug('deleteRun(%s) => %s', runId, endpoint);
+        debug('deleteRun(%s, %s) => %s', experimentName, runId, endpoint);
         return got
             .delete(endpoint, {
                 headers: { Authorization: `Bearer ${token}` },
