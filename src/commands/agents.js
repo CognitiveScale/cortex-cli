@@ -230,14 +230,8 @@ module.exports.ListActivationsCommand = class {
                 } else {
                     const tableSpec = [
                         { column: 'Activation Id', field: 'activationId', width: 38 },
-                        { column: 'Type', field: 'type', width: 20 },
-                        { column: 'Status', field: 'status', width: 15 },
-                        { column: 'Start', field: 'start', width: 15 },
-                        { column: 'End', field: 'end', width: 15 },
-                        { column: 'Session Id', field: 'sessionId', width: 38 },
                     ];
-
-                    printTable(tableSpec, result);
+                    printTable(tableSpec, _.map(result, r => ({ 'activationId': r })));
                 }
             } else {
                 printError(`Failed to list activations for instance ${agentName}: ${response.message}`, options);
