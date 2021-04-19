@@ -46,7 +46,7 @@
     "graphql-request": "3.3.0",
     "is-installed-globally": "0.3.1",
     "jmespath": "0.15.0",
-    "jose": "2.0.2",
+    "jose": "2.0.5",
     "js-yaml": "3.13.1",
     "lodash": "4.17.20",
     "moment": "2.24.0",
