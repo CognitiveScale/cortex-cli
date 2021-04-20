@@ -138,11 +138,11 @@ program
     .option('--project [project]', 'The project to use')
     .option('--json', 'Output results using JSON')
     .option('--query [query]', 'A JMESPath query to use in filtering the response data.')
-    .option('--startBefore [timestamp]', 'A timestamp that activations must have started before.')
-    .option('--startAfter [timestamp]', 'A timestamp that activations must have started after.')
-    .option('--endBefore [timestamp]', 'A timestamp that activations must have ended before.')
-    .option('--endAfter [timestamp]', 'A timestamp that activations must have ended after.')
-    .option('--status [status]', 'Filter activations by status [complete|failed].')
+    .option('--startBefore [timestamp]', 'Filters activations to include those that started before the specified timestamp.')
+    .option('--startAfter [timestamp]', 'Filters activations to include those that started after the specified timestamp.')
+    .option('--endBefore [timestamp]', 'Filters activations to include those that ended before the specified timestamp.')
+    .option('--endAfter [timestamp]', 'Filters activations to include those that ended after the specified timestamp.')
+    .option('--status [status]', 'Filters activations by status [complete|error].')
     .action(withCompatibilityCheck((agentName, options) => {
         try {
             new ListActivationsCommand(program).execute(agentName, options);
