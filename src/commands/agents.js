@@ -208,12 +208,19 @@ module.exports.ListActivationsCommand = class {
         this.program = program;
     }
 
-    execute(instanceId, options) {
+    execute(agentName, options) {
         const profile = loadProfile(options.profile);
-        debug('%s.listActivations(%s)', profile.name, instanceId);
+        debug('%s.listActivations(%s)', profile.name, agentName);
 
         const agents = new Agents(profile.url);
-        agents.listActivations(options.project || profile.project, profile.token, instanceId).then((response) => {
+        // TODO validate param types?
+        const queryParams = {};
+        if (options.startBefore) queryParams.startBefore = options.startBefore;
+        if (options.startAfter) queryParams.startAfter = options.startAfter;
+        if (options.endBefore) queryParams.endBefore = options.endBefore;
+        if (options.endAfter) queryParams.endAfter = options.endAfter;
+        if (options.status) queryParams.status = options.status;
+        agents.listActivations(options.project || profile.project, profile.token, agentName, queryParams).then((response) => {
             if (response.success) {
                 let result = response.result.activations;
                 if (options.query) result = filterObject(result, options);
@@ -223,21 +230,15 @@ module.exports.ListActivationsCommand = class {
                 } else {
                     const tableSpec = [
                         { column: 'Activation Id', field: 'activationId', width: 38 },
-                        { column: 'Type', field: 'type', width: 20 },
-                        { column: 'Status', field: 'status', width: 15 },
-                        { column: 'Start', field: 'start', width: 15 },
-                        { column: 'End', field: 'end', width: 15 },
-                        { column: 'Session Id', field: 'sessionId', width: 38 },
                     ];
-
-                    printTable(tableSpec, result);
+                    printTable(tableSpec, _.map(result, r => ({ activationId: r })));
                 }
             } else {
-                printError(`Failed to list activations for instance ${instanceId}: ${response.message}`, options);
+                printError(`Failed to list activations for instance ${agentName}: ${response.message}`, options);
             }
         })
             .catch((err) => {
-                printError(`Failed to list activations for instance ${instanceId}: ${err.status} ${err.message}`, options);
+                printError(`Failed to list activations for instance ${agentName}: ${err.status} ${err.message}`, options);
             });
     }
 };
