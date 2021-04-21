@@ -16,7 +16,7 @@
 
 const debug = require('debug')('cortex:cli');
 const { got } = require('./apiutils');
-const { constructError, getUserAgent } = require('../commands/utils');
+const { constructError, getUserAgent, checkProject } = require('../commands/utils');
 
 module.exports = class Connections {
     constructor(cortexUrl) {
@@ -24,23 +24,8 @@ module.exports = class Connections {
         this.cortexUrl = cortexUrl;
     }
 
-    async queryConnection(projectId, token, connectionName, queryObject) {
-        const endpoint = `${this.endpoint(projectId)}/${encodeURIComponent(connectionName)}/query`;
-        debug('queryConnection(%s) => %s', connectionName, endpoint);
-        try {
-            const message = await got
-                .post(endpoint, {
-                    headers: { Authorization: `Bearer ${token}` },
-                    'user-agent': getUserAgent(),
-                    json: queryObject,
-            }).json();
-            return { success: true, message };
-        } catch (err) {
-            return constructError(err);
-        }
-    }
-
     listConnections(projectId, token) {
+        checkProject(projectId);
         const endpoint = `${this.endpoint(projectId)}`;
         debug('listConnections() => %s', endpoint);
         return got
@@ -53,6 +38,7 @@ module.exports = class Connections {
     }
 
     async saveConnection(projectId, token, connObj) {
+        checkProject(projectId);
         const endpoint = `${this.endpoint(projectId)}`;
         debug('saveConnection(%s) => %s', connObj.name, endpoint);
         try {
@@ -69,6 +55,7 @@ module.exports = class Connections {
     }
 
     describeConnection(projectId, token, connectionName) {
+        checkProject(projectId);
         const endpoint = `${this.endpoint(projectId)}/${encodeURIComponent(connectionName)}`;
         debug('describeConnection(%s) => %s', connectionName, endpoint);
         return got
@@ -78,26 +65,6 @@ module.exports = class Connections {
             }).json()
             .then(result => ({ success: true, result }))
             .catch(err => constructError(err));
-    }
-
-    async testConnection(projectId, token, {
-         name, title, description, connectionType, allowWrite, tags, params,
-    }) {
-        const url = `${this.cortexUrl}/fabric/v4/projects/${projectId}/connectiontest`;
-        debug('testConnection(%s) => %s', name, url);
-        try {
-            const message = await got
-                .post(url, {
-                    headers: { Authorization: `Bearer ${token}` },
-                    'user-agent': getUserAgent(),
-                    json: {
-                        name, title, description, connectionType, allowWrite, tags, params,
-                    },
-                }).json();
-            return { success: true, message };
-        } catch (err) {
-            return constructError(err);
-        }
     }
 
     listConnectionsTypes(token) {
