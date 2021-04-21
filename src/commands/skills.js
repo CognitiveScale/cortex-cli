@@ -117,6 +117,51 @@ module.exports.DescribeSkillCommand = class DescribeSkillCommand {
     }
 };
 
+module.exports.UndeploySkillCommand = class UndeploySkillCommand {
+    constructor(program) {
+        this.program = program;
+    }
+
+    execute(skillName, options) {
+        const profile = loadProfile(options.profile);
+        debug('%s.executeUndeploySkill(%s)', profile.name, skillName);
+        const catalog = new Catalog(profile.url);
+        catalog.unDeploySkill(options.project || profile.project, profile.token, skillName, options.verbose).then((response) => {
+            if (response.success) {
+                printSuccess(`Undeploy skill ${skillName}: ${response.message}`, options);
+            } else {
+                printError(`Failed to Undeploy skill ${skillName}: ${response.message}`, options);
+            }
+        })
+            .catch((err) => {
+                printError(`Failed to Undeploy skill ${skillName}: ${err.status} ${err.message}`, options);
+            });
+    }
+};
+
+module.exports.DeploySkillCommand = class DeploySkillCommand {
+    constructor(program) {
+        this.program = program;
+    }
+
+    execute(skillName, options) {
+        const profile = loadProfile(options.profile);
+        debug('%s.executeDeploySkill(%s)', profile.name, skillName);
+
+        const catalog = new Catalog(profile.url);
+        catalog.deploySkill(options.project || profile.project, profile.token, skillName, options.verbose).then((response) => {
+            if (response.success) {
+                printSuccess(`Deployed skill ${skillName}: ${response.message}`, options);
+            } else {
+                printError(`Failed to deploy skill ${skillName}: ${response.message}`, options);
+            }
+        })
+            .catch((err) => {
+                printError(`Failed to deploy skill ${skillName}: ${err.status} ${err.message}`, options);
+            });
+    }
+};
+
 module.exports.InvokeSkillCommand = class InvokeSkillCommand {
     constructor(program) {
         this.program = program;
