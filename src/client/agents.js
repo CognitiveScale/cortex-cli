@@ -16,7 +16,7 @@
 
 const debug = require('debug')('cortex:cli');
 const { got } = require('./apiutils');
-const { constructError, getUserAgent } = require('../commands/utils');
+const { constructError, getUserAgent, checkProject } = require('../commands/utils');
 
 module.exports = class Agents {
     constructor(cortexUrl) {
@@ -25,6 +25,7 @@ module.exports = class Agents {
     }
 
     invokeAgentService(projectId, token, agentName, serviceName, params) {
+        checkProject(projectId);
         const endpoint = `${this.endpointV4(projectId)}/agentinvoke/${encodeURIComponent(agentName)}/services/${serviceName}`;
         debug('invokeAgentService(%s, %s) => %s', agentName, serviceName, endpoint);
         return got
@@ -38,6 +39,7 @@ module.exports = class Agents {
     }
 
     invokeSkill(projectId, token, skillName, inputName, params) {
+        checkProject(projectId);
         const endpoint = `${this.endpointV4(projectId)}/skillinvoke/${encodeURIComponent(skillName)}/inputs/${inputName}`;
         debug('invokeSkill(%s, %s) => %s', skillName, inputName, endpoint);
         return got
@@ -51,6 +53,7 @@ module.exports = class Agents {
     }
 
     getActivation(projectId, token, activationId, verbose) {
+        checkProject(projectId);
         const endpoint = `${this.endpointV4(projectId)}/activations/${activationId}`;
         debug('getActivation(%s) => %s', activationId, endpoint);
         const opts = {
@@ -67,6 +70,7 @@ module.exports = class Agents {
     }
 
     listActivations(projectId, token, agentName, params) {
+        checkProject(projectId);
         const endpoint = `${this.endpointV4(projectId)}/agentinvoke/${agentName}/activations`;
         debug('listActivations(%s) => %s', agentName, endpoint);
         const opts = {
@@ -83,6 +87,7 @@ module.exports = class Agents {
     }
 
     listAgentSnapshots(projectId, token, agentName) {
+        checkProject(projectId);
         const endpoint = `${this.endpointV4(projectId)}/agents/${encodeURIComponent(agentName)}/snapshots`;
         debug('listAgentSnapshots(%s) => %s', agentName, endpoint);
         return got
@@ -95,6 +100,7 @@ module.exports = class Agents {
     }
 
     describeAgentSnapshot(projectId, token, snapshotId, output) {
+        checkProject(projectId);
         const endpoint = `${this.endpointV4(projectId)}/snapshots/${snapshotId}?deps=true`;
         debug('describeAgentSnapshot(%s) => %s', snapshotId, endpoint);
         return got
@@ -107,6 +113,7 @@ module.exports = class Agents {
     }
 
     createAgentSnapshot(projectId, token, snapshot) {
+        checkProject(projectId);
         const endpoint = `${this.endpointV4(projectId)}/agents/${encodeURIComponent(snapshot.agentName)}/snapshots`;
         debug('createAgentSnapshot(%s)=> %s', snapshot, endpoint);
         return got
