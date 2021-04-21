@@ -117,19 +117,18 @@ module.exports.DescribeSkillCommand = class DescribeSkillCommand {
     }
 };
 
-module.exports.UndeploySkillCommand = class RedeploySkillCommand {
+module.exports.UndeploySkillCommand = class UndeploySkillCommand {
     constructor(program) {
         this.program = program;
     }
 
     execute(skillName, options) {
         const profile = loadProfile(options.profile);
-        debug('%s.executeUneDeploySkill(%s)', profile.name, skillName);
-
+        debug('%s.executeUndeploySkill(%s)', profile.name, skillName);
         const catalog = new Catalog(profile.url);
         catalog.unDeploySkill(options.project || profile.project, profile.token, skillName, options.verbose).then((response) => {
             if (response.success) {
-                printSuccess(`Undeployed skill ${skillName}: ${response.message}`, options);
+                printSuccess(`Undeploy skill ${skillName}: ${response.message}`, options);
             } else {
                 printError(`Failed to Undeploy skill ${skillName}: ${response.message}`, options);
             }
