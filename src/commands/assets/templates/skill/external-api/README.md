@@ -5,6 +5,9 @@ This skill type allows users to wrap an external REST API as a Cortex Fabric Ski
 1. Update `skill.yaml` with `HTTP Method`, `URL`, `Path` and `headers` per the targeted external API
 2. Deploy the Skill `cortex skills save -y skill.yaml --project <Project Name>`
 
+A Makefile is provided to do these steps. Set environment variable `PROJECT_NAME` (Cortex Project Name) and use Makefile to deploy skill.
+`make all` will deploy Cortex Skill, and then invoke skill to test.
+
 The Skill is added to the Cortex Fabric catalog and is available for selection when building interventions or Agents.
 
 Skills that are deployed may be invoked (run) either independently or within an agent.
