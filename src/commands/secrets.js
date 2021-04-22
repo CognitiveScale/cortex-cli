@@ -74,7 +74,7 @@ module.exports.ReadSecretsCommand = class {
                 else {
                     const tableSpec = [
                         { column: 'Key Name', field: 'keyName', width: 50 },
-                        { column: 'Value', field: 'value', width: 50 },
+                        { column: 'Value (Not Shown)', field: 'value', width: 50 },
                     ];
                     printTable(tableSpec, [{ keyName, value: JSON.stringify(getOr(undefined, 'value', result), null, 2) }]);
                 }
@@ -110,16 +110,18 @@ module.exports.WriteSecretsCommand = class {
         }
 
         if (isUndefined(data)) {
-          return printError('Failed to write secure secret : no value specified', options);
+          return printError('Failed to write secret : no value specified', options);
         }
 
         const secrets = new Secrets(profile.url);
         return secrets.writeSecret(options.project || profile.project, profile.token, keyName, data).then((response) => {
-                const result = filterObject(response.result, options);
-                printSuccess(result.message, options);
+            if (response.success) {
+                return printSuccess(response.message, options);
+            }
+            return printError(`Failed to write secret: ${response.status} ${response.message}`, options);
         })
         .catch((err) => {
-            printError(`Failed to write secure secret : ${err.status} ${err.message}`, options);
+            printError(`Failed to write secret : ${err.status} ${err.message}`, options);
         });
     }
 };

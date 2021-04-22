@@ -62,7 +62,7 @@ module.exports = class Secrets {
                 'user-agent': getUserAgent(),
                 json: body,
             }).json()
-            .then(result => ({ success: true, result }))
+            .then(result => ({ ...result }))
             .catch(err => constructError(err));
     }
 };
