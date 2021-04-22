@@ -85,7 +85,7 @@ module.exports = class Catalog {
                 'user-agent': getUserAgent(),
                 searchParams: { verbose },
             }).json()
-            .then(res => ({ success: true, skill: res }))
+            .then(res => ({ ...res }))
             .catch(err => constructError(err));
     }
 
@@ -99,7 +99,7 @@ module.exports = class Catalog {
                 'user-agent': getUserAgent(),
                 searchParams: { verbose },
             }).json()
-            .then(res => ({ success: true, skill: res }))
+            .then(res => ({ ...res }))
             .catch(err => constructError(err));
     }
 
