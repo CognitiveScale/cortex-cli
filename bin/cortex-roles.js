@@ -125,7 +125,7 @@ program.command('assign <role>')
     .option('--delete', 'Unassign users from role')
     .action(withCompatibilityCheck((role, options) => {
         try {
-            nonEmptyStringParser('user names must not be empty')(options.users)
+            nonEmptyStringParser('user names must not be empty')(options.users);
             new RoleAssignCommand(program).execute(role, options);
         } catch (err) {
             console.error(chalk.red(err.message));
