@@ -19,7 +19,7 @@ const program = require('./commander');
 
 function nonEmptyStringParser(message = 'empty string argument') {
     return function parseNonEmptyString(arg) {
-        if (_.isEmpty(arg)) {
+        if (_.isEmpty(arg) || (_.isArray(arg) && arg.filter(val => _.isEmpty(val)).length > 0)) {
             const error = `error: ${message}`;
             console.error(error);
             program._exit(1, 'cortex.invalidStringArgument', error);
