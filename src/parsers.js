@@ -17,14 +17,21 @@
 const _ = require('lodash');
 const program = require('./commander');
 
-function nonEmptyStringParser(message = 'empty string argument') {
-    return function parseNonEmptyString(arg) {
-        if (_.isEmpty(arg)) {
+function nonEmptyStringParser(opts) {
+    const { message = 'empty string argument', variadic = false } = opts;
+    return function parseNonEmptyString(value, oldValue) {
+        if (_.isEmpty(value)) {
             const error = `error: ${message}`;
             console.error(error);
             program._exit(1, 'cortex.invalidStringArgument', error);
         }
-        return arg;
+        if (variadic) {
+            if (!Array.isArray(oldValue)) {
+                return [value];
+            }
+            return oldValue.concat(value);
+        }
+        return value;
     };
 }
 
