@@ -15,10 +15,13 @@
  */
 
 const debug = require('debug')('cortex:cli');
-const { loadProfile } = require('../config');
+const URL = require('url-parse');
 const { printSuccess, printError } = require('./utils');
-const Actions = require('../client/actions');
 const { callMe } = require('../commands/utils');
+const {
+    generateJwt,
+    loadProfile,
+} = require('../config');
 
 module.exports.DockerLoginCommand = class {
     constructor(program) {
@@ -27,12 +30,15 @@ module.exports.DockerLoginCommand = class {
 
     async execute(options) {
         const profile = loadProfile(options.profile);
-        debug('%s.executeDockerLogin()', profile.name);
+        const ttl = options.ttl || '14d';
 
-        const action = new Actions(profile.url);
-        const registryUrl = await action._cortexRegistryUrl(options.project || profile.project, profile.token);
         try {
-            await callMe(`docker login -u cli --password ${profile.token} ${registryUrl}`);
+            // TODO fetch this from new endpoint or maybe store this in the profile??
+            const registryUrl = (new URL(profile.url)).hostname.replace("api", "private-registry");
+            const jwt = generateJwt(profile, ttl);
+            const command = `docker login -u cli --password ${jwt} ${registryUrl}`;
+            debug('%s.executeDockerLogin(%s)', profile.name, command);
+            await callMe(command);
             printSuccess(JSON.stringify('Login Succeeded', null, 2), options);
         } catch (err) {
             printError(`Failed to docker login: ${err.message || err}`, options);

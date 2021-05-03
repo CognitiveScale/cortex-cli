@@ -162,8 +162,9 @@ module.exports.GetAccessToken = class {
 
     execute(options) {
         const profile = loadProfile(options.profile);
+        const ttl = options.ttl || '1d';
         debug('%s.getAccesToken', profile.name);
-        const jwt = generateJwt(profile, '1d');
+        const jwt = generateJwt(profile, ttl);
         return printSuccess(jwt, options);
     }
 };

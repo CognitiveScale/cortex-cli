@@ -47,13 +47,10 @@ program
     .option('--profile [profile]', 'The profile to use')
     .option('--project [project]', 'The project to use')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
-    .action(() => {
+    .option('--ttl [time]', 'The amount of time for this login to remain active (ex. "1d")', "1d")
+    .action((options) => {
         try {
-            new GetAccessToken(program).execute({
-                profile: program.profile,
-                project: program.project,
-                color: program.color,
-            });
+            new GetAccessToken(program).execute(options);
         } catch (err) {
             console.error(chalk.red(err.message));
         }
