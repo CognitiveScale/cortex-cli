@@ -34,7 +34,7 @@ module.exports.DockerLoginCommand = class {
 
         try {
             // TODO fetch this from new endpoint or maybe store this in the profile??
-            const registryUrl = (new URL(profile.url)).hostname.replace("api", "private-registry");
+            const registryUrl = (new URL(profile.url)).hostname.replace('api', 'private-registry');
             const jwt = generateJwt(profile, ttl);
             const command = `docker login -u cli --password ${jwt} ${registryUrl}`;
             debug('%s.executeDockerLogin(%s)', profile.name, command);
