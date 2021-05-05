@@ -35,7 +35,7 @@ program
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
     .option('--project [project]', 'The project to use')
-    .option('--ttl [time]', 'The amount of time for this login to remain active (ex. "14d")', "14d")
+    .option('--ttl [time]', 'The amount of time for this login to remain active (ex. "14d")', '14d')
     .action(withCompatibilityCheck((options) => {
         try {
             new DockerLoginCommand(program).execute(options);
