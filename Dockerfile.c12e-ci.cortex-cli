@@ -1,4 +1,4 @@
-FROM c12e/nodejs:8.9.4
+FROM c12e/nodejs:12.22.0-ubi8
 
 COPY . /from_ci_cd_build
 
