@@ -171,16 +171,16 @@ module.exports.getSourceFiles = (source, cb) => {
 };
 
 function round(value, precision) {
-    const multiplier = Math.pow(10, precision || 0);
+    const multiplier = 10 ** (precision || 0);
     return Math.floor(value * multiplier) / multiplier;
 }
 
 module.exports.humanReadableFileSize = (sizeInBytes) => {
     const ranges = {
-        K: Math.pow(10, 3),
-        M: Math.pow(10, 6),
-        G: Math.pow(10, 9),
-        T: Math.pow(10, 12),
+        K: 10 ** 3,
+        M: 10 ** 6,
+        G: 10 ** 9,
+        T: 10 ** 12,
     };
     if (sizeInBytes < ranges.K) {
         return `${sizeInBytes}B`;
@@ -307,3 +307,12 @@ const pkg = findPackageJson(__dirname).next().value;
 module.exports.getUserAgent = function getUserAgent() {
     return `${pkg.name}/${pkg.version} (${os.platform()}; ${os.arch()}; ${os.release()}; ${osName()})`;
 };
+
+module.exports.LISTTABLEFORMAT = [
+    { column: 'Name', field: 'name', width: 30 },
+    { column: 'Title', field: 'title', width: 40 },
+    { column: 'Description', field: 'description', width: 50 },
+    { column: 'Modified', field: 'updatedAt', width: 26 },
+    { column: 'Author', field: 'createdBy', width: 25 },
+
+];

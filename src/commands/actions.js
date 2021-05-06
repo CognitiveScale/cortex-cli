@@ -16,8 +16,10 @@
 const _ = require('lodash');
 const fs = require('fs');
 const debug = require('debug')('cortex:cli');
+const moment = require('moment');
 const { loadProfile } = require('../config');
 const Actions = require('../client/actions');
+
 const {
  printSuccess, printError, filterObject, parseObject, printTable,
 } = require('./utils');
@@ -42,12 +44,13 @@ module.exports.ListActionsCommand = class {
                         printSuccess(JSON.stringify(result, null, 2), options);
                     } else {
                         const tableSpec = [
-                            { column: 'Name', field: 'name', width: 50 },
+                            { column: 'Name', field: 'name', width: 30 },
+                            { column: 'Type', field: 'type', width: 8 },
                             { column: 'Image', field: 'image', width: 50 },
-                            { column: 'Created On', field: 'createdAt', width: 26 },
+                            { column: 'Updated', field: 'updatedAt', width: 26 },
+                            { column: 'Author', field: 'createdBy', width: 26 },
                         ];
-
-                        printTable(tableSpec, result);
+                        printTable(tableSpec, result, o => ({ ...o, updatedAt: o.updatedAt ? moment(o.updatedAt).fromNow() : '-' }));
                     }
                 } else {
                     printError(`Failed to list actions: ${response.status} ${response.message}`, options);

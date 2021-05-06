@@ -26,7 +26,7 @@ const {
     DescribeActionCommand,
     DeleteActionCommand,
     DeployActionCommand,
-    // TODO readd logs/task calls
+    // TODO re-add logs/task calls
     // GetLogsCommand,
     // JobTaskListActionCommand,
     // TaskCancelActionCommand,

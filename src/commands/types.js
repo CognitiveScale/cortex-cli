@@ -16,8 +16,11 @@
 
 const fs = require('fs');
 const debug = require('debug')('cortex:cli');
+const moment = require('moment');
 const { loadProfile } = require('../config');
 const Catalog = require('../client/catalog');
+const { LISTTABLEFORMAT } = require('./utils');
+
 const {
  printSuccess, printError, filterObject, parseObject, printTable, 
 } = require('./utils');
@@ -69,13 +72,7 @@ module.exports.ListTypesCommand = class ListTypesCommand {
                 if (options.json) {
                     printSuccess(JSON.stringify(result, null, 2), options);
                 } else {
-                    const tableSpec = [
-                        { column: 'Title', field: 'title', width: 50 },
-                        { column: 'Name', field: 'name', width: 50 },
-                        { column: 'Version', field: '_version', width: 12 },
-                    ];
-
-                    printTable(tableSpec, result);
+                    printTable(LISTTABLEFORMAT, result, o => ({ ...o, updatedAt: o.updatedAt ? moment(o.updatedAt).fromNow() : '-' }));
                 }
             } else {
                 printError(`Failed to list types: ${response.status} ${response.message}`, options);
