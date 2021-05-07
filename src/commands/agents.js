@@ -17,9 +17,12 @@
 const fs = require('fs');
 const debug = require('debug')('cortex:cli');
 const _ = require('lodash');
+const moment = require('moment');
 const { loadProfile } = require('../config');
 const Catalog = require('../client/catalog');
 const Agents = require('../client/agents');
+const { LISTTABLEFORMAT } = require('./utils');
+
 const {
  printSuccess, printError, filterObject, parseObject, printTable, formatValidationPath,
 } = require('./utils');
@@ -79,13 +82,7 @@ module.exports.ListAgentsCommand = class ListAgentsCommand {
                 if (options.json) {
                     printSuccess(JSON.stringify(result, null, 2), options);
                 } else {
-                    const tableSpec = [
-                        { column: 'Name', field: 'name', width: 50 },
-                        { column: 'Title', field: 'title', width: 25 },
-                        { column: 'Description', field: 'description', width: 50 },
-                        { column: 'Created On', field: 'createdAt', width: 26 },
-                    ];
-                    printTable(tableSpec, result);
+                    printTable(LISTTABLEFORMAT, result, o => ({ ...o, updatedAt: o.updatedAt ? moment(o.updatedAt).fromNow() : '-' }));
                 }
             } else {
                 printError(`Failed to list agents: ${response.status} ${response.message}`, options);

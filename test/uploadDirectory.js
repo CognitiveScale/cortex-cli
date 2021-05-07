@@ -75,7 +75,7 @@ describe('Human Readable File Size', () => {
     });
 
     it('1MB less some', (done) => {
-        const sizeInBytes = Math.pow(10, 3) - 1;
+        const sizeInBytes = (10 ** 3) - 1;
         const formattedFileSize = humanReadableFileSize(sizeInBytes);
         expect(formattedFileSize).to.have.string('999B');
         done();
@@ -89,14 +89,14 @@ describe('Human Readable File Size', () => {
     });
 
     it('1k less', (done) => {
-        const sizeInBytes = Math.pow(10, 6) - 1;
+        const sizeInBytes = (10 ** 6) - 1;
         const formattedFileSize = humanReadableFileSize(sizeInBytes);
         expect(formattedFileSize).to.have.string('999.9K');
         done();
     });
 
     it('several GB', (done) => {
-        const sizeInBytes = 32 * Math.pow(10, 9) + 345 * Math.pow(10, 6);
+        const sizeInBytes = 32 * (10 ** 9) + 345 * (10 ** 6);
         const formattedFileSize = humanReadableFileSize(sizeInBytes);
         expect(formattedFileSize).to.have.string('32.3G');
         done();
