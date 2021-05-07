@@ -47,7 +47,7 @@ module.exports.ListActionsCommand = class {
                             { column: 'Name', field: 'name', width: 30 },
                             { column: 'Type', field: 'type', width: 8 },
                             { column: 'Image', field: 'image', width: 50 },
-                            { column: 'Updated', field: 'updatedAt', width: 26 },
+                            { column: 'Modified', field: 'updatedAt', width: 26 },
                             { column: 'Author', field: 'createdBy', width: 26 },
                         ];
                         printTable(tableSpec, result, o => ({ ...o, updatedAt: o.updatedAt ? moment(o.updatedAt).fromNow() : '-' }));
