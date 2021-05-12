@@ -125,13 +125,13 @@ module.exports.UndeploySkillCommand = class UndeploySkillCommand {
         const catalog = new Catalog(profile.url);
         catalog.unDeploySkill(options.project || profile.project, profile.token, skillName, options.verbose).then((response) => {
             if (response.success) {
-                printSuccess(`Undeploy skill ${skillName}: ${response.message}`, options);
+                printSuccess(`Undeploy Skill ${skillName}: ${response.message}`, options);
             } else {
-                printError(`Failed to Undeploy skill ${skillName}: ${response.message}`, options);
+                printError(`Failed to Undeploy Skill ${skillName}: ${response.message}`, options);
             }
         })
             .catch((err) => {
-                printError(`Failed to Undeploy skill ${skillName}: ${err.status} ${err.message}`, options);
+                printError(`Failed to Undeploy Skill ${skillName}: ${err.status} ${err.message}`, options);
             });
     }
 };
@@ -148,13 +148,13 @@ module.exports.DeploySkillCommand = class DeploySkillCommand {
         const catalog = new Catalog(profile.url);
         catalog.deploySkill(options.project || profile.project, profile.token, skillName, options.verbose).then((response) => {
             if (response.success) {
-                printSuccess(`Deployed skill ${skillName}: ${response.message}`, options);
+                printSuccess(`Deployed Skill ${skillName}: ${response.message}`, options);
             } else {
-                printError(`Failed to deploy skill ${skillName}: ${response.message}`, options);
+                printError(`Failed to deploy Skill ${skillName}: ${response.message}`, options);
             }
         })
             .catch((err) => {
-                printError(`Failed to deploy skill ${skillName}: ${err.status} ${err.message}`, options);
+                printError(`Failed to deploy Skill ${skillName}: ${err.status} ${err.message}`, options);
             });
     }
 };
