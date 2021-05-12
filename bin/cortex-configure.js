@@ -47,7 +47,7 @@ program
     .option('--profile [profile]', 'The profile to use')
     .option('--project [project]', 'The project to use')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
-    .option('--ttl [time]', 'The amount of time for this login to remain active (ex. "1d")', '1d')
+    .option('--ttl [time]', 'The amount of time for this login to remain active, expressed as a number of hours, days, or weeks (e.g. 1h, 2d, 2w)', '1d')
     .action((options) => {
         try {
             new GetAccessToken(program).execute(options);

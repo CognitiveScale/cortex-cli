@@ -67,7 +67,7 @@ program
 // Write Secure Value
 program
     .command('save <keyName> [value]')
-    .description('Save or overwrite a secure value. By default, values are stored as strings but can also be saved as JSON or YAML values.')
+    .description('Save or overwrite a secure value. By default values are stored as strings but can also be saved as JSON or YAML.')
     .option('--no-compat', 'Ignore API compatibility checks')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--data [data]', 'JSON value to save')

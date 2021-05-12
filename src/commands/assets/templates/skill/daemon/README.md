@@ -14,8 +14,8 @@ Note:
 
 #### Steps
 
-A Makefile is provided to do these steps. Set environment variables `DOCKER_PREGISTRY_URL` (like <docker-registry-url>/<namespace-org>) and `PROJECT_NAME` (Cortex Project Name) and use Makefile to deploy skill.
-`make all` will build & push Docker image, deploy Cortex Action and Skill, and then invoke skill to test.
+A Makefile is provided to do these steps. Set environment variables `DOCKER_PREGISTRY_URL` (like <docker-registry-url>/<namespace-org>) and `PROJECT_NAME` (Cortex Project Name) and use Makefile to deploy Skill.
+`make all` will build and push Docker image, deploy Cortex Action and Skill, and then invoke Skill to test.
 
 1. Modify the main executable (`main.py` by default) run by the action image's entrypoint/command to handle the action's custom logic.
 2. Modify the `requirements.txt` file to provide packages or libraries that the action requires.
