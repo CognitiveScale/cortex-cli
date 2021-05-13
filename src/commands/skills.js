@@ -16,9 +16,12 @@
 const _ = require('lodash');
 const fs = require('fs');
 const debug = require('debug')('cortex:cli');
+const moment = require('moment');
 const { loadProfile } = require('../config');
 const Catalog = require('../client/catalog');
 const Agent = require('../client/agents');
+const { LISTTABLEFORMAT } = require('./utils');
+
 const {
  printSuccess, printError, filterObject, parseObject, printTable, formatValidationPath,
 } = require('./utils');
@@ -75,13 +78,7 @@ module.exports.ListSkillsCommand = class ListSkillsCommand {
                 if (options.json) {
                     printSuccess(JSON.stringify(result, null, 2), options);
                 } else {
-                    const tableSpec = [
-                        { column: 'Title', field: 'title', width: 50 },
-                        { column: 'Name', field: 'name', width: 50 },
-                        { column: 'Version', field: '_version', width: 12 },
-                    ];
-
-                    printTable(tableSpec, result);
+                    printTable(LISTTABLEFORMAT, _.sortBy(result, ['name']), o => ({ ...o, updatedAt: o.updatedAt ? moment(o.updatedAt).fromNow() : '-' }));
                 }
             } else {
                 printError(`Failed to list skills: ${response.status} ${response.message}`, options);
@@ -103,7 +100,7 @@ module.exports.DescribeSkillCommand = class DescribeSkillCommand {
         debug('%s.executeDescribeSkill(%s)', profile.name, skillName);
 
         const catalog = new Catalog(profile.url);
-        catalog.describeSkill(options.project || profile.project, profile.token, skillName).then((response) => {
+        catalog.describeSkill(options.project || profile.project, profile.token, skillName, options.verbose).then((response) => {
             if (response.success) {
                 const result = filterObject(response.skill, options);
                 printSuccess(JSON.stringify(result, null, 2), options);
@@ -114,6 +111,51 @@ module.exports.DescribeSkillCommand = class DescribeSkillCommand {
         .catch((err) => {
             printError(`Failed to describe skill ${skillName}: ${err.status} ${err.message}`, options);
         });
+    }
+};
+
+module.exports.UndeploySkillCommand = class UndeploySkillCommand {
+    constructor(program) {
+        this.program = program;
+    }
+
+    execute(skillName, options) {
+        const profile = loadProfile(options.profile);
+        debug('%s.executeUndeploySkill(%s)', profile.name, skillName);
+        const catalog = new Catalog(profile.url);
+        catalog.unDeploySkill(options.project || profile.project, profile.token, skillName, options.verbose).then((response) => {
+            if (response.success) {
+                printSuccess(`Undeploy Skill ${skillName}: ${response.message}`, options);
+            } else {
+                printError(`Failed to Undeploy Skill ${skillName}: ${response.message}`, options);
+            }
+        })
+            .catch((err) => {
+                printError(`Failed to Undeploy Skill ${skillName}: ${err.status} ${err.message}`, options);
+            });
+    }
+};
+
+module.exports.DeploySkillCommand = class DeploySkillCommand {
+    constructor(program) {
+        this.program = program;
+    }
+
+    execute(skillName, options) {
+        const profile = loadProfile(options.profile);
+        debug('%s.executeDeploySkill(%s)', profile.name, skillName);
+
+        const catalog = new Catalog(profile.url);
+        catalog.deploySkill(options.project || profile.project, profile.token, skillName, options.verbose).then((response) => {
+            if (response.success) {
+                printSuccess(`Deployed Skill ${skillName}: ${response.message}`, options);
+            } else {
+                printError(`Failed to deploy Skill ${skillName}: ${response.message}`, options);
+            }
+        })
+            .catch((err) => {
+                printError(`Failed to deploy Skill ${skillName}: ${err.status} ${err.message}`, options);
+            });
     }
 };
 

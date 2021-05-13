@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 const _ = require('lodash');
-const fs = require('fs');
-const path = require('path');
 const debug = require('debug')('cortex:cli');
 const { loadProfile } = require('../config');
 const Content = require('../client/content');
@@ -72,8 +70,6 @@ module.exports.UploadContent = class UploadContent {
         const contentClient = new Content(profile.url);
 
         const chunkSize = parseInt(options.chunkSize, 10);
-        // const chunkSize = parseInt(options.chunkSize);
-        const uploadSecure = _.partial(UploadContent.uploadSecure, contentClient, profile, options);
         const upload = _.partial(UploadContent.upload, contentClient, profile, options);
 
         if (options.recursive) {
@@ -108,27 +104,9 @@ module.exports.UploadContent = class UploadContent {
                     cbTest(filesDict);
                 }
             });
-        } else if (options.secure) {
-                uploadSecure(contentKey, filePath);
-            } else {
-                upload(contentKey, filePath);
-            }
-    }
-
-
-    static uploadSecure(contentClient, profile, options, contentKey, filePath) {
-        const fileContent = fs.readFileSync(filePath);
-        const fileBaseName = path.basename(filePath);
-
-        const secureContent = {};
-        secureContent[fileBaseName] = Buffer.from(fileContent).toString('base64');
-        contentClient.uploadSecureContent(options.project || profile.project, profile.token, contentKey, secureContent).then((response) => {
-            if (response.success) {
-                printSuccess('Secure content successfully uploaded.', options);
-            } else {
-                printError(`Failed to upload secure content: ${response.status} ${response.message}`, options);
-            }
-        });
+        } else {
+            upload(contentKey, filePath);
+        }
     }
 
     static upload(contentClient, profile, options, contentKey, filePath) {
@@ -184,31 +162,16 @@ module.exports.DownloadContent = class DownloadContent {
         const content = new Content(profile.url);
         const showProgress = !!options.progress;
 
-        // To download content from Secrets
-        if (options.secure) {
-            content.downloadSecureContent(options.project || profile.project, profile.token, contentKey).then((response) => {
-                if (response.success) {
-                    printSuccess(response.message, options);
-                } else {
-                    printError(`Failed to download secure content: ${response.status} ${response.message}`, options);
-                }
-            })
-                .catch((err) => {
-                    debug(err);
-                    printError(`Failed to download secure content: ${err.status} ${err.message}`, options);
-                });
-        } else {
-            content.downloadContent(options.project || profile.project, profile.token, contentKey, showProgress).then((response) => {
-                if (response.success) {
-                    // messages need to be on stderr as content is streamed to stdout
-                    console.error(response.message);
-                } else {
-                    printError(`Failed to download content: ${response.status} ${response.message}`, options);
-                }
-            }).catch((err) => {
-                    debug(err);
-                    printError(`Failed to download content: ${err.status} ${err.message}`, options);
-            });
-        }
+        content.downloadContent(options.project || profile.project, profile.token, contentKey, showProgress).then((response) => {
+            if (response.success) {
+                // messages need to be on stderr as content is streamed to stdout
+                console.error(response.message);
+            } else {
+                printError(`Failed to download content: ${response.status} ${response.message}`, options);
+            }
+        }).catch((err) => {
+                debug(err);
+                printError(`Failed to download content: ${err.status} ${err.message}`, options);
+        });
     }
 };

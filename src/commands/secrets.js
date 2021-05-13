@@ -21,81 +21,81 @@ const isUndefined = require('lodash/fp/isUndefined');
 const map = require('lodash/fp/map');
 
 const { loadProfile } = require('../config');
-const Variables = require('../client/variables');
+const Secrets = require('../client/secrets');
 const {
  printSuccess, printError, filterObject, parseObject, printTable,
 } = require('./utils');
 
-module.exports.ListVariablesCommand = class {
+module.exports.ListSecretsCommand = class {
     constructor(program) {
         this.program = program;
     }
 
     execute(options) {
         const profile = loadProfile(options.profile);
-        debug('%s.listVariables(%s)', profile.name);
+        debug('%s.listsecrets(%s)', profile.name);
 
-        const variables = new Variables(profile.url);
-        variables.listVariables(options.project || profile.project, profile.token)
+        const secrets = new Secrets(profile.url);
+        secrets.listSecrets(options.project || profile.project, profile.token)
             .then((response) => {
                 if (response.success) {
                     const result = filterObject(response.result, options);
                     if (options.json) printSuccess(JSON.stringify(result, null, 2), options);
                     else {
                         const tableSpec = [
-                            { column: 'Variable Key Name', field: 'keyName', width: 50 },
+                            { column: 'Secret Key Name', field: 'keyName', width: 50 },
                         ];
                         printTable(tableSpec, map(x => ({ keyName: x }), result));
                     }
                 } else {
-                    printError(`Failed to list variables: ${response.message}`, options);
+                    printError(`Failed to list secrets: ${response.message}`, options);
                 }
             })
             .catch((err) => {
-                printError(`Failed to list variables : ${err.status} ${err.message}`, options);
+                printError(`Failed to list secrets : ${err.status} ${err.message}`, options);
             });
     }
 };
 
-module.exports.ReadVariableCommand = class {
+module.exports.ReadSecretsCommand = class {
     constructor(program) {
         this.program = program;
     }
 
     execute(keyName, options) {
         const profile = loadProfile(options.profile);
-        debug('%s.readVariable(%s)', profile.name, keyName);
+        debug('%s.readsecret(%s)', profile.name, keyName);
 
-        const variables = new Variables(profile.url);
-        variables.readVariable(options.project || profile.project, profile.token, keyName).then((response) => {
+        const secrets = new Secrets(profile.url);
+        secrets.readSecret(options.project || profile.project, profile.token, keyName).then((response) => {
             if (response.success) {
                 const result = filterObject(response.result, options);
                 if (options.json) printSuccess(JSON.stringify(result, null, 2), options);
                 else {
                     const tableSpec = [
-                        { column: 'Variable Key Name', field: 'keyName', width: 50 },
-                        { column: 'Value', field: 'value', width: 50 },
+                        { column: 'Key Name', field: 'keyName', width: 50 },
+                        { column: 'Value (Not Shown)', field: 'value', width: 50 },
                     ];
                     printTable(tableSpec, [{ keyName, value: JSON.stringify(getOr(undefined, 'value', result), null, 2) }]);
                 }
             } else {
-                printError(`Failed to read secure variable : ${response.message}`, options);
+                printError(`Failed to read secure secret : ${response.message}`, options);
             }
         })
             .catch((err) => {
-                printError(`Failed to read secure variable : ${err.status} ${err.message}`, options);
+                printError(`Failed to read secure secret : ${err.status} ${err.message}`, options);
             });
     }
 };
 
-module.exports.WriteVariableCommand = class {
+module.exports.WriteSecretsCommand = class {
     constructor(program) {
         this.program = program;
     }
 
     execute(keyName, value, options) {
         const profile = loadProfile(options.profile);
-        debug('%s.writeVariable(%s)', profile.name, keyName);
+        debug('%s.writeSecret(%s)', profile.name, keyName);
 
         let data = value;
         if (options.data) {
@@ -110,16 +110,18 @@ module.exports.WriteVariableCommand = class {
         }
 
         if (isUndefined(data)) {
-          return printError('Failed to write secure variable : no value specified', options);
+          return printError('Failed to write secret : no value specified', options);
         }
 
-        const variables = new Variables(profile.url);
-        return variables.writeVariable(options.project || profile.project, profile.token, keyName, data).then((response) => {
-                const result = filterObject(response.result, options);
-                printSuccess(result.message, options);
+        const secrets = new Secrets(profile.url);
+        return secrets.writeSecret(options.project || profile.project, profile.token, keyName, data).then((response) => {
+            if (response.success) {
+                return printSuccess(response.message, options);
+            }
+            return printError(`Failed to write secret: ${response.status} ${response.message}`, options);
         })
         .catch((err) => {
-            printError(`Failed to write secure variable : ${err.status} ${err.message}`, options);
+            printError(`Failed to write secret : ${err.status} ${err.message}`, options);
         });
     }
 };

@@ -26,22 +26,59 @@ const {
     ListSkillsCommand,
     DescribeSkillCommand,
     InvokeSkillCommand,
+    DeploySkillCommand,
+    UndeploySkillCommand,
 } = require('../src/commands/skills');
 
 program.description('Work with Cortex Skills');
 
-// Save Skill
+// Deploy Skill
 program
-    .command('save <skillDefinition>')
-    .description('Save a skill definition')
+    .command('deploy <skillName>')
+    .description('Deploy the skill resource to the cluster')
+    .option('--no-compat', 'Ignore API compatibility checks')
+    .option('--profile [profile]', 'The profile to use')
+    .option('--project [project]', 'The project to use')
+    .action(withCompatibilityCheck((skillName, options) => {
+        try {
+            new DeploySkillCommand(program).execute(skillName, options);
+        } catch (err) {
+            console.error(chalk.red(err.message));
+        }
+    }));
+
+// Describe Skill
+program
+    .command('describe <skillName>')
+    .alias('get')
+    .description('Describe skill')
     .option('--no-compat', 'Ignore API compatibility checks')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
     .option('--project [project]', 'The project to use')
-    .option('-y, --yaml', 'Use YAML for skill definition format')
-    .action(withCompatibilityCheck((skillDefinition, options) => {
+    .option('--query [query]', 'A JMESPath query to use in filtering the response data.')
+    .option('--verbose', 'Verbose output')
+    .action(withCompatibilityCheck((skillName, options) => {
         try {
-            new SaveSkillCommand(program).execute(skillDefinition, options);
+            new DescribeSkillCommand(program).execute(skillName, options);
+        } catch (err) {
+            console.error(chalk.red(err.message));
+        }
+    }));
+
+// Invoke Skill
+program
+    .command('invoke <skillName> <inputName>')
+    .description('Invoke a skill')
+    .option('--no-compat', 'Ignore API compatibility checks')
+    .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
+    .option('--profile [profile]', 'The profile to use')
+    .option('--project [project]', 'The project to use')
+    .option('--params [params]', 'JSON params to send to the action')
+    .option('--params-file [paramsFile]', 'A file containing either JSON or YAML formatted params')
+    .action(withCompatibilityCheck((skillName, inputName, options) => {
+        try {
+            new InvokeSkillCommand(program).execute(skillName, inputName, options);
         } catch (err) {
             console.error(chalk.red(err.message));
         }
@@ -65,37 +102,33 @@ program
         }
     }));
 
-// Describe Skill
+// Save Skill
 program
-    .command('describe <skillName>')
-    .alias('get')
-    .description('Describe skill')
+    .command('save <skillDefinition>')
+    .description('Save a skill definition')
     .option('--no-compat', 'Ignore API compatibility checks')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
     .option('--project [project]', 'The project to use')
-    .option('--query [query]', 'A JMESPath query to use in filtering the response data.')
-    .action(withCompatibilityCheck((skillName, options) => {
+    .option('-y, --yaml', 'Use YAML for skill definition format')
+    .action(withCompatibilityCheck((skillDefinition, options) => {
         try {
-            new DescribeSkillCommand(program).execute(skillName, options);
+            new SaveSkillCommand(program).execute(skillDefinition, options);
         } catch (err) {
             console.error(chalk.red(err.message));
         }
     }));
 
-// Invoke Skill
+// Undeploy Skill
 program
-    .command('invoke <skillName> <inputName>')
-    .description('Invoke a skill')
+    .command('undeploy <skillName>')
+    .description('Undeploy the skill resource from the cluster')
     .option('--no-compat', 'Ignore API compatibility checks')
-    .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
     .option('--project [project]', 'The project to use')
-    .option('--params [params]', 'JSON params to send to the action')
-    .option('--params-file [paramsFile]', 'A file containing either JSON or YAML formatted params')
-    .action(withCompatibilityCheck((skillName, inputName, options) => {
+    .action(withCompatibilityCheck((skillName, options) => {
         try {
-            new InvokeSkillCommand(program).execute(skillName, inputName, options);
+            new UndeploySkillCommand(program).execute(skillName, options);
         } catch (err) {
             console.error(chalk.red(err.message));
         }

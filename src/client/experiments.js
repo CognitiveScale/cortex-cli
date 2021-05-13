@@ -16,7 +16,7 @@
 
 const debug = require('debug')('cortex:cli');
 const { got } = require('./apiutils');
-const { constructError, getUserAgent } = require('../commands/utils');
+const { constructError, getUserAgent, checkProject } = require('../commands/utils');
 const Content = require('./content');
 
 module.exports = class Experiments {
@@ -26,6 +26,7 @@ module.exports = class Experiments {
     }
 
     listExperiments(projectId, token) {
+        checkProject(projectId);
         const endpoint = `${this.endpoint(projectId)}`;
         debug('listExperiments() => %s', endpoint);
         return got
@@ -38,6 +39,7 @@ module.exports = class Experiments {
     }
 
     describeExperiment(projectId, token, name) {
+        checkProject(projectId);
         const endpoint = `${this.endpoint(projectId)}/${encodeURIComponent(name)}`;
         debug('describeExperiment(%s) => %s', name, endpoint);
         return got
@@ -50,6 +52,7 @@ module.exports = class Experiments {
     }
 
     deleteExperiment(projectId, token, name) {
+        checkProject(projectId);
         const endpoint = `${this.endpoint(projectId)}/${encodeURIComponent(name)}`;
         debug('deleteExperiment(%s) => %s', name, endpoint);
         return got
@@ -62,6 +65,7 @@ module.exports = class Experiments {
     }
 
     listRuns(projectId, token, experimentName, filter, limit, sort) {
+        checkProject(projectId);
         const endpoint = `${this.endpoint(projectId)}/${encodeURIComponent(experimentName)}/runs`;
         debug('listRuns(%s) => %s', experimentName, endpoint);
         const query = {};
@@ -79,6 +83,7 @@ module.exports = class Experiments {
     }
 
     describeRun(projectId, token, experimentName, runId) {
+        checkProject(projectId);
         const endpoint = `${this.endpoint(projectId)}/${encodeURIComponent(experimentName)}/runs/${runId}`;
         debug('describeRun(%s) => %s', runId, endpoint);
         return got
@@ -91,8 +96,9 @@ module.exports = class Experiments {
     }
 
     deleteRun(projectId, token, experimentName, runId) {
+        checkProject(projectId);
         const endpoint = `${this.endpoint(projectId)}/${encodeURIComponent(experimentName)}/runs/${runId}`;
-        debug('deleteRun(%s) => %s', runId, endpoint);
+        debug('deleteRun(%s, %s) => %s', experimentName, runId, endpoint);
         return got
             .delete(endpoint, {
                 headers: { Authorization: `Bearer ${token}` },
@@ -108,6 +114,7 @@ module.exports = class Experiments {
 
     // eslint-disable-next-line no-unused-vars
     async downloadArtifact(projectId, token, experimentName, runId, artifactName, showProgress = false) {
+        checkProject(projectId);
         try {
             // Check if run exists..
             await this.describeRun(projectId, token, experimentName, runId);

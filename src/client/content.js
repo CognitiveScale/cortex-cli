@@ -20,8 +20,7 @@ const stream = require('stream');
 const { promisify } = require('util');
 const debug = require('debug')('cortex:cli');
 const { got } = require('./apiutils');
-const { constructError, getUserAgent } = require('../commands/utils');
-const Variables = require('./variables');
+const { constructError, getUserAgent, checkProject } = require('../commands/utils');
 
 const pipeline = promisify(stream.pipeline);
 
@@ -37,8 +36,9 @@ module.exports = class Content {
     }
 
     listContent(projectId, token) {
+        checkProject(projectId);
         const endpoint = this.endpoint(projectId);
-        debug('listContent %s', endpoint);
+        debug('listContent() => %s', endpoint);
         return got
             .get(endpoint, {
                 headers: { Authorization: `Bearer ${token}` },
@@ -50,6 +50,7 @@ module.exports = class Content {
 
     // eslint-disable-next-line no-unused-vars
     async uploadContentStreaming(projectId, token, key, content, showProgress = false, contentType = 'application/octet-stream') {
+        checkProject(projectId);
         const contentKey = this._sanitizeKey(key);
         const endpoint = `${this.endpoint(projectId)}/${contentKey}`;
         // todo show progress..
@@ -70,16 +71,11 @@ module.exports = class Content {
         }
     }
 
-    async uploadSecureContent(projectId, token, key, content) {
-        const contentKey = this._sanitizeKey(key);
-        const vars = new Variables(this.cortextUrl);
-        return vars.writeVariable(projectId, token, contentKey, content);
-    }
-
     deleteContent(projectId, token, key) {
+        checkProject(projectId);
         const contentKey = this._sanitizeKey(key);
         const endpoint = `${this.endpoint(projectId)}/${contentKey}`;
-        debug('deleteContent => %s', endpoint);
+        debug('deleteContent() => %s', endpoint);
         return got
             .delete(endpoint, {
                 headers: { Authorization: `Bearer ${token}` },
@@ -91,10 +87,11 @@ module.exports = class Content {
 
     // TODO progress
     // eslint-disable-next-line no-unused-vars
-    async downloadContent(projecId, token, key, showProgress = false) {
+    async downloadContent(projectId, token, key, showProgress = false) {
+        checkProject(projectId);
         const contentKey = this._sanitizeKey(key);
-        const endpoint = `${this.endpoint(projecId)}/${contentKey}`;
-        debug('downloadContent(%s) => %s', key, this.endpoint);
+        const endpoint = `${this.endpoint(projectId)}/${contentKey}`;
+        debug('downloadContent() => %s', endpoint);
         try {
             return pipeline(
                 got.stream(endpoint, {
@@ -106,11 +103,5 @@ module.exports = class Content {
         } catch (err) {
             return constructError(err);
         }
-    }
-
-    async downloadSecureContent(projectId, token, key) {
-        const contentKey = this._sanitizeKey(key);
-        const vars = new Variables(this.cortextUrl);
-        return vars.readVariable(projectId, token, contentKey);
     }
 };

@@ -15,18 +15,20 @@
  */
 
 const debug = require('debug')('cortex:cli');
+const urljoin = require('url-join');
 const { got } = require('./apiutils');
-const { constructError, getUserAgent } = require('../commands/utils');
+const { constructError, getUserAgent, checkProject } = require('../commands/utils');
 
-module.exports = class Variables {
+module.exports = class Secrets {
     constructor(cortexUrl) {
         this.cortexUrl = cortexUrl;
-        this.endpoint = projectId => `${cortexUrl}/fabric/v4/projects/${projectId}/secrets`;
+        this.endpoint = projectId => urljoin(cortexUrl, 'fabric/v4/projects', projectId, 'secrets');
     }
 
-    listVariables(projectId, token) {
-        const endpoint = `${this.endpoint(projectId)}?list=true`;
-        debug('listVariables => %s', endpoint);
+    listSecrets(projectId, token) {
+        checkProject(projectId);
+        const endpoint = urljoin(this.endpoint(projectId), '?list=true');
+        debug('listSecrets => %s', endpoint);
         return got
             .get(endpoint, {
                 headers: { Authorization: `Bearer ${token}` },
@@ -36,9 +38,10 @@ module.exports = class Variables {
             .catch(err => constructError(err));
     }
 
-    readVariable(projectId, token, keyName) {
-        const endpoint = `${this.endpoint(projectId)}/${keyName}`;
-        debug('readVariable($s) => %s', keyName, endpoint);
+    readSecret(projectId, token, keyName) {
+        checkProject(projectId);
+        const endpoint = urljoin(this.endpoint(projectId), keyName);
+        debug('readSecret(%s) => %s', keyName, endpoint);
         return got
             .get(endpoint, {
                 headers: { Authorization: `Bearer ${token}` },
@@ -48,9 +51,10 @@ module.exports = class Variables {
             .catch(err => constructError(err));
     }
 
-    writeVariable(projectId, token, keyName, value) {
-        const endpoint = `${this.endpoint(projectId)}/${keyName}`;
-        debug('writeVariable(%s) => %s', keyName, endpoint);
+    writeSecret(projectId, token, keyName, value) {
+        checkProject(projectId);
+        const endpoint = urljoin(this.endpoint(projectId), keyName);
+        debug('writeSecret(%s) => %s', keyName, endpoint);
         const body = { value };
         return got
             .post(endpoint, {
@@ -58,7 +62,7 @@ module.exports = class Variables {
                 'user-agent': getUserAgent(),
                 json: body,
             }).json()
-            .then(result => ({ success: true, result }))
+            .then(result => ({ ...result }))
             .catch(err => constructError(err));
     }
 };

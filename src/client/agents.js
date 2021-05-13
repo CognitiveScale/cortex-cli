@@ -16,7 +16,7 @@
 
 const debug = require('debug')('cortex:cli');
 const { got } = require('./apiutils');
-const { constructError, getUserAgent } = require('../commands/utils');
+const { constructError, getUserAgent, checkProject } = require('../commands/utils');
 
 module.exports = class Agents {
     constructor(cortexUrl) {
@@ -25,6 +25,7 @@ module.exports = class Agents {
     }
 
     invokeAgentService(projectId, token, agentName, serviceName, params) {
+        checkProject(projectId);
         const endpoint = `${this.endpointV4(projectId)}/agentinvoke/${encodeURIComponent(agentName)}/services/${serviceName}`;
         debug('invokeAgentService(%s, %s) => %s', agentName, serviceName, endpoint);
         return got
@@ -38,6 +39,7 @@ module.exports = class Agents {
     }
 
     invokeSkill(projectId, token, skillName, inputName, params) {
+        checkProject(projectId);
         const endpoint = `${this.endpointV4(projectId)}/skillinvoke/${encodeURIComponent(skillName)}/inputs/${inputName}`;
         debug('invokeSkill(%s, %s) => %s', skillName, inputName, endpoint);
         return got
@@ -50,33 +52,44 @@ module.exports = class Agents {
             .catch(err => constructError(err));
     }
 
-    getActivation(projectId, token, activationId) {
+    getActivation(projectId, token, activationId, verbose) {
+        checkProject(projectId);
         const endpoint = `${this.endpointV4(projectId)}/activations/${activationId}`;
         debug('getActivation(%s) => %s', activationId, endpoint);
+        const opts = {
+            headers: { Authorization: `Bearer ${token}` },
+            'user-agent': getUserAgent(),
+        };
+        if (verbose) {
+            opts.searchParams = { verbose: true };
+        }
         return got
-            .get(endpoint, {
-                headers: { Authorization: `Bearer ${token}` },
-                'user-agent': getUserAgent(),
-            }).json()
+            .get(endpoint, opts).json()
             .then(result => ({ success: true, result }))
             .catch(err => constructError(err));
     }
 
-    listActivations(projectId, token, snapshotId) {
-        const endpoint = `${this.endpointV4(projectId)}/snapshots/${snapshotId}/activations`;
-        debug('listActivations(%s, %s) => %s', snapshotId, endpoint);
+    listActivations(projectId, token, agentName, params) {
+        checkProject(projectId);
+        const endpoint = `${this.endpointV4(projectId)}/agentinvoke/${agentName}/activations`;
+        debug('listActivations(%s) => %s', agentName, endpoint);
+        const opts = {
+            headers: { Authorization: `Bearer ${token}` },
+            'user-agent': getUserAgent(),
+        };
+        if (params) {
+            opts.searchParams = params;
+        }
         return got
-            .get(endpoint, {
-                headers: { Authorization: `Bearer ${token}` },
-                'user-agent': getUserAgent(),
-            }).json()
+            .get(endpoint, opts).json()
             .then(result => ({ success: true, result }))
             .catch(err => constructError(err));
     }
 
     listAgentSnapshots(projectId, token, agentName) {
+        checkProject(projectId);
         const endpoint = `${this.endpointV4(projectId)}/agents/${encodeURIComponent(agentName)}/snapshots`;
-        debug('listAgentSnapshots(%s, %s) => %s', agentName, endpoint);
+        debug('listAgentSnapshots(%s) => %s', agentName, endpoint);
         return got
             .get(endpoint, {
                 headers: { Authorization: `Bearer ${token}` },
@@ -87,8 +100,9 @@ module.exports = class Agents {
     }
 
     describeAgentSnapshot(projectId, token, snapshotId, output) {
+        checkProject(projectId);
         const endpoint = `${this.endpointV4(projectId)}/snapshots/${snapshotId}?deps=true`;
-        debug('describeAgentSnapshot(%s, %s) => %s', snapshotId, endpoint);
+        debug('describeAgentSnapshot(%s) => %s', snapshotId, endpoint);
         return got
             .get(endpoint, {
                 headers: { Authorization: `Bearer ${token}` },
@@ -99,8 +113,9 @@ module.exports = class Agents {
     }
 
     createAgentSnapshot(projectId, token, snapshot) {
+        checkProject(projectId);
         const endpoint = `${this.endpointV4(projectId)}/agents/${encodeURIComponent(snapshot.agentName)}/snapshots`;
-        debug('getAgentSnapshot=> %s', endpoint);
+        debug('createAgentSnapshot(%s)=> %s', snapshot, endpoint);
         return got
             .post(endpoint, {
                 headers: { Authorization: `Bearer ${token}` },

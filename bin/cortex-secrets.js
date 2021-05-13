@@ -22,17 +22,17 @@ const program = require('../src/commander');
 const { withCompatibilityCheck } = require('../src/compatibility');
 
 const {
-    ListVariablesCommand,
-    ReadVariableCommand,
-    WriteVariableCommand,
-} = require('../src/commands/variables');
+    ListSecretsCommand,
+    ReadSecretsCommand,
+    WriteSecretsCommand,
+} = require('../src/commands/secrets');
 
 program.description('Work with Cortex Secrets');
 
-// List Secure Variable Keys
+// List Secure Keys
 program
     .command('list')
-    .description('List secure variable keys')
+    .description('List secure keys')
     .option('--no-compat', 'Ignore API compatibility checks')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--json', 'Output results using JSON')
@@ -40,16 +40,17 @@ program
     .option('--project [project]', 'The project to use')
     .action(withCompatibilityCheck((options) => {
         try {
-            new ListVariablesCommand(program).execute(options);
+            new ListSecretsCommand(program).execute(options);
         } catch (err) {
             console.error(chalk.red(err.message));
         }
     }));
 
-// Read Secure Variable Value
+// Read Secure Value
 program
     .command('describe <keyName>')
-    .description('Retrieve the value stored for the given variable key.')
+    .alias('get')
+    .description('Retrieve the value stored for the given key.')
     .option('--no-compat', 'Ignore API compatibility checks')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--json', 'Output results using JSON')
@@ -57,16 +58,16 @@ program
     .option('--project [project]', 'The project to use')
     .action(withCompatibilityCheck((keyName, options) => {
         try {
-            new ReadVariableCommand(program).execute(keyName, options);
+            new ReadSecretsCommand(program).execute(keyName, options);
         } catch (err) {
             console.error(chalk.red(err.message));
         }
     }));
 
-// Write Secure Variable Value
+// Write Secure Value
 program
     .command('save <keyName> [value]')
-    .description('Save or overwrite a secure variable value. By default, values are stored as strings but can also be saved as JSON or YAML values.')
+    .description('Save or overwrite a secure value. By default values are stored as strings but can also be saved as JSON or YAML.')
     .option('--no-compat', 'Ignore API compatibility checks')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--data [data]', 'JSON value to save')
@@ -75,7 +76,7 @@ program
     .option('--project [project]', 'The project to use')
     .action(withCompatibilityCheck((keyName, value, options) => {
         try {
-            new WriteVariableCommand(program).execute(keyName, value, options);
+            new WriteSecretsCommand(program).execute(keyName, value, options);
         } catch (err) {
             console.error(chalk.red(err.message));
         }

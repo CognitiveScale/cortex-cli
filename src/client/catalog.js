@@ -38,7 +38,7 @@ module.exports = class Catalog {
 
     saveSkill(projectId, token, skillObj) {
         checkProject(projectId);
-        debug('saveSkill(%s) => %s', skillObj.name, this.endpoints.skills);
+        debug('saveSkill(%s) => %s', skillObj.name, this.endpoints.skills(projectId));
         return got
             .post(this.endpoints.skills(projectId), {
                 headers: { Authorization: `Bearer ${token}` },
@@ -51,7 +51,7 @@ module.exports = class Catalog {
 
     listSkills(projectId, token) {
         checkProject(projectId);
-        debug('listSkills() => %s', this.endpoints.skills);
+        debug('listSkills() => %s', this.endpoints.skills(projectId));
         return got
             .get(this.endpoints.skills(projectId), {
                 headers: { Authorization: `Bearer ${token}` },
@@ -61,7 +61,7 @@ module.exports = class Catalog {
             .catch(err => constructError(err));
     }
 
-    describeSkill(projectId, token, skillName) {
+    describeSkill(projectId, token, skillName, verbose = false) {
         checkProject(projectId);
         const endpoint = `${this.endpoints.skills(projectId)}/${encodeURIComponent(skillName)}`;
         debug('describeSkill(%s) => %s', skillName, endpoint);
@@ -69,8 +69,37 @@ module.exports = class Catalog {
             .get(endpoint, {
                 headers: { Authorization: `Bearer ${token}` },
                 'user-agent': getUserAgent(),
+                searchParams: { verbose },
             }).json()
             .then(res => ({ success: true, skill: res }))
+            .catch(err => constructError(err));
+    }
+
+    deploySkill(projectId, token, skillName, verbose = false) {
+        checkProject(projectId);
+        const endpoint = `${this.endpoints.skills(projectId)}/${encodeURIComponent(skillName)}/deploy`;
+        debug('deploySkill(%s) => %s', skillName, endpoint);
+        return got
+            .get(endpoint, {
+                headers: { Authorization: `Bearer ${token}` },
+                'user-agent': getUserAgent(),
+                searchParams: { verbose },
+            }).json()
+            .then(res => ({ ...res }))
+            .catch(err => constructError(err));
+    }
+
+    unDeploySkill(projectId, token, skillName, verbose = false) {
+        checkProject(projectId);
+        const endpoint = `${this.endpoints.skills(projectId)}/${encodeURIComponent(skillName)}/undeploy`;
+        debug('undeploySkill(%s) => %s', skillName, endpoint);
+        return got
+            .get(endpoint, {
+                headers: { Authorization: `Bearer ${token}` },
+                'user-agent': getUserAgent(),
+                searchParams: { verbose },
+            }).json()
+            .then(res => ({ ...res }))
             .catch(err => constructError(err));
     }
 
@@ -95,6 +124,7 @@ module.exports = class Catalog {
         return this.describeAgent(projectId, token, agentName).then((response) => {
             if (response.success) {
                 const urlBase = `${this.endpoints.agents(projectId)}/${encodeURIComponent(agentName)}/services`;
+                debug('listServices(%s) => %s', agentName, urlBase);
                 const servicesList = response.agent.inputs
                     .filter(i => i.signalType === 'Service')
                     .map(i => ({ ...i, url: `${urlBase}/${i.name}` }))
@@ -119,7 +149,7 @@ module.exports = class Catalog {
             .catch(err => constructError(err));
     }
 
-    describeAgent(projectId, token, agentName) {
+    describeAgent(projectId, token, agentName, verbose) {
         checkProject(projectId);
         const endpoint = `${this.endpoints.agents(projectId)}/${encodeURIComponent(agentName)}`;
         debug('describeAgent(%s) => %s', agentName, endpoint);
@@ -127,6 +157,7 @@ module.exports = class Catalog {
             .get(endpoint, {
                 headers: { Authorization: `Bearer ${token}` },
                 'user-agent': getUserAgent(),
+                searchParams: { verbose },
             }).json()
             .then(agent => ({ success: true, agent }))
             .catch(err => constructError(err));
@@ -150,7 +181,7 @@ module.exports = class Catalog {
         checkProject(projectId);
         const endpoint = `${this.endpoints.types(projectId)}`;
         const names = types.types.map(t => t.name);
-        debug('saveType(%s) => %s', JSON.stringify(names), this.endpoints.types);
+        debug('saveType(%s) => %s', JSON.stringify(names), this.endpoints.types(projectId));
         return got
             .post(endpoint, {
                 headers: { Authorization: `Bearer ${token}` },
@@ -179,7 +210,7 @@ module.exports = class Catalog {
     listTypes(projectId, token) {
         checkProject(projectId);
         const endpoint = `${this.endpoints.types(projectId)}`;
-        debug('listTypes() => %s', this.endpoints.types);
+        debug('listTypes() => %s', endpoint);
         return got
             .get(endpoint, {
                 headers: { Authorization: `Bearer ${token}` },
@@ -192,10 +223,9 @@ module.exports = class Catalog {
 
     exportCampaign(projectId, token, campaignName, deployable, outputFileName) {
         checkProject(projectId);
-        debug('exportCampaign(%s) => %s', campaignName, this.endpoints.campaigns);
-
 
         const url = `${this.endpoints.campaigns(projectId)}${campaignName}/export?deployable=${deployable}`;
+        debug('exportCampaign(%s) => %s', campaignName, url);
 
         return http.get(url,
             { headers: { Authorization: `Bearer ${token}` } },
@@ -215,8 +245,9 @@ module.exports = class Catalog {
 
     importCampaign(projectId, token, filepath, deploy, overwrite) {
         checkProject(projectId);
-        debug('importCampaign(%s)', this.endpoints.campaigns);
+        
         const importUrl = `${this.endpoints.campaigns(projectId)}import?deployable=${deploy}&overwrite=${overwrite}`;
+        debug('importCampaign(%s) => %s', filepath, importUrl);
         if (!fs.existsSync(filepath) || !fs.lstatSync(filepath).isFile()) {
             printError(`Campaign export file ${filepath} doesn't exists or not a valid export file`);
         }
