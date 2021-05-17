@@ -290,7 +290,7 @@ module.exports.ListAgentSnapshotsCommand = class {
                     printSuccess(JSON.stringify(result, null, 2), options);
                 } else {
                     const tableSpec = [
-                        { column: 'Snapshot ID', field: 'snapshotId', width: 30 },
+                        { column: 'Snapshot ID', field: 'snapshotId', width: 40 },
                         { column: 'Title', field: 'title', width: 40 },
 // Removed as this is confusing for end users, agent version may not change
 //                        { column: 'Agent Version', field: 'agentVersion', width: 15 },
