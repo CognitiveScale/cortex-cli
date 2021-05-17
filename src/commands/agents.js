@@ -294,10 +294,10 @@ module.exports.ListAgentSnapshotsCommand = class {
                         { column: 'Title', field: 'title', width: 40 },
 // Removed as this is confusing for end users, agent version may not change
 //                        { column: 'Agent Version', field: 'agentVersion', width: 15 },
-                        { column: 'Modified', field: 'updatedAt', width: 26 },
+                        { column: 'Created', field: 'createdAt', width: 26 },
                         { column: 'Author', field: 'createdBy', width: 26 },
                     ];
-                    printTable(tableSpec, result, o => ({ ...o, updatedAt: o.updatedAt ? moment(o.updatedAt).fromNow() : '-' }));
+                    printTable(tableSpec, result, o => ({ ...o, createdAt: o.createdAt ? moment(o.createdAt).fromNow() : '-' }));
                 }
             } else {
                 printError(`Failed to list agent snapshots ${agentName}: ${response.message}`, options);
