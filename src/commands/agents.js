@@ -290,7 +290,7 @@ module.exports.ListAgentSnapshotsCommand = class {
                     printSuccess(JSON.stringify(result, null, 2), options);
                 } else {
                     const tableSpec = [
-                        { column: 'Snapshot ID', field: 'id', width: 40 },
+                        { column: 'Snapshot ID', field: 'snapshotId', width: 40 },
                         { column: 'Title', field: 'title', width: 30 },
                         { column: 'Agent Version', field: 'agentVersion', width: 15 },
                         { column: 'Created On', field: 'createdAt', width: 26 },
