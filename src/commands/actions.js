@@ -161,9 +161,8 @@ module.exports.DeleteActionCommand = class {
     execute(actionName, options) {
         const profile = loadProfile(options.profile);
         debug('%s.executeDeleteAction(%s)', profile.name, actionName);
-        const { actionType } = options;
         const actions = new Actions(profile.url);
-        actions.deleteAction(options.project || profile.project, profile.token, actionName, actionType)
+        actions.deleteAction(options.project || profile.project, profile.token, actionName)
             .then((response) => {
                 if (response.success) {
                     const result = filterObject(response, options);

@@ -65,7 +65,7 @@
     "chai-as-promised": "7.1.1",
     "eslint": "5.16.0",
     "eslint-config-airbnb-base": "13.1.0",
-    "eslint-plugin-import": "2.20.2",
+    "eslint-plugin-import": "2.23.2",
     "mocha": "7.1.1",
     "nock": "13.0.4",
     "rewire": "5.0.0"
