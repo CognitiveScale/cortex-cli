@@ -82,8 +82,6 @@ program
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
     .option('--project [project]', 'The project to use')
-    .option('--query [query]', 'A JMESPath query to use in filtering the response data.')
-    .option('--actionType [actionType]', 'Type of action')
     .action(withCompatibilityCheck((actionName, options) => {
         try {
             new DeleteActionCommand(program).execute(actionName, options);
