@@ -113,19 +113,20 @@ program
     .alias('save')
     .description('Deploy an action')
     .storeOptionsAsProperties(false)
-    .option('--actionName, --name [name]', 'Action name')
-    .option('--actionType [actionType]', 'Type of action')
+    .option('--name, --actionName [name]', 'Action name')
+    .option('--type, --actionType [job|daemon]', 'Type of action')
     .option('--cmd [cmd]', 'Command to be executed') // '["--daemon"]'
-    .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
-    .option('--docker [image]', 'Docker image to use as the runner')
+    .option('--image, --docker [image]', 'Docker image to use as the runner')
     .option('--environmentVariables [environmentVariables]', 'Docker container environment variables, only used for daemon action types')
+    .option('--jobTimeout', 'Job Timeout in seconds, this will marked the job as FAILED')
     .option('--no-compat', 'Ignore API compatibility checks')
     .option('--podspec [podspec]', 'A file containing either a JSON or YAML formatted pod spec to merge with the action definition, used for specifying resources (like memory, ephemeral storage, CPUs, and GPUs) and tolerations (like allowing pods to be scheduled on tainted nodes).')
     .option('--port [port]', 'Docker port') // '9091'
     .option('--profile [profile]', 'The profile to use')
     .option('--project [project]', 'The project to use')
-    .option('--push-docker', 'Push Docker image to the Cortex registry.')
     .option('--scaleCount [count]', 'Scale count, only used for daemon action types')
+    .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
+    .option('--push-docker', 'Push Docker image to the Cortex registry.')
     .option('-y, --yaml', 'Use YAML format')
     .action(withCompatibilityCheck((actionName, options) => {
         try {
