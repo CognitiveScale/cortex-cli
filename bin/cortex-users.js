@@ -25,6 +25,7 @@ const {
     UserDescribeCommand,
     UserGrantCommand,
     UserCreateCommand,
+    UserListCommand,
 } = require('../src/commands/users');
 
 program.description('Work with Cortex User');
@@ -87,6 +88,19 @@ program.command('create <user>')
     .action(withCompatibilityCheck((user, options) => {
         try {
             new UserCreateCommand(program).execute(user, options);
+        } catch (err) {
+            console.error(chalk.red(err.message));
+        }
+    }));
+
+program.command('list')
+    .description('Lists all service users created within Cortex')
+    .option('--no-compat', 'Ignore API compatibility checks')
+    .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
+    .option('--profile [profile]', 'The profile to use')
+    .action(withCompatibilityCheck((options) => {
+        try {
+            new UserListCommand(program).execute(options);
         } catch (err) {
             console.error(chalk.red(err.message));
         }

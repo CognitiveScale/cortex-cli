@@ -71,9 +71,7 @@ module.exports.UserCreateCommand = class {
         const profile = loadProfile(options.profile);
         debug('%s.createUser=%s', profile.name, user);
 
-        const flags = [];
-
-        const client = new Users(profile.url, user, flags);
+        const client = new Users(profile.url, user);
         client.createServiceUser(profile.token, user).then((response) => {
             if (response.success) {
                 const result = filterObject(response.result, options);
@@ -84,6 +82,30 @@ module.exports.UserCreateCommand = class {
         })
             .catch((err) => {
                 printError(`Failed to create user : ${err.status} ${err.message}`, options);
+            });
+    }
+};
+
+module.exports.UserListCommand = class {
+    constructor(program) {
+        this.program = program;
+    }
+
+    execute(options) {
+        const profile = loadProfile(options.profile);
+        debug('%s.listUsers', profile.name);
+
+        const client = new Users(profile.url, 'self');
+        client.listServiceUsers(profile.token).then((response) => {
+            if (response.success) {
+                const result = filterObject(response.result, options);
+                printSuccess(JSON.stringify(result, null, 2), options);
+            } else {
+                printError(`Failed to list service users : ${response.message}`, options);
+            }
+        })
+            .catch((err) => {
+                printError(`Failed to list service users : ${err.status} ${err.message}`, options);
             });
     }
 };
