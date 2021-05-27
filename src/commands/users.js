@@ -62,6 +62,32 @@ module.exports.UserGrantCommand = class {
     }
 };
 
+module.exports.UserCreateCommand = class {
+    constructor(program) {
+        this.program = program;
+    }
+
+    execute(user, options) {
+        const profile = loadProfile(options.profile);
+        debug('%s.createUser=%s', profile.name, user);
+
+        const flags = [];
+
+        const client = new Users(profile.url, user, flags);
+        client.createServiceUser(profile.token, user).then((response) => {
+            if (response.success) {
+                const result = filterObject(response.result, options);
+                printSuccess(JSON.stringify(result, null, 2), options);
+            } else {
+                printError(`Failed to create user ${user} : ${response.message}`, options);
+            }
+        })
+            .catch((err) => {
+                printError(`Failed to create user : ${err.status} ${err.message}`, options);
+            });
+    }
+};
+
 module.exports.UserDescribeCommand = class {
     constructor(program) {
         this.program = program;
