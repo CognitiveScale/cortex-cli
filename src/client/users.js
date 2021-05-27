@@ -54,6 +54,18 @@ module.exports = class Users {
             .catch(err => constructError(err));
     }
 
+    deleteServiceUser(token, user) {
+        const endpoint = `${this.endpoint}/accounts/service/${user}`;
+        debug('createServiceUser => %s', endpoint);
+        return got
+            .delete(endpoint, {
+                headers: { Authorization: `Bearer ${token}` },
+                'user-agent': getUserAgent(),
+            }).json()
+            .then(res => ({ success: true, result: res }))
+            .catch(err => constructError(err));
+    }
+
     listServiceUsers(token) {
         const endpoint = `${this.endpoint}/accounts/service`;
         debug('createServiceUser => %s', endpoint);
