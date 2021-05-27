@@ -64,11 +64,11 @@ module.exports.DeleteModelCommand = class {
         this.program = program;
     }
 
-    execute(actionName, options) {
+    execute(modelName, options) {
         const profile = loadProfile(options.profile);
-        debug('%s.executeDeleteAction(%s)', profile.name, actionName);
+        debug('%s.executeDeleteModel(%s)', profile.name, modelName);
         const models = new Models(profile.url);
-        models.deleteModel(options.project || profile.project, profile.token, actionName)
+        models.deleteModel(options.project || profile.project, profile.token, modelName)
             .then((response) => {
                 if (response && response.success) {
                     const result = filterObject(response, options);

@@ -20,7 +20,7 @@ const {
 } = require('../commands/utils');
 
 
-module.exports = class Actions {
+module.exports = class Models {
     constructor(cortexUrl) {
         this.cortexUrl = cortexUrl;
         this.endpointV4 = projectId => `${cortexUrl}/fabric/v4/projects/${projectId}/models`;
@@ -40,17 +40,17 @@ module.exports = class Actions {
             .catch(err => constructError(err));
     }
 
-    deleteModel(projectId, token, actionName) {
+    deleteModel(projectId, token, modelName) {
         checkProject(projectId);
-        const endpoint = `${this.endpointV4(projectId)}/${encodeURIComponent(actionName)}`;
-        debug('deleteAction(%s) => %s', actionName, endpoint);
+        const endpoint = `${this.endpointV4(projectId)}/${encodeURIComponent(modelName)}`;
+        debug('deleteAction(%s) => %s', modelName, endpoint);
         return got
             .delete(endpoint, {
                 headers: { Authorization: `Bearer ${token}` },
                 'user-agent': getUserAgent(),
             })
             .json()
-            .then(action => ({ success: true, action }))
+            .then(model => ({ success: true, model }))
             .catch(err => constructError(err));
     }
 };
