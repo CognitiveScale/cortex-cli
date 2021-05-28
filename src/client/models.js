@@ -53,4 +53,49 @@ module.exports = class Models {
             .then(model => ({ success: true, model }))
             .catch(err => constructError(err));
     }
+
+    listModels(projectId, token) {
+        checkProject(projectId);
+        const endpoint = `${this.endpointV4(projectId)}`;
+        debug('listModels() => %s', endpoint);
+        return got
+            .get(endpoint, {
+                headers: { Authorization: `Bearer ${token}` },
+                'user-agent': getUserAgent(),
+            })
+            .json()
+            .then(modelResp => ({ success: true, ...modelResp }))
+            .catch(err => constructError(err));
+    }
+
+
+    describeModel(projectId, token, modelName, verbose) {
+        checkProject(projectId);
+        const endpoint = `${this.endpointV4(projectId)}/${encodeURIComponent(modelName)}`;
+
+        debug('describeAgent(%s) => %s', modelName, endpoint);
+        return got
+            .get(endpoint, {
+                headers: { Authorization: `Bearer ${token}` },
+                'user-agent': getUserAgent(),
+                searchParams: { verbose },
+            }).json()
+            .then(model => ({ success: true, model }))
+            .catch(err => constructError(err));
+    }
+
+    describeModelVersions(projectId, token, modelName) {
+        checkProject(projectId);
+        const endpoint = `${this.endpointV4(projectId)}/${encodeURIComponent(modelName)}/versions`;
+
+        debug('describeAgentVersions(%s) => %s', modelName, endpoint);
+        return got
+            .get(endpoint, {
+                headers: { Authorization: `Bearer ${token}` },
+                'user-agent': getUserAgent(),
+            })
+            .json()
+            .then(model => ({ success: true, model }))
+            .catch(err => constructError(err));
+    }
 };

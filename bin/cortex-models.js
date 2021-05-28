@@ -24,9 +24,51 @@ const { withCompatibilityCheck } = require('../src/compatibility');
 const {
     DeleteModelCommand,
     SaveModelCommand,
+    DescribeModelCommand,
+    ListModelsCommand,
 } = require('../src/commands/models');
 
-program.description('Work with Cortex Actions');
+program.description('Work with Cortex Models');
+
+// List Models
+program
+    .command('list')
+    .description('List model definitions')
+    .alias('l')
+    .option('--no-compat', 'Ignore API compatibility checks')
+    .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
+    .option('--profile [profile]', 'The profile to use')
+    .option('--project [project]', 'The project to use')
+    .option('--json', 'Output results using JSON')
+    .option('--query [query]', 'A JMESPath query to use in filtering the response data. Ignored if output format is not JSON.')
+    .action(withCompatibilityCheck((options) => {
+        try {
+            new ListModelsCommand(program).execute(options);
+        } catch (err) {
+            console.error(chalk.red(err.message));
+        }
+    }));
+
+// Describe Model
+program
+    .command('describe <modelName>')
+    .description('Describe model')
+    .alias('get')
+    .option('--no-compat', 'Ignore API compatibility checks')
+    .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
+    .option('--profile [profile]', 'The profile to use')
+    .option('--project [project]', 'The project to use')
+    .option('--query [query]', 'A JMESPath query to use in filtering the response data.')
+    .option('--versions', 'To get list of versions of an model')
+    .option('--verbose', 'Verbose output')
+    .action(withCompatibilityCheck((modelName, options) => {
+        try {
+            new DescribeModelCommand(program).execute(modelName, options);
+        } catch (err) {
+            console.error(chalk.red(err.message));
+        }
+    }));
+
 
 // Delete Model
 program

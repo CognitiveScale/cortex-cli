@@ -14,9 +14,11 @@
  * limitations under the License.
  */
 const fs = require('fs');
+const moment = require('moment');
 const debug = require('debug')('cortex:cli');
 const { loadProfile } = require('../config');
 const Models = require('../client/models');
+const { LISTTABLEFORMAT } = require('./utils');
 
 const {
     printSuccess, printError, filterObject, parseObject, printTable, formatValidationPath
@@ -56,6 +58,75 @@ module.exports.SaveModelCommand = class SaveModelCommand {
             .catch((err) => {
                 printError(`Failed to save model: ${err.status} ${err.message}`, options);
             });
+    }
+};
+
+module.exports.ListModelsCommand = class ListModelsCommand {
+    constructor(program) {
+        this.program = program;
+    }
+
+    execute(options) {
+        const profile = loadProfile(options.profile);
+        debug('%s.executeListModels()', profile.name);
+
+        const models = new Models(profile.url);
+        models.listModels(options.project || profile.project, profile.token).then((response) => {
+            if (response.success) {
+                let result = response.models;
+                if (options.query) result = filterObject(result, options);
+
+                if (options.json) {
+                    printSuccess(JSON.stringify(result, null, 2), options);
+                } else {
+                    printTable(LISTTABLEFORMAT, result, o => ({ ...o, updatedAt: o.updatedAt ? moment(o.updatedAt).fromNow() : '-' }));
+                }
+            } else {
+                printError(`Failed to list models: ${response.status} ${response.message}`, options);
+            }
+        })
+            .catch((err) => {
+                debug(err);
+                printError(`Failed to list models: ${err.status} ${err.message}`, options);
+            });
+    }
+};
+
+module.exports.DescribeModelCommand = class DescribeModelCommand {
+    constructor(program) {
+        this.program = program;
+    }
+
+    execute(modelName, options) {
+        const profile = loadProfile(options.profile);
+        const models = new Models(profile.url);
+        if (options.versions) {
+            debug('%s.executeDescribeModelVersions(%s)', profile.name, modelName);
+            models.describeModelVersions(options.project || profile.project, profile.token, modelName).then((response) => {
+                if (response.success) {
+                    const result = filterObject(response.model, options);
+                    printSuccess(JSON.stringify(result, null, 2), options);
+                } else {
+                    printError(`Failed to describe model versions ${modelName}: ${response.message}`, options);
+                }
+            })
+                .catch((err) => {
+                    printError(`Failed to describe model versions ${modelName}: ${err.status} ${err.message}`, options);
+                });
+        } else {
+            debug('%s.executeDescribeModel(%s)', profile.name, modelName);
+            models.describeModel(options.project || profile.project, profile.token, modelName, options.verbose).then((response) => {
+                if (response.success) {
+                    const result = filterObject(response.model, options);
+                    printSuccess(JSON.stringify(result, null, 2), options);
+                } else {
+                    printError(`Failed to describe model ${modelName}: ${response.message}`, options);
+                }
+            })
+                .catch((err) => {
+                    printError(`Failed to describe model ${modelName}: ${err.status} ${err.message}`, options);
+                });
+        }
     }
 };
 
