@@ -73,7 +73,7 @@ module.exports = class Models {
         checkProject(projectId);
         const endpoint = `${this.endpointV4(projectId)}/${encodeURIComponent(modelName)}`;
 
-        debug('describeAgent(%s) => %s', modelName, endpoint);
+        debug('describeModel(%s) => %s', modelName, endpoint);
         return got
             .get(endpoint, {
                 headers: { Authorization: `Bearer ${token}` },
@@ -88,7 +88,7 @@ module.exports = class Models {
         checkProject(projectId);
         const endpoint = `${this.endpointV4(projectId)}/${encodeURIComponent(modelName)}/versions`;
 
-        debug('describeAgentVersions(%s) => %s', modelName, endpoint);
+        debug('describeModelVersions(%s) => %s', modelName, endpoint);
         return got
             .get(endpoint, {
                 headers: { Authorization: `Bearer ${token}` },
