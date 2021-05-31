@@ -104,7 +104,6 @@ module.exports.DescribeModelCommand = class DescribeModelCommand {
             const response = await cli.descModels(options.project || profile.project, modelName, profile.token);
             let result = response;
             if (options.query) result = filterObject(result, options);
-            // console.log('options.json=', options.json)
             printSuccess(JSON.stringify(result, null, 2), options);
         } catch (err) {
             printError(`Failed to describe model: ${err.status} ${err.message}`, options);

@@ -118,7 +118,7 @@ module.exports = class ApiServerClient {
         try {
             const fetched = await this._client(token)
                 .request(gql`{ modelByName ( project: "${projectId}", name: "${name}" ) { name, description, model_mode, source, status, title, type } }`);
-            return _.get(fetched, 'models', []);
+            return _.get(fetched, 'modelByName', []);
         } catch (err) {
             throw err;
         }
