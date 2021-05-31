@@ -39,6 +39,8 @@ program
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
     .option('--project [project]', 'The project to use')
+    .option('--offset [offset]', 'The offset to use')
+    .option('--limit [limit]', 'The limit to use')
     .option('--json', 'Output results using JSON')
     .option('--query [query]', 'A JMESPath query to use in filtering the response data. Ignored if output format is not JSON.')
     .action(withCompatibilityCheck((options) => {

@@ -54,21 +54,6 @@ module.exports = class Models {
             .catch(err => constructError(err));
     }
 
-    listModels(projectId, token) {
-        checkProject(projectId);
-        const endpoint = `${this.endpointV4(projectId)}`;
-        debug('listModels() => %s', endpoint);
-        return got
-            .get(endpoint, {
-                headers: { Authorization: `Bearer ${token}` },
-                'user-agent': getUserAgent(),
-            })
-            .json()
-            .then(modelResp => ({ success: true, ...modelResp }))
-            .catch(err => constructError(err));
-    }
-
-
     describeModel(projectId, token, modelName, verbose) {
         checkProject(projectId);
         const endpoint = `${this.endpointV4(projectId)}/${encodeURIComponent(modelName)}`;

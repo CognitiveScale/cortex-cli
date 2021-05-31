@@ -102,7 +102,7 @@ module.exports = class ApiServerClient {
     async listModels(projectId, offset, limit, token) {
         try {
             const fetched = await this._client(token)
-                .request(gql`{ models ( project: "${projectId}", offset: "${offset}", limit: "${limit}" ) { name, title, description} }`);
+                .request(gql`{ models ( project: "${projectId}", offset: ${offset}, limit: ${limit} ) { name, title, description} }`);
             return _.get(fetched, 'models', []);
         } catch (err) {
             throw err;
