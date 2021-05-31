@@ -95,35 +95,19 @@ module.exports.DescribeModelCommand = class DescribeModelCommand {
         this.program = program;
     }
 
-    execute(modelName, options) {
+    async execute(options) {
         const profile = loadProfile(options.profile);
-        const models = new Models(profile.url);
-        if (options.versions) {
-            debug('%s.executeDescribeModelVersions(%s)', profile.name, modelName);
-            models.describeModelVersions(options.project || profile.project, profile.token, modelName).then((response) => {
-                if (response.success) {
-                    const result = filterObject(response.model, options);
-                    printSuccess(JSON.stringify(result, null, 2), options);
-                } else {
-                    printError(`Failed to describe model versions ${modelName}: ${response.message}`, options);
-                }
-            })
-                .catch((err) => {
-                    printError(`Failed to describe model versions ${modelName}: ${err.status} ${err.message}`, options);
-                });
-        } else {
-            debug('%s.executeDescribeModel(%s)', profile.name, modelName);
-            models.describeModel(options.project || profile.project, profile.token, modelName, options.verbose).then((response) => {
-                if (response.success) {
-                    const result = filterObject(response.model, options);
-                    printSuccess(JSON.stringify(result, null, 2), options);
-                } else {
-                    printError(`Failed to describe model ${modelName}: ${response.message}`, options);
-                }
-            })
-                .catch((err) => {
-                    printError(`Failed to describe model ${modelName}: ${err.status} ${err.message}`, options);
-                });
+        debug('%s.executeDescribeModels()', profile.name);
+
+        const cli = new ApiServerClient(profile.url);
+        try {
+            const response = await cli.descModels(options.project || profile.project, options.name, profile.token);
+            let result = response;
+            if (options.query) result = filterObject(result, options);
+            // console.log('options.json=', options.json)
+            printSuccess(JSON.stringify(result, null, 2), options);
+        } catch (err) {
+            printError(`Failed to describe model: ${err.status} ${err.message}`, options);
         }
     }
 };

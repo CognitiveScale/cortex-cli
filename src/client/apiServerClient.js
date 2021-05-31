@@ -95,14 +95,29 @@ module.exports = class ApiServerClient {
     }
 
     /**
-     * Query campaign using graphql
+     * Query model list using graphql
      * @param projectId, offset, limit
      * @return {Promise<any>}
      */
     async listModels(projectId, offset, limit, token) {
         try {
             const fetched = await this._client(token)
-                .request(gql`{ models ( project: "${projectId}", offset: ${offset}, limit: ${limit} ) { name, title, description} }`);
+                .request(gql`{ models ( project: "${projectId}", offset: ${offset}, limit: ${limit} ) { name, title, description } }`);
+            return _.get(fetched, 'models', []);
+        } catch (err) {
+            throw err;
+        }
+    }
+
+    /**
+     * Query model description using graphql
+     * @param projectId, name
+     * @return {Promise<any>}
+     */
+    async descModels(projectId, name, token) {
+        try {
+            const fetched = await this._client(token)
+                .request(gql`{ modelByName ( project: "${projectId}", name: "${name}" ) { name, description, model_mode, source, status, title, type } }`);
             return _.get(fetched, 'models', []);
         } catch (err) {
             throw err;
