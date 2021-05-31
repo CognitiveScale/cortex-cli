@@ -14,11 +14,10 @@
  * limitations under the License.
  */
 const fs = require('fs');
-const moment = require('moment');
 const debug = require('debug')('cortex:cli');
+const ApiServerClient = require('../client/apiServerClient');
 const { loadProfile } = require('../config');
 const Models = require('../client/models');
-const { LISTTABLEFORMAT } = require('./utils');
 
 const {
     printSuccess, printError, filterObject, parseObject, printTable, formatValidationPath
@@ -66,29 +65,28 @@ module.exports.ListModelsCommand = class ListModelsCommand {
         this.program = program;
     }
 
-    execute(options) {
+    async execute(options) {
         const profile = loadProfile(options.profile);
         debug('%s.executeListModels()', profile.name);
 
-        const models = new Models(profile.url);
-        models.listModels(options.project || profile.project, profile.token).then((response) => {
-            if (response.success) {
-                let result = response.models;
-                if (options.query) result = filterObject(result, options);
-
-                if (options.json) {
-                    printSuccess(JSON.stringify(result, null, 2), options);
-                } else {
-                    printTable(LISTTABLEFORMAT, result, o => ({ ...o, updatedAt: o.updatedAt ? moment(o.updatedAt).fromNow() : '-' }));
-                }
+        const cli = new ApiServerClient(profile.url);
+        try {
+            const response = await cli.listModels(options.project || profile.project, options.offset, options.limit, profile.token);
+            let result = response;
+            if (options.query) result = filterObject(result, options);
+            if (options.json) {
+                printSuccess(JSON.stringify(result, null, 2), options);
             } else {
-                printError(`Failed to list models: ${response.status} ${response.message}`, options);
+                const tableSpec = [
+                    { column: 'Name', field: 'name', width: 30 },
+                    { column: 'Title', field: 'title', width: 50 },
+                    { column: 'Description', field: 'description', width: 80 },
+                ];
+                printTable(tableSpec, result);
             }
-        })
-            .catch((err) => {
-                debug(err);
-                printError(`Failed to list models: ${err.status} ${err.message}`, options);
-            });
+        } catch (err) {
+            printError(`Failed to list models: ${err.status} ${err.message}`, options);
+        }
     }
 };
 

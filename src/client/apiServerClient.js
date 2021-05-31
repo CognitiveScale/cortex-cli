@@ -93,4 +93,19 @@ module.exports = class ApiServerClient {
             throw err;
         }
     }
+
+    /**
+     * Query campaign using graphql
+     * @param projectId, offset, limit
+     * @return {Promise<any>}
+     */
+    async listModels(projectId, offset, limit, token) {
+        try {
+            const fetched = await this._client(token)
+                .request(gql`{ models ( project: "${projectId}", offset: "${offset}", limit: "${limit}" ) { name, title, description} }`);
+            return _.get(fetched, 'models', []);
+        } catch (err) {
+            throw err;
+        }
+    }
 };
