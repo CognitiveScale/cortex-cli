@@ -95,13 +95,13 @@ module.exports.DescribeModelCommand = class DescribeModelCommand {
         this.program = program;
     }
 
-    async execute(options) {
+    async execute(modelName, options) {
         const profile = loadProfile(options.profile);
         debug('%s.executeDescribeModels()', profile.name);
 
         const cli = new ApiServerClient(profile.url);
         try {
-            const response = await cli.descModels(options.project || profile.project, options.name, profile.token);
+            const response = await cli.descModels(options.project || profile.project, modelName, profile.token);
             let result = response;
             if (options.query) result = filterObject(result, options);
             // console.log('options.json=', options.json)
