@@ -202,7 +202,7 @@ module.exports.ListAssessmentReportCommand = class {
                         { column: 'Created At', field: 'createdAt', width: 25 },
                     ];
                     response.forEach(r => r.summary = JSON.stringify(r.summary));
-                    printTable(tableSpec, response );
+                    printTable(tableSpec, response);
                 }
             })
             .catch((err) => {

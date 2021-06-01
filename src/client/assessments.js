@@ -13,8 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-const _ = require('lodash');
-const querystring = require("querystring");
+const querystring = require('querystring');
 const debug = require('debug')('cortex:cli');
 const { got } = require('./apiutils');
 const {
@@ -25,6 +24,7 @@ module.exports = class Assessments {
     constructor(cortexUrl) {
         this.endpointV4 = `${cortexUrl}/fabric/v4/impactassessment`;
     }
+
     queryResources(token, name, projectId, type, skip, limit) {
         const url = `${this.endpointV4}/resources?${querystring.stringify({ projectId, name, type, skip, limit })}`;
         debug('queryResources => %s', url);
@@ -36,18 +36,20 @@ module.exports = class Assessments {
             .then(resources => resources)
             .catch(err => constructError(err));
     }
+
     createAssessment(token, name, title, description, scope, componentName, componentTypes) {
-        const url = `${this.endpointV4}/assessments`
+        const url = `${this.endpointV4}/assessments`;
         debug('createAssessment => %s', url);
         return got
             .post(url, {
                 headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
                 'user-agent': getUserAgent(),
-                body: JSON.stringify({name, title, description, scope, componentName, componentTypes})
+                body: JSON.stringify({ name, title, description, scope, componentName, componentTypes }),
             }).json()
             .then(resources => resources)
             .catch(err => constructError(err));
     }
+
     listAssessment(token, skip, limit) {
         const url = `${this.endpointV4}/assessments?${querystring.stringify({ skip, limit })}`;
         debug('listAssessment => %s', url);
@@ -59,6 +61,7 @@ module.exports = class Assessments {
             .then(resources => resources)
             .catch(err => constructError(err));
     }
+
     getAssessment(token, name) {
         const url = `${this.endpointV4}/assessments/${name}`;
         debug('getAssessment => %s', url);
@@ -70,6 +73,7 @@ module.exports = class Assessments {
             .then(resources => resources)
             .catch(err => constructError(err));
     }
+
     deleteAssessment(token, name) {
         const url = `${this.endpointV4}/assessments/${name}`;
         debug('deleteAssessment => %s', url);
@@ -81,6 +85,7 @@ module.exports = class Assessments {
             .then(resources => resources)
             .catch(err => constructError(err));
     }
+
     runAssessment(token, name) {
         const url = `${this.endpointV4}/assessments/${name}/run`;
         debug('runAssessment => %s', url);
@@ -92,6 +97,7 @@ module.exports = class Assessments {
             .then(resources => resources)
             .catch(err => constructError(err));
     }
+
     listAssessmentReports(token, name) {
         const url = `${this.endpointV4}/assessments/${name}/reports`;
         debug('listAssessmentReports => %s', url);
@@ -103,6 +109,7 @@ module.exports = class Assessments {
             .then(resources => resources)
             .catch(err => constructError(err));
     }
+
     getAssessmentReport(token, name, reportId) {
         const url = `${this.endpointV4}/assessments/${name}/reports/${reportId}`;
         debug('getAssessmentReport => %s', url);
@@ -114,4 +121,4 @@ module.exports = class Assessments {
             .then(resources => resources)
             .catch(err => constructError(err));
     }
-}
+};

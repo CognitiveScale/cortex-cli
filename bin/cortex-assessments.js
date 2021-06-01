@@ -29,7 +29,7 @@ const {
     RunAssessmentCommand,
     ListAssessmentReportCommand,
     GetAssessmentReportCommand,
-} = require('../src/commands/assessments')
+} = require('../src/commands/assessments');
 
 program.description('Work with Cortex Assessments');
 
@@ -117,7 +117,7 @@ program
     .option('--profile [profile]', 'The profile to use')
     .action(withCompatibilityCheck((assessmentName, options) => {
         try {
-            new DeleteAssessmentCommand(program).execute(assessmentName, options)
+            new DeleteAssessmentCommand(program).execute(assessmentName, options);
         } catch (err) {
             console.error(chalk.red(err.message));
         }
