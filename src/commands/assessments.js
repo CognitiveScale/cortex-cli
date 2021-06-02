@@ -37,7 +37,7 @@ module.exports.ListResourcesCommand = class {
         const client = new Assessments(profile.url);
         client.queryResources(profile.token, options.name, options.scope, options.type, options.skip, options.limit)
             .then((response) => {
-                if (!response.success) throw response;
+                if (response.success === false) throw response;
                 if (options.json) {
                     printSuccess(JSON.stringify(response, null, 2), options);
                 } else {
@@ -79,7 +79,7 @@ module.exports.CreateAssessmentCommand = class {
             options.description || assessment.description, options.scope || assessment.scope,
             options.component || assessment.component, options.type || assessment.type)
             .then((response) => {
-                if (!response.success) throw response;
+                if (response.success === false) throw response;
                 if (response.success) {
                     printSuccess(`Assessment ${options.name} saved successfully`, options);
                 } else {
@@ -104,7 +104,7 @@ module.exports.ListAssessmentCommand = class {
         const client = new Assessments(profile.url);
         client.listAssessment(profile.token, options.skip, options.limit)
             .then((response) => {
-                if (!response.success) throw response;
+                if (response.success === false) throw response;
                 if (options.json) {
                     printSuccess(JSON.stringify(response, null, 2), options);
                 } else {
@@ -138,7 +138,7 @@ module.exports.DescribeAssessmentCommand = class {
         const client = new Assessments(profile.url);
         client.getAssessment(profile.token, name)
             .then((response) => {
-                if (!response.success) throw response;
+                if (response.success === false) throw response;
                 printSuccess(JSON.stringify(response, null, 2), options);
             })
             .catch((err) => {
@@ -159,7 +159,7 @@ module.exports.DeleteAssessmentCommand = class {
         const client = new Assessments(profile.url);
         client.deleteAssessment(profile.token, name)
             .then((response) => {
-                if (!response.success) throw response;
+                if (response.success === false) throw response;
                 printSuccess(JSON.stringify(response, null, 2), options);
             })
             .catch((err) => {
@@ -180,7 +180,7 @@ module.exports.RunAssessmentCommand = class {
         const client = new Assessments(profile.url);
         client.runAssessment(profile.token, name)
             .then((response) => {
-                if (!response.success) throw response;
+                if (response.success === false) throw response;
                 printSuccess(JSON.stringify(response, null, 2), options);
             })
             .catch((err) => {
@@ -201,7 +201,7 @@ module.exports.ListAssessmentReportCommand = class {
         const client = new Assessments(profile.url);
         client.listAssessmentReports(profile.token, name)
             .then((response) => {
-                if (!response.success) throw response;
+                if (response.success === false) throw response;
                 if (options.json) {
                     printSuccess(JSON.stringify(response, null, 2), options);
                 } else {
@@ -234,7 +234,7 @@ module.exports.GetAssessmentReportCommand = class {
         const client = new Assessments(profile.url);
         client.getAssessmentReport(profile.token, name, reportId)
             .then((response) => {
-                if (!response.success) throw response;
+                if (response.success === false) throw response;
                 if (options.json) {
                     const output = {
                         name: response.reportId,
@@ -274,7 +274,7 @@ module.exports.ExportAssessmentReportCommand = class {
         const client = new Assessments(profile.url);
         client.exportAssessmentReport(profile.token, name, reportId)
             .then((response) => {
-                if (!response.success) throw response;
+                if (response.success === false) throw response;
                 printSuccess(`Report exported to ${response.file}`, options)
             })
             .catch((err) => {
