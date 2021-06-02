@@ -33,8 +33,9 @@ module.exports = class Assessments {
             .get(url, {
                 headers: { Authorization: `Bearer ${token}` },
                 'user-agent': getUserAgent(),
-            }).json()
-            .then(resources => resources)
+            })
+            .json()
+            .then(res => res)
             .catch(err => constructError(err));
     }
 
@@ -47,7 +48,7 @@ module.exports = class Assessments {
                 'user-agent': getUserAgent(),
                 body: JSON.stringify({ name, title, description, scope, componentName, componentTypes }),
             }).json()
-            .then(resources => resources)
+            .then(res => res)
             .catch(err => constructError(err));
     }
 
@@ -59,7 +60,7 @@ module.exports = class Assessments {
                 headers: { Authorization: `Bearer ${token}` },
                 'user-agent': getUserAgent(),
             }).json()
-            .then(resources => resources)
+            .then(res => res)
             .catch(err => constructError(err));
     }
 
@@ -71,7 +72,7 @@ module.exports = class Assessments {
                 headers: { Authorization: `Bearer ${token}` },
                 'user-agent': getUserAgent(),
             }).json()
-            .then(resources => resources)
+            .then(res => res)
             .catch(err => constructError(err));
     }
 
@@ -83,7 +84,7 @@ module.exports = class Assessments {
                 headers: { Authorization: `Bearer ${token}` },
                 'user-agent': getUserAgent(),
             }).json()
-            .then(resources => resources)
+            .then(res => res)
             .catch(err => constructError(err));
     }
 
@@ -95,7 +96,7 @@ module.exports = class Assessments {
                 headers: { Authorization: `Bearer ${token}` },
                 'user-agent': getUserAgent(),
             }).json()
-            .then(resources => resources)
+            .then(res => res)
             .catch(err => constructError(err));
     }
 
@@ -107,7 +108,7 @@ module.exports = class Assessments {
                 headers: { Authorization: `Bearer ${token}` },
                 'user-agent': getUserAgent(),
             }).json()
-            .then(resources => resources)
+            .then(res => res)
             .catch(err => constructError(err));
     }
 
@@ -119,7 +120,7 @@ module.exports = class Assessments {
                 headers: { Authorization: `Bearer ${token}` },
                 'user-agent': getUserAgent(),
             }).json()
-            .then(resources => resources)
+            .then(res => res)
             .catch(err => constructError(err));
     }
 
