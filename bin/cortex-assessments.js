@@ -29,6 +29,7 @@ const {
     RunAssessmentCommand,
     ListAssessmentReportCommand,
     GetAssessmentReportCommand,
+    ExportAssessmentReportCommand,
 } = require('../src/commands/assessments');
 
 program.description('Work with Cortex Assessments');
@@ -46,7 +47,6 @@ program
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
     .option('--json', 'Output results using JSON')
-    .option('--query [query]', 'A JMESPath query to use in filtering the response data. Ignored if output format is not JSON.')
     .action(withCompatibilityCheck((options) => {
         try {
             new ListResourcesCommand(program).execute(options);
@@ -66,6 +66,7 @@ program
     .option('--scope [projects]', 'Assessment scope projects')
     .option('--component [Cortex component name]', 'Cortex component name')
     .option('--type [Cortex component types]', 'Assessment scope component types')
+    .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
     .option('-y, --yaml', 'Use YAML format')
     .action(withCompatibilityCheck((assessmentDefinition, options) => {
@@ -85,7 +86,6 @@ program
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
     .option('--json', 'Output results using JSON')
-    .option('--query [query]', 'A JMESPath query to use in filtering the response data. Ignored if output format is not JSON.')
     .action(withCompatibilityCheck((options) => {
         try {
             new ListAssessmentCommand(program).execute(options);
@@ -129,7 +129,6 @@ program
     .option('--no-compat', 'Ignore API compatibility checks')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
-    .option('--query [query]', 'A JMESPath query to use in filtering the response data.')
     .action(withCompatibilityCheck((assessmentName, options) => {
         try {
             new RunAssessmentCommand(program).execute(assessmentName, options);
@@ -146,7 +145,7 @@ program
     .option('--no-compat', 'Ignore API compatibility checks')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
-    .option('--query [query]', 'A JMESPath query to use in filtering the response data.')
+    .option('--json', 'Output results using JSON')
     .action(withCompatibilityCheck((assessmentName, options) => {
         try {
             new ListAssessmentReportCommand(program).execute(assessmentName, options);
@@ -161,10 +160,24 @@ program
     .option('--no-compat', 'Ignore API compatibility checks')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
-    .option('--query [query]', 'A JMESPath query to use in filtering the response data.')
+    .option('--json', 'Output results using JSON')
     .action(withCompatibilityCheck((assessmentName, reportId, options) => {
         try {
             new GetAssessmentReportCommand(program).execute(assessmentName, reportId, options);
+        } catch (err) {
+            console.error(chalk.red(err.message));
+        }
+    }));
+
+program
+    .command('report-export <assessmentName> <reportId>')
+    .description('Export report of the assessment')
+    .option('--no-compat', 'Ignore API compatibility checks')
+    .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
+    .option('--profile [profile]', 'The profile to use')
+    .action(withCompatibilityCheck((assessmentName, reportId, options) => {
+        try {
+            new ExportAssessmentReportCommand(program).execute(assessmentName, reportId, options);
         } catch (err) {
             console.error(chalk.red(err.message));
         }

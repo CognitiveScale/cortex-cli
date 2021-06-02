@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 const querystring = require('querystring');
+const { createWriteStream } = require("fs");
 const debug = require('debug')('cortex:cli');
 const { got } = require('./apiutils');
 const {
@@ -120,5 +121,15 @@ module.exports = class Assessments {
             }).json()
             .then(resources => resources)
             .catch(err => constructError(err));
+    }
+
+    exportAssessmentReport(token, name, reportId) {
+        const url = `${this.endpointV4}/assessments/${name}/reports/${reportId}/export`;
+        debug('exportAssessmentReport => %s', url);
+        got.stream(url, {
+                headers: { Authorization: `Bearer ${token}` },
+                'user-agent': getUserAgent(),
+            }).pipe(createWriteStream(`${reportId}.csv`), { end: true });
+        return Promise.resolve({ file: `${reportId}.csv`});
     }
 };

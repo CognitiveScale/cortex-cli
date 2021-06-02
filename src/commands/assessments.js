@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 const fs = require('fs');
+const _ = require('lodash');
 const debug = require('debug')('cortex:cli');
+const moment = require('moment');
 const { loadProfile } = require('../config');
 const Assessments = require('../client/assessments');
 
@@ -111,7 +113,7 @@ module.exports.ListAssessmentCommand = class {
                         { column: '# Reports', field: 'reportCount', width: 12 },
                         { column: 'Created At', field: 'createdAt', width: 25 },
                     ];
-                    printTable(tableSpec, response);
+                    printTable(tableSpec, response, o => ({ ...o, createdAt: o.createdAt ? moment(o.createdAt).fromNow() : '-' }));
                 }
             })
             .catch((err) => {
@@ -201,8 +203,8 @@ module.exports.ListAssessmentReportCommand = class {
                         { column: 'Impact Summary', field: 'summary', width: 60 },
                         { column: 'Created At', field: 'createdAt', width: 25 },
                     ];
-                    response.forEach(r => r.summary = JSON.stringify(r.summary));
-                    printTable(tableSpec, response);
+                    response.forEach(r => r.summary = JSON.stringify(Object.fromEntries(r.summary.map(item => [item.type, item.count]))));
+                    printTable(tableSpec, response, o => ({ ...o, createdAt: o.createdAt ? moment(o.createdAt).fromNow() : '-' }));
                 }
             })
             .catch((err) => {
@@ -223,10 +225,48 @@ module.exports.GetAssessmentReportCommand = class {
         const client = new Assessments(profile.url);
         client.getAssessmentReport(profile.token, name, reportId)
             .then((response) => {
-                printSuccess(JSON.stringify(response, null, 2), options);
+                if (options.json) {
+                    const output = {
+                        name: response.reportId,
+                        assessment: response.assessmentId,
+                        summary: Object.fromEntries(response.summary.map(item => [item.type, item.count])),
+                        report: response.detail,
+                        createdAt: response.createdAt,
+                    }
+                    printSuccess(JSON.stringify(output, null, 2), options);
+                } else {
+                    const flattenRefs = _.uniqBy(_.flatten(response.detail.map(ref => ref.sourcePath.map(s => ({ ...s, projectId: ref._projectId })))), (r) => (`${r.name}-${r.type}`));
+                    const tableSpec = [
+                        { column: 'Name', field: 'name', width: 30 },
+                        { column: 'Title', field: 'title', width: 30 },
+                        { column: 'Type', field: 'type', width: 20 },
+                        { column: 'Project', field: 'projectId', width: 25 },
+                    ];
+                    printTable(tableSpec, _.sortBy(flattenRefs, 'type'));
+                }
             })
             .catch((err) => {
                 printError(`Failed to get assessment ${name} report ${reportId}: ${err.status} ${err.message}`, options);
+            });
+    }
+};
+
+module.exports.ExportAssessmentReportCommand = class {
+    constructor(program) {
+        this.program = program;
+    }
+
+    execute(name, reportId, options) {
+        const profile = loadProfile(options.profile);
+        debug('%s.ExportAssessmentReportCommand()', profile.name);
+
+        const client = new Assessments(profile.url);
+        client.exportAssessmentReport(profile.token, name, reportId)
+            .then((response) => {
+                printSuccess(`Report exported to ${response.file}`, options)
+            })
+            .catch((err) => {
+                printError(`Failed to export assessment ${name} report ${reportId}: ${err.status} ${err.message}`, options);
             });
     }
 };
