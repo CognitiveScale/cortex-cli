@@ -15,9 +15,10 @@
  */
 const fs = require('fs');
 const debug = require('debug')('cortex:cli');
-const ApiServerClient = require('../client/apiServerClient');
+const moment = require('moment');
 const { loadProfile } = require('../config');
 const Models = require('../client/models');
+const { LISTTABLEFORMAT } = require('./utils');
 
 const {
     printSuccess, printError, filterObject, parseObject, printTable, formatValidationPath
@@ -65,28 +66,28 @@ module.exports.ListModelsCommand = class ListModelsCommand {
         this.program = program;
     }
 
-    async execute(options) {
+    execute(options) {
         const profile = loadProfile(options.profile);
         debug('%s.executeListModels()', profile.name);
+        const models = new Models(profile.url);
+        models.listModels(options.project || profile.project, options.offset, options.limit, profile.token).then((response) => {
+            if (response.success) {
+                let result = response.models;
+                if (options.query) result = filterObject(result, options);
 
-        const cli = new ApiServerClient(profile.url);
-        try {
-            const response = await cli.listModels(options.project || profile.project, options.offset, options.limit, profile.token);
-            let result = response;
-            if (options.query) result = filterObject(result, options);
-            if (options.json) {
-                printSuccess(JSON.stringify(result, null, 2), options);
+                if (options.json) {
+                    printSuccess(JSON.stringify(result, null, 2), options);
+                } else {
+                    printTable(LISTTABLEFORMAT, result, o => ({ ...o, updatedAt: o.updatedAt ? moment(o.updatedAt).fromNow() : '-' }));
+                }
             } else {
-                const tableSpec = [
-                    { column: 'Name', field: 'name', width: 30 },
-                    { column: 'Title', field: 'title', width: 50 },
-                    { column: 'Description', field: 'description', width: 80 },
-                ];
-                printTable(tableSpec, result);
+                printError(`Failed to list models: ${response.status} ${response.message}`, options);
             }
-        } catch (err) {
-            printError(`Failed to list models: ${err.status} ${err.message}`, options);
-        }
+        })
+            .catch((err) => {
+                debug(err);
+                printError(`Failed to list models: ${err.status} ${err.message}`, options);
+            });
     }
 };
 
@@ -95,19 +96,21 @@ module.exports.DescribeModelCommand = class DescribeModelCommand {
         this.program = program;
     }
 
-    async execute(modelName, options) {
+    execute(modelName, options) {
         const profile = loadProfile(options.profile);
-        debug('%s.executeDescribeModels()', profile.name);
-
-        const cli = new ApiServerClient(profile.url);
-        try {
-            const response = await cli.descModels(options.project || profile.project, modelName, profile.token);
-            let result = response;
-            if (options.query) result = filterObject(result, options);
-            printSuccess(JSON.stringify(result, null, 2), options);
-        } catch (err) {
-            printError(`Failed to describe model: ${err.status} ${err.message}`, options);
-        }
+        const models = new Models(profile.url);
+        debug('%s.executeDescribeModel(%s)', profile.name, modelName);
+        models.describeModel(options.project || profile.project, profile.token, modelName, options.verbose).then((response) => {
+            if (response.success) {
+                const result = filterObject(response.model, options);
+                printSuccess(JSON.stringify(result, null, 2), options);
+            } else {
+                printError(`Failed to describe model ${modelName}: ${response.message}`, options);
+            }
+        })
+        .catch((err) => {
+            printError(`Failed to describe model ${modelName}: ${err.status} ${err.message}`, options);
+        });
     }
 };
 

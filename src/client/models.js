@@ -53,4 +53,32 @@ module.exports = class Models {
             .then(model => ({ success: true, model }))
             .catch(err => constructError(err));
     }
+
+    describeModel(projectId, token, modelName, verbose) {
+        checkProject(projectId);
+        const endpoint = `${this.endpointV4(projectId)}/${encodeURIComponent(modelName)}`;
+        debug('describeModel(%s) => %s', modelName, endpoint);
+        return got
+            .get(endpoint, {
+                headers: { Authorization: `Bearer ${token}` },
+                'user-agent': getUserAgent(),
+                searchParams: { verbose },
+            }).json()
+            .then(model => ({ success: true, model }))
+            .catch(err => constructError(err));
+    }
+
+    listModels(projectId, offset, limit, token) {
+        checkProject(projectId);
+        const endpoint = `${this.endpointV4(projectId)}?skip=${offset}&limit=${limit}`;
+        debug('listModels() => %s', endpoint);
+        return got
+            .get(endpoint, {
+                headers: { Authorization: `Bearer ${token}` },
+                'user-agent': getUserAgent(),
+            })
+            .json()
+            .then(modelsResp => ({ success: true, ...modelsResp }))
+            .catch(err => constructError(err));
+    }
 };
