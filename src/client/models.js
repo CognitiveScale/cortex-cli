@@ -73,7 +73,7 @@ module.exports = class Models {
         const endpoint = `${this.endpointV4(projectId)}?skip=${offset}&limit=${limit}`;
         debug('listModels() => %s', endpoint);
         return got
-            .post(endpoint, {
+            .get(endpoint, {
                 headers: { Authorization: `Bearer ${token}` },
                 'user-agent': getUserAgent(),
             })
