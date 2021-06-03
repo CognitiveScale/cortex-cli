@@ -207,7 +207,7 @@ module.exports.ListAssessmentReportCommand = class {
                 } else {
                     const tableSpec = [
                         { column: 'Assessment Name', field: 'assessmentId', width: 30 },
-                        { column: 'Report Id', field: 'reportId', width: 40 },
+                        { column: 'Report Id', field: 'reportId', width: 50 },
                         { column: 'Impact Summary', field: 'summary', width: 60 },
                         { column: 'Created At', field: 'createdAt', width: 25 },
                         { column: 'Created By', field: 'createdBy', width: 25 },
