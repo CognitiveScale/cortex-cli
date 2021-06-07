@@ -61,7 +61,6 @@ program
     .option('--profile [profile]', 'The profile to use')
     .option('--project [project]', 'The project to use')
     .option('--query [query]', 'A JMESPath query to use in filtering the response data.')
-    .option('--versions', 'To get list of versions of an model')
     .option('--verbose', 'Verbose output')
     .action(withCompatibilityCheck((modelName, options) => {
         try {
