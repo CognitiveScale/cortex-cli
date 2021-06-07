@@ -17,9 +17,7 @@ const querystring = require('querystring');
 const { createWriteStream } = require("fs");
 const debug = require('debug')('cortex:cli');
 const { got } = require('./apiutils');
-const {
-    constructError, getUserAgent,
-} = require('../commands/utils');
+const { constructError, getUserAgent } = require('../commands/utils');
 
 module.exports = class Assessments {
     constructor(cortexUrl) {

@@ -14,7 +14,11 @@
  * limitations under the License.
  */
 const fs = require('fs');
-const _ = require('lodash');
+const _ = {
+    uniqBy: require('lodash/uniqBy'),
+    sortBy: require('lodash/sortBy'),
+    flatten: require('lodash/flatten'),
+};
 const debug = require('debug')('cortex:cli');
 const moment = require('moment');
 const { loadProfile } = require('../config');
@@ -47,7 +51,7 @@ module.exports.ListResourcesCommand = class {
                         { column: 'Type', field: 'resourceType', width: 16 },
                         { column: 'Project', field: '_projectId', width: 15 },
                     ];
-                    printTable(tableSpec, response);
+                    printTable(tableSpec, response.data);
                 }
             })
             .catch((err) => {
@@ -117,7 +121,7 @@ module.exports.ListAssessmentCommand = class {
                         { column: 'Created At', field: 'createdAt', width: 25 },
                         { column: 'Created By', field: 'createdBy', width: 25 },
                     ];
-                    printTable(tableSpec, response, o => ({ ...o, createdAt: o.createdAt ? moment(o.createdAt).fromNow() : '-' }));
+                    printTable(tableSpec, response.data, o => ({ ...o, createdAt: o.createdAt ? moment(o.createdAt).fromNow() : '-' }));
                 }
             })
             .catch((err) => {
@@ -212,8 +216,8 @@ module.exports.ListAssessmentReportCommand = class {
                         { column: 'Created At', field: 'createdAt', width: 25 },
                         { column: 'Created By', field: 'createdBy', width: 25 },
                     ];
-                    response.forEach(r => r.summary = JSON.stringify(Object.fromEntries(r.summary.map(item => [item.type, item.count]))));
-                    printTable(tableSpec, response, o => ({ ...o, createdAt: o.createdAt ? moment(o.createdAt).fromNow() : '-' }));
+                    response.data.forEach(r => r.summary = JSON.stringify(Object.fromEntries(r.summary.map(item => [item.type, item.count]))));
+                    printTable(tableSpec, response.data, o => ({ ...o, createdAt: o.createdAt ? moment(o.createdAt).fromNow() : '-' }));
                 }
             })
             .catch((err) => {
