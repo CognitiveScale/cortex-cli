@@ -21,7 +21,7 @@ const Models = require('../client/models');
 const { LISTTABLEFORMAT } = require('./utils');
 
 const {
-    printSuccess, printError, filterObject, parseObject, printTable, formatValidationPath
+    printSuccess, printError, filterObject, parseObject, printTable, formatValidationPath,
 } = require('./utils');
 
 module.exports.SaveModelCommand = class SaveModelCommand {
