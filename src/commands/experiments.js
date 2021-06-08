@@ -14,13 +14,14 @@
  * limitations under the License.
  */
 
+const fs = require('fs');
 const _ = require('lodash');
 const debug = require('debug')('cortex:cli');
 const moment = require('moment');
 const { loadProfile } = require('../config');
 const Experiments = require('../client/experiments');
 const {
- printSuccess, printError, filterObject, printTable,
+ printSuccess, printError, filterObject, printTable, parseObject,
 } = require('./utils');
 
 class ListExperiments {
@@ -237,6 +238,80 @@ class DownloadArtifactCommand {
     }
 }
 
+class SaveExperimentCommand {
+    constructor(program) {
+        this.program = program;
+    }
+
+    execute(experimentDefinition, options) {
+        const profile = loadProfile(options.profile);
+        debug('%s.executeSaveExperiment(%s)', profile.name, experimentDefinition);
+
+        const experimentDefStr = fs.readFileSync(experimentDefinition);
+        const experiment = parseObject(experimentDefStr, options);
+        debug('%o', experiment);
+
+        const experiments = new Experiments(profile.url);
+        experiments.saveExperiment(options.project || profile.project, profile.token, experiment).then((response) => {
+            if (response.success) {
+                printSuccess('Experiment saved', options);
+            } else if (response.details) {
+                console.log(`Failed to save experiment: ${response.status} ${response.message}`);
+                console.log('The following issues were found:');
+                const tableSpec = [
+                    { column: 'Path', field: 'path', width: 50 },
+                    { column: 'Message', field: 'message', width: 100 },
+                ];
+                response.details.map(d => d.path = formatValidationPath(d.path));
+                printTable(tableSpec, response.details);
+                printError(''); // Just exit
+            } else {
+                printError(JSON.stringify(response));
+            }
+        })
+            .catch((err) => {
+                printError(`Failed to save experiment: ${err.status} ${err.message}`, options);
+            });
+    }
+}
+
+class CreateRunCommand {
+    constructor(program) {
+        this.program = program;
+    }
+
+    execute(runDefinition, options) {
+        const profile = loadProfile(options.profile);
+        debug('%s.executeCreateRun(%s)', profile.name, runDefinition);
+
+        const runDefinitionStr = fs.readFileSync(runDefinition);
+        const run = parseObject(runDefinitionStr, options);
+        debug('%o', run);
+
+        const experiments = new Experiments(profile.url);
+        experiments.createRun(options.project || profile.project, profile.token, run).then((response) => {
+            if (response.success) {
+                printSuccess('Run created', options);
+            } else if (response.details) {
+                console.log(`Failed to create run: ${response.status} ${response.message}`);
+                console.log('The following issues were found:');
+                const tableSpec = [
+                    { column: 'Path', field: 'path', width: 50 },
+                    { column: 'Message', field: 'message', width: 100 },
+                ];
+                response.details.map(d => d.path = formatValidationPath(d.path));
+                printTable(tableSpec, response.details);
+                printError(''); // Just exit
+            } else {
+                printError(JSON.stringify(response));
+            }
+        })
+            .catch((err) => {
+                printError(`Failed to create run: ${err.status} ${err.message}`, options);
+            });
+    }
+}
+
 module.exports = {
     ListExperiments,
     ListRuns,
@@ -245,4 +320,6 @@ module.exports = {
     DeleteRunCommand,
     DeleteExperimentCommand,
     DownloadArtifactCommand,
+    SaveExperimentCommand,
+    CreateRunCommand
 };

@@ -126,4 +126,33 @@ module.exports = class Experiments {
             return constructError(err);
         }
     }
+
+    saveExperiment(projectId, token, experimentObj) {
+        checkProject(projectId);
+        const endpoint = `${this.endpoint(projectId)}`;
+        debug('saveExperiment(%s) => %s', experimentObj.name, endpoint);
+        return got
+            .post(endpoint, {
+                headers: { Authorization: `Bearer ${token}` },
+                'user-agent': getUserAgent(),
+                json: experimentObj
+            }).json()
+            .then(result => ({ success: true, result }))
+            .catch(err => constructError(err));
+    }
+
+    createRun(projectId, token, runObj) {
+        checkProject(projectId);
+        const experimentName = runObj.experiment_name;
+        const endpoint = `${this.endpoint(projectId)}/${encodeURIComponent(experimentName)}/runs`;
+        debug('createRun(%s) => %s', experimentName, endpoint);
+        return got
+            .post(endpoint, {
+                headers: { Authorization: `Bearer ${token}` },
+                'user-agent': getUserAgent(),
+                json: runObj,
+            }).json()
+            .then(result => ({ success: true, result }))
+            .catch(err => constructError(err));
+    }
 };

@@ -29,6 +29,8 @@ const {
     DeleteRunCommand,
     DeleteExperimentCommand,
     DownloadArtifactCommand,
+    SaveExperimentCommand,
+    CreateRunCommand,
 } = require('../src/commands/experiments');
 
 program.description('Work with Cortex Experiments');
@@ -159,5 +161,38 @@ program
         }
     }));
 
+// Save Experiment
+program
+    .command('save <experimentDefinition>')
+    .description('Save an experiment definition')
+    .option('--no-compat', 'Ignore API compatibility checks')
+    .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
+    .option('--profile [profile]', 'The profile to use')
+    .option('--project [project]', 'The project to use')
+    .option('-y, --yaml', 'Use YAML for experiment definition format')
+    .action(withCompatibilityCheck((experimentDefinition, options) => {
+        try {
+            new SaveExperimentCommand(program).execute(experimentDefinition, options);
+        } catch (err) {
+            console.error(chalk.red(err.message));
+        }
+    }));
+
+// Save Experiment
+program
+    .command('create-run <runDefinition>')
+    .description('Create run for experiment')
+    .option('--no-compat', 'Ignore API compatibility checks')
+    .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
+    .option('--profile [profile]', 'The profile to use')
+    .option('--project [project]', 'The project to use')
+    .option('-y, --yaml', 'Use YAML for run definition format')
+    .action(withCompatibilityCheck((runDefinition, options) => {
+        try {
+            new CreateRunCommand(program).execute(runDefinition, options);
+        } catch (err) {
+            console.error(chalk.red(err.message));
+        }
+    }));
 
 program.parse(process.argv);
