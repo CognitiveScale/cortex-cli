@@ -113,6 +113,12 @@ module.exports.WriteSecretsCommand = class {
           return printError('Failed to write secret : no value specified', options);
         }
 
+        // FAB-1775: validate secret key name
+        const invalidCharsRegex = /^\w+([./-]?\w+)*$/;
+        if (!invalidCharsRegex.test(keyName)) {
+            return printError(`Failed to write secret : keyName did not conform to regex ${JSON.stringify(invalidCharsRegex)}`, options);
+        }
+
         const secrets = new Secrets(profile.url);
         return secrets.writeSecret(options.project || profile.project, profile.token, keyName, data).then((response) => {
             if (response.success) {
