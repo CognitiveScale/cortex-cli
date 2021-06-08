@@ -168,3 +168,18 @@ module.exports.GetAccessToken = class {
         return printSuccess(jwt, options);
     }
 };
+
+module.exports.PrintEnvVars = class {
+    constructor(program) {
+        this.program = program;
+    }
+
+    execute(options) {
+        const vars = [];
+        const profile = loadProfile(options.profile);
+        vars.push(`export CORTEX_TOKEN=${profile.token}`);
+        vars.push(`export CORTEX_URI=${profile.url}`);
+        vars.push(`export CORTEX_PROJECT=${options.project || profile.project}`);
+        return printSuccess(vars.join('\n'), options);
+    }
+}

@@ -42,6 +42,42 @@ module.exports = class Users {
         }
     }
 
+    createServiceUser(token, user) {
+        const endpoint = `${this.endpoint}/accounts/service/${user}`;
+        debug('createServiceUser => %s', endpoint);
+        return got
+            .post(endpoint, {
+                headers: { Authorization: `Bearer ${token}` },
+                'user-agent': getUserAgent(),
+            }).json()
+            .then(res => ({ success: true, result: res }))
+            .catch(err => constructError(err));
+    }
+
+    deleteServiceUser(token, user) {
+        const endpoint = `${this.endpoint}/accounts/service/${user}`;
+        debug('createServiceUser => %s', endpoint);
+        return got
+            .delete(endpoint, {
+                headers: { Authorization: `Bearer ${token}` },
+                'user-agent': getUserAgent(),
+            }).json()
+            .then(res => ({ success: true, result: res }))
+            .catch(err => constructError(err));
+    }
+
+    listServiceUsers(token) {
+        const endpoint = `${this.endpoint}/accounts/service`;
+        debug('createServiceUser => %s', endpoint);
+        return got
+            .get(endpoint, {
+                headers: { Authorization: `Bearer ${token}` },
+                'user-agent': getUserAgent(),
+            }).json()
+            .then(res => ({ success: true, result: res }))
+            .catch(err => constructError(err));
+    }
+
     describeUser(token) {
         const endpoint = `${this.usersEndpoint}/${this.flags}`;
         debug('describeUser => %s', endpoint);

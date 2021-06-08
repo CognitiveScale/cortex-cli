@@ -62,6 +62,78 @@ module.exports.UserGrantCommand = class {
     }
 };
 
+module.exports.UserDeleteCommand = class {
+    constructor(program) {
+        this.program = program;
+    }
+
+    execute(user, options) {
+        const profile = loadProfile(options.profile);
+        debug('%s.deleteServiceUser=%s', profile.name, user);
+
+        const client = new Users(profile.url, user);
+        client.deleteServiceUser(profile.token, user).then((response) => {
+            if (response.success) {
+                const result = filterObject(response.result, options);
+                printSuccess(JSON.stringify(result, null, 2), options);
+            } else {
+                printError(`Failed to delete user ${user} : ${response.message}`, options);
+            }
+        })
+            .catch((err) => {
+                printError(`Failed to delete user : ${err.status} ${err.message}`, options);
+            });
+    }
+};
+
+module.exports.UserCreateCommand = class {
+    constructor(program) {
+        this.program = program;
+    }
+
+    execute(user, options) {
+        const profile = loadProfile(options.profile);
+        debug('%s.createServiceUser=%s', profile.name, user);
+
+        const client = new Users(profile.url, user);
+        client.createServiceUser(profile.token, user).then((response) => {
+            if (response.success) {
+                const result = filterObject(response.result, options);
+                printSuccess(JSON.stringify(result, null, 2), options);
+            } else {
+                printError(`Failed to create user ${user} : ${response.message}`, options);
+            }
+        })
+            .catch((err) => {
+                printError(`Failed to create user : ${err.status} ${err.message}`, options);
+            });
+    }
+};
+
+module.exports.UserListCommand = class {
+    constructor(program) {
+        this.program = program;
+    }
+
+    execute(options) {
+        const profile = loadProfile(options.profile);
+        debug('%s.listServiceUsers', profile.name);
+
+        const client = new Users(profile.url, 'self');
+        client.listServiceUsers(profile.token).then((response) => {
+            if (response.success) {
+                const result = filterObject(response.result, options);
+                printSuccess(JSON.stringify(result, null, 2), options);
+            } else {
+                printError(`Failed to list service users : ${response.message}`, options);
+            }
+        })
+            .catch((err) => {
+                printError(`Failed to list service users : ${err.status} ${err.message}`, options);
+            });
+    }
+};
+
 module.exports.UserDescribeCommand = class {
     constructor(program) {
         this.program = program;

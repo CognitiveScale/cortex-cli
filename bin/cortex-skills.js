@@ -93,6 +93,7 @@ program
     .option('--profile [profile]', 'The profile to use')
     .option('--project [project]', 'The project to use')
     .option('--json', 'Output results using JSON')
+    .option('--no-status', 'skip extra call for skill status')
     .option('--query [query]', 'A JMESPath query to use in filtering the response data.')
     .action(withCompatibilityCheck((options) => {
         try {

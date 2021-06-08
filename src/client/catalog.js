@@ -49,13 +49,16 @@ module.exports = class Catalog {
             .catch(err => constructError(err));
     }
 
-    listSkills(projectId, token) {
+    listSkills(projectId, token, status = false) {
         checkProject(projectId);
         debug('listSkills() => %s', this.endpoints.skills(projectId));
+        const query = {};
+        if (status) query.status = true;
         return got
             .get(this.endpoints.skills(projectId), {
                 headers: { Authorization: `Bearer ${token}` },
                 'user-agent': getUserAgent(),
+                searchParams: query,
             }).json()
             .then(skills => ({ success: true, ...skills }))
             .catch(err => constructError(err));
