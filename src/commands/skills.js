@@ -71,25 +71,19 @@ module.exports.ListSkillsCommand = class ListSkillsCommand {
 
         const catalog = new Catalog(profile.url);
         try {
-            const response = await catalog.listSkills(options.project || profile.project, profile.token);
+            const response = await catalog.listSkills(options.project || profile.project, profile.token, options.nostatus === undefined);
             if (response.success) {
                 let result = response.skills;
                 const tableFormat = LISTTABLEFORMAT;
-                if (!_.has(options, 'no-status')) {
-                    const statuses = await catalog.listSkills(options.project || profile.project, profile.token, true);
+                if (options.nostatus === undefined) {
                     result = result.map((skill) => {
-                        const status = statuses.skills.find(s => s.name === skill.name.toLowerCase());
-                        let actionStatus = 'Not deployed';
-                        if (!_.isEmpty(status)) {
-                            const actionStatuses = _.get(status, 'actionStatus', []);
-                           actionStatus = _.isEmpty(actionStatuses) ? 'Deployed' : actionStatuses.map(s => `${s.name}: ${s.state}`).join(' ');
-                        }
+                        const status = _.isEmpty(skill.actionStatuses) ? skill.deployStatus : skill.actionStatuses.map(s => `${s.name}: ${s.state}`).join(' ');
                         return {
                             ...skill,
-                            actionStatus,
+                            status,
                         };
                     });
-                    tableFormat.push({ column: 'Status', field: 'actionStatus', width: 30 });
+                    tableFormat.push({ column: 'Status', field: 'status', width: 30 });
                 }
                 if (options.query) result = filterObject(result, options);
 
