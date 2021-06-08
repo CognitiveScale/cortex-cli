@@ -129,7 +129,7 @@ module.exports.DeleteModelCommand = class {
                     const result = filterObject(response, options);
                     printSuccess(JSON.stringify(result, null, 2), options);
                 } else {
-                    printError(`Model deletion failed: ${response.status} ${response.message}`, options);
+                    printError(`Model deletion failed: ${response.status} ${response.message}.`, options);
                 }
             })
             .catch((err) => {
