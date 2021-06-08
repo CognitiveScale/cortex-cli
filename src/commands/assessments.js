@@ -118,10 +118,10 @@ module.exports.ListAssessmentCommand = class {
                         { column: 'Description', field: 'description', width: 40 },
                         { column: 'Projects', field: 'scope', width: 25 },
                         { column: '# Reports', field: 'reportCount', width: 12 },
-                        { column: 'Created At', field: 'createdAt', width: 25 },
-                        { column: 'Created By', field: 'createdBy', width: 25 },
+                        { column: 'Created', field: '_createdAt', width: 25 },
+                        { column: 'Created By', field: '_createdBy', width: 25 },
                     ];
-                    printTable(tableSpec, response.data, o => ({ ...o, createdAt: o.createdAt ? moment(o.createdAt).fromNow() : '-' }));
+                    printTable(tableSpec, response.data, o => ({ ...o, _createdAt: o._createdAt ? moment(o._createdAt).fromNow() : '-' }));
                 }
             })
             .catch((err) => {
@@ -213,11 +213,11 @@ module.exports.ListAssessmentReportCommand = class {
                         { column: 'Assessment Name', field: 'assessmentId', width: 30 },
                         { column: 'Report Id', field: 'reportId', width: 50 },
                         { column: 'Impact Summary', field: 'summary', width: 60 },
-                        { column: 'Created At', field: 'createdAt', width: 25 },
-                        { column: 'Created By', field: 'createdBy', width: 25 },
+                        { column: 'Created', field: '_createdAt', width: 25 },
+                        { column: 'Created By', field: '_createdBy', width: 25 },
                     ];
                     response.data.forEach(r => r.summary = JSON.stringify(Object.fromEntries(r.summary.map(item => [item.type, item.count]))));
-                    printTable(tableSpec, response.data, o => ({ ...o, createdAt: o.createdAt ? moment(o.createdAt).fromNow() : '-' }));
+                    printTable(tableSpec, response.data, o => ({ ...o, _createdAt: o._createdAt ? moment(o._createdAt).fromNow() : '-' }));
                 }
             })
             .catch((err) => {
@@ -245,8 +245,8 @@ module.exports.GetAssessmentReportCommand = class {
                         assessment: response.assessmentId,
                         summary: Object.fromEntries(response.summary.map(item => [item.type, item.count])),
                         report: response.detail,
-                        createdAt: response.createdAt,
-                        createdBy: response.createdBy,
+                        _createdAt: response._createdAt,
+                        _createdBy: response._createdBy,
                     }
                     printSuccess(JSON.stringify(output, null, 2), options);
                 } else {
