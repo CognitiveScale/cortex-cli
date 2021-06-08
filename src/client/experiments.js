@@ -25,9 +25,9 @@ module.exports = class Experiments {
         this.endpoint = projectId => `${cortexUrl}/fabric/v4/projects/${projectId}/experiments`;
     }
 
-    listExperiments(projectId, token) {
+    listExperiments(projectId, modelId, token) {
         checkProject(projectId);
-        const endpoint = `${this.endpoint(projectId)}`;
+        const endpoint = `${this.endpoint(projectId)}?${modelId ? `modelId=${modelId}` : ''}`;
         debug('listExperiments() => %s', endpoint);
         return got
             .get(endpoint, {
