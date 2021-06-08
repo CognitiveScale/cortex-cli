@@ -106,6 +106,20 @@ module.exports = class Catalog {
             .catch(err => constructError(err));
     }
 
+    skillLogs(projectId, token, skillName, actionName, verbose = false) {
+        checkProject(projectId);
+        const endpoint = `${this.endpoints.skills(projectId)}/${encodeURIComponent(skillName)}/action/${actionName}/logs`;
+        debug('skillLogs(%s, %s) => %s', skillName, actionName, endpoint);
+        return got
+            .get(endpoint, {
+                headers: { Authorization: `Bearer ${token}` },
+                'user-agent': getUserAgent(),
+                searchParams: { verbose },
+            }).json()
+            .then(res => ({ ...res }))
+            .catch(err => constructError(err));
+    }
+
     listAgents(projectId, token) {
         checkProject(projectId);
         const endpoint = this.endpoints.agents(projectId);

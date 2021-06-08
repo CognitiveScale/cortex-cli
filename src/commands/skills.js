@@ -152,6 +152,28 @@ module.exports.UndeploySkillCommand = class UndeploySkillCommand {
     }
 };
 
+module.exports.SkillLogsCommand = class SkillLogsCommand {
+    constructor(program) {
+        this.program = program;
+    }
+
+    execute(skillName, actionName, options) {
+        const profile = loadProfile(options.profile);
+        debug('%s.executeSkillLogs(%s,%s)', profile.name, skillName, actionName);
+        const catalog = new Catalog(profile.url);
+        catalog.skillLogs(options.project || profile.project, profile.token, skillName, actionName, options.verbose).then((response) => {
+            if (response.success) {
+                printSuccess(JSON.stringify(response.logs), options);
+            } else {
+                printError(`Failed to List Skill/Action Logs ${skillName}/${actionName}: ${response.message}`, options);
+            }
+        })
+            .catch((err) => {
+                printError(`Failed to List Skill/Action Logs ${skillName}/${actionName}: ${err.status} ${err.message}`, options);
+            });
+    }
+};
+
 module.exports.DeploySkillCommand = class DeploySkillCommand {
     constructor(program) {
         this.program = program;
