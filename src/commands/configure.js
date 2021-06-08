@@ -182,4 +182,4 @@ module.exports.PrintEnvVars = class {
         vars.push(`export CORTEX_PROJECT=${options.project || profile.project}`);
         return printSuccess(vars.join('\n'), options);
     }
-}
+};
