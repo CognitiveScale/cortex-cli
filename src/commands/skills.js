@@ -65,28 +65,44 @@ module.exports.ListSkillsCommand = class ListSkillsCommand {
         this.program = program;
     }
 
-    execute(options) {
+    async execute(options) {
         const profile = loadProfile(options.profile);
         debug('%s.executeListSkills()', profile.name);
 
         const catalog = new Catalog(profile.url);
-        catalog.listSkills(options.project || profile.project, profile.token).then((response) => {
+        try {
+            const response = await catalog.listSkills(options.project || profile.project, profile.token);
             if (response.success) {
                 let result = response.skills;
+                const tableFormat = LISTTABLEFORMAT;
+                if (!_.has(options, 'no-status')) {
+                    const statuses = await catalog.listSkills(options.project || profile.project, profile.token, true);
+                    result = result.map((skill) => {
+                        const status = statuses.skills.find(s => s.name === skill.name.toLowerCase());
+                        let actionStatus = 'Not deployed';
+                        if (!_.isEmpty(status)) {
+                            const actionStatuses = _.get(status, 'actionStatus', []);
+                           actionStatus = _.isEmpty(actionStatuses) ? 'Deployed' : actionStatuses.map(s => `${s.name}: ${s.state}`).join(' ');
+                        }
+                        return {
+                            ...skill,
+                            actionStatus,
+                        };
+                    });
+                    tableFormat.push({ column: 'Status', field: 'actionStatus', width: 30 });
+                }
                 if (options.query) result = filterObject(result, options);
 
                 if (options.json) {
-                    printSuccess(JSON.stringify(result, null, 2), options);
-                } else {
-                    printTable(LISTTABLEFORMAT, _.sortBy(result, ['name']), o => ({ ...o, updatedAt: o.updatedAt ? moment(o.updatedAt).fromNow() : '-' }));
+                    return printSuccess(JSON.stringify(result, null, 2), options);
                 }
-            } else {
-                printError(`Failed to list skills: ${response.status} ${response.message}`, options);
+                return printTable(tableFormat,
+                    _.sortBy(result, ['name']), o => ({ ...o, updatedAt: o.updatedAt ? moment(o.updatedAt).fromNow() : '-' }));
             }
-        })
-        .catch((err) => {
-            printError(`Failed to list skills: ${err.status} ${err.message}`, options);
-        });
+            return printError(`Failed to list skills: ${response.status} ${response.message}`, options);
+        } catch (err) {
+            return printError(`Failed to list skills: ${err.status} ${err.message}`, options);
+        }
     }
 };
 

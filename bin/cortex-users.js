@@ -24,6 +24,9 @@ const {
     UserProjectAssignCommand,
     UserDescribeCommand,
     UserGrantCommand,
+    UserCreateCommand,
+    UserListCommand,
+    UserDeleteCommand,
 } = require('../src/commands/users');
 
 program.description('Work with Cortex User');
@@ -73,6 +76,45 @@ program.command('project <project>')
     .action(withCompatibilityCheck((project, options) => {
         try {
             new UserProjectAssignCommand(program).execute(project, options);
+        } catch (err) {
+            console.error(chalk.red(err.message));
+        }
+    }));
+
+program.command('delete <user>')
+    .description('Deletes a service user and disables any existing tokens created by the user')
+    .option('--no-compat', 'Ignore API compatibility checks')
+    .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
+    .option('--profile [profile]', 'The profile to use')
+    .action(withCompatibilityCheck((user, options) => {
+        try {
+            new UserDeleteCommand(program).execute(user, options);
+        } catch (err) {
+            console.error(chalk.red(err.message));
+        }
+    }));
+
+program.command('create <user>')
+    .description('Creates a service user (with no assigned roles/grants) that can authenticate with and call Fabric API\'s')
+    .option('--no-compat', 'Ignore API compatibility checks')
+    .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
+    .option('--profile [profile]', 'The profile to use')
+    .action(withCompatibilityCheck((user, options) => {
+        try {
+            new UserCreateCommand(program).execute(user, options);
+        } catch (err) {
+            console.error(chalk.red(err.message));
+        }
+    }));
+
+program.command('list')
+    .description('Lists all service users created within Cortex')
+    .option('--no-compat', 'Ignore API compatibility checks')
+    .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
+    .option('--profile [profile]', 'The profile to use')
+    .action(withCompatibilityCheck((options) => {
+        try {
+            new UserListCommand(program).execute(options);
         } catch (err) {
             console.error(chalk.red(err.message));
         }
