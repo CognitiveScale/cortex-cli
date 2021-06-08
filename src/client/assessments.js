@@ -25,7 +25,13 @@ module.exports = class Assessments {
     }
 
     queryResources(token, name, projectId, type, skip, limit) {
-        const url = `${this.endpointV4}/resources?${querystring.stringify({ projectId, name, type, skip, limit })}`;
+        const url = `${this.endpointV4}/resources?${querystring.stringify({
+            projectId, 
+            name, 
+            type, 
+            skip, 
+            limit,
+        })}`;
         debug('queryResources => %s', url);
         return got
             .get(url, {
@@ -44,7 +50,14 @@ module.exports = class Assessments {
             .post(url, {
                 headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
                 'user-agent': getUserAgent(),
-                body: JSON.stringify({ name, title, description, scope, componentName, componentTypes }),
+                body: JSON.stringify({
+                    name,
+                    title,
+                    description,
+                    scope,
+                    componentName,
+                    componentTypes,
+                }),
             }).json()
             .then(res => res)
             .catch(err => constructError(err));
