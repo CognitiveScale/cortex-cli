@@ -247,10 +247,11 @@ module.exports.GetAssessmentReportCommand = class {
                         report: response.detail,
                         _createdAt: response._createdAt,
                         _createdBy: response._createdBy,
-                    }
+                    };
                     printSuccess(JSON.stringify(output, null, 2), options);
                 } else {
-                    const flattenRefs = _.uniqBy(_.flatten(response.detail.map(ref => ref.sourcePath.map(s => ({ ...s, projectId: ref._projectId })))), (r) => (`${r.name}-${r.type}`));
+                    const flattenRefs = _.uniqBy(_.flatten(
+                        response.detail.map(ref => ref.sourcePath.map(s => ({ ...s, projectId: ref._projectId })))), (r) => (`${r.name}-${r.type}`));
                     const tableSpec = [
                         { column: 'Name', field: 'name', width: 30 },
                         { column: 'Title', field: 'title', width: 30 },
@@ -279,7 +280,7 @@ module.exports.ExportAssessmentReportCommand = class {
         client.exportAssessmentReport(profile.token, name, reportId)
             .then((response) => {
                 if (response.success === false) throw response;
-                printSuccess(`Report exported to ${response.file}`, options)
+                printSuccess(`Report exported to ${response.file}`, options);
             })
             .catch((err) => {
                 printError(`Failed to export assessment ${name} report ${reportId}: ${err.status} ${err.message}`, options);

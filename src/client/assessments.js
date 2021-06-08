@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 const querystring = require('querystring');
-const { createWriteStream } = require("fs");
+const { createWriteStream } = require('fs');
 const debug = require('debug')('cortex:cli');
 const { got } = require('./apiutils');
 const { constructError, getUserAgent } = require('../commands/utils');
@@ -129,6 +129,6 @@ module.exports = class Assessments {
                 headers: { Authorization: `Bearer ${token}` },
                 'user-agent': getUserAgent(),
             }).pipe(createWriteStream(`${reportId}.csv`), { end: true });
-        return Promise.resolve({ file: `${reportId}.csv`});
+        return Promise.resolve({ file: `${reportId}.csv` });
     }
 };
