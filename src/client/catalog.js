@@ -108,7 +108,7 @@ module.exports = class Catalog {
 
     skillLogs(projectId, token, skillName, actionName, verbose = false) {
         checkProject(projectId);
-        const endpoint = `${this.endpoints.skills(projectId)}/${encodeURIComponent(skillName)}/action/${actionName}/logs`;
+        const endpoint = `${this.endpoints.skills(projectId)}/${encodeURIComponent(skillName)}/action/${encodeURIComponent(actionName)}/logs`;
         debug('skillLogs(%s, %s) => %s', skillName, actionName, endpoint);
         return got
             .get(endpoint, {
