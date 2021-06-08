@@ -68,11 +68,16 @@ module.exports = class Catalog {
         checkProject(projectId);
         const endpoint = `${this.endpoints.skills(projectId)}/${encodeURIComponent(skillName)}`;
         debug('describeSkill(%s) => %s', skillName, endpoint);
+        const searchParams = {};
+        if (verbose) {
+            searchParams.verbose = verbose;
+            searchParams.status = verbose;
+        }
         return got
             .get(endpoint, {
                 headers: { Authorization: `Bearer ${token}` },
                 'user-agent': getUserAgent(),
-                searchParams: { verbose },
+                searchParams,
             }).json()
             .then(res => ({ success: true, skill: res }))
             .catch(err => constructError(err));
