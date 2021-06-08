@@ -28,6 +28,7 @@ const {
     InvokeSkillCommand,
     DeploySkillCommand,
     UndeploySkillCommand,
+    SkillLogsCommand,
 } = require('../src/commands/skills');
 
 program.description('Work with Cortex Skills');
@@ -130,6 +131,23 @@ program
     .action(withCompatibilityCheck((skillName, options) => {
         try {
             new UndeploySkillCommand(program).execute(skillName, options);
+        } catch (err) {
+            console.error(chalk.red(err.message));
+        }
+    }));
+
+// Get Skill/action logs
+program
+    .command('logs <skillName> <actionName>')
+    .description('Get logs of a skill and action')
+    .option('--no-compat', 'Ignore API compatibility checks')
+    .option('--profile [profile]', 'The profile to use')
+    .option('--project [project]', 'The project to use')
+    // TODO enable when we want to support tasks
+    // .option('--type [type]', 'The type of action logs to fetch [skill|task]')
+    .action(withCompatibilityCheck((skillName, actionName, options) => {
+        try {
+            new SkillLogsCommand(program).execute(skillName, actionName, options);
         } catch (err) {
             console.error(chalk.red(err.message));
         }
