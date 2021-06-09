@@ -316,3 +316,10 @@ module.exports.LISTTABLEFORMAT = [
     { column: 'Author', field: 'createdBy', width: 25 },
 
 ];
+
+module.exports.RUNTABLEFORMAT = [
+    { column: 'Run ID', field: 'runId', width: 30 },
+    { column: 'Experiment Name', field: 'experimentName', width: 40 },
+    { column: 'Took', field: 'took', width: 50 },
+    { column: 'Modified', field: '_updatedAt', width: 26 },
+];

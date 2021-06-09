@@ -19,8 +19,7 @@ const debug = require('debug')('cortex:cli');
 const moment = require('moment');
 const { loadProfile } = require('../config');
 const Models = require('../client/models');
-const Experiments = require('../client/experiments');
-const { LISTTABLEFORMAT } = require('./utils');
+const { LISTTABLEFORMAT, RUNTABLEFORMAT } = require('./utils');
 
 const {
     printSuccess, printError, filterObject, parseObject, printTable, formatValidationPath,
@@ -110,7 +109,7 @@ module.exports.ListModelRunsCommand = class ListModelsCommand {
                 if (options.json) {
                     printSuccess(JSON.stringify(result, null, 2), options);
                 } else {
-                    printTable(LISTTABLEFORMAT, result, o => ({ ...o, updatedAt: o.updatedAt ? moment(o.updatedAt).fromNow() : '-' }));
+                    printTable(RUNTABLEFORMAT, result, o => ({ ...o, updatedAt: o.updatedAt ? moment(o.updatedAt).fromNow() : '-' }));
                 }
             } else {
                 printError(`Failed to list model runs: ${response.status} ${response.message}`, options);
