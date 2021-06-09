@@ -152,11 +152,10 @@ module.exports.PublishModelCommand = class PublishModelCommand {
         models.describeModel(options.project || profile.project, profile.token, modelName, options.verbose).then((response) => {
             if (response.success) {
                 const result = filterObject(response.model, options);
-                printSuccess(JSON.stringify(result, null, 2), options);
                 result.status = 'Published';
                 models.saveModel(options.project || profile.project, profile.token, result).then((responseModel) => {
                     if (responseModel.success) {
-                        printSuccess('Model saved', options);
+                        printSuccess('Model published', options);
                     } else if (responseModel.details) {
                         console.log(`Failed to save model: ${responseModel.status} ${responseModel.message}`);
                         console.log('The following issues were found:');
