@@ -118,7 +118,6 @@ program
     .action(withCompatibilityCheck((modelDefinition, options) => {
         try {
             new RegisterModelCommand(program).execute(modelDefinition, options);
-            new PublishModelCommand(program).execute(modelName, options);
         } catch (err) {
             console.error(chalk.red(err.message));
         }

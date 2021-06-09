@@ -206,6 +206,7 @@ module.exports.RegisterModelCommand = class RegisterModelCommand {
                         //printSuccess('Run created', options);
                         printSuccess(JSON.stringify(response_run, null, 2), options);
                         const runId = response_run.result.runId;
+                        //upload artifact here....
                     } else if (response_run.details) {
                         console.log(`Failed to create run: ${response.status} ${response.message}`);
                         console.log('The following issues were found:');
