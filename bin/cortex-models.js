@@ -26,6 +26,7 @@ const {
     SaveModelCommand,
     DescribeModelCommand,
     ListModelsCommand,
+    ListModelRunsCommand,
 } = require('../src/commands/models');
 
 program.description('Work with Cortex Models');
@@ -41,6 +42,7 @@ program
     .option('--project [project]', 'The project to use')
     .option('--offset [offset]', 'The offset to use')
     .option('--limit [limit]', 'The limit to use')
+    .option('--tags [tags]', 'The tags to use (comma separated values)')
     .option('--json', 'Output results using JSON')
     .option('--query [query]', 'A JMESPath query to use in filtering the response data. Ignored if output format is not JSON.')
     .action(withCompatibilityCheck((options) => {
@@ -103,5 +105,24 @@ program
             console.error(chalk.red(err.message));
         }
     }));
+
+// List model runs Model
+program
+    .command('list-runs <modelName>')
+    .description('list model run')
+    .option('--no-compat', 'Ignore API compatibility checks')
+    .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
+    .option('--profile [profile]', 'The profile to use')
+    .option('--project [project]', 'The project to use')
+    .option('--json', 'Output results using JSON')
+    .option('--query [query]', 'A JMESPath query to use in filtering the response data. Ignored if output format is not JSON.')
+    .action(withCompatibilityCheck((modelName, options) => {
+        try {
+            new ListModelRunsCommand(program).execute(modelName, options);
+        } catch (err) {
+            console.error(chalk.red(err.message));
+        }
+    }));
+
 
 program.parse(process.argv);

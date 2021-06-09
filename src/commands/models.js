@@ -14,10 +14,12 @@
  * limitations under the License.
  */
 const fs = require('fs');
+const _ = require('lodash');
 const debug = require('debug')('cortex:cli');
 const moment = require('moment');
 const { loadProfile } = require('../config');
 const Models = require('../client/models');
+const Experiments = require('../client/experiments');
 const { LISTTABLEFORMAT } = require('./utils');
 
 const {
@@ -87,6 +89,36 @@ module.exports.ListModelsCommand = class ListModelsCommand {
             .catch((err) => {
                 debug(err);
                 printError(`Failed to list models: ${err.status} ${err.message}`, options);
+            });
+    }
+};
+
+module.exports.ListModelRunsCommand = class ListModelsCommand {
+    constructor(program) {
+        this.program = program;
+    }
+
+    execute(modelName, options) {
+        const profile = loadProfile(options.profile);
+        debug('%s.executeListModels()', profile.name);
+        const models = new Models(profile.url);
+        models.listModelRuns(options.project || profile.project, modelName, profile.token).then((response) => {
+            if (response.success) {
+                let result = response.runs;
+                if (options.query) result = filterObject(result, options);
+
+                if (options.json) {
+                    printSuccess(JSON.stringify(result, null, 2), options);
+                } else {
+                    printTable(LISTTABLEFORMAT, result, o => ({ ...o, updatedAt: o.updatedAt ? moment(o.updatedAt).fromNow() : '-' }));
+                }
+            } else {
+                printError(`Failed to list model runs: ${response.status} ${response.message}`, options);
+            }
+        })
+            .catch((err) => {
+                debug(err);
+                printError(`Failed to list model runs: ${err.status} ${err.message}`, options);
             });
     }
 };
