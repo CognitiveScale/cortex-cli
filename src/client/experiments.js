@@ -13,16 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+const fs = require('fs');
+const stream = require('stream');
+const { promisify } = require('util');
 
+const pipeline = promisify(stream.pipeline);
 const debug = require('debug')('cortex:cli');
 const { got } = require('./apiutils');
 const { constructError, getUserAgent, checkProject } = require('../commands/utils');
 const Content = require('./content');
-
-const fs = require('fs');
-const { promisify } = require('util');
-const stream = require('stream');
-const pipeline = promisify(stream.pipeline);
 
 module.exports = class Experiments {
     constructor(cortexUrl) {
@@ -140,7 +139,7 @@ module.exports = class Experiments {
             .post(endpoint, {
                 headers: { Authorization: `Bearer ${token}` },
                 'user-agent': getUserAgent(),
-                json: experimentObj
+                json: experimentObj,
             }).json()
             .then(result => ({ success: true, result }))
             .catch(err => constructError(err));

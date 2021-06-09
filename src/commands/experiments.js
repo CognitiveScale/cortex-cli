@@ -21,7 +21,7 @@ const moment = require('moment');
 const { loadProfile } = require('../config');
 const Experiments = require('../client/experiments');
 const {
- printSuccess, printError, filterObject, printTable, parseObject,
+ printSuccess, printError, filterObject, printTable, parseObject, formatValidationPath,
 } = require('./utils');
 
 class ListExperiments {
@@ -319,7 +319,6 @@ class UploadArtifactCommand {
 
         const experiments = new Experiments(profile.url);
 
-        const chunkSize = parseInt(options.chunkSize, 10);
         const upload = _.partial(UploadArtifactCommand.upload, experiments, profile, options);
 
         upload(filePath, artifact, experimentName, runId);
@@ -352,5 +351,5 @@ module.exports = {
     DownloadArtifactCommand,
     SaveExperimentCommand,
     CreateRunCommand,
-    UploadArtifactCommand
+    UploadArtifactCommand,
 };
