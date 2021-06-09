@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 const fs = require('fs');
+const _ = require('lodash');
 const debug = require('debug')('cortex:cli');
 const moment = require('moment');
 const { loadProfile } = require('../config');
@@ -203,19 +204,29 @@ module.exports.RegisterModelCommand = class RegisterModelCommand {
                 const experiment_name = response.result.name;
                 experiments.createRun(options.project || profile.project, profile.token, experiment_name).then((response_run) => {
                     if (response_run.success) {
-                        //printSuccess('Run created', options);
-                        printSuccess(JSON.stringify(response_run, null, 2), options);
                         const runId = response_run.result.runId;
-                        //upload artifact here....
+                        const contentType = _.get(options, 'contentType', 'application/octet-stream');
+                        experiments.uploadArtifact(options.project || profile.project, profile.token, experiment_name, runId, model.filePath, model.artifact, contentType).then((response_artifact) => {
+                            if (response_artifact.success) {
+                                printSuccess('Artifact successfully uploaded.', options);
+                                printSuccess(JSON.stringify(response_run.result, null, 2), options);
+                            } else {
+                                printError(`Failed to upload Artifact: ${response_artifact.status} ${response.message}`, options);
+                            }
+                        })
+                        .catch((err) => {
+                            debug(err);
+                            printError(`Failed to upload Artifact: ${err.status} ${err.message}`, options);
+                        });
                     } else if (response_run.details) {
-                        console.log(`Failed to create run: ${response.status} ${response.message}`);
+                        console.log(`Failed to create run: ${response_run.status} ${response_run.message}`);
                         console.log('The following issues were found:');
                         const tableSpec = [
                             { column: 'Path', field: 'path', width: 50 },
                             { column: 'Message', field: 'message', width: 100 },
                         ];
                         response.details.map(d => d.path = formatValidationPath(d.path));
-                        printTable(tableSpec, response.details);
+                        printTable(tableSpec, response_run.details);
                         printError(''); // Just exit
                     } else {
                         printError(JSON.stringify(response_run));

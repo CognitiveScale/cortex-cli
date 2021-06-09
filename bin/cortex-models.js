@@ -132,6 +132,7 @@ program
     .option('--profile [profile]', 'The profile to use')
     .option('--project [project]', 'The project to use')
     .option('-y, --yaml', 'Use YAML for model definition format')
+    .option('--content-type [MIME type]', 'Sets the `Content-Type` or MIME type of the content ( default: application/octet-stream )')
     .action(withCompatibilityCheck((modelName, options) => {
         try {
             new PublishModelCommand(program).execute(modelName, options);
