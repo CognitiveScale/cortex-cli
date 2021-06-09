@@ -18,6 +18,7 @@ const debug = require('debug')('cortex:cli');
 const moment = require('moment');
 const { loadProfile } = require('../config');
 const Models = require('../client/models');
+const Experiments = require('../client/experiments');
 const { LISTTABLEFORMAT } = require('./utils');
 
 const {
@@ -136,4 +137,107 @@ module.exports.DeleteModelCommand = class {
                 printError(`Failed to delete model: ${err.status} ${err.message}`, options);
             });
     }
+};
+
+module.exports.PublishModelCommand = class PublishModelCommand {
+    constructor(program) {
+        this.program = program;
+    }
+
+    execute(modelName, options) {
+        const profile = loadProfile(options.profile);
+        const models = new Models(profile.url);
+        debug('%s.executePublishModel(%s)', profile.name, modelName);
+        models.describeModel(options.project || profile.project, profile.token, modelName, options.verbose).then((response) => {
+            if (response.success) {
+                const result = filterObject(response.model, options);
+                printSuccess(JSON.stringify(result, null, 2), options);
+                result.status = 'Published'
+                models.saveModel(options.project || profile.project, profile.token, model).then((response) => {
+                    if (response.success) {
+                        printSuccess('Model saved', options);
+                    } else if (response.details) {
+                        console.log(`Failed to save model: ${response.status} ${response.message}`);
+                        console.log('The following issues were found:');
+                        const tableSpec = [
+                            { column: 'Path', field: 'path', width: 50 },
+                            { column: 'Message', field: 'message', width: 100 },
+                        ];
+                        response.details.map(d => d.path = formatValidationPath(d.path));
+                        printTable(tableSpec, response.details);
+                        printError(''); // Just exit
+                    } else {
+                        printError(JSON.stringify(response));
+                    }
+                })
+                .catch((err) => {
+                    printError(`Failed to save model: ${err.status} ${err.message}`, options);
+                });
+            } else {
+                printError(`Failed to publish model ${modelName}: ${response.message}`, options);
+            }
+        })
+        .catch((err) => {
+            printError(`Failed to describe model ${modelName}: ${err.status} ${err.message}`, options);
+        });
+    }
+};
+
+module.exports.RegisterModelCommand = class RegisterModelCommand {
+    constructor(program) {
+        this.program = program;
+    }
+
+    execute(modelDefinition, options) {
+        const profile = loadProfile(options.profile);
+        debug('%s.executeRegisterModel(%s)', profile.name, modelDefinition);
+
+        const modelDefStr = fs.readFileSync(modelDefinition);
+        const model = parseObject(modelDefStr, options);
+        debug('%o', model);
+
+        const models = new Models(profile.url);
+        const experiments = new Experiments(profile.url);
+        experiments.saveExperiment(options.project || profile.project, profile.token, model).then((response) => {
+            if (response.success) {
+                const experiment_name = response.result.name;
+                experiments.createRun(options.project || profile.project, profile.token, experiment_name).then((response_run) => {
+                    if (response_run.success) {
+                        //printSuccess('Run created', options);
+                        printSuccess(JSON.stringify(response_run, null, 2), options);
+                        const runId = response_run.result.runId;
+                    } else if (response_run.details) {
+                        console.log(`Failed to create run: ${response.status} ${response.message}`);
+                        console.log('The following issues were found:');
+                        const tableSpec = [
+                            { column: 'Path', field: 'path', width: 50 },
+                            { column: 'Message', field: 'message', width: 100 },
+                        ];
+                        response.details.map(d => d.path = formatValidationPath(d.path));
+                        printTable(tableSpec, response.details);
+                        printError(''); // Just exit
+                    } else {
+                        printError(JSON.stringify(response_run));
+                    }
+                }).catch((err) => {
+                    printError(`Failed to create Run: ${err.status} ${err.message}`, options);
+                });
+            } else if (response.details) {
+                console.log(`Failed to save experiment: ${response.status} ${response.message}`);
+                console.log('The following issues were found:');
+                const tableSpec = [
+                    { column: 'Path', field: 'path', width: 50 },
+                    { column: 'Message', field: 'message', width: 100 },
+                ];
+                response.details.map(d => d.path = formatValidationPath(d.path));
+                printTable(tableSpec, response.details);
+                printError(''); // Just exit
+            } else {
+                printError(JSON.stringify(response));
+            }
+        })
+        .catch((err) => {
+            printError(`Failed to register model: ${err.status} ${err.message}`, options);
+        });
+}
 };

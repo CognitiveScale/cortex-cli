@@ -19,6 +19,11 @@ const { got } = require('./apiutils');
 const { constructError, getUserAgent, checkProject } = require('../commands/utils');
 const Content = require('./content');
 
+const fs = require('fs');
+const { promisify } = require('util');
+const stream = require('stream');
+const pipeline = promisify(stream.pipeline);
+
 module.exports = class Experiments {
     constructor(cortexUrl) {
         this.cortexUrl = cortexUrl;
@@ -141,18 +146,40 @@ module.exports = class Experiments {
             .catch(err => constructError(err));
     }
 
-    createRun(projectId, token, runObj) {
+    createRun(projectId, token, experimentName) {
         checkProject(projectId);
-        const experimentName = runObj.experiment_name;
         const endpoint = `${this.endpoint(projectId)}/${encodeURIComponent(experimentName)}/runs`;
         debug('createRun(%s) => %s', experimentName, endpoint);
         return got
             .post(endpoint, {
                 headers: { Authorization: `Bearer ${token}` },
                 'user-agent': getUserAgent(),
-                json: runObj,
+                json: {},
             }).json()
             .then(result => ({ success: true, result }))
             .catch(err => constructError(err));
+    }
+
+    async uploadArtifact(projectId, token, experimentName, runId, content, artifact, contentType = 'application/octet-stream') {
+        checkProject(projectId);
+
+        const endpoint = `${this.endpoint(projectId)}/${encodeURIComponent(experimentName)}/runs/${encodeURIComponent(runId)}/artifacts/${artifact}`;
+
+        debug('uploadArtifact(%s, %s) => %s', artifact, content, endpoint);
+        try {
+            const message = await pipeline(
+                fs.createReadStream(content),
+                got.stream.put(endpoint, {
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                        'Content-Type': contentType,
+                    },
+                    'user-agent': getUserAgent(),
+                }),
+            );
+            return { success: true, message };
+        } catch (err) {
+            return constructError(err);
+        }
     }
 };

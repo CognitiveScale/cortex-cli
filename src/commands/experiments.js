@@ -280,16 +280,12 @@ class CreateRunCommand {
         this.program = program;
     }
 
-    execute(runDefinition, options) {
+    execute(experimentName, options) {
         const profile = loadProfile(options.profile);
-        debug('%s.executeCreateRun(%s)', profile.name, runDefinition);
-
-        const runDefinitionStr = fs.readFileSync(runDefinition);
-        const run = parseObject(runDefinitionStr, options);
-        debug('%o', run);
+        debug('%s.executeCreateRun(%s)', profile.name, experimentName);
 
         const experiments = new Experiments(profile.url);
-        experiments.createRun(options.project || profile.project, profile.token, run).then((response) => {
+        experiments.createRun(options.project || profile.project, profile.token, experimentName).then((response) => {
             if (response.success) {
                 printSuccess('Run created', options);
             } else if (response.details) {
@@ -312,6 +308,40 @@ class CreateRunCommand {
     }
 }
 
+class UploadArtifactCommand {
+    constructor(program) {
+        this.program = program;
+    }
+
+    execute(experimentName, runId, filePath, artifact, options) {
+        const profile = loadProfile(options.profile);
+        debug('%s.executeUploadArtifact()', profile.name);
+
+        const experiments = new Experiments(profile.url);
+
+        const chunkSize = parseInt(options.chunkSize, 10);
+        const upload = _.partial(UploadArtifactCommand.upload, experiments, profile, options);
+
+        upload(filePath, artifact, experimentName, runId);
+    }
+
+    static upload(experiments, profile, options, filePath, artifact, experimentName, runId) {
+        const contentType = _.get(options, 'contentType', 'application/octet-stream');
+        return experiments.uploadArtifact(options.project || profile.project, profile.token, experimentName, runId, filePath, artifact, contentType).then((response) => {
+            if (response.success) {
+                printSuccess('Artifact successfully uploaded.', options);
+                printSuccess(JSON.stringify(response, null, 2), options);
+            } else {
+                printError(`Failed to upload Artifact: ${response.status} ${response.message}`, options);
+            }
+        })
+        .catch((err) => {
+            debug(err);
+            printError(`Failed to upload Artifact: ${err.status} ${err.message}`, options);
+        });
+    }
+}
+
 module.exports = {
     ListExperiments,
     ListRuns,
@@ -321,5 +351,6 @@ module.exports = {
     DeleteExperimentCommand,
     DownloadArtifactCommand,
     SaveExperimentCommand,
-    CreateRunCommand
+    CreateRunCommand,
+    UploadArtifactCommand
 };

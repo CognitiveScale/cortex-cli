@@ -31,6 +31,7 @@ const {
     DownloadArtifactCommand,
     SaveExperimentCommand,
     CreateRunCommand,
+    UploadArtifactCommand,
 } = require('../src/commands/experiments');
 
 program.description('Work with Cortex Experiments');
@@ -180,16 +181,34 @@ program
 
 // Save Experiment
 program
-    .command('create-run <runDefinition>')
+    .command('create-run <experimentName>')
     .description('Create run for experiment')
     .option('--no-compat', 'Ignore API compatibility checks')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
     .option('--project [project]', 'The project to use')
     .option('-y, --yaml', 'Use YAML for run definition format')
-    .action(withCompatibilityCheck((runDefinition, options) => {
+    .action(withCompatibilityCheck((experimentName, options) => {
         try {
-            new CreateRunCommand(program).execute(runDefinition, options);
+            new CreateRunCommand(program).execute(experimentName, options);
+        } catch (err) {
+            console.error(chalk.red(err.message));
+        }
+    }));
+
+// Upload Artifact
+program
+    .command('upload-artifact <experimentName> <runId> <filePath> <artifactKey>')
+    .description('Upload artifact for run')
+    .option('--no-compat', 'Ignore API compatibility checks')
+    .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
+    .option('--profile [profile]', 'The profile to use')
+    .option('--project [project]', 'The project to use')
+    .option('--content-type [MIME type]', 'Sets the `Content-Type` or MIME type of the content ( default: application/octet-stream )')
+    .option('--chunkSize [int]', 'Number of files to simultaneous upload', 10)
+    .action(withCompatibilityCheck((experimentName, runId, filePath, artifactKey, options) => {
+        try {
+            new UploadArtifactCommand(program).execute(experimentName, runId, filePath, artifactKey, options);
         } catch (err) {
             console.error(chalk.red(err.message));
         }

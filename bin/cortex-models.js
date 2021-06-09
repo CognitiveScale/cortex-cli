@@ -26,6 +26,8 @@ const {
     SaveModelCommand,
     DescribeModelCommand,
     ListModelsCommand,
+    RegisterModelCommand,
+    PublishModelCommand,
 } = require('../src/commands/models');
 
 program.description('Work with Cortex Models');
@@ -99,6 +101,41 @@ program
     .action(withCompatibilityCheck((modelDefinition, options) => {
         try {
             new SaveModelCommand(program).execute(modelDefinition, options);
+        } catch (err) {
+            console.error(chalk.red(err.message));
+        }
+    }));
+
+// Register Model
+program
+    .command('register-model <modelDefinition>')
+    .description('Register a model')
+    .option('--no-compat', 'Ignore API compatibility checks')
+    .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
+    .option('--profile [profile]', 'The profile to use')
+    .option('--project [project]', 'The project to use')
+    .option('-y, --yaml', 'Use YAML for model definition format')
+    .action(withCompatibilityCheck((modelDefinition, options) => {
+        try {
+            new RegisterModelCommand(program).execute(modelDefinition, options);
+            new PublishModelCommand(program).execute(modelName, options);
+        } catch (err) {
+            console.error(chalk.red(err.message));
+        }
+    }));
+
+// Publish Model
+program
+    .command('publish <modelName>')
+    .description('Publish a model')
+    .option('--no-compat', 'Ignore API compatibility checks')
+    .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
+    .option('--profile [profile]', 'The profile to use')
+    .option('--project [project]', 'The project to use')
+    .option('-y, --yaml', 'Use YAML for model definition format')
+    .action(withCompatibilityCheck((modelName, options) => {
+        try {
+            new PublishModelCommand(program).execute(modelName, options);
         } catch (err) {
             console.error(chalk.red(err.message));
         }
