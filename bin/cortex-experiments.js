@@ -62,6 +62,7 @@ program
 program
     .command('describe <experimentName>')
     .description('Describe experiment')
+    .alias('get')
     .option('--no-compat', 'Ignore API compatibility checks')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
@@ -117,6 +118,7 @@ program
 program
     .command('describe-run <experimentName> <runId>')
     .description('Describe run')
+    .alias('get-run')
     .option('--no-compat', 'Ignore API compatibility checks')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')

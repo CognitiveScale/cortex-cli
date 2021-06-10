@@ -108,8 +108,8 @@ program
 
 // Register Model
 program
-    .command('register <modelDefinition>')
-    .description('Register a model')
+    .command('upload <modelDefinition>')
+    .description('Upload a model')
     .option('--no-compat', 'Ignore API compatibility checks')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')

@@ -288,6 +288,7 @@ class CreateRunCommand {
         experiments.createRun(options.project || profile.project, profile.token, experimentName).then((response) => {
             if (response.success) {
                 printSuccess('Run created', options);
+                printSuccess(JSON.stringify(response.result, null, 2), options);
             } else if (response.details) {
                 console.log(`Failed to create run: ${response.status} ${response.message}`);
                 console.log('The following issues were found:');
