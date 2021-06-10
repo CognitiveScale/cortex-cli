@@ -214,13 +214,13 @@ module.exports.RegisterModelCommand = class RegisterModelCommand {
             }
             const runId = _.get(saveRunResponse, 'result.runId', '');
             const contentType = _.get(options, 'contentType', 'application/octet-stream');
-            const uploadArtifactResponse = experiments.uploadArtifact(
+            const uploadArtifactResponse = await experiments.uploadArtifact(
                 options.project || profile.project, profile.token,
                 experimentName, runId, model.filePath, model.artifact, contentType,
             );
             if (uploadArtifactResponse.success) {
                 printSuccess('Artifact successfully uploaded.', options);
-                printSuccess(JSON.stringify(uploadArtifactResponse.result, null, 2), options);
+                printSuccess(JSON.stringify(saveRunResponse.result, null, 2), options);
                 return;
             }
             printError(`Failed to upload Artifact: ${uploadArtifactResponse.status} ${uploadArtifactResponse.message}`, options);
