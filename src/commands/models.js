@@ -70,7 +70,7 @@ module.exports.ListModelsCommand = class ListModelsCommand {
         const profile = loadProfile(options.profile);
         debug('%s.executeListModels()', profile.name);
         const models = new Models(profile.url);
-        models.listModels(options.project || profile.project, options.offset, options.limit, profile.token).then((response) => {
+        models.listModels(options.project || profile.project, options.offset, options.limit, options.tags, profile.token).then((response) => {
             if (response.success) {
                 let result = response.models;
                 if (options.query) result = filterObject(result, options);

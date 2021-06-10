@@ -68,9 +68,9 @@ module.exports = class Models {
             .catch(err => constructError(err));
     }
 
-    listModels(projectId, offset, limit, token) {
+    listModels(projectId, offset, limit, tags, token) {
         checkProject(projectId);
-        const endpoint = `${this.endpointV4(projectId)}?skip=${offset}&limit=${limit}`;
+        const endpoint = `${this.endpointV4(projectId)}?skip=${offset}&limit=${limit}${tags ? `&tags=${tags}` : ''}`;
         debug('listModels() => %s', endpoint);
         return got
             .get(endpoint, {
