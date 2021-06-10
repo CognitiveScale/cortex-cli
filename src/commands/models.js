@@ -145,41 +145,26 @@ module.exports.PublishModelCommand = class PublishModelCommand {
         this.program = program;
     }
 
-    execute(modelName, options) {
+    async execute(modelName, options) {
         const profile = loadProfile(options.profile);
         const models = new Models(profile.url);
         debug('%s.executePublishModel(%s)', profile.name, modelName);
-        models.describeModel(options.project || profile.project, profile.token, modelName, options.verbose).then((response) => {
-            if (response.success) {
-                const result = filterObject(response.model, options);
-                result.status = 'Published';
-                models.saveModel(options.project || profile.project, profile.token, result).then((responseModel) => {
-                    if (responseModel.success) {
-                        printSuccess('Model published', options);
-                    } else if (responseModel.details) {
-                        console.log(`Failed to save model: ${responseModel.status} ${responseModel.message}`);
-                        console.log('The following issues were found:');
-                        const tableSpec = [
-                            { column: 'Path', field: 'path', width: 50 },
-                            { column: 'Message', field: 'message', width: 100 },
-                        ];
-                        response.details.map(d => d.path = formatValidationPath(d.path));
-                        printTable(tableSpec, responseModel.details);
-                        printError(''); // Just exit
-                    } else {
-                        printError(JSON.stringify(responseModel));
-                    }
-                })
-                .catch((err) => {
-                    printError(`Failed to save model: ${err.status} ${err.message}`, options);
-                });
-            } else {
-                printError(`Failed to publish model ${modelName}: ${response.message}`, options);
+        try {
+            const getModelObj = await models.describeModel(options.project || profile.project, profile.token, modelName, options.verbose);
+            if (!getModelObj.success) {
+                printError(JSON.stringify(getModelObj));
+                return;
             }
-        })
-        .catch((err) => {
-            printError(`Failed to describe model ${modelName}: ${err.status} ${err.message}`, options);
-        });
+            const model = { ...getModelObj.model };
+            model.status = 'Published';
+            const saveModelObj = await models.saveModel(options.project || profile.project, profile.token, model);
+            if (!saveModelObj.success) {
+                printError(JSON.stringify(saveModelObj));
+            }
+            printSuccess('Model published', options);
+        } catch (err) {
+            printError(`Failed to publish model ${modelName}: ${err.status} ${err.message}`, options);
+        }
     }
 };
 
@@ -188,7 +173,7 @@ module.exports.RegisterModelCommand = class RegisterModelCommand {
         this.program = program;
     }
 
-    execute(modelDefinition, options) {
+    async execute(modelDefinition, options) {
         const profile = loadProfile(options.profile);
         debug('%s.executeRegisterModel(%s)', profile.name, modelDefinition);
 
@@ -196,58 +181,51 @@ module.exports.RegisterModelCommand = class RegisterModelCommand {
         const model = parseObject(modelDefStr, options);
         debug('%o', model);
 
+        function printErrorDetails(response) {
+            const tableSpec = [
+                { column: 'Path', field: 'path', width: 50 },
+                { column: 'Message', field: 'message', width: 100 },
+            ];
+            response.details.map(d => d.path = formatValidationPath(d.path));
+            printTable(tableSpec, response.details);
+            printError(''); // Just exit
+        }
+
         const experiments = new Experiments(profile.url);
-        experiments.saveExperiment(options.project || profile.project, profile.token, model).then((response) => {
-            if (response.success) {
-                const experimentName = response.result.name;
-                experiments.createRun(options.project || profile.project, profile.token, experimentName).then((responseRun) => {
-                    if (responseRun.success) {
-                        const runId = _.get(responseRun, 'result.runId', '');
-                        const contentType = _.get(options, 'contentType', 'application/octet-stream');
-                        experiments.uploadArtifact(options.project || profile.project, profile.token, experimentName, runId, model.filePath, model.artifact, contentType).then((responseArtifact) => {
-                            if (responseArtifact.success) {
-                                printSuccess('Artifact successfully uploaded.', options);
-                                printSuccess(JSON.stringify(responseRun.result, null, 2), options);
-                            } else {
-                                printError(`Failed to upload Artifact: ${responseArtifact.status} ${responseArtifact.message}`, options);
-                            }
-                        })
-                        .catch((err) => {
-                            debug(err);
-                            printError(`Failed to upload Artifact: ${err.status} ${err.message}`, options);
-                        });
-                    } else if (responseRun.details) {
-                        console.log(`Failed to create run: ${responseRun.status} ${responseRun.message}`);
-                        console.log('The following issues were found:');
-                        const tableSpec = [
-                            { column: 'Path', field: 'path', width: 50 },
-                            { column: 'Message', field: 'message', width: 100 },
-                        ];
-                        response.details.map(d => d.path = formatValidationPath(d.path));
-                        printTable(tableSpec, responseRun.details);
-                        printError(''); // Just exit
-                    } else {
-                        printError(JSON.stringify(responseRun));
-                    }
-                }).catch((err) => {
-                    printError(`Failed to create Run: ${err.status} ${err.message}`, options);
-                });
-            } else if (response.details) {
-                console.log(`Failed to save experiment: ${response.status} ${response.message}`);
-                console.log('The following issues were found:');
-                const tableSpec = [
-                    { column: 'Path', field: 'path', width: 50 },
-                    { column: 'Message', field: 'message', width: 100 },
-                ];
-                response.details.map(d => d.path = formatValidationPath(d.path));
-                printTable(tableSpec, response.details);
-                printError(''); // Just exit
-            } else {
-                printError(JSON.stringify(response));
+        try {
+            const saveExperimentResponse = await experiments.saveExperiment(options.project || profile.project, profile.token, model);
+            if (!saveExperimentResponse.success) {
+                if (saveExperimentResponse.details) {
+                    printErrorDetails(saveExperimentResponse);
+                    return;
+                }
+                printError(JSON.stringify(saveExperimentResponse));
+                return;
             }
-        })
-        .catch((err) => {
+            const experimentName = _.get(saveExperimentResponse, 'result.name', '');
+            const saveRunResponse = await experiments.createRun(options.project || profile.project, profile.token, experimentName);
+            if (!saveRunResponse.success) {
+                if (saveRunResponse.details) {
+                    printErrorDetails(saveRunResponse);
+                    return;
+                }
+                printError(JSON.stringify(saveRunResponse));
+                return;
+            }
+            const runId = _.get(saveRunResponse, 'result.runId', '');
+            const contentType = _.get(options, 'contentType', 'application/octet-stream');
+            const uploadArtifactResponse = experiments.uploadArtifact(
+                options.project || profile.project, profile.token,
+                experimentName, runId, model.filePath, model.artifact, contentType,
+            );
+            if (uploadArtifactResponse.success) {
+                printSuccess('Artifact successfully uploaded.', options);
+                printSuccess(JSON.stringify(uploadArtifactResponse.result, null, 2), options);
+                return;
+            }
+            printError(`Failed to upload Artifact: ${uploadArtifactResponse.status} ${uploadArtifactResponse.message}`, options);
+        } catch (err) {
             printError(`Failed to register model: ${err.status} ${err.message}`, options);
-        });
-}
+        }
+    }
 };
