@@ -106,7 +106,7 @@ program
         }
     }));
 
-// List model runs Model
+// List model runs
 program
     .command('list-runs <modelName>')
     .description('list model run')
