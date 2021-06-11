@@ -49,14 +49,44 @@ module.exports.ListResourcesCommand = class {
                     const tableSpec = [
                         { column: 'Name', field: 'resourceName', width: 30 },
                         { column: 'Title', field: 'resourceTitle', width: 30 },
-                        { column: 'Type', field: 'resourceType', width: 16 },
+                        { column: 'Type', field: 'resourceType', width: 25 },
                         { column: 'Project', field: '_projectId', width: 15 },
                     ];
                     printTable(tableSpec, response.data);
                 }
             })
             .catch((err) => {
-                printError(`Failed to list actions: ${err.status} ${err.message}`, options);
+                printError(`Failed to list Cortex resources: ${err.status} ${err.message}`, options);
+            });
+    }
+};
+
+module.exports.ListResourceTypesCommand = class {
+    constructor(program) {
+        this.program = program;
+    }
+
+    execute(command) {
+        const options = command.opts();
+        const profile = loadProfile(options.profile);
+        debug('%s.ListResourceTypesCommand()', profile.name);
+
+        const client = new Assessments(profile.url);
+        client.listResourceTypes(profile.token)
+            .then((response) => {
+                if (response.success === false) throw response;
+                if (options.json) {
+                    printSuccess(JSON.stringify(response.data, null, 2), options);
+                } else {
+                    const types = response.data.map(t => ({ type: t }));
+                    const tableSpec = [
+                        { column: 'Type', field: 'type', width: 25 },
+                    ];
+                    printTable(tableSpec, types);
+                }
+            })
+            .catch((err) => {
+                printError(`Failed to list Cortex resource types: ${err.status} ${err.message}`, options);
             });
     }
 };
