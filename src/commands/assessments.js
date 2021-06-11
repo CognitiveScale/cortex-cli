@@ -79,7 +79,6 @@ module.exports.ListResourceTypesCommand = class {
                     printSuccess(JSON.stringify(response.data, null, 2), options);
                 } else {
                     const types = response.data.map(t => ({ type: t }));
-                    printSuccess(JSON.stringify(types, null, 2), options);
                     const tableSpec = [
                         { column: 'Type', field: 'type', width: 25 },
                     ];
