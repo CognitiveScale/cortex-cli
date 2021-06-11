@@ -22,6 +22,7 @@ const program = require('../src/commander');
 const { withCompatibilityCheck } = require('../src/compatibility');
 const {
     ListResourcesCommand,
+    ListResourceTypesCommand,
     CreateAssessmentCommand,
     ListAssessmentCommand,
     DescribeAssessmentCommand,
@@ -35,7 +36,22 @@ const {
 program.description('Work with Cortex Assessments');
 
 program
-    .command('generate')
+    .command('list-types')
+    .description('List Cortex resource types')
+    .option('--no-compat', 'Ignore API compatibility checks')
+    .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
+    .option('--profile [profile]', 'The profile to use')
+    .option('--json', 'Output results using JSON')
+    .action(withCompatibilityCheck((options) => {
+        try {
+            new ListResourceTypesCommand(program).execute(options);
+        } catch (err) {
+            console.error(chalk.red(err.message));
+        }
+    }));
+
+program
+    .command('list-resources')
     .description('List matching resources')
     .storeOptionsAsProperties(false)
     .option('--scope [projects]', 'Assessment scope projects')
@@ -58,7 +74,7 @@ program
 program
     .command('create [assessmentDefinition]')
     .alias('save')
-    .description('Create an assessment')
+    .description('Create an assessment. Do `list-resources` and `list-types` to select component and type')
     .storeOptionsAsProperties(false)
     .option('--name [name]', 'Assessment name')
     .option('--title [title]', 'Assessment title')

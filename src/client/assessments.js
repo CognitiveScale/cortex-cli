@@ -37,6 +37,19 @@ module.exports = class Assessments {
             .catch(err => constructError(err));
     }
 
+    listResourceTypes(token) {
+        const url = `${this.endpointV4}/types`;
+        debug('listResourceTypes => %s', url);
+        return got
+            .get(url, {
+                headers: { Authorization: `Bearer ${token}` },
+                'user-agent': getUserAgent(),
+            })
+            .json()
+            .then(res => res)
+            .catch(err => constructError(err));
+    }
+
     createAssessment(token, name, title, description, scope, componentName, componentTypes) {
         const url = `${this.endpointV4}/assessments`;
         debug('createAssessment => %s', url);
