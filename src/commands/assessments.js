@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 const fs = require('fs');
+
 const _ = {
     uniqBy: require('lodash/uniqBy'),
     sortBy: require('lodash/sortBy'),
@@ -282,8 +283,10 @@ module.exports.GetAssessmentReportCommand = class {
                     printSuccess(JSON.stringify(output, null, 2), options);
                 } else {
                     const flattenRefs = _.uniqBy(
-                        _.flatten(response.detail.map(ref => ref.sourcePath.map(s => ({ ...s, projectId: ref._projectId })))),
-                            r => (`${r.name}-${r.type}`));
+                        _.flatten(
+                            response.detail.map(ref => ref.sourcePath.map(s => ({ ...s, projectId: ref._projectId }))),
+                        ), r => `${r.name}-${r.type}`,
+                    );
                     const tableSpec = [
                         { column: 'Name', field: 'name', width: 30 },
                         { column: 'Title', field: 'title', width: 30 },

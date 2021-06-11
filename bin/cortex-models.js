@@ -22,135 +22,144 @@ const program = require('../src/commander');
 const { withCompatibilityCheck } = require('../src/compatibility');
 
 const {
-    SaveSkillCommand,
-    ListSkillsCommand,
-    DescribeSkillCommand,
-    InvokeSkillCommand,
-    DeploySkillCommand,
-    UndeploySkillCommand,
-    SkillLogsCommand,
-} = require('../src/commands/skills');
+    DeleteModelCommand,
+    SaveModelCommand,
+    DescribeModelCommand,
+    ListModelsCommand,
+    RegisterModelCommand,
+    PublishModelCommand,
+    ListModelRunsCommand,
+} = require('../src/commands/models');
 
-program.description('Work with Cortex Skills');
+program.description('Work with Cortex Models');
 
-// Deploy Skill
+// List Models
 program
-    .command('deploy <skillName>')
-    .description('Deploy the skill resource to the cluster')
+    .command('list')
+    .description('List model definitions')
+    .alias('l')
     .option('--no-compat', 'Ignore API compatibility checks')
+    .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
     .option('--project [project]', 'The project to use')
-    .action(withCompatibilityCheck((skillName, options) => {
+    .option('--offset [offset]', 'The offset to use')
+    .option('--limit [limit]', 'The limit to use')
+    .option('--tags [tags]', 'The tags to use (comma separated values)')
+    .option('--json', 'Output results using JSON')
+    .option('--query [query]', 'A JMESPath query to use in filtering the response data. Ignored if output format is not JSON.')
+    .action(withCompatibilityCheck((options) => {
         try {
-            new DeploySkillCommand(program).execute(skillName, options);
+            new ListModelsCommand(program).execute(options);
         } catch (err) {
             console.error(chalk.red(err.message));
         }
     }));
 
-// Describe Skill
+// Describe Model
 program
-    .command('describe <skillName>')
+    .command('describe <modelName>')
+    .description('Describe model')
     .alias('get')
-    .description('Describe skill')
     .option('--no-compat', 'Ignore API compatibility checks')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
     .option('--project [project]', 'The project to use')
     .option('--query [query]', 'A JMESPath query to use in filtering the response data.')
     .option('--verbose', 'Verbose output')
-    .action(withCompatibilityCheck((skillName, options) => {
+    .action(withCompatibilityCheck((modelName, options) => {
         try {
-            new DescribeSkillCommand(program).execute(skillName, options);
+            new DescribeModelCommand(program).execute(modelName, options);
         } catch (err) {
             console.error(chalk.red(err.message));
         }
     }));
 
-// Invoke Skill
+
+// Delete Model
 program
-    .command('invoke <skillName> <inputName>')
-    .description('Invoke a skill')
+    .command('delete <modelName>')
+    .description('Delete a model')
     .option('--no-compat', 'Ignore API compatibility checks')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
     .option('--project [project]', 'The project to use')
-    .option('--params [params]', 'JSON params to send to the action')
-    .option('--params-file [paramsFile]', 'A file containing either JSON or YAML formatted params')
-    .action(withCompatibilityCheck((skillName, inputName, options) => {
+    .action(withCompatibilityCheck((modelName, options) => {
         try {
-            new InvokeSkillCommand(program).execute(skillName, inputName, options);
+            new DeleteModelCommand(program).execute(modelName, options);
         } catch (err) {
             console.error(chalk.red(err.message));
         }
     }));
 
-// List Skills
+// Save Model
 program
-    .command('list')
-    .description('List skill definitions')
+    .command('save <modelDefinition>')
+    .description('Save a model definition')
+    .option('--no-compat', 'Ignore API compatibility checks')
+    .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
+    .option('--profile [profile]', 'The profile to use')
+    .option('--project [project]', 'The project to use')
+    .option('-y, --yaml', 'Use YAML for model definition format')
+    .action(withCompatibilityCheck((modelDefinition, options) => {
+        try {
+            new SaveModelCommand(program).execute(modelDefinition, options);
+        } catch (err) {
+            console.error(chalk.red(err.message));
+        }
+    }));
+
+// Register Model
+program
+    .command('upload <modelDefinition>')
+    .description('Upload a model')
+    .option('--no-compat', 'Ignore API compatibility checks')
+    .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
+    .option('--profile [profile]', 'The profile to use')
+    .option('--project [project]', 'The project to use')
+    .option('-y, --yaml', 'Use YAML for model definition format')
+    .action(withCompatibilityCheck((modelDefinition, options) => {
+        try {
+            new RegisterModelCommand(program).execute(modelDefinition, options);
+        } catch (err) {
+            console.error(chalk.red(err.message));
+        }
+    }));
+
+// Publish Model
+program
+    .command('publish <modelName>')
+    .description('Publish a model')
+    .option('--no-compat', 'Ignore API compatibility checks')
+    .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
+    .option('--profile [profile]', 'The profile to use')
+    .option('--project [project]', 'The project to use')
+    .option('-y, --yaml', 'Use YAML for model definition format')
+    .option('--content-type [MIME type]', 'Sets the `Content-Type` or MIME type of the content ( default: application/octet-stream )')
+    .action(withCompatibilityCheck((modelName, options) => {
+        try {
+            new PublishModelCommand(program).execute(modelName, options);
+        } catch (err) {
+            console.error(chalk.red(err.message));
+        }
+    }));
+
+// List model runs
+program
+    .command('list-runs <modelName>')
+    .description('list model run')
     .option('--no-compat', 'Ignore API compatibility checks')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
     .option('--project [project]', 'The project to use')
     .option('--json', 'Output results using JSON')
-    .option('--nostatus', 'skip extra call for skill status')
-    .option('--query [query]', 'A JMESPath query to use in filtering the response data.')
-    .action(withCompatibilityCheck((options) => {
+    .option('--query [query]', 'A JMESPath query to use in filtering the response data. Ignored if output format is not JSON.')
+    .action(withCompatibilityCheck((modelName, options) => {
         try {
-            new ListSkillsCommand(program).execute(options);
+            new ListModelRunsCommand(program).execute(modelName, options);
         } catch (err) {
             console.error(chalk.red(err.message));
         }
     }));
 
-// Save Skill
-program
-    .command('save <skillDefinition>')
-    .description('Save a skill definition')
-    .option('--no-compat', 'Ignore API compatibility checks')
-    .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
-    .option('--profile [profile]', 'The profile to use')
-    .option('--project [project]', 'The project to use')
-    .option('-y, --yaml', 'Use YAML for skill definition format')
-    .action(withCompatibilityCheck((skillDefinition, options) => {
-        try {
-            new SaveSkillCommand(program).execute(skillDefinition, options);
-        } catch (err) {
-            console.error(chalk.red(err.message));
-        }
-    }));
-
-// Undeploy Skill
-program
-    .command('undeploy <skillName>')
-    .description('Undeploy the skill resource from the cluster')
-    .option('--no-compat', 'Ignore API compatibility checks')
-    .option('--profile [profile]', 'The profile to use')
-    .option('--project [project]', 'The project to use')
-    .action(withCompatibilityCheck((skillName, options) => {
-        try {
-            new UndeploySkillCommand(program).execute(skillName, options);
-        } catch (err) {
-            console.error(chalk.red(err.message));
-        }
-    }));
-
-// Get Skill/action logs
-program
-    .command('logs <skillName> <actionName>')
-    .description('Get logs of a skill and action')
-    .option('--no-compat', 'Ignore API compatibility checks')
-    .option('--profile [profile]', 'The profile to use')
-    .option('--project [project]', 'The project to use')
-    // TODO enable when we want to support tasks
-    // .option('--type [type]', 'The type of action logs to fetch [skill|task]')
-    .action(withCompatibilityCheck((skillName, actionName, options) => {
-        try {
-            new SkillLogsCommand(program).execute(skillName, actionName, options);
-        } catch (err) {
-            console.error(chalk.red(err.message));
-        }
-    }));
 
 program.parse(process.argv);

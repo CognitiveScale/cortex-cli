@@ -29,6 +29,9 @@ const {
     DeleteRunCommand,
     DeleteExperimentCommand,
     DownloadArtifactCommand,
+    SaveExperimentCommand,
+    CreateRunCommand,
+    UploadArtifactCommand,
 } = require('../src/commands/experiments');
 
 program.description('Work with Cortex Experiments');
@@ -41,6 +44,7 @@ program
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
     .option('--project [project]', 'The project to use')
+    .option('--modelId [modelId]', 'The model to use')
     .option('--json', 'Output results using JSON')
     .option('--query [query]', 'A JMESPath query to use in filtering the response data.')
     .option('--filter [filter]', 'A Mongo style filter to use.')
@@ -59,6 +63,7 @@ program
 program
     .command('describe <experimentName>')
     .description('Describe experiment')
+    .alias('get')
     .option('--no-compat', 'Ignore API compatibility checks')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
@@ -114,6 +119,7 @@ program
 program
     .command('describe-run <experimentName> <runId>')
     .description('Describe run')
+    .alias('get-run')
     .option('--no-compat', 'Ignore API compatibility checks')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
@@ -159,5 +165,56 @@ program
         }
     }));
 
+// Save Experiment
+program
+    .command('save <experimentDefinition>')
+    .description('Save an experiment definition')
+    .option('--no-compat', 'Ignore API compatibility checks')
+    .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
+    .option('--profile [profile]', 'The profile to use')
+    .option('--project [project]', 'The project to use')
+    .option('-y, --yaml', 'Use YAML for experiment definition format')
+    .action(withCompatibilityCheck((experimentDefinition, options) => {
+        try {
+            new SaveExperimentCommand(program).execute(experimentDefinition, options);
+        } catch (err) {
+            console.error(chalk.red(err.message));
+        }
+    }));
+
+// Save Experiment
+program
+    .command('create-run <experimentName>')
+    .description('Create run for experiment')
+    .option('--no-compat', 'Ignore API compatibility checks')
+    .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
+    .option('--profile [profile]', 'The profile to use')
+    .option('--project [project]', 'The project to use')
+    .option('-y, --yaml', 'Use YAML for run definition format')
+    .action(withCompatibilityCheck((experimentName, options) => {
+        try {
+            new CreateRunCommand(program).execute(experimentName, options);
+        } catch (err) {
+            console.error(chalk.red(err.message));
+        }
+    }));
+
+// Upload Artifact
+program
+    .command('upload-artifact <experimentName> <runId> <filePath> <artifactKey>')
+    .description('Upload artifact for run')
+    .option('--no-compat', 'Ignore API compatibility checks')
+    .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
+    .option('--profile [profile]', 'The profile to use')
+    .option('--project [project]', 'The project to use')
+    .option('--content-type [MIME type]', 'Sets the `Content-Type` or MIME type of the content ( default: application/octet-stream )')
+    .option('--chunkSize [int]', 'Number of files to simultaneous upload', 10)
+    .action(withCompatibilityCheck((experimentName, runId, filePath, artifactKey, options) => {
+        try {
+            new UploadArtifactCommand(program).execute(experimentName, runId, filePath, artifactKey, options);
+        } catch (err) {
+            console.error(chalk.red(err.message));
+        }
+    }));
 
 program.parse(process.argv);

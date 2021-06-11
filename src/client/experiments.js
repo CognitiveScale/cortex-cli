@@ -13,7 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+const fs = require('fs');
+const stream = require('stream');
+const { promisify } = require('util');
 
+const pipeline = promisify(stream.pipeline);
 const debug = require('debug')('cortex:cli');
 const { got } = require('./apiutils');
 const { constructError, getUserAgent, checkProject } = require('../commands/utils');
@@ -25,9 +29,9 @@ module.exports = class Experiments {
         this.endpoint = projectId => `${cortexUrl}/fabric/v4/projects/${projectId}/experiments`;
     }
 
-    listExperiments(projectId, token) {
+    listExperiments(projectId, modelId, token) {
         checkProject(projectId);
-        const endpoint = `${this.endpoint(projectId)}`;
+        const endpoint = `${this.endpoint(projectId)}?${modelId ? `modelId=${modelId}` : ''}`;
         debug('listExperiments() => %s', endpoint);
         return got
             .get(endpoint, {
@@ -122,6 +126,57 @@ module.exports = class Experiments {
             const key = this._artifactKey(experimentName, runId, artifactName);
             const cont = new Content(this.cortexUrl);
             return cont.downloadContent(projectId, token, key, showProgress);
+        } catch (err) {
+            return constructError(err);
+        }
+    }
+
+    saveExperiment(projectId, token, experimentObj) {
+        checkProject(projectId);
+        const endpoint = `${this.endpoint(projectId)}`;
+        debug('saveExperiment(%s) => %s', experimentObj.name, endpoint);
+        return got
+            .post(endpoint, {
+                headers: { Authorization: `Bearer ${token}` },
+                'user-agent': getUserAgent(),
+                json: experimentObj,
+            }).json()
+            .then(result => ({ success: true, result }))
+            .catch(err => constructError(err));
+    }
+
+    createRun(projectId, token, experimentName) {
+        checkProject(projectId);
+        const endpoint = `${this.endpoint(projectId)}/${encodeURIComponent(experimentName)}/runs`;
+        debug('createRun(%s) => %s', experimentName, endpoint);
+        return got
+            .post(endpoint, {
+                headers: { Authorization: `Bearer ${token}` },
+                'user-agent': getUserAgent(),
+                json: {},
+            }).json()
+            .then(result => ({ success: true, result }))
+            .catch(err => constructError(err));
+    }
+
+    async uploadArtifact(projectId, token, experimentName, runId, content, artifact, contentType = 'application/octet-stream') {
+        checkProject(projectId);
+
+        const endpoint = `${this.endpoint(projectId)}/${encodeURIComponent(experimentName)}/runs/${encodeURIComponent(runId)}/artifacts/${artifact}`;
+
+        debug('uploadArtifact(%s, %s) => %s', artifact, content, endpoint);
+        try {
+            const message = await pipeline(
+                fs.createReadStream(content),
+                got.stream.put(endpoint, {
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                        'Content-Type': contentType,
+                    },
+                    'user-agent': getUserAgent(),
+                }),
+            );
+            return { success: true, message };
         } catch (err) {
             return constructError(err);
         }
