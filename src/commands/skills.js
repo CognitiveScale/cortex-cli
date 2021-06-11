@@ -65,28 +65,38 @@ module.exports.ListSkillsCommand = class ListSkillsCommand {
         this.program = program;
     }
 
-    execute(options) {
+    async execute(options) {
         const profile = loadProfile(options.profile);
         debug('%s.executeListSkills()', profile.name);
 
         const catalog = new Catalog(profile.url);
-        catalog.listSkills(options.project || profile.project, profile.token).then((response) => {
+        try {
+            const response = await catalog.listSkills(options.project || profile.project, profile.token, options.nostatus === undefined);
             if (response.success) {
                 let result = response.skills;
+                const tableFormat = LISTTABLEFORMAT;
+                if (options.nostatus === undefined) {
+                    result = result.map((skill) => {
+                        const status = _.isEmpty(skill.actionStatuses) ? skill.deployStatus : skill.actionStatuses.map(s => `${s.name}: ${s.state}`).join(' ');
+                        return {
+                            ...skill,
+                            status,
+                        };
+                    });
+                    tableFormat.push({ column: 'Status', field: 'status', width: 30 });
+                }
                 if (options.query) result = filterObject(result, options);
 
                 if (options.json) {
-                    printSuccess(JSON.stringify(result, null, 2), options);
-                } else {
-                    printTable(LISTTABLEFORMAT, _.sortBy(result, ['name']), o => ({ ...o, updatedAt: o.updatedAt ? moment(o.updatedAt).fromNow() : '-' }));
+                    return printSuccess(JSON.stringify(result, null, 2), options);
                 }
-            } else {
-                printError(`Failed to list skills: ${response.status} ${response.message}`, options);
+                return printTable(tableFormat,
+                    _.sortBy(result, ['name']), o => ({ ...o, updatedAt: o.updatedAt ? moment(o.updatedAt).fromNow() : '-' }));
             }
-        })
-        .catch((err) => {
-            printError(`Failed to list skills: ${err.status} ${err.message}`, options);
-        });
+            return printError(`Failed to list skills: ${response.status} ${response.message}`, options);
+        } catch (err) {
+            return printError(`Failed to list skills: ${err.status} ${err.message}`, options);
+        }
     }
 };
 
@@ -132,6 +142,28 @@ module.exports.UndeploySkillCommand = class UndeploySkillCommand {
         })
             .catch((err) => {
                 printError(`Failed to Undeploy Skill ${skillName}: ${err.status} ${err.message}`, options);
+            });
+    }
+};
+
+module.exports.SkillLogsCommand = class SkillLogsCommand {
+    constructor(program) {
+        this.program = program;
+    }
+
+    execute(skillName, actionName, options) {
+        const profile = loadProfile(options.profile);
+        debug('%s.executeSkillLogs(%s,%s)', profile.name, skillName, actionName);
+        const catalog = new Catalog(profile.url);
+        catalog.skillLogs(options.project || profile.project, profile.token, skillName, actionName, options.verbose).then((response) => {
+            if (response.success) {
+                printSuccess(JSON.stringify(response.logs), options);
+            } else {
+                printError(`Failed to List Skill/Action Logs ${skillName}/${actionName}: ${response.message}`, options);
+            }
+        })
+            .catch((err) => {
+                printError(`Failed to List Skill/Action Logs ${skillName}/${actionName}: ${err.status} ${err.message}`, options);
             });
     }
 };
