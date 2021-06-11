@@ -14,7 +14,10 @@
  * limitations under the License.
  */
 const fs = require('fs');
-const _ = require('lodash');
+
+const _ = {
+    get: require('lodash/get'),
+};
 const debug = require('debug')('cortex:cli');
 const moment = require('moment');
 const { loadProfile } = require('../config');
