@@ -34,7 +34,7 @@ class ListExperiments {
         debug('%s.listExperiments()', profile.name);
 
         const exp = new Experiments(profile.url);
-        exp.listExperiments(options.project || profile.project, options.modelId, profile.token).then((response) => {
+        exp.listExperiments(options.project || profile.project, options.model, profile.token).then((response) => {
             if (response.success) {
                 let { result } = response;
                 if (options.query) {
