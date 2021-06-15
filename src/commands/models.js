@@ -208,11 +208,6 @@ module.exports.RegisterModelCommand = class RegisterModelCommand {
 
     async execute(modelDefinition, options) {
         const profile = loadProfile(options.profile);
-        debug('%s.executeRegisterModel(%s)', profile.name, modelDefinition);
-
-        const modelDefStr = fs.readFileSync(modelDefinition);
-        const model = parseObject(modelDefStr, options);
-        debug('%o', model);
 
         function printErrorDetails(response) {
             const tableSpec = [
@@ -225,7 +220,14 @@ module.exports.RegisterModelCommand = class RegisterModelCommand {
         }
 
         const experiments = new Experiments(profile.url);
+
         try {
+            debug('%s.executeRegisterModel(%s)', profile.name, modelDefinition);
+
+            const modelDefStr = fs.readFileSync(modelDefinition);
+            const model = parseObject(modelDefStr, options);
+            debug('%o', model);
+
             const saveExperimentResponse = await experiments.saveExperiment(options.project || profile.project, profile.token, model);
             if (!saveExperimentResponse.success) {
                 if (saveExperimentResponse.details) {
@@ -258,7 +260,7 @@ module.exports.RegisterModelCommand = class RegisterModelCommand {
             }
             printError(`Failed to upload Artifact: ${uploadArtifactResponse.status} ${uploadArtifactResponse.message}`, options);
         } catch (err) {
-            printError(`Failed to register model: ${err.status} ${err.message}`, options);
+            printError(`Failed to upload model: ${err.status} ${err.message}`, options);
         }
     }
 };
