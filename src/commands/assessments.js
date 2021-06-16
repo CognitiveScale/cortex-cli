@@ -19,6 +19,7 @@ const _ = {
     uniqBy: require('lodash/uniqBy'),
     sortBy: require('lodash/sortBy'),
     flatten: require('lodash/flatten'),
+    compact: require('lodash/compact'),
 };
 const debug = require('debug')('cortex:cli');
 const moment = require('moment');
@@ -52,7 +53,7 @@ module.exports.ListResourcesCommand = class {
                         { column: 'Type', field: 'resourceType', width: 25 },
                         { column: 'Project', field: '_projectId', width: 15 },
                     ];
-                    printTable(tableSpec, response.data);
+                    printTable(tableSpec, _.sortBy(response.data, ['_projectId', 'resourceType']));
                 }
             })
             .catch((err) => {
@@ -75,10 +76,11 @@ module.exports.ListResourceTypesCommand = class {
         client.listResourceTypes(profile.token)
             .then((response) => {
                 if (response.success === false) throw response;
+                const data = _.compact(response.data)
                 if (options.json) {
-                    printSuccess(JSON.stringify(response.data, null, 2), options);
+                    printSuccess(JSON.stringify(data, null, 2), options);
                 } else {
-                    const types = response.data.map(t => ({ type: t }));
+                    const types = data.map(t => ({ type: t }));
                     const tableSpec = [
                         { column: 'Type', field: 'type', width: 25 },
                     ];
@@ -292,7 +294,7 @@ module.exports.GetAssessmentReportCommand = class {
                         { column: 'Type', field: 'type', width: 20 },
                         { column: 'Project', field: 'projectId', width: 25 },
                     ];
-                    printTable(tableSpec, _.sortBy(flattenRefs, 'type'));
+                    printTable(tableSpec, _.sortBy(flattenRefs, ['projectId', 'type']));
                 }
             })
             .catch((err) => {
@@ -306,12 +308,13 @@ module.exports.ExportAssessmentReportCommand = class {
         this.program = program;
     }
 
-    execute(name, reportId, options) {
+    execute(name, reportId, command) {
+        const options = command.opts();
         const profile = loadProfile(options.profile);
         debug('%s.ExportAssessmentReportCommand()', profile.name);
 
         const client = new Assessments(profile.url);
-        client.exportAssessmentReport(profile.token, name, reportId)
+        client.exportAssessmentReport(profile.token, name, reportId, options.type)
             .then((response) => {
                 if (response.success === false) throw response;
                 printSuccess(`Report exported to ${response.file}`, options);
