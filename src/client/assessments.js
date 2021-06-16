@@ -148,8 +148,9 @@ module.exports = class Assessments {
             .catch(err => constructError(err));
     }
 
-    exportAssessmentReport(token, name, reportId) {
-        const url = `${this.endpointV4}/assessments/${name}/reports/${reportId}/export`;
+    exportAssessmentReport(token, name, reportId, types) {
+        const filter = types && types.trim() ? `?components=${types.trim()}` : '';
+        const url = `${this.endpointV4}/assessments/${name}/reports/${reportId}/export${filter}`;
         debug('exportAssessmentReport => %s', url);
         got.stream(url, {
                 headers: { Authorization: `Bearer ${token}` },
