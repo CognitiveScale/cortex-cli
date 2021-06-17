@@ -76,7 +76,7 @@ module.exports.ListResourceTypesCommand = class {
         client.listResourceTypes(profile.token)
             .then((response) => {
                 if (response.success === false) throw response;
-                const data = _.compact(response.data)
+                const data = _.compact(response.data);
                 if (options.json) {
                     printSuccess(JSON.stringify(data, null, 2), options);
                 } else {
