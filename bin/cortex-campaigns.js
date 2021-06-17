@@ -26,8 +26,6 @@ const {
     DescribeCampaignCommand,
     ExportCampaignCommand,
     ImportCampaignCommand,
-    ListMissionsCommand,
-    DeployMissionCommand,
 } = require('../src/commands/campaigns');
 
 program.description('Work with Cortex Campaigns');
