@@ -312,10 +312,24 @@ module.exports = class Catalog {
             .catch(err => constructError(err));
     }
 
-    deployMissions(projectId, token, campaign, mission) {
+    deployMission(projectId, token, campaign, mission) {
         checkProject(projectId);
         const endpoint = `${this.endpoints.campaigns(projectId)}${campaign}/missions/${mission}/deploy`;
         debug('deployMissions() => %s', endpoint);
+        return got
+            .get(endpoint, {
+                headers: { Authorization: `Bearer ${token}` },
+                'user-agent': getUserAgent(),
+            })
+            .json()
+            .then(res => ({ success: true, data: res }))
+            .catch(err => constructError(err));
+    }
+
+    getMission(projectId, token, campaign, mission) {
+        checkProject(projectId);
+        const endpoint = `${this.endpoints.campaigns(projectId)}${campaign}/missions/${mission}`;
+        debug('getMissions() => %s', endpoint);
         return got
             .get(endpoint, {
                 headers: { Authorization: `Bearer ${token}` },
