@@ -26,6 +26,8 @@ const {
     DescribeCampaignCommand,
     ExportCampaignCommand,
     ImportCampaignCommand,
+    ListMissionsCommand,
+    DeployMissionCommand,
 } = require('../src/commands/campaigns');
 
 program.description('Work with Cortex Campaigns');
@@ -90,12 +92,43 @@ program
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
     .option('--project [project]', 'The project to use')
-    .option('--filepath [filepath]', 'Exported Campaign file path to import')
     .option('--deploy [boolean]', 'Set missions status Ready To Deploy', true)
     .option('--overwrite [boolean]', 'Overwrite existing deployed missions with the imported one', false)
     .action(withCompatibilityCheck((campaignName, options) => {
         try {
             new ImportCampaignCommand(program).execute(campaignName, options);
+        } catch (err) {
+            console.error(chalk.red(err.message));
+        }
+    }));
+
+program
+    .command('list-missions <campaignName>')
+    .description('List Missions of the Campaign')
+    .option('--json', 'Output results using JSON')
+    .option('--no-compat', 'Ignore API compatibility checks')
+    .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
+    .option('--profile [profile]', 'The profile to use')
+    .option('--project [project]', 'The project to use')
+    .action(withCompatibilityCheck((campaignName, options) => {
+        try {
+            new ListMissionsCommand(program).execute(campaignName, options);
+        } catch (err) {
+            console.error(chalk.red(err.message));
+        }
+    }));
+
+program
+    .command('deploy-missions <campaignName> <missionName>')
+    .description('Deploy the selected Missions of the Campaign')
+    .option('--json', 'Output results using JSON')
+    .option('--no-compat', 'Ignore API compatibility checks')
+    .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
+    .option('--profile [profile]', 'The profile to use')
+    .option('--project [project]', 'The project to use')
+    .action(withCompatibilityCheck((campaignName, missionName, options) => {
+        try {
+            new DeployMissionCommand(program).execute(campaignName, missionName, options);
         } catch (err) {
             console.error(chalk.red(err.message));
         }
