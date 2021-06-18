@@ -135,10 +135,10 @@ class ListRuns {
                     const tableSpec = [
                         { alias: 'Run ID', value: 'runId', width: 25 },
                         {
- alias: 'Start', value: 'startTime', width: 25, formatter: val => moment.unix(val).format('YYYY-MM-DD HH:mm a'), 
+ alias: 'Start', value: 'startTime', width: 25, formatter: val => (val ? moment.unix(val).format('YYYY-MM-DD HH:mm a') : ''),
 },
                         {
- alias: 'Took', value: 'took', width: 25, formatter: val => moment.duration(val, 'seconds').humanize(), 
+ alias: 'Took', value: 'took', width: 25, formatter: val => (val ? moment.duration(val, 'seconds').humanize() : ''),
 },
                         {
  alias: 'Params', value: 'params', width: 45, formatter: val => _.map(val, (v, k) => `${k}: ${v}`).join('\n'), 
