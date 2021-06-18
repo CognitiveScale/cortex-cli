@@ -17,6 +17,7 @@ const fs = require('fs');
 
 const _ = {
     uniqBy: require('lodash/uniqBy'),
+    maxBy: require('lodash/maxBy'),
     sortBy: require('lodash/sortBy'),
     flatten: require('lodash/flatten'),
     compact: require('lodash/compact'),
@@ -47,11 +48,12 @@ module.exports.ListResourcesCommand = class {
                 if (options.json) {
                     printSuccess(JSON.stringify(response, null, 2), options);
                 } else {
+                    const maxLen = _.maxBy(response.data, (r) => r.resourceName.length).resourceName.length;
                     const tableSpec = [
-                        { column: 'Name', field: 'resourceName', width: 30 },
+                        { column: 'Name', field: 'resourceName', width: Math.min(maxLen+2, 90) },
                         { column: 'Title', field: 'resourceTitle', width: 30 },
                         { column: 'Type', field: 'resourceType', width: 25 },
-                        { column: 'Project', field: '_projectId', width: 15 },
+                        { column: 'Project', field: '_projectId', width: 25 },
                     ];
                     printTable(tableSpec, _.sortBy(response.data, ['_projectId', 'resourceType']));
                 }
@@ -151,8 +153,8 @@ module.exports.ListAssessmentCommand = class {
                         { column: 'Description', field: 'description', width: 40 },
                         { column: 'Projects', field: 'scope', width: 25 },
                         { column: '# Reports', field: 'reportCount', width: 12 },
-                        { column: 'Created', field: '_createdAt', width: 25 },
-                        { column: 'Created By', field: '_createdBy', width: 25 },
+                        { column: 'Modified', field: '_updatedAt', width: 25 },
+                        { column: 'Author', field: '_createdBy', width: 25 },
                     ];
                     printTable(tableSpec, response.data, o => ({ ...o, _createdAt: o._createdAt ? moment(o._createdAt).fromNow() : '-' }));
                 }
@@ -246,8 +248,8 @@ module.exports.ListAssessmentReportCommand = class {
                         { column: 'Assessment Name', field: 'assessmentId', width: 30 },
                         { column: 'Report Id', field: 'reportId', width: 50 },
                         { column: 'Impact Summary', field: 'summary', width: 60 },
-                        { column: 'Created', field: '_createdAt', width: 25 },
-                        { column: 'Created By', field: '_createdBy', width: 25 },
+                        { column: 'Modified', field: '_updatedAt', width: 25 },
+                        { column: 'Author', field: '_createdBy', width: 25 },
                     ];
                     response.data.forEach(r => r.summary = JSON.stringify(Object.fromEntries(r.summary.map(item => [item.type, item.count]))));
                     printTable(tableSpec, response.data, o => ({ ...o, _createdAt: o._createdAt ? moment(o._createdAt).fromNow() : '-' }));
