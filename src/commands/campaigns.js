@@ -122,7 +122,7 @@ module.exports.ListMissionsCommand = class ListMissionsCommand {
         const cli = new Catalog(profile.url);
 
         try {
-            cli.listMissions(options.project || profile.project, profile.token, campaign).then(response => {
+            cli.listMissions(options.project || profile.project, profile.token, campaign).then((response) => {
                 if (response.success === false) throw response;
                 const data = Object.values(response.data);
                 if (options.json) {
@@ -154,7 +154,7 @@ module.exports.DeployMissionCommand = class DeployMissionCommand {
         debug('%s.executeDeployMissionCommand(%s)', profile.name, campaign);
         const cli = new Catalog(profile.url);
 
-        cli.deployMission(options.project || profile.project, profile.token, campaign, mission).then(response => {
+        cli.deployMission(options.project || profile.project, profile.token, campaign, mission).then((response) => {
             if (response.success === false) throw response;
             printSuccess(JSON.stringify(response.data, null, 2), options);
         }).catch(err => printError(`Failed to deploy mission ${mission} of campaign ${campaign}: ${err.status} ${err.message}`, options));
@@ -172,7 +172,7 @@ module.exports.DescribeMissionCommand = class DescribeMissionCommand {
         debug('%s.executeDescribeMissionCommand(%s)', profile.name, campaign);
         const cli = new Catalog(profile.url);
 
-        cli.getMission(options.project || profile.project, profile.token, campaign, mission).then(response => {
+        cli.getMission(options.project || profile.project, profile.token, campaign, mission).then((response) => {
             if (response.success === false) throw response;
             printSuccess(JSON.stringify(response.data, null, 2), options);
         }).catch(err => printError(`Failed to describe mission ${mission} of campaign ${campaign}: ${err.status} ${err.message}`, options));
