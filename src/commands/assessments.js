@@ -48,7 +48,8 @@ module.exports.ListResourcesCommand = class {
                 if (options.json) {
                     printSuccess(JSON.stringify(response, null, 2), options);
                 } else {
-                    const maxLen = _.maxBy(response.data, (r) => r.resourceName.length).resourceName.length;
+                    const maxLenRow = _.maxBy(response.data, (r) => r.resourceName.length);
+                    const maxLen = maxLenRow ? maxLenRow.resourceName.length : 30;
                     const tableSpec = [
                         { column: 'Name', field: 'resourceName', width: Math.min(maxLen+2, 90) },
                         { column: 'Title', field: 'resourceTitle', width: 30 },
