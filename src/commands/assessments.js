@@ -48,7 +48,6 @@ module.exports.ListResourcesCommand = class {
                 if (options.json) {
                     printSuccess(JSON.stringify(response, null, 2), options);
                 } else {
-
                     const maxLenRow = _.maxBy(response.data, r => r.resourceName.length);
                     const maxLen = maxLenRow ? maxLenRow.resourceName.length : 30;
                     const tableSpec = [
@@ -158,7 +157,7 @@ module.exports.ListAssessmentCommand = class {
                         { column: 'Modified', field: '_updatedAt', width: 25 },
                         { column: 'Author', field: '_createdBy', width: 25 },
                     ];
-                    printTable(tableSpec, response.data, o => ({ ...o, _createdAt: o._createdAt ? moment(o._createdAt).fromNow() : '-' }));
+                    printTable(tableSpec, response.data, o => ({ ...o, _updatedAt: o._updatedAt ? moment(o._updatedAt).fromNow() : '-' }));
                 }
             })
             .catch((err) => {
@@ -254,7 +253,7 @@ module.exports.ListAssessmentReportCommand = class {
                         { column: 'Author', field: '_createdBy', width: 25 },
                     ];
                     response.data.forEach(r => r.summary = JSON.stringify(Object.fromEntries(r.summary.map(item => [item.type, item.count]))));
-                    printTable(tableSpec, response.data, o => ({ ...o, _createdAt: o._createdAt ? moment(o._createdAt).fromNow() : '-' }));
+                    printTable(tableSpec, response.data, o => ({ ...o, _updatedAt: o._updatedAt ? moment(o._updatedAt).fromNow() : '-' }));
                 }
             })
             .catch((err) => {
