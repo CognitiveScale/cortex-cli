@@ -280,12 +280,15 @@ class CreateRunCommand {
         this.program = program;
     }
 
-    execute(experimentName, options) {
+    execute(runDefinition, options) {
         const profile = loadProfile(options.profile);
-        debug('%s.executeCreateRun(%s)', profile.name, experimentName);
+        debug('%s.executeCreateRun(%s)', profile.name, runDefinition);
+
+        const runDefinitionStr = fs.readFileSync(runDefinition);
+        const run = parseObject(runDefinitionStr, options);
 
         const experiments = new Experiments(profile.url);
-        experiments.createRun(options.project || profile.project, profile.token, experimentName).then((response) => {
+        experiments.createRun(options.project || profile.project, profile.token, run).then((response) => {
             if (response.success) {
                 printSuccess('Run created', options);
                 printSuccess(JSON.stringify(response.result, null, 2), options);
