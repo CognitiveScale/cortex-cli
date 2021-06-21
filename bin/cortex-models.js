@@ -26,7 +26,7 @@ const {
     SaveModelCommand,
     DescribeModelCommand,
     ListModelsCommand,
-    RegisterModelCommand,
+    // RegisterModelCommand,
     PublishModelCommand,
     ListModelRunsCommand,
 } = require('../src/commands/models');
@@ -109,7 +109,7 @@ program
     }));
 
 // Register Model -
-//program
+// program
 //    .command('upload <modelDefinition>')
 //    .description('Upload a model')
 //    .option('--no-compat', 'Ignore API compatibility checks')
