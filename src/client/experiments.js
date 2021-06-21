@@ -145,15 +145,15 @@ module.exports = class Experiments {
             .catch(err => constructError(err));
     }
 
-    createRun(projectId, token, experimentName) {
+    createRun(projectId, token, runObj) {
         checkProject(projectId);
-        const endpoint = `${this.endpoint(projectId)}/${encodeURIComponent(experimentName)}/runs`;
-        debug('createRun(%s) => %s', experimentName, endpoint);
+        const endpoint = `${this.endpoint(projectId)}/${encodeURIComponent(runObj.experimentName)}/runs`;
+        debug('createRun(%s) => %s', runObj.experimentName, endpoint);
         return got
             .post(endpoint, {
                 headers: { Authorization: `Bearer ${token}` },
                 'user-agent': getUserAgent(),
-                json: {},
+                json: runObj,
             }).json()
             .then(result => ({ success: true, result }))
             .catch(err => constructError(err));

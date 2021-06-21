@@ -184,16 +184,16 @@ program
 
 // Save Experiment
 program
-    .command('create-run <experimentName>')
+    .command('create-run <runDefinition>')
     .description('Create run for experiment')
     .option('--no-compat', 'Ignore API compatibility checks')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
     .option('--project [project]', 'The project to use')
     .option('-y, --yaml', 'Use YAML for run definition format')
-    .action(withCompatibilityCheck((experimentName, options) => {
+    .action(withCompatibilityCheck((runDefinition, options) => {
         try {
-            new CreateRunCommand(program).execute(experimentName, options);
+            new CreateRunCommand(program).execute(runDefinition, options);
         } catch (err) {
             console.error(chalk.red(err.message));
         }
