@@ -76,9 +76,9 @@ program
     .command('env')
     .option('--profile [profile]', 'The profile to use')
     .option('--project [project]', 'The project to use')
-    .description('Describe a configured profile')
-    .action((options) => {
-        new PrintEnvVars(program).execute(options);
+    .description('Print cortex environment variables')
+    .action(() => {
+        new PrintEnvVars(program).execute();
     });
 
 program

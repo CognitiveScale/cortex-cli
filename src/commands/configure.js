@@ -174,11 +174,14 @@ module.exports.PrintEnvVars = class {
         this.program = program;
     }
 
-    execute(options) {
+    execute() {
         const vars = [];
-        const profile = loadProfile(options.profile);
+        const options = this.program;
+        const profile = loadProfile(options.profile, false);
         vars.push(`export CORTEX_TOKEN=${profile.token}`);
         vars.push(`export CORTEX_URI=${profile.url}`);
+        // not sure why we used URI previously ??
+        vars.push(`export CORTEX_URL=${profile.url}`);
         vars.push(`export CORTEX_PROJECT=${options.project || profile.project}`);
         return printSuccess(vars.join('\n'), options);
     }
