@@ -27,6 +27,8 @@ const {
     DescribeMissionCommand,
 } = require('../src/commands/campaigns');
 
+const { InvokeAgentServiceCommand } = require('../src/commands/agents');
+
 program.description('Work with Cortex Missions');
 
 program
@@ -71,6 +73,23 @@ program
     .action(withCompatibilityCheck((campaignName, missionName, options) => {
         try {
             new DeployMissionCommand(program).execute(campaignName, missionName, options);
+        } catch (err) {
+            console.error(chalk.red(err.message));
+        }
+    }));
+
+program
+    .command('invoke <campaignName> <missionName>')
+    .description('Invoke the mission')
+    .option('--no-compat', 'Ignore API compatibility checks')
+    .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
+    .option('--profile [profile]', 'The profile to use')
+    .option('--project [project]', 'The project to use')
+    .option('--params [params]', 'JSON params to send to the action')
+    .option('--params-file [paramsFile]', 'A file containing either JSON or YAML formatted params')
+    .action(withCompatibilityCheck((campaignName, missionName, options) => {
+        try {
+            new InvokeAgentServiceCommand(program).execute(missionName, 'router_service', options);
         } catch (err) {
             console.error(chalk.red(err.message));
         }
