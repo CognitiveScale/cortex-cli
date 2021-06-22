@@ -87,7 +87,7 @@ program
     .option('--project [project]', 'The project to use')
     .option('--params [params]', 'JSON params to send to the action')
     .option('--params-file [paramsFile]', 'A file containing either JSON or YAML formatted params')
-    .action(withCompatibilityCheck((missionName, options) => {
+    .action(withCompatibilityCheck((campaignName, missionName, options) => {
         try {
             new InvokeAgentServiceCommand(program).execute(missionName, 'router_service', options);
         } catch (err) {
