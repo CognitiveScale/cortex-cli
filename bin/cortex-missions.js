@@ -80,7 +80,7 @@ program
 
 program
     .command('invoke <campaignName> <missionName>')
-    .description('Invoke an agent service')
+    .description('Invoke the mission')
     .option('--no-compat', 'Ignore API compatibility checks')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
