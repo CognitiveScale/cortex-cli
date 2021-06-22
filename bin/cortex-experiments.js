@@ -85,7 +85,7 @@ program
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
     .option('--project [project]', 'The project to use')
-    .action(withCompatibilityCheck((experimentName, runId, options) => {
+    .action(withCompatibilityCheck((experimentName, options) => {
         try {
             new DeleteExperimentCommand(program).execute(experimentName, options);
         } catch (err) {
