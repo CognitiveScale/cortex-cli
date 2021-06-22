@@ -46,7 +46,7 @@ module.exports.SaveModelCommand = class SaveModelCommand {
         const models = new Models(profile.url);
         models.saveModel(options.project || profile.project, profile.token, model).then((response) => {
             if (response.success) {
-                printSuccess('Model saved');
+                printSuccess('Model saved', options);
                 printSuccess(JSON.stringify(_.pick(response.message, ['version', 'created', 'modelId']), null, 2));
             } else if (response.details) {
                 console.log(`Failed to save model: ${response.status} ${response.message}`);
