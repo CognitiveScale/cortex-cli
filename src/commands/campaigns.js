@@ -17,6 +17,7 @@ const debug = require('debug')('cortex:cli');
 const { loadProfile } = require('../config');
 const ApiServerClient = require('../client/apiServerClient');
 const Catalog = require('../client/catalog');
+const _ = { get: require('lodash/get')};
 const {
  printSuccess, printError, filterObject, printTable,
 } = require('./utils');
@@ -156,7 +157,8 @@ module.exports.DeployMissionCommand = class DeployMissionCommand {
 
         cli.deployMission(options.project || profile.project, profile.token, campaign, mission).then(response => {
             if (response.success === false) throw response;
-            printSuccess(JSON.stringify(response.data, null, 2), options);
+            const output = _.get(response, 'data.message') || JSON.stringify(response.data || response, null, 2);
+            printSuccess(output, options);
         }).catch(err => printError(`Failed to deploy mission ${mission} of campaign ${campaign}: ${err.status} ${err.message}`, options));
     }
 };
