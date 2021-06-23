@@ -137,7 +137,7 @@ class ListRuns {
                         { column: 'Start', field: 'startTime', width: 25 },
                         { column: 'Took', field: 'took', width: 25 },
                         { column: 'Params', field: 'params', width: 45 },
-                        { column: 'Metrics', field: 'metrics' , width: 45},
+                        { column: 'Metrics', field: 'metrics', width: 45 },
                         { column: 'Artifacts', field: 'artifacts' },
                     ];
                     const trans = (o) => {
@@ -145,7 +145,7 @@ class ListRuns {
                         o.took = o.took ? moment.duration(o.took, 'seconds').humanize() : '';
                         o.params = _.map(o.params, (v, k) => `${k}: ${v}`).join('\n');
                         o.metrics = _.map(o.metrics, (v, k) => `${k}: ${v}`).join('\n');
-                        o.artifacts = Object.keys(_.get(o,'artifacts',{})).join(', ');
+                        o.artifacts = Object.keys(_.get(o, 'artifacts', {})).join(', ');
                         return o;
                     };
                     printTable(tableSpec, _.get(result, 'runs', []), trans);
