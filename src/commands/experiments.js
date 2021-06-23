@@ -133,25 +133,22 @@ class ListRuns {
                     printSuccess(JSON.stringify(result, null, 2), options);
                 } else {
                     const tableSpec = [
-                        { alias: 'Run ID', value: 'runId', width: 25 },
-                        {
- alias: 'Start', value: 'startTime', width: 25, formatter: val => (val ? moment.unix(val).format('YYYY-MM-DD HH:mm a') : ''),
-},
-                        {
- alias: 'Took', value: 'took', width: 25, formatter: val => (val ? moment.duration(val, 'seconds').humanize() : ''),
-},
-                        {
- alias: 'Params', value: 'params', width: 45, formatter: val => _.map(val, (v, k) => `${k}: ${v}`).join('\n'), 
-},
-                        {
- alias: 'Metrics', value: 'metrics', width: 45, formatter: val => _.map(val, (v, k) => `${k}: ${v}`).join('\n'), 
-},
-                        { alias: 'Artifacts', value: 'artifacts', formatter: val => Object.keys(val).join(', ') },
+                        { column: 'Run ID', field: 'runId', width: 25 },
+                        { column: 'Start', field: 'startTime', width: 25 },
+                        { column: 'Took', field: 'took', width: 25 },
+                        { column: 'Params', field: 'params', width: 45 },
+                        { column: 'Metrics', field: 'metrics' , width: 45},
+                        { column: 'Artifacts', field: 'artifacts' },
                     ];
-                    
-                    const Table = require('tty-table');
-                    const t = new Table(tableSpec, result.runs);
-                    console.log(t.render());
+                    const trans = (o) => {
+                        o.startTime = o.startTime ? moment.unix(o.startTime).format('YYYY-MM-DD HH:mm a') : '';
+                        o.took = o.took ? moment.duration(o.took, 'seconds').humanize() : '';
+                        o.params = _.map(o.params, (v, k) => `${k}: ${v}`).join('\n');
+                        o.metrics = _.map(o.metrics, (v, k) => `${k}: ${v}`).join('\n');
+                        o.artifacts = Object.keys(_.get(o,'artifacts',{})).join(', ');
+                        return o;
+                    };
+                    printTable(tableSpec, _.get(result, 'runs', []), trans);
                 }
             } else {
                 printError(`Failed to list runs: ${response.status} ${response.status} - ${response.message}`, options);
