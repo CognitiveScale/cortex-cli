@@ -144,9 +144,9 @@ program
     .option('--startBefore [timestamp]', 'Filters activations to include those that started before the specified timestamp.')
     .option('--startAfter [timestamp]', 'Filters activations to include those that started after the specified timestamp.')
     .option('--status [status]', 'Filters activations by status [complete|error].')
-    .action(withCompatibilityCheck((options) => {
+    .action(withCompatibilityCheck((agentName, options) => {
         try {
-            new ListActivationsCommand(program).execute(options);
+            new ListActivationsCommand(program).execute(agentName, options);
         } catch (err) {
             console.error(chalk.red(err.message));
         }
