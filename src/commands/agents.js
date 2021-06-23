@@ -205,7 +205,7 @@ module.exports.ListActivationsCommand = class {
         this.program = program;
     }
 
-    execute(options) {
+    execute(agentName, options) {
         const profile = loadProfile(options.profile);
 
         const agents = new Agents(profile.url);
@@ -216,8 +216,9 @@ module.exports.ListActivationsCommand = class {
         if (options.endBefore) queryParams.endBefore = options.endBefore;
         if (options.endAfter) queryParams.endAfter = options.endAfter;
         if (options.status) queryParams.status = options.status;
+        // TODO limit + skip
         if (options.correlationId) queryParams.correlationId = options.correlationId;
-        if (options.agentName) queryParams.agentName = options.agentName;
+        queryParams.agentName = agentName;
 
         agents.listActivations(options.project || profile.project, profile.token, queryParams).then((response) => {
             if (response.success) {
@@ -228,18 +229,16 @@ module.exports.ListActivationsCommand = class {
                     printSuccess(JSON.stringify(result, null, 2), options);
                 } else {
                     const tableSpec = [
-                        { column: 'Activation Id', field: 'requestId', width: 40 },
-                        { column: 'Status', field: 'status', width: 20 },
-                        { column: 'Started', field: 'start', width: 65 },
+                        { column: 'Activation Id', field: 'activationId', width: 38 },
                     ];
-                    printTable(tableSpec, _.map(result, o => ({ ...o, start: o.start ? moment(o.start).fromNow() : '-' })));
+                    printTable(tableSpec, _.map(result, r => ({ activationId: r })));
                 }
             } else {
-                printError(`Failed to list activations: ${response.message}`, options);
+                printError(`Failed to list activations for agent "${agentName}": ${response.message}`, options);
             }
         })
             .catch((err) => {
-                printError(`Failed to list activations: ${err.status} ${err.message}`, options);
+                printError(`Failed to list activations for agent "${agentName}": ${err.status} ${err.message}`, options);
             });
     }
 };
