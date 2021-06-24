@@ -33,7 +33,6 @@
     "@hapi/joi": "17.1.1",
     "boxen": "4.2.0",
     "chalk": "4.0.0",
-    "cli-table": "0.3.1",
     "co": "4.6.0",
     "co-prompt": "1.0.0",
     "commander": "6.2.0",
@@ -55,7 +54,7 @@
     "plop": "2.7.4",
     "semver": "7.1.3",
     "timeago.js": "4.0.2",
-    "tty-table": "4.1.3",
+    "cli-table3": "0.6.0",
     "url-join": "4.0.1",
     "url-parse": "1.5.1"
   },

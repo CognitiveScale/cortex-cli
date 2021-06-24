@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-const Table = require('cli-table');
+const Table = require('cli-table3');
 const _ = require('lodash');
 const chalk = require('chalk');
 const debug = require('debug')('cortex:cli');
