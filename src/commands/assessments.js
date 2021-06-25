@@ -314,13 +314,6 @@ module.exports.ExportAssessmentReportCommand = class {
         debug('%s.ExportAssessmentReportCommand()', profile.name);
 
         const client = new Assessments(profile.url);
-        client.exportAssessmentReport(profile.token, name, reportId, options.type)
-            .then((response) => {
-                if (response.success === false) throw response;
-                printSuccess(`Report exported to ${response.file}`, options);
-            })
-            .catch((err) => {
-                printError(`Failed to export assessment ${name} report ${reportId}: ${err.status} ${err.message}`, options);
-            });
+        client.exportAssessmentReport(profile.token, name, reportId, options.type);
     }
 };
