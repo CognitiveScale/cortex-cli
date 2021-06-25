@@ -50,7 +50,7 @@ module.exports.ListResourcesCommand = class {
                     const tableSpec = [
                         { column: 'Name', field: 'resourceName' },
                         { column: 'Title', field: 'resourceTitle' },
-                        { column: 'Type', field: 'resourceType' },
+                        { column: 'Resource Type', field: 'resourceType' },
                         { column: 'Project', field: '_projectId' },
                     ];
                     printTable(tableSpec, response.data);
@@ -82,7 +82,7 @@ module.exports.ListResourceTypesCommand = class {
                 } else {
                     const types = data.map(t => ({ type: t }));
                     const tableSpec = [
-                        { column: 'Type', field: 'type' },
+                        { column: 'Resource Type', field: 'type' },
                     ];
                     printTable(tableSpec, types);
                 }
@@ -291,7 +291,7 @@ module.exports.GetAssessmentReportCommand = class {
                     const tableSpec = [
                         { column: 'Name', field: 'name' },
                         { column: 'Title', field: 'title' },
-                        { column: 'Type', field: 'type' },
+                        { column: 'Resource Type', field: 'type' },
                         { column: 'Project', field: 'projectId' },
                     ];
                     printTable(tableSpec, _.sortBy(flattenRefs, ['projectId', 'type']));
