@@ -267,7 +267,6 @@ module.exports = class Catalog {
 
     importCampaign(projectId, token, filepath, deploy, overwrite) {
         checkProject(projectId);
-
         const importUrl = `${this.endpoints.campaigns(projectId)}import?deployable=${deploy}&overwrite=${overwrite}`;
         debug('importCampaign(%s) => %s', filepath, importUrl);
         if (!fs.existsSync(filepath) || !fs.lstatSync(filepath).isFile()) {

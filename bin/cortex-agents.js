@@ -138,11 +138,10 @@ program
     .option('--project [project]', 'The project to use')
     .option('--json', 'Output results using JSON')
     .option('--query [query]', 'A JMESPath query to use in filtering the response data.')
-    .option('--endBefore [timestamp]', 'Filters activations to include those that ended before the specified timestamp.')
-    .option('--endAfter [timestamp]', 'Filters activations to include those that ended after the specified timestamp.')
-    .option('--startBefore [timestamp]', 'Filters activations to include those that started before the specified timestamp.')
     .option('--startBefore [timestamp]', 'Filters activations to include those that started before the specified timestamp.')
     .option('--startAfter [timestamp]', 'Filters activations to include those that started after the specified timestamp.')
+    .option('--endBefore [timestamp]', 'Filters activations to include those that ended before the specified timestamp.')
+    .option('--endAfter [timestamp]', 'Filters activations to include those that ended after the specified timestamp.')
     .option('--status [status]', 'Filters activations by status [complete|error].')
     .action(withCompatibilityCheck((agentName, options) => {
         try {

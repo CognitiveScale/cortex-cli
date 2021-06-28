@@ -207,6 +207,7 @@ module.exports.ListActivationsCommand = class {
 
     execute(agentName, options) {
         const profile = loadProfile(options.profile);
+        debug('%s.listActivations(%s)', profile.name, agentName);
 
         const agents = new Agents(profile.url);
         // TODO validate param types?
