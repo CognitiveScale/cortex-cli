@@ -76,6 +76,7 @@ program
     .command('env')
     .option('--profile [profile]', 'The profile to use')
     .option('--project [project]', 'The project to use')
+    .option('--ttl [time]', 'The amount of time for this login to remain active, expressed as a number of hours, days, or weeks (e.g. 1h, 2d, 2w)', '1d')
     .description('Print cortex environment variables')
     .action(() => {
         new PrintEnvVars(program).execute();

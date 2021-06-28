@@ -178,7 +178,9 @@ module.exports.PrintEnvVars = class {
         const vars = [];
         const options = this.program;
         const profile = loadProfile(options.profile, false);
-        vars.push(`export CORTEX_TOKEN=${profile.token}`);
+        const ttl = options.ttl || '1d';
+        const jwt = generateJwt(profile, ttl);
+        vars.push(`export CORTEX_TOKEN=${jwt}`);
         vars.push(`export CORTEX_URI=${profile.url}`);
         // not sure why we used URI previously ??
         vars.push(`export CORTEX_URL=${profile.url}`);
