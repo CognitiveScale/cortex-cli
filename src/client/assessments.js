@@ -162,9 +162,9 @@ module.exports = class Assessments {
         pipeline(rs, createWriteStream(file), (e) => {
             if (e) {
                 const err = constructError(e);
-                printError(`Failed to export assessment ${name} report ${reportId}: ${err.status} ${err.message}`, options);
+                printError(`Failed to export assessment "${name}" report "${reportId}": ${err.status} ${err.message}`, options);
             } else {
-                printSuccess(`Report exported to file ${file}`, options);
+                printSuccess(`Report exported to file "${file}"`, options);
             }
         });
     }

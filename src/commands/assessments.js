@@ -109,7 +109,7 @@ module.exports.CreateAssessmentCommand = class {
                 const assessmentDefStr = fs.readFileSync(assessmentDef);
                 assessment = parseObject(assessmentDefStr, options);
             } catch (err) {
-                printError(`Failed to read assessment definition ${assessmentDef}: ${err.message}`, options);
+                printError(`Failed to read assessment definition "${assessmentDef}": ${err.message}`, options);
             }
         }
         client.createAssessment(profile.token, options.name || assessment.name, options.title || assessment.title,
@@ -179,7 +179,7 @@ module.exports.DescribeAssessmentCommand = class {
                 printSuccess(JSON.stringify(response, null, 2), options);
             })
             .catch((err) => {
-                printError(`Failed to get assessment ${name}: ${err.status} ${err.message}`, options);
+                printError(`Failed to get assessment "${name}": ${err.status} ${err.message}`, options);
             });
     }
 };
@@ -200,7 +200,7 @@ module.exports.DeleteAssessmentCommand = class {
                 printSuccess(JSON.stringify(response, null, 2), options);
             })
             .catch((err) => {
-                printError(`Failed to delete assessment ${name}: ${err.status} ${err.message}`, options);
+                printError(`Failed to delete assessment "${name}": ${err.status} ${err.message}`, options);
             });
     }
 };
@@ -221,7 +221,7 @@ module.exports.RunAssessmentCommand = class {
                 printSuccess(JSON.stringify(response, null, 2), options);
             })
             .catch((err) => {
-                printError(`Failed to run assessment ${name}: ${err.status} ${err.message}`, options);
+                printError(`Failed to run assessment "${name}": ${err.status} ${err.message}`, options);
             });
     }
 };
@@ -254,7 +254,7 @@ module.exports.ListAssessmentReportCommand = class {
                 }
             })
             .catch((err) => {
-                printError(`Failed to list assessment ${name} reports: ${err.status} ${err.message}`, options);
+                printError(`Failed to list assessment "${name}" reports: ${err.status} ${err.message}`, options);
             });
     }
 };
@@ -298,7 +298,7 @@ module.exports.GetAssessmentReportCommand = class {
                 }
             })
             .catch((err) => {
-                printError(`Failed to get assessment ${name} report ${reportId}: ${err.status} ${err.message}`, options);
+                printError(`Failed to get assessment "${name}" report "${reportId}": ${err.status} ${err.message}`, options);
             });
     }
 };
