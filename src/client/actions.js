@@ -100,13 +100,10 @@ module.exports = class Actions {
             .catch(err => constructError(err));
     }
 
-    deleteAction(projectId, token, actionName, actionType) {
+    deleteAction(projectId, token, actionName) {
         checkProject(projectId);
-        let endpoint = `${this.endpointV4(projectId)}/${encodeURIComponent(actionName)}`;
-        if (actionType) {
-            endpoint = `${endpoint}?actionType=${actionType}`;
-        }
-        debug('deleteAction(%s, %s) => %s', actionName, actionType, endpoint);
+        const endpoint = `${this.endpointV4(projectId)}/${encodeURIComponent(actionName)}`;
+        debug('deleteAction(%s) => %s', actionName, endpoint);
         return got
             .delete(endpoint, {
                 headers: { Authorization: `Bearer ${token}` },

@@ -113,15 +113,16 @@ module.exports.DeployActionCommand = class {
         if (options.actionName) {
             actionInst.name = options.actionName;
         }
-        if (options.name) {
-            actionInst.name = options.name;
-        }
+        if (options.name) { actionInst.name = options.name; }
         if (options.podspec) {
             const paramsStr = fs.readFileSync(options.podspec);
             actionInst.podSpec = parseObject(paramsStr, options);
         }
-        if (options.docker) { actionInst.docker = options.docker; }
-        if (options.actionType) { actionInst.actionType = options.actionType; }
+        if (options.docker) { actionInst.image = options.docker; }
+        if (options.image) { actionInst.image = options.image; }
+
+        if (options.type) { actionInst.type = options.type; }
+        if (options.actionType) { actionInst.type = options.actionType; }
         if (options.cmd) { actionInst.command = options.cmd; }
         if (options.port) {
             if (!isNumeric(options.port)) {
@@ -136,6 +137,13 @@ module.exports.DeployActionCommand = class {
                 printError('--scaleCount must be a number', options);
             }
             actionInst.scaleCount = parseInt(options.scaleCount, 10);
+        }
+
+        if (options.jobTimeout) {
+            if (!isNumeric(options.jobTimeout)) {
+                printError('--jobTimeout must be a number', options);
+            }
+            actionInst.jobTimeout = parseInt(options.jobTimeout, 10);
         }
 
         const actions = new Actions(profile.url);
@@ -161,9 +169,8 @@ module.exports.DeleteActionCommand = class {
     execute(actionName, options) {
         const profile = loadProfile(options.profile);
         debug('%s.executeDeleteAction(%s)', profile.name, actionName);
-        const { actionType } = options;
         const actions = new Actions(profile.url);
-        actions.deleteAction(options.project || profile.project, profile.token, actionName, actionType)
+        actions.deleteAction(options.project || profile.project, profile.token, actionName)
             .then((response) => {
                 if (response.success) {
                     const result = filterObject(response, options);

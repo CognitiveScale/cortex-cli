@@ -30,6 +30,7 @@ function docker_build(){
     npm config set loglevel warn
     npm cache clear --force
     npm install -dd --verbose
+    npm test
     echo ${VERSION} > version.txt
     ./generate_docs.sh
     BRANCH=$(git symbolic-ref --short -q HEAD)

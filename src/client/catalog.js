@@ -49,13 +49,16 @@ module.exports = class Catalog {
             .catch(err => constructError(err));
     }
 
-    listSkills(projectId, token) {
+    listSkills(projectId, token, status = false) {
         checkProject(projectId);
         debug('listSkills() => %s', this.endpoints.skills(projectId));
+        const query = {};
+        if (status) query.status = true;
         return got
             .get(this.endpoints.skills(projectId), {
                 headers: { Authorization: `Bearer ${token}` },
                 'user-agent': getUserAgent(),
+                searchParams: query,
             }).json()
             .then(skills => ({ success: true, ...skills }))
             .catch(err => constructError(err));
@@ -65,11 +68,16 @@ module.exports = class Catalog {
         checkProject(projectId);
         const endpoint = `${this.endpoints.skills(projectId)}/${encodeURIComponent(skillName)}`;
         debug('describeSkill(%s) => %s', skillName, endpoint);
+        const searchParams = {};
+        if (verbose) {
+            searchParams.verbose = verbose;
+            searchParams.status = verbose;
+        }
         return got
             .get(endpoint, {
                 headers: { Authorization: `Bearer ${token}` },
                 'user-agent': getUserAgent(),
-                searchParams: { verbose },
+                searchParams,
             }).json()
             .then(res => ({ success: true, skill: res }))
             .catch(err => constructError(err));
@@ -93,6 +101,20 @@ module.exports = class Catalog {
         checkProject(projectId);
         const endpoint = `${this.endpoints.skills(projectId)}/${encodeURIComponent(skillName)}/undeploy`;
         debug('undeploySkill(%s) => %s', skillName, endpoint);
+        return got
+            .get(endpoint, {
+                headers: { Authorization: `Bearer ${token}` },
+                'user-agent': getUserAgent(),
+                searchParams: { verbose },
+            }).json()
+            .then(res => ({ ...res }))
+            .catch(err => constructError(err));
+    }
+
+    skillLogs(projectId, token, skillName, actionName, verbose = false) {
+        checkProject(projectId);
+        const endpoint = `${this.endpoints.skills(projectId)}/${encodeURIComponent(skillName)}/action/${encodeURIComponent(actionName)}/logs`;
+        debug('skillLogs(%s, %s) => %s', skillName, actionName, endpoint);
         return got
             .get(endpoint, {
                 headers: { Authorization: `Bearer ${token}` },
@@ -245,7 +267,6 @@ module.exports = class Catalog {
 
     importCampaign(projectId, token, filepath, deploy, overwrite) {
         checkProject(projectId);
-        
         const importUrl = `${this.endpoints.campaigns(projectId)}import?deployable=${deploy}&overwrite=${overwrite}`;
         debug('importCampaign(%s) => %s', filepath, importUrl);
         if (!fs.existsSync(filepath) || !fs.lstatSync(filepath).isFile()) {
@@ -274,6 +295,48 @@ module.exports = class Catalog {
             }).on('error', (err) => {
                 printError(err);
             });
+    }
+
+    listMissions(projectId, token, campaign) {
+        checkProject(projectId);
+        const endpoint = `${this.endpoints.campaigns(projectId)}${campaign}/missions`;
+        debug('listMissions() => %s', endpoint);
+        return got
+            .get(endpoint, {
+                headers: { Authorization: `Bearer ${token}` },
+                'user-agent': getUserAgent(),
+            })
+            .json()
+            .then(res => ({ success: true, data: res }))
+            .catch(err => constructError(err));
+    }
+
+    deployMission(projectId, token, campaign, mission) {
+        checkProject(projectId);
+        const endpoint = `${this.endpoints.campaigns(projectId)}${campaign}/missions/${mission}/deploy`;
+        debug('deployMissions() => %s', endpoint);
+        return got
+            .get(endpoint, {
+                headers: { Authorization: `Bearer ${token}` },
+                'user-agent': getUserAgent(),
+            })
+            .json()
+            .then(res => ({ success: true, data: res }))
+            .catch(err => constructError(err));
+    }
+
+    getMission(projectId, token, campaign, mission) {
+        checkProject(projectId);
+        const endpoint = `${this.endpoints.campaigns(projectId)}${campaign}/missions/${mission}`;
+        debug('getMissions() => %s', endpoint);
+        return got
+            .get(endpoint, {
+                headers: { Authorization: `Bearer ${token}` },
+                'user-agent': getUserAgent(),
+            })
+            .json()
+            .then(res => ({ success: true, data: res }))
+            .catch(err => constructError(err));
     }
 
     // saveProfileSchema(projectId, token, schemaObj) {

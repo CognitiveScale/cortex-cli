@@ -22,79 +22,74 @@ const program = require('../src/commander');
 const { withCompatibilityCheck } = require('../src/compatibility');
 
 const {
-    ListCampaignsCommand,
-    DescribeCampaignCommand,
-    ExportCampaignCommand,
-    ImportCampaignCommand,
+    ListMissionsCommand,
+    DeployMissionCommand,
+    DescribeMissionCommand,
 } = require('../src/commands/campaigns');
 
-program.description('Work with Cortex Campaigns');
+const { InvokeAgentServiceCommand } = require('../src/commands/agents');
 
-// List Campaigns
+program.description('Work with Cortex Missions');
+
 program
-    .command('list')
-    .description('List Campaigns')
-    .option('--no-compat', 'Ignore API compatibility checks')
-    .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
-    .option('--profile [profile]', 'The profile to use')
-    .option('--project [project]', 'The project to use')
+    .command('list <campaignName>')
+    .description('List Missions of the Campaign')
     .option('--json', 'Output results using JSON')
-    .option('--query [query]', 'A JMESPath query to use in filtering the response data.')
-    .action(withCompatibilityCheck((options) => {
+    .option('--no-compat', 'Ignore API compatibility checks')
+    .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
+    .option('--profile [profile]', 'The profile to use')
+    .option('--project [project]', 'The project to use')
+    .action(withCompatibilityCheck((campaignName, options) => {
         try {
-            new ListCampaignsCommand(program).execute(options);
+            new ListMissionsCommand(program).execute(campaignName, options);
         } catch (err) {
             console.error(chalk.red(err.message));
         }
     }));
 
-// Get|Describe Campaign
 program
-    .command('describe <campaignName>')
+    .command('describe <campaignName> <missionName>')
     .alias('get')
-    .description('Describe Campaign')
+    .description('Describe the selected Missions of the Campaign')
     .option('--no-compat', 'Ignore API compatibility checks')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
     .option('--project [project]', 'The project to use')
-    .option('--query [query]', 'A JMESPath query to use in filtering the response data.')
-    .action(withCompatibilityCheck((campaignName, options) => {
+    .action(withCompatibilityCheck((campaignName, missionName, options) => {
         try {
-            new DescribeCampaignCommand(program).execute(campaignName, options);
+            new DescribeMissionCommand(program).execute(campaignName, missionName, options);
         } catch (err) {
             console.error(chalk.red(err.message));
         }
     }));
 
 program
-    .command('export <campaignName>')
-    .description('Export Campaign Archive')
+    .command('deploy <campaignName> <missionName>')
+    .description('Deploy the selected Missions of the Campaign')
     .option('--no-compat', 'Ignore API compatibility checks')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
     .option('--project [project]', 'The project to use')
-    .option('--deployable [boolean]', 'Export only deployable missions', true)
-    .option('--o [output]', 'Export file name')
-    .action(withCompatibilityCheck((campaignName, options) => {
+    .action(withCompatibilityCheck((campaignName, missionName, options) => {
         try {
-            new ExportCampaignCommand(program).execute(campaignName, options);
+            new DeployMissionCommand(program).execute(campaignName, missionName, options);
         } catch (err) {
             console.error(chalk.red(err.message));
         }
     }));
 
 program
-    .command('import <campaignExportFilepath>')
-    .description('Import Campaign Archive')
+    .command('invoke <campaignName> <missionName>')
+    .description('Invoke the mission')
     .option('--no-compat', 'Ignore API compatibility checks')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
     .option('--project [project]', 'The project to use')
-    .option('--deploy [boolean]', 'Set missions status Ready To Deploy', true)
-    .option('--overwrite [boolean]', 'Overwrite existing deployed missions with the imported one', false)
-    .action(withCompatibilityCheck((campaignName, options) => {
+    .option('--params [params]', 'JSON params to send to the action')
+    .option('--params-file [paramsFile]', 'A file containing either JSON or YAML formatted params')
+    .action(withCompatibilityCheck((campaignName, missionName, options) => {
         try {
-            new ImportCampaignCommand(program).execute(campaignName, options);
+            new InvokeAgentServiceCommand(program).execute(missionName, 'router_service', options);
         } catch (err) {
             console.error(chalk.red(err.message));
         }

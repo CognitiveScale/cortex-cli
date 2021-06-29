@@ -17,6 +17,8 @@ const debug = require('debug')('cortex:cli');
 const { loadProfile } = require('../config');
 const ApiServerClient = require('../client/apiServerClient');
 const Catalog = require('../client/catalog');
+
+const _ = { get: require('lodash/get') };
 const {
  printSuccess, printError, filterObject, printTable,
 } = require('./utils');
@@ -107,5 +109,75 @@ module.exports.ImportCampaignCommand = class ImportCampaignCommand {
         } catch (err) {
             printError(`Failed to import campaign: ${err.status} ${err.message}`, options);
         }
+    }
+};
+
+module.exports.ListMissionsCommand = class ListMissionsCommand {
+    constructor(program) {
+        this.program = program;
+    }
+
+    execute(campaign, cmd) {
+        const options = cmd.opts();
+        const profile = loadProfile(options.profile);
+        debug('%s.executeListMissionsCommand(%s)', profile.name, campaign);
+        const cli = new Catalog(profile.url);
+
+        try {
+            cli.listMissions(options.project || profile.project, profile.token, campaign).then((response) => {
+                if (response.success === false) throw response;
+                const data = Object.values(response.data);
+                if (options.json) {
+                    printSuccess(JSON.stringify(data, null, 2), options);
+                } else {
+                    const tableSpec = [
+                        { column: 'Name', field: 'name', width: 50 },
+                        { column: 'Title', field: 'title', width: 50 },
+                        { column: 'Description', field: 'description', width: 80 },
+                        { column: 'Status', field: 'lifecycleState', width: 30 },
+                    ];
+                    printTable(tableSpec, data);
+                }
+            });
+        } catch (err) {
+            printError(`Failed to list missions of campaign ${campaign}: ${err.status} ${err.message}`, options);
+        }
+    }
+};
+
+module.exports.DeployMissionCommand = class DeployMissionCommand {
+    constructor(program) {
+        this.program = program;
+    }
+
+    execute(campaign, mission, cmd) {
+        const options = cmd.opts();
+        const profile = loadProfile(options.profile);
+        debug('%s.executeDeployMissionCommand(%s)', profile.name, campaign);
+        const cli = new Catalog(profile.url);
+
+        cli.deployMission(options.project || profile.project, profile.token, campaign, mission).then((response) => {
+            if (response.success === false) throw response;
+            const output = _.get(response, 'data.message') || JSON.stringify(response.data || response, null, 2);
+            printSuccess(output, options);
+        }).catch(err => printError(`Failed to deploy mission ${mission} of campaign ${campaign}: ${err.status} ${err.message}`, options));
+    }
+};
+
+module.exports.DescribeMissionCommand = class DescribeMissionCommand {
+    constructor(program) {
+        this.program = program;
+    }
+
+    execute(campaign, mission, cmd) {
+        const options = cmd.opts();
+        const profile = loadProfile(options.profile);
+        debug('%s.executeDescribeMissionCommand(%s)', profile.name, campaign);
+        const cli = new Catalog(profile.url);
+
+        cli.getMission(options.project || profile.project, profile.token, campaign, mission).then((response) => {
+            if (response.success === false) throw response;
+            printSuccess(JSON.stringify(response.data, null, 2), options);
+        }).catch(err => printError(`Failed to describe mission ${mission} of campaign ${campaign}: ${err.status} ${err.message}`, options));
     }
 };

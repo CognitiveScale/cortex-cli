@@ -14,13 +14,14 @@
  * limitations under the License.
  */
 
+const fs = require('fs');
 const _ = require('lodash');
 const debug = require('debug')('cortex:cli');
 const moment = require('moment');
 const { loadProfile } = require('../config');
 const Experiments = require('../client/experiments');
 const {
- printSuccess, printError, filterObject, printTable,
+ printSuccess, printError, filterObject, printTable, parseObject, formatValidationPath,
 } = require('./utils');
 
 class ListExperiments {
@@ -33,7 +34,7 @@ class ListExperiments {
         debug('%s.listExperiments()', profile.name);
 
         const exp = new Experiments(profile.url);
-        exp.listExperiments(options.project || profile.project, profile.token).then((response) => {
+        exp.listExperiments(options.project || profile.project, options.model, profile.token).then((response) => {
             if (response.success) {
                 let { result } = response;
                 if (options.query) {
@@ -132,25 +133,22 @@ class ListRuns {
                     printSuccess(JSON.stringify(result, null, 2), options);
                 } else {
                     const tableSpec = [
-                        { alias: 'Run ID', value: 'runId', width: 25 },
-                        {
- alias: 'Start', value: 'startTime', width: 25, formatter: val => moment.unix(val).format('YYYY-MM-DD HH:mm a'), 
-},
-                        {
- alias: 'Took', value: 'took', width: 25, formatter: val => moment.duration(val, 'seconds').humanize(), 
-},
-                        {
- alias: 'Params', value: 'params', width: 45, formatter: val => _.map(val, (v, k) => `${k}: ${v}`).join('\n'), 
-},
-                        {
- alias: 'Metrics', value: 'metrics', width: 45, formatter: val => _.map(val, (v, k) => `${k}: ${v}`).join('\n'), 
-},
-                        { alias: 'Artifacts', value: 'artifacts', formatter: val => Object.keys(val).join(', ') },
+                        { column: 'Run ID', field: 'runId', width: 25 },
+                        { column: 'Start', field: 'startTime', width: 25 },
+                        { column: 'Took', field: 'took', width: 25 },
+                        { column: 'Params', field: 'params', width: 45 },
+                        { column: 'Metrics', field: 'metrics', width: 45 },
+                        { column: 'Artifacts', field: 'artifacts' },
                     ];
-                    
-                    const Table = require('tty-table');
-                    const t = new Table(tableSpec, result.runs);
-                    console.log(t.render());
+                    const trans = (o) => {
+                        o.startTime = o.startTime ? moment.unix(o.startTime).format('YYYY-MM-DD HH:mm a') : '';
+                        o.took = o.took ? moment.duration(o.took, 'seconds').humanize() : '';
+                        o.params = _.map(o.params, (v, k) => `${k}: ${v}`).join('\n');
+                        o.metrics = _.map(o.metrics, (v, k) => `${k}: ${v}`).join('\n');
+                        o.artifacts = Object.keys(_.get(o, 'artifacts', {})).join(', ');
+                        return o;
+                    };
+                    printTable(tableSpec, _.get(result, 'runs', []), trans);
                 }
             } else {
                 printError(`Failed to list runs: ${response.status} ${response.status} - ${response.message}`, options);
@@ -237,6 +235,113 @@ class DownloadArtifactCommand {
     }
 }
 
+class SaveExperimentCommand {
+    constructor(program) {
+        this.program = program;
+    }
+
+    execute(experimentDefinition, options) {
+        const profile = loadProfile(options.profile);
+        debug('%s.executeSaveExperiment(%s)', profile.name, experimentDefinition);
+
+        const experimentDefStr = fs.readFileSync(experimentDefinition);
+        const experiment = parseObject(experimentDefStr, options);
+        debug('%o', experiment);
+
+        const experiments = new Experiments(profile.url);
+        experiments.saveExperiment(options.project || profile.project, profile.token, experiment).then((response) => {
+            if (response.success) {
+                printSuccess('Experiment saved', options);
+            } else if (response.details) {
+                console.log(`Failed to save experiment: ${response.status} ${response.message}`);
+                console.log('The following issues were found:');
+                const tableSpec = [
+                    { column: 'Path', field: 'path', width: 50 },
+                    { column: 'Message', field: 'message', width: 100 },
+                ];
+                response.details.map(d => d.path = formatValidationPath(d.path));
+                printTable(tableSpec, response.details);
+                printError(''); // Just exit
+            } else {
+                printError(JSON.stringify(response));
+            }
+        })
+            .catch((err) => {
+                printError(`Failed to save experiment: ${err.status} ${err.message}`, options);
+            });
+    }
+}
+
+class CreateRunCommand {
+    constructor(program) {
+        this.program = program;
+    }
+
+    execute(runDefinition, options) {
+        const profile = loadProfile(options.profile);
+        debug('%s.executeCreateRun(%s)', profile.name, runDefinition);
+
+        const runDefinitionStr = fs.readFileSync(runDefinition);
+        const run = parseObject(runDefinitionStr, options);
+
+        const experiments = new Experiments(profile.url);
+        experiments.createRun(options.project || profile.project, profile.token, run).then((response) => {
+            if (response.success) {
+                printSuccess('Run created', options);
+                printSuccess(JSON.stringify(response.result, null, 2), options);
+            } else if (response.details) {
+                console.log(`Failed to create run: ${response.status} ${response.message}`);
+                console.log('The following issues were found:');
+                const tableSpec = [
+                    { column: 'Path', field: 'path', width: 50 },
+                    { column: 'Message', field: 'message', width: 100 },
+                ];
+                response.details.map(d => d.path = formatValidationPath(d.path));
+                printTable(tableSpec, response.details);
+                printError(''); // Just exit
+            } else {
+                printError(JSON.stringify(response));
+            }
+        })
+            .catch((err) => {
+                printError(`Failed to create run: ${err.status} ${err.message}`, options);
+            });
+    }
+}
+
+class UploadArtifactCommand {
+    constructor(program) {
+        this.program = program;
+    }
+
+    execute(experimentName, runId, filePath, artifact, options) {
+        const profile = loadProfile(options.profile);
+        debug('%s.executeUploadArtifact()', profile.name);
+
+        const experiments = new Experiments(profile.url);
+
+        const upload = _.partial(UploadArtifactCommand.upload, experiments, profile, options);
+
+        upload(filePath, artifact, experimentName, runId);
+    }
+
+    static upload(experiments, profile, options, filePath, artifact, experimentName, runId) {
+        const contentType = _.get(options, 'contentType', 'application/octet-stream');
+        return experiments.uploadArtifact(options.project || profile.project, profile.token, experimentName, runId, filePath, artifact, contentType).then((response) => {
+            if (response.success) {
+                printSuccess('Artifact successfully uploaded.', options);
+                printSuccess(JSON.stringify(response, null, 2), options);
+            } else {
+                printError(`Failed to upload Artifact: ${response.status} ${response.message}`, options);
+            }
+        })
+        .catch((err) => {
+            debug(err);
+            printError(`Failed to upload Artifact: ${err.status} ${err.message}`, options);
+        });
+    }
+}
+
 module.exports = {
     ListExperiments,
     ListRuns,
@@ -245,4 +350,7 @@ module.exports = {
     DeleteRunCommand,
     DeleteExperimentCommand,
     DownloadArtifactCommand,
+    SaveExperimentCommand,
+    CreateRunCommand,
+    UploadArtifactCommand,
 };

@@ -96,7 +96,7 @@ class Profile {
  url, username, issuer, audience, jwk, project,
 }) {
         this.name = name;
-        this.url = process.env.CORTEX_URI || url;
+        this.url = url;
         this.username = username;
         this.jwk = jwk;
         this.account = 'cortex';
@@ -136,12 +136,15 @@ class Config {
         }
     }
 
-    getProfile(name) {
+    getProfile(name, useenv = true) {
         const profile = this.profiles[name];
         if (!profile) {
             return undefined;
         }
         const profileType = new Profile(name, profile).validate();
+        if (useenv) {
+            profileType.url = process.env.CORTEX_URI || profileType.url;
+        }
         profileType.token = generateJwt(profile);
         return profileType;
     }
@@ -180,14 +183,14 @@ class Config {
     }
 }
 
-module.exports.loadProfile = function (profileName) {
+module.exports.loadProfile = function (profileName, useenv = true) {
     const config = readConfig();
     if (config === undefined) {
         throw new Error('Please configure the Cortex CLI by running "cortex configure"');
     }
 
     const name = profileName || config.currentProfile || 'default';
-    const profile = config.getProfile(name);
+    const profile = config.getProfile(name, useenv);
     if (!profile) {
         throw new Error(`Profile with name "${name}" could not be located in your configuration.  Please run "cortex configure".`);
     }

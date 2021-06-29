@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-const Table = require('cli-table');
+const Table = require('cli-table3');
 const _ = require('lodash');
 const chalk = require('chalk');
 const debug = require('debug')('cortex:cli');
@@ -48,7 +48,7 @@ module.exports.constructError = (error) => {
         // Guess it wasn't JSON!
     }
     return {
- success: false, message: errorText, details, status: error.status || '', 
+ success: false, message: errorText, details, status: error.status || error.code || _.get(errResp, 'statusCode') || '',
 };
 };
 
@@ -206,7 +206,7 @@ module.exports.formatAllServiceInputParameters = (allParameters) => {
      if (allParameters.$ref != null) {
          return `$ref:${allParameters.$ref}`;
      }
-     
+
          return allParameters.map(inputParameters => formatServiceInputParameter(inputParameters)).join('\n');
 };
 
@@ -231,8 +231,8 @@ module.exports.countLinesInFile = filePath => new Promise((resolve, reject) => {
             .on('end', () => (leftovers ? resolve(count + 1) : resolve(count)));
     });
 module.exports.formatValidationPath = (p) => {
-    let cnt = 0; let 
-res = '';
+    let cnt = 0;
+    let res = '';
     const len = p.length;
     p.forEach((s) => {
         if (_.isNumber(s)) {
@@ -316,3 +316,11 @@ module.exports.LISTTABLEFORMAT = [
     { column: 'Author', field: 'createdBy', width: 25 },
 
 ];
+
+module.exports.RUNTABLEFORMAT = [
+    { column: 'Run ID', field: 'runId', width: 30 },
+    { column: 'Experiment Name', field: 'experimentName', width: 40 },
+    { column: 'Took', field: 'took', width: 50 },
+    { column: 'Modified', field: '_updatedAt', width: 26 },
+];
+

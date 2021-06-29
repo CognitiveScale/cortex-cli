@@ -217,7 +217,11 @@ module.exports.ListActivationsCommand = class {
         if (options.endBefore) queryParams.endBefore = options.endBefore;
         if (options.endAfter) queryParams.endAfter = options.endAfter;
         if (options.status) queryParams.status = options.status;
-        agents.listActivations(options.project || profile.project, profile.token, agentName, queryParams).then((response) => {
+        // TODO limit + skip
+        if (options.correlationId) queryParams.correlationId = options.correlationId;
+        queryParams.agentName = agentName;
+
+        agents.listActivations(options.project || profile.project, profile.token, queryParams).then((response) => {
             if (response.success) {
                 let result = response.result.activations;
                 if (options.query) result = filterObject(result, options);
@@ -231,11 +235,11 @@ module.exports.ListActivationsCommand = class {
                     printTable(tableSpec, _.map(result, r => ({ activationId: r })));
                 }
             } else {
-                printError(`Failed to list activations for instance ${agentName}: ${response.message}`, options);
+                printError(`Failed to list activations for agent "${agentName}": ${response.message}`, options);
             }
         })
             .catch((err) => {
-                printError(`Failed to list activations for instance ${agentName}: ${err.status} ${err.message}`, options);
+                printError(`Failed to list activations for agent "${agentName}": ${err.status} ${err.message}`, options);
             });
     }
 };
@@ -290,12 +294,14 @@ module.exports.ListAgentSnapshotsCommand = class {
                     printSuccess(JSON.stringify(result, null, 2), options);
                 } else {
                     const tableSpec = [
-                        { column: 'Snapshot ID', field: 'id', width: 40 },
-                        { column: 'Title', field: 'title', width: 30 },
-                        { column: 'Agent Version', field: 'agentVersion', width: 15 },
-                        { column: 'Created On', field: 'createdAt', width: 26 },
+                        { column: 'Snapshot ID', field: 'snapshotId', width: 40 },
+                        { column: 'Title', field: 'title', width: 40 },
+// Removed as this is confusing for end users, agent version may not change
+//                        { column: 'Agent Version', field: 'agentVersion', width: 15 },
+                        { column: 'Created', field: 'createdAt', width: 26 },
+                        { column: 'Author', field: 'createdBy', width: 26 },
                     ];
-                    printTable(tableSpec, result);
+                    printTable(tableSpec, result, o => ({ ...o, createdAt: o.createdAt ? moment(o.createdAt).fromNow() : '-' }));
                 }
             } else {
                 printError(`Failed to list agent snapshots ${agentName}: ${response.message}`, options);
