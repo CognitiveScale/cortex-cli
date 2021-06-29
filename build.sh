@@ -37,7 +37,7 @@ function docker_build(){
     if [[ ${BRANCH} = "master" ]]; then
         rm -rf node_modules
         npm install --silent --only=production
-        npm publish --registry=https://registry.npmjs.com/
+        npm publish --registry=https://registry.npmjs.org/
     elif [[ ${BRANCH} = "develop" ]]; then
         npm config set always-auth true
 #        npm publish --tag "${BRANCH}" --registry=https://cognitivescale.jfrog.io/artifactory/api/npm/npm-local/
