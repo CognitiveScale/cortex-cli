@@ -71,7 +71,7 @@ module.exports = class Agents {
 
     listActivations(projectId, token, params) {
         checkProject(projectId);
-        const endpoint = `${this.endpointV4(projectId)}/agentinvoke/${params.agentName}/activations`;
+        const endpoint = `${this.endpointV4(projectId)}/activations`;
         debug('listActivations(%s) => %s', params.agentName, endpoint);
         const opts = {
             headers: { Authorization: `Bearer ${token}` },
