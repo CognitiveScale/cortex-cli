@@ -20,7 +20,7 @@ const http = require('https');
 const fs = require('fs');
 const { got } = require('./apiutils');
 const {
- constructError, formatAllServiceInputParameters, checkProject, getUserAgent, printSuccess, printError,
+ constructError, formatAllServiceInputParameters, checkProject, getUserAgent, printSuccess, printError, printTable,
 } = require('../commands/utils');
 
 const createEndpoints = baseUri => ({
@@ -285,17 +285,25 @@ module.exports = class Catalog {
             method: 'POST',
             headers,
         });
-
-        form.pipe(req)
-            .on('response', (response) => {
-                if (response.statusCode === 200 || response.statusCode === 201) {
-                    printSuccess('Campaign imported successfully');
-                } else {
-                    printError(`Campaign file ${filepath} import failed with error: [${response.statusCode}] ${response.statusMessage}`);
-                }
-            }).on('error', (err) => {
-                printError(err);
-            });
+        form.pipe(req);
+        req.on('response', (response) => {
+            if (response.statusCode === 200 || response.statusCode === 201) {
+                response.setEncoding('utf-8');
+                response.on('data', (data) => {
+                    const importReport = JSON.parse(data);
+                    if (!importReport.warnings || importReport.warnings.length === 0) {
+                        printSuccess('Campaign imported successfully');
+                    } else {
+                        printSuccess('Campaign imported with warnings');
+                        printTable([{ column: 'Warnings', field: 'message' }], importReport.warnings.map(w => ({ message: w })));
+                    }
+                });
+            } else {
+                printError(`Campaign file ${filepath} import failed with error: [${response.statusCode}] ${response.statusMessage}`);
+            }
+        }).on('error', (err) => {
+            printError(err);
+        });
     }
 
     listMissions(projectId, token, campaign) {
