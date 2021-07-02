@@ -17,6 +17,7 @@ const fs = require('fs');
 
 const _ = {
     get: require('lodash/get'),
+    pick: require('lodash/pick'),
 };
 const debug = require('debug')('cortex:cli');
 const moment = require('moment');
@@ -46,6 +47,7 @@ module.exports.SaveModelCommand = class SaveModelCommand {
         models.saveModel(options.project || profile.project, profile.token, model).then((response) => {
             if (response.success) {
                 printSuccess('Model saved', options);
+                printSuccess(JSON.stringify(_.pick(response.message, ['version', 'created', 'modelId']), null, 2));
             } else if (response.details) {
                 console.log(`Failed to save model: ${response.status} ${response.message}`);
                 console.log('The following issues were found:');
