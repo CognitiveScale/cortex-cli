@@ -210,7 +210,7 @@ module.exports.ListActivationsCommand = class {
             printError('Either --agentName, --correlationId, or --status must be provided', options);
         }
         const profile = loadProfile(options.profile);
-        debug('%s.listActivations(%s)', profile.name, agentName);
+        debug('%s.listActivations(%s)', profile.name);
 
         const agents = new Agents(profile.url);
         // TODO validate param types?

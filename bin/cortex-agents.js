@@ -148,7 +148,7 @@ program
     .option('--limit [limit]', 'Limit number of records', '100')
     .option('--offset [offset]', 'Skip number of records', '0')
     .option('--sort [asc|desc]', 'Sort the activations by start timestamp ascending (asc) or descending (desc)')
-    .action(withCompatibilityCheck((agentName, options) => {
+    .action(withCompatibilityCheck((options) => {
         try {
             new ListActivationsCommand(program).execute(options);
         } catch (err) {
