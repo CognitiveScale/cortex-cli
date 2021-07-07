@@ -323,4 +323,3 @@ module.exports.RUNTABLEFORMAT = [
     { column: 'Took', field: 'took', width: 50 },
     { column: 'Modified', field: '_updatedAt', width: 26 },
 ];
-
