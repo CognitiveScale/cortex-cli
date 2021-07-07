@@ -17,7 +17,6 @@ const fs = require('fs');
 
 const _ = {
     uniqBy: require('lodash/uniqBy'),
-    maxBy: require('lodash/maxBy'),
     sortBy: require('lodash/sortBy'),
     flatten: require('lodash/flatten'),
     compact: require('lodash/compact'),
@@ -48,15 +47,13 @@ module.exports.ListResourcesCommand = class {
                 if (options.json) {
                     printSuccess(JSON.stringify(response, null, 2), options);
                 } else {
-                    const maxLenRow = _.maxBy(response.data, r => r.resourceName.length);
-                    const maxLen = maxLenRow ? maxLenRow.resourceName.length : 30;
                     const tableSpec = [
-                        { column: 'Name', field: 'resourceName', width: Math.min(maxLen + 2, 90) },
-                        { column: 'Title', field: 'resourceTitle', width: 30 },
-                        { column: 'Type', field: 'resourceType', width: 25 },
-                        { column: 'Project', field: '_projectId', width: 25 },
+                        { column: 'Name', field: 'resourceName' },
+                        { column: 'Title', field: 'resourceTitle' },
+                        { column: 'Resource Type', field: 'resourceType' },
+                        { column: 'Project', field: '_projectId' },
                     ];
-                    printTable(tableSpec, _.sortBy(response.data, ['_projectId', 'resourceType']));
+                    printTable(tableSpec, response.data);
                 }
             })
             .catch((err) => {
@@ -85,7 +82,7 @@ module.exports.ListResourceTypesCommand = class {
                 } else {
                     const types = data.map(t => ({ type: t }));
                     const tableSpec = [
-                        { column: 'Type', field: 'type', width: 25 },
+                        { column: 'Resource Type', field: 'type' },
                     ];
                     printTable(tableSpec, types);
                 }
@@ -112,7 +109,7 @@ module.exports.CreateAssessmentCommand = class {
                 const assessmentDefStr = fs.readFileSync(assessmentDef);
                 assessment = parseObject(assessmentDefStr, options);
             } catch (err) {
-                printError(`Failed to read assessment definition ${assessmentDef}: ${err.message}`, options);
+                printError(`Failed to read assessment definition "${assessmentDef}": ${err.message}`, options);
             }
         }
         client.createAssessment(profile.token, options.name || assessment.name, options.title || assessment.title,
@@ -149,13 +146,13 @@ module.exports.ListAssessmentCommand = class {
                     printSuccess(JSON.stringify(response, null, 2), options);
                 } else {
                     const tableSpec = [
-                        { column: 'Name', field: 'name', width: 30 },
-                        { column: 'Title', field: 'title', width: 30 },
-                        { column: 'Description', field: 'description', width: 40 },
-                        { column: 'Projects', field: 'scope', width: 25 },
-                        { column: '# Reports', field: 'reportCount', width: 12 },
-                        { column: 'Modified', field: '_updatedAt', width: 25 },
-                        { column: 'Author', field: '_createdBy', width: 25 },
+                        { column: 'Name', field: 'name' },
+                        { column: 'Title', field: 'title' },
+                        { column: 'Description', field: 'description' },
+                        { column: 'Projects', field: 'scope' },
+                        { column: '# Reports', field: 'reportCount' },
+                        { column: 'Modified', field: '_updatedAt' },
+                        { column: 'Author', field: '_createdBy' },
                     ];
                     printTable(tableSpec, response.data, o => ({ ...o, _updatedAt: o._updatedAt ? moment(o._updatedAt).fromNow() : '-' }));
                 }
@@ -182,7 +179,7 @@ module.exports.DescribeAssessmentCommand = class {
                 printSuccess(JSON.stringify(response, null, 2), options);
             })
             .catch((err) => {
-                printError(`Failed to get assessment ${name}: ${err.status} ${err.message}`, options);
+                printError(`Failed to get assessment "${name}": ${err.status} ${err.message}`, options);
             });
     }
 };
@@ -203,7 +200,7 @@ module.exports.DeleteAssessmentCommand = class {
                 printSuccess(JSON.stringify(response, null, 2), options);
             })
             .catch((err) => {
-                printError(`Failed to delete assessment ${name}: ${err.status} ${err.message}`, options);
+                printError(`Failed to delete assessment "${name}": ${err.status} ${err.message}`, options);
             });
     }
 };
@@ -224,7 +221,7 @@ module.exports.RunAssessmentCommand = class {
                 printSuccess(JSON.stringify(response, null, 2), options);
             })
             .catch((err) => {
-                printError(`Failed to run assessment ${name}: ${err.status} ${err.message}`, options);
+                printError(`Failed to run assessment "${name}": ${err.status} ${err.message}`, options);
             });
     }
 };
@@ -246,18 +243,18 @@ module.exports.ListAssessmentReportCommand = class {
                     printSuccess(JSON.stringify(response, null, 2), options);
                 } else {
                     const tableSpec = [
-                        { column: 'Assessment Name', field: 'assessmentId', width: 30 },
-                        { column: 'Report Id', field: 'reportId', width: 50 },
-                        { column: 'Impact Summary', field: 'summary', width: 60 },
-                        { column: 'Modified', field: '_updatedAt', width: 25 },
-                        { column: 'Author', field: '_createdBy', width: 25 },
+                        { column: 'Assessment Name', field: 'assessmentId' },
+                        { column: 'Report Id', field: 'reportId' },
+                        { column: 'Impact Summary', field: 'summary' },
+                        { column: 'Modified', field: '_updatedAt' },
+                        { column: 'Author', field: '_createdBy' },
                     ];
                     response.data.forEach(r => r.summary = JSON.stringify(Object.fromEntries(r.summary.map(item => [item.type, item.count]))));
                     printTable(tableSpec, response.data, o => ({ ...o, _updatedAt: o._updatedAt ? moment(o._updatedAt).fromNow() : '-' }));
                 }
             })
             .catch((err) => {
-                printError(`Failed to list assessment ${name} reports: ${err.status} ${err.message}`, options);
+                printError(`Failed to list assessment "${name}" reports: ${err.status} ${err.message}`, options);
             });
     }
 };
@@ -289,19 +286,19 @@ module.exports.GetAssessmentReportCommand = class {
                     const flattenRefs = _.uniqBy(
                         _.flatten(
                             response.detail.map(ref => ref.sourcePath.map(s => ({ ...s, projectId: ref._projectId }))),
-                        ), r => `${r.name}-${r.type}`,
+                        ), r => `${r.name}-${r.type}-${r.projectId}`,
                     );
                     const tableSpec = [
-                        { column: 'Name', field: 'name', width: 30 },
-                        { column: 'Title', field: 'title', width: 30 },
-                        { column: 'Type', field: 'type', width: 20 },
-                        { column: 'Project', field: 'projectId', width: 25 },
+                        { column: 'Name', field: 'name' },
+                        { column: 'Title', field: 'title' },
+                        { column: 'Resource Type', field: 'type' },
+                        { column: 'Project', field: 'projectId' },
                     ];
                     printTable(tableSpec, _.sortBy(flattenRefs, ['projectId', 'type']));
                 }
             })
             .catch((err) => {
-                printError(`Failed to get assessment ${name} report ${reportId}: ${err.status} ${err.message}`, options);
+                printError(`Failed to get assessment "${name}" report "${reportId}": ${err.status} ${err.message}`, options);
             });
     }
 };
@@ -317,13 +314,6 @@ module.exports.ExportAssessmentReportCommand = class {
         debug('%s.ExportAssessmentReportCommand()', profile.name);
 
         const client = new Assessments(profile.url);
-        client.exportAssessmentReport(profile.token, name, reportId, options.type)
-            .then((response) => {
-                if (response.success === false) throw response;
-                printSuccess(`Report exported to ${response.file}`, options);
-            })
-            .catch((err) => {
-                printError(`Failed to export assessment ${name} report ${reportId}: ${err.status} ${err.message}`, options);
-            });
+        client.exportAssessmentReport(profile.token, name, reportId, options.type);
     }
 };

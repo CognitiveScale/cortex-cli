@@ -14,9 +14,12 @@
  * limitations under the License.
  */
 const querystring = require('querystring');
+const { pipeline } = require('stream');
 const { createWriteStream } = require('fs');
 const debug = require('debug')('cortex:cli');
 const { got } = require('./apiutils');
+const { printSuccess } = require('../commands/utils');
+const { printError } = require('../commands/utils');
 const { constructError, getUserAgent } = require('../commands/utils');
 
 module.exports = class Assessments {
@@ -149,13 +152,20 @@ module.exports = class Assessments {
     }
 
     exportAssessmentReport(token, name, reportId, types) {
+        const options = { color: 'on' };
+        const file = `${reportId}.csv`;
         const filter = types && types.trim() ? `?components=${types.trim()}` : '';
         const url = `${this.endpointV4}/assessments/${name}/reports/${reportId}/export${filter}`;
         debug('exportAssessmentReport => %s', url);
-        got.stream(url, {
-                headers: { Authorization: `Bearer ${token}` },
-                'user-agent': getUserAgent(),
-            }).pipe(createWriteStream(`${reportId}.csv`), { end: true });
-        return Promise.resolve({ file: `${reportId}.csv` });
+
+        const rs = got.stream(url, { headers: { Authorization: `Bearer ${token}` }, 'user-agent': getUserAgent() });
+        pipeline(rs, createWriteStream(file), (e) => {
+            if (e) {
+                const err = constructError(e);
+                printError(`Failed to export assessment "${name}" report "${reportId}": ${err.status} ${err.message}`, options);
+            } else {
+                printSuccess(`Report exported to file "${file}"`, options);
+            }
+        });
     }
 };
