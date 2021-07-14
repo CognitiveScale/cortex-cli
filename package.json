@@ -31,6 +31,8 @@
   "homepage": "https://github.com/CognitiveScale/cortex-cli",
   "dependencies": {
     "@hapi/joi": "17.1.1",
+    "yauzl": "2.10.0",
+    "get-stream": "6.0.1",
     "boxen": "4.2.0",
     "chalk": "4.0.0",
     "co": "4.6.0",

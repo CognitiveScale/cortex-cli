@@ -249,19 +249,23 @@ module.exports = class Catalog {
         const url = `${this.endpoints.campaigns(projectId)}${campaignName}/export?deployable=${deployable}`;
         debug('exportCampaign(%s) => %s', campaignName, url);
 
-        return http.get(url,
-            { headers: { Authorization: `Bearer ${token}` } },
-            (response) => {
-            if (response.statusCode === 200 || response.statusCode === 201) {
-                const path = `./${outputFileName || `${campaignName}.amp`}`;
-                const file = fs.createWriteStream(path);
-                response.pipe(file);
-                printSuccess(`Successfully exported Campaign ${campaignName} from project ${projectId} to file ${path}`);
-            } else {
-                printError(`Failed to export Campaign ${campaignName} from project ${projectId}. Error: [${response.statusCode}] ${response.statusMessage}`);
-            }
-        }).on('error', (e) => {
-            printError(e);
+        return new Promise((resolve, reject) => {
+            http.get(url,
+                { headers: { Authorization: `Bearer ${token}` } },
+                (response) => {
+                    if (response.statusCode === 200 || response.statusCode === 201) {
+                        const path = `./${outputFileName || `${campaignName}.amp`}`;
+                        const file = fs.createWriteStream(path);
+                        response.pipe(file);
+                        resolve(path);
+                        printSuccess(`Successfully exported Campaign ${campaignName} from project ${projectId} to file ${path}`);
+                    } else {
+                        printError(`Failed to export Campaign ${campaignName} from project ${projectId}. Error: [${response.statusCode}] ${response.statusMessage}`);
+                    }
+                }).on('error', (e) => {
+                    reject(e);
+                    printError(e);
+                });
         });
     }
 

@@ -27,6 +27,19 @@ module.exports = class Assessments {
         this.endpointV4 = `${cortexUrl}/fabric/v4/impactassessment`;
     }
 
+    getDependenciesOfResource(token, project, type, name) {
+        const url = `${this.endpointV4}/dependencies/${project}/${type}/${name}`;
+        debug('queryResources => %s', url);
+        return got
+            .get(url, {
+                headers: { Authorization: `Bearer ${token}` },
+                'user-agent': getUserAgent(),
+            })
+            .json()
+            .then(res => res)
+            .catch(err => constructError(err));
+    }
+
     queryResources(token, name, projectId, type, skip, limit) {
         const url = `${this.endpointV4}/resources?${querystring.stringify({
             projectId, 
