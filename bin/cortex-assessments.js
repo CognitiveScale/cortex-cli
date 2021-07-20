@@ -82,6 +82,7 @@ program
     .option('--scope [projects]', 'Assessment scope projects (comma separated values)')
     .option('--component [Cortex component name]', 'Cortex component name')
     .option('--type [Cortex component types]', 'Assessment scope component types (comma separated values)')
+    .option('--overwrite [boolean]', 'Overwrite existing assessment, if exists')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
     .option('-y, --yaml', 'Use YAML format')

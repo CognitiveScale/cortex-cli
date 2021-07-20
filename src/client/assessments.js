@@ -59,7 +59,7 @@ module.exports = class Assessments {
             .catch(err => constructError(err));
     }
 
-    createAssessment(token, name, title, description, scope, componentName, componentTypes) {
+    createAssessment(token, name, title, description, scope, componentName, componentTypes, overwrite) {
         const url = `${this.endpointV4}/assessments`;
         debug('createAssessment => %s', url);
         return got
@@ -73,6 +73,7 @@ module.exports = class Assessments {
                     scope,
                     componentName,
                     componentTypes,
+                    overwrite,
                 }),
             }).json()
             .then(res => res)
