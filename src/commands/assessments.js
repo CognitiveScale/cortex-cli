@@ -145,7 +145,8 @@ module.exports.CreateAssessmentCommand = class {
         }
         client.createAssessment(profile.token, options.name || assessment.name, options.title || assessment.title,
             options.description || assessment.description, options.scope || assessment.scope,
-            options.component || assessment.component, options.type || assessment.type)
+            options.component || assessment.component, options.type || assessment.type,
+            options.overwrite || assessment.overwrite)
             .then((response) => {
                 if (response.success === false) throw response;
                 if (response.success) {
