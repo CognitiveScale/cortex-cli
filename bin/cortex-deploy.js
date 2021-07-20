@@ -23,6 +23,8 @@ const { withCompatibilityCheck } = require('../src/compatibility');
 
 const {
     DeploySnapshotCommand,
+    DeployCampaignCommand,
+    DeployConnectionCommand,
 } = require('../src/commands/deploy');
 
 program.description('Export Cortex artifacts for deployment');
@@ -37,9 +39,40 @@ program
     .option('--project [project]', 'The project to use')
     .option('-y, --yaml', 'Use YAML for snapshot export format')
     .option('-f, --force', 'Force delete existing exported files')
-    .action(withCompatibilityCheck((skillDefinition, options) => {
+    .action(withCompatibilityCheck((snapshotIds, options) => {
         try {
-            new DeploySnapshotCommand(program).execute(skillDefinition, options);
+            new DeploySnapshotCommand(program).execute(snapshotIds, options);
+        } catch (err) {
+            console.error(chalk.red(err.message));
+        }
+    }));
+
+program
+    .command('campaign <campaignName>')
+    .description('Export Campaigns for deployment')
+    .option('--no-compat', 'Ignore API compatibility checks')
+    .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
+    .option('--profile [profile]', 'The profile to use')
+    .option('--project [project]', 'The project to use')
+    .option('--deployable', 'Export only ready to deploy Campaigns')
+    .action(withCompatibilityCheck((campaignName, options) => {
+        try {
+            new DeployCampaignCommand(program).execute(campaignName, options);
+        } catch (err) {
+            console.error(chalk.red(err.message));
+        }
+    }));
+
+program
+    .command('connection <connectionName>')
+    .description('Export Connection for deployment')
+    .option('--no-compat', 'Ignore API compatibility checks')
+    .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
+    .option('--profile [profile]', 'The profile to use')
+    .option('--project [project]', 'The project to use')
+    .action(withCompatibilityCheck((connectionName, options) => {
+        try {
+            new DeployConnectionCommand(program).execute(connectionName, options);
         } catch (err) {
             console.error(chalk.red(err.message));
         }

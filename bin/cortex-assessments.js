@@ -31,6 +31,7 @@ const {
     ListAssessmentReportCommand,
     GetAssessmentReportCommand,
     ExportAssessmentReportCommand,
+    DependencyTreeCommand,
 } = require('../src/commands/assessments');
 
 program.description('Work with Cortex Assessments');
@@ -45,6 +46,25 @@ program
     .action(withCompatibilityCheck((options) => {
         try {
             new ListResourceTypesCommand(program).execute(options);
+        } catch (err) {
+            console.error(chalk.red(err.message));
+        }
+    }));
+
+program
+    .command('dependency-tree')
+    .description('Dependencies of a resource')
+    .storeOptionsAsProperties(false)
+    .requiredOption('--scope [project]', 'project name of the resource')
+    .requiredOption('--name [Cortex component name]', 'Cortex component name')
+    .requiredOption('--type [Cortex component types]', 'Cortex resource type')
+    .option('--no-compat', 'Ignore API compatibility checks')
+    .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
+    .option('--profile [profile]', 'The profile to use')
+    .option('--json', 'Output results using JSON')
+    .action(withCompatibilityCheck((options) => {
+        try {
+            new DependencyTreeCommand(program).execute(options);
         } catch (err) {
             console.error(chalk.red(err.message));
         }

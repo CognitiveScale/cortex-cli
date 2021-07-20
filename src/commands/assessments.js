@@ -93,6 +93,37 @@ module.exports.ListResourceTypesCommand = class {
     }
 };
 
+module.exports.DependencyTreeCommand = class {
+    constructor(program) {
+        this.program = program;
+    }
+
+    execute(command) {
+        const options = command.opts();
+        const profile = loadProfile(options.profile);
+        debug('%s.DependencyTreeCommand()', profile.name);
+
+        const client = new Assessments(profile.url);
+        client.getDependenciesOfResource(profile.token, options.scope, options.type, options.name)
+            .then((response) => {
+                if (response.success === false) throw response;
+                if (options.json) {
+                    printSuccess(JSON.stringify(response, null, 2), options);
+                } else {
+                    const tableSpec = [
+                        { column: 'Name', field: 'resourceName' },
+                        { column: 'Title', field: 'resourceTitle' },
+                        { column: 'Resource Type', field: 'resourceType' },
+                    ];
+                    printTable(tableSpec, response.data);
+                }
+            })
+            .catch((err) => {
+                printError(`Failed to list dependency Cortex resource: ${err.status} ${err.message}`, options);
+            });
+    }
+};
+
 module.exports.CreateAssessmentCommand = class {
     constructor(program) {
         this.program = program;
