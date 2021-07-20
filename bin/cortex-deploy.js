@@ -70,9 +70,9 @@ program
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
     .option('--project [project]', 'The project to use')
-    .action(withCompatibilityCheck((campaignName, options) => {
+    .action(withCompatibilityCheck((connectionName, options) => {
         try {
-            new DeployConnectionCommand(program).execute(campaignName, options);
+            new DeployConnectionCommand(program).execute(connectionName, options);
         } catch (err) {
             console.error(chalk.red(err.message));
         }
