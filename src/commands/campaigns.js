@@ -112,6 +112,31 @@ module.exports.ImportCampaignCommand = class ImportCampaignCommand {
     }
 };
 
+module.exports.DeployCampaignCommand = class DeployCampaignCommand {
+    constructor(program) {
+        this.program = program;
+    }
+
+    execute(campaignName, cmd) {
+        const options = cmd.opts();
+        const profile = loadProfile(options.profile);
+        debug('%s.executeDeployCampaignCommand(%s)', profile.name, campaignName);
+        const cli = new Catalog(profile.url);
+
+        try {
+            cli.deployCampaign(options.project || profile.project, profile.token, campaignName).then((response) => {
+                if (response.success === false) throw response;
+                const output = _.get(response, 'data.message') || JSON.stringify(response.data || response, null, 2);
+                printSuccess(output, options);
+            }).catch((e) => {
+                printError(`Failed to deploy campaign: ${e.status} ${e.message}`, options);
+            });
+        } catch (err) {
+            printError(`Failed to deploy campaign: ${err.status} ${err.message}`, options);
+        }
+    }
+};
+
 module.exports.UndeployCampaignCommand = class UndeployCampaignCommand {
     constructor(program) {
         this.program = program;

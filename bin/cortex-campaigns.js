@@ -26,6 +26,7 @@ const {
     DescribeCampaignCommand,
     ExportCampaignCommand,
     ImportCampaignCommand,
+    DeployCampaignCommand,
     UndeployCampaignCommand,
 } = require('../src/commands/campaigns');
 
@@ -96,6 +97,21 @@ program
     .action(withCompatibilityCheck((campaignName, options) => {
         try {
             new ImportCampaignCommand(program).execute(campaignName, options);
+        } catch (err) {
+            console.error(chalk.red(err.message));
+        }
+    }));
+
+program
+    .command('deploy <campaignName>')
+    .description('Deploy Campaign')
+    .option('--no-compat', 'Ignore API compatibility checks')
+    .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
+    .option('--profile [profile]', 'The profile to use')
+    .option('--project [project]', 'The project to use')
+    .action(withCompatibilityCheck((campaignName, options) => {
+        try {
+            new DeployCampaignCommand(program).execute(campaignName, options);
         } catch (err) {
             console.error(chalk.red(err.message));
         }
