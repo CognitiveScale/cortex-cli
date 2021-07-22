@@ -25,6 +25,7 @@ const {
     ListMissionsCommand,
     DeployMissionCommand,
     DescribeMissionCommand,
+    UndeployMissionCommand,
 } = require('../src/commands/campaigns');
 
 const { InvokeAgentServiceCommand } = require('../src/commands/agents');
@@ -90,6 +91,21 @@ program
     .action(withCompatibilityCheck((campaignName, missionName, options) => {
         try {
             new InvokeAgentServiceCommand(program).execute(missionName, 'router_service', options);
+        } catch (err) {
+            console.error(chalk.red(err.message));
+        }
+    }));
+
+program
+    .command('undeploy <campaignName> <missionName>')
+    .description('Undeploy the selected Missions of the Campaign')
+    .option('--no-compat', 'Ignore API compatibility checks')
+    .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
+    .option('--profile [profile]', 'The profile to use')
+    .option('--project [project]', 'The project to use')
+    .action(withCompatibilityCheck((campaignName, missionName, options) => {
+        try {
+            new UndeployMissionCommand(program).execute(campaignName, missionName, options);
         } catch (err) {
             console.error(chalk.red(err.message));
         }

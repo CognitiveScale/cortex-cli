@@ -112,6 +112,56 @@ module.exports.ImportCampaignCommand = class ImportCampaignCommand {
     }
 };
 
+module.exports.UndeployCampaignCommand = class UndeployCampaignCommand {
+    constructor(program) {
+        this.program = program;
+    }
+
+    execute(campaignName, cmd) {
+        const options = cmd.opts();
+        const profile = loadProfile(options.profile);
+        debug('%s.executeUndeployCampaignCommand(%s)', profile.name, campaignName);
+        const cli = new Catalog(profile.url);
+
+        try {
+            cli.undeployCampaign(options.project || profile.project, profile.token, campaignName).then((response) => {
+                if (response.success === false) throw response;
+                const output = _.get(response, 'data.message') || JSON.stringify(response.data || response, null, 2);
+                printSuccess(output, options);
+            }).catch((e) => {
+                printError(`Failed to undeploy campaign: ${e.status} ${e.message}`, options);
+            });
+        } catch (err) {
+            printError(`Failed to undeploy campaign: ${err.status} ${err.message}`, options);
+        }
+    }
+};
+
+module.exports.UndeployMissionCommand = class UndeployMissionCommand {
+    constructor(program) {
+        this.program = program;
+    }
+
+    execute(campaignName, missionName, cmd) {
+        const options = cmd.opts();
+        const profile = loadProfile(options.profile);
+        debug('%s.executeUndeployMissionCommand(%s)', profile.name, missionName);
+        const cli = new Catalog(profile.url);
+
+        try {
+            cli.undeployMission(options.project || profile.project, profile.token, campaignName, missionName).then((response) => {
+                if (response.success === false) throw response;
+                const output = _.get(response, 'data.message') || JSON.stringify(response.data || response, null, 2);
+                printSuccess(output, options);
+            }).catch((e) => {
+                printError(`Failed to undeploy mission: ${e.status} ${e.message}`, options);
+            });
+        } catch (err) {
+            printError(`Failed to undeploy mission: ${err.status} ${err.message}`, options);
+        }
+    }
+};
+
 module.exports.ListMissionsCommand = class ListMissionsCommand {
     constructor(program) {
         this.program = program;
