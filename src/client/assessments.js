@@ -28,7 +28,7 @@ module.exports = class Assessments {
     }
 
     getDependenciesOfResource(token, project, type, name) {
-        const url = `${this.endpointV4}/dependencies/${encodeURIComponent(project)}/${encodeURIComponent(type)}/${encodeURIComponent(name)}`;
+        const url = `${this.endpointV4}/dependencies/${project}/${type}/${encodeURIComponent(name)}`;
         debug('queryResources => %s', url);
         return got
             .get(url, {
@@ -83,7 +83,7 @@ module.exports = class Assessments {
                     name: encodeURIComponent(name),
                     title,
                     description,
-                    scope: encodeURIComponent(scope),
+                    scope,
                     componentName: encodeURIComponent(componentName),
                     componentTypes,
                     overwrite,
