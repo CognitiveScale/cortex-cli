@@ -28,7 +28,7 @@ module.exports = class Assessments {
     }
 
     getDependenciesOfResource(token, project, type, name) {
-        const url = `${this.endpointV4}/dependencies/${project}/${type}/${name}`;
+        const url = `${this.endpointV4}/dependencies/${project}/${type}/${encodeURIComponent(name)}`;
         debug('queryResources => %s', url);
         return got
             .get(url, {
@@ -43,7 +43,7 @@ module.exports = class Assessments {
     queryResources(token, name, projectId, type, skip, limit) {
         const url = `${this.endpointV4}/resources?${querystring.stringify({
             projectId, 
-            name, 
+            name: encodeURIComponent(name), 
             type, 
             skip, 
             limit,
@@ -80,11 +80,11 @@ module.exports = class Assessments {
                 headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
                 'user-agent': getUserAgent(),
                 body: JSON.stringify({
-                    name,
+                    name: encodeURIComponent(name),
                     title,
                     description,
                     scope,
-                    componentName,
+                    componentName: encodeURIComponent(componentName),
                     componentTypes,
                     overwrite,
                 }),
@@ -106,7 +106,7 @@ module.exports = class Assessments {
     }
 
     getAssessment(token, name) {
-        const url = `${this.endpointV4}/assessments/${name}`;
+        const url = `${this.endpointV4}/assessments/${encodeURIComponent(name)}`;
         debug('getAssessment => %s', url);
         return got
             .get(url, {
@@ -118,7 +118,7 @@ module.exports = class Assessments {
     }
 
     deleteAssessment(token, name) {
-        const url = `${this.endpointV4}/assessments/${name}`;
+        const url = `${this.endpointV4}/assessments/${encodeURIComponent(name)}`;
         debug('deleteAssessment => %s', url);
         return got
             .delete(url, {
@@ -130,7 +130,7 @@ module.exports = class Assessments {
     }
 
     runAssessment(token, name) {
-        const url = `${this.endpointV4}/assessments/${name}/run`;
+        const url = `${this.endpointV4}/assessments/${encodeURIComponent(name)}/run`;
         debug('runAssessment => %s', url);
         return got
             .post(url, {
@@ -142,7 +142,7 @@ module.exports = class Assessments {
     }
 
     listAssessmentReports(token, name) {
-        const url = `${this.endpointV4}/assessments/${name}/reports`;
+        const url = `${this.endpointV4}/assessments/${encodeURIComponent(name)}/reports`;
         debug('listAssessmentReports => %s', url);
         return got
             .get(url, {
@@ -154,7 +154,7 @@ module.exports = class Assessments {
     }
 
     getAssessmentReport(token, name, reportId) {
-        const url = `${this.endpointV4}/assessments/${name}/reports/${reportId}`;
+        const url = `${this.endpointV4}/assessments/${encodeURIComponent(name)}/reports/${encodeURIComponent(reportId)}`;
         debug('getAssessmentReport => %s', url);
         return got
             .get(url, {
@@ -167,9 +167,9 @@ module.exports = class Assessments {
 
     exportAssessmentReport(token, name, reportId, types) {
         const options = { color: 'on' };
-        const file = `${reportId}.csv`;
+        const file = `${reportId.split('/').pop()}.csv`;
         const filter = types && types.trim() ? `?components=${types.trim()}` : '';
-        const url = `${this.endpointV4}/assessments/${name}/reports/${reportId}/export${filter}`;
+        const url = `${this.endpointV4}/assessments/${encodeURIComponent(name)}/reports/${encodeURIComponent(reportId)}/export${filter}`;
         debug('exportAssessmentReport => %s', url);
 
         const rs = got.stream(url, { headers: { Authorization: `Bearer ${token}` }, 'user-agent': getUserAgent() });
