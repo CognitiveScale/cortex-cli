@@ -43,7 +43,7 @@ module.exports = class Assessments {
     queryResources(token, name, projectId, type, skip, limit) {
         const url = `${this.endpointV4}/resources?${querystring.stringify({
             projectId, 
-            name: encodeURIComponent(name), 
+            name, 
             type, 
             skip, 
             limit,
