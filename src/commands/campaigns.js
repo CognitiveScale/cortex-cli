@@ -127,7 +127,12 @@ module.exports.DeployCampaignCommand = class DeployCampaignCommand {
             cli.deployCampaign(options.project || profile.project, profile.token, campaignName).then((response) => {
                 if (response.success === false) throw response;
                 const output = _.get(response, 'data.message') || JSON.stringify(response.data || response, null, 2);
-                printSuccess(output, options);
+                if (!response.data.warnings || response.data.warnings.length === 0) {
+                    printSuccess(output, options);
+                } else {
+                    printError('Campaign deployed with warnings', options, false);
+                    printTable([{ column: 'Warnings', field: 'message' }], response.data.warnings.map(w => ({ message: w })));
+                }
             }).catch((e) => {
                 printError(`Failed to deploy campaign: ${e.status} ${e.message}`, options);
             });
@@ -152,7 +157,12 @@ module.exports.UndeployCampaignCommand = class UndeployCampaignCommand {
             cli.undeployCampaign(options.project || profile.project, profile.token, campaignName).then((response) => {
                 if (response.success === false) throw response;
                 const output = _.get(response, 'data.message') || JSON.stringify(response.data || response, null, 2);
-                printSuccess(output, options);
+                if (!response.data.warnings || response.data.warnings.length === 0) {
+                    printSuccess(output, options);
+                } else {
+                    printError('Campaign undeployed with warnings', options, false);
+                    printTable([{ column: 'Warnings', field: 'message' }], response.data.warnings.map(w => ({ message: w })));
+                }
             }).catch((e) => {
                 printError(`Failed to undeploy campaign: ${e.status} ${e.message}`, options);
             });
