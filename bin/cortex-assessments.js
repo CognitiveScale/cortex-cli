@@ -100,7 +100,7 @@ program
     .option('--title [title]', 'Assessment title')
     .option('--description [description]', 'Assessment description')
     .option('--scope [projects]', 'Assessment scope projects (comma separated values)')
-    .option('--component [Cortex component name]', 'Cortex component name')
+    .option('--component [Cortex component name]', 'Cortex component name (case insensitive regex/substring match)')
     .option('--type [Cortex component types]', 'Assessment scope component types (comma separated values)')
     .option('--overwrite [boolean]', 'Overwrite existing assessment, if exists')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
