@@ -310,6 +310,48 @@ module.exports = class Catalog {
         });
     }
 
+    undeployCampaign(projectId, token, campaign) {
+        checkProject(projectId);
+        const endpoint = `${this.endpoints.campaigns(projectId)}${campaign}/undeploy`;
+        debug('undeployCampaign() => %s', endpoint);
+        return got
+            .get(endpoint, {
+                headers: { Authorization: `Bearer ${token}` },
+                'user-agent': getUserAgent(),
+            })
+            .json()
+            .then(res => ({ success: true, data: res }))
+            .catch(err => constructError(err));
+    }
+
+    deployCampaign(projectId, token, campaign) {
+        checkProject(projectId);
+        const endpoint = `${this.endpoints.campaigns(projectId)}${campaign}/deploy`;
+        debug('deployCampaign() => %s', endpoint);
+        return got
+            .get(endpoint, {
+                headers: { Authorization: `Bearer ${token}` },
+                'user-agent': getUserAgent(),
+            })
+            .json()
+            .then(res => ({ success: true, data: res }))
+            .catch(err => constructError(err));
+    }
+
+    undeployMission(projectId, token, campaign, mission) {
+        checkProject(projectId);
+        const endpoint = `${this.endpoints.campaigns(projectId)}${campaign}/missions/${mission}/undeploy`;
+        debug('undeployMissions() => %s', endpoint);
+        return got
+            .get(endpoint, {
+                headers: { Authorization: `Bearer ${token}` },
+                'user-agent': getUserAgent(),
+            })
+            .json()
+            .then(res => ({ success: true, data: res }))
+            .catch(err => constructError(err));
+    }
+
     listMissions(projectId, token, campaign) {
         checkProject(projectId);
         const endpoint = `${this.endpoints.campaigns(projectId)}${campaign}/missions`;

@@ -112,6 +112,91 @@ module.exports.ImportCampaignCommand = class ImportCampaignCommand {
     }
 };
 
+module.exports.DeployCampaignCommand = class DeployCampaignCommand {
+    constructor(program) {
+        this.program = program;
+    }
+
+    execute(campaignName, cmd) {
+        const options = cmd.opts();
+        const profile = loadProfile(options.profile);
+        debug('%s.executeDeployCampaignCommand(%s)', profile.name, campaignName);
+        const cli = new Catalog(profile.url);
+
+        try {
+            cli.deployCampaign(options.project || profile.project, profile.token, campaignName).then((response) => {
+                if (response.success === false) throw response;
+                const output = _.get(response, 'data.message') || JSON.stringify(response.data || response, null, 2);
+                if (!response.data.warnings || response.data.warnings.length === 0) {
+                    printSuccess(output, options);
+                } else {
+                    printError('Campaign deployed with warnings', options, false);
+                    printTable([{ column: 'Warnings', field: 'message' }], response.data.warnings.map(w => ({ message: w })));
+                }
+            }).catch((e) => {
+                printError(`Failed to deploy campaign: ${e.status} ${e.message}`, options);
+            });
+        } catch (err) {
+            printError(`Failed to deploy campaign: ${err.status} ${err.message}`, options);
+        }
+    }
+};
+
+module.exports.UndeployCampaignCommand = class UndeployCampaignCommand {
+    constructor(program) {
+        this.program = program;
+    }
+
+    execute(campaignName, cmd) {
+        const options = cmd.opts();
+        const profile = loadProfile(options.profile);
+        debug('%s.executeUndeployCampaignCommand(%s)', profile.name, campaignName);
+        const cli = new Catalog(profile.url);
+
+        try {
+            cli.undeployCampaign(options.project || profile.project, profile.token, campaignName).then((response) => {
+                if (response.success === false) throw response;
+                const output = _.get(response, 'data.message') || JSON.stringify(response.data || response, null, 2);
+                if (!response.data.warnings || response.data.warnings.length === 0) {
+                    printSuccess(output, options);
+                } else {
+                    printError('Campaign undeployed with warnings', options, false);
+                    printTable([{ column: 'Warnings', field: 'message' }], response.data.warnings.map(w => ({ message: w })));
+                }
+            }).catch((e) => {
+                printError(`Failed to undeploy campaign: ${e.status} ${e.message}`, options);
+            });
+        } catch (err) {
+            printError(`Failed to undeploy campaign: ${err.status} ${err.message}`, options);
+        }
+    }
+};
+
+module.exports.UndeployMissionCommand = class UndeployMissionCommand {
+    constructor(program) {
+        this.program = program;
+    }
+
+    execute(campaignName, missionName, cmd) {
+        const options = cmd.opts();
+        const profile = loadProfile(options.profile);
+        debug('%s.executeUndeployMissionCommand(%s)', profile.name, missionName);
+        const cli = new Catalog(profile.url);
+
+        try {
+            cli.undeployMission(options.project || profile.project, profile.token, campaignName, missionName).then((response) => {
+                if (response.success === false) throw response;
+                const output = _.get(response, 'data.message') || JSON.stringify(response.data || response, null, 2);
+                printSuccess(output, options);
+            }).catch((e) => {
+                printError(`Failed to undeploy mission: ${e.status} ${e.message}`, options);
+            });
+        } catch (err) {
+            printError(`Failed to undeploy mission: ${err.status} ${err.message}`, options);
+        }
+    }
+};
+
 module.exports.ListMissionsCommand = class ListMissionsCommand {
     constructor(program) {
         this.program = program;
