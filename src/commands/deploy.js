@@ -160,7 +160,7 @@ module.exports.DeployCampaignCommand = class {
         const filepaths = {};
         const promises = [];
 
-        yauzl.open('x.zip', { lazyEntries: true }, (err, zipfile) => {
+        yauzl.open(`${campaignName}.zip`, { lazyEntries: true }, (err, zipfile) => {
             if (err) {
                 throw err;
             }
