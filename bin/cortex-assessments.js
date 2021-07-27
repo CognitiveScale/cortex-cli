@@ -57,7 +57,7 @@ program
     .storeOptionsAsProperties(false)
     .requiredOption('--scope [project]', 'project name of the resource')
     .requiredOption('--name [Cortex component name]', 'Cortex component name')
-    .requiredOption('--type [Cortex component types]', 'Cortex resource type')
+    .requiredOption('--type [Cortex component type]', 'Cortex resource type')
     .option('--no-compat', 'Ignore API compatibility checks')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')

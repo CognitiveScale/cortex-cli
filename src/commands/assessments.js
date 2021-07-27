@@ -111,9 +111,9 @@ module.exports.DependencyTreeCommand = class {
                     printSuccess(JSON.stringify(response, null, 2), options);
                 } else {
                     const tableSpec = [
-                        { column: 'Name', field: 'resourceName' },
-                        { column: 'Title', field: 'resourceTitle' },
-                        { column: 'Resource Type', field: 'resourceType' },
+                        { column: 'Name', field: 'name' },
+                        { column: 'Title', field: 'title' },
+                        { column: 'Resource Type', field: 'type' },
                     ];
                     printTable(tableSpec, response.data);
                 }

@@ -29,7 +29,7 @@ module.exports = class Assessments {
 
     getDependenciesOfResource(token, project, type, name) {
         const url = `${this.endpointV4}/dependencies/${project}/${type}/${encodeURIComponent(name)}`;
-        debug('queryResources => %s', url);
+        debug('dependencyTree => %s', url);
         return got
             .get(url, {
                 headers: { Authorization: `Bearer ${token}` },
