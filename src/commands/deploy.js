@@ -49,7 +49,7 @@ function updateManifest(filepaths) {
         const entries = [..._.get(manifest, `cortex.${kind}`, []), ...filepaths[type]];
         _.set(manifest, `cortex.${kind}`, _.uniq(entries));
     });
-    return manifest;
+    writeToFile(jsonToYaml(manifest), manifestFile);
 }
 
 async function addDependencies(url, token, project, resourceType, resourceName) {
@@ -59,8 +59,7 @@ async function addDependencies(url, token, project, resourceType, resourceName) 
     writeToFile(JSON.stringify(dependencies), depsFilePath);
     const depsManifest = {};
     depsManifest[`_dependencies.${resourceType}.${resourceName}`] = [depsFilePath];
-    const manifest = updateManifest(depsManifest);
-    writeToFile(jsonToYaml(manifest), manifestFile);
+    updateManifest(depsManifest);
 }
 
 /**
@@ -115,8 +114,7 @@ module.exports.DeploySnapshotCommand = class {
         });
 
         Promise.all(promises).then((result) => {
-            const manifest = updateManifest('snapshots', result);
-            writeToFile(jsonToYaml(manifest), manifestFile);
+            updateManifest('snapshots', result);
             printSuccess(`Successfully generated manifest file ${manifestFile}`);
         });
     }
@@ -178,8 +176,7 @@ module.exports.DeployCampaignCommand = class {
             zipfile.once('end', async () => {
                 await addDependencies(profile.url, profile.token, project, 'Campaign', campaignName);
                 Promise.all(promises).then(() => {
-                    const manifest = updateManifest(filepaths);
-                    writeToFile(jsonToYaml(manifest), manifestFile);
+                    updateManifest(filepaths);
                     printSuccess(`Successfully updated manifest file ${manifestFile}`);
                 });
                 deleteFile(`${campaignName}.zip`);
@@ -202,11 +199,12 @@ module.exports.DeployConnectionCommand = class {
         connection.describeConnection(project, profile.token, connectionName).then(async (response) => {
             if (response.success) {
                 const result = filterObject(response.result, options);
-                const connectionDesc = JSON.stringify(result, null, 2);
+                const connectionDesc = cleanInternalFields(result);
                 const filepath = path.join(artifactsDir, 'connections', `${connectionName}.json`);
                 writeToFile(connectionDesc, filepath);
                 updateManifest({ connection: [filepath] });
                 await addDependencies(profile.url, profile.token, project, 'Connection', connectionName);
+                printSuccess(`Connection ${connectionName} exported successfully`);
             } else {
                 printError(`Failed to export connection ${connectionName}: ${response.message}`, options);
             }

@@ -89,7 +89,7 @@ program
     .option('--params-file [paramsFile]', 'A file containing either JSON or YAML formatted params')
     .action(withCompatibilityCheck((campaignName, missionName, options) => {
         try {
-            new InvokeAgentServiceCommand(program).execute(missionName, 'router_service', options);
+            new InvokeAgentServiceCommand(program).execute(missionName, 'cohort_manager_service', options);
         } catch (err) {
             console.error(chalk.red(err.message));
         }
