@@ -80,11 +80,11 @@ module.exports = class Assessments {
                 headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
                 'user-agent': getUserAgent(),
                 body: JSON.stringify({
-                    name: encodeURIComponent(name),
+                    name,
                     title,
                     description,
                     scope,
-                    componentName: encodeURIComponent(componentName),
+                    componentName,
                     componentTypes,
                     overwrite,
                 }),
