@@ -245,8 +245,10 @@ module.exports.formatValidationPath = (p) => {
     return res;
 };
 
+// connections get returns createdAt (not prefixed by _) field that cause saving exported connection to fail. Hence removing them manually
+const systemFields = ['createdAt', 'updatedAt', 'createdBy', 'updatedBy'];
 module.exports.cleanInternalFields = jsobj => JSON.stringify(jsobj, (a, obj) => {
-        if (a.startsWith('_')) {
+        if (a.startsWith('_') || systemFields.includes(a)) {
             return undefined;
         }
         return obj;
