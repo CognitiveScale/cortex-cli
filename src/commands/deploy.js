@@ -114,7 +114,7 @@ module.exports.DeploySnapshotCommand = class {
         });
 
         Promise.all(promises).then((result) => {
-            updateManifest('snapshots', result);
+            updateManifest({ snapshots: result });
             printSuccess(`Successfully generated manifest file ${manifestFile}`);
         });
     }
@@ -158,7 +158,7 @@ module.exports.DeployCampaignCommand = class {
         const filepaths = {};
         const promises = [];
 
-        yauzl.open('x.zip', { lazyEntries: true }, (err, zipfile) => {
+        yauzl.open(`${campaignName}.zip`, { lazyEntries: true }, (err, zipfile) => {
             if (err) {
                 throw err;
             }
