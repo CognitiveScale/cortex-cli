@@ -25,10 +25,11 @@ const { constructError, getUserAgent } = require('../commands/utils');
 module.exports = class Assessments {
     constructor(cortexUrl) {
         this.endpointV4 = `${cortexUrl}/fabric/v4/impactassessment`;
+        this.endpointApiV4 = `${cortexUrl}/fabric/v4/dependencies`;
     }
 
     getDependenciesOfResource(token, project, type, name) {
-        const url = `${this.endpointV4}/dependencies/${project}/${type}/${encodeURIComponent(name)}`;
+        const url = `${this.endpointApiV4}/tree/${project}/${type}/${encodeURIComponent(name)}`;
         debug('dependencyTree => %s', url);
         return got
             .get(url, {
