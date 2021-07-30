@@ -189,7 +189,19 @@ module.exports.GetActivationCommand = class {
         agents.getActivation(project || profile.project, profile.token, activationId, verbose, report).then((response) => {
             if (response.success) {
                 const result = filterObject(response.result, options);
-                printSuccess(JSON.stringify(result, null, 2), options);
+                if (options.report && !options.json) {
+                    const tableSpec = [
+                        { column: 'Name', field: 'name', width: 40 },
+                        { column: 'Type', field: 'type', width: 20 },
+                        { column: 'Status', field: 'status', width: 20 },
+                        { column: 'Elapsed (ms)', field: 'elapsed', width: 30 },
+                    ];
+                    printSuccess(`Status: ${result.status}`);
+                    printSuccess(`Elapsed Time (ms): ${result.elapsed}`);    
+                    printTable(tableSpec, result.transits);
+                } else {
+                    return printSuccess(JSON.stringify(result, null, 2), options);
+                }
             } else {
                 printError(`Failed to get activation ${activationId}: ${response.message}`, options);
             }
