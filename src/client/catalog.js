@@ -256,11 +256,11 @@ module.exports = class Catalog {
                     if (response.statusCode === 200 || response.statusCode === 201) {
                         const path = `./${outputFileName || `${campaignName}.amp`}`;
                         const file = fs.createWriteStream(path);
-                        response.pipe(file);
-                        resolve(path);
+                        response.pipe(file).on('close', resolve).on('error', reject);
                         printSuccess(`Successfully exported Campaign ${campaignName} from project ${projectId} to file ${path}`);
                     } else {
                         printError(`Failed to export Campaign ${campaignName} from project ${projectId}. Error: [${response.statusCode}] ${response.statusMessage}`);
+                        reject({ status: response.statusCode });
                     }
                 }).on('error', (e) => {
                     reject(e);
