@@ -200,7 +200,7 @@ module.exports.GetActivationCommand = class {
                     printSuccess(`Elapsed Time (ms): ${result.elapsed}`);    
                     printTable(tableSpec, result.transits);
                 } else {
-                    return printSuccess(JSON.stringify(result, null, 2), options);
+                    printSuccess(JSON.stringify(result, null, 2), options);
                 }
             } else {
                 printError(`Failed to get activation ${activationId}: ${response.message}`, options);
