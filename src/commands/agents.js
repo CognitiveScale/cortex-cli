@@ -192,6 +192,7 @@ module.exports.GetActivationCommand = class {
                 if (options.report && !options.json) {
                     const tableSpec = [
                         { column: 'Name', field: 'name', width: 40 },
+                        { column: 'Title', field: 'title', width: 40 },
                         { column: 'Type', field: 'type', width: 20 },
                         { column: 'Status', field: 'status', width: 20 },
                         { column: 'Elapsed (ms)', field: 'elapsed', width: 30 },
