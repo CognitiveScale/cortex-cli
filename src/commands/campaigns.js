@@ -65,7 +65,7 @@ module.exports.DescribeCampaignCommand = class DescribeCampaignCommand {
         const cli = new ApiServerClient(profile.url);
 
         try {
-                const response = await cli.getCampaign(options.project || profile.project, profile.token, campaignName);
+            const response = await cli.getCampaign(options.project || profile.project, profile.token, campaignName);
             const result = filterObject(response, options);
             printSuccess(JSON.stringify(result, null, 2), options);
         } catch (err) {
@@ -84,9 +84,12 @@ module.exports.ExportCampaignCommand = class ExportCampaignCommand {
         const profile = loadProfile(options.profile);
         debug('%s.executeExportCampaignCommand(%s)', profile.name, campaignName);
         const cli = new Catalog(profile.url);
-
+        const project = options.project || profile.project;
+        const path = `./${options.o || `${campaignName}.amp`}`;
         try {
-            cli.exportCampaign(options.project || profile.project, profile.token, campaignName, options.deployable, options.o);
+            cli.exportCampaign(project, profile.token, campaignName, options.deployable, path)
+                .then(() => printSuccess(`Successfully exported Campaign ${campaignName} from project ${project} to file ${path}`))
+                .catch(e => printError(`Failed to export Campaign ${campaignName} from project ${project}. Error: ${e}`));
         } catch (err) {
             printError(`Failed to export campaign: ${err.status} ${err.message}`, options);
         }
