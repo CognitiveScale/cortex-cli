@@ -30,11 +30,11 @@ const {
     printSuccess, printError, parseObject, printTable,
 } = require('./utils');
 
-const handleTable = (spec, data, noDataMessage) => {
-  if (data.length === 0) {
+const handleTable = (spec, data, transformer, noDataMessage) => {
+  if (!data || data.length === 0) {
       printSuccess(noDataMessage);
   } else {
-      printTable(spec, data);
+      printTable(spec, data, transformer);
   }
 };
 
@@ -61,7 +61,7 @@ module.exports.ListResourcesCommand = class {
                         { column: 'Resource Type', field: 'resourceType' },
                         { column: 'Project', field: '_projectId' },
                     ];
-                    handleTable(tableSpec, response.data, 'No matching resources found');
+                    handleTable(tableSpec, response.data, null, 'No matching resources found');
                 }
             })
             .catch((err) => {
@@ -92,7 +92,7 @@ module.exports.ListResourceTypesCommand = class {
                     const tableSpec = [
                         { column: 'Resource Type', field: 'type' },
                     ];
-                    handleTable(tableSpec, types, 'Resource Types not available');
+                    handleTable(tableSpec, types, null, 'Resource Types not available');
                 }
             })
             .catch((err) => {
@@ -123,7 +123,7 @@ module.exports.DependencyTreeCommand = class {
                         { column: 'Title', field: 'title' },
                         { column: 'Resource Type', field: 'type' },
                     ];
-                    handleTable(tableSpec, response.data, 'No downstream dependency found');
+                    handleTable(tableSpec, response.data, null, 'No downstream dependency found');
                 }
             })
             .catch((err) => {
@@ -290,7 +290,7 @@ module.exports.ListAssessmentReportCommand = class {
                         { column: 'Author', field: '_createdBy' },
                     ];
                     response.data.forEach(r => r.summary = JSON.stringify(Object.fromEntries(r.summary.map(item => [item.type, item.count]))));
-                    handleTable(tableSpec, response.data, o => ({ ...o, _updatedAt: o._updatedAt ? moment(o._updatedAt).fromNow() : '-' }), 'No report found for Assessment');
+                    handleTable(tableSpec, response.data, o => ({ ...o, _updatedAt: o._updatedAt ? moment(o._updatedAt).fromNow() : '-' }), `No report found for the Assessment ${name}`);
                 }
             })
             .catch((err) => {
@@ -334,7 +334,7 @@ module.exports.GetAssessmentReportCommand = class {
                         { column: 'Resource Type', field: 'type' },
                         { column: 'Project', field: 'projectId' },
                     ];
-                    handleTable(tableSpec, _.sortBy(flattenRefs, ['projectId', 'type']), 'No upstream dependencies found');
+                    handleTable(tableSpec, _.sortBy(flattenRefs, ['projectId', 'type']), null, 'No upstream dependencies found');
                 }
             })
             .catch((err) => {

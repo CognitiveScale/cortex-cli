@@ -115,7 +115,7 @@ module.exports.DeploySnapshotCommand = class {
 
         Promise.all(promises).then((result) => {
             updateManifest({ snapshots: result });
-            printSuccess(`Successfully generated manifest file ${manifestFile}`);
+            printSuccess(`Successfully updated manifest file ${manifestFile}`);
         });
     }
 };
@@ -177,7 +177,7 @@ module.exports.DeployCampaignCommand = class {
                 await addDependencies(profile.url, profile.token, project, 'Campaign', campaignName);
                 Promise.all(promises).then(() => {
                     updateManifest(filepaths);
-                    printSuccess(`Successfully updated manifest file ${manifestFile}`);
+                    printSuccess(`Successfully exported Campaign ${campaignName} in ${artifactsDir} and updated manifest file ${manifestFile}`);
                 });
                 deleteFile(`${campaignName}.zip`);
             });
@@ -204,7 +204,7 @@ module.exports.DeployConnectionCommand = class {
                 writeToFile(connectionDesc, filepath);
                 updateManifest({ connection: [filepath] });
                 await addDependencies(profile.url, profile.token, project, 'Connection', connectionName);
-                printSuccess(`Connection ${connectionName} exported successfully`);
+                printSuccess(`Successfully exported Connection ${connectionName} in ${artifactsDir} and updated manifest file ${manifestFile}`);
             } else {
                 printError(`Failed to export connection ${connectionName}: ${response.message}`, options);
             }
