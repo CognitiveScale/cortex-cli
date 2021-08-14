@@ -20,7 +20,7 @@ const http = require('https');
 const fs = require('fs');
 const { got } = require('./apiutils');
 const {
- constructError, formatAllServiceInputParameters, checkProject, getUserAgent, printSuccess, printError,
+ constructError, formatAllServiceInputParameters, checkProject, getUserAgent, printSuccess, printError, printTable,
 } = require('../commands/utils');
 
 const createEndpoints = baseUri => ({
@@ -249,19 +249,23 @@ module.exports = class Catalog {
         const url = `${this.endpoints.campaigns(projectId)}${campaignName}/export?deployable=${deployable}`;
         debug('exportCampaign(%s) => %s', campaignName, url);
 
-        return http.get(url,
-            { headers: { Authorization: `Bearer ${token}` } },
-            (response) => {
-            if (response.statusCode === 200 || response.statusCode === 201) {
-                const path = `./${outputFileName || `${campaignName}.amp`}`;
-                const file = fs.createWriteStream(path);
-                response.pipe(file);
-                printSuccess(`Successfully exported Campaign ${campaignName} from project ${projectId} to file ${path}`);
-            } else {
-                printError(`Failed to export Campaign ${campaignName} from project ${projectId}. Error: [${response.statusCode}] ${response.statusMessage}`);
-            }
-        }).on('error', (e) => {
-            printError(e);
+        return new Promise((resolve, reject) => {
+            http.get(url,
+                { headers: { Authorization: `Bearer ${token}` } },
+                (response) => {
+                    if (response.statusCode === 200 || response.statusCode === 201) {
+                        const path = `./${outputFileName || `${campaignName}.amp`}`;
+                        const file = fs.createWriteStream(path);
+                        response.pipe(file).on('close', resolve).on('error', reject);
+                        printSuccess(`Successfully exported Campaign ${campaignName} from project ${projectId} to file ${path}`);
+                    } else {
+                        printError(`Failed to export Campaign ${campaignName} from project ${projectId}. Error: [${response.statusCode}] ${response.statusMessage}`);
+                        reject({ status: response.statusCode });
+                    }
+                }).on('error', (e) => {
+                    reject(e);
+                    printError(e);
+                });
         });
     }
 
@@ -285,17 +289,67 @@ module.exports = class Catalog {
             method: 'POST',
             headers,
         });
+        form.pipe(req);
+        req.on('response', (response) => {
+            if (response.statusCode === 200 || response.statusCode === 201) {
+                response.setEncoding('utf-8');
+                response.on('data', (data) => {
+                    const importReport = JSON.parse(data);
+                    if (!importReport.warnings || importReport.warnings.length === 0) {
+                        printSuccess('Campaign imported successfully');
+                    } else {
+                        printSuccess('Campaign imported with warnings');
+                        printTable([{ column: 'Warnings', field: 'message' }], importReport.warnings.map(w => ({ message: w })));
+                    }
+                });
+            } else {
+                printError(`Campaign file ${filepath} import failed with error: [${response.statusCode}] ${response.statusMessage}`);
+            }
+        }).on('error', (err) => {
+            printError(err);
+        });
+    }
 
-        form.pipe(req)
-            .on('response', (response) => {
-                if (response.statusCode === 200 || response.statusCode === 201) {
-                    printSuccess('Campaign imported successfully');
-                } else {
-                    printError(`Campaign file ${filepath} import failed with error: [${response.statusCode}] ${response.statusMessage}`);
-                }
-            }).on('error', (err) => {
-                printError(err);
-            });
+    undeployCampaign(projectId, token, campaign) {
+        checkProject(projectId);
+        const endpoint = `${this.endpoints.campaigns(projectId)}${campaign}/undeploy`;
+        debug('undeployCampaign() => %s', endpoint);
+        return got
+            .get(endpoint, {
+                headers: { Authorization: `Bearer ${token}` },
+                'user-agent': getUserAgent(),
+            })
+            .json()
+            .then(res => ({ success: true, data: res }))
+            .catch(err => constructError(err));
+    }
+
+    deployCampaign(projectId, token, campaign) {
+        checkProject(projectId);
+        const endpoint = `${this.endpoints.campaigns(projectId)}${campaign}/deploy`;
+        debug('deployCampaign() => %s', endpoint);
+        return got
+            .get(endpoint, {
+                headers: { Authorization: `Bearer ${token}` },
+                'user-agent': getUserAgent(),
+            })
+            .json()
+            .then(res => ({ success: true, data: res }))
+            .catch(err => constructError(err));
+    }
+
+    undeployMission(projectId, token, campaign, mission) {
+        checkProject(projectId);
+        const endpoint = `${this.endpoints.campaigns(projectId)}${campaign}/missions/${mission}/undeploy`;
+        debug('undeployMissions() => %s', endpoint);
+        return got
+            .get(endpoint, {
+                headers: { Authorization: `Bearer ${token}` },
+                'user-agent': getUserAgent(),
+            })
+            .json()
+            .then(res => ({ success: true, data: res }))
+            .catch(err => constructError(err));
     }
 
     listMissions(projectId, token, campaign) {

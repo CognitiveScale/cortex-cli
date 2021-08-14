@@ -162,14 +162,7 @@ module.exports.DownloadContent = class DownloadContent {
         const content = new Content(profile.url);
         const showProgress = !!options.progress;
 
-        content.downloadContent(options.project || profile.project, profile.token, contentKey, showProgress).then((response) => {
-            if (response.success) {
-                // messages need to be on stderr as content is streamed to stdout
-                console.error(response.message);
-            } else {
-                printError(`Failed to download content: ${response.status} ${response.message}`, options);
-            }
-        }).catch((err) => {
+        content.downloadContent(options.project || profile.project, profile.token, contentKey, showProgress).catch((err) => {
                 debug(err);
                 printError(`Failed to download content: ${err.status} ${err.message}`, options);
         });

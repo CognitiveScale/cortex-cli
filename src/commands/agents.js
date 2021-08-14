@@ -184,12 +184,25 @@ module.exports.GetActivationCommand = class {
     execute(activationId, options) {
         const profile = loadProfile(options.profile);
         debug('%s.getActivation(%s)', profile.name, activationId);
-        const { verbose, project } = options;
+        const { report, verbose, project } = options;
         const agents = new Agents(profile.url);
-        agents.getActivation(project || profile.project, profile.token, activationId, verbose).then((response) => {
+        agents.getActivation(project || profile.project, profile.token, activationId, verbose, report).then((response) => {
             if (response.success) {
                 const result = filterObject(response.result, options);
-                printSuccess(JSON.stringify(result, null, 2), options);
+                if (options.report && !options.json) {
+                    const tableSpec = [
+                        { column: 'Name', field: 'name', width: 40 },
+                        { column: 'Title', field: 'title', width: 40 },
+                        { column: 'Type', field: 'type', width: 20 },
+                        { column: 'Status', field: 'status', width: 20 },
+                        { column: 'Elapsed (ms)', field: 'elapsed', width: 30 },
+                    ];
+                    printSuccess(`Status: ${result.status}`);
+                    printSuccess(`Elapsed Time (ms): ${result.elapsed}`);    
+                    printTable(tableSpec, result.transits);
+                } else {
+                    printSuccess(JSON.stringify(result, null, 2), options);
+                }
             } else {
                 printError(`Failed to get activation ${activationId}: ${response.message}`, options);
             }
@@ -205,9 +218,12 @@ module.exports.ListActivationsCommand = class {
         this.program = program;
     }
 
-    execute(agentName, options) {
+    execute(options) {
+        if (_.isEmpty(options.agentName) && _.isEmpty(options.correlationId) && _.isEmpty(options.status)) {
+            printError('Either --agentName, --correlationId, or --status must be provided', options);
+        }
         const profile = loadProfile(options.profile);
-        debug('%s.listActivations(%s)', profile.name, agentName);
+        debug('%s.listActivations(%s)', profile.name);
 
         const agents = new Agents(profile.url);
         // TODO validate param types?
@@ -216,10 +232,12 @@ module.exports.ListActivationsCommand = class {
         if (options.startAfter) queryParams.startAfter = options.startAfter;
         if (options.endBefore) queryParams.endBefore = options.endBefore;
         if (options.endAfter) queryParams.endAfter = options.endAfter;
-        if (options.status) queryParams.status = options.status;
-        // TODO limit + skip
+        if (options.status) queryParams.status = _.toUpper(options.status);
         if (options.correlationId) queryParams.correlationId = options.correlationId;
-        queryParams.agentName = agentName;
+        if (options.agentName) queryParams.agentName = options.agentName;
+        if (options.limit) queryParams.limit = options.limit;
+        if (options.offset) queryParams.offset = options.offset;
+        if (options.sort) queryParams.sort = _.toLower(options.sort);
 
         agents.listActivations(options.project || profile.project, profile.token, queryParams).then((response) => {
             if (response.success) {
@@ -230,16 +248,18 @@ module.exports.ListActivationsCommand = class {
                     printSuccess(JSON.stringify(result, null, 2), options);
                 } else {
                     const tableSpec = [
-                        { column: 'Activation Id', field: 'activationId', width: 38 },
+                        { column: 'Activation Id', field: 'activationId', width: 40 },
+                        { column: 'Status', field: 'status', width: 20 },
+                        { column: 'Started', field: 'start', width: 65 },
                     ];
-                    printTable(tableSpec, _.map(result, r => ({ activationId: r })));
+                    printTable(tableSpec, _.map(result, o => ({ ...o, start: o.start ? moment(o.start).fromNow() : '-' })));
                 }
             } else {
-                printError(`Failed to list activations for agent "${agentName}": ${response.message}`, options);
+                printError(`Failed to list activations: ${response.message}`, options);
             }
         })
             .catch((err) => {
-                printError(`Failed to list activations for agent "${agentName}": ${err.status} ${err.message}`, options);
+                printError(`Failed to list activations: ${err.status} ${err.message}`, options);
             });
     }
 };

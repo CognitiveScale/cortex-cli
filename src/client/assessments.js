@@ -14,14 +14,31 @@
  * limitations under the License.
  */
 const querystring = require('querystring');
+const { pipeline } = require('stream');
 const { createWriteStream } = require('fs');
 const debug = require('debug')('cortex:cli');
 const { got } = require('./apiutils');
+const { printSuccess } = require('../commands/utils');
+const { printError } = require('../commands/utils');
 const { constructError, getUserAgent } = require('../commands/utils');
 
 module.exports = class Assessments {
     constructor(cortexUrl) {
         this.endpointV4 = `${cortexUrl}/fabric/v4/impactassessment`;
+        this.endpointApiV4 = `${cortexUrl}/fabric/v4/dependencies`;
+    }
+
+    getDependenciesOfResource(token, project, type, name) {
+        const url = `${this.endpointApiV4}/tree/${project}/${type}/${encodeURIComponent(name)}`;
+        debug('dependencyTree => %s', url);
+        return got
+            .get(url, {
+                headers: { Authorization: `Bearer ${token}` },
+                'user-agent': getUserAgent(),
+            })
+            .json()
+            .then(res => res)
+            .catch(err => constructError(err));
     }
 
     queryResources(token, name, projectId, type, skip, limit) {
@@ -56,7 +73,7 @@ module.exports = class Assessments {
             .catch(err => constructError(err));
     }
 
-    createAssessment(token, name, title, description, scope, componentName, componentTypes) {
+    createAssessment(token, name, title, description, scope, componentName, componentTypes, overwrite) {
         const url = `${this.endpointV4}/assessments`;
         debug('createAssessment => %s', url);
         return got
@@ -70,6 +87,7 @@ module.exports = class Assessments {
                     scope,
                     componentName,
                     componentTypes,
+                    overwrite,
                 }),
             }).json()
             .then(res => res)
@@ -89,7 +107,7 @@ module.exports = class Assessments {
     }
 
     getAssessment(token, name) {
-        const url = `${this.endpointV4}/assessments/${name}`;
+        const url = `${this.endpointV4}/assessments/${encodeURIComponent(name)}`;
         debug('getAssessment => %s', url);
         return got
             .get(url, {
@@ -101,7 +119,7 @@ module.exports = class Assessments {
     }
 
     deleteAssessment(token, name) {
-        const url = `${this.endpointV4}/assessments/${name}`;
+        const url = `${this.endpointV4}/assessments/${encodeURIComponent(name)}`;
         debug('deleteAssessment => %s', url);
         return got
             .delete(url, {
@@ -113,7 +131,7 @@ module.exports = class Assessments {
     }
 
     runAssessment(token, name) {
-        const url = `${this.endpointV4}/assessments/${name}/run`;
+        const url = `${this.endpointV4}/assessments/${encodeURIComponent(name)}/run`;
         debug('runAssessment => %s', url);
         return got
             .post(url, {
@@ -125,7 +143,7 @@ module.exports = class Assessments {
     }
 
     listAssessmentReports(token, name) {
-        const url = `${this.endpointV4}/assessments/${name}/reports`;
+        const url = `${this.endpointV4}/assessments/${encodeURIComponent(name)}/reports`;
         debug('listAssessmentReports => %s', url);
         return got
             .get(url, {
@@ -137,7 +155,7 @@ module.exports = class Assessments {
     }
 
     getAssessmentReport(token, name, reportId) {
-        const url = `${this.endpointV4}/assessments/${name}/reports/${reportId}`;
+        const url = `${this.endpointV4}/assessments/${encodeURIComponent(name)}/reports/${encodeURIComponent(reportId)}`;
         debug('getAssessmentReport => %s', url);
         return got
             .get(url, {
@@ -149,13 +167,20 @@ module.exports = class Assessments {
     }
 
     exportAssessmentReport(token, name, reportId, types) {
+        const options = { color: 'on' };
+        const file = `${reportId.split('/').pop()}.csv`;
         const filter = types && types.trim() ? `?components=${types.trim()}` : '';
-        const url = `${this.endpointV4}/assessments/${name}/reports/${reportId}/export${filter}`;
+        const url = `${this.endpointV4}/assessments/${encodeURIComponent(name)}/reports/${encodeURIComponent(reportId)}/export${filter}`;
         debug('exportAssessmentReport => %s', url);
-        got.stream(url, {
-                headers: { Authorization: `Bearer ${token}` },
-                'user-agent': getUserAgent(),
-            }).pipe(createWriteStream(`${reportId}.csv`), { end: true });
-        return Promise.resolve({ file: `${reportId}.csv` });
+
+        const rs = got.stream(url, { headers: { Authorization: `Bearer ${token}` }, 'user-agent': getUserAgent() });
+        pipeline(rs, createWriteStream(file), (e) => {
+            if (e) {
+                const err = constructError(e);
+                printError(`Failed to export assessment "${name}" report "${reportId}": ${err.status} ${err.message}`, options);
+            } else {
+                printSuccess(`Report exported to file "${file}"`, options);
+            }
+        });
     }
 };

@@ -52,7 +52,7 @@ module.exports = class Agents {
             .catch(err => constructError(err));
     }
 
-    getActivation(projectId, token, activationId, verbose) {
+    getActivation(projectId, token, activationId, verbose, report) {
         checkProject(projectId);
         const endpoint = `${this.endpointV4(projectId)}/activations/${activationId}`;
         debug('getActivation(%s) => %s', activationId, endpoint);
@@ -63,6 +63,9 @@ module.exports = class Agents {
         if (verbose) {
             opts.searchParams = { verbose: true };
         }
+        if (report) {
+            opts.searchParams = { report: true };
+        }
         return got
             .get(endpoint, opts).json()
             .then(result => ({ success: true, result }))
@@ -71,7 +74,7 @@ module.exports = class Agents {
 
     listActivations(projectId, token, params) {
         checkProject(projectId);
-        const endpoint = `${this.endpointV4(projectId)}/agentinvoke/${params.agentName}/activations`;
+        const endpoint = `${this.endpointV4(projectId)}/activations`;
         debug('listActivations(%s) => %s', params.agentName, endpoint);
         const opts = {
             headers: { Authorization: `Bearer ${token}` },
