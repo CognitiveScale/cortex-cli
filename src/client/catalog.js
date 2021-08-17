@@ -243,7 +243,7 @@ module.exports = class Catalog {
             .catch(err => constructError(err));
     }
 
-    exportCampaign(projectId, token, campaignName, deployable, outputFileName) {
+    exportCampaign(projectId, token, campaignName, deployable, path) {
         checkProject(projectId);
 
         const url = `${this.endpoints.campaigns(projectId)}${campaignName}/export?deployable=${deployable}`;
@@ -254,10 +254,8 @@ module.exports = class Catalog {
                 { headers: { Authorization: `Bearer ${token}` } },
                 (response) => {
                     if (response.statusCode === 200 || response.statusCode === 201) {
-                        const path = `./${outputFileName || `${campaignName}.amp`}`;
                         const file = fs.createWriteStream(path);
                         response.pipe(file).on('close', resolve).on('error', reject);
-                        printSuccess(`Successfully exported Campaign ${campaignName} from project ${projectId} to file ${path}`);
                     } else {
                         printError(`Failed to export Campaign ${campaignName} from project ${projectId}. Error: [${response.statusCode}] ${response.statusMessage}`);
                         reject({ status: response.statusCode });

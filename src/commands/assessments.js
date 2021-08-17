@@ -30,6 +30,14 @@ const {
     printSuccess, printError, parseObject, printTable,
 } = require('./utils');
 
+const handleTable = (spec, data, transformer, noDataMessage) => {
+  if (!data || data.length === 0) {
+      printSuccess(noDataMessage);
+  } else {
+      printTable(spec, data, transformer);
+  }
+};
+
 module.exports.ListResourcesCommand = class {
     constructor(program) {
         this.program = program;
@@ -53,7 +61,7 @@ module.exports.ListResourcesCommand = class {
                         { column: 'Resource Type', field: 'resourceType' },
                         { column: 'Project', field: '_projectId' },
                     ];
-                    printTable(tableSpec, response.data);
+                    handleTable(tableSpec, response.data, null, 'No matching resources found');
                 }
             })
             .catch((err) => {
@@ -84,7 +92,7 @@ module.exports.ListResourceTypesCommand = class {
                     const tableSpec = [
                         { column: 'Resource Type', field: 'type' },
                     ];
-                    printTable(tableSpec, types);
+                    handleTable(tableSpec, types, null, 'Resource Types not available');
                 }
             })
             .catch((err) => {
@@ -115,7 +123,7 @@ module.exports.DependencyTreeCommand = class {
                         { column: 'Title', field: 'title' },
                         { column: 'Resource Type', field: 'type' },
                     ];
-                    printTable(tableSpec, response.data);
+                    handleTable(tableSpec, response.data, null, 'No downstream dependency found');
                 }
             })
             .catch((err) => {
@@ -186,7 +194,7 @@ module.exports.ListAssessmentCommand = class {
                         { column: 'Modified', field: '_updatedAt' },
                         { column: 'Author', field: '_createdBy' },
                     ];
-                    printTable(tableSpec, response.data, o => ({ ...o, _updatedAt: o._updatedAt ? moment(o._updatedAt).fromNow() : '-' }));
+                    handleTable(tableSpec, response.data, o => ({ ...o, _updatedAt: o._updatedAt ? moment(o._updatedAt).fromNow() : '-' }), 'No Assessments found');
                 }
             })
             .catch((err) => {
@@ -282,7 +290,7 @@ module.exports.ListAssessmentReportCommand = class {
                         { column: 'Author', field: '_createdBy' },
                     ];
                     response.data.forEach(r => r.summary = JSON.stringify(Object.fromEntries(r.summary.map(item => [item.type, item.count]))));
-                    printTable(tableSpec, response.data, o => ({ ...o, _updatedAt: o._updatedAt ? moment(o._updatedAt).fromNow() : '-' }));
+                    handleTable(tableSpec, response.data, o => ({ ...o, _updatedAt: o._updatedAt ? moment(o._updatedAt).fromNow() : '-' }), `No report found for the Assessment ${name}`);
                 }
             })
             .catch((err) => {
@@ -326,7 +334,7 @@ module.exports.GetAssessmentReportCommand = class {
                         { column: 'Resource Type', field: 'type' },
                         { column: 'Project', field: 'projectId' },
                     ];
-                    printTable(tableSpec, _.sortBy(flattenRefs, ['projectId', 'type']));
+                    handleTable(tableSpec, _.sortBy(flattenRefs, ['projectId', 'type']), null, 'No upstream dependencies found');
                 }
             })
             .catch((err) => {
