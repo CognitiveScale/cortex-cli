@@ -141,6 +141,7 @@ program
     .option('--json', 'Output results using JSON')
     .option('--query [query]', 'A JMESPath query to use in filtering the response data.')
     .option('--agentName [string]', 'Query activations by agentName')
+    .option('--skillName [string]', 'Query activations by skillName')
     .option('--startBefore [timestamp]', 'Filters activations to include those that started before the specified timestamp.')
     .option('--startAfter [timestamp]', 'Filters activations to include those that started after the specified timestamp.')
     .option('--endBefore [timestamp]', 'Filters activations to include those that ended before the specified timestamp.')

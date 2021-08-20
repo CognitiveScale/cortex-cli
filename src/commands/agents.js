@@ -219,8 +219,11 @@ module.exports.ListActivationsCommand = class {
     }
 
     execute(options) {
-        if (_.isEmpty(options.agentName) && _.isEmpty(options.correlationId) && _.isEmpty(options.status)) {
-            printError('Either --agentName, --correlationId, or --status must be provided', options);
+        if (_.isEmpty(options.agentName) 
+            && _.isEmpty(options.skillName) 
+            && _.isEmpty(options.correlationId) 
+            && _.isEmpty(options.status)) {
+            printError('Either --agentName, --skillName, --correlationId, or --status must be provided', options);
         }
         const profile = loadProfile(options.profile);
         debug('%s.listActivations(%s)', profile.name);
@@ -235,6 +238,7 @@ module.exports.ListActivationsCommand = class {
         if (options.status) queryParams.status = _.toUpper(options.status);
         if (options.correlationId) queryParams.correlationId = options.correlationId;
         if (options.agentName) queryParams.agentName = options.agentName;
+        if (options.skillName) queryParams.skillName = options.skillName;
         if (options.limit) queryParams.limit = options.limit;
         if (options.offset) queryParams.offset = options.offset;
         if (options.sort) queryParams.sort = _.toLower(options.sort);
@@ -248,11 +252,16 @@ module.exports.ListActivationsCommand = class {
                     printSuccess(JSON.stringify(result, null, 2), options);
                 } else {
                     const tableSpec = [
+                        { column: 'Name', field: 'name', width: 30 },
                         { column: 'Activation Id', field: 'activationId', width: 40 },
                         { column: 'Status', field: 'status', width: 20 },
                         { column: 'Started', field: 'start', width: 65 },
                     ];
-                    printTable(tableSpec, _.map(result, o => ({ ...o, start: o.start ? moment(o.start).fromNow() : '-' })));
+                    printTable(tableSpec, _.map(result, o => ({
+                        ...o,
+                        name: o.agentName ? `${o.agentName} (Agent)` : o.skillName ? `${o.skillName} (Skill)` : '-',
+                        start: o.start ? moment(o.start).fromNow() : '-',
+                    })));
                 }
             } else {
                 printError(`Failed to list activations: ${response.message}`, options);
