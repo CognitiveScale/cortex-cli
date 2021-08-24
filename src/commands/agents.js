@@ -257,9 +257,20 @@ module.exports.ListActivationsCommand = class {
                         { column: 'Status', field: 'status', width: 20 },
                         { column: 'Started', field: 'start', width: 65 },
                     ];
+
+                    const genName = (o) => {
+                        if (o.agentName) {
+                            return `${o.agentName} (Agent)`;
+                        }
+                        if (o.skillName) {
+                            return `${o.skillName} (Skill)`;
+                        }
+                        return '-';
+                    };
+
                     printTable(tableSpec, _.map(result, o => ({
                         ...o,
-                        name: o.agentName ? `${o.agentName} (Agent)` : o.skillName ? `${o.skillName} (Skill)` : '-',
+                        name: genName(o),
                         start: o.start ? moment(o.start).fromNow() : '-',
                     })));
                 }
