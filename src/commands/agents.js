@@ -199,7 +199,7 @@ module.exports.GetActivationCommand = class {
                     ];
                     printSuccess(`Status: ${result.status}`);
                     printSuccess(`Elapsed Time (ms): ${result.elapsed}`);    
-                    printTable(tableSpec, result.transits);
+                    printTable(tableSpec, _.sortBy(result.transits, ['start', 'end']));
                 } else {
                     printSuccess(JSON.stringify(result, null, 2), options);
                 }
