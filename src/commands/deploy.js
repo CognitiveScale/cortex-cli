@@ -68,6 +68,7 @@ async function addDependencies(url, token, project, resourceType, resourceName) 
     } else {
         printError(`Failed to get dependencies of ${resourceName} of type ${resourceType} in project ${project}:  ${dependencies.status} ${dependencies.message}`);
     }
+    return dependencies;
 }
 
 /**
@@ -222,36 +223,7 @@ module.exports.DeployConnectionCommand = class {
     }
 };
 
-module.exports.DeploySkillCommand = class {
-    constructor(program) {
-        this.program = program;
-    }
-
-    execute(skillName, options) {
-        const profile = loadProfile(options.profile);
-        const project = options.project || profile.project;
-        debug('%s.exportDeploySkillCommand%s)', profile.name, skillName);
-
-        const catalog = new Catalog(profile.url);
-        catalog.describeSkill(project, profile.token, skillName, false).then(async (response) => {
-            if (response.success) {
-                const result = filterObject(response.skill, options);
-                const skillDesc = cleanInternalFields(result);
-                const filepath = path.join(artifactsDir, 'skills', `${skillName}.json`);
-                writeToFile(skillDesc, filepath);
-                updateManifest({ skill: [filepath] });
-                await addDependencies(profile.url, profile.token, project, 'Skill', skillName);
-                printSuccess(`Successfully exported Skill ${skillName} in ${artifactsDir} and updated manifest file ${manifestFile}`);
-            } else {
-                printError(`Failed to export skill ${skillName}: ${response.message}`, options);
-            }
-        }).catch((err) => {
-            printError(`Failed to export skill ${skillName}: ${err.status} ${err.message}`, options);
-        });
-    }
-};
-
-module.exports.DeployExperimentCommand = class {
+const DeployExperimentCommand = class {
     constructor(program) {
         this.program = program;
     }
@@ -314,7 +286,7 @@ module.exports.DeployExperimentCommand = class {
                 writeToFile(runDesc, filepath);
                 if (result.artifacts) {
                     await Promise.all(Object.values(result.artifacts)
-                        .map((value) => content.downloadContent(project, profile.token, value, false, path.join(artifactsDir, value))));
+                        .map(value => content.downloadContent(project, profile.token, value, false, path.join(artifactsDir, value))));
                 }
                 manifest.run = [filepath];
                 exports.run = exportRun;
@@ -326,5 +298,57 @@ module.exports.DeployExperimentCommand = class {
         }
         printSuccess(`Successfully exported ${JSON.stringify(exports)} in ${artifactsDir} and updated manifest file ${manifestFile}`);
         updateManifest(manifest);
+    }
+};
+
+module.exports.DeployExperimentCommand = DeployExperimentCommand;
+
+module.exports.DeploySkillCommand = class {
+    constructor(program) {
+        this.program = program;
+    }
+
+    execute(skillName, options) {
+        const profile = loadProfile(options.profile);
+        const project = options.project || profile.project;
+        debug('%s.exportDeploySkillCommand%s)', profile.name, skillName);
+
+        const manifest = {};
+        const exports = {};
+        const catalog = new Catalog(profile.url);
+        catalog.describeSkill(project, profile.token, skillName, false).then(async (response) => {
+            if (response.success) {
+                const result = filterObject(response.skill, options);
+                const skillDesc = cleanInternalFields(result);
+                const filepath = path.join(artifactsDir, 'skills', `${skillName}.json`);
+                writeToFile(skillDesc, filepath);
+                manifest.skill = [filepath];
+                exports.skill = skillName;
+                const dependencies = await addDependencies(profile.url, profile.token, project, 'Skill', skillName);
+                const mlOps = Object.fromEntries(dependencies.data.filter(d => ['Model', 'Experiment', 'ExperimentRun'].includes(d.type)).map(d => [d.type, d.name]));
+                if (mlOps && mlOps.Experiment) {
+                    await new DeployExperimentCommand(this.program).execute(mlOps.Model, mlOps.ExperimentRun, mlOps.Experiment);
+                }
+                const existingActions = result.actions.map(a => a.name);
+                const actions = dependencies.data.filter(d => d.type === 'Action' && !existingActions.includes(d.name)).map(d => d.name);
+                if (actions.length > 0) {
+                    const actionsClient = new Actions(profile.url);
+                    actions.forEach((a) => {
+                        response = actionsClient.describeAction(project, profile.token, a);
+                        if (response.success) {
+                            const actionDesc = cleanInternalFields(filterObject(response.action, options));
+                            writeToFile(actionDesc, path.join(artifactsDir, 'actions', `${a}.json`));
+                        }
+                    });
+                    manifest.action = actions.map(a => path.join(artifactsDir, 'actions', `${a}.json`));
+                    exports.action = actions;
+                }
+                printSuccess(`Successfully exported  ${JSON.stringify(Object.assign(exports, mlOps))} in ${artifactsDir} and updated manifest file ${manifestFile}`);
+            } else {
+                printError(`Failed to export skill ${skillName}: ${response.message}`, options);
+            }
+        }).catch((err) => {
+            printError(`Failed to export skill ${skillName}: ${err.status} ${err.message}`, options);
+        });
     }
 };
