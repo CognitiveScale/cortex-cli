@@ -32,7 +32,7 @@ module.exports = class Assessments {
         const url = `${this.endpointApiV4}/tree/${project}/${type}/${encodeURIComponent(name)}`;
         debug('dependencyTree => %s', url);
         return got
-            .get(url, {
+            .post(url, {
                 headers: { Authorization: `Bearer ${token}` },
                 'user-agent': getUserAgent(),
             })

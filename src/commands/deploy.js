@@ -24,6 +24,10 @@ const Agents = require('../client/agents');
 const Catalog = require('../client/catalog');
 const Assessments = require('../client/assessments');
 const Connections = require('../client/connections');
+const Experiments = require('../client/experiments');
+const Models = require('../client/models');
+const Actions = require('../client/actions');
+const Content = require('../client/content');
 
 const _ = {
     get: require('lodash/get'),
@@ -55,11 +59,15 @@ function updateManifest(filepaths) {
 async function addDependencies(url, token, project, resourceType, resourceName) {
     const assessments = new Assessments(url);
     const dependencies = await assessments.getDependenciesOfResource(token, project, resourceType, resourceName);
-    const depsFilePath = path.join(artifactsDir, resourceName, '_dependencies.json');
-    writeToFile(JSON.stringify(dependencies), depsFilePath);
-    const depsManifest = {};
-    depsManifest[`_dependencies.${resourceType}.${resourceName}`] = [depsFilePath];
-    updateManifest(depsManifest);
+    if (dependencies.success) {
+        const depsFilePath = path.join(artifactsDir, resourceName, '_dependencies.json');
+        writeToFile(JSON.stringify(dependencies), depsFilePath);
+        const depsManifest = {};
+        depsManifest[`_dependencies.${resourceType}.${resourceName}`] = [depsFilePath];
+        updateManifest(depsManifest);
+    } else {
+        printError(`Failed to get dependencies of ${resourceName} of type ${resourceType} in project ${project}:  ${dependencies.status} ${dependencies.message}`);
+    }
 }
 
 /**
@@ -211,5 +219,107 @@ module.exports.DeployConnectionCommand = class {
         }).catch((err) => {
             printError(`Failed to export connection ${connectionName}: ${err.status} ${err.message}`, options);
         });
+    }
+};
+
+module.exports.DeploySkillCommand = class {
+    constructor(program) {
+        this.program = program;
+    }
+
+    execute(skillName, options) {
+        const profile = loadProfile(options.profile);
+        const project = options.project || profile.project;
+        debug('%s.exportDeploySkillCommand%s)', profile.name, skillName);
+
+        const catalog = new Catalog(profile.url);
+        catalog.describeSkill(project, profile.token, skillName, false).then(async (response) => {
+            if (response.success) {
+                const result = filterObject(response.skill, options);
+                const skillDesc = cleanInternalFields(result);
+                const filepath = path.join(artifactsDir, 'skills', `${skillName}.json`);
+                writeToFile(skillDesc, filepath);
+                updateManifest({ skill: [filepath] });
+                await addDependencies(profile.url, profile.token, project, 'Skill', skillName);
+                printSuccess(`Successfully exported Skill ${skillName} in ${artifactsDir} and updated manifest file ${manifestFile}`);
+            } else {
+                printError(`Failed to export skill ${skillName}: ${response.message}`, options);
+            }
+        }).catch((err) => {
+            printError(`Failed to export skill ${skillName}: ${err.status} ${err.message}`, options);
+        });
+    }
+};
+
+module.exports.DeployExperimentCommand = class {
+    constructor(program) {
+        this.program = program;
+    }
+
+    async execute(modelName, experimentName, runId, options) {
+        const profile = loadProfile(options.profile);
+        const project = options.project || profile.project;
+        debug('%s.exportDeployExperimentCommand%s)', profile.name, experimentName);
+
+        const manifest = {};
+        const exports = {};
+        const experiments = new Experiments(profile.url);
+        const model = new Models(profile.url);
+        const content = new Content(profile.url);
+
+        let response;
+        // export model if provided
+        if (modelName) {
+            response = await model.describeModel(project, profile.token, modelName, true);
+            if (response.success) {
+                const result = filterObject(response.model, options);
+                const modelDesc = cleanInternalFields(result);
+                const filepath = path.join(artifactsDir, 'models', `${modelName}.json`);
+                writeToFile(modelDesc, filepath);
+                manifest.model = [filepath];
+                exports.model = modelName;
+            } else {
+                printError(`Failed to export model ${modelName}: ${response.message}`, options);
+            }
+        }
+        response = await experiments.describeExperiment(project, profile.token, experimentName);
+        if (response.success) {
+            const result = filterObject(response.result, options);
+            const expDesc = cleanInternalFields(result);
+            const filepath = path.join(artifactsDir, 'experiments', `${experimentName}.json`);
+            writeToFile(expDesc, filepath);
+            manifest.experiment = [filepath];
+            exports.experiment = experimentName;
+        } else {
+            printError(`Failed to export experiment ${experimentName}: ${response.message}`, options);
+        }
+        let exportRun = runId;
+        if (!runId && options.latestRun) {
+            response = await experiments.listRuns(project, profile.token, experimentName, null, 1, JSON.stringify({ startTime: -1 }));
+            if (response.success) {
+                exportRun = response.result.runs.pop().runId;
+            }
+        }
+        if (exportRun) {
+            response = await experiments.describeRun(project, profile.token, experimentName, exportRun);
+            if (response.success) {
+                const result = filterObject(response.result, options);
+                const runDesc = cleanInternalFields(result);
+                const filepath = path.join(artifactsDir, `experiments/${experimentName}/runs`, `${exportRun}.json`);
+                writeToFile(runDesc, filepath);
+                if (result.artifacts) {
+                    await Promise.all(Object.values(result.artifacts)
+                        .map((value) => content.downloadContent(project, profile.token, value, false, path.join(artifactsDir, value))));
+                }
+                manifest.run = [filepath];
+                exports.run = exportRun;
+            } else {
+                printError(`Failed to export experiment ${experimentName}: ${response.message}`, options);
+            }
+        } else {
+            printError('Provide runId or `--latestRun` option to export last run ', options);
+        }
+        printSuccess(`Successfully exported ${JSON.stringify(exports)} in ${artifactsDir} and updated manifest file ${manifestFile}`);
+        updateManifest(manifest);
     }
 };

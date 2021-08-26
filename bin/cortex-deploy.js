@@ -25,6 +25,8 @@ const {
     DeploySnapshotCommand,
     DeployCampaignCommand,
     DeployConnectionCommand,
+    DeployExperimentCommand,
+    DeploySkillCommand,
 } = require('../src/commands/deploy');
 
 program.description('Export Cortex artifacts for deployment');
@@ -73,6 +75,37 @@ program
     .action(withCompatibilityCheck((connectionName, options) => {
         try {
             new DeployConnectionCommand(program).execute(connectionName, options);
+        } catch (err) {
+            console.error(chalk.red(err.message));
+        }
+    }));
+
+program
+    .command('skill <skillName>')
+    .description('Export Skill for deployment')
+    .option('--no-compat', 'Ignore API compatibility checks')
+    .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
+    .option('--profile [profile]', 'The profile to use')
+    .option('--project [project]', 'The project to use')
+    .action(withCompatibilityCheck((skillName, options) => {
+        try {
+            new DeploySkillCommand(program).execute(skillName, options);
+        } catch (err) {
+            console.error(chalk.red(err.message));
+        }
+    }));
+
+program
+    .command('experiment [modelName] <experimentName> [runId]')
+    .description('Export Experiment with Model and Run for deployment')
+    .option('--no-compat', 'Ignore API compatibility checks')
+    .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
+    .option('--profile [profile]', 'The profile to use')
+    .option('--project [project]', 'The project to use')
+    .option('--latestRun [boolean]', 'Export latest run of experiment')
+    .action(withCompatibilityCheck((modelName, experimentName, runId, options) => {
+        try {
+            new DeployExperimentCommand(program).execute(modelName, experimentName, runId, options);
         } catch (err) {
             console.error(chalk.red(err.message));
         }

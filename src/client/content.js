@@ -20,6 +20,7 @@ const stream = require('stream');
 const { promisify } = require('util');
 const debug = require('debug')('cortex:cli');
 const { got } = require('./apiutils');
+const { createFileStream } = require('../commands/utils');
 const { constructError, getUserAgent, checkProject } = require('../commands/utils');
 
 const pipeline = promisify(stream.pipeline);
@@ -87,18 +88,23 @@ module.exports = class Content {
 
     // TODO progress
     // eslint-disable-next-line no-unused-vars
-    async downloadContent(projectId, token, key, showProgress = false) {
+    async downloadContent(projectId, token, key, showProgress = false, toFile = null) {
         checkProject(projectId);
         const contentKey = this._sanitizeKey(key);
         const endpoint = `${this.endpoint(projectId)}/${contentKey}`;
         debug('downloadContent() => %s', endpoint);
         try {
+            if (toFile) {
+                toFile = createFileStream(toFile);
+            } else {
+                toFile = process.stdout;
+            }
             return pipeline(
                 got.stream(endpoint, {
                     headers: { Authorization: `Bearer ${token}` },
                     'user-agent': getUserAgent(),
                 }),
-                process.stdout,
+                toFile,
             );
         } catch (err) {
             return constructError(err);
