@@ -268,20 +268,6 @@ module.exports.DeployExperimentCommand = class {
         const content = new Content(profile.url);
 
         let response;
-        // export model if provided
-        if (modelName) {
-            response = await model.describeModel(project, profile.token, modelName, true);
-            if (response.success) {
-                const result = filterObject(response.model, options);
-                const modelDesc = cleanInternalFields(result);
-                const filepath = path.join(artifactsDir, 'models', `${modelName}.json`);
-                writeToFile(modelDesc, filepath);
-                manifest.model = [filepath];
-                exports.model = modelName;
-            } else {
-                printError(`Failed to export model ${modelName}: ${response.message}`, options);
-            }
-        }
         response = await experiments.describeExperiment(project, profile.token, experimentName);
         if (response.success) {
             const result = filterObject(response.result, options);
@@ -290,8 +276,27 @@ module.exports.DeployExperimentCommand = class {
             writeToFile(expDesc, filepath);
             manifest.experiment = [filepath];
             exports.experiment = experimentName;
+            modelName = modelName || result.modelId;
         } else {
             printError(`Failed to export experiment ${experimentName}: ${response.message}`, options);
+        }
+        // export model if provided or pick from experiment
+        if (modelName) {
+            response = await model.describeModel(project, profile.token, modelName, true);
+            if (response.success) {
+                const result = filterObject(response.model, options);
+                const modelDesc = cleanInternalFields(result);
+                if (result.status && result.status === 'Published') {
+                    const filepath = path.join(artifactsDir, 'models', `${modelName}.json`);
+                    writeToFile(modelDesc, filepath);
+                    manifest.model = [filepath];
+                    exports.model = modelName;
+                } else {
+                    printError(`Only Published models can be exported. Model ${modelName} is in ${result.status}`);
+                }
+            } else {
+                printError(`Failed to export model ${modelName}: ${response.message}`, options);
+            }
         }
         let exportRun = runId;
         if (!runId && options.latestRun) {
