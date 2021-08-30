@@ -41,6 +41,7 @@ program
     .option('--project [project]', 'The project to use')
     .option('-y, --yaml', 'Use YAML for snapshot export format')
     .option('-f, --force', 'Force delete existing exported files')
+    .option('--latestRun [boolean]', 'Export latest run of Experiment(s) if not specified')
     .action(withCompatibilityCheck((snapshotIds, options) => {
         try {
             new DeploySnapshotCommand(program).execute(snapshotIds, options);
@@ -87,6 +88,7 @@ program
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
     .option('--project [project]', 'The project to use')
+    .option('--latestRun [boolean]', 'Export latest run of experiment if not specified')
     .action(withCompatibilityCheck((skillName, options) => {
         try {
             new DeploySkillCommand(program).execute(skillName, options);
@@ -96,16 +98,16 @@ program
     }));
 
 program
-    .command('experiment [modelName] <experimentName> [runId]')
+    .command('experiment <experimentName> [runId]')
     .description('Export Experiment with Model and Run for deployment')
     .option('--no-compat', 'Ignore API compatibility checks')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
     .option('--project [project]', 'The project to use')
-    .option('--latestRun [boolean]', 'Export latest run of experiment')
-    .action(withCompatibilityCheck((modelName, experimentName, runId, options) => {
+    .option('--latestRun [boolean]', 'Export latest run of experiment if not specified')
+    .action(withCompatibilityCheck((experimentName, runId, options) => {
         try {
-            new DeployExperimentCommand(program).execute(modelName, experimentName, runId, options);
+            new DeployExperimentCommand(program).execute(experimentName, runId, options);
         } catch (err) {
             console.error(chalk.red(err.message));
         }

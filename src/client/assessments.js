@@ -28,14 +28,18 @@ module.exports = class Assessments {
         this.endpointApiV4 = `${cortexUrl}/fabric/v4/dependencies`;
     }
 
-    getDependenciesOfResource(token, project, type, name) {
-        const url = `${this.endpointApiV4}/tree/${project}/${type}/${encodeURIComponent(name)}`;
+    getDependenciesOfResource(token, project, type, name, json = null, missing = false) {
+        const url = `${this.endpointApiV4}/tree/${project}/${type}/${encodeURIComponent(name)}?${querystring.stringify({ missing })}`;
         debug('dependencyTree => %s', url);
+        const body = {
+            headers: { Authorization: `Bearer ${token}` },
+            'user-agent': getUserAgent(),
+        };
+        if (json) {
+            body.json = json;
+        }
         return got
-            .post(url, {
-                headers: { Authorization: `Bearer ${token}` },
-                'user-agent': getUserAgent(),
-            })
+            .post(url, body)
             .json()
             .then(res => res)
             .catch(err => constructError(err));
