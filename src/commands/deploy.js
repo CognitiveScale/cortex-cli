@@ -124,7 +124,10 @@ const DeployExperimentCommand = class {
         if (!runId && options.latestRun) {
             response = await experiments.listRuns(project, profile.token, experimentName, null, 1, JSON.stringify({ startTime: -1 }));
             if (response.success) {
-                exportRun = response.result.runs.pop().runId;
+                const { runs } = response.result;
+                if (_.size(runs)) {
+                    exportRun = runs[0].runId;
+                }
             }
         }
         if (exportRun) {
