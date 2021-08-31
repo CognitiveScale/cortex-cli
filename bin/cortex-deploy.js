@@ -25,6 +25,8 @@ const {
     DeploySnapshotCommand,
     DeployCampaignCommand,
     DeployConnectionCommand,
+    DeployExperimentCommand,
+    DeploySkillCommand,
 } = require('../src/commands/deploy');
 
 program.description('Export Cortex artifacts for deployment');
@@ -39,6 +41,7 @@ program
     .option('--project [project]', 'The project to use')
     .option('-y, --yaml', 'Use YAML for snapshot export format')
     .option('-f, --force', 'Force delete existing exported files')
+    .option('--latestRun [boolean]', 'Export latest run of Experiment(s) if not specified')
     .action(withCompatibilityCheck((snapshotIds, options) => {
         try {
             new DeploySnapshotCommand(program).execute(snapshotIds, options);
@@ -73,6 +76,38 @@ program
     .action(withCompatibilityCheck((connectionName, options) => {
         try {
             new DeployConnectionCommand(program).execute(connectionName, options);
+        } catch (err) {
+            console.error(chalk.red(err.message));
+        }
+    }));
+
+program
+    .command('skill <skillName>')
+    .description('Export Skill for deployment')
+    .option('--no-compat', 'Ignore API compatibility checks')
+    .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
+    .option('--profile [profile]', 'The profile to use')
+    .option('--project [project]', 'The project to use')
+    .option('--latestRun [boolean]', 'Export latest run of experiment if not specified')
+    .action(withCompatibilityCheck((skillName, options) => {
+        try {
+            new DeploySkillCommand(program).execute(skillName, options);
+        } catch (err) {
+            console.error(chalk.red(err.message));
+        }
+    }));
+
+program
+    .command('experiment <experimentName> [runId]')
+    .description('Export Experiment with Model and Run for deployment')
+    .option('--no-compat', 'Ignore API compatibility checks')
+    .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
+    .option('--profile [profile]', 'The profile to use')
+    .option('--project [project]', 'The project to use')
+    .option('--latestRun [boolean]', 'Export latest run of experiment if not specified')
+    .action(withCompatibilityCheck((experimentName, runId, options) => {
+        try {
+            new DeployExperimentCommand(program).execute(experimentName, runId, options);
         } catch (err) {
             console.error(chalk.red(err.message));
         }

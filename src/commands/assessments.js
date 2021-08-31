@@ -106,13 +106,17 @@ module.exports.DependencyTreeCommand = class {
         this.program = program;
     }
 
-    execute(command) {
+    execute(dependencyFile, command) {
         const options = command.opts();
         const profile = loadProfile(options.profile);
         debug('%s.DependencyTreeCommand()', profile.name);
 
         const client = new Assessments(profile.url);
-        client.getDependenciesOfResource(profile.token, options.scope, options.type, options.name)
+        let body;
+        if (dependencyFile) {
+            body = JSON.parse(fs.readFileSync(dependencyFile).toString());
+        }
+        client.getDependenciesOfResource(profile.token, options.scope, options.type, options.name, body, options.missing)
             .then((response) => {
                 if (response.success === false) throw response;
                 if (options.json) {

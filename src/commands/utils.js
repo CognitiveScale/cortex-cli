@@ -262,6 +262,14 @@ module.exports.jsonToYaml = (json) => {
     return yaml.dump(json);
 };
 
+module.exports.createFileStream = (filepath) => {
+    const dir = path.dirname(filepath);
+    if (!fs.existsSync(dir)) {
+        fs.mkdirSync(dir, { recursive: true });
+    }
+    return fs.createWriteStream(filepath);
+};
+
 module.exports.writeToFile = (content, filepath) => {
     const dir = path.dirname(filepath);
     if (!fs.existsSync(dir)) {

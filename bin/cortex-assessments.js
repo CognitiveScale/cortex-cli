@@ -52,19 +52,20 @@ program
     }));
 
 program
-    .command('dependency-tree')
-    .description('Dependencies of a resource')
+    .command('dependency-tree [dependencyFile]')
+    .description('Dependencies of a resource or find missing ones from dependencyFile')
     .storeOptionsAsProperties(false)
     .requiredOption('--scope [project]', 'project name of the resource')
-    .requiredOption('--name [Cortex component name]', 'Cortex component name')
-    .requiredOption('--type [Cortex component type]', 'Cortex resource type')
+    .option('--name [Cortex component name]', 'Cortex component name')
+    .option('--type [Cortex component type]', 'Cortex resource type')
     .option('--no-compat', 'Ignore API compatibility checks')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
     .option('--json', 'Output results using JSON')
-    .action(withCompatibilityCheck((options) => {
+    .option('--missing [boolean]', 'Filter only missing dependencies')
+    .action(withCompatibilityCheck((dependencyFile, options) => {
         try {
-            new DependencyTreeCommand(program).execute(options);
+            new DependencyTreeCommand(program).execute(dependencyFile, options);
         } catch (err) {
             console.error(chalk.red(err.message));
         }
