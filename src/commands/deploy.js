@@ -62,7 +62,7 @@ async function addDependencies(url, token, project, resourceType, resourceName) 
     const dependencies = await assessments.getDependenciesOfResource(token, project, resourceType, resourceName);
     if (dependencies.data) {
         const depsFilePath = path.join(artifactsDir, resourceName, '_dependencies.json');
-        writeToFile(JSON.stringify(dependencies), depsFilePath);
+        writeToFile(JSON.stringify(dependencies, null, 2), depsFilePath);
         const depsManifest = {};
         depsManifest[`_dependencies.${resourceType}.${resourceName}`] = [depsFilePath];
         updateManifest(depsManifest);
