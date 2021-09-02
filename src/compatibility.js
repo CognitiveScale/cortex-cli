@@ -30,7 +30,7 @@ const Semver = require('semver');
 const uniq = require('lodash/fp/uniq');
 const { got } = require('./client/apiutils');
 const { loadProfile } = require('./config');
-const { printError, printWarning, getUserAgent } = require('../src/commands/utils');
+const { printError, printWarning, getUserAgent } = require('./commands/utils');
 
 const pkg = findPackageJson(__dirname).next().value;
 
@@ -38,9 +38,9 @@ function getAvailableVersions(name) {
     debug('getAvailableVersions => %s', name);
     return npmFetch
         .json(pkg.name)
-        .then(manifest => keys(getOr({}, 'versions', manifest)))
-        .then(versions => uniq(concat(versions, pkg.version)))
-        .then(versions => versions.sort(Semver.compare))
+        .then((manifest) => keys(getOr({}, 'versions', manifest)))
+        .then((versions) => uniq(concat(versions, pkg.version)))
+        .then((versions) => versions.sort(Semver.compare))
         .catch(() => {
             throw new Error('Unable to determine CLI available versions');
         });
@@ -106,7 +106,7 @@ async function getCompatibility(profile) {
             // warn user but don't fail
             const versions = await getAvailableVersions(pkg.name);
             debug('getCompatibility => versions: %s, requirements: %s', versions, requirements);
-            const compatibleVersions = filter(v => Semver.satisfies(v, requirements), versions);
+            const compatibleVersions = filter((v) => Semver.satisfies(v, requirements), versions);
             debug('getCompatibility => compatible versions: %s', compatibleVersions);
             const { version: current } = pkg;
             const latest = last(compatibleVersions);
@@ -123,7 +123,7 @@ async function getCompatibility(profile) {
 
 function withCompatibilityCheck(fn) {
     return (...args) => {
-        const command = args.find(a => a !== undefined && typeof a.opts === 'function');
+        const command = args.find((a) => a !== undefined && typeof a.opts === 'function');
         const options = command.opts();
         if (options.compat && !_.toLower(process.env.CORTEX_NO_COMPAT) === 'true') {
             const { profile: profileName } = options;

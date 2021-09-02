@@ -44,7 +44,6 @@ module.exports.ListContent = class ListContent {
                         { column: 'Size (bytes)', field: 'Size', width: 20 },
                     ];
 
-
                     printTable(tableSpec, response.message);
                 }
             } else {
@@ -92,7 +91,7 @@ module.exports.UploadContent = class UploadContent {
                         .reduce((promise, currentChunk) => promise
                             .then(() => {
                                 debug(`working on chunk of files: ${JSON.stringify(currentChunk)}`);
-                                const promises = currentChunk.map(item => upload(`${contentKey}/${item.relative}`, item.canonical));
+                                const promises = currentChunk.map((item) => upload(`${contentKey}/${item.relative}`, item.canonical));
                                 return Promise.all(promises);
                             }), Promise.resolve());
                 } else {

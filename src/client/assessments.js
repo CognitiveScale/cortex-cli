@@ -41,8 +41,8 @@ module.exports = class Assessments {
         return got
             .post(url, body)
             .json()
-            .then(res => res)
-            .catch(err => constructError(err));
+            .then((res) => res)
+            .catch((err) => constructError(err));
     }
 
     queryResources(token, name, projectId, type, skip, limit) {
@@ -60,8 +60,8 @@ module.exports = class Assessments {
                 'user-agent': getUserAgent(),
             })
             .json()
-            .then(res => res)
-            .catch(err => constructError(err));
+            .then((res) => res)
+            .catch((err) => constructError(err));
     }
 
     listResourceTypes(token) {
@@ -73,8 +73,8 @@ module.exports = class Assessments {
                 'user-agent': getUserAgent(),
             })
             .json()
-            .then(res => res)
-            .catch(err => constructError(err));
+            .then((res) => res)
+            .catch((err) => constructError(err));
     }
 
     createAssessment(token, name, title, description, scope, componentName, componentTypes, overwrite) {
@@ -94,8 +94,8 @@ module.exports = class Assessments {
                     overwrite,
                 }),
             }).json()
-            .then(res => res)
-            .catch(err => constructError(err));
+            .then((res) => res)
+            .catch((err) => constructError(err));
     }
 
     listAssessment(token, skip, limit) {
@@ -106,8 +106,8 @@ module.exports = class Assessments {
                 headers: { Authorization: `Bearer ${token}` },
                 'user-agent': getUserAgent(),
             }).json()
-            .then(res => res)
-            .catch(err => constructError(err));
+            .then((res) => res)
+            .catch((err) => constructError(err));
     }
 
     getAssessment(token, name) {
@@ -118,8 +118,8 @@ module.exports = class Assessments {
                 headers: { Authorization: `Bearer ${token}` },
                 'user-agent': getUserAgent(),
             }).json()
-            .then(res => res)
-            .catch(err => constructError(err));
+            .then((res) => res)
+            .catch((err) => constructError(err));
     }
 
     deleteAssessment(token, name) {
@@ -130,8 +130,8 @@ module.exports = class Assessments {
                 headers: { Authorization: `Bearer ${token}` },
                 'user-agent': getUserAgent(),
             }).json()
-            .then(res => res)
-            .catch(err => constructError(err));
+            .then((res) => res)
+            .catch((err) => constructError(err));
     }
 
     runAssessment(token, name) {
@@ -142,8 +142,8 @@ module.exports = class Assessments {
                 headers: { Authorization: `Bearer ${token}` },
                 'user-agent': getUserAgent(),
             }).json()
-            .then(res => res)
-            .catch(err => constructError(err));
+            .then((res) => res)
+            .catch((err) => constructError(err));
     }
 
     listAssessmentReports(token, name) {
@@ -154,8 +154,8 @@ module.exports = class Assessments {
                 headers: { Authorization: `Bearer ${token}` },
                 'user-agent': getUserAgent(),
             }).json()
-            .then(res => res)
-            .catch(err => constructError(err));
+            .then((res) => res)
+            .catch((err) => constructError(err));
     }
 
     getAssessmentReport(token, name, reportId) {
@@ -166,8 +166,8 @@ module.exports = class Assessments {
                 headers: { Authorization: `Bearer ${token}` },
                 'user-agent': getUserAgent(),
             }).json()
-            .then(res => res)
-            .catch(err => constructError(err));
+            .then((res) => res)
+            .catch((err) => constructError(err));
     }
 
     exportAssessmentReport(token, name, reportId, types) {

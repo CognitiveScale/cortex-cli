@@ -23,11 +23,11 @@ const {
  constructError, formatAllServiceInputParameters, checkProject, getUserAgent, printSuccess, printError, printTable,
 } = require('../commands/utils');
 
-const createEndpoints = baseUri => ({
-        skills: projectId => `${baseUri}/fabric/v4/projects/${projectId}/skills`,
-        agents: projectId => `${baseUri}/fabric/v4/projects/${projectId}/agents`,
-        types: projectId => `${baseUri}/fabric/v4/projects/${projectId}/types`,
-        campaigns: projectId => `${baseUri}/fabric/v4/projects/${projectId}/campaigns/`,
+const createEndpoints = (baseUri) => ({
+        skills: (projectId) => `${baseUri}/fabric/v4/projects/${projectId}/skills`,
+        agents: (projectId) => `${baseUri}/fabric/v4/projects/${projectId}/agents`,
+        types: (projectId) => `${baseUri}/fabric/v4/projects/${projectId}/types`,
+        campaigns: (projectId) => `${baseUri}/fabric/v4/projects/${projectId}/campaigns/`,
     });
 
 module.exports = class Catalog {
@@ -45,8 +45,8 @@ module.exports = class Catalog {
                 'user-agent': getUserAgent(),
                 json: skillObj,
             }).json()
-            .then(res => ({ success: true, message: res }))
-            .catch(err => constructError(err));
+            .then((res) => ({ success: true, message: res }))
+            .catch((err) => constructError(err));
     }
 
     listSkills(projectId, token, status = false) {
@@ -60,8 +60,8 @@ module.exports = class Catalog {
                 'user-agent': getUserAgent(),
                 searchParams: query,
             }).json()
-            .then(skills => ({ success: true, ...skills }))
-            .catch(err => constructError(err));
+            .then((skills) => ({ success: true, ...skills }))
+            .catch((err) => constructError(err));
     }
 
     describeSkill(projectId, token, skillName, verbose = false) {
@@ -79,8 +79,8 @@ module.exports = class Catalog {
                 'user-agent': getUserAgent(),
                 searchParams,
             }).json()
-            .then(res => ({ success: true, skill: res }))
-            .catch(err => constructError(err));
+            .then((res) => ({ success: true, skill: res }))
+            .catch((err) => constructError(err));
     }
 
     deploySkill(projectId, token, skillName, verbose = false) {
@@ -93,8 +93,8 @@ module.exports = class Catalog {
                 'user-agent': getUserAgent(),
                 searchParams: { verbose },
             }).json()
-            .then(res => ({ ...res }))
-            .catch(err => constructError(err));
+            .then((res) => ({ ...res }))
+            .catch((err) => constructError(err));
     }
 
     unDeploySkill(projectId, token, skillName, verbose = false) {
@@ -107,8 +107,8 @@ module.exports = class Catalog {
                 'user-agent': getUserAgent(),
                 searchParams: { verbose },
             }).json()
-            .then(res => ({ ...res }))
-            .catch(err => constructError(err));
+            .then((res) => ({ ...res }))
+            .catch((err) => constructError(err));
     }
 
     skillLogs(projectId, token, skillName, actionName, verbose = false) {
@@ -121,8 +121,8 @@ module.exports = class Catalog {
                 'user-agent': getUserAgent(),
                 searchParams: { verbose },
             }).json()
-            .then(res => ({ ...res }))
-            .catch(err => constructError(err));
+            .then((res) => ({ ...res }))
+            .catch((err) => constructError(err));
     }
 
     listAgents(projectId, token) {
@@ -135,8 +135,8 @@ module.exports = class Catalog {
                 'user-agent': getUserAgent(),
             })
             .json()
-            .then(agentResp => ({ success: true, ...agentResp }))
-            .catch(err => constructError(err));
+            .then((agentResp) => ({ success: true, ...agentResp }))
+            .catch((err) => constructError(err));
     }
 
     listServices(projectId, token, agentName) {
@@ -148,9 +148,9 @@ module.exports = class Catalog {
                 const urlBase = `${this.endpoints.agents(projectId)}/${encodeURIComponent(agentName)}/services`;
                 debug('listServices(%s) => %s', agentName, urlBase);
                 const servicesList = response.agent.inputs
-                    .filter(i => i.signalType === 'Service')
-                    .map(i => ({ ...i, url: `${urlBase}/${i.name}` }))
-                    .map(i => ({ ...i, formatted_types: formatAllServiceInputParameters(i.parameters) }));
+                    .filter((i) => i.signalType === 'Service')
+                    .map((i) => ({ ...i, url: `${urlBase}/${i.name}` }))
+                    .map((i) => ({ ...i, formatted_types: formatAllServiceInputParameters(i.parameters) }));
                 return { success: true, services: servicesList };
             }
                 return response;
@@ -167,8 +167,8 @@ module.exports = class Catalog {
                 'user-agent': getUserAgent(),
                 json: agentObj,
             }).json()
-            .then(res => ({ success: true, message: res }))
-            .catch(err => constructError(err));
+            .then((res) => ({ success: true, message: res }))
+            .catch((err) => constructError(err));
     }
 
     describeAgent(projectId, token, agentName, verbose) {
@@ -181,8 +181,8 @@ module.exports = class Catalog {
                 'user-agent': getUserAgent(),
                 searchParams: { verbose },
             }).json()
-            .then(agent => ({ success: true, agent }))
-            .catch(err => constructError(err));
+            .then((agent) => ({ success: true, agent }))
+            .catch((err) => constructError(err));
     }
 
     describeAgentVersions(projectId, token, agentName) {
@@ -195,14 +195,14 @@ module.exports = class Catalog {
                 'user-agent': getUserAgent(),
             })
             .json()
-            .then(agent => ({ success: true, agent }))
-            .catch(err => constructError(err));
+            .then((agent) => ({ success: true, agent }))
+            .catch((err) => constructError(err));
     }
 
     saveType(projectId, token, types) {
         checkProject(projectId);
         const endpoint = `${this.endpoints.types(projectId)}`;
-        const names = types.types.map(t => t.name);
+        const names = types.types.map((t) => t.name);
         debug('saveType(%s) => %s', JSON.stringify(names), this.endpoints.types(projectId));
         return got
             .post(endpoint, {
@@ -211,8 +211,8 @@ module.exports = class Catalog {
                 json: types,
             })
             .json()
-            .then(message => ({ success: true, message }))
-            .catch(err => constructError(err));
+            .then((message) => ({ success: true, message }))
+            .catch((err) => constructError(err));
     }
 
     describeType(projectId, token, typeName) {
@@ -225,8 +225,8 @@ module.exports = class Catalog {
                 'user-agent': getUserAgent(),
             })
             .json()
-            .then(type => ({ success: true, type }))
-            .catch(err => constructError(err));
+            .then((type) => ({ success: true, type }))
+            .catch((err) => constructError(err));
     }
 
     listTypes(projectId, token) {
@@ -239,8 +239,8 @@ module.exports = class Catalog {
                 'user-agent': getUserAgent(),
             })
             .json()
-            .then(types => ({ success: true, ...types }))
-            .catch(err => constructError(err));
+            .then((types) => ({ success: true, ...types }))
+            .catch((err) => constructError(err));
     }
 
     exportCampaign(projectId, token, campaignName, deployable, path) {
@@ -297,7 +297,7 @@ module.exports = class Catalog {
                         printSuccess('Campaign imported successfully');
                     } else {
                         printSuccess('Campaign imported with warnings');
-                        printTable([{ column: 'Warnings', field: 'message' }], importReport.warnings.map(w => ({ message: w })));
+                        printTable([{ column: 'Warnings', field: 'message' }], importReport.warnings.map((w) => ({ message: w })));
                     }
                 });
             } else {
@@ -318,8 +318,8 @@ module.exports = class Catalog {
                 'user-agent': getUserAgent(),
             })
             .json()
-            .then(res => ({ success: true, data: res }))
-            .catch(err => constructError(err));
+            .then((res) => ({ success: true, data: res }))
+            .catch((err) => constructError(err));
     }
 
     deployCampaign(projectId, token, campaign) {
@@ -332,8 +332,8 @@ module.exports = class Catalog {
                 'user-agent': getUserAgent(),
             })
             .json()
-            .then(res => ({ success: true, data: res }))
-            .catch(err => constructError(err));
+            .then((res) => ({ success: true, data: res }))
+            .catch((err) => constructError(err));
     }
 
     undeployMission(projectId, token, campaign, mission) {
@@ -346,8 +346,8 @@ module.exports = class Catalog {
                 'user-agent': getUserAgent(),
             })
             .json()
-            .then(res => ({ success: true, data: res }))
-            .catch(err => constructError(err));
+            .then((res) => ({ success: true, data: res }))
+            .catch((err) => constructError(err));
     }
 
     listMissions(projectId, token, campaign) {
@@ -360,8 +360,8 @@ module.exports = class Catalog {
                 'user-agent': getUserAgent(),
             })
             .json()
-            .then(res => ({ success: true, data: res }))
-            .catch(err => constructError(err));
+            .then((res) => ({ success: true, data: res }))
+            .catch((err) => constructError(err));
     }
 
     deployMission(projectId, token, campaign, mission) {
@@ -374,8 +374,8 @@ module.exports = class Catalog {
                 'user-agent': getUserAgent(),
             })
             .json()
-            .then(res => ({ success: true, data: res }))
-            .catch(err => constructError(err));
+            .then((res) => ({ success: true, data: res }))
+            .catch((err) => constructError(err));
     }
 
     getMission(projectId, token, campaign, mission) {
@@ -388,8 +388,8 @@ module.exports = class Catalog {
                 'user-agent': getUserAgent(),
             })
             .json()
-            .then(res => ({ success: true, data: res }))
-            .catch(err => constructError(err));
+            .then((res) => ({ success: true, data: res }))
+            .catch((err) => constructError(err));
     }
 
     // saveProfileSchema(projectId, token, schemaObj) {

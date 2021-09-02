@@ -89,7 +89,7 @@ module.exports.ExportCampaignCommand = class ExportCampaignCommand {
         try {
             cli.exportCampaign(project, profile.token, campaignName, options.deployable, path)
                 .then(() => printSuccess(`Successfully exported Campaign ${campaignName} from project ${project} to file ${path}`))
-                .catch(e => printError(`Failed to export Campaign ${campaignName} from project ${project}. Error: ${e}`));
+                .catch((e) => printError(`Failed to export Campaign ${campaignName} from project ${project}. Error: ${e}`));
         } catch (err) {
             printError(`Failed to export campaign: ${err.status} ${err.message}`, options);
         }
@@ -134,7 +134,7 @@ module.exports.DeployCampaignCommand = class DeployCampaignCommand {
                     printSuccess(output, options);
                 } else {
                     printError('Campaign deployed with warnings', options, false);
-                    printTable([{ column: 'Warnings', field: 'message' }], response.data.warnings.map(w => ({ message: w })));
+                    printTable([{ column: 'Warnings', field: 'message' }], response.data.warnings.map((w) => ({ message: w })));
                 }
             }).catch((e) => {
                 printError(`Failed to deploy campaign: ${e.status} ${e.message}`, options);
@@ -164,7 +164,7 @@ module.exports.UndeployCampaignCommand = class UndeployCampaignCommand {
                     printSuccess(output, options);
                 } else {
                     printError('Campaign undeployed with warnings', options, false);
-                    printTable([{ column: 'Warnings', field: 'message' }], response.data.warnings.map(w => ({ message: w })));
+                    printTable([{ column: 'Warnings', field: 'message' }], response.data.warnings.map((w) => ({ message: w })));
                 }
             }).catch((e) => {
                 printError(`Failed to undeploy campaign: ${e.status} ${e.message}`, options);
@@ -248,7 +248,7 @@ module.exports.DeployMissionCommand = class DeployMissionCommand {
             if (response.success === false) throw response;
             const output = _.get(response, 'data.message') || JSON.stringify(response.data || response, null, 2);
             printSuccess(output, options);
-        }).catch(err => printError(`Failed to deploy mission ${mission} of campaign ${campaign}: ${err.status} ${err.message}`, options));
+        }).catch((err) => printError(`Failed to deploy mission ${mission} of campaign ${campaign}: ${err.status} ${err.message}`, options));
     }
 };
 
@@ -266,6 +266,6 @@ module.exports.DescribeMissionCommand = class DescribeMissionCommand {
         cli.getMission(options.project || profile.project, profile.token, campaign, mission).then((response) => {
             if (response.success === false) throw response;
             printSuccess(JSON.stringify(response.data, null, 2), options);
-        }).catch(err => printError(`Failed to describe mission ${mission} of campaign ${campaign}: ${err.status} ${err.message}`, options));
+        }).catch((err) => printError(`Failed to describe mission ${mission} of campaign ${campaign}: ${err.status} ${err.message}`, options));
     }
 };

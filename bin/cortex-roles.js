@@ -67,7 +67,6 @@ program.command('describe <role>')
         }
     }));
 
-
 program.command('delete <role>')
     .description('Delete a role and remove grants/assignments')
     .option('--no-compat', 'Ignore API compatibility checks')

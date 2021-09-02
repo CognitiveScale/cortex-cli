@@ -28,7 +28,7 @@ const pipeline = promisify(stream.pipeline);
 module.exports = class Content {
     constructor(cortexUrl) {
         this.cortexUrl = cortexUrl;
-        this.endpoint = projectId => `${cortexUrl}/fabric/v4/projects/${projectId}/content`;
+        this.endpoint = (projectId) => `${cortexUrl}/fabric/v4/projects/${projectId}/content`;
     }
 
     _sanitizeKey(key) {
@@ -45,8 +45,8 @@ module.exports = class Content {
                 headers: { Authorization: `Bearer ${token}` },
                 'user-agent': getUserAgent(),
             }).json()
-            .then(message => ({ success: true, message }))
-            .catch(err => constructError(err));
+            .then((message) => ({ success: true, message }))
+            .catch((err) => constructError(err));
     }
 
     // eslint-disable-next-line no-unused-vars
@@ -82,8 +82,8 @@ module.exports = class Content {
                 headers: { Authorization: `Bearer ${token}` },
                 'user-agent': getUserAgent(),
             }).json()
-            .then(message => ({ success: true, message }))
-            .catch(err => constructError(err));
+            .then((message) => ({ success: true, message }))
+            .catch((err) => constructError(err));
     }
 
     // TODO progress

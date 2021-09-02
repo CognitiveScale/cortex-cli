@@ -17,7 +17,7 @@
 const debug = require('debug')('cortex:cli');
 const URL = require('url-parse');
 const { printSuccess, printError } = require('./utils');
-const { callMe } = require('../commands/utils');
+const { callMe } = require('./utils');
 const {
     generateJwt,
     loadProfile,

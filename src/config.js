@@ -23,7 +23,7 @@ const debug = require('debug')('cortex:config');
 const { JWT, JWK } = require('jose');
 const { printError } = require('./commands/utils');
 
-module.exports.generateJwt = generateJwt = function(profile, expiresIn = '2m') {
+module.exports.generateJwt = generateJwt = function (profile, expiresIn = '2m') {
     const {
          username, issuer, audience, jwk,
     } = profile;
@@ -36,46 +36,48 @@ module.exports.generateJwt = generateJwt = function(profile, expiresIn = '2m') {
         subject: username,
         expiresIn,
     });
-}
+};
 
 module.exports.defaultConfig = defaultConfig = function () {
   return new Config({});
 };
 
 module.exports.readConfig = readConfig = function () {
-    const configDir = process.env.CORTEX_CONFIG_DIR || path.join(os.homedir(), '.cortex');
-    if (!fs.existsSync(configDir)) {
-        fs.mkdirSync(configDir);
-    }
-
-    debug(`Reading config from ${configDir}`);
-
-    const configFile = path.join(configDir, 'config');
-    if (fs.existsSync(configFile)) {
-        // deal with config versions
-        const configObj = JSON.parse(fs.readFileSync(configFile));
-
-        if (configObj.version && configObj.version === '3') {
-            // version 3
-            // debug('loaded v3 config: %o', configObj);
-            return new Config(configObj);
+    try {
+        const configDir = process.env.CORTEX_CONFIG_DIR || path.join(os.homedir(), '.cortex');
+        if (!fs.existsSync(configDir)) {
+            fs.mkdirSync(configDir);
         }
+
+        debug(`Reading config from ${configDir}`);
+
+        const configFile = path.join(configDir, 'config');
+        if (fs.existsSync(configFile)) {
+            // deal with config versions
+            const configObj = JSON.parse(fs.readFileSync(configFile));
+
+            if (configObj.version && configObj.version === '3') {
+                // version 3
+                // debug('loaded v3 config: %o', configObj);
+                return new Config(configObj);
+            }
             fs.copyFileSync(configFile, path.join(configDir, 'config_v2'));
             defaultConfig().save();
             printError('Old profile found and moved to ~/.cortex/config_v2. Please run "cortex configure"');
 
+            if (configObj.version && configObj.version === '2') {
+                // version 2
+                // debug('loaded v2 config: %o', configObj);
+                return new Config(configObj);
+            }
 
-        if (configObj.version && configObj.version === '2') {
-            // version 2
-            // debug('loaded v2 config: %o', configObj);
-            return new Config(configObj);
+            // version 1
+            // debug('loaded v1 config: %o', configObj);
+            return new Config({profiles: configObj});
         }
-
-        // version 1
-        // debug('loaded v1 config: %o', configObj);
-        return new Config({ profiles: configObj });
+    } catch (err) {
+        throw new Error(`Unable to load config: ${err.message}`);
     }
-
     return undefined;
 };
 
@@ -113,6 +115,7 @@ class Profile {
         }
         return this;
     }
+
     toJSON() {
         return {
             url: this.url,

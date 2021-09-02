@@ -49,7 +49,7 @@ module.exports.SaveSkillCommand = class SaveSkillCommand {
                             { column: 'Path', field: 'path', width: 50 },
                             { column: 'Message', field: 'message', width: 100 },
                         ];
-                        response.details.map(d => d.path = formatValidationPath(d.path));
+                        response.details.map((d) => d.path = formatValidationPath(d.path));
                         printTable(tableSpec, response.details);
                     }
                     printError(''); // Just exit
@@ -77,7 +77,7 @@ module.exports.ListSkillsCommand = class ListSkillsCommand {
                 const tableFormat = LISTTABLEFORMAT;
                 if (options.nostatus === undefined) {
                     result = result.map((skill) => {
-                        const status = _.isEmpty(skill.actionStatuses) ? skill.deployStatus : skill.actionStatuses.map(s => `${s.name}: ${s.state}`).join(' ');
+                        const status = _.isEmpty(skill.actionStatuses) ? skill.deployStatus : skill.actionStatuses.map((s) => `${s.name}: ${s.state}`).join(' ');
                         return {
                             ...skill,
                             status,
@@ -91,7 +91,7 @@ module.exports.ListSkillsCommand = class ListSkillsCommand {
                     return printSuccess(JSON.stringify(result, null, 2), options);
                 }
                 return printTable(tableFormat,
-                    _.sortBy(result, ['name']), o => ({ ...o, updatedAt: o.updatedAt ? moment(o.updatedAt).fromNow() : '-' }));
+                    _.sortBy(result, ['name']), (o) => ({ ...o, updatedAt: o.updatedAt ? moment(o.updatedAt).fromNow() : '-' }));
             }
             return printError(`Failed to list skills: ${response.status} ${response.message}`, options);
         } catch (err) {

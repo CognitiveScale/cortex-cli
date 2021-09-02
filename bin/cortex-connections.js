@@ -30,7 +30,6 @@ const {
 
 program.description('Work with Cortex Connections');
 
-
 // List Connections
 program
     .command('list')

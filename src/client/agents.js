@@ -21,7 +21,7 @@ const { constructError, getUserAgent, checkProject } = require('../commands/util
 module.exports = class Agents {
     constructor(cortexUrl) {
         this.cortexUrl = cortexUrl;
-        this.endpointV4 = projectId => `${cortexUrl}/fabric/v4/projects/${projectId}`;
+        this.endpointV4 = (projectId) => `${cortexUrl}/fabric/v4/projects/${projectId}`;
     }
 
     invokeAgentService(projectId, token, agentName, serviceName, params) {
@@ -34,8 +34,8 @@ module.exports = class Agents {
                 'user-agent': getUserAgent(),
                 json: params,
             }).json()
-           .then(result => ({ success: true, result }))
-            .catch(err => constructError(err));
+           .then((result) => ({ success: true, result }))
+            .catch((err) => constructError(err));
     }
 
     invokeSkill(projectId, token, skillName, inputName, params) {
@@ -48,8 +48,8 @@ module.exports = class Agents {
                 'user-agent': getUserAgent(),
                 json: params,
             }).json()
-            .then(result => ({ success: true, result }))
-            .catch(err => constructError(err));
+            .then((result) => ({ success: true, result }))
+            .catch((err) => constructError(err));
     }
 
     getActivation(projectId, token, activationId, verbose, report) {
@@ -68,8 +68,8 @@ module.exports = class Agents {
         }
         return got
             .get(endpoint, opts).json()
-            .then(result => ({ success: true, result }))
-            .catch(err => constructError(err));
+            .then((result) => ({ success: true, result }))
+            .catch((err) => constructError(err));
     }
 
     listActivations(projectId, token, params) {
@@ -85,8 +85,8 @@ module.exports = class Agents {
         }
         return got
             .get(endpoint, opts).json()
-            .then(result => ({ success: true, result }))
-            .catch(err => constructError(err));
+            .then((result) => ({ success: true, result }))
+            .catch((err) => constructError(err));
     }
 
     listAgentSnapshots(projectId, token, agentName) {
@@ -98,8 +98,8 @@ module.exports = class Agents {
                 headers: { Authorization: `Bearer ${token}` },
                 'user-agent': getUserAgent(),
             }).json()
-            .then(result => ({ success: true, result }))
-            .catch(err => constructError(err));
+            .then((result) => ({ success: true, result }))
+            .catch((err) => constructError(err));
     }
 
     describeAgentSnapshot(projectId, token, snapshotId, output) {
@@ -112,7 +112,7 @@ module.exports = class Agents {
                 'user-agent': getUserAgent(),
                 searchParams: { output, deps: true },
             }).text()
-            .catch(err => constructError(err));
+            .catch((err) => constructError(err));
     }
 
     createAgentSnapshot(projectId, token, snapshot) {
@@ -125,7 +125,7 @@ module.exports = class Agents {
                 'user-agent': getUserAgent(),
                 json: snapshot,
             }).json()
-            .then(result => ({ success: true, result }))
-            .catch(err => constructError(err));
+            .then((result) => ({ success: true, result }))
+            .catch((err) => constructError(err));
     }
 };
