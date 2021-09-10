@@ -15,13 +15,20 @@
  */
 
 const commander = require('commander');
-const { ListProfilesCommand } = require('../src/commands/configure');
+const { ListProfilesCommand, ConfigureCommand } = require('../src/commands/configure');
 
 describe('sanity check', () => {
     it('lists profiles', (done) => {
         const program = new commander.Command();
         const command = new ListProfilesCommand(program);
         command.execute({ color: 'on' });
+        done();
+    });
+    // TODO fix unit test config so it doesn't overwrite users home dir, `CORTEX_CONFIG_DIR=./test/cortex` is not being honored from package.json
+    xit('Creates a new profile', (done) => {
+        const program = new commander.Command();
+        const command = new ConfigureCommand(program);
+        command.execute({ color: 'on', profile: 'test', file: 'test/files/pat.json' });
         done();
     });
 });
