@@ -119,7 +119,7 @@ program
     .option('--image, --docker [image]', 'Docker image to use as the runner')
     .option('--environmentVariables [environmentVariables]', 'Docker container environment variables, only used for daemon action types')
     .option('--jobTimeout [jobTimeout]', 'Job Timeout in seconds, this will marked the job as FAILED (default: no timeout)')
-    .option('-k --k8sResource [file...]', 'Additional kubernetes resources deployed and owned by the skill')
+    .option('-k, --k8sResource [file...]', 'Additional kubernetes resources deployed and owned by the skill')
     .option('--no-compat', 'Ignore API compatibility checks')
     .option('--podspec [podspec]', 'A file containing either a JSON or YAML formatted pod spec to merge with the action definition, used for specifying resources (like memory, ephemeral storage, CPUs, and GPUs) and tolerations (like allowing pods to be scheduled on tainted nodes).')
     .option('--port [port]', 'Docker port') // '9091'
