@@ -29,17 +29,23 @@ const {
 
 program
     .option('--file [file]', 'Personal access config file location')
-    .option('--profile [profile]', 'The profile to configure')
+    .option('--profile [profile]', 'The profile to configure', 'default')
     .option('--project [project]', 'The default project to use')
     .description('Configure the Cortex CLI');
 
 program.command('create', { isDefault: true })
     .description('Authenticate to cortex (default command)')
     .option('--file [file]', 'Personal access config file location')
-    .option('--profile [profile]', 'The profile to configure')
+    .option('--profile [profile]', 'The profile to configure', 'default')
     .option('--project [project]', 'The default project')
-    .action(() => {
-        new ConfigureCommand(program).execute({ profile: program.profile, color: program.color });
+    .action((options) => {
+        try {
+            // options.profile = program.profile;
+            options.color = program.color;
+            new ConfigureCommand(program).execute(options);
+        } catch (err) {
+            console.error(chalk.red(err.message));
+        }
     });
 
 program

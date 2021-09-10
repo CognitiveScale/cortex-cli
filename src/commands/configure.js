@@ -44,7 +44,7 @@ module.exports.ConfigureCommand = class {
     execute(options) {
         const config = readConfig();
         const profileName = options.profile || _.get(config, 'currentProfile', 'default');
-        const patFile = this.program.file;
+        const patFile = options.file;
 
         debug('configuring profile: %s', profileName);
         console.log(`Configuring profile ${chalk.green.bold(profileName)}:`);
