@@ -47,7 +47,6 @@ program.command('describe')
         }
     }));
 
-
 program.command('grant <user>')
     .description('Manage user grants')
     .option('--no-compat', 'Ignore API compatibility checks')

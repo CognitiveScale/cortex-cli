@@ -88,7 +88,7 @@ module.exports.ListResourceTypesCommand = class {
                 if (options.json) {
                     printSuccess(JSON.stringify(data, null, 2), options);
                 } else {
-                    const types = data.map(t => ({ type: t }));
+                    const types = data.map((t) => ({ type: t }));
                     const tableSpec = [
                         { column: 'Resource Type', field: 'type' },
                     ];
@@ -198,7 +198,7 @@ module.exports.ListAssessmentCommand = class {
                         { column: 'Modified', field: '_updatedAt' },
                         { column: 'Author', field: '_createdBy' },
                     ];
-                    handleTable(tableSpec, response.data, o => ({ ...o, _updatedAt: o._updatedAt ? moment(o._updatedAt).fromNow() : '-' }), 'No Assessments found');
+                    handleTable(tableSpec, response.data, (o) => ({ ...o, _updatedAt: o._updatedAt ? moment(o._updatedAt).fromNow() : '-' }), 'No Assessments found');
                 }
             })
             .catch((err) => {
@@ -293,8 +293,8 @@ module.exports.ListAssessmentReportCommand = class {
                         { column: 'Modified', field: '_updatedAt' },
                         { column: 'Author', field: '_createdBy' },
                     ];
-                    response.data.forEach(r => r.summary = JSON.stringify(Object.fromEntries(r.summary.map(item => [item.type, item.count]))));
-                    handleTable(tableSpec, response.data, o => ({ ...o, _updatedAt: o._updatedAt ? moment(o._updatedAt).fromNow() : '-' }), `No report found for the Assessment ${name}`);
+                    response.data.forEach((r) => r.summary = JSON.stringify(Object.fromEntries(r.summary.map((item) => [item.type, item.count]))));
+                    handleTable(tableSpec, response.data, (o) => ({ ...o, _updatedAt: o._updatedAt ? moment(o._updatedAt).fromNow() : '-' }), `No report found for the Assessment ${name}`);
                 }
             })
             .catch((err) => {
@@ -320,7 +320,7 @@ module.exports.GetAssessmentReportCommand = class {
                     const output = {
                         name: response.reportId,
                         assessment: response.assessmentId,
-                        summary: Object.fromEntries(response.summary.map(item => [item.type, item.count])),
+                        summary: Object.fromEntries(response.summary.map((item) => [item.type, item.count])),
                         report: response.detail,
                         _createdAt: response._createdAt,
                         _createdBy: response._createdBy,
@@ -329,8 +329,8 @@ module.exports.GetAssessmentReportCommand = class {
                 } else {
                     const flattenRefs = _.uniqBy(
                         _.flatten(
-                            response.detail.map(ref => ref.sourcePath.map(s => ({ ...s, projectId: ref._projectId }))),
-                        ), r => `${r.name}-${r.type}-${r.projectId}`,
+                            response.detail.map((ref) => ref.sourcePath.map((s) => ({ ...s, projectId: ref._projectId }))),
+                        ), (r) => `${r.name}-${r.type}-${r.projectId}`,
                     );
                     const tableSpec = [
                         { column: 'Name', field: 'name' },

@@ -4,6 +4,7 @@
         "no-underscore-dangle": [
             0
         ],
+        "max-classes-per-file": "off",
         "no-console": "off", // This is a cli app..
         "indent": 0,
         "global-require":"off",

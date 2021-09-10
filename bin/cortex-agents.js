@@ -110,7 +110,6 @@ program
         }
     }));
 
-
 program
     .command('get-activation <activationId>')
     .description('Get dataset or service activation')
@@ -158,7 +157,6 @@ program
             console.error(chalk.red(err.message));
         }
     }));
-
 
     program
     .command('list-services <agentName>')

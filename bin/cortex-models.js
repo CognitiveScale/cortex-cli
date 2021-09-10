@@ -74,7 +74,6 @@ program
         }
     }));
 
-
 // Delete Model
 program
     .command('delete <modelName>')
@@ -160,6 +159,5 @@ program
             console.error(chalk.red(err.message));
         }
     }));
-
 
 program.parse(process.argv);

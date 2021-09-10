@@ -26,7 +26,7 @@ const Content = require('./content');
 module.exports = class Experiments {
     constructor(cortexUrl) {
         this.cortexUrl = cortexUrl;
-        this.endpoint = projectId => `${cortexUrl}/fabric/v4/projects/${projectId}/experiments`;
+        this.endpoint = (projectId) => `${cortexUrl}/fabric/v4/projects/${projectId}/experiments`;
     }
 
     listExperiments(projectId, modelId, token) {
@@ -38,8 +38,8 @@ module.exports = class Experiments {
                 headers: { Authorization: `Bearer ${token}` },
                 'user-agent': getUserAgent(),
             }).json()
-            .then(result => ({ success: true, result }))
-            .catch(err => constructError(err));
+            .then((result) => ({ success: true, result }))
+            .catch((err) => constructError(err));
     }
 
     describeExperiment(projectId, token, name) {
@@ -51,8 +51,8 @@ module.exports = class Experiments {
                 headers: { Authorization: `Bearer ${token}` },
                 'user-agent': getUserAgent(),
             }).json()
-            .then(result => ({ success: true, result }))
-            .catch(err => constructError(err));
+            .then((result) => ({ success: true, result }))
+            .catch((err) => constructError(err));
     }
 
     deleteExperiment(projectId, token, name) {
@@ -64,8 +64,8 @@ module.exports = class Experiments {
                 headers: { Authorization: `Bearer ${token}` },
                 'user-agent': getUserAgent(),
             }).json()
-            .then(result => ({ success: true, result }))
-            .catch(err => constructError(err));
+            .then((result) => ({ success: true, result }))
+            .catch((err) => constructError(err));
     }
 
     listRuns(projectId, token, experimentName, filter, limit, sort) {
@@ -82,8 +82,8 @@ module.exports = class Experiments {
                 'user-agent': getUserAgent(),
                 searchParams: query,
             }).json()
-            .then(result => ({ success: true, result }))
-            .catch(err => constructError(err));
+            .then((result) => ({ success: true, result }))
+            .catch((err) => constructError(err));
     }
 
     describeRun(projectId, token, experimentName, runId) {
@@ -95,8 +95,8 @@ module.exports = class Experiments {
                 headers: { Authorization: `Bearer ${token}` },
                 'user-agent': getUserAgent(),
             }).json()
-            .then(result => ({ success: true, result }))
-            .catch(err => constructError(err));
+            .then((result) => ({ success: true, result }))
+            .catch((err) => constructError(err));
     }
 
     deleteRun(projectId, token, experimentName, runId) {
@@ -108,8 +108,8 @@ module.exports = class Experiments {
                 headers: { Authorization: `Bearer ${token}` },
                 'user-agent': getUserAgent(),
             }).json()
-            .then(result => ({ success: true, result }))
-            .catch(err => constructError(err));
+            .then((result) => ({ success: true, result }))
+            .catch((err) => constructError(err));
     }
 
     _artifactKey(experimentName, runId, artifact) {
@@ -141,8 +141,8 @@ module.exports = class Experiments {
                 'user-agent': getUserAgent(),
                 json: experimentObj,
             }).json()
-            .then(result => ({ success: true, result }))
-            .catch(err => constructError(err));
+            .then((result) => ({ success: true, result }))
+            .catch((err) => constructError(err));
     }
 
     createRun(projectId, token, runObj) {
@@ -155,8 +155,8 @@ module.exports = class Experiments {
                 'user-agent': getUserAgent(),
                 json: runObj,
             }).json()
-            .then(result => ({ success: true, result }))
-            .catch(err => constructError(err));
+            .then((result) => ({ success: true, result }))
+            .catch((err) => constructError(err));
     }
 
     async uploadArtifact(projectId, token, experimentName, runId, content, artifact, contentType = 'application/octet-stream') {

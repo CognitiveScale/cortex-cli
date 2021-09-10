@@ -8,7 +8,7 @@ module.exports = (plop) => {
                 type: 'input',
                 name: 'name',
                 message: 'Skill Name? (Skill name must be alphanumeric, beginning with a letter. Hyphen and underscore allowed internally.)',
-                validate: value => /^[0-9a-zA-Z][0-9a-zA-Z_\- ]{0,18}[0-9a-zA-Z]$/.test(value),
+                validate: (value) => /^[0-9a-zA-Z][0-9a-zA-Z_\- ]{0,18}[0-9a-zA-Z]$/.test(value),
             },
             {
                 type: 'list',

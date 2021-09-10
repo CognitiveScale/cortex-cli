@@ -51,7 +51,7 @@ module.exports.SaveAgentCommand = class SaveAgentCommand {
                 { column: 'Path', field: 'path', width: 50 },
                 { column: 'Message', field: 'message', width: 100 },
             ];
-            response.details.map(d => d.path = formatValidationPath(d.path));
+            response.details.map((d) => d.path = formatValidationPath(d.path));
             printTable(tableSpec, response.details);
             printError(''); // Just exit
         } else {
@@ -82,7 +82,7 @@ module.exports.ListAgentsCommand = class ListAgentsCommand {
                 if (options.json) {
                     printSuccess(JSON.stringify(result, null, 2), options);
                 } else {
-                    printTable(LISTTABLEFORMAT, result, o => ({ ...o, updatedAt: o.updatedAt ? moment(o.updatedAt).fromNow() : '-' }));
+                    printTable(LISTTABLEFORMAT, result, (o) => ({ ...o, updatedAt: o.updatedAt ? moment(o.updatedAt).fromNow() : '-' }));
                 }
             } else {
                 printError(`Failed to list agents: ${response.status} ${response.message}`, options);
@@ -268,7 +268,7 @@ module.exports.ListActivationsCommand = class {
                         return '-';
                     };
 
-                    printTable(tableSpec, _.map(result, o => ({
+                    printTable(tableSpec, _.map(result, (o) => ({
                         ...o,
                         name: genName(o),
                         start: o.start ? moment(o.start).fromNow() : '-',
@@ -341,7 +341,7 @@ module.exports.ListAgentSnapshotsCommand = class {
                         { column: 'Created', field: 'createdAt', width: 26 },
                         { column: 'Author', field: 'createdBy', width: 26 },
                     ];
-                    printTable(tableSpec, result, o => ({ ...o, createdAt: o.createdAt ? moment(o.createdAt).fromNow() : '-' }));
+                    printTable(tableSpec, result, (o) => ({ ...o, createdAt: o.createdAt ? moment(o.createdAt).fromNow() : '-' }));
                 }
             } else {
                 printError(`Failed to list agent snapshots ${agentName}: ${response.message}`, options);

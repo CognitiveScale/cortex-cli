@@ -47,7 +47,7 @@ program
     .command('users [cmd]', 'Work with a Cortex Users');
 
 program.parse(process.argv, { noActionHandler: () => {} });
-if (!program.commands.map(cmd => cmd._name).includes(program.args[0])) {
+if (!program.commands.map((cmd) => cmd._name).includes(program.args[0])) {
     program.outputHelp(identity);
     process.exit(1);
 }

@@ -139,7 +139,7 @@ const DeployExperimentCommand = class {
                 writeToFile(runDesc, filepath);
                 if (result.artifacts) {
                     await Promise.all(Object.values(result.artifacts)
-                        .map(value => content.downloadContent(project, profile.token, value, false, path.join(artifactsDir, value))));
+                        .map((value) => content.downloadContent(project, profile.token, value, false, path.join(artifactsDir, value))));
                 }
                 manifest.run = [filepath];
                 exports.run = exportRun;
@@ -246,7 +246,7 @@ module.exports.DeployCampaignCommand = class {
                 files.push(filepath);
                 entries[type] = files;
                 resolve(filepath);
-            }).catch(e => reject(e));
+            }).catch((e) => reject(e));
         });
     }
 
@@ -274,7 +274,7 @@ module.exports.DeployCampaignCommand = class {
                     zipfile.readEntry();
                 });
             });
-            zipfile.on('error', e => printError(e));
+            zipfile.on('error', (e) => printError(e));
             zipfile.once('end', async () => {
                 await addDependencies(profile.url, profile.token, project, 'Campaign', campaignName);
                 Promise.all(promises).then(() => {
@@ -339,13 +339,13 @@ module.exports.DeploySkillCommand = class {
                 exports.skill = skillName;
                 const dependencies = await addDependencies(profile.url, profile.token, project, 'Skill', skillName);
                 // export linked model/experiment of skill
-                const mlOps = Object.fromEntries(dependencies.data.filter(d => ['Model', 'Experiment', 'ExperimentRun'].includes(d.type)).map(d => [d.type, d.name]));
+                const mlOps = Object.fromEntries(dependencies.data.filter((d) => ['Model', 'Experiment', 'ExperimentRun'].includes(d.type)).map((d) => [d.type, d.name]));
                 if (mlOps && mlOps.Experiment) {
                     await new DeployExperimentCommand(this.program).execute(mlOps.Experiment, (mlOps.ExperimentRun || '').split('-').pop(), options);
                 }
                 // export actions of the skill
-                const existingActions = result.actions.map(a => a.name);
-                const actions = dependencies.data.filter(d => d.type === 'Action' && !existingActions.includes(d.name)).map(d => d.name);
+                const existingActions = result.actions.map((a) => a.name);
+                const actions = dependencies.data.filter((d) => d.type === 'Action' && !existingActions.includes(d.name)).map((d) => d.name);
                 if (actions.length > 0) {
                     const actionsClient = new Actions(profile.url);
                     await Promise.all(actions.map(async (a) => {
@@ -357,11 +357,11 @@ module.exports.DeploySkillCommand = class {
                             printError(`Failed to export action ${a}: ${response.message}`, options);
                         }
                     }));
-                    manifest.action = actions.map(a => path.join(artifactsDir, 'actions', `${a}.json`));
+                    manifest.action = actions.map((a) => path.join(artifactsDir, 'actions', `${a}.json`));
                     exports.action = actions;
                 }
                 // export types of skill
-                const types = dependencies.data.filter(d => d.type === 'Type').map(d => d.name);
+                const types = dependencies.data.filter((d) => d.type === 'Type').map((d) => d.name);
                 if (types.length > 0) {
                     await Promise.all(types.map(async (type) => {
                         response = await catalog.describeType(project, profile.token, type);
@@ -372,7 +372,7 @@ module.exports.DeploySkillCommand = class {
                             printError(`Failed to export type ${type}: ${JSON.stringify(response)}`, options);
                         }
                     }));
-                    manifest.type = types.map(a => path.join(artifactsDir, 'types', `${a}.json`));
+                    manifest.type = types.map((a) => path.join(artifactsDir, 'types', `${a}.json`));
                     exports.type = types;
                 }
                 updateManifest(manifest);

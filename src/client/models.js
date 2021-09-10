@@ -19,11 +19,10 @@ const {
     constructError, checkProject, getUserAgent,
 } = require('../commands/utils');
 
-
 module.exports = class Models {
     constructor(cortexUrl) {
         this.cortexUrl = cortexUrl;
-        this.endpointV4 = projectId => `${cortexUrl}/fabric/v4/projects/${projectId}/models`;
+        this.endpointV4 = (projectId) => `${cortexUrl}/fabric/v4/projects/${projectId}/models`;
     }
 
     saveModel(projectId, token, modelObj) {
@@ -36,8 +35,8 @@ module.exports = class Models {
                 'user-agent': getUserAgent(),
                 json: modelObj,
             }).json()
-            .then(res => ({ success: true, message: res }))
-            .catch(err => constructError(err));
+            .then((res) => ({ success: true, message: res }))
+            .catch((err) => constructError(err));
     }
 
     deleteModel(projectId, token, modelName) {
@@ -50,8 +49,8 @@ module.exports = class Models {
                 'user-agent': getUserAgent(),
             })
             .json()
-            .then(model => ({ success: true, model }))
-            .catch(err => constructError(err));
+            .then((model) => ({ success: true, model }))
+            .catch((err) => constructError(err));
     }
 
     describeModel(projectId, token, modelName, verbose) {
@@ -64,8 +63,8 @@ module.exports = class Models {
                 'user-agent': getUserAgent(),
                 searchParams: { verbose },
             }).json()
-            .then(model => ({ success: true, model }))
-            .catch(err => constructError(err));
+            .then((model) => ({ success: true, model }))
+            .catch((err) => constructError(err));
     }
 
     listModels(projectId, offset, limit, tags, token) {
@@ -78,8 +77,8 @@ module.exports = class Models {
                 'user-agent': getUserAgent(),
             })
             .json()
-            .then(modelsResp => ({ success: true, ...modelsResp }))
-            .catch(err => constructError(err));
+            .then((modelsResp) => ({ success: true, ...modelsResp }))
+            .catch((err) => constructError(err));
     }
 
     listModelRuns(projectId, modelName, token) {
@@ -92,7 +91,7 @@ module.exports = class Models {
                 'user-agent': getUserAgent(),
             })
             .json()
-            .then(modelsResp => ({ success: true, ...modelsResp }))
-            .catch(err => constructError(err));
+            .then((modelsResp) => ({ success: true, ...modelsResp }))
+            .catch((err) => constructError(err));
     }
 };

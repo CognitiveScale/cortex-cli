@@ -30,7 +30,6 @@ const {
 
 program.description('Work with Cortex Contents');
 
-
 // List Content
 program
     .command('list')
@@ -103,6 +102,5 @@ program
             console.error(chalk.red(err.message));
         }
     }));
-
 
 program.parse(process.argv);

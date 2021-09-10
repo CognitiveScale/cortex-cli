@@ -50,8 +50,8 @@ module.exports = class Users {
                 headers: { Authorization: `Bearer ${token}` },
                 'user-agent': getUserAgent(),
             }).json()
-            .then(res => ({ success: true, result: res }))
-            .catch(err => constructError(err));
+            .then((res) => ({ success: true, result: res }))
+            .catch((err) => constructError(err));
     }
 
     deleteServiceUser(token, user) {
@@ -62,8 +62,8 @@ module.exports = class Users {
                 headers: { Authorization: `Bearer ${token}` },
                 'user-agent': getUserAgent(),
             }).json()
-            .then(res => ({ success: true, result: res }))
-            .catch(err => constructError(err));
+            .then((res) => ({ success: true, result: res }))
+            .catch((err) => constructError(err));
     }
 
     listServiceUsers(token) {
@@ -74,8 +74,8 @@ module.exports = class Users {
                 headers: { Authorization: `Bearer ${token}` },
                 'user-agent': getUserAgent(),
             }).json()
-            .then(res => ({ success: true, result: res }))
-            .catch(err => constructError(err));
+            .then((res) => ({ success: true, result: res }))
+            .catch((err) => constructError(err));
     }
 
     describeUser(token) {
@@ -86,8 +86,8 @@ module.exports = class Users {
                 headers: { Authorization: `Bearer ${token}` },
                 'user-agent': getUserAgent(),
             }).json()
-            .then(res => ({ success: true, result: res }))
-            .catch(err => constructError(err));
+            .then((res) => ({ success: true, result: res }))
+            .catch((err) => constructError(err));
     }
 
     createGrantForUser(token, body) {
@@ -99,8 +99,8 @@ module.exports = class Users {
                 'user-agent': getUserAgent(),
                 json: body,
             }).json()
-            .then(res => ({ success: true, result: res }))
-            .catch(err => constructError(err));
+            .then((res) => ({ success: true, result: res }))
+            .catch((err) => constructError(err));
     }
 
     removeGrantFromUser(token, body) {
@@ -112,8 +112,8 @@ module.exports = class Users {
                 'user-agent': getUserAgent(),
                 json: body,
             }).json()
-            .then(res => ({ success: true, result: res }))
-            .catch(err => constructError(err));
+            .then((res) => ({ success: true, result: res }))
+            .catch((err) => constructError(err));
     }
 
     addUsersToProject(token, project, users) {
@@ -125,8 +125,8 @@ module.exports = class Users {
                 'user-agent': getUserAgent(),
                 json: { project, users },
             }).json()
-            .then(res => ({ success: true, result: res }))
-            .catch(err => constructError(err));
+            .then((res) => ({ success: true, result: res }))
+            .catch((err) => constructError(err));
     }
 
     removeUsersFromProject(token, project, users) {
@@ -138,7 +138,7 @@ module.exports = class Users {
                 'user-agent': getUserAgent(),
                 json: { project, users },
             }).json()
-            .then(res => ({ success: true, result: res }))
-            .catch(err => constructError(err));
+            .then((res) => ({ success: true, result: res }))
+            .catch((err) => constructError(err));
     }
 };
