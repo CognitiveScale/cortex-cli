@@ -22,7 +22,8 @@ const fs = require('fs');
 const sinon = require('sinon');
 const { expect } = require('chai');
 const yaml = require('js-yaml');
-const program = require('../bin/cortex-configure');
+const { stripAnsi } = require('./utils');
+ const program = require('../bin/cortex-configure');
 
 let restore;
 describe('configure', () => {
@@ -48,14 +49,14 @@ describe('configure', () => {
     });
 
     function getPrintedLines() {
-        return _.flatten(printSpy.args);
+        return _.flatten(printSpy.args).map((s) => stripAnsi(s));
     }
 
     it('lists profiles', (done) => {
         program.parse(['node', 'configure', 'list']);
         sinon.assert.calledTwice(printSpy);
         // default is set at default...
-        expect(getPrintedLines()).to.eql(['\u001b[32m\u001b[1mdefault\u001b[22m\u001b[39m', 'other']);
+        expect(getPrintedLines()).to.eql(['default', 'other']);
         done();
     });
 
@@ -71,12 +72,12 @@ describe('configure', () => {
         program.parse(['node', 'configure', '--file', './test/cortex/pat-file.json', '--project', 'test', '--profile', 'conftest']);
         const output = getPrintedLines();
         expect(output).to.length(2);
-        expect(output[1]).to.eql('Configuration for profile [32m[1mconftest[22m[39m saved.');
+        expect(output[1]).to.eql('Configuration for profile conftest saved.');
         const conf = yaml.load(fs.readFileSync(path.join(tmpDir, 'config')));
         expect(conf.profiles.conftest).to.haveOwnProperty('project', 'test');
         printSpy.resetHistory();
         program.parse(['node', 'configure', 'list']);
-        expect(getPrintedLines()).to.eql(['default', 'other', '\u001b[32m\u001b[1mconftest\u001b[22m\u001b[39m']);
+        expect(getPrintedLines()).to.eql(['default', 'other', 'conftest']);
         done();
     });
 });
