@@ -6,7 +6,7 @@
   "scripts": {
     "preinstall": "npx check-node-version -p --package",
     "pretest": "eslint bin/**/*.js src/**/*.js test/**/*.js && audit-ci -h",
-    "test": "CORTEX_CONFIG_DIR=./test/cortex mocha --recursive"
+    "test": "NODE_ENV=test mocha --exit"
   },
   "engines": {
     "node": ">=12.0.0"
