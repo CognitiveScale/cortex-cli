@@ -44,17 +44,17 @@ describe('Upload Directory', () => {
 
         const expectedFileDicts = [
             {
-                canonical: '/home/jgielstra/projects/cortex6/cortex-cli/test/cortex/config',
+                canonical: `${__dirname}/cortex/config`,
                 relative: 'config',
                 size: 919,
             },
             {
-                canonical: '/home/jgielstra/projects/cortex6/cortex-cli/test/cortex/pat-file.json',
+                canonical: `${__dirname}/cortex/pat-file.json`,
                 relative: 'pat-file.json',
                 size: 326,
             },
             {
-                canonical: '/home/jgielstra/projects/cortex6/cortex-cli/test/cortex/sample/upload/config',
+                canonical: `${__dirname}/cortex/sample/upload/config`,
                 relative: 'sample/upload/config',
                 size: 483,
             },
