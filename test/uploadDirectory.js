@@ -16,12 +16,21 @@
 
 const commander = require('commander');
 const chai = require('chai');
+const mockedEnv = require('mocked-env');
 const { UploadContent } = require('../src/commands/content');
 const { humanReadableFileSize } = require('../src/commands/utils');
 
 const { expect } = chai;
-
+let restoreEnv;
 describe('Upload Directory', () => {
+    before(() => {
+        restoreEnv = mockedEnv({
+            CORTEX_CONFIG_DIR: './test/cortex',
+        });
+    });
+    after(() => {
+        restoreEnv();
+    });
     it('test upload', (done) => {
         const program = new commander.Command();
         const command = new UploadContent(program);
@@ -35,14 +44,19 @@ describe('Upload Directory', () => {
 
         const expectedFileDicts = [
             {
- canonical: `${__dirname}/cortex/config`,
-              relative: 'config',
-              size: 483,
+                canonical: '/home/jgielstra/projects/cortex6/cortex-cli/test/cortex/config',
+                relative: 'config',
+                size: 919,
             },
             {
- canonical: `${__dirname}/cortex/sample/upload/config`,
-              relative: 'sample/upload/config',
-              size: 483,
+                canonical: '/home/jgielstra/projects/cortex6/cortex-cli/test/cortex/pat-file.json',
+                relative: 'pat-file.json',
+                size: 326,
+            },
+            {
+                canonical: '/home/jgielstra/projects/cortex6/cortex-cli/test/cortex/sample/upload/config',
+                relative: 'sample/upload/config',
+                size: 483,
             },
         ];
 

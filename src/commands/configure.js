@@ -41,10 +41,10 @@ module.exports.ConfigureCommand = class {
         this.program = program;
     }
 
-    execute(options) {
+    execute() {
+        const { profile, file, project } = this.program.opts();
         const config = readConfig();
-        const profileName = options.profile || _.get(config, 'currentProfile', 'default');
-        const patFile = this.program.file;
+        const profileName = profile || _.get(config, 'currentProfile', 'default');
 
         debug('configuring profile: %s', profileName);
         console.log(`Configuring profile ${chalk.green.bold(profileName)}:`);
@@ -53,14 +53,13 @@ module.exports.ConfigureCommand = class {
         co(function* () {
             try {
                 let patData = null;
-                if (patFile) {
-                    patData = _validatePatFile(patFile);
+                if (file) {
+                    patData = _validatePatFile(file);
                 } else {
                     patData = JSON.parse(yield prompt('Cortex Personal Access Config: '));
                 }
-                cmd.saveConfig(config, profileName, patData, cmd.program.project);
+                cmd.saveConfig(config, profileName, patData, project);
                 console.log(`Configuration for profile ${chalk.green.bold(profileName)} saved.`);
-                process.exit(1);
             } catch (err) {
                 printError(err);
             }
@@ -133,7 +132,8 @@ module.exports.ListProfilesCommand = class {
         this.program = program;
     }
 
-    execute(options) {
+    execute() {
+        const options = this.program.opts();
         const config = readConfig();
         if (config === undefined) {
             printError('Configuration not found.  Please run "cortex configure".', options);
