@@ -31,6 +31,7 @@ program
     .option('--file [file]', 'Personal access config file location')
     .option('--profile [profile]', 'The profile to configure', 'default')
     .option('--project [project]', 'The default project to use')
+    .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .description('Configure the Cortex CLI');
 
 program.command('create', { isDefault: true })
@@ -38,11 +39,9 @@ program.command('create', { isDefault: true })
     .option('--file [file]', 'Personal access config file location')
     .option('--profile [profile]', 'The profile to configure', 'default')
     .option('--project [project]', 'The default project')
-    .action((options) => {
+    .action(() => {
         try {
-            // options.profile = program.profile;
-            options.color = program.color;
-            new ConfigureCommand(program).execute(options);
+            new ConfigureCommand(program).execute();
         } catch (err) {
             console.error(chalk.red(err.message));
         }
@@ -62,9 +61,6 @@ program
             console.error(chalk.red(err.message));
         }
     });
-
-program
-    .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on');
 
 program
     .command('list')
@@ -97,4 +93,7 @@ program
         new SetProfileCommand(program).execute(profileName, { color: program.color });
     });
 
-program.parse(process.argv);
+if (process.env.NODE_ENV !== 'test') {
+    program.parse(process.argv);
+}
+module.exports = program;

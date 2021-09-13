@@ -23,9 +23,13 @@ const debug = require('debug')('cortex:config');
 const { JWT, JWK } = require('jose');
 const { printError } = require('./commands/utils');
 
-module.exports.generateJwt = generateJwt = function (profile, expiresIn = '2m') {
+function configDir() {
+    return process.env.CORTEX_CONFIG_DIR || path.join(os.homedir(), '.cortex');
+}
+
+function generateJwt(profile, expiresIn = '2m') {
     const {
-         username, issuer, audience, jwk,
+        username, issuer, audience, jwk,
     } = profile;
     const jwtSigner = JWK.asKey(jwk);
     const payload = {
@@ -36,56 +40,14 @@ module.exports.generateJwt = generateJwt = function (profile, expiresIn = '2m') 
         subject: username,
         expiresIn,
     });
-};
-
-module.exports.defaultConfig = defaultConfig = function () {
-  return new Config({});
-};
-
-module.exports.readConfig = readConfig = function () {
-    try {
-        const configDir = process.env.CORTEX_CONFIG_DIR || path.join(os.homedir(), '.cortex');
-        if (!fs.existsSync(configDir)) {
-            fs.mkdirSync(configDir);
-        }
-
-        debug(`Reading config from ${configDir}`);
-
-        const configFile = path.join(configDir, 'config');
-        if (fs.existsSync(configFile)) {
-            // deal with config versions
-            const configObj = JSON.parse(fs.readFileSync(configFile));
-
-            if (configObj.version && configObj.version === '3') {
-                // version 3
-                // debug('loaded v3 config: %o', configObj);
-                return new Config(configObj);
-            }
-            fs.copyFileSync(configFile, path.join(configDir, 'config_v2'));
-            defaultConfig().save();
-            printError('Old profile found and moved to ~/.cortex/config_v2. Please run "cortex configure"');
-
-            if (configObj.version && configObj.version === '2') {
-                // version 2
-                // debug('loaded v2 config: %o', configObj);
-                return new Config(configObj);
-            }
-
-            // version 1
-            // debug('loaded v1 config: %o', configObj);
-            return new Config({profiles: configObj});
-        }
-    } catch (err) {
-        throw new Error(`Unable to load config: ${err.message}`);
-    }
-    return undefined;
-};
+}
 
 const ProfileSchema = Joi.object().keys({
     name: Joi.string().optional(),
     url: Joi.string().uri().required(),
     username: Joi.string().required(),
-    account: Joi.string().required(),
+    // deprecated
+    account: Joi.string().optional(),
     jwk: Joi.any().required(),
     issuer: Joi.string().required(),
     audience: Joi.string().required(),
@@ -101,14 +63,13 @@ class Profile {
         this.url = url;
         this.username = username;
         this.jwk = jwk;
-        this.account = 'cortex';
         this.issuer = issuer;
         this.audience = audience;
         this.project = project;
     }
 
     validate() {
-        const { error, value } = ProfileSchema.validate(this, { abortEarly: false });
+        const { error } = ProfileSchema.validate(this, { abortEarly: false });
         if (error) {
             throw new Error(`Invalid configuration profile <${this.name}>: ${error.details[0].message}. `
                 + 'Please get your Personal Access Token from the Cortex Console and run "cortex configure".');
@@ -133,10 +94,9 @@ class Config {
         this.version = version || '3';
         this.profiles = profiles || {};
         this.currentProfile = currentProfile;
-
-        for (const name of Object.keys(this.profiles)) {
+        Object.keys(this.profiles).forEach((name) => {
             this.profiles[name] = new Profile(name, this.profiles[name]);
-        }
+        });
     }
 
     getProfile(name, useenv = true) {
@@ -164,29 +124,68 @@ class Config {
 
     toJSON() {
         const profiles = {};
-        for (const name of Object.keys(this.profiles)) {
+        Object.keys(this.profiles).forEach((name) => {
             profiles[name] = this.profiles[name].toJSON();
-        }
-
+        });
         return { version: this.version, profiles, currentProfile: this.currentProfile };
     }
 
     save() {
-        const configDir = path.join(os.homedir(), '.cortex');
-        if (!fs.existsSync(configDir)) {
-            fs.mkdirSync(configDir);
+        const dir = configDir();
+        if (!fs.existsSync(dir)) {
+            fs.mkdirSync(dir);
         }
 
         _.forEach(this.profiles, (profile) => {
             delete profile.token;
         });
 
-        const configFile = path.join(configDir, 'config');
+        const configFile = path.join(dir, 'config');
         fs.writeFileSync(configFile, JSON.stringify(this.toJSON(), null, 2));
     }
 }
 
-module.exports.loadProfile = function (profileName, useenv = true) {
+function defaultConfig() {
+    return new Config({});
+}
+
+function readConfig() {
+    try {
+        const dir = configDir();
+        if (!fs.existsSync(dir)) {
+            fs.mkdirSync(dir);
+        }
+
+        debug(`Reading config from ${dir}`);
+
+        const configFile = path.join(dir, 'config');
+        if (fs.existsSync(configFile)) {
+            // deal with config versions
+            const configObj = JSON.parse(fs.readFileSync(configFile));
+
+            if (configObj.version && configObj.version === '3') {
+                // version 3
+                return new Config(configObj);
+            }
+            fs.copyFileSync(configFile, path.join(dir, 'config_v2'));
+            defaultConfig().save();
+            printError('Old profile found and moved to ~/.cortex/config_v2. Please run "cortex configure"');
+
+            if (configObj.version && configObj.version === '2') {
+                // version 2
+                return new Config(configObj);
+            }
+
+            // version 1
+            return new Config({ profiles: configObj });
+        }
+    } catch (err) {
+        throw new Error(`Unable to load config: ${err.message}`);
+    }
+    return undefined;
+}
+
+function loadProfile(profileName, useenv = true) {
     const config = readConfig();
     if (config === undefined) {
         throw new Error('Please configure the Cortex CLI by running "cortex configure"');
@@ -198,4 +197,11 @@ module.exports.loadProfile = function (profileName, useenv = true) {
         throw new Error(`Profile with name "${name}" could not be located in your configuration.  Please run "cortex configure".`);
     }
     return profile;
+}
+
+module.exports = {
+    loadProfile,
+    generateJwt,
+    defaultConfig,
+    readConfig,
 };
