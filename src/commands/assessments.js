@@ -44,7 +44,7 @@ module.exports.ListResourcesCommand = class {
     }
 
     execute(command) {
-        const options = command.opts();
+        const options = command;
         const profile = loadProfile(options.profile);
         debug('%s.ListResourcesCommand()', profile.name);
 
@@ -76,7 +76,7 @@ module.exports.ListResourceTypesCommand = class {
     }
 
     execute(command) {
-        const options = command.opts();
+        const options = command;
         const profile = loadProfile(options.profile);
         debug('%s.ListResourceTypesCommand()', profile.name);
 
@@ -107,7 +107,7 @@ module.exports.DependencyTreeCommand = class {
     }
 
     execute(dependencyFile, command) {
-        const options = command.opts();
+        const options = command;
         const profile = loadProfile(options.profile);
         debug('%s.DependencyTreeCommand()', profile.name);
 
@@ -142,7 +142,7 @@ module.exports.CreateAssessmentCommand = class {
     }
 
     execute(assessmentDef, command) {
-        const options = command.opts();
+        const options = command;
         const profile = loadProfile(options.profile);
         debug('%s.CreateAssessmentCommand()', profile.name);
         const client = new Assessments(profile.url);
@@ -353,7 +353,7 @@ module.exports.ExportAssessmentReportCommand = class {
     }
 
     execute(name, reportId, command) {
-        const options = command.opts();
+        const options = command;
         const profile = loadProfile(options.profile);
         debug('%s.ExportAssessmentReportCommand()', profile.name);
 
