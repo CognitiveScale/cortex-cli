@@ -59,7 +59,7 @@ module.exports.DescribeCampaignCommand = class DescribeCampaignCommand {
     }
 
     async execute(campaignName, cmd) {
-        const options = cmd.opts();
+        const options = cmd;
         const profile = loadProfile(options.profile);
         debug('%s.executeDescribeCampaign(%s)', profile.name, campaignName);
         const cli = new ApiServerClient(profile.url);
@@ -80,7 +80,7 @@ module.exports.ExportCampaignCommand = class ExportCampaignCommand {
     }
 
     execute(campaignName, cmd) {
-        const options = cmd.opts();
+        const options = cmd;
         const profile = loadProfile(options.profile);
         debug('%s.executeExportCampaignCommand(%s)', profile.name, campaignName);
         const cli = new Catalog(profile.url);
@@ -102,7 +102,7 @@ module.exports.ImportCampaignCommand = class ImportCampaignCommand {
     }
 
     execute(campaignFilepath, cmd) {
-        const options = cmd.opts();
+        const options = cmd;
         const profile = loadProfile(options.profile);
         debug('%s.executeImportCampaignCommand(%s)', profile.name, campaignFilepath);
         const cli = new Catalog(profile.url);
@@ -121,7 +121,7 @@ module.exports.DeployCampaignCommand = class DeployCampaignCommand {
     }
 
     execute(campaignName, cmd) {
-        const options = cmd.opts();
+        const options = cmd;
         const profile = loadProfile(options.profile);
         debug('%s.executeDeployCampaignCommand(%s)', profile.name, campaignName);
         const cli = new Catalog(profile.url);
@@ -151,7 +151,7 @@ module.exports.UndeployCampaignCommand = class UndeployCampaignCommand {
     }
 
     execute(campaignName, cmd) {
-        const options = cmd.opts();
+        const options = cmd;
         const profile = loadProfile(options.profile);
         debug('%s.executeUndeployCampaignCommand(%s)', profile.name, campaignName);
         const cli = new Catalog(profile.url);
@@ -181,7 +181,7 @@ module.exports.UndeployMissionCommand = class UndeployMissionCommand {
     }
 
     execute(campaignName, missionName, cmd) {
-        const options = cmd.opts();
+        const options = cmd;
         const profile = loadProfile(options.profile);
         debug('%s.executeUndeployMissionCommand(%s)', profile.name, missionName);
         const cli = new Catalog(profile.url);
@@ -206,7 +206,7 @@ module.exports.ListMissionsCommand = class ListMissionsCommand {
     }
 
     execute(campaign, cmd) {
-        const options = cmd.opts();
+        const options = cmd;
         const profile = loadProfile(options.profile);
         debug('%s.executeListMissionsCommand(%s)', profile.name, campaign);
         const cli = new Catalog(profile.url);
@@ -239,7 +239,7 @@ module.exports.DeployMissionCommand = class DeployMissionCommand {
     }
 
     execute(campaign, mission, cmd) {
-        const options = cmd.opts();
+        const options = cmd;
         const profile = loadProfile(options.profile);
         debug('%s.executeDeployMissionCommand(%s)', profile.name, campaign);
         const cli = new Catalog(profile.url);
@@ -258,7 +258,7 @@ module.exports.DescribeMissionCommand = class DescribeMissionCommand {
     }
 
     execute(campaign, mission, cmd) {
-        const options = cmd.opts();
+        const options = cmd;
         const profile = loadProfile(options.profile);
         debug('%s.executeDescribeMissionCommand(%s)', profile.name, campaign);
         const cli = new Catalog(profile.url);

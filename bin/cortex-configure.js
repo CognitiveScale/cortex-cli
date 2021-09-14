@@ -1,5 +1,3 @@
-#!/usr/bin/env node
-
 /*
  * Copyright 2020 Cognitive Scale, Inc. All Rights Reserved.
  *
@@ -29,17 +27,22 @@ const {
 
 program
     .option('--file [file]', 'Personal access config file location')
-    .option('--profile [profile]', 'The profile to configure')
+    .option('--profile [profile]', 'The profile to configure', 'default')
     .option('--project [project]', 'The default project to use')
+    .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .description('Configure the Cortex CLI');
 
 program.command('create', { isDefault: true })
     .description('Authenticate to cortex (default command)')
     .option('--file [file]', 'Personal access config file location')
-    .option('--profile [profile]', 'The profile to configure')
+    .option('--profile [profile]', 'The profile to configure', 'default')
     .option('--project [project]', 'The default project')
     .action(() => {
-        new ConfigureCommand(program).execute({ profile: program.profile, color: program.color });
+        try {
+            new ConfigureCommand(program).execute();
+        } catch (err) {
+            console.error(chalk.red(err.message));
+        }
     });
 
 program
@@ -56,9 +59,6 @@ program
             console.error(chalk.red(err.message));
         }
     });
-
-program
-    .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on');
 
 program
     .command('list')
@@ -91,4 +91,7 @@ program
         new SetProfileCommand(program).execute(profileName, { color: program.color });
     });
 
-program.parse(process.argv);
+if (process.env.NODE_ENV !== 'test') {
+    program.parse(process.argv);
+}
+module.exports = program;
