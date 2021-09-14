@@ -29,6 +29,7 @@ const {
     DeploySkillCommand,
     UndeploySkillCommand,
     SkillLogsCommand,
+    DeleteSkillCommand,
 } = require('../src/commands/skills');
 
 program.description('Work with Cortex Skills');
@@ -99,6 +100,22 @@ program
     .action(withCompatibilityCheck((options) => {
         try {
             new ListSkillsCommand(program).execute(options);
+        } catch (err) {
+            console.error(chalk.red(err.message));
+        }
+    }));
+
+// Delete Skill
+program
+    .command('delete <skillName>')
+    .description('Delete a skill')
+    .option('--no-compat', 'Ignore API compatibility checks')
+    .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
+    .option('--profile [profile]', 'The profile to use')
+    .option('--project [project]', 'The project to use')
+    .action(withCompatibilityCheck((skillName, options) => {
+        try {
+            new DeleteSkillCommand(program).execute(skillName, options);
         } catch (err) {
             console.error(chalk.red(err.message));
         }
