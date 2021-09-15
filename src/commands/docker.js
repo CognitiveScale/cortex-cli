@@ -29,13 +29,13 @@ module.exports.DockerLoginCommand = class {
     }
 
     async execute(options) {
-        const profile = loadProfile(options.profile);
+        const profile = await loadProfile(options.profile);
         const ttl = options.ttl || '14d';
 
         try {
             // TODO fetch this from new endpoint or maybe store this in the profile??
             const registryUrl = (new URL(profile.url)).hostname.replace('api', 'private-registry');
-            const jwt = generateJwt(profile, ttl);
+            const jwt = await generateJwt(profile, ttl);
             const command = `docker login -u cli --password ${jwt} ${registryUrl}`;
             debug('%s.executeDockerLogin(%s)', profile.name, command);
             await callMe(command);

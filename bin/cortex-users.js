@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 const chalk = require('chalk');
-const program = require('../src/commander');
+const program = require('commander');
 
 const { withCompatibilityCheck } = require('../src/compatibility');
 
@@ -119,4 +119,4 @@ program.command('list')
         }
     }));
 
-program.parse(process.argv);
+program.showHelpAfterError().parseAsync(process.argv);

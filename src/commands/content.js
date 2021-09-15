@@ -26,8 +26,8 @@ module.exports.ListContent = class ListContent {
         this.program = program;
     }
 
-    execute(options) {
-        const profile = loadProfile(options.profile);
+    async execute(options) {
+        const profile = await loadProfile(options.profile);
         debug('%s.listContent()', profile.name);
 
         const content = new Content(profile.url);
@@ -62,8 +62,8 @@ module.exports.UploadContent = class UploadContent {
         this.program = program;
     }
 
-    execute(contentKey, filePath, options, cbTest) {
-        const profile = loadProfile(options.profile);
+    async execute(contentKey, filePath, options, cbTest) {
+        const profile = await loadProfile(options.profile);
         debug('%s.uploadContent()', profile.name);
 
         const contentClient = new Content(profile.url);
@@ -130,8 +130,8 @@ module.exports.DeleteContent = class DeleteContent {
         this.program = program;
     }
 
-    execute(contentKey, options) {
-        const profile = loadProfile(options.profile);
+    async execute(contentKey, options) {
+        const profile = await loadProfile(options.profile);
         debug('%s.deleteContent()', profile.name);
 
         const content = new Content(profile.url);
@@ -154,8 +154,8 @@ module.exports.DownloadContent = class DownloadContent {
         this.program = program;
     }
 
-    execute(contentKey, options) {
-        const profile = loadProfile(options.profile);
+    async execute(contentKey, options) {
+        const profile = await loadProfile(options.profile);
         debug('%s.DownloadContent()', profile.name);
 
         const content = new Content(profile.url);

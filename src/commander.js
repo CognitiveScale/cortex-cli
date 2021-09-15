@@ -23,7 +23,7 @@ const { exportDoc } = require('./commands/utils.js');
 // Monkey-patch `commander` library to keep track of when an action executes
 commander.Command.prototype._action = commander.Command.prototype.action;
 commander.Command.prototype.action = function (fn) {
-    return this._action(function wrapped(...args) {
+    return this._action(async function wrapped(...args) {
         (this.parent || this)._actionTaken = true;
         fn(...args);
     });
@@ -46,10 +46,6 @@ commander.Command.prototype.parse = function (argv, options) {
 
     this._parse(argv);
     if (!this.wasActionTaken()) {
-        // TODO this seems broken in v6
-        // if (process.env.CORTEX_TOKEN) {
-        //     console.error('Using token from environment variable $CORTEX_TOKEN');
-        // }
         opts.noActionHandler();
     }
 };

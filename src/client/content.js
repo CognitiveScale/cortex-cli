@@ -88,7 +88,7 @@ module.exports = class Content {
 
     // TODO progress
     // eslint-disable-next-line no-unused-vars
-    async downloadContent(projectId, token, key, showProgress = false, toFile = null) {
+    downloadContent(projectId, token, key, showProgress = false, toFile = null) {
         checkProject(projectId);
         const contentKey = this._sanitizeKey(key);
         const endpoint = `${this.endpoint(projectId)}/${contentKey}`;

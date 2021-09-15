@@ -91,9 +91,9 @@ module.exports.SetProfileCommand = class {
         this.program = program;
     }
 
-    execute(profileName, options) {
+    async execute(profileName, options) {
         const config = readConfig();
-        const profile = config.getProfile(profileName);
+        const profile = await config.getProfile(profileName);
         if (profile === undefined) {
             printError(`No profile named ${profileName}.  Run cortex configure --profile ${profileName} to create it.`, options);
             return;
@@ -111,7 +111,7 @@ module.exports.DescribeProfileCommand = class {
         this.program = program;
     }
 
-    execute(options) {
+    async execute(options) {
         const config = readConfig();
         if (config === undefined) {
             printError('Configuration not found.  Please run "cortex configure".');
@@ -121,7 +121,7 @@ module.exports.DescribeProfileCommand = class {
         const profileName = options.profile || config.currentProfile;
         debug('describing profile: %s', profileName);
 
-        const profile = config.getProfile(profileName);
+        const profile = await config.getProfile(profileName);
         if (profile === undefined) {
             printError(`No profile named ${profileName}.  Run cortex configure --profile ${profileName} to create it.`, options);
             return;
@@ -168,11 +168,11 @@ module.exports.GetAccessToken = class {
         this.program = program;
     }
 
-    execute(options) {
-        const profile = loadProfile(options.profile);
+    async execute(options) {
+        const profile = await loadProfile(options.profile);
         const ttl = options.ttl || '1d';
         debug('%s.getAccesToken', profile.name);
-        const jwt = generateJwt(profile, ttl);
+        const jwt = await generateJwt(profile, ttl);
         return printSuccess(jwt, options);
     }
 };
@@ -182,12 +182,12 @@ module.exports.PrintEnvVars = class {
         this.program = program;
     }
 
-    execute() {
+    async execute() {
         const vars = [];
-        const options = this.program;
-        const profile = loadProfile(options.profile, false);
+        const options = this.program.opts();
+        const profile = await loadProfile(options.profile, false);
         const ttl = options.ttl || '1d';
-        const jwt = generateJwt(profile, ttl);
+        const jwt = await generateJwt(profile, ttl);
         vars.push(`export CORTEX_TOKEN=${jwt}`);
         vars.push(`export CORTEX_URI=${profile.url}`);
         // not sure why we used URI previously ??

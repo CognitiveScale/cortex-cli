@@ -29,7 +29,7 @@ module.exports.ListCampaignsCommand = class ListCampaignsCommand {
     }
 
     async execute(options) {
-        const profile = loadProfile(options.profile);
+        const profile = await loadProfile(options.profile);
         debug('%s.executeListCampaigns()', profile.name);
 
         const cli = new ApiServerClient(profile.url);
@@ -60,7 +60,7 @@ module.exports.DescribeCampaignCommand = class DescribeCampaignCommand {
 
     async execute(campaignName, cmd) {
         const options = cmd;
-        const profile = loadProfile(options.profile);
+        const profile = await loadProfile(options.profile);
         debug('%s.executeDescribeCampaign(%s)', profile.name, campaignName);
         const cli = new ApiServerClient(profile.url);
 
@@ -79,9 +79,9 @@ module.exports.ExportCampaignCommand = class ExportCampaignCommand {
         this.program = program;
     }
 
-    execute(campaignName, cmd) {
+    async execute(campaignName, cmd) {
         const options = cmd;
-        const profile = loadProfile(options.profile);
+        const profile = await loadProfile(options.profile);
         debug('%s.executeExportCampaignCommand(%s)', profile.name, campaignName);
         const cli = new Catalog(profile.url);
         const project = options.project || profile.project;
@@ -101,9 +101,9 @@ module.exports.ImportCampaignCommand = class ImportCampaignCommand {
         this.program = program;
     }
 
-    execute(campaignFilepath, cmd) {
+    async execute(campaignFilepath, cmd) {
         const options = cmd;
-        const profile = loadProfile(options.profile);
+        const profile = await loadProfile(options.profile);
         debug('%s.executeImportCampaignCommand(%s)', profile.name, campaignFilepath);
         const cli = new Catalog(profile.url);
 
@@ -120,9 +120,9 @@ module.exports.DeployCampaignCommand = class DeployCampaignCommand {
         this.program = program;
     }
 
-    execute(campaignName, cmd) {
+    async execute(campaignName, cmd) {
         const options = cmd;
-        const profile = loadProfile(options.profile);
+        const profile = await loadProfile(options.profile);
         debug('%s.executeDeployCampaignCommand(%s)', profile.name, campaignName);
         const cli = new Catalog(profile.url);
 
@@ -150,9 +150,9 @@ module.exports.UndeployCampaignCommand = class UndeployCampaignCommand {
         this.program = program;
     }
 
-    execute(campaignName, cmd) {
+    async execute(campaignName, cmd) {
         const options = cmd;
-        const profile = loadProfile(options.profile);
+        const profile = await loadProfile(options.profile);
         debug('%s.executeUndeployCampaignCommand(%s)', profile.name, campaignName);
         const cli = new Catalog(profile.url);
 
@@ -180,9 +180,9 @@ module.exports.UndeployMissionCommand = class UndeployMissionCommand {
         this.program = program;
     }
 
-    execute(campaignName, missionName, cmd) {
+    async execute(campaignName, missionName, cmd) {
         const options = cmd;
-        const profile = loadProfile(options.profile);
+        const profile = await loadProfile(options.profile);
         debug('%s.executeUndeployMissionCommand(%s)', profile.name, missionName);
         const cli = new Catalog(profile.url);
 
@@ -205,9 +205,9 @@ module.exports.ListMissionsCommand = class ListMissionsCommand {
         this.program = program;
     }
 
-    execute(campaign, cmd) {
+    async execute(campaign, cmd) {
         const options = cmd;
-        const profile = loadProfile(options.profile);
+        const profile = await loadProfile(options.profile);
         debug('%s.executeListMissionsCommand(%s)', profile.name, campaign);
         const cli = new Catalog(profile.url);
 
@@ -238,9 +238,9 @@ module.exports.DeployMissionCommand = class DeployMissionCommand {
         this.program = program;
     }
 
-    execute(campaign, mission, cmd) {
+    async execute(campaign, mission, cmd) {
         const options = cmd;
-        const profile = loadProfile(options.profile);
+        const profile = await loadProfile(options.profile);
         debug('%s.executeDeployMissionCommand(%s)', profile.name, campaign);
         const cli = new Catalog(profile.url);
 
@@ -257,9 +257,9 @@ module.exports.DescribeMissionCommand = class DescribeMissionCommand {
         this.program = program;
     }
 
-    execute(campaign, mission, cmd) {
+    async execute(campaign, mission, cmd) {
         const options = cmd;
-        const profile = loadProfile(options.profile);
+        const profile = await loadProfile(options.profile);
         debug('%s.executeDescribeMissionCommand(%s)', profile.name, campaign);
         const cli = new Catalog(profile.url);
 

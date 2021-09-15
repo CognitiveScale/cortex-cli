@@ -32,7 +32,7 @@ module.exports.SaveSkillCommand = class SaveSkillCommand {
     }
 
     async execute(skillDefinition, options) {
-        const profile = loadProfile(options.profile);
+        const profile = await loadProfile(options.profile);
         debug('%s.executeSaveSkill(%s)', profile.name, skillDefinition);
         try {
             const skillDefStr = fs.readFileSync(skillDefinition);
@@ -66,7 +66,7 @@ module.exports.ListSkillsCommand = class ListSkillsCommand {
     }
 
     async execute(options) {
-        const profile = loadProfile(options.profile);
+        const profile = await loadProfile(options.profile);
         debug('%s.executeListSkills()', profile.name);
 
         const catalog = new Catalog(profile.url);
@@ -106,7 +106,7 @@ module.exports.DescribeSkillCommand = class DescribeSkillCommand {
     }
 
     async execute(skillName, options) {
-        const profile = loadProfile(options.profile);
+        const profile = await loadProfile(options.profile);
         debug('%s.executeDescribeSkill(%s)', profile.name, skillName);
 
         const catalog = new Catalog(profile.url);
@@ -125,8 +125,8 @@ module.exports.UndeploySkillCommand = class UndeploySkillCommand {
         this.program = program;
     }
 
-    execute(skillName, options) {
-        const profile = loadProfile(options.profile);
+    async execute(skillName, options) {
+        const profile = await loadProfile(options.profile);
         debug('%s.executeUndeploySkill(%s)', profile.name, skillName);
         const catalog = new Catalog(profile.url);
         catalog.unDeploySkill(options.project || profile.project, profile.token, skillName, options.verbose).then((response) => {
@@ -147,8 +147,8 @@ module.exports.SkillLogsCommand = class SkillLogsCommand {
         this.program = program;
     }
 
-    execute(skillName, actionName, options) {
-        const profile = loadProfile(options.profile);
+    async execute(skillName, actionName, options) {
+        const profile = await loadProfile(options.profile);
         debug('%s.executeSkillLogs(%s,%s)', profile.name, skillName, actionName);
         const catalog = new Catalog(profile.url);
         catalog.skillLogs(options.project || profile.project, profile.token, skillName, actionName, options.verbose).then((response) => {
@@ -169,8 +169,8 @@ module.exports.DeploySkillCommand = class DeploySkillCommand {
         this.program = program;
     }
 
-    execute(skillName, options) {
-        const profile = loadProfile(options.profile);
+    async execute(skillName, options) {
+        const profile = await loadProfile(options.profile);
         debug('%s.executeDeploySkill(%s)', profile.name, skillName);
 
         const catalog = new Catalog(profile.url);
@@ -192,8 +192,8 @@ module.exports.InvokeSkillCommand = class InvokeSkillCommand {
         this.program = program;
     }
 
-    execute(skillName, inputName, options) {
-        const profile = loadProfile(options.profile);
+    async execute(skillName, inputName, options) {
+        const profile = await loadProfile(options.profile);
         debug('%s.executeInvokeSkill(%s/%s)', profile.name, skillName, inputName);
 
         let params = {};

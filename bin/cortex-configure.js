@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 const chalk = require('chalk');
-const program = require('../src/commander');
+// const program = require('commander');
+const program = require('commander');
 
 const {
     ConfigureCommand,
@@ -69,10 +70,9 @@ program
 
 program
     .command('describe <profileName>')
+    .alias('get')
     .description('Describe a configured profile')
-    .action((profileName) => {
-        new DescribeProfileCommand(program).execute({ profile: profileName, color: program.color });
-    });
+    .action((profileName) => new DescribeProfileCommand(program).execute({ profile: profileName, color: program.color }));
 
 program
     .command('env')
@@ -92,6 +92,6 @@ program
     });
 
 if (process.env.NODE_ENV !== 'test') {
-    program.parse(process.argv);
+    program.showHelpAfterError().parseAsync(process.argv);
 }
 module.exports = program;

@@ -31,7 +31,7 @@ module.exports.SaveTypeCommand = class SaveTypeCommand {
     }
 
     async execute(typeDefinition, options) {
-        const profile = loadProfile(options.profile);
+        const profile = await loadProfile(options.profile);
         debug('%s.executeSaveType(%s)', profile.name, typeDefinition);
         try {
             const typeDefStr = fs.readFileSync(typeDefinition);
@@ -59,8 +59,8 @@ module.exports.ListTypesCommand = class ListTypesCommand {
         this.program = program;
     }
 
-    execute(options) {
-        const profile = loadProfile(options.profile);
+    async execute(options) {
+        const profile = await loadProfile(options.profile);
         debug('%s.executeListTypes()', profile.name);
 
         const catalog = new Catalog(profile.url);
@@ -89,8 +89,8 @@ module.exports.DescribeTypeCommand = class DescribeTypeCommand {
         this.program = program;
     }
 
-    execute(typeName, options) {
-        const profile = loadProfile(options.profile);
+    async execute(typeName, options) {
+        const profile = await loadProfile(options.profile);
         debug('%s.executeDescribeType(%s)', profile.name, typeName);
 
         const catalog = new Catalog(profile.url);

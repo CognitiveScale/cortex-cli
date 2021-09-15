@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 const chalk = require('chalk');
-const program = require('../src/commander');
+const program = require('commander');
 
 const { withCompatibilityCheck } = require('../src/compatibility');
 const { nonEmptyStringParser } = require('../src/parsers');
@@ -202,4 +202,4 @@ program.command('assign-external')
             console.error(chalk.red(err.message));
         }
     }));
-program.parse(process.argv);
+program.showHelpAfterError().parseAsync(process.argv);

@@ -28,8 +28,8 @@ module.exports.ListConnections = class ListConnections {
         this.program = program;
     }
 
-    execute(options) {
-        const profile = loadProfile(options.profile);
+    async execute(options) {
+        const profile = await loadProfile(options.profile);
         debug('%s.listConnections()', profile.name);
 
         const conns = new Connections(profile.url);
@@ -80,8 +80,8 @@ module.exports.SaveConnectionCommand = class SaveConnectionCommand {
        return params.filter((item) => item.name !== 'jdbc_jar_file');
    }
 
-   execute(connectionDefinition, options) {
-       const profile = loadProfile(options.profile);
+   async execute(connectionDefinition, options) {
+       const profile = await loadProfile(options.profile);
        debug('%s.executeSaveDefinition(%s)', profile.name, connectionDefinition);
 
        const connDefStr = fs.readFileSync(connectionDefinition);
@@ -135,8 +135,8 @@ module.exports.DescribeConnectionCommand = class DescribeConnectionCommand {
         this.program = program;
     }
 
-    execute(connectionName, options) {
-        const profile = loadProfile(options.profile);
+    async execute(connectionName, options) {
+        const profile = await loadProfile(options.profile);
         debug('%s.executeDescribeConnection(%s)', profile.name, connectionName);
 
         const connection = new Connections(profile.url);
@@ -159,8 +159,8 @@ module.exports.ListConnectionsTypes = class ListConnectionsTypes {
         this.program = program;
     }
 
-    execute(options) {
-        const profile = loadProfile(options.profile);
+    async execute(options) {
+        const profile = await loadProfile(options.profile);
         debug('%s.listConnectionsTypes()', profile.name);
 
         const conns = new Connections(profile.url);

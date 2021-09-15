@@ -78,7 +78,7 @@ const DeployExperimentCommand = class {
     }
 
     async execute(experimentName, runId, options) {
-        const profile = loadProfile(options.profile);
+        const profile = await loadProfile(options.profile);
         const project = options.project || profile.project;
         debug('%s.exportDeployExperimentCommand%s)', profile.name, experimentName);
 
@@ -182,8 +182,8 @@ module.exports.DeploySnapshotCommand = class {
         this.program = program;
     }
 
-    execute(snapshotIds, options) {
-        const profile = loadProfile(options.profile);
+    async execute(snapshotIds, options) {
+        const profile = await loadProfile(options.profile);
         const project = options.project || profile.project;
         debug('%s.exportDeploymentSnapshot(%s)', profile.name, snapshotIds);
 
@@ -251,7 +251,7 @@ module.exports.DeployCampaignCommand = class {
     }
 
     async execute(campaignName, options) {
-        const profile = loadProfile(options.profile);
+        const profile = await loadProfile(options.profile);
         const project = options.project || profile.project;
         debug('%s.exportDeploymentCampaigns(%s)', profile.name, campaignName);
 
@@ -292,8 +292,8 @@ module.exports.DeployConnectionCommand = class {
         this.program = program;
     }
 
-    execute(connectionName, options) {
-        const profile = loadProfile(options.profile);
+    async execute(connectionName, options) {
+        const profile = await loadProfile(options.profile);
         const project = options.project || profile.project;
         debug('%s.exportDeploymentConnection%s)', profile.name, connectionName);
 
@@ -321,8 +321,8 @@ module.exports.DeploySkillCommand = class {
         this.program = program;
     }
 
-    execute(skillName, options) {
-        const profile = loadProfile(options.profile);
+    async execute(skillName, options) {
+        const profile = await loadProfile(options.profile);
         const project = options.project || profile.project;
         debug('%s.exportDeploySkillCommand%s)', profile.name, skillName);
 

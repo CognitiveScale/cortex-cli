@@ -17,7 +17,7 @@
  */
 
 const chalk = require('chalk');
-const program = require('../src/commander');
+const program = require('commander');
 
 const {
     GenerateSkillCommand,
@@ -37,4 +37,4 @@ program
         }
     });
 
-program.parse(process.argv);
+program.showHelpAfterError().parseAsync(process.argv);

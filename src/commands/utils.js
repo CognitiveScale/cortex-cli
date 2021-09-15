@@ -128,6 +128,7 @@ module.exports.exportDoc = (program) => {
  * @param commandStr
  * @returns {Promise<*>}
  */
+// eslint-disable-next-line require-await
 async function callMe(commandStr) {
     return new Promise((resolve, reject) => {
         const proc = exec(commandStr, (err, stdout) => {
