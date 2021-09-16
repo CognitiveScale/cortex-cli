@@ -21,7 +21,7 @@ const moment = require('moment');
 const { loadProfile } = require('../config');
 const Catalog = require('../client/catalog');
 const Agents = require('../client/agents');
-const { LISTTABLEFORMAT } = require('./utils');
+const { LISTTABLEFORMAT, DEPENDENCYTABLEFORMAT} = require('./utils');
 
 const {
  printSuccess, printError, filterObject, parseObject, printTable, formatValidationPath,
@@ -411,6 +411,34 @@ module.exports.CreateAgentSnapshotCommand = class {
         })
             .catch((err) => {
                 printError(`Failed to create agent snapshot ${agentName}: ${err.status} ${err.message}`, options);
+            });
+    }
+};
+
+module.exports.DeleteAgentCommand = class DeleteAgentCommand {
+    constructor(program) {
+        this.program = program;
+    }
+
+    execute(agentName, options) {
+        const profile = loadProfile(options.profile);
+        debug('%s.executeDeleteAgent(%s)', profile.name, agentName);
+        const catalog = new Catalog(profile.url);
+        catalog.deleteAgent(options.project || profile.project, profile.token, agentName)
+            .then((response) => {
+                if (response.success) {
+                    const result = filterObject(response, options);
+                    return printSuccess(JSON.stringify(result, null, 2), options);
+                }
+                if (response.status === 403) { // has dependencies
+                    const tableFormat = DEPENDENCYTABLEFORMAT;
+                    printError(`Agent deletion failed: ${response.status} ${response.message}.`, options, false);
+                    return printTable(tableFormat, response.details);
+                }
+                return printError(`Agent deletion failed: ${response.status} ${response.message}.`, options);
+            })
+            .catch((err) => {
+                printError(`Failed to delete agent: ${err.status} ${err.message}`, options);
             });
     }
 };
