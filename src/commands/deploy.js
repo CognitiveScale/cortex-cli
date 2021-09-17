@@ -48,7 +48,7 @@ const manifestMeta = {
 };
 
 function updateManifest(filepaths) {
-    const manifest = fileExists(manifestFile) ? yaml.safeLoad(fs.readFileSync(manifestFile).toString()) : manifestMeta;
+    const manifest = fileExists(manifestFile) ? yaml.load(fs.readFileSync(manifestFile).toString()) : manifestMeta;
     Object.keys(filepaths).forEach((type) => {
         const kind = type.toLowerCase();
         const entries = [..._.get(manifest, `cortex.${kind}`, []), ...filepaths[type]];
@@ -192,7 +192,7 @@ module.exports.DeploySnapshotCommand = class {
         snapshotIds.split(' ').forEach((snapshotId) => {
             promises.push(agents.describeAgentSnapshot(project, profile.token, snapshotId).then(async (response) => {
                 let result = JSON.parse(response);
-                // export dependant NLOps artifacts
+                // export dependant MLOps artifacts
                 if (_.size(result.dependencies.mlOps)) {
                     await Promise.all(result.dependencies.mlOps.map(async (ml) => {
                         if (_.size(ml.experiments)) {
@@ -233,10 +233,10 @@ module.exports.DeployCampaignCommand = class {
                 let type;
                 let filepath;
                 if (filename.endsWith('.yml') || filename.endsWith('.yaml')) {
-                    const resource = yaml.safeLoad(content);
+                    const resource = yaml.load(content.toString());
                     type = resource.kind;
                     filepath = path.join(artifactsDir, campaign, filename);
-                    writeToFile(yaml.safeDump(resource), filepath);
+                    writeToFile(yaml.dump(resource), filepath);
                 } else {
                     type = path.extname(filename).replace(/\./g, '');
                     filepath = path.join(artifactsDir, campaign, filename);
