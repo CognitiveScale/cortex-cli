@@ -17,6 +17,8 @@ pipelines:
                     source: cruise-output/buildReport*.json
                 - build:
                     source: devBranchRevision.json
+                - build:
+                    source: cortex-cli-docs.md
               tasks:
                 - script: |
                     set -eux
@@ -44,6 +46,8 @@ pipelines:
               artifacts:
                 - build:
                     source: masterBranchRevision.json
+                - build:
+                    source: cortex-cli-docs.md
               tasks:
                 - fetch:
                     pipeline: cortex-cli
