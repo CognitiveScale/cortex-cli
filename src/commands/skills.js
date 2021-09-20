@@ -105,22 +105,18 @@ module.exports.DescribeSkillCommand = class DescribeSkillCommand {
         this.program = program;
     }
 
-    execute(skillName, options) {
+    async execute(skillName, options) {
         const profile = loadProfile(options.profile);
         debug('%s.executeDescribeSkill(%s)', profile.name, skillName);
 
         const catalog = new Catalog(profile.url);
-        catalog.describeSkill(options.project || profile.project, profile.token, skillName, options.verbose).then((response) => {
-            if (response.success) {
-                const result = filterObject(response.skill, options);
-                printSuccess(JSON.stringify(result, null, 2), options);
-            } else {
-                printError(`Failed to describe skill ${skillName}: ${response.message}`, options);
-            }
-        })
-        .catch((err) => {
+        try {
+            let response = await catalog.describeSkill(options.project || profile.project, profile.token, skillName, options.verbose, options.output);
+            if (options.output === 'json') response = JSON.stringify(filterObject(response, options), null, 2);
+            printSuccess(response, options);
+        } catch (err) {
             printError(`Failed to describe skill ${skillName}: ${err.status} ${err.message}`, options);
-        });
+        }
     }
 };
 
