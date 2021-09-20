@@ -171,7 +171,7 @@ module.exports.DeleteConnectionCommand = class DeleteConnectionCommand {
             }
             if (response.status === 403) { // has dependencies
                 const tableFormat = DEPENDENCYTABLEFORMAT;
-                printError(`Connection deletion failed: ${response.status} ${response.message}.`, options, false);
+                printError(`Connection deletion failed: ${response.message}.`, options, false);
                 return printTable(tableFormat, response.details);
             }
             return printError(`Failed to delete connection ${connectionName}: ${response.message}`, options);
