@@ -64,23 +64,26 @@ module.exports = class Catalog {
             .catch((err) => constructError(err));
     }
 
-    describeSkill(projectId, token, skillName, verbose = false) {
+    async describeSkill(projectId, token, skillName, verbose = false, output = 'json') {
         checkProject(projectId);
         const endpoint = `${this.endpoints.skills(projectId)}/${encodeURIComponent(skillName)}`;
         debug('describeSkill(%s) => %s', skillName, endpoint);
-        const searchParams = {};
+        const searchParams = { output };
         if (verbose) {
             searchParams.verbose = verbose;
             searchParams.status = verbose;
         }
-        return got
-            .get(endpoint, {
+        try {
+            const res = got.get(endpoint, {
                 headers: { Authorization: `Bearer ${token}` },
                 'user-agent': getUserAgent(),
                 searchParams,
-            }).json()
-            .then((res) => ({ success: true, skill: res }))
-            .catch((err) => constructError(err));
+            });
+            if (output === 'json') return res.json();
+            return res.text();
+        } catch (err) {
+            return constructError(err);
+        }
     }
 
     deploySkill(projectId, token, skillName, verbose = false) {
