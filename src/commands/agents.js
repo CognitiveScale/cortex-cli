@@ -432,7 +432,7 @@ module.exports.DeleteAgentCommand = class DeleteAgentCommand {
                 }
                 if (response.status === 403) { // has dependencies
                     const tableFormat = DEPENDENCYTABLEFORMAT;
-                    printError(`Agent deletion failed: ${response.status} ${response.message}.`, options, false);
+                    printError(`Agent deletion failed: ${response.message}.`, options, false);
                     return printTable(tableFormat, response.details);
                 }
                 return printError(`Agent deletion failed: ${response.status} ${response.message}.`, options);
