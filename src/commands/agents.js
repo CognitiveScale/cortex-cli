@@ -21,7 +21,7 @@ const moment = require('moment');
 const { loadProfile } = require('../config');
 const Catalog = require('../client/catalog');
 const Agents = require('../client/agents');
-const { LISTTABLEFORMAT, DEPENDENCYTABLEFORMAT} = require('./utils');
+const { LISTTABLEFORMAT, DEPENDENCYTABLEFORMAT } = require('./utils');
 
 const {
  printSuccess, printError, filterObject, parseObject, printTable, formatValidationPath,
