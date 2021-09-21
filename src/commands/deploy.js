@@ -330,8 +330,11 @@ module.exports.DeploySkillCommand = class {
         const exports = {};
         const catalog = new Catalog(profile.url);
         catalog.describeSkill(project, profile.token, skillName, false).then(async (response) => {
-            if (response.success) {
-                const result = filterObject(response.skill, options);
+            // check if response is valid skill and not error.
+            if (response.success === false) {
+                printError(`Failed to export skill ${skillName}: ${response.message}`, options);
+            } else {
+                const result = filterObject(response, options);
                 const skillDesc = cleanInternalFields(result);
                 const filepath = path.join(artifactsDir, 'skills', `${skillName}.json`);
                 writeToFile(skillDesc, filepath);
@@ -377,8 +380,6 @@ module.exports.DeploySkillCommand = class {
                 }
                 updateManifest(manifest);
                 printSuccess(`Successfully exported  ${JSON.stringify(Object.assign(exports, mlOps))} in ${artifactsDir} and updated manifest file ${manifestFile}`);
-            } else {
-                printError(`Failed to export skill ${skillName}: ${response.message}`, options);
             }
         }).catch((err) => {
             printError(`Failed to export skill ${skillName}: ${err.status} ${err.message}`, options);
