@@ -21,7 +21,7 @@ const moment = require('moment');
 const { loadProfile } = require('../config');
 const Experiments = require('../client/experiments');
 const {
- printSuccess, printError, filterObject, printTable, parseObject, formatValidationPath,
+ printSuccess, printError, filterObject, printTable, parseObject, formatValidationPath, DEPENDENCYTABLEFORMAT,
 } = require('./utils');
 
 class ListExperiments {
@@ -100,10 +100,15 @@ class DeleteExperimentCommand {
         exp.deleteExperiment(options.project || profile.project, profile.token, experimentName).then((response) => {
             if (response.success) {
                 const result = filterObject(response.result, options);
-                printSuccess(JSON.stringify(result, null, 2), options);
-            } else {
-                printError(`Failed to delete experiment ${experimentName}: ${response.status} - ${response.message}`, options);
+                return printSuccess(JSON.stringify(result, null, 2), options);
             }
+            if (response.status === 403) { // has dependencies
+                const tableFormat = DEPENDENCYTABLEFORMAT;
+                printError(`Experiment deletion failed: ${response.message}.`, options, false);
+                return printTable(tableFormat, response.details);
+            }
+            return printError(`Failed to delete experiment ${experimentName}: ${response.status} - ${response.message}`, options);
+
         })
         .catch((err) => {
             printError(`Failed to delete experiment ${experimentName}: ${err.status} - ${err.message}`, options);
@@ -197,10 +202,15 @@ class DeleteRunCommand {
         const exp = new Experiments(profile.url);
         exp.deleteRun(options.project || profile.project, profile.token, experimentName, runId).then((response) => {
             if (response.success) {
-                printSuccess(`Run ${runId} in experiment ${experimentName} deleted`, options);
-            } else {
-                printError(`Failed to delete run ${experimentName}/${runId}: ${response.status} - ${response.message}`, options);
+                return printSuccess(`Run ${runId} in experiment ${experimentName} deleted`, options);
             }
+            if (response.status === 403) { // has dependencies
+               const tableFormat = DEPENDENCYTABLEFORMAT;
+               printError(`Run deletion failed: ${response.message}.`, options, false);
+               return printTable(tableFormat, response.details);
+            }
+            return printError(`Failed to delete run ${experimentName}/${runId}: ${response.status} - ${response.message}`, options);
+
         })
         .catch((err) => {
             printError(`Failed to delete run ${experimentName}/${runId}: ${err.status} - ${err.message}`, options);

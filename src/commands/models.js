@@ -24,7 +24,7 @@ const moment = require('moment');
 const { loadProfile } = require('../config');
 const Models = require('../client/models');
 const Experiments = require('../client/experiments');
-const { LISTTABLEFORMAT, RUNTABLEFORMAT } = require('./utils');
+const { LISTTABLEFORMAT, RUNTABLEFORMAT, DEPENDENCYTABLEFORMAT } = require('./utils');
 
 const {
     printSuccess, printError, filterObject, parseObject, printTable, formatValidationPath,
@@ -164,10 +164,15 @@ module.exports.DeleteModelCommand = class {
             .then((response) => {
                 if (response && response.success) {
                     const result = filterObject(response, options);
-                    printSuccess(JSON.stringify(result, null, 2), options);
-                } else {
-                    printError(`Model deletion failed: ${response.status} ${response.message}.`, options);
+                    return printSuccess(JSON.stringify(result, null, 2), options);
                 }
+                if (response.status === 403) { // has dependencies
+                    const tableFormat = DEPENDENCYTABLEFORMAT;
+                    printError(`Model deletion failed: ${response.message}.`, options, false);
+                    return printTable(tableFormat, response.details);
+                }
+                return printError(`Model deletion failed: ${response.status} ${response.message}.`, options);
+
             })
             .catch((err) => {
                 printError(`Failed to delete model: ${err.status} ${err.message}`, options);
