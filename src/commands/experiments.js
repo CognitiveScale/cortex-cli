@@ -108,7 +108,6 @@ class DeleteExperimentCommand {
                 return printTable(tableFormat, response.details);
             }
             return printError(`Failed to delete experiment ${experimentName}: ${response.status} - ${response.message}`, options);
-
         })
         .catch((err) => {
             printError(`Failed to delete experiment ${experimentName}: ${err.status} - ${err.message}`, options);
@@ -210,7 +209,6 @@ class DeleteRunCommand {
                return printTable(tableFormat, response.details);
             }
             return printError(`Failed to delete run ${experimentName}/${runId}: ${response.status} - ${response.message}`, options);
-
         })
         .catch((err) => {
             printError(`Failed to delete run ${experimentName}/${runId}: ${err.status} - ${err.message}`, options);

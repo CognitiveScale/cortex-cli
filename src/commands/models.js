@@ -172,7 +172,6 @@ module.exports.DeleteModelCommand = class {
                     return printTable(tableFormat, response.details);
                 }
                 return printError(`Model deletion failed: ${response.status} ${response.message}.`, options);
-
             })
             .catch((err) => {
                 printError(`Failed to delete model: ${err.status} ${err.message}`, options);
