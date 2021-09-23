@@ -152,10 +152,10 @@ module.exports.DeleteSecretCommand = class {
                 printError(`Secret deletion failed: ${response.message}.`, options, false);
                 return printTable(tableFormat, response.details);
             }
-            return printError(`Failed to read secure secret : ${response.message}`, options);
+            return printError(`Failed to delete secure secret : ${response.message}`, options);
         })
         .catch((err) => {
-            printError(`Failed to read secure secret : ${err.status} ${err.message}`, options);
+            printError(`Failed to delete secure secret : ${err.status} ${err.message}`, options);
         });
     }
 };
