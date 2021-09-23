@@ -27,7 +27,6 @@ const {
     WriteSecretsCommand,
     DeleteSecretCommand,
 } = require('../src/commands/secrets');
-const {DeleteConnectionCommand} = require("../src/commands/connections");
 
 program.description('Work with Cortex Secrets');
 
