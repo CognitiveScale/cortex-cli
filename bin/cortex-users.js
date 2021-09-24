@@ -29,6 +29,7 @@ const {
     UserDeleteCommand,
 } = require('../src/commands/users');
 
+program.name('cortex users');
 program.description('Work with Cortex User');
 
 program.command('describe')
@@ -119,4 +120,7 @@ program.command('list')
         }
     }));
 
-program.showHelpAfterError().parseAsync(process.argv);
+if (require.main === module) {
+    program.showHelpAfterError().parseAsync(process.argv);
+}
+module.exports = program;

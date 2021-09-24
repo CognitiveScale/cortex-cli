@@ -34,6 +34,7 @@ const {
     CreateAgentSnapshotCommand,
 } = require('../src/commands/agents');
 
+program.name('cortex agents');
 program.description('Work with Cortex Agents');
 
 // Save Agent
@@ -227,4 +228,7 @@ program
         }
     }));
 
-program.showHelpAfterError().parseAsync(process.argv);
+if (require.main === module) {
+    program.showHelpAfterError().parseAsync(process.argv);
+}
+module.exports = program;

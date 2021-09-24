@@ -28,6 +28,7 @@ const {
     ListConnectionsTypes,
 } = require('../src/commands/connections');
 
+program.name('cortex connections');
 program.description('Work with Cortex Connections');
 
 // List Connections
@@ -101,4 +102,7 @@ program
         }
     }));
 
-program.showHelpAfterError().parseAsync(process.argv);
+if (require.main === module) {
+    program.showHelpAfterError().parseAsync(process.argv);
+}
+module.exports = program;

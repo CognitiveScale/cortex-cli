@@ -109,20 +109,6 @@ module.exports.printTable = (spec, objects, transform) => {
     console.log(table.toString());
 };
 
-module.exports.exportDoc = (program) => {
-    console.log(JSON.stringify(program.commands.map((c) => ({
-        name: c._name,
-        description: c._description,
-        usage: c.usage(),
-        options: c.options.map((o) => ({
-            flags: o.flags,
-            defaultValue: o.defaultValue,
-            description: o.description,
-        })),
-    }))));
-    process.exit(0);
-};
-
 /**
  * Execute a sub command, return stdout on success, return stderr on failure
  * @param commandStr

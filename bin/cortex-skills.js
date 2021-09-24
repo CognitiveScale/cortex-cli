@@ -31,6 +31,7 @@ const {
     SkillLogsCommand,
 } = require('../src/commands/skills');
 
+program.name('cortex skills');
 program.description('Work with Cortex Skills');
 
 // Deploy Skill
@@ -154,4 +155,7 @@ program
         }
     }));
 
-program.showHelpAfterError().parseAsync(process.argv);
+if (require.main === module) {
+    program.showHelpAfterError().parseAsync(process.argv);
+}
+module.exports = program;

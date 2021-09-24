@@ -27,6 +27,7 @@ const {
     DescribeProjectCommand,
 } = require('../src/commands/projects');
 
+program.name('cortex projects');
 program.description('Work with Cortex Projects');
 
 // Create Project
@@ -83,4 +84,7 @@ program
         }
     }));
 
-program.showHelpAfterError().parseAsync(process.argv);
+if (require.main === module) {
+    program.showHelpAfterError().parseAsync(process.argv);
+}
+module.exports = program;

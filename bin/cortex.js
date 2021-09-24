@@ -21,6 +21,7 @@ const program = require('commander');
 
 const pkg = findPackageJson(__dirname).next().value;
 
+program.name('cortex');
 program
     .version(pkg.version, '-v, --version')
     .description('Cortex CLI')
@@ -44,8 +45,7 @@ program
     .command('types [cmd]', 'Work with Cortex Types')
     .command('users [cmd]', 'Work with a Cortex Users');
 
-program.showHelpAfterError().parseAsync(process.argv);
-// if (!program.commands.map((cmd) => cmd._name).includes(program.args[0])) {
-//     program.outputHelp(identity);
-//     process.exit(1);
-// }
+if (require.main === module) {
+    program.showHelpAfterError().parseAsync(process.argv);
+}
+module.exports = program;

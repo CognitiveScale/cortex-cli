@@ -25,6 +25,7 @@ const {
     DockerLoginCommand,
 } = require('../src/commands/docker');
 
+program.name('cortex docker');
 program.description('Work with Docker');
 
 // Login
@@ -44,4 +45,7 @@ program
         }
     }));
 
-program.showHelpAfterError().parseAsync(process.argv);
+if (require.main === module) {
+    program.showHelpAfterError().parseAsync(process.argv);
+}
+module.exports = program;

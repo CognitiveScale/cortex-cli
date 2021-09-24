@@ -27,6 +27,7 @@ const {
     DescribeTypeCommand,
 } = require('../src/commands/types');
 
+program.name('cortex types');
 program.description('Work with Cortex Types');
 
 // Save Type
@@ -82,4 +83,7 @@ program
         }
     }));
 
-program.showHelpAfterError().parseAsync(process.argv);
+if (require.main === module) {
+    program.showHelpAfterError().parseAsync(process.argv);
+}
+module.exports = program;

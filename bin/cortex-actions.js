@@ -35,6 +35,7 @@ const {
     // TaskStatusActionCommand,
 } = require('../src/commands/actions');
 
+program.name('cortex actions');
 program.description('Work with Cortex Actions');
 
 // List Actions
@@ -223,4 +224,7 @@ program
 //         }
 //     }));
 
-program.showHelpAfterError().parseAsync(process.argv);
+if (require.main === module) {
+    program.showHelpAfterError().parseAsync(process.argv);
+}
+module.exports = program;

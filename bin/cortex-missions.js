@@ -32,6 +32,7 @@ const {
 
 const { InvokeAgentServiceCommand } = require('../src/commands/agents');
 
+program.name('cortex missions');
 program.description('Work with Cortex Missions');
 
 program
@@ -139,4 +140,7 @@ program
         }
     }));
 
-program.showHelpAfterError().parseAsync(process.argv);
+if (require.main === module) {
+    program.showHelpAfterError().parseAsync(process.argv);
+}
+module.exports = program;

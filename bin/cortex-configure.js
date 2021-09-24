@@ -26,6 +26,9 @@ const {
     PrintEnvVars,
 } = require('../src/commands/configure');
 
+program.name('cortex configure');
+program.description('Configure cortex connection profiles');
+
 program
     .option('--file [file]', 'Personal access config file location')
     .option('--profile [profile]', 'The profile to configure', 'default')

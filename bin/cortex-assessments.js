@@ -34,6 +34,7 @@ const {
     DependencyTreeCommand,
 } = require('../src/commands/assessments');
 
+program.name('cortex assessments');
 program.description('Work with Cortex Assessments');
 
 program
@@ -223,4 +224,7 @@ program
         }
     }));
 
-program.showHelpAfterError().parseAsync(process.argv);
+if (require.main === module) {
+    program.showHelpAfterError().parseAsync(process.argv);
+}
+module.exports = program;

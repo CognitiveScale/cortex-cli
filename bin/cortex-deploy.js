@@ -29,6 +29,7 @@ const {
     DeploySkillCommand,
 } = require('../src/commands/deploy');
 
+program.name('cortex deploy');
 program.description('Export Cortex artifacts for deployment');
 
 // Export Agent Snapshot. Provide snapshotIds in quotes separated by space like "snapshotId1 snapshotId2". This is to support multiple agents in one deployment manifest file.
@@ -113,4 +114,7 @@ program
         }
     }));
 
-program.showHelpAfterError().parseAsync(process.argv);
+if (require.main === module) {
+    program.showHelpAfterError().parseAsync(process.argv);
+}
+module.exports = program;

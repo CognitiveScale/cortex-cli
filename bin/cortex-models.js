@@ -31,6 +31,7 @@ const {
     ListModelRunsCommand,
 } = require('../src/commands/models');
 
+program.name('cortex models');
 program.description('Work with Cortex Models');
 
 // List Models
@@ -160,4 +161,7 @@ program
         }
     }));
 
-program.showHelpAfterError().parseAsync(process.argv);
+if (require.main === module) {
+    program.showHelpAfterError().parseAsync(process.argv);
+}
+module.exports = program;

@@ -3,13 +3,24 @@
  */
 const _ = require('lodash');
 const fs = require('fs');
+const glob = require('glob');
 
-// read command args if passed
-const sourcedir = _.get(process.argv, '[2]', '.');
-const outfile = _.get(process.argv, '[3]');
+const outfile = _.get(process.argv, '[2]');
 
-// use top level commands as driver
-const rootJson = require(`${sourcedir}/cortex.json`);
+const cmd_files = ['./bin/cortex-agents.js', './bin/cortex-agents.js']; // glob.sync('./bin/cortex-*.js');
+
+function genDocs(program) {
+    return program.commands.map((c) => ({
+        name: c._name,
+        description: c._description,
+        usage: c.usage(),
+        options: c.options.map((o) => ({
+            flags: o.flags,
+            defaultValue: o.defaultValue,
+            description: o.description,
+        })),
+    }));
+}
 
 // replace /n/t with HTML equivs
 const cleanString = (s) => s
@@ -34,11 +45,11 @@ _.join(
 )}`;
 
 const cmdHeading = (cmd) => `
-## ${_.capitalize(cmd.name)}
+## ${_.capitalize(cmd.name())}
 \`\`\`
-cortex ${cmd.name} ${cmd.usage}
+${cmd.name()} ${cmd.usage()}
 \`\`\`    
-${cmd.description}  
+${cmd.description()}  
 `;
 
 const header = `---
@@ -75,13 +86,16 @@ cortex [command] [options]
 it is describing. This can include YAML, JSON, or other formats.
 `;
 
-const body = _.join(
-    _.sortBy(rootJson, ['name']).map(
-        (cmd) => `${cmdHeading(cmd)}\n`
-            + `${subcmdTable(require(`${sourcedir}/cortex-${cmd.name}.json`))}`,
-        ),
-'',
-);
+const body = cmd_files.sort().map((cmdFile) => {
+    // eslint-disable-next-line import/no-dynamic-require
+    const cacheName = require.resolve(cmdFile);
+    const prog = require(cmdFile);
+    const docObj = genDocs(prog);
+    const res = `${cmdHeading(prog)}\n${subcmdTable(docObj)}`;
+    delete require.cache(cacheName);
+    return res;
+});
+
 const output = header + body;
 // if outfile write to file ...
 if (_.isEmpty(outfile)) {

@@ -35,6 +35,7 @@ const {
     RoleListCommand,
 } = require('../src/commands/roles');
 
+program.name('cortex roles');
 program.description('Work with Cortex Roles');
 
 program.command('list')
@@ -202,4 +203,7 @@ program.command('assign-external')
             console.error(chalk.red(err.message));
         }
     }));
-program.showHelpAfterError().parseAsync(process.argv);
+if (require.main === module) {
+    program.showHelpAfterError().parseAsync(process.argv);
+}
+module.exports = program;

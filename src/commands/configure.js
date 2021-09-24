@@ -67,7 +67,7 @@ module.exports.ConfigureCommand = class {
                 }
                 cmd.saveConfig(config, profileName, patData, project);
                 console.log(`Configuration for profile ${chalk.green.bold(profileName)} saved.`);
-                process.exit(0); //
+                // process.exit(0); //
             } catch (err) {
                 printError(err);
             }
