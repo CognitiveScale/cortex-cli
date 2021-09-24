@@ -97,57 +97,74 @@ module.exports.DeployActionCommand = class {
     }
 
     async execute(actionDefinition, options) {
-        const profile = await loadProfile(options.profile);
+        try {
+            const profile = await loadProfile(options.profile);
 
-        let actionInst = {};
-        if (actionDefinition) {
-            debug('%s.deployActionCommand(%s)', profile.name, actionDefinition);
-            try {
-                const actionDefStr = fs.readFileSync(actionDefinition);
-                actionInst = parseObject(actionDefStr, options);
-            } catch (err) {
-                printError(`Failed to deploy action: ${err.message}`, options);
+            let actionInst = {};
+            if (actionDefinition) {
+                debug('%s.deployActionCommand(%s)', profile.name, actionDefinition);
+                try {
+                    const actionDefStr = fs.readFileSync(actionDefinition);
+                    actionInst = parseObject(actionDefStr, options);
+                } catch (err) {
+                    printError(`Failed to deploy action: ${err.message}`, options);
+                }
             }
-        }
-        if (options.actionName) {
-            actionInst.name = options.actionName;
-        }
-        if (options.name) { actionInst.name = options.name; }
-        if (options.podspec) {
-            const paramsStr = fs.readFileSync(options.podspec);
-            actionInst.podSpec = parseObject(paramsStr, options);
-        }
-        if (!_.isEmpty(options.k8sResource)) {
-            const k8sResources = options.k8sResource.map((f) => parseObject(fs.readFileSync(f), options));
-            actionInst.k8sResources = k8sResources;
-        }
-        
-        if (options.image) { actionInst.image = options.image; }
-        if (options.docker) { actionInst.image = options.docker; }
-        if (options.type) { actionInst.type = options.type; }
-        if (options.actionType) { actionInst.type = options.actionType; }
-        if (options.cmd) { actionInst.command = options.cmd; }
-        if (options.port) {
-            if (!isNumeric(options.port)) {
-                printError('--port must be a number', options);
+            if (options.actionName) {
+                actionInst.name = options.actionName;
             }
-            actionInst.port = options.port;
-        }
-        if (options.environmentVariables) { actionInst.environmentVariables = options.environmentVariables; }
-        if (options.pushDocker) { actionInst.pushDocker = options.pushDocker; }
-        if (options.scaleCount) {
-            if (!isNumeric(options.scaleCount)) {
-                printError('--scaleCount must be a number', options);
+            if (options.name) {
+                actionInst.name = options.name;
             }
-            actionInst.scaleCount = parseInt(options.scaleCount, 10);
-        }
+            if (options.podspec) {
+                const paramsStr = fs.readFileSync(options.podspec);
+                actionInst.podSpec = parseObject(paramsStr, options);
+            }
+            if (!_.isEmpty(options.k8sResource)) {
+                const k8sResources = options.k8sResource.map((f) => parseObject(fs.readFileSync(f), options));
+                actionInst.k8sResources = k8sResources;
+            }
+            if (options.docker) {
+                actionInst.image = options.docker;
+            }
+            if (options.image) {
+                actionInst.image = options.image;
+            }
 
-        if (options.jobTimeout) {
-            if (!isNumeric(options.jobTimeout)) {
-                printError('--jobTimeout must be a number', options);
+            if (options.type) {
+                actionInst.type = options.type;
             }
-            actionInst.jobTimeout = parseInt(options.jobTimeout, 10);
-        }
+            if (options.actionType) {
+                actionInst.type = options.actionType;
+            }
+            if (options.cmd) {
+                actionInst.command = options.cmd;
+            }
+            if (options.port) {
+                if (!isNumeric(options.port)) {
+                    printError('--port must be a number', options);
+                }
+                actionInst.port = options.port;
+            }
+            if (options.environmentVariables) {
+                actionInst.environmentVariables = options.environmentVariables;
+            }
+            if (options.pushDocker) {
+                actionInst.pushDocker = options.pushDocker;
+            }
+            if (options.scaleCount) {
+                if (!isNumeric(options.scaleCount)) {
+                    printError('--scaleCount must be a number', options);
+                }
+                actionInst.scaleCount = parseInt(options.scaleCount, 10);
+            }
+
+            if (options.jobTimeout) {
+                if (!isNumeric(options.jobTimeout)) {
+                    printError('--jobTimeout must be a number', options);
+                }
+                actionInst.jobTimeout = parseInt(options.jobTimeout, 10);
+            }
 
         const actions = new Actions(profile.url);
         actions.deployAction(options.project || profile.project, profile.token, actionInst)
