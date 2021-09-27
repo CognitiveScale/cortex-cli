@@ -7,9 +7,9 @@ const glob = require('glob');
 
 const outfile = _.get(process.argv, '[2]');
 
-const cmd_files = ['./bin/cortex-agents.js', './bin/cortex-agents.js']; // glob.sync('./bin/cortex-*.js');
+const cmd_files = ['./bin/cortex-agents.js', './bin/cortex-actions.js']; // glob.sync('./bin/cortex-*.js');
 
-function genDocs(program) {
+function docObject(program) {
     return program.commands.map((c) => ({
         name: c._name,
         description: c._description,
@@ -86,14 +86,16 @@ cortex [command] [options]
 it is describing. This can include YAML, JSON, or other formats.
 `;
 
+function markdownForCmd(program) {
+    const docObj = docObject(program);
+    return `${cmdHeading(program)}\n${subcmdTable(docObj)}`;
+}
+
+const vm = require('vm');
 const body = cmd_files.sort().map((cmdFile) => {
-    // eslint-disable-next-line import/no-dynamic-require
-    const cacheName = require.resolve(cmdFile);
-    const prog = require(cmdFile);
-    const docObj = genDocs(prog);
-    const res = `${cmdHeading(prog)}\n${subcmdTable(docObj)}`;
-    delete require.cache(cacheName);
-    return res;
+    vm.runInNewContext(`const prog = require("${cmdFile}"); result =  markdownForCmd(prog);`,
+        { markdownForCmd }
+    );
 });
 
 const output = header + body;
