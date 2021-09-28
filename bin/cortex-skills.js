@@ -114,6 +114,7 @@ program
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
     .option('--project [project]', 'The project to use')
+    .option('-k, --k8sResource [file...]', 'Additional kubernetes resources deployed and owned by the skill')
     .option('-y, --yaml', 'Use YAML for skill definition format')
     .action(withCompatibilityCheck((skillDefinition, options) => {
         try {

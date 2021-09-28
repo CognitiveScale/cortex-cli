@@ -20,10 +20,8 @@ const moment = require('moment');
 const { loadProfile } = require('../config');
 const Catalog = require('../client/catalog');
 const Agent = require('../client/agents');
-const { LISTTABLEFORMAT } = require('./utils');
-
 const {
- printSuccess, printError, filterObject, parseObject, printTable, formatValidationPath,
+    printSuccess, printError, printWarning, filterObject, parseObject, printTable, formatValidationPath, LISTTABLEFORMAT,
 } = require('./utils');
 
 module.exports.SaveSkillCommand = class SaveSkillCommand {
@@ -32,12 +30,21 @@ module.exports.SaveSkillCommand = class SaveSkillCommand {
     }
 
     async execute(skillDefinition, options) {
-        const profile = await loadProfile(options.profile);
-        debug('%s.executeSaveSkill(%s)', profile.name, skillDefinition);
         try {
+            const profile = await loadProfile(options.profile);
             const skillDefStr = fs.readFileSync(skillDefinition);
             const skill = parseObject(skillDefStr, options);
             const catalog = new Catalog(profile.url);
+            if (!_.isEmpty(options.k8sResource)) {
+                const k8sResources = options.k8sResource.map((f) => parseObject(fs.readFileSync(f), options));
+                if (_.isEmpty(_.get(skill, 'actions', []))) {
+                    printError('Skill must contain an action to apply kubernetes resources', options, true);
+                }
+                if (skill.actions.length > 1) {
+                    printWarning('Applying kubernetes resources to all actions');
+                }
+                skill.actions.map((a) => a.k8sResources = k8sResources);
+            }
             const response = await catalog.saveSkill(options.project || profile.project, profile.token, skill);
             if (response.success) {
                 printSuccess('Skill saved', options);
