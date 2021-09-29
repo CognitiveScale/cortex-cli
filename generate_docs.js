@@ -2,12 +2,6 @@
  * Opted to use pure JS versus adding handlebars as a dep, as handlebars always has vulns..
  */
 const _ = require('lodash');
-const fs = require('fs');
-const glob = require('glob');
-
-const outfile = _.get(process.argv, '[2]');
-
-const cmd_files = ['./bin/cortex-agents.js', './bin/cortex-actions.js']; // glob.sync('./bin/cortex-*.js');
 
 function docObject(program) {
     return program.commands.map((c) => ({
@@ -52,11 +46,11 @@ ${cmd.name()} ${cmd.usage()}
 ${cmd.description()}  
 `;
 
-
 function markdownForCmd(program) {
     const docObj = docObject(program);
     return `${cmdHeading(program)}\n${subcmdTable(docObj)}`;
 }
 
+// eslint-disable-next-line import/no-dynamic-require
 const cmd = require(process.argv[2]);
 console.log(markdownForCmd(cmd));
