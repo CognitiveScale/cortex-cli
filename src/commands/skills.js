@@ -36,7 +36,7 @@ module.exports.SaveSkillCommand = class SaveSkillCommand {
             const skill = parseObject(skillDefStr, options);
             const catalog = new Catalog(profile.url);
             if (!_.isEmpty(options.k8sResource)) {
-                const k8sResources = options.k8sResource.map((f) => parseObject(fs.readFileSync(f), options));
+                const k8sResources = options.k8sResource.map((f) => JSON.stringify(parseObject(fs.readFileSync(f), options)));
                 if (_.isEmpty(_.get(skill, 'actions', []))) {
                     printError('Skill must contain an action to apply kubernetes resources', options, true);
                 }

@@ -183,16 +183,20 @@ module.exports.PrintEnvVars = class {
     }
 
     async execute() {
-        const vars = [];
-        const options = this.program.opts();
-        const profile = await loadProfile(options.profile, false);
-        const ttl = options.ttl || '1d';
-        const jwt = await generateJwt(profile, ttl);
-        vars.push(`export CORTEX_TOKEN=${jwt}`);
-        vars.push(`export CORTEX_URI=${profile.url}`);
-        // not sure why we used URI previously ??
-        vars.push(`export CORTEX_URL=${profile.url}`);
-        vars.push(`export CORTEX_PROJECT=${options.project || profile.project}`);
-        return printSuccess(vars.join('\n'), options);
+        try {
+            const vars = [];
+            const options = this.program.opts();
+            const profile = await loadProfile(options.profile, false);
+            const ttl = options.ttl || '1d';
+            const jwt = await generateJwt(profile, ttl);
+            vars.push(`export CORTEX_TOKEN=${jwt}`);
+            vars.push(`export CORTEX_URI=${profile.url}`);
+            // not sure why we used URI previously ??
+            vars.push(`export CORTEX_URL=${profile.url}`);
+            vars.push(`export CORTEX_PROJECT=${options.project || profile.project}`);
+            return printSuccess(vars.join('\n'), { color: 'off' });
+        } catch (err) {
+            return printError(err.message, {}, true);
+        }
     }
 };
