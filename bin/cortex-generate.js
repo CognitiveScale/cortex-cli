@@ -26,12 +26,12 @@ const {
 program.description('Scaffolding Cortex Components');
 
 program
-    .command('skill')
+    .command('skill <skillName> <type>')
     .description('Generates the structure and top level build script for a skill in current directory')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
-    .action((options) => { // deliberately not using withCompatibilityCheck()
+    .action((skillName, type, options) => { // deliberately not using withCompatibilityCheck()
         try {
-            new GenerateSkillCommand(program).execute(options);
+            new GenerateSkillCommand(program).execute(skillName, type, options);
         } catch (err) {
             console.error(chalk.red(err.message));
         }
