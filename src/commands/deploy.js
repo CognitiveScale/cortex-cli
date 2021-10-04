@@ -156,6 +156,37 @@ const DeployExperimentCommand = class {
 
 module.exports.DeployExperimentCommand = DeployExperimentCommand;
 
+const DeployConnectionCommand = class {
+    constructor(program) {
+        this.program = program;
+    }
+
+    execute(connectionName, options) {
+        const profile = loadProfile(options.profile);
+        const project = options.project || profile.project;
+        debug('%s.exportDeploymentConnection%s)', profile.name, connectionName);
+
+        const connection = new Connections(profile.url);
+        connection.describeConnection(project, profile.token, connectionName).then(async (response) => {
+            if (response.success) {
+                const result = filterObject(response.result, options);
+                const connectionDesc = cleanInternalFields(result);
+                const filepath = path.join(artifactsDir, 'connections', `${connectionName}.json`);
+                writeToFile(connectionDesc, filepath);
+                updateManifest({ connection: [filepath] });
+                await addDependencies(profile.url, profile.token, project, 'Connection', connectionName);
+                printSuccess(`Successfully exported Connection ${connectionName} in ${artifactsDir} and updated manifest file ${manifestFile}`);
+            } else {
+                printError(`Failed to export connection ${connectionName}: ${response.message}`, options);
+            }
+        }).catch((err) => {
+            printError(`Failed to export connection ${connectionName}: ${err.status} ${err.message}`, options);
+        });
+    }
+};
+
+module.exports.DeployConnectionCommand = DeployConnectionCommand;
+
 /**
  * Cortex deploy command is to export Cortex artifacts (agent, snapshot, skill, action etc) for CI/CD deployment. This command:
  * 1. Exports cortex artifacts
@@ -192,6 +223,14 @@ module.exports.DeploySnapshotCommand = class {
         snapshotIds.split(' ').forEach((snapshotId) => {
             promises.push(agents.describeAgentSnapshot(project, profile.token, snapshotId).then(async (response) => {
                 let result = JSON.parse(response);
+                // export dependant MLOps artifacts
+                if (_.size(result.dependencies.connections)) {
+                    await Promise.all(result.dependencies.connections.map(async (con) => {
+                        if (_.size(con.connections)) {
+                            await Promise.all(con.connections.map((c) => new DeployConnectionCommand(this.program).execute(c, options)));
+                        }
+                    }));
+                }
                 // export dependant MLOps artifacts
                 if (_.size(result.dependencies.mlOps)) {
                     await Promise.all(result.dependencies.mlOps.map(async (ml) => {
@@ -287,35 +326,6 @@ module.exports.DeployCampaignCommand = class {
     }
 };
 
-module.exports.DeployConnectionCommand = class {
-    constructor(program) {
-        this.program = program;
-    }
-
-    execute(connectionName, options) {
-        const profile = loadProfile(options.profile);
-        const project = options.project || profile.project;
-        debug('%s.exportDeploymentConnection%s)', profile.name, connectionName);
-
-        const connection = new Connections(profile.url);
-        connection.describeConnection(project, profile.token, connectionName).then(async (response) => {
-            if (response.success) {
-                const result = filterObject(response.result, options);
-                const connectionDesc = cleanInternalFields(result);
-                const filepath = path.join(artifactsDir, 'connections', `${connectionName}.json`);
-                writeToFile(connectionDesc, filepath);
-                updateManifest({ connection: [filepath] });
-                await addDependencies(profile.url, profile.token, project, 'Connection', connectionName);
-                printSuccess(`Successfully exported Connection ${connectionName} in ${artifactsDir} and updated manifest file ${manifestFile}`);
-            } else {
-                printError(`Failed to export connection ${connectionName}: ${response.message}`, options);
-            }
-        }).catch((err) => {
-            printError(`Failed to export connection ${connectionName}: ${err.status} ${err.message}`, options);
-        });
-    }
-};
-
 module.exports.DeploySkillCommand = class {
     constructor(program) {
         this.program = program;
@@ -341,6 +351,11 @@ module.exports.DeploySkillCommand = class {
                 manifest.skill = [filepath];
                 exports.skill = skillName;
                 const dependencies = await addDependencies(profile.url, profile.token, project, 'Skill', skillName);
+                // export linked connections of skill
+                const connections = dependencies.data.filter((d) => d.type === 'Connection').map((d) => d.name);
+                if (connections) {
+                    await Promise.all(connections.map((connection) => new DeployConnectionCommand(this.program).execute(connection, options)));
+                }
                 // export linked model/experiment of skill
                 const mlOps = Object.fromEntries(dependencies.data.filter((d) => ['Model', 'Experiment', 'ExperimentRun'].includes(d.type)).map((d) => [d.type, d.name]));
                 if (mlOps && mlOps.Experiment) {
