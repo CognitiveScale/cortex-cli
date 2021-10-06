@@ -198,7 +198,7 @@ module.exports.GetActivationCommand = class {
                         { column: 'Elapsed (ms)', field: 'elapsed', width: 30 },
                     ];
                     printSuccess(`Status: ${result.status}`);
-                    printSuccess(`Elapsed Time (ms): ${result.elapsed}`);    
+                    printSuccess(`Elapsed Time (ms): ${result.elapsed}`);
                     printTable(tableSpec, _.sortBy(result.transits, ['start', 'end']));
                 } else {
                     printSuccess(JSON.stringify(result, null, 2), options);
@@ -219,9 +219,9 @@ module.exports.ListActivationsCommand = class {
     }
 
     execute(options) {
-        if (_.isEmpty(options.agentName) 
-            && _.isEmpty(options.skillName) 
-            && _.isEmpty(options.correlationId) 
+        if (_.isEmpty(options.agentName)
+            && _.isEmpty(options.skillName)
+            && _.isEmpty(options.correlationId)
             && _.isEmpty(options.status)) {
             printError('Either --agentName, --skillName, --correlationId, or --status must be provided', options);
         }
@@ -252,10 +252,7 @@ module.exports.ListActivationsCommand = class {
                     printSuccess(JSON.stringify(result, null, 2), options);
                 } else {
                     const tableSpec = [
-                        { column: 'Name', field: 'name', width: 30 },
-                        { column: 'Activation Id', field: 'activationId', width: 40 },
-                        { column: 'Status', field: 'status', width: 20 },
-                        { column: 'Started', field: 'start', width: 65 },
+                        { column: 'Activation Id', field: 'activationId', width: 38 },
                     ];
 
                     const genName = (o) => {

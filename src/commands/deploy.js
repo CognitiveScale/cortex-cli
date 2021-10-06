@@ -386,3 +386,97 @@ module.exports.DeploySkillCommand = class {
         });
     }
 };
+
+module.exports.DeployCampaignCommand = class {
+    constructor(program) {
+        this.program = program;
+    }
+
+    processResource(project, campaign, stream, filename, entries) {
+        return new Promise((resolve, reject) => {
+            getStream.buffer(stream).then((content) => {
+                let type;
+                let filepath;
+                if (filename.endsWith('.yml') || filename.endsWith('.yaml')) {
+                    const resource = yaml.safeLoad(content);
+                    type = resource.kind;
+                    filepath = path.join(artifactsDir, campaign, filename);
+                    writeToFile(yaml.safeDump(resource), filepath);
+                } else {
+                    type = path.extname(filename).replace(/\./g, '');
+                    filepath = path.join(artifactsDir, campaign, filename);
+                    writeToFile(content, filepath);
+                }
+                const files = entries[type] || [];
+                files.push(filepath);
+                entries[type] = files;
+                resolve(filepath);
+            }).catch(e => reject(e));
+        });
+    }
+
+    async execute(campaignName, options) {
+        const profile = loadProfile(options.profile);
+        const project = options.project || profile.project;
+        debug('%s.exportDeploymentCampaigns(%s)', profile.name, campaignName);
+
+        const catalog = new Catalog(profile.url);
+        await catalog.exportCampaign(project, profile.token, campaignName, options.deployable, `${campaignName}.zip`);
+        const filepaths = {};
+        const promises = [];
+
+        yauzl.open(`${campaignName}.zip`, { lazyEntries: true }, (err, zipfile) => {
+            if (err) {
+                throw err;
+            }
+            zipfile.readEntry();
+            zipfile.on('entry', (entry) => {
+                zipfile.openReadStream(entry, (e, readStream) => {
+                    if (e) {
+                        printError(e);
+                    }
+                    promises.push(this.processResource(project, campaignName, readStream, entry.fileName, filepaths));
+                    zipfile.readEntry();
+                });
+            });
+            zipfile.on('error', e => printError(e));
+            zipfile.once('end', async () => {
+                await addDependencies(profile.url, profile.token, project, 'Campaign', campaignName);
+                Promise.all(promises).then(() => {
+                    updateManifest(filepaths);
+                    printSuccess(`Successfully updated manifest file ${manifestFile}`);
+                });
+                deleteFile(`${campaignName}.zip`);
+            });
+        });
+    }
+};
+
+module.exports.DeployConnectionCommand = class {
+    constructor(program) {
+        this.program = program;
+    }
+
+    execute(connectionName, options) {
+        const profile = loadProfile(options.profile);
+        const project = options.project || profile.project;
+        debug('%s.exportDeploymentConnection%s)', profile.name, connectionName);
+
+        const connection = new Connections(profile.url);
+        connection.describeConnection(project, profile.token, connectionName).then(async (response) => {
+            if (response.success) {
+                const result = filterObject(response.result, options);
+                const connectionDesc = cleanInternalFields(result);
+                const filepath = path.join(artifactsDir, 'connections', `${connectionName}.json`);
+                writeToFile(connectionDesc, filepath);
+                updateManifest({ connection: [filepath] });
+                await addDependencies(profile.url, profile.token, project, 'Connection', connectionName);
+                printSuccess(`Connection ${connectionName} exported successfully`);
+            } else {
+                printError(`Failed to export connection ${connectionName}: ${response.message}`, options);
+            }
+        }).catch((err) => {
+            printError(`Failed to export connection ${connectionName}: ${err.status} ${err.message}`, options);
+        });
+    }
+};
