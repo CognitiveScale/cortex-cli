@@ -17,6 +17,7 @@
  */
 
 const chalk = require('chalk');
+const fs = require('fs');
 const program = require('../src/commander');
 const  { parseObject, printError } = require('../src/commands/utils');
 
@@ -91,24 +92,24 @@ program
     .option('--params-file [paramsFile]', 'A file containing either JSON or YAML formatted params')
     .action(withCompatibilityCheck((campaignName, missionName, options) => {
         try {
-            // if (options.params) {
-            //     try {
-            //         params = parseObject(options.params, options);
-            //     } catch (e) {
-            //         printError(`Failed to parse params: ${options.params} Error: ${e}`, options);
-            //     }
-            // } else if (options.paramsFile) {
-            //     const paramsStr = fs.readFileSync(options.paramsFile);
-            //     params = parseObject(paramsStr, options);
-            // }
-            // if (params.payload) {
-            //     // apply validations
-            //     // batch size can't be empty, can't be negative
-            //     if (!params.payload.batch_size || params.payload.batch_size <= 0){
-            //         printError(`batch_size cannot be "${params.payload.batch_size}"`)
-            //         throw "Inappropriate Batch Size passed in params"
-            //     }
-            // }
+            if (options.params) {
+                try {
+                    params = parseObject(options.params, options);
+                } catch (e) {
+                    printError(`Failed to parse params: ${options.params} Error: ${e}`, options);
+                }
+            } else if (options.paramsFile) {
+                const paramsStr = fs.readFileSync(options.paramsFile);
+                params = parseObject(paramsStr, options);
+            }
+            if (params.payload) {
+                // apply validations
+                // batch size can't be empty, can't be negative
+                if (!params.payload.batch_size || params.payload.batch_size <= 0){
+                    printError(`batch_size cannot be "${params.payload.batch_size}"`)
+                    throw "Inappropriate Batch Size passed in params"
+                }
+            }
             new InvokeAgentServiceCommand(program).execute(`${missionName}-online-learner-agent`, 'online_learner_service', options);
         } catch (err) {
             console.error(chalk.red(err.message));
