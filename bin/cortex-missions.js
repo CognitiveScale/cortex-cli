@@ -19,7 +19,7 @@
 const chalk = require('chalk');
 const fs = require('fs');
 const program = require('../src/commander');
-const  { parseObject, printError } = require('../src/commands/utils');
+const { parseObject, printError } = require('../src/commands/utils');
 
 const { withCompatibilityCheck } = require('../src/compatibility');
 
@@ -92,6 +92,7 @@ program
     .option('--params-file [paramsFile]', 'A file containing either JSON or YAML formatted params')
     .action(withCompatibilityCheck((campaignName, missionName, options) => {
         try {
+            let params = {};
             if (options.params) {
                 try {
                     params = parseObject(options.params, options);
@@ -105,9 +106,9 @@ program
             if (params.payload) {
                 // apply validations
                 // batch size can't be empty, can't be negative
-                if (!params.payload.batch_size || params.payload.batch_size <= 0){
-                    printError(`batch_size cannot be "${params.payload.batch_size}"`)
-                    throw "Inappropriate Batch Size passed in params"
+                if (!params.payload.batch_size || params.payload.batch_size <= 0) {
+                    printError(`batch_size cannot be "${params.payload.batch_size}"`);
+                    throw new Error('Inappropriate Batch Size passed in params');
                 }
             }
             new InvokeAgentServiceCommand(program).execute(`${missionName}-online-learner-agent`, 'online_learner_service', options);
