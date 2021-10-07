@@ -105,11 +105,18 @@ program
             }
             if (params.payload) {
                 // apply validations
+                if (!params.payload.campaign_name || !params.payload.mission_name || !params.payload.profile_schema) {
+                    printError('payload must contain campaign_name, mission_name and profile_schema');
+                    throw new Error('Payload must contain campaign_name, mission_name and profile_schema');
+                }
                 // batch size can't be empty, can't be negative
                 if (!params.payload.batch_size || params.payload.batch_size <= 0) {
                     printError(`batch_size cannot be "${params.payload.batch_size}"`);
                     throw new Error('Inappropriate Batch Size passed in params');
                 }
+            } else {
+                printError('payload cannot be empty');
+                throw new Error('Empty payload received in params');
             }
             new InvokeAgentServiceCommand(program).execute(`${missionName}-online-learner-agent`, 'online_learner_service', options);
         } catch (err) {
