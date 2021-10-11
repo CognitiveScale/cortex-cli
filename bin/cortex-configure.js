@@ -84,7 +84,6 @@ program
     .option('--ttl [time]', 'The amount of time for this login to remain active, expressed as a number of hours, days, or weeks (e.g. 1h, 2d, 2w)', '1d')
     .description('Print cortex environment variables')
     .action((options) => {
-        console.log(options);
         new PrintEnvVars(program).execute(options);
     });
 
