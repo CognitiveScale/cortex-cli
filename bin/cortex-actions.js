@@ -114,7 +114,7 @@ program
     .description('Deploy an action')
     .storeOptionsAsProperties(false)
     .option('--name, --actionName [name]', 'Action name')
-    .option('--type, --actionType [job|daemon]', 'Type of action')
+    .option('--type, --actionType [job/daemon]', 'Type of action')
     .option('--cmd [cmd]', 'Command to be executed') // '["--daemon"]'
     .option('--image, --docker [image]', 'Docker image to use as the runner')
     .option('--environmentVariables [environmentVariables]', 'Docker container environment variables, only used for daemon action types')
