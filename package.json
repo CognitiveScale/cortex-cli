@@ -5,7 +5,7 @@
   "main": "./bin/cortex.js",
   "scripts": {
     "preinstall": "npx check-node-version -p --package",
-    "pretest": "eslint bin/**/*.js src/**/*.js test/**/*.js && audit-ci -h",
+    "pretest": "eslint bin/**/*.js src/**/*.js test/**/*.js && audit-ci -h --allowlist 1002475",
     "test": "NODE_ENV=test mocha --exit"
   },
   "engines": {
