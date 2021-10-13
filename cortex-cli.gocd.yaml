@@ -41,8 +41,6 @@ pipelines:
               elastic_profile_id: gocd-test-agent-dind
               artifacts:
                 - build:
-                    source: masterBranchRevision.json
-                - build:
                     source: cortex-cli-docs.md
               tasks:
                 - script: |
