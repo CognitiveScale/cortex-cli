@@ -45,7 +45,7 @@ module.exports.ListSecretsCommand = class {
                         const tableSpec = [
                             { column: 'Secret Key Name', field: 'keyName', width: 50 },
                         ];
-                        printTable(tableSpec, map(x => ({ keyName: x }), result));
+                        printTable(tableSpec, map((x) => ({ keyName: x }), result));
                     }
                 } else {
                     printError(`Failed to list secrets: ${response.message}`, options);

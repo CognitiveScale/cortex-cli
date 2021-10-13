@@ -1,0 +1,69 @@
+format_version: 10
+pipelines:
+  cortex-cli:
+    group: fabric6
+    materials:
+      cortex-cli:
+        git: git@github.com:CognitiveScale/cortex-cli.git
+        branch: develop
+    stages:
+      - build:
+          clean_workspace: yes
+          jobs:
+            Build:
+              elastic_profile_id: gocd-test-agent-dind
+              artifacts:
+                - build:
+                    source: cruise-output/buildReport*.json
+                - build:
+                    source: devBranchRevision.json
+                - build:
+                    source: cortex-cli-docs.md
+              tasks:
+                - script: |
+                    set -eux
+                    git clone git@github.com:CognitiveScale/gocd-pipeline-scripts.git
+                    ./gocd-pipeline-scripts/common/c12e-common.sh dev
+                    echo ./gocd-pipeline-scripts/cortex5/docs/update-docs.sh cli
+  cortex-cli-master:
+    group: fabric6
+    environment_variables:
+      DOCKER_SECRET_FLAG: "id=npmrc,src=~/.npmrc"
+    materials:
+      cortex-cli:
+        git: git@github.com:CognitiveScale/cortex-cli.git
+        branch: master
+    stages:
+      - build:
+          clean_workspace: yes
+          jobs:
+            Build:
+              elastic_profile_id: gocd-test-agent-dind
+              artifacts:
+                - build:
+                    source: masterBranchRevision.json
+                - build:
+                    source: cortex-cli-docs.md
+              tasks:
+                - script: |
+                    mv devBranchRevision.json masterBranchRevision.json
+                    git clone git@github.com:CognitiveScale/gocd-pipeline-scripts.git
+                    ./gocd-pipeline-scripts/common/c12e-common.sh master
+                    echo ./gocd-pipeline-scripts/cortex5/docs/update-docs.sh cli
+      - publishDocs:
+          clean_workspace: yes
+          jobs:
+            commitDocs:
+              elastic_profile_id: gocd-test-agent-dind
+              tasks:
+                - fetch:
+                    stage: build
+                    job: Build
+                    source: cortex-cli-docs.md
+                    is_file: yes
+                - script: |
+                    git clone --branch master --single-branch git@github.com:CognitiveScale/cortex-fabric.git
+                    mv cortex-cli-docs.md cortex-fabric/docs/docs/reference-guides/cortex-cli.md
+                    cd cortex-fabric
+                    git commit -a -m "Publishing New CLI Docs"
+                    git push origin master

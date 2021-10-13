@@ -50,7 +50,7 @@ module.exports.ListActionsCommand = class {
                             { column: 'Modified', field: 'updatedAt', width: 26 },
                             { column: 'Author', field: 'createdBy', width: 26 },
                         ];
-                        printTable(tableSpec, result, o => ({ ...o, updatedAt: o.updatedAt ? moment(o.updatedAt).fromNow() : '-' }));
+                        printTable(tableSpec, result, (o) => ({ ...o, updatedAt: o.updatedAt ? moment(o.updatedAt).fromNow() : '-' }));
                     }
                 } else {
                     printError(`Failed to list actions: ${response.status} ${response.message}`, options);
@@ -96,8 +96,7 @@ module.exports.DeployActionCommand = class {
         this.program = program;
     }
 
-    execute(actionDefinition, command) {
-        const options = command.opts();
+    execute(actionDefinition, options) {
         const profile = loadProfile(options.profile);
 
         let actionInst = {};
@@ -117,6 +116,10 @@ module.exports.DeployActionCommand = class {
         if (options.podspec) {
             const paramsStr = fs.readFileSync(options.podspec);
             actionInst.podSpec = parseObject(paramsStr, options);
+        }
+        if (!_.isEmpty(options.k8sResource)) {
+            const k8sResources = options.k8sResource.map((f) => parseObject(fs.readFileSync(f), options));
+            actionInst.k8sResources = k8sResources;
         }
         if (options.docker) { actionInst.image = options.docker; }
         if (options.image) { actionInst.image = options.image; }
@@ -269,7 +272,6 @@ module.exports.JobTaskListActionCommand = class {
     }
 };
 
-
 module.exports.TaskStatsActionCommand = class {
     constructor(program) {
         this.program = program;
@@ -290,7 +292,6 @@ module.exports.TaskStatsActionCommand = class {
             });
     }
 };
-
 
 module.exports.ListTaskByActivation = class {
     constructor(program) {

@@ -23,11 +23,9 @@ const fs = require('fs');
 const glob = require('glob');
 const jmsepath = require('jmespath');
 const os = require('os');
-const osName = require('os-name');
 const path = require('path');
 const yaml = require('js-yaml');
 const { exec } = require('child_process');
-
 
 module.exports.constructError = (error) => {
     // fallback to text in message or standard error message
@@ -87,41 +85,36 @@ module.exports.filterObject = (obj, options) => {
     return obj;
 };
 
-module.exports.parseObject = (str, options) => {
-    if (options.yaml) {
-        return yaml.safeLoad(str);
-    }
-
-    return JSON.parse(str);
-};
+// YAML 1.2 parses both yaml & json
+module.exports.parseObject = (str) => yaml.load(str);
 
 function _extractValues(fields, obj) {
     const rv = [];
-    fields.forEach(f => rv.push((obj !== undefined && obj !== null && obj[f] !== undefined && obj[f] !== null) ? obj[f].toString() : '-'));
+    fields.forEach((f) => rv.push((obj !== undefined && obj !== null && obj[f] !== undefined && obj[f] !== null) ? obj[f].toString() : '-'));
     return rv;
 }
 
 module.exports.printTable = (spec, objects, transform) => {
     transform = transform || function (obj) { return obj; };
 
-    const head = spec.map(s => s.column);
-    const colWidths = spec.map(s => s.width);
-    const fields = spec.map(s => s.field);
-    const values = objects.map(obj => _extractValues(fields, transform(obj)));
+    const head = spec.map((s) => s.column);
+    const colWidths = spec.map((s) => s.width);
+    const fields = spec.map((s) => s.field);
+    const values = objects.map((obj) => _extractValues(fields, transform(obj)));
     debug('printing fields: %o', fields);
 
     const table = new Table({ head, colWidths, style: { head: ['cyan'] } });
-    values.forEach(v => table.push(v));
+    values.forEach((v) => table.push(v));
 
     console.log(table.toString());
 };
 
 module.exports.exportDoc = (program) => {
-    console.log(JSON.stringify(program.commands.map(c => ({
+    console.log(JSON.stringify(program.commands.map((c) => ({
         name: c._name,
         description: c._description,
         usage: c.usage(),
-        options: c.options.map(o => ({
+        options: c.options.map((o) => ({
             flags: o.flags,
             defaultValue: o.defaultValue,
             description: o.description,
@@ -160,7 +153,7 @@ module.exports.getSourceFiles = (source, cb) => {
         if (err) {
             cb(err, null);
         } else {
-            const results = files.filter(fpath => fs.lstatSync(fpath).isFile()).map(fpath => ({
+            const results = files.filter((fpath) => fs.lstatSync(fpath).isFile()).map((fpath) => ({
                     canonical: fpath,
                     relative: path.relative(normalizedSource, fpath),
                     size: fs.lstatSync(fpath).size,
@@ -207,17 +200,16 @@ module.exports.formatAllServiceInputParameters = (allParameters) => {
          return `$ref:${allParameters.$ref}`;
      }
 
-         return allParameters.map(inputParameters => formatServiceInputParameter(inputParameters)).join('\n');
+         return allParameters.map((inputParameters) => formatServiceInputParameter(inputParameters)).join('\n');
 };
 
-
-module.exports.countLinesInFile = filePath => new Promise((resolve, reject) => {
+module.exports.countLinesInFile = (filePath) => new Promise((resolve, reject) => {
     // Bug ... this code ignores the final line that does not end with a new line ... thats why leftovers was added
     // eslint-disable-next-line implicit-arrow-linebreak
         let count = 0;
         let leftovers = true;
         fs.createReadStream(filePath)
-            .on('error', e => reject(e))
+            .on('error', (e) => reject(e))
             .on('data', (chunk) => {
                 for (let i = 0; i < chunk.length; i += 1) {
                     if (chunk[i] === 10) {
@@ -247,19 +239,26 @@ module.exports.formatValidationPath = (p) => {
 
 // connections get returns createdAt (not prefixed by _) field that cause saving exported connection to fail. Hence removing them manually
 const systemFields = ['createdAt', 'updatedAt', 'createdBy', 'updatedBy'];
-module.exports.cleanInternalFields = jsobj => JSON.stringify(jsobj, (a, obj) => {
+module.exports.cleanInternalFields = (jsobj) => JSON.stringify(jsobj, (a, obj) => {
         if (a.startsWith('_') || systemFields.includes(a)) {
             return undefined;
         }
         return obj;
     }, 2);
 
-
 module.exports.jsonToYaml = (json) => {
     if (typeof json === 'string') {
         json = JSON.parse(json);
     }
     return yaml.dump(json);
+};
+
+module.exports.createFileStream = (filepath) => {
+    const dir = path.dirname(filepath);
+    if (!fs.existsSync(dir)) {
+        fs.mkdirSync(dir, { recursive: true });
+    }
+    return fs.createWriteStream(filepath);
 };
 
 module.exports.writeToFile = (content, filepath) => {
@@ -271,7 +270,7 @@ module.exports.writeToFile = (content, filepath) => {
     fs.writeFileSync(filepath, content);
 };
 
-module.exports.fileExists = filepath => fs.existsSync(filepath);
+module.exports.fileExists = (filepath) => fs.existsSync(filepath);
 
 // Alternatively, we can use fs.rmdirSync(<path>, {recursive: true}), but that requires node v12+
 const deleteFolderRecursive = (filepath) => {
@@ -307,7 +306,7 @@ module.exports.checkProject = (projectId) => {
 
 const pkg = findPackageJson(__dirname).next().value;
 module.exports.getUserAgent = function getUserAgent() {
-    return `${pkg.name}/${pkg.version} (${os.platform()}; ${os.arch()}; ${os.release()}; ${osName()})`;
+    return `${pkg.name}/${pkg.version} (${os.platform()}; ${os.arch()}; ${os.release()}; ${os.platform()})`;
 };
 
 module.exports.LISTTABLEFORMAT = [

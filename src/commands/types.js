@@ -72,7 +72,7 @@ module.exports.ListTypesCommand = class ListTypesCommand {
                 if (options.json) {
                     printSuccess(JSON.stringify(result, null, 2), options);
                 } else {
-                    printTable(LISTTABLEFORMAT, result, o => ({ ...o, updatedAt: o.updatedAt ? moment(o.updatedAt).fromNow() : '-' }));
+                    printTable(LISTTABLEFORMAT, result, (o) => ({ ...o, updatedAt: o.updatedAt ? moment(o.updatedAt).fromNow() : '-' }));
                 }
             } else {
                 printError(`Failed to list types: ${response.status} ${response.message}`, options);

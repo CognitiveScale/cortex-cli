@@ -15,9 +15,8 @@
  */
 
 const debug = require('debug')('cortex:cli');
-const co = require('co');
 const _ = require('lodash');
-const prompt = require('co-prompt');
+const prompt = require('prompt');
 const chalk = require('chalk');
 const fs = require('fs');
 
@@ -36,35 +35,43 @@ function _validatePatFile(patFile) {
     return JSON.parse(fs.readFileSync(patFile));
 }
 
+prompt.message = '';
+prompt.delimeter = '';
+prompt.colors = false;
 module.exports.ConfigureCommand = class {
     constructor(program) {
         this.program = program;
     }
 
-    execute(options) {
+    async execute() {
+        const { profile, file, project } = this.program.opts();
         const config = readConfig();
-        const profileName = options.profile || _.get(config, 'currentProfile', 'default');
-        const patFile = this.program.file;
+        const profileName = profile || _.get(config, 'currentProfile', 'default');
 
         debug('configuring profile: %s', profileName);
         console.log(`Configuring profile ${chalk.green.bold(profileName)}:`);
 
         const cmd = this;
-        co(function* () {
+//        co(function* () {
             try {
                 let patData = null;
-                if (patFile) {
-                    patData = _validatePatFile(patFile);
+                if (file) {
+                    patData = _validatePatFile(file);
                 } else {
-                    patData = JSON.parse(yield prompt('Cortex Personal Access Config: '));
+                    const { patjson } = await prompt.get([{
+                        name: 'patjson',
+                        required: true,
+                        description: 'Cortex Personal Access Config',
+                    }]);
+                    patData = JSON.parse(patjson);
                 }
-                cmd.saveConfig(config, profileName, patData, cmd.program.project);
+                cmd.saveConfig(config, profileName, patData, project);
                 console.log(`Configuration for profile ${chalk.green.bold(profileName)} saved.`);
-                process.exit(1);
+                process.exit(0); //
             } catch (err) {
                 printError(err);
             }
-        });
+ //       });
     }
 
     saveConfig(config, profileName, {
@@ -133,7 +140,8 @@ module.exports.ListProfilesCommand = class {
         this.program = program;
     }
 
-    execute(options) {
+    execute() {
+        const options = this.program.opts();
         const config = readConfig();
         if (config === undefined) {
             printError('Configuration not found.  Please run "cortex configure".', options);

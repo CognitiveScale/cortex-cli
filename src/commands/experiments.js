@@ -259,7 +259,7 @@ class SaveExperimentCommand {
                     { column: 'Path', field: 'path', width: 50 },
                     { column: 'Message', field: 'message', width: 100 },
                 ];
-                response.details.map(d => d.path = formatValidationPath(d.path));
+                response.details.map((d) => d.path = formatValidationPath(d.path));
                 printTable(tableSpec, response.details);
                 printError(''); // Just exit
             } else {
@@ -296,7 +296,7 @@ class CreateRunCommand {
                     { column: 'Path', field: 'path', width: 50 },
                     { column: 'Message', field: 'message', width: 100 },
                 ];
-                response.details.map(d => d.path = formatValidationPath(d.path));
+                response.details.map((d) => d.path = formatValidationPath(d.path));
                 printTable(tableSpec, response.details);
                 printError(''); // Just exit
             } else {

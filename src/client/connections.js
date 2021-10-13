@@ -20,7 +20,7 @@ const { constructError, getUserAgent, checkProject } = require('../commands/util
 
 module.exports = class Connections {
     constructor(cortexUrl) {
-        this.endpoint = projectId => `${cortexUrl}/fabric/v4/projects/${projectId}/connections`;
+        this.endpoint = (projectId) => `${cortexUrl}/fabric/v4/projects/${projectId}/connections`;
         this.cortexUrl = cortexUrl;
     }
 
@@ -33,8 +33,8 @@ module.exports = class Connections {
                 headers: { Authorization: `Bearer ${token}` },
                 'user-agent': getUserAgent(),
             }).json()
-            .then(result => ({ success: true, result }))
-            .catch(err => constructError(err));
+            .then((result) => ({ success: true, result }))
+            .catch((err) => constructError(err));
     }
 
     async saveConnection(projectId, token, connObj) {
@@ -63,8 +63,8 @@ module.exports = class Connections {
                 headers: { Authorization: `Bearer ${token}` },
                 'user-agent': getUserAgent(),
             }).json()
-            .then(result => ({ success: true, result }))
-            .catch(err => constructError(err));
+            .then((result) => ({ success: true, result }))
+            .catch((err) => constructError(err));
     }
 
     listConnectionsTypes(token) {
@@ -75,7 +75,7 @@ module.exports = class Connections {
                 headers: { Authorization: `Bearer ${token}` },
                 'user-agent': getUserAgent(),
             }).json()
-            .then(result => ({ success: true, result }))
-            .catch(err => constructError(err));
+            .then((result) => ({ success: true, result }))
+            .catch((err) => constructError(err));
     }
 };

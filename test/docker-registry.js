@@ -3,7 +3,6 @@ const Actions = require('../src/client/actions');
 
 const action = new Actions('https://api.cortex-dev.insights.ai');
 
-
 describe('_cortexRegistryImagePath()', () => {
     it('returns the full URL of the image in the private registry', () => {
         const registryUrl = 'private-registry.cortex.insights.ai';

@@ -55,7 +55,7 @@ module.exports.SaveModelCommand = class SaveModelCommand {
                     { column: 'Path', field: 'path', width: 50 },
                     { column: 'Message', field: 'message', width: 100 },
                 ];
-                response.details.map(d => d.path = formatValidationPath(d.path));
+                response.details.map((d) => d.path = formatValidationPath(d.path));
                 printTable(tableSpec, response.details);
                 printError(''); // Just exit
             } else {
@@ -85,7 +85,7 @@ module.exports.ListModelsCommand = class ListModelsCommand {
                 if (options.json) {
                     printSuccess(JSON.stringify(result, null, 2), options);
                 } else {
-                    printTable(LISTTABLEFORMAT, result, o => ({ ...o, updatedAt: o.updatedAt ? moment(o.updatedAt).fromNow() : '-' }));
+                    printTable(LISTTABLEFORMAT, result, (o) => ({ ...o, updatedAt: o.updatedAt ? moment(o.updatedAt).fromNow() : '-' }));
                 }
             } else {
                 printError(`Failed to list models: ${response.status} ${response.message}`, options);
@@ -115,7 +115,7 @@ module.exports.ListModelRunsCommand = class ListModelsCommand {
                 if (options.json) {
                     printSuccess(JSON.stringify(result, null, 2), options);
                 } else {
-                    printTable(RUNTABLEFORMAT, result, o => ({ ...o, updatedAt: o.updatedAt ? moment(o.updatedAt).fromNow() : '-' }));
+                    printTable(RUNTABLEFORMAT, result, (o) => ({ ...o, updatedAt: o.updatedAt ? moment(o.updatedAt).fromNow() : '-' }));
                 }
             } else {
                 printError(`Failed to list model runs: ${response.status} ${response.message}`, options);
@@ -216,7 +216,7 @@ module.exports.RegisterModelCommand = class RegisterModelCommand {
                 { column: 'Path', field: 'path', width: 50 },
                 { column: 'Message', field: 'message', width: 100 },
             ];
-            response.details.map(d => d.path = formatValidationPath(d.path));
+            response.details.map((d) => d.path = formatValidationPath(d.path));
             printTable(tableSpec, response.details);
             printError(''); // Just exit
         }

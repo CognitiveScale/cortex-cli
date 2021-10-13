@@ -54,10 +54,9 @@ module.exports = class Roles {
                 headers: { Authorization: `Bearer ${token}` },
                 'user-agent': getUserAgent(),
             }).json()
-            .then(res => ({ success: true, result: res }))
-            .catch(err => constructError(err));
+            .then((res) => ({ success: true, result: res }))
+            .catch((err) => constructError(err));
     }
-
 
     deleteRole(token) {
         const endpoint = this.rolesEndpoint;
@@ -67,8 +66,8 @@ module.exports = class Roles {
                 headers: { Authorization: `Bearer ${token}` },
                 'user-agent': getUserAgent(),
             }).json()
-            .then(res => ({ success: true, result: res }))
-            .catch(err => constructError(err));
+            .then((res) => ({ success: true, result: res }))
+            .catch((err) => constructError(err));
     }
 
     createRole(token, body) {
@@ -80,10 +79,9 @@ module.exports = class Roles {
                 'user-agent': getUserAgent(),
                 json: body,
             }).json()
-            .then(res => ({ success: true, result: res }))
-            .catch(err => constructError(err));
+            .then((res) => ({ success: true, result: res }))
+            .catch((err) => constructError(err));
     }
-
 
     addUsersToRole(token, users) {
         const endpoint = `${this.rolesUsersEndpoint}`;
@@ -94,8 +92,8 @@ module.exports = class Roles {
                 'user-agent': getUserAgent(),
                 json: { users },
             }).json()
-            .then(res => ({ success: true, result: res }))
-            .catch(err => constructError(err));
+            .then((res) => ({ success: true, result: res }))
+            .catch((err) => constructError(err));
     }
 
     removeUsersFromRole(token, users) {
@@ -107,8 +105,8 @@ module.exports = class Roles {
                 'user-agent': getUserAgent(),
                 json: { users },
             }).json()
-            .then(res => ({ success: true, result: res }))
-            .catch(err => constructError(err));
+            .then((res) => ({ success: true, result: res }))
+            .catch((err) => constructError(err));
     }
 
     createGrantForRole(token, body) {
@@ -120,8 +118,8 @@ module.exports = class Roles {
                 'user-agent': getUserAgent(),
                 json: body,
             }).json()
-            .then(res => ({ success: true, result: res }))
-            .catch(err => constructError(err));
+            .then((res) => ({ success: true, result: res }))
+            .catch((err) => constructError(err));
     }
 
     removeGrantFromRole(token, body) {
@@ -133,8 +131,8 @@ module.exports = class Roles {
                 'user-agent': getUserAgent(),
                 json: body,
             }).json()
-            .then(res => ({ success: true, result: res }))
-            .catch(err => constructError(err));
+            .then((res) => ({ success: true, result: res }))
+            .catch((err) => constructError(err));
     }
 
     listRoles(token, project) {
@@ -148,8 +146,8 @@ module.exports = class Roles {
                 headers: { Authorization: `Bearer ${token}` },
                 'user-agent': getUserAgent(),
             }).json()
-            .then(res => ({ success: true, result: res }))
-            .catch(err => constructError(err));
+            .then((res) => ({ success: true, result: res }))
+            .catch((err) => constructError(err));
     }
 
     addRolesToProject(token, project, roles) {
@@ -161,8 +159,8 @@ module.exports = class Roles {
                 'user-agent': getUserAgent(),
                 json: { project, roles },
             }).json()
-            .then(res => ({ success: true, result: res }))
-            .catch(err => constructError(err));
+            .then((res) => ({ success: true, result: res }))
+            .catch((err) => constructError(err));
     }
 
     removeRolesFromProject(token, project, roles) {
@@ -174,8 +172,8 @@ module.exports = class Roles {
                 'user-agent': getUserAgent(),
                 json: { project, roles },
             }).json()
-            .then(res => ({ success: true, result: res }))
-            .catch(err => constructError(err));
+            .then((res) => ({ success: true, result: res }))
+            .catch((err) => constructError(err));
     }
 
     listExternalGroups(token) {
@@ -186,8 +184,8 @@ module.exports = class Roles {
                 headers: { Authorization: `Bearer ${token}` },
                 'user-agent': getUserAgent(),
             }).json()
-            .then(res => ({ success: true, result: res }))
-            .catch(err => constructError(err));
+            .then((res) => ({ success: true, result: res }))
+            .catch((err) => constructError(err));
     }
 
     describeExternalGroup(token, externalGroup) {
@@ -198,8 +196,8 @@ module.exports = class Roles {
                 headers: { Authorization: `Bearer ${token}` },
                 'user-agent': getUserAgent(),
             }).json()
-            .then(res => ({ success: true, result: res }))
-            .catch(err => constructError(err));
+            .then((res) => ({ success: true, result: res }))
+            .catch((err) => constructError(err));
     }
 
     deleteExternalGroup(token, externalGroup) {
@@ -210,8 +208,8 @@ module.exports = class Roles {
                 headers: { Authorization: `Bearer ${token}` },
                 'user-agent': getUserAgent(),
             }).json()
-            .then(res => ({ success: true, result: res }))
-            .catch(err => constructError(err));
+            .then((res) => ({ success: true, result: res }))
+            .catch((err) => constructError(err));
     }
 
     addExternalGroupToRole(token, externalGroup) {
@@ -223,8 +221,8 @@ module.exports = class Roles {
                 'user-agent': getUserAgent(),
                 json: { externalGroup },
             }).json()
-            .then(res => ({ success: true, result: res }))
-            .catch(err => constructError(err));
+            .then((res) => ({ success: true, result: res }))
+            .catch((err) => constructError(err));
     }
 
     removeExternalGroupFromRole(token, externalGroup) {
@@ -235,7 +233,7 @@ module.exports = class Roles {
                 headers: { Authorization: `Bearer ${token}` },
                 'user-agent': getUserAgent(),
             }).json()
-            .then(res => ({ success: true, result: res }))
-            .catch(err => constructError(err));
+            .then((res) => ({ success: true, result: res }))
+            .catch((err) => constructError(err));
     }
 };

@@ -22,7 +22,7 @@ const { constructError, getUserAgent, checkProject } = require('../commands/util
 module.exports = class Secrets {
     constructor(cortexUrl) {
         this.cortexUrl = cortexUrl;
-        this.endpoint = projectId => urljoin(cortexUrl, 'fabric/v4/projects', projectId, 'secrets');
+        this.endpoint = (projectId) => urljoin(cortexUrl, 'fabric/v4/projects', projectId, 'secrets');
     }
 
     listSecrets(projectId, token) {
@@ -34,8 +34,8 @@ module.exports = class Secrets {
                 headers: { Authorization: `Bearer ${token}` },
                 'user-agent': getUserAgent(),
             }).json()
-            .then(result => ({ success: true, result }))
-            .catch(err => constructError(err));
+            .then((result) => ({ success: true, result }))
+            .catch((err) => constructError(err));
     }
 
     readSecret(projectId, token, keyName) {
@@ -47,8 +47,8 @@ module.exports = class Secrets {
                 headers: { Authorization: `Bearer ${token}` },
                 'user-agent': getUserAgent(),
             }).json()
-            .then(result => ({ success: true, result }))
-            .catch(err => constructError(err));
+            .then((result) => ({ success: true, result }))
+            .catch((err) => constructError(err));
     }
 
     writeSecret(projectId, token, keyName, value) {
@@ -62,7 +62,7 @@ module.exports = class Secrets {
                 'user-agent': getUserAgent(),
                 json: body,
             }).json()
-            .then(result => ({ ...result }))
-            .catch(err => constructError(err));
+            .then((result) => ({ ...result }))
+            .catch((err) => constructError(err));
     }
 };

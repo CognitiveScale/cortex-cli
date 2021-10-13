@@ -1,0 +1,13 @@
+{
+  "url": "http://localhost:8000",
+  "username": "test_user",
+  "issuer": "cognitivescale.com",
+  "audience": "cortex",
+  "jwk": {
+    "crv": "Ed25519",
+    "x": "yA1XUDSEoKWa28bCMFljlXwlEFbSVmQQ7ftIMNtB69U",
+    "d": "bRujm6B2EFaPTp56cU3z3K1w_5oFleLeL3hsLgqCVLc",
+    "kty": "OKP",
+    "kid": "X4u2Hv4VxL77bE8N9dT4ltVBoJsSLTH4bY1a5WL6wNY"
+  }
+}

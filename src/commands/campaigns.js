@@ -59,13 +59,13 @@ module.exports.DescribeCampaignCommand = class DescribeCampaignCommand {
     }
 
     async execute(campaignName, cmd) {
-        const options = cmd.opts();
+        const options = cmd;
         const profile = loadProfile(options.profile);
         debug('%s.executeDescribeCampaign(%s)', profile.name, campaignName);
         const cli = new ApiServerClient(profile.url);
 
         try {
-                const response = await cli.getCampaign(options.project || profile.project, profile.token, campaignName);
+            const response = await cli.getCampaign(options.project || profile.project, profile.token, campaignName);
             const result = filterObject(response, options);
             printSuccess(JSON.stringify(result, null, 2), options);
         } catch (err) {
@@ -80,13 +80,16 @@ module.exports.ExportCampaignCommand = class ExportCampaignCommand {
     }
 
     execute(campaignName, cmd) {
-        const options = cmd.opts();
+        const options = cmd;
         const profile = loadProfile(options.profile);
         debug('%s.executeExportCampaignCommand(%s)', profile.name, campaignName);
         const cli = new Catalog(profile.url);
-
+        const project = options.project || profile.project;
+        const path = `./${options.o || `${campaignName}.amp`}`;
         try {
-            cli.exportCampaign(options.project || profile.project, profile.token, campaignName, options.deployable, options.o);
+            cli.exportCampaign(project, profile.token, campaignName, options.deployable, path)
+                .then(() => printSuccess(`Successfully exported Campaign ${campaignName} from project ${project} to file ${path}`))
+                .catch((e) => printError(`Failed to export Campaign ${campaignName} from project ${project}. Error: ${e}`));
         } catch (err) {
             printError(`Failed to export campaign: ${err.status} ${err.message}`, options);
         }
@@ -99,7 +102,7 @@ module.exports.ImportCampaignCommand = class ImportCampaignCommand {
     }
 
     execute(campaignFilepath, cmd) {
-        const options = cmd.opts();
+        const options = cmd;
         const profile = loadProfile(options.profile);
         debug('%s.executeImportCampaignCommand(%s)', profile.name, campaignFilepath);
         const cli = new Catalog(profile.url);
@@ -118,7 +121,7 @@ module.exports.DeployCampaignCommand = class DeployCampaignCommand {
     }
 
     execute(campaignName, cmd) {
-        const options = cmd.opts();
+        const options = cmd;
         const profile = loadProfile(options.profile);
         debug('%s.executeDeployCampaignCommand(%s)', profile.name, campaignName);
         const cli = new Catalog(profile.url);
@@ -131,7 +134,7 @@ module.exports.DeployCampaignCommand = class DeployCampaignCommand {
                     printSuccess(output, options);
                 } else {
                     printError('Campaign deployed with warnings', options, false);
-                    printTable([{ column: 'Warnings', field: 'message' }], response.data.warnings.map(w => ({ message: w })));
+                    printTable([{ column: 'Warnings', field: 'message' }], response.data.warnings.map((w) => ({ message: w })));
                 }
             }).catch((e) => {
                 printError(`Failed to deploy campaign: ${e.status} ${e.message}`, options);
@@ -148,7 +151,7 @@ module.exports.UndeployCampaignCommand = class UndeployCampaignCommand {
     }
 
     execute(campaignName, cmd) {
-        const options = cmd.opts();
+        const options = cmd;
         const profile = loadProfile(options.profile);
         debug('%s.executeUndeployCampaignCommand(%s)', profile.name, campaignName);
         const cli = new Catalog(profile.url);
@@ -161,7 +164,7 @@ module.exports.UndeployCampaignCommand = class UndeployCampaignCommand {
                     printSuccess(output, options);
                 } else {
                     printError('Campaign undeployed with warnings', options, false);
-                    printTable([{ column: 'Warnings', field: 'message' }], response.data.warnings.map(w => ({ message: w })));
+                    printTable([{ column: 'Warnings', field: 'message' }], response.data.warnings.map((w) => ({ message: w })));
                 }
             }).catch((e) => {
                 printError(`Failed to undeploy campaign: ${e.status} ${e.message}`, options);
@@ -178,7 +181,7 @@ module.exports.UndeployMissionCommand = class UndeployMissionCommand {
     }
 
     execute(campaignName, missionName, cmd) {
-        const options = cmd.opts();
+        const options = cmd;
         const profile = loadProfile(options.profile);
         debug('%s.executeUndeployMissionCommand(%s)', profile.name, missionName);
         const cli = new Catalog(profile.url);
@@ -203,7 +206,7 @@ module.exports.ListMissionsCommand = class ListMissionsCommand {
     }
 
     execute(campaign, cmd) {
-        const options = cmd.opts();
+        const options = cmd;
         const profile = loadProfile(options.profile);
         debug('%s.executeListMissionsCommand(%s)', profile.name, campaign);
         const cli = new Catalog(profile.url);
@@ -236,7 +239,7 @@ module.exports.DeployMissionCommand = class DeployMissionCommand {
     }
 
     execute(campaign, mission, cmd) {
-        const options = cmd.opts();
+        const options = cmd;
         const profile = loadProfile(options.profile);
         debug('%s.executeDeployMissionCommand(%s)', profile.name, campaign);
         const cli = new Catalog(profile.url);
@@ -245,7 +248,7 @@ module.exports.DeployMissionCommand = class DeployMissionCommand {
             if (response.success === false) throw response;
             const output = _.get(response, 'data.message') || JSON.stringify(response.data || response, null, 2);
             printSuccess(output, options);
-        }).catch(err => printError(`Failed to deploy mission ${mission} of campaign ${campaign}: ${err.status} ${err.message}`, options));
+        }).catch((err) => printError(`Failed to deploy mission ${mission} of campaign ${campaign}: ${err.status} ${err.message}`, options));
     }
 };
 
@@ -255,7 +258,7 @@ module.exports.DescribeMissionCommand = class DescribeMissionCommand {
     }
 
     execute(campaign, mission, cmd) {
-        const options = cmd.opts();
+        const options = cmd;
         const profile = loadProfile(options.profile);
         debug('%s.executeDescribeMissionCommand(%s)', profile.name, campaign);
         const cli = new Catalog(profile.url);
@@ -263,6 +266,6 @@ module.exports.DescribeMissionCommand = class DescribeMissionCommand {
         cli.getMission(options.project || profile.project, profile.token, campaign, mission).then((response) => {
             if (response.success === false) throw response;
             printSuccess(JSON.stringify(response.data, null, 2), options);
-        }).catch(err => printError(`Failed to describe mission ${mission} of campaign ${campaign}: ${err.status} ${err.message}`, options));
+        }).catch((err) => printError(`Failed to describe mission ${mission} of campaign ${campaign}: ${err.status} ${err.message}`, options));
     }
 };

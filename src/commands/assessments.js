@@ -30,13 +30,21 @@ const {
     printSuccess, printError, parseObject, printTable,
 } = require('./utils');
 
+const handleTable = (spec, data, transformer, noDataMessage) => {
+  if (!data || data.length === 0) {
+      printSuccess(noDataMessage);
+  } else {
+      printTable(spec, data, transformer);
+  }
+};
+
 module.exports.ListResourcesCommand = class {
     constructor(program) {
         this.program = program;
     }
 
     execute(command) {
-        const options = command.opts();
+        const options = command;
         const profile = loadProfile(options.profile);
         debug('%s.ListResourcesCommand()', profile.name);
 
@@ -53,7 +61,7 @@ module.exports.ListResourcesCommand = class {
                         { column: 'Resource Type', field: 'resourceType' },
                         { column: 'Project', field: '_projectId' },
                     ];
-                    printTable(tableSpec, response.data);
+                    handleTable(tableSpec, response.data, null, 'No matching resources found');
                 }
             })
             .catch((err) => {
@@ -68,7 +76,7 @@ module.exports.ListResourceTypesCommand = class {
     }
 
     execute(command) {
-        const options = command.opts();
+        const options = command;
         const profile = loadProfile(options.profile);
         debug('%s.ListResourceTypesCommand()', profile.name);
 
@@ -80,11 +88,11 @@ module.exports.ListResourceTypesCommand = class {
                 if (options.json) {
                     printSuccess(JSON.stringify(data, null, 2), options);
                 } else {
-                    const types = data.map(t => ({ type: t }));
+                    const types = data.map((t) => ({ type: t }));
                     const tableSpec = [
                         { column: 'Resource Type', field: 'type' },
                     ];
-                    printTable(tableSpec, types);
+                    handleTable(tableSpec, types, null, 'Resource Types not available');
                 }
             })
             .catch((err) => {
@@ -98,13 +106,17 @@ module.exports.DependencyTreeCommand = class {
         this.program = program;
     }
 
-    execute(command) {
-        const options = command.opts();
+    execute(dependencyFile, command) {
+        const options = command;
         const profile = loadProfile(options.profile);
         debug('%s.DependencyTreeCommand()', profile.name);
 
         const client = new Assessments(profile.url);
-        client.getDependenciesOfResource(profile.token, options.scope, options.type, options.name)
+        let body;
+        if (dependencyFile) {
+            body = JSON.parse(fs.readFileSync(dependencyFile).toString());
+        }
+        client.getDependenciesOfResource(profile.token, options.scope, options.type, options.name, body, options.missing)
             .then((response) => {
                 if (response.success === false) throw response;
                 if (options.json) {
@@ -115,7 +127,7 @@ module.exports.DependencyTreeCommand = class {
                         { column: 'Title', field: 'title' },
                         { column: 'Resource Type', field: 'type' },
                     ];
-                    printTable(tableSpec, response.data);
+                    handleTable(tableSpec, response.data, null, 'No downstream dependency found');
                 }
             })
             .catch((err) => {
@@ -130,7 +142,7 @@ module.exports.CreateAssessmentCommand = class {
     }
 
     execute(assessmentDef, command) {
-        const options = command.opts();
+        const options = command;
         const profile = loadProfile(options.profile);
         debug('%s.CreateAssessmentCommand()', profile.name);
         const client = new Assessments(profile.url);
@@ -186,7 +198,7 @@ module.exports.ListAssessmentCommand = class {
                         { column: 'Modified', field: '_updatedAt' },
                         { column: 'Author', field: '_createdBy' },
                     ];
-                    printTable(tableSpec, response.data, o => ({ ...o, _updatedAt: o._updatedAt ? moment(o._updatedAt).fromNow() : '-' }));
+                    handleTable(tableSpec, response.data, (o) => ({ ...o, _updatedAt: o._updatedAt ? moment(o._updatedAt).fromNow() : '-' }), 'No Assessments found');
                 }
             })
             .catch((err) => {
@@ -281,8 +293,8 @@ module.exports.ListAssessmentReportCommand = class {
                         { column: 'Modified', field: '_updatedAt' },
                         { column: 'Author', field: '_createdBy' },
                     ];
-                    response.data.forEach(r => r.summary = JSON.stringify(Object.fromEntries(r.summary.map(item => [item.type, item.count]))));
-                    printTable(tableSpec, response.data, o => ({ ...o, _updatedAt: o._updatedAt ? moment(o._updatedAt).fromNow() : '-' }));
+                    response.data.forEach((r) => r.summary = JSON.stringify(Object.fromEntries(r.summary.map((item) => [item.type, item.count]))));
+                    handleTable(tableSpec, response.data, (o) => ({ ...o, _updatedAt: o._updatedAt ? moment(o._updatedAt).fromNow() : '-' }), `No report found for the Assessment ${name}`);
                 }
             })
             .catch((err) => {
@@ -308,7 +320,7 @@ module.exports.GetAssessmentReportCommand = class {
                     const output = {
                         name: response.reportId,
                         assessment: response.assessmentId,
-                        summary: Object.fromEntries(response.summary.map(item => [item.type, item.count])),
+                        summary: Object.fromEntries(response.summary.map((item) => [item.type, item.count])),
                         report: response.detail,
                         _createdAt: response._createdAt,
                         _createdBy: response._createdBy,
@@ -317,8 +329,8 @@ module.exports.GetAssessmentReportCommand = class {
                 } else {
                     const flattenRefs = _.uniqBy(
                         _.flatten(
-                            response.detail.map(ref => ref.sourcePath.map(s => ({ ...s, projectId: ref._projectId }))),
-                        ), r => `${r.name}-${r.type}-${r.projectId}`,
+                            response.detail.map((ref) => ref.sourcePath.map((s) => ({ ...s, projectId: ref._projectId }))),
+                        ), (r) => `${r.name}-${r.type}-${r.projectId}`,
                     );
                     const tableSpec = [
                         { column: 'Name', field: 'name' },
@@ -326,7 +338,7 @@ module.exports.GetAssessmentReportCommand = class {
                         { column: 'Resource Type', field: 'type' },
                         { column: 'Project', field: 'projectId' },
                     ];
-                    printTable(tableSpec, _.sortBy(flattenRefs, ['projectId', 'type']));
+                    handleTable(tableSpec, _.sortBy(flattenRefs, ['projectId', 'type']), null, 'No upstream dependencies found');
                 }
             })
             .catch((err) => {
@@ -341,7 +353,7 @@ module.exports.ExportAssessmentReportCommand = class {
     }
 
     execute(name, reportId, command) {
-        const options = command.opts();
+        const options = command;
         const profile = loadProfile(options.profile);
         debug('%s.ExportAssessmentReportCommand()', profile.name);
 

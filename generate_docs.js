@@ -5,33 +5,33 @@ const _ = require('lodash');
 const fs = require('fs');
 
 // read command args if passed
-const sourcedir = _.get(process.argv,'[2]','.')
-const outfile = _.get(process.argv,'[3]');
+const sourcedir = _.get(process.argv, '[2]', '.');
+const outfile = _.get(process.argv, '[3]');
 
 // use top level commands as driver
-const rootJson = require(`${sourcedir}/cortex.json`)
+const rootJson = require(`${sourcedir}/cortex.json`);
 
 // replace /n/t with HTML equivs
 const cleanString = (s) => s
     .replace(/\n/g, '')
     .replace(/\t/g, '')
-    .replace(/</g,'`<')
-    .replace(/>/g,'>`')
+    .replace(/</g, '`<')
+    .replace(/>/g, '>`');
 
 // print sub-command flags as string
 const optionRow = (opts) => _.join(
-    _.sortBy(opts,['flags']).map(
-        (opt) => `\`${opt.flags}\`${ _.isEmpty(opt.defaultValue) ? '' : ` (*default:* \`${opt.defaultValue }\`)`} - ${cleanString(opt.description)}`
+    _.sortBy(opts, ['flags']).map(
+        (opt) => `\`${opt.flags}\`${_.isEmpty(opt.defaultValue) ? '' : ` (*default:* \`${opt.defaultValue}\`)`} - ${cleanString(opt.description)}`,
     ),
-    '<br />'
-)
+    '<br />',
+);
 
 const subcmdTable = (subcmd) => `| Command | Description | Options |
-| ------- | ----------- | ------- |\n` +
+| ------- | ----------- | ------- |\n${ 
 _.join(
-    _.sortBy(subcmd, ['name']).map((cmd) => `| \`${cmd.name} ${cmd.usage }\` | ${cmd.description } | ${optionRow(cmd.options)} |`),
-    '\n'
-)
+    _.sortBy(subcmd, ['name']).map((cmd) => `| \`${cmd.name} ${cmd.usage}\` | ${cmd.description} | ${optionRow(cmd.options)} |`),
+    '\n',
+)}`;
 
 const cmdHeading = (cmd) => `
 ## ${_.capitalize(cmd.name)}
@@ -73,18 +73,19 @@ cortex [command] [options]
 \`--query\` option to [filter the results](/getting-started/use-cli.md).
 * The output results for \`describe\` commands display in the format of the document
 it is describing. This can include YAML, JSON, or other formats.
-`
+`;
 
 const body = _.join(
-    _.sortBy(rootJson, ["name"]).map(
-        (cmd) =>`${cmdHeading(cmd)}\n`+
-            `${subcmdTable(require(`${sourcedir}/cortex-${cmd.name}.json`))}`
+    _.sortBy(rootJson, ['name']).map(
+        (cmd) => `${cmdHeading(cmd)}\n`
+            + `${subcmdTable(require(`${sourcedir}/cortex-${cmd.name}.json`))}`,
         ),
-'');
-const output = header + body
+'',
+);
+const output = header + body;
 // if outfile write to file ...
 if (_.isEmpty(outfile)) {
-    console.log(output)
+    console.log(output);
 } else {
-    fs.writeFileSync(outfile, output)
+    fs.writeFileSync(outfile, output);
 }

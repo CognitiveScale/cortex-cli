@@ -7,8 +7,12 @@ module.exports = (plop) => {
             {
                 type: 'input',
                 name: 'name',
-                message: 'Skill Name? (Skill name must be alphanumeric, beginning with a letter. Hyphen and underscore allowed internally.)',
-                validate: value => /^[0-9a-zA-Z][0-9a-zA-Z_\- ]{0,18}[0-9a-zA-Z]$/.test(value),
+                message: 'Skill Name? (Skill name must be alphanumeric, beginning with a letter. Hyphen allowed internally.)',
+                validate: (value) => {
+                    // can return a boolean or a string
+                    const isValidSkill = /^[0-9a-zA-Z][0-9a-zA-Z\- ]{0,18}[0-9a-zA-Z]$/.test(value);
+                    return isValidSkill ? true : 'Invalid skill name. Should follow pattern: ^[0-9a-zA-Z][0-9a-zA-Z\\- ]{0,18}[0-9a-zA-Z]$';
+                },
             },
             {
                 type: 'list',

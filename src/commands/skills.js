@@ -49,7 +49,7 @@ module.exports.SaveSkillCommand = class SaveSkillCommand {
                             { column: 'Path', field: 'path', width: 50 },
                             { column: 'Message', field: 'message', width: 100 },
                         ];
-                        response.details.map(d => d.path = formatValidationPath(d.path));
+                        response.details.map((d) => d.path = formatValidationPath(d.path));
                         printTable(tableSpec, response.details);
                     }
                     printError(''); // Just exit
@@ -77,7 +77,7 @@ module.exports.ListSkillsCommand = class ListSkillsCommand {
                 const tableFormat = LISTTABLEFORMAT;
                 if (options.nostatus === undefined) {
                     result = result.map((skill) => {
-                        const status = _.isEmpty(skill.actionStatuses) ? skill.deployStatus : skill.actionStatuses.map(s => `${s.name}: ${s.state}`).join(' ');
+                        const status = _.isEmpty(skill.actionStatuses) ? skill.deployStatus : skill.actionStatuses.map((s) => `${s.name}: ${s.state}`).join(' ');
                         return {
                             ...skill,
                             status,
@@ -91,7 +91,7 @@ module.exports.ListSkillsCommand = class ListSkillsCommand {
                     return printSuccess(JSON.stringify(result, null, 2), options);
                 }
                 return printTable(tableFormat,
-                    _.sortBy(result, ['name']), o => ({ ...o, updatedAt: o.updatedAt ? moment(o.updatedAt).fromNow() : '-' }));
+                    _.sortBy(result, ['name']), (o) => ({ ...o, updatedAt: o.updatedAt ? moment(o.updatedAt).fromNow() : '-' }));
             }
             return printError(`Failed to list skills: ${response.status} ${response.message}`, options);
         } catch (err) {
@@ -105,22 +105,18 @@ module.exports.DescribeSkillCommand = class DescribeSkillCommand {
         this.program = program;
     }
 
-    execute(skillName, options) {
+    async execute(skillName, options) {
         const profile = loadProfile(options.profile);
         debug('%s.executeDescribeSkill(%s)', profile.name, skillName);
 
         const catalog = new Catalog(profile.url);
-        catalog.describeSkill(options.project || profile.project, profile.token, skillName, options.verbose).then((response) => {
-            if (response.success) {
-                const result = filterObject(response.skill, options);
-                printSuccess(JSON.stringify(result, null, 2), options);
-            } else {
-                printError(`Failed to describe skill ${skillName}: ${response.message}`, options);
-            }
-        })
-        .catch((err) => {
+        try {
+            let response = await catalog.describeSkill(options.project || profile.project, profile.token, skillName, options.verbose, options.output);
+            if (_.get(options, 'output', 'json').toLowerCase() === 'json') response = JSON.stringify(filterObject(response, options), null, 2);
+            printSuccess(response, options);
+        } catch (err) {
             printError(`Failed to describe skill ${skillName}: ${err.status} ${err.message}`, options);
-        });
+        }
     }
 };
 

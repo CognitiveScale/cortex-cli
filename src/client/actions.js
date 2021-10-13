@@ -24,7 +24,7 @@ const {
 module.exports = class Actions {
     constructor(cortexUrl) {
         this.cortexUrl = cortexUrl;
-        this.endpointV4 = projectId => `${cortexUrl}/fabric/v4/projects/${projectId}/actions`;
+        this.endpointV4 = (projectId) => `${cortexUrl}/fabric/v4/projects/${projectId}/actions`;
     }
 
     async deployAction(projectId, token, actionInst) {
@@ -53,8 +53,8 @@ module.exports = class Actions {
                     'user-agent': getUserAgent(),
                    json: body,
             }).json()
-        .then(res => ({ success: true, message: res }))
-        .catch(err => constructError(err));
+        .then((res) => ({ success: true, message: res }))
+        .catch((err) => constructError(err));
     }
 
     listActions(projectId, token) {
@@ -65,8 +65,8 @@ module.exports = class Actions {
                 headers: { Authorization: `Bearer ${token}` },
                 'user-agent': getUserAgent(),
             }).json()
-            .then(actions => actions)
-            .catch(err => constructError(err));
+            .then((actions) => actions)
+            .catch((err) => constructError(err));
     }
 
     describeAction(projectId, token, actionName) {
@@ -76,8 +76,8 @@ module.exports = class Actions {
         return got
             .get(endpoint, { headers: { Authorization: `Bearer ${token}` } })
             .json()
-            .then(action => action)
-            .catch(err => constructError(err));
+            .then((action) => action)
+            .catch((err) => constructError(err));
     }
 
     getLogsAction(projectId, token, actionName) {
@@ -97,7 +97,7 @@ module.exports = class Actions {
                     }
                     return logs;
             })
-            .catch(err => constructError(err));
+            .catch((err) => constructError(err));
     }
 
     deleteAction(projectId, token, actionName) {
@@ -110,8 +110,8 @@ module.exports = class Actions {
                 'user-agent': getUserAgent(),
             })
             .json()
-            .then(action => ({ success: true, action }))
-            .catch(err => constructError(err));
+            .then((action) => ({ success: true, action }))
+            .catch((err) => constructError(err));
     }
 
     taskLogs(projectId, token, jobId, taskId) {
@@ -125,8 +125,8 @@ module.exports = class Actions {
                 'user-agent': getUserAgent(),
             })
             .json()
-            .then(res => res)
-            .catch(err => constructError(err));
+            .then((res) => res)
+            .catch((err) => constructError(err));
     }
 
     taskCancel(projectId, token, jobId, taskId) {
@@ -140,8 +140,8 @@ module.exports = class Actions {
                 'user-agent': getUserAgent(),
             })
             .json()
-            .then(res => res)
-            .catch(err => constructError(err));
+            .then((res) => res)
+            .catch((err) => constructError(err));
     }
 
     taskStatus(projectId, token, jobId, taskId) {
@@ -159,7 +159,7 @@ module.exports = class Actions {
                     debug('resBody (with provider status as well): %s', res);
                     return _.omit(res, '_providerStatus');
             })
-            .catch(err => constructError(err));
+            .catch((err) => constructError(err));
     }
 
     jobListTasks(projectId, token, jobId) {
@@ -173,8 +173,8 @@ module.exports = class Actions {
                 'user-agent': getUserAgent(),
             })
             .json()
-            .then(res => res)
-            .catch(err => constructError(err));
+            .then((res) => res)
+            .catch((err) => constructError(err));
     }
 
     taskStats(projectId, token, jobId) {
@@ -188,8 +188,8 @@ module.exports = class Actions {
                 'user-agent': getUserAgent(),
             })
             .json()
-            .then(res => res)
-            .catch(err => constructError(err));
+            .then((res) => res)
+            .catch((err) => constructError(err));
     }
 
     listTasksByActivation(projectId, token, activationId) {
@@ -202,8 +202,8 @@ module.exports = class Actions {
                 'user-agent': getUserAgent(),
             })
             .json()
-            .then(res => res)
-            .catch(err => constructError(err));
+            .then((res) => res)
+            .catch((err) => constructError(err));
     }
 
     getConfig(projectId, token) {
@@ -216,8 +216,8 @@ module.exports = class Actions {
                 'user-agent': getUserAgent(),
             })
             .json()
-            .then(config => ({ success: true, config }))
-            .catch(err => constructError(err));
+            .then((config) => ({ success: true, config }))
+            .catch((err) => constructError(err));
     }
 
     static getCanonicalJobId(jobId) {
