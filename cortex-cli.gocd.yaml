@@ -41,12 +41,9 @@ pipelines:
               elastic_profile_id: gocd-test-agent-dind
               artifacts:
                 - build:
-                    source: masterBranchRevision.json
-                - build:
                     source: cortex-cli-docs.md
               tasks:
                 - script: |
-                    mv devBranchRevision.json masterBranchRevision.json
                     git clone git@github.com:CognitiveScale/gocd-pipeline-scripts.git
                     ./gocd-pipeline-scripts/common/c12e-common.sh master
                     echo ./gocd-pipeline-scripts/cortex5/docs/update-docs.sh cli
