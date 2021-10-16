@@ -145,7 +145,7 @@ program
 // List model runs
 program
     .command('list-runs <modelName>')
-    .description('list model run')
+    .description('List model run')
     .option('--no-compat', 'Ignore API compatibility checks')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
