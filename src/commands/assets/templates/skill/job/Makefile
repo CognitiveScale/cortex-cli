@@ -6,6 +6,7 @@ build: check-env
 	docker build -t ${DOCKER_IMAGE_URL} .
 
 push: check-env
+	cortex docker login
 	docker push ${DOCKER_IMAGE_URL}
 
 deploy: check-env
