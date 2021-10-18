@@ -26,7 +26,7 @@ const {
 program.description('Scaffolding Cortex Components');
 
 program
-    .command('skill <skillName> <type>')
+    .command('skill [skillName] [type]')
     .description('Generates the structure and top level build script for a skill in current directory')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .action((skillName, type, options) => { // deliberately not using withCompatibilityCheck()
