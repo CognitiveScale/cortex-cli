@@ -101,7 +101,7 @@ module.exports.DeployActionCommand = class {
 
         let actionInst = {};
         if (actionDefinition) {
-            debug('%s.createAgentSnapshot(%s)', profile.name, actionDefinition);
+            debug('%s.deployActionCommand(%s)', profile.name, actionDefinition);
             try {
                 const actionDefStr = fs.readFileSync(actionDefinition);
                 actionInst = parseObject(actionDefStr, options);
@@ -121,9 +121,9 @@ module.exports.DeployActionCommand = class {
             const k8sResources = options.k8sResource.map((f) => parseObject(fs.readFileSync(f), options));
             actionInst.k8sResources = k8sResources;
         }
-        if (options.docker) { actionInst.image = options.docker; }
+        
         if (options.image) { actionInst.image = options.image; }
-
+        if (options.docker) { actionInst.image = options.docker; }
         if (options.type) { actionInst.type = options.type; }
         if (options.actionType) { actionInst.type = options.actionType; }
         if (options.cmd) { actionInst.command = options.cmd; }

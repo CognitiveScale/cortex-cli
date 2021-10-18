@@ -34,7 +34,7 @@ module.exports = class Actions {
             endpoint = `${endpoint}?actionType=${actionInst.actionType}`;
         }
         debug('deployAction(%s, docker=%s, ttl=%s) => %s',
-            actionInst.name, actionInst.dockerImage, actionInst.ttl, endpoint);
+            actionInst.name, actionInst.image, actionInst.ttl, endpoint);
         const body = { ...actionInst };
         // image & docker floating around fixup just in case..
         if (body.docker) {
@@ -42,7 +42,7 @@ module.exports = class Actions {
             delete body.docker;
         }
         try {
-            body.docker = await this._maybePushDockerImage(actionInst.dockerImage, token, actionInst.pushDocker);
+            body.docker = await this._maybePushDockerImage(actionInst.image, token, actionInst.pushDocker);
         } catch (error) {
             return { success: false, status: 400, message: error.message || error };
         }
