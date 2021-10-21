@@ -167,7 +167,7 @@ module.exports.DeployActionCommand = class {
             }
 
             const actions = new Actions(profile.url);
-            const response = actions.deployAction(options.project || profile.project, profile.token, actionInst);
+            const response = await actions.deployAction(options.project || profile.project, profile.token, actionInst);
             if (response.success) {
                 printSuccess(JSON.stringify(response.message, null, 2), options);
             } else {
