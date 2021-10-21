@@ -64,7 +64,7 @@ module.exports = class Catalog {
             .catch((err) => constructError(err));
     }
 
-    async describeSkill(projectId, token, skillName, verbose = false, output = 'json') {
+    describeSkill(projectId, token, skillName, verbose = false, output = 'json') {
         checkProject(projectId);
         const endpoint = `${this.endpoints.skills(projectId)}/${encodeURIComponent(skillName)}`;
         debug('describeSkill(%s) => %s', skillName, endpoint);

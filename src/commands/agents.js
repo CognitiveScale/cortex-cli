@@ -32,8 +32,8 @@ module.exports.SaveAgentCommand = class SaveAgentCommand {
         this.program = program;
     }
 
-    execute(agentDefinition, options) {
-        const profile = loadProfile(options.profile);
+    async execute(agentDefinition, options) {
+        const profile = await loadProfile(options.profile);
         debug('%s.executeSaveAgent(%s)', profile.name, agentDefinition);
 
         const agentDefStr = fs.readFileSync(agentDefinition);
@@ -69,8 +69,8 @@ module.exports.ListAgentsCommand = class ListAgentsCommand {
         this.program = program;
     }
 
-    execute(options) {
-        const profile = loadProfile(options.profile);
+    async execute(options) {
+        const profile = await loadProfile(options.profile);
         debug('%s.executeListAgents()', profile.name);
 
         const catalog = new Catalog(profile.url);
@@ -100,8 +100,8 @@ module.exports.DescribeAgentCommand = class DescribeAgentCommand {
         this.program = program;
     }
 
-    execute(agentName, options) {
-        const profile = loadProfile(options.profile);
+    async execute(agentName, options) {
+        const profile = await loadProfile(options.profile);
         const catalog = new Catalog(profile.url);
         if (options.versions) {
             debug('%s.executeDescribeAgentVersions(%s)', profile.name, agentName);
@@ -138,8 +138,8 @@ module.exports.InvokeAgentServiceCommand = class {
         this.program = program;
     }
 
-    execute(agentName, serviceName, options) {
-        const profile = loadProfile(options.profile);
+    async execute(agentName, serviceName, options) {
+        const profile = await loadProfile(options.profile);
         debug('%s.invokeAgentService(%s, %s)', profile.name, agentName, serviceName);
 
         let params = {};
@@ -181,8 +181,8 @@ module.exports.GetActivationCommand = class {
         this.program = program;
     }
 
-    execute(activationId, options) {
-        const profile = loadProfile(options.profile);
+    async execute(activationId, options) {
+        const profile = await loadProfile(options.profile);
         debug('%s.getActivation(%s)', profile.name, activationId);
         const { report, verbose, project } = options;
         const agents = new Agents(profile.url);
@@ -218,14 +218,14 @@ module.exports.ListActivationsCommand = class {
         this.program = program;
     }
 
-    execute(options) {
+    async execute(options) {
         if (_.isEmpty(options.agentName) 
             && _.isEmpty(options.skillName) 
             && _.isEmpty(options.correlationId) 
             && _.isEmpty(options.status)) {
             printError('Either --agentName, --skillName, --correlationId, or --status must be provided', options);
         }
-        const profile = loadProfile(options.profile);
+        const profile = await loadProfile(options.profile);
         debug('%s.listActivations(%s)', profile.name);
 
         const agents = new Agents(profile.url);
@@ -289,8 +289,8 @@ module.exports.ListServicesCommand = class ListServicesCommand {
         this.program = program;
     }
 
-    execute(agentName, options) {
-        const profile = loadProfile(options.profile);
+    async execute(agentName, options) {
+        const profile = await loadProfile(options.profile);
         debug('%s.listServices(%s)', profile.name, agentName);
 
         const catalog = new Catalog(profile.url);
@@ -321,8 +321,8 @@ module.exports.ListAgentSnapshotsCommand = class {
         this.program = program;
     }
 
-    execute(agentName, options) {
-        const profile = loadProfile(options.profile);
+    async execute(agentName, options) {
+        const profile = await loadProfile(options.profile);
         debug('%s.listAgentSnapshots(%s)', profile.name, agentName);
 
         const agents = new Agents(profile.url);
@@ -360,7 +360,7 @@ module.exports.DescribeAgentSnapshotCommand = class {
     }
 
     async execute(snapshotId, options) {
-        const profile = loadProfile(options.profile);
+        const profile = await loadProfile(options.profile);
         debug('%s.describeAgentSnapshot(%s)', profile.name, snapshotId);
 
         const agents = new Agents(profile.url);
@@ -386,8 +386,8 @@ module.exports.CreateAgentSnapshotCommand = class {
         this.program = program;
     }
 
-    execute(snapshotDefinition, options) {
-        const profile = loadProfile(options.profile);
+    async execute(snapshotDefinition, options) {
+        const profile = await loadProfile(options.profile);
         let snapshot;
         if (snapshotDefinition) {
             debug('%s.createAgentSnapshot(%s)', profile.name, snapshotDefinition);

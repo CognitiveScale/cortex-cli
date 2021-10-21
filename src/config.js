@@ -20,26 +20,27 @@ const fs = require('fs');
 const path = require('path');
 const Joi = require('@hapi/joi');
 const debug = require('debug')('cortex:config');
-const { JWT, JWK } = require('jose');
+const { parseJwk } = require('jose-node-cjs-runtime/jwk/parse');
+const { SignJWT } = require('jose-node-cjs-runtime/jwt/sign');
 const { printError } = require('./commands/utils');
 
 function configDir() {
     return process.env.CORTEX_CONFIG_DIR || path.join(os.homedir(), '.cortex');
 }
 
-function generateJwt(profile, expiresIn = '2m') {
+async function generateJwt(profile, expiresIn = '2m') {
     const {
         username, issuer, audience, jwk,
     } = profile;
-    const jwtSigner = JWK.asKey(jwk);
-    const payload = {
-    };
-    return JWT.sign(payload, jwtSigner, {
-        issuer,
-        audience,
-        subject: username,
-        expiresIn,
-    });
+    const jwtSigner = await parseJwk(jwk, 'Ed25519');
+    return new SignJWT({})
+        .setProtectedHeader({ alg: 'EdDSA', kid: jwk.kid })
+        .setSubject(username)
+        .setAudience(audience)
+        .setIssuer(issuer)
+        .setIssuedAt()
+        .setExpirationTime(expiresIn)
+        .sign(jwtSigner, { kid: jwk.kid });
 }
 
 const ProfileSchema = Joi.object().keys({
@@ -99,7 +100,7 @@ class Config {
         });
     }
 
-    getProfile(name, useenv = true) {
+    async getProfile(name, useenv = true) {
         const profile = this.profiles[name];
         if (!profile) {
             return undefined;
@@ -108,7 +109,7 @@ class Config {
         if (useenv) {
             profileType.url = process.env.CORTEX_URI || profileType.url;
         }
-        profileType.token = generateJwt(profile);
+        profileType.token = await generateJwt(profile);
         return profileType;
     }
 
@@ -185,14 +186,14 @@ function readConfig() {
     return undefined;
 }
 
-function loadProfile(profileName, useenv = true) {
+async function loadProfile(profileName, useenv = true) {
     const config = readConfig();
     if (config === undefined) {
         throw new Error('Please configure the Cortex CLI by running "cortex configure"');
     }
 
     const name = profileName || config.currentProfile || 'default';
-    const profile = config.getProfile(name, useenv);
+    const profile = await config.getProfile(name, useenv);
     if (!profile) {
         throw new Error(`Profile with name "${name}" could not be located in your configuration.  Please run "cortex configure".`);
     }

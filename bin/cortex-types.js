@@ -17,7 +17,7 @@
  */
 
 const chalk = require('chalk');
-const program = require('../src/commander');
+const program = require('commander');
 
 const { withCompatibilityCheck } = require('../src/compatibility');
 
@@ -27,6 +27,7 @@ const {
     DescribeTypeCommand,
 } = require('../src/commands/types');
 
+program.name('cortex types');
 program.description('Work with Cortex Types');
 
 // Save Type
@@ -82,4 +83,7 @@ program
         }
     }));
 
-program.parse(process.argv);
+if (require.main === module) {
+    program.showHelpAfterError().parseAsync(process.argv);
+}
+module.exports = program;

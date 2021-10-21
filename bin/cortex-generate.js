@@ -17,12 +17,13 @@
  */
 
 const chalk = require('chalk');
-const program = require('../src/commander');
+const program = require('commander');
 
 const {
     GenerateSkillCommand,
 } = require('../src/commands/generate');
 
+program.name('cortex generate');
 program.description('Scaffolding Cortex Components');
 
 program
@@ -37,4 +38,7 @@ program
         }
     });
 
-program.parse(process.argv);
+if (require.main === module) {
+    program.showHelpAfterError().parseAsync(process.argv);
+}
+module.exports = program;
