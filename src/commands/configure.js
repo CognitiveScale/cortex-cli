@@ -36,7 +36,7 @@ function _validatePatFile(patFile) {
 }
 
 prompt.message = '';
-prompt.delimeter = '';
+prompt.delimiter = '';
 prompt.colors = false;
 module.exports.ConfigureCommand = class {
     constructor(program) {
