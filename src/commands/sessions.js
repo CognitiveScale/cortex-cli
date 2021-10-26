@@ -25,7 +25,7 @@ const Sessions = require('../client/sessions');
 const { SESSIONTABLEFORMAT } = require('./utils');
 
 const {
-    printSuccess, printError, filterObject, parseObject, printTable, formatValidationPath,
+    printSuccess, printError, filterObject, parseObject, printTable,
 } = require('./utils');
 
 module.exports.SaveSessionCommand = class SaveSessionCommand {
