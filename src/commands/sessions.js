@@ -46,8 +46,6 @@ module.exports.SaveSessionCommand = class SaveSessionCommand {
             if (response.success) {
                 printSuccess('Session saved', options);
                 printSuccess(JSON.stringify(_.pick(response.message, ['sessionId']), null, 2));
-            } else if (response.details) {
-                console.log(`Failed to save session: ${response.status} ${response.message}`);
             } else {
                 printError(JSON.stringify(response));
             }
