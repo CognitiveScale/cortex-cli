@@ -18,7 +18,7 @@ const fs = require('fs');
 const debug = require('debug')('cortex:cli');
 const { loadProfile } = require('../config');
 const Sessions = require('../client/sessions');
-const { SESSIONTABLEFORMAT, formatValidationPath} = require('./utils');
+const { SESSIONTABLEFORMAT, formatValidationPath } = require('./utils');
 
 const {
     printSuccess, printError, filterObject, parseObject, printTable,
