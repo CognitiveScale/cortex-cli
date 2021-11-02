@@ -15,10 +15,6 @@
  */
 const fs = require('fs');
 
-const _ = {
-    get: require('lodash/get'),
-    pick: require('lodash/pick'),
-};
 const debug = require('debug')('cortex:cli');
 const { loadProfile } = require('../config');
 const Sessions = require('../client/sessions');
