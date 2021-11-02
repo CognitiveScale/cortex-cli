@@ -22,7 +22,7 @@ const _ = {
 const debug = require('debug')('cortex:cli');
 const { loadProfile } = require('../config');
 const Sessions = require('../client/sessions');
-const { SESSIONTABLEFORMAT } = require('./utils');
+const { SESSIONTABLEFORMAT, formatValidationPath} = require('./utils');
 
 const {
     printSuccess, printError, filterObject, parseObject, printTable,
@@ -45,7 +45,16 @@ module.exports.SaveSessionCommand = class SaveSessionCommand {
         sessions.saveSession(options.project || profile.project, profile.token, session).then((response) => {
             if (response.success) {
                 printSuccess('Session saved', options);
-                printSuccess(JSON.stringify(_.pick(response.message, ['sessionId']), null, 2));
+            } else if (response.details) {
+                console.log(`Failed to save session: ${response.status} ${response.message}`);
+                console.log('The following issues were found:');
+                const tableSpec = [
+                    { column: 'Path', field: 'path', width: 50 },
+                    { column: 'Message', field: 'message', width: 100 },
+                ];
+                response.details.map((d) => d.path = formatValidationPath(d.path));
+                printTable(tableSpec, response.details);
+                printError(''); // Just exit
             } else {
                 printError(JSON.stringify(response));
             }
