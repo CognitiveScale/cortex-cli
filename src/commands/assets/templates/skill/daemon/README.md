@@ -7,15 +7,19 @@ Note:
 
 
 #### Files generated
-* `skill.yaml` Skill definition
-* `main.py` Python3 code serving the daemon API
-* `requirements.txt` Python3 libraries dependencies
-* `Dockerfile` to build Docker image for this skill
+* `test/`
+  * `payload.json` Payload used when invoking Skill
+* `Dockerfile` Builds the Docker image for the Action
+* `main.py` Code for Cortex daemon
+* `Makefile` Used to perform deployment steps
+* `README.md` Provides the objectives, requirements, and instructions for generating and deploying the Skill.
+* `requirements.txt` Dependencies and libraries
+* `skill.yaml` Skill definition and Action mapping
 
 #### Steps
 
 A Makefile is provided to do these steps. Set environment variables `DOCKER_PREGISTRY_URL` (like <docker-registry-url>/<namespace-org>) and `PROJECT_NAME` (Cortex Project Name) and use Makefile to deploy Skill.
-`make all` will build and push Docker image, deploy Cortex Action and Skill, and then invoke Skill to test.
+`make all` will build and push Docker image, deploy Cortex Skill, and then invoke Skill to test.
 
 1. Modify the main executable (`main.py` by default) run by the action image's entrypoint/command to handle the action's custom logic.
 2. Modify the `requirements.txt` file to provide packages or libraries that the action requires.
@@ -32,16 +36,8 @@ A Makefile is provided to do these steps. Set environment variables `DOCKER_PREG
   ```
   docker tag <existing-image-name>:<existing-version> <new-image-name>:<new-version>
   ```
-5. Deploy the action.
-  ```
-  cortex actions deploy --actionName <SKILL_NAME> \
-  --actionType daemon \
-  --docker <DOCKER_IMAGE> \
-  --port '5000'  \
-  --project <Project Name>
-  ```
-6. Modify the `skill.yaml` file.
-7. Save/deploy the Skill.
+5. Modify the `skill.yaml` file.
+6. Save/deploy the Skill.
   ```
   cortex skills save -y skill.yaml --project <Project Name>
   ```
@@ -50,4 +46,4 @@ A Makefile is provided to do these steps. Set environment variables `DOCKER_PREG
 
    Skills that are deployed may be invoked (run) either independently or within an agent.
 
-For more details about how to build skills go to [Cortex Fabric Documentation - Development - Develop Skills](https://cognitivescale.github.io/cortex-fabric/docs/development/define-skills)
+For more details about how to build Skills go to [Cortex Fabric Documentation - Development - Develop Skills](https://cognitivescale.github.io/cortex-fabric/docs/build-skills/define-skills)

@@ -10,7 +10,6 @@ push: check-env
 	docker push ${DOCKER_IMAGE_URL}
 
 deploy: check-env
-	cortex actions deploy action.json --project ${PROJECT_NAME} --docker ${DOCKER_IMAGE_URL}
 	cortex skills save -y skill.yaml --project ${PROJECT_NAME}
 	sleep 10s # wait for action containers to pull and deploy
 

@@ -24,3 +24,9 @@ outputs:
         type: object
         description: Job Execution Logs
         required: true
+
+actions:
+  - name: {{dashCase name}}
+    actionType: job
+    docker: {{dashCase name}}:latest
+    environmentVariables: '"TEST"="value"'
