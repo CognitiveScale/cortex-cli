@@ -26,10 +26,7 @@ function local_docker(){
 
 # This runs inside a linux docker container
 function docker_build(){
-    npm -v
-    npm config set loglevel warn
-    npm cache clear --force
-    npm install -dd --verbose
+    npm install
     npm test
     echo ${VERSION} > version.txt
     ./generate_docs.sh

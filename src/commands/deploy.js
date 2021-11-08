@@ -78,7 +78,7 @@ const DeployExperimentCommand = class {
     }
 
     async execute(experimentName, runId, options) {
-        const profile = loadProfile(options.profile);
+        const profile = await loadProfile(options.profile);
         const project = options.project || profile.project;
         debug('%s.exportDeployExperimentCommand%s)', profile.name, experimentName);
 
@@ -161,8 +161,8 @@ const DeployConnectionCommand = class {
         this.program = program;
     }
 
-    execute(connectionName, options) {
-        const profile = loadProfile(options.profile);
+    async execute(connectionName, options) {
+        const profile = await loadProfile(options.profile);
         const project = options.project || profile.project;
         debug('%s.exportDeploymentConnection%s)', profile.name, connectionName);
 
@@ -213,8 +213,8 @@ module.exports.DeploySnapshotCommand = class {
         this.program = program;
     }
 
-    execute(snapshotIds, options) {
-        const profile = loadProfile(options.profile);
+    async execute(snapshotIds, options) {
+        const profile = await loadProfile(options.profile);
         const project = options.project || profile.project;
         debug('%s.exportDeploymentSnapshot(%s)', profile.name, snapshotIds);
 
@@ -290,7 +290,7 @@ module.exports.DeployCampaignCommand = class {
     }
 
     async execute(campaignName, options) {
-        const profile = loadProfile(options.profile);
+        const profile = await loadProfile(options.profile);
         const project = options.project || profile.project;
         debug('%s.exportDeploymentCampaigns(%s)', profile.name, campaignName);
 
@@ -326,13 +326,42 @@ module.exports.DeployCampaignCommand = class {
     }
 };
 
+module.exports.DeployConnectionCommand = class {
+    constructor(program) {
+        this.program = program;
+    }
+
+    async execute(connectionName, options) {
+        const profile = await loadProfile(options.profile);
+        const project = options.project || profile.project;
+        debug('%s.exportDeploymentConnection%s)', profile.name, connectionName);
+
+        const connection = new Connections(profile.url);
+        connection.describeConnection(project, profile.token, connectionName).then(async (response) => {
+            if (response.success) {
+                const result = filterObject(response.result, options);
+                const connectionDesc = cleanInternalFields(result);
+                const filepath = path.join(artifactsDir, 'connections', `${connectionName}.json`);
+                writeToFile(connectionDesc, filepath);
+                updateManifest({ connection: [filepath] });
+                await addDependencies(profile.url, profile.token, project, 'Connection', connectionName);
+                printSuccess(`Successfully exported Connection ${connectionName} in ${artifactsDir} and updated manifest file ${manifestFile}`);
+            } else {
+                printError(`Failed to export connection ${connectionName}: ${response.message}`, options);
+            }
+        }).catch((err) => {
+            printError(`Failed to export connection ${connectionName}: ${err.status} ${err.message}`, options);
+        });
+    }
+};
+
 module.exports.DeploySkillCommand = class {
     constructor(program) {
         this.program = program;
     }
 
-    execute(skillName, options) {
-        const profile = loadProfile(options.profile);
+    async execute(skillName, options) {
+        const profile = await loadProfile(options.profile);
         const project = options.project || profile.project;
         debug('%s.exportDeploySkillCommand%s)', profile.name, skillName);
 

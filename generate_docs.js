@@ -2,14 +2,19 @@
  * Opted to use pure JS versus adding handlebars as a dep, as handlebars always has vulns..
  */
 const _ = require('lodash');
-const fs = require('fs');
 
-// read command args if passed
-const sourcedir = _.get(process.argv, '[2]', '.');
-const outfile = _.get(process.argv, '[3]');
-
-// use top level commands as driver
-const rootJson = require(`${sourcedir}/cortex.json`);
+function docObject(program) {
+    return program.commands.map((c) => ({
+        name: c._name,
+        description: c._description,
+        usage: c.usage(),
+        options: c.options.map((o) => ({
+            flags: o.flags,
+            defaultValue: o.defaultValue,
+            description: o.description,
+        })),
+    }));
+}
 
 // replace /n/t with HTML equivs
 const cleanString = (s) => s
@@ -34,58 +39,18 @@ _.join(
 )}`;
 
 const cmdHeading = (cmd) => `
-## ${_.capitalize(cmd.name)}
+## ${_.capitalize(cmd.name())}
 \`\`\`
-cortex ${cmd.name} ${cmd.usage}
+${cmd.name()} ${cmd.usage()}
 \`\`\`    
-${cmd.description}  
+${cmd.description()}  
 `;
 
-const header = `---
-title: "Cortex CLI"
-linkTitle: "Cortex CLI"
-description: >
-  Provides a list of all commands available in the Cortex Command Line Interface.
----
-This reference guide provides a list of all commands available in the Cortex Command Line
-Interface (Cortex CLI). See [CLI](getting-started/use-cli.md) for
-help getting started using the CLI.
-## Notation
-The following table describes the common notation used in this reference guide.
-
-| Notation | Description  | Example                                       |
-| -------- | -----------  | -------                                       |
-| \`< >\`    | Required     | \`<value>\` denotes a required value.      |
-| \`[ ]\`    | Optional     | \`[options]\` denotes an optional value.        |
-## Syntax
-\`\`\`cli
-cortex [command] [options]
-\`\`\`
-## Global options
-| Option | Description |
-| --------- | --------- |
-| \`-v\`, \`--version\` | Outputs the version number. |
-| \`-h\`, \`--help\` | Outputs usage information. |
-| \`--profile [profile]\` | Run the CLI using the specified profile instead of the default config. |
-## General notes
-* The output results for most \`list\` commands display as a table. Add the
-\`--json\` option to output results as JSON. When \`--json\` is used, you can use the
-\`--query\` option to [filter the results](/getting-started/use-cli.md).
-* The output results for \`describe\` commands display in the format of the document
-it is describing. This can include YAML, JSON, or other formats.
-`;
-
-const body = _.join(
-    _.sortBy(rootJson, ['name']).map(
-        (cmd) => `${cmdHeading(cmd)}\n`
-            + `${subcmdTable(require(`${sourcedir}/cortex-${cmd.name}.json`))}`,
-        ),
-'',
-);
-const output = header + body;
-// if outfile write to file ...
-if (_.isEmpty(outfile)) {
-    console.log(output);
-} else {
-    fs.writeFileSync(outfile, output);
+function markdownForCmd(program) {
+    const docObj = docObject(program);
+    return `${cmdHeading(program)}\n${subcmdTable(docObj)}`;
 }
+
+// eslint-disable-next-line import/no-dynamic-require
+const cmd = require(process.argv[2]);
+console.log(markdownForCmd(cmd));
