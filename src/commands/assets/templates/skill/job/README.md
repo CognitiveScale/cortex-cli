@@ -14,32 +14,50 @@ Cortex skill that runs a background job.
 
 #### Steps
 
-A Makefile is provided to do these steps. Set environment variables `DOCKER_PREGISTRY_URL` (like <docker-registry-url>/<namespace-org>) and `PROJECT_NAME` (Cortex Project Name) and use Makefile to deploy Skill.
-`make all` will build and push Docker image, deploy Cortex Skill, and then invoke Skill to test.
-
 1. Modify the main executable (`main.py` by default) run by the action image's entrypoint/command to handle the action's custom logic.
 2. Modify the `requirements.txt` file to provide packages or libraries that the action requires.
-3. Build the docker image (uses the `main.py` file)
-  ```
-  docker build -t <image-name>:<version> .
-  ```
-4. Push the docker image to a registry that is connected to your Kubernetes cluster.
-  ```
-  docker push <image-name>:<version>
-  ```
+3. Modify the `skill.yaml` file as needed. The Skill is added to the Cortex Fabric catalog and is available for selection when building interventions or Agents. Skills that are deployed may be invoked (run) either independently or within an agent. For more details about how to build Skills go to [Cortex Fabric Documentation - Development - Develop Skills](https://cognitivescale.github.io/cortex-fabric/docs/build-skills/define-skills)
+4. A Makefile is provided to do these steps. Set environment variables `DOCKER_PREGISTRY_URL` (like `<docker-registry-url>/<namespace-org>`) and `PROJECT_NAME` (Cortex Project Name) to use the Makefile.
+   `make all` will build and push Docker image, deploy Cortex Skill, and then invoke Skill to test.
+   ```text
+   DOCKER_PREGISTRY_URL=<docker-registry-url>/<namespace-org> PROJECT_NAME=<project-name> make all
+   ```
 
-**(Optionally) Retag an image**
-  ```
-  docker tag <existing-image-name>:<existing-version> <new-image-name>:<new-version>
-  ```
-5. Modify the `skill.yaml` file.
-6. Save/deploy the Skill.
-  ```
-  cortex skills save -y skill.yaml --project <Project Name>
-  ```
+#### Test the code locally
 
-The Skill is added to the Cortex Fabric catalog and is available for selection when building interventions or Agents.
+To avoid using up your private registry space, it is good practice testing your code before pushing.
 
-Skills that are deployed may be invoked (run) either independently or within an agent.
+Create Python virtual env.
+```shell
+python -m venv testvenv
+source testvenv/bin/activate
+pip install -r requirements.txt
+```
 
-For more details about how to build Skills go to [Cortex Fabric Documentation - Development - Develop Skills](https://cognitivescale.github.io/cortex-fabric/docs/build-skills/define-skills)
+Run the daemon.
+```shell
+uvicorn main:app --port 5000
+
+INFO:     Started server process [57435]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+INFO:     Uvicorn running on http://127.0.0.1:5000 (Press CTRL+C to quit)
+```
+
+Test daemon endpoint.
+```shell
+curl -X 'POST' \
+  'http://localhost:5000/invoke' \
+  -H 'accept: application/json' \
+  -H 'Content-Type: application/json' \
+  -d '{"payload": {"message":  "This is a test payload message"}}'
+````
+
+Response:
+```json
+{
+  "message":  "This is a test payload message"
+}
+```
+
+You can also test your endpoints via fastapi docs. Visit `http://localhost:5000/docs` using your browser, click on the "Try it out" button, enter the required fields, and click "Execute"
