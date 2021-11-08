@@ -28,6 +28,7 @@ Note:
    ```
 
 #### Test the code locally
+
 To avoid using up your private registry space, it is good practice testing your code before pushing.
 
 Create Python virtual env.
@@ -37,11 +38,30 @@ source testvenv/bin/activate
 pip install -r requirements.txt
 ```
 
-Testing the job.
+Run the daemon.
 ```shell
-python ./main.py '{"payload":{"message":  "This is a test payload message"}}'
-````
-Response:
-```text
-{"message":  "This is a test payload message"}
+uvicorn main:app --port 5000
+
+INFO:     Started server process [57435]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+INFO:     Uvicorn running on http://127.0.0.1:5000 (Press CTRL+C to quit)
 ```
+
+Test daemon endpoint.
+```shell
+curl -X 'POST' \
+  'http://localhost:5000/invoke' \
+  -H 'accept: application/json' \
+  -H 'Content-Type: application/json' \
+  -d '{"payload": {"message":  "This is a test payload message"}}'
+````
+
+Response:
+```json
+{
+  "message":  "This is a test payload message"
+}
+```
+
+You can also test your endpoints via fastapi docs. Visit `http://localhost:5000/docs` using your browser, click on the "Try it out" button, enter the required fields, and click "Execute"
