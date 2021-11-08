@@ -326,35 +326,6 @@ module.exports.DeployCampaignCommand = class {
     }
 };
 
-module.exports.DeployConnectionCommand = class {
-    constructor(program) {
-        this.program = program;
-    }
-
-    async execute(connectionName, options) {
-        const profile = await loadProfile(options.profile);
-        const project = options.project || profile.project;
-        debug('%s.exportDeploymentConnection%s)', profile.name, connectionName);
-
-        const connection = new Connections(profile.url);
-        connection.describeConnection(project, profile.token, connectionName).then(async (response) => {
-            if (response.success) {
-                const result = filterObject(response.result, options);
-                const connectionDesc = cleanInternalFields(result);
-                const filepath = path.join(artifactsDir, 'connections', `${connectionName}.json`);
-                writeToFile(connectionDesc, filepath);
-                updateManifest({ connection: [filepath] });
-                await addDependencies(profile.url, profile.token, project, 'Connection', connectionName);
-                printSuccess(`Successfully exported Connection ${connectionName} in ${artifactsDir} and updated manifest file ${manifestFile}`);
-            } else {
-                printError(`Failed to export connection ${connectionName}: ${response.message}`, options);
-            }
-        }).catch((err) => {
-            printError(`Failed to export connection ${connectionName}: ${err.status} ${err.message}`, options);
-        });
-    }
-};
-
 module.exports.DeploySkillCommand = class {
     constructor(program) {
         this.program = program;
