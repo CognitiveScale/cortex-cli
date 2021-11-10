@@ -17,7 +17,7 @@
  */
 
 const chalk = require('chalk');
-const program = require('../src/commander');
+const program = require('commander');
 
 const { withCompatibilityCheck } = require('../src/compatibility');
 
@@ -27,6 +27,7 @@ const {
     WriteSecretsCommand,
 } = require('../src/commands/secrets');
 
+program.name('cortex secrets');
 program.description('Work with Cortex Secrets');
 
 // List Secure Keys
@@ -82,4 +83,7 @@ program
         }
     }));
 
-program.parse(process.argv);
+if (require.main === module) {
+    program.showHelpAfterError().parseAsync(process.argv);
+}
+module.exports = program;

@@ -20,10 +20,8 @@ const moment = require('moment');
 const { loadProfile } = require('../config');
 const Catalog = require('../client/catalog');
 const Agent = require('../client/agents');
-const { LISTTABLEFORMAT } = require('./utils');
-
 const {
- printSuccess, printError, filterObject, parseObject, printTable, formatValidationPath,
+    printSuccess, printError, printWarning, filterObject, parseObject, printTable, formatValidationPath, LISTTABLEFORMAT,
 } = require('./utils');
 
 module.exports.SaveSkillCommand = class SaveSkillCommand {
@@ -32,12 +30,21 @@ module.exports.SaveSkillCommand = class SaveSkillCommand {
     }
 
     async execute(skillDefinition, options) {
-        const profile = loadProfile(options.profile);
-        debug('%s.executeSaveSkill(%s)', profile.name, skillDefinition);
         try {
+            const profile = await loadProfile(options.profile);
             const skillDefStr = fs.readFileSync(skillDefinition);
             const skill = parseObject(skillDefStr, options);
             const catalog = new Catalog(profile.url);
+            if (!_.isEmpty(options.k8sResource)) {
+                const k8sResources = options.k8sResource.map((f) => JSON.stringify(parseObject(fs.readFileSync(f), options)));
+                if (_.isEmpty(_.get(skill, 'actions', []))) {
+                    printError('Skill must contain an action to apply kubernetes resources', options, true);
+                }
+                if (skill.actions.length > 1) {
+                    printWarning('Applying kubernetes resources to all actions');
+                }
+                skill.actions.map((a) => a.k8sResources = k8sResources);
+            }
             const response = await catalog.saveSkill(options.project || profile.project, profile.token, skill);
             if (response.success) {
                 printSuccess('Skill saved', options);
@@ -66,7 +73,7 @@ module.exports.ListSkillsCommand = class ListSkillsCommand {
     }
 
     async execute(options) {
-        const profile = loadProfile(options.profile);
+        const profile = await loadProfile(options.profile);
         debug('%s.executeListSkills()', profile.name);
 
         const catalog = new Catalog(profile.url);
@@ -105,22 +112,18 @@ module.exports.DescribeSkillCommand = class DescribeSkillCommand {
         this.program = program;
     }
 
-    execute(skillName, options) {
-        const profile = loadProfile(options.profile);
+    async execute(skillName, options) {
+        const profile = await loadProfile(options.profile);
         debug('%s.executeDescribeSkill(%s)', profile.name, skillName);
 
         const catalog = new Catalog(profile.url);
-        catalog.describeSkill(options.project || profile.project, profile.token, skillName, options.verbose).then((response) => {
-            if (response.success) {
-                const result = filterObject(response.skill, options);
-                printSuccess(JSON.stringify(result, null, 2), options);
-            } else {
-                printError(`Failed to describe skill ${skillName}: ${response.message}`, options);
-            }
-        })
-        .catch((err) => {
+        try {
+            let response = await catalog.describeSkill(options.project || profile.project, profile.token, skillName, options.verbose, options.output);
+            if (_.get(options, 'output', 'json').toLowerCase() === 'json') response = JSON.stringify(filterObject(response, options), null, 2);
+            printSuccess(response, options);
+        } catch (err) {
             printError(`Failed to describe skill ${skillName}: ${err.status} ${err.message}`, options);
-        });
+        }
     }
 };
 
@@ -129,8 +132,8 @@ module.exports.UndeploySkillCommand = class UndeploySkillCommand {
         this.program = program;
     }
 
-    execute(skillName, options) {
-        const profile = loadProfile(options.profile);
+    async execute(skillName, options) {
+        const profile = await loadProfile(options.profile);
         debug('%s.executeUndeploySkill(%s)', profile.name, skillName);
         const catalog = new Catalog(profile.url);
         catalog.unDeploySkill(options.project || profile.project, profile.token, skillName, options.verbose).then((response) => {
@@ -151,8 +154,8 @@ module.exports.SkillLogsCommand = class SkillLogsCommand {
         this.program = program;
     }
 
-    execute(skillName, actionName, options) {
-        const profile = loadProfile(options.profile);
+    async execute(skillName, actionName, options) {
+        const profile = await loadProfile(options.profile);
         debug('%s.executeSkillLogs(%s,%s)', profile.name, skillName, actionName);
         const catalog = new Catalog(profile.url);
         catalog.skillLogs(options.project || profile.project, profile.token, skillName, actionName, options.verbose).then((response) => {
@@ -173,8 +176,8 @@ module.exports.DeploySkillCommand = class DeploySkillCommand {
         this.program = program;
     }
 
-    execute(skillName, options) {
-        const profile = loadProfile(options.profile);
+    async execute(skillName, options) {
+        const profile = await loadProfile(options.profile);
         debug('%s.executeDeploySkill(%s)', profile.name, skillName);
 
         const catalog = new Catalog(profile.url);
@@ -196,8 +199,8 @@ module.exports.InvokeSkillCommand = class InvokeSkillCommand {
         this.program = program;
     }
 
-    execute(skillName, inputName, options) {
-        const profile = loadProfile(options.profile);
+    async execute(skillName, inputName, options) {
+        const profile = await loadProfile(options.profile);
         debug('%s.executeInvokeSkill(%s/%s)', profile.name, skillName, inputName);
 
         let params = {};

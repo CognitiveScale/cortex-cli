@@ -13,6 +13,20 @@
         "kty": "OKP",
         "kid": "X4u2Hv4VxL77bE8N9dT4ltVBoJsSLTH4bY1a5WL6wNY"
       }
+    },
+    "other": {
+      "url": "http://other:8000",
+      "username": "other_user",
+      "issuer": "cognitivescale.com",
+      "audience": "cortex",
+      "project": "otherProj",
+      "jwk": {
+        "crv": "Ed25519",
+        "x": "yA1XUDSEoKWa28bCMFljlXwlEFbSVmQQ7ftIMNtB69U",
+        "d": "bRujm6B2EFaPTp56cU3z3K1w_5oFleLeL3hsLgqCVLc",
+        "kty": "OKP",
+        "kid": "X4u2Hv4VxL77bE8N9dT4ltVBoJsSLTH4bY1a5WL6wNY"
+      }
     }
   },
   "currentProfile": "default"

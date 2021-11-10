@@ -43,9 +43,9 @@ module.exports.ListResourcesCommand = class {
         this.program = program;
     }
 
-    execute(command) {
-        const options = command.opts();
-        const profile = loadProfile(options.profile);
+    async execute(command) {
+        const options = command;
+        const profile = await loadProfile(options.profile);
         debug('%s.ListResourcesCommand()', profile.name);
 
         const client = new Assessments(profile.url);
@@ -75,9 +75,9 @@ module.exports.ListResourceTypesCommand = class {
         this.program = program;
     }
 
-    execute(command) {
-        const options = command.opts();
-        const profile = loadProfile(options.profile);
+    async execute(command) {
+        const options = command;
+        const profile = await loadProfile(options.profile);
         debug('%s.ListResourceTypesCommand()', profile.name);
 
         const client = new Assessments(profile.url);
@@ -106,9 +106,9 @@ module.exports.DependencyTreeCommand = class {
         this.program = program;
     }
 
-    execute(dependencyFile, command) {
-        const options = command.opts();
-        const profile = loadProfile(options.profile);
+    async execute(dependencyFile, command) {
+        const options = command;
+        const profile = await loadProfile(options.profile);
         debug('%s.DependencyTreeCommand()', profile.name);
 
         const client = new Assessments(profile.url);
@@ -141,9 +141,9 @@ module.exports.CreateAssessmentCommand = class {
         this.program = program;
     }
 
-    execute(assessmentDef, command) {
-        const options = command.opts();
-        const profile = loadProfile(options.profile);
+    async execute(assessmentDef, command) {
+        const options = command;
+        const profile = await loadProfile(options.profile);
         debug('%s.CreateAssessmentCommand()', profile.name);
         const client = new Assessments(profile.url);
         let assessment = {};
@@ -178,8 +178,8 @@ module.exports.ListAssessmentCommand = class {
         this.program = program;
     }
 
-    execute(options) {
-        const profile = loadProfile(options.profile);
+    async execute(options) {
+        const profile = await loadProfile(options.profile);
         debug('%s.ListAssessmentCommand()', profile.name);
 
         const client = new Assessments(profile.url);
@@ -212,8 +212,8 @@ module.exports.DescribeAssessmentCommand = class {
         this.program = program;
     }
 
-    execute(name, options) {
-        const profile = loadProfile(options.profile);
+    async execute(name, options) {
+        const profile = await loadProfile(options.profile);
         debug('%s.DescribeAssessmentCommand()', profile.name);
 
         const client = new Assessments(profile.url);
@@ -233,8 +233,8 @@ module.exports.DeleteAssessmentCommand = class {
         this.program = program;
     }
 
-    execute(name, options) {
-        const profile = loadProfile(options.profile);
+    async execute(name, options) {
+        const profile = await loadProfile(options.profile);
         debug('%s.DeleteAssessmentCommand()', profile.name);
 
         const client = new Assessments(profile.url);
@@ -254,8 +254,8 @@ module.exports.RunAssessmentCommand = class {
         this.program = program;
     }
 
-    execute(name, options) {
-        const profile = loadProfile(options.profile);
+    async execute(name, options) {
+        const profile = await loadProfile(options.profile);
         debug('%s.RunAssessmentCommand()', profile.name);
 
         const client = new Assessments(profile.url);
@@ -275,8 +275,8 @@ module.exports.ListAssessmentReportCommand = class {
         this.program = program;
     }
 
-    execute(name, options) {
-        const profile = loadProfile(options.profile);
+    async execute(name, options) {
+        const profile = await loadProfile(options.profile);
         debug('%s.ListAssessmentReportCommand()', profile.name);
 
         const client = new Assessments(profile.url);
@@ -308,8 +308,8 @@ module.exports.GetAssessmentReportCommand = class {
         this.program = program;
     }
 
-    execute(name, reportId, options) {
-        const profile = loadProfile(options.profile);
+    async execute(name, reportId, options) {
+        const profile = await loadProfile(options.profile);
         debug('%s.GetAssessmentReportCommand()', profile.name);
 
         const client = new Assessments(profile.url);
@@ -352,9 +352,9 @@ module.exports.ExportAssessmentReportCommand = class {
         this.program = program;
     }
 
-    execute(name, reportId, command) {
-        const options = command.opts();
-        const profile = loadProfile(options.profile);
+    async execute(name, reportId, command) {
+        const options = command;
+        const profile = await loadProfile(options.profile);
         debug('%s.ExportAssessmentReportCommand()', profile.name);
 
         const client = new Assessments(profile.url);

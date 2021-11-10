@@ -17,12 +17,11 @@
  */
 
 const findPackageJson = require('find-package-json');
-const identity = require('lodash/fp/identity');
-
-const program = require('../src/commander');
+const program = require('commander');
 
 const pkg = findPackageJson(__dirname).next().value;
 
+program.name('cortex');
 program
     .version(pkg.version, '-v, --version')
     .description('Cortex CLI')
@@ -46,8 +45,7 @@ program
     .command('types [cmd]', 'Work with Cortex Types')
     .command('users [cmd]', 'Work with a Cortex Users');
 
-program.parse(process.argv, { noActionHandler: () => {} });
-if (!program.commands.map((cmd) => cmd._name).includes(program.args[0])) {
-    program.outputHelp(identity);
-    process.exit(1);
+if (require.main === module) {
+    program.showHelpAfterError().parseAsync(process.argv);
 }
+module.exports = program;

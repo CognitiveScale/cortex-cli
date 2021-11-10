@@ -19,7 +19,7 @@ const debug = require('debug')('cortex:cli');
 const { loadProfile } = require('../config');
 const ApiServerClient = require('../client/apiServerClient');
 const {
- printSuccess, printError, filterObject, parseObject, printTable, 
+ printSuccess, printError, filterObject, parseObject, printTable,
 } = require('./utils');
 
 module.exports.CreateProjectCommand = class CreateProjectCommand {
@@ -28,8 +28,8 @@ module.exports.CreateProjectCommand = class CreateProjectCommand {
     }
 
     async execute(projectDefinition, command) {
-        const options = command.opts();
-        const profile = loadProfile(options.profile);
+        const options = command;
+        const profile = await loadProfile(options.profile);
         debug('%s.executeSaveProject(%s)', profile.name, projectDefinition);
         let project = {};
         try {
@@ -59,7 +59,7 @@ module.exports.ListProjectsCommand = class ListProjectsCommand {
     }
 
     async execute(options) {
-        const profile = loadProfile(options.profile);
+        const profile = await loadProfile(options.profile);
         debug('%s.executeListProjects()', profile.name);
 
         const cli = new ApiServerClient(profile.url);
@@ -89,8 +89,8 @@ module.exports.DescribeProjectCommand = class DescribeProjectCommand {
     }
 
     async execute(projectName, cmd) {
-        const options = cmd.opts();
-        const profile = loadProfile(options.profile);
+        const options = cmd;
+        const profile = await loadProfile(options.profile);
         debug('%s.executeDescribeProject(%s)', profile.name, projectName);
         const cli = new ApiServerClient(profile.url);
 

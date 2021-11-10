@@ -17,7 +17,7 @@
  */
 
 const chalk = require('chalk');
-const program = require('../src/commander');
+const program = require('commander');
 
 const { withCompatibilityCheck } = require('../src/compatibility');
 
@@ -30,6 +30,7 @@ const {
     UndeployCampaignCommand,
 } = require('../src/commands/campaigns');
 
+program.name('cortex campaigns');
 program.description('Work with Cortex Campaigns');
 
 // List Campaigns
@@ -132,4 +133,7 @@ program
         }
     }));
 
-program.parse(process.argv);
+if (require.main === module) {
+    program.showHelpAfterError().parseAsync(process.argv);
+}
+module.exports = program;

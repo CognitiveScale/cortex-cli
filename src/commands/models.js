@@ -24,7 +24,7 @@ const moment = require('moment');
 const { loadProfile } = require('../config');
 const Models = require('../client/models');
 const Experiments = require('../client/experiments');
-const { LISTTABLEFORMAT, RUNTABLEFORMAT } = require('./utils');
+const { LISTTABLEFORMAT, RUNTABLEFORMAT, DEPENDENCYTABLEFORMAT } = require('./utils');
 
 const {
     printSuccess, printError, filterObject, parseObject, printTable, formatValidationPath,
@@ -35,8 +35,8 @@ module.exports.SaveModelCommand = class SaveModelCommand {
         this.program = program;
     }
 
-    execute(modelDefinition, options) {
-        const profile = loadProfile(options.profile);
+    async execute(modelDefinition, options) {
+        const profile = await loadProfile(options.profile);
         debug('%s.executeSaveModel(%s)', profile.name, modelDefinition);
 
         const modelDefStr = fs.readFileSync(modelDefinition);
@@ -73,8 +73,8 @@ module.exports.ListModelsCommand = class ListModelsCommand {
         this.program = program;
     }
 
-    execute(options) {
-        const profile = loadProfile(options.profile);
+    async execute(options) {
+        const profile = await loadProfile(options.profile);
         debug('%s.executeListModels()', profile.name);
         const models = new Models(profile.url);
         models.listModels(options.project || profile.project, options.offset, options.limit, options.tags, profile.token).then((response) => {
@@ -103,8 +103,8 @@ module.exports.ListModelRunsCommand = class ListModelsCommand {
         this.program = program;
     }
 
-    execute(modelName, options) {
-        const profile = loadProfile(options.profile);
+    async execute(modelName, options) {
+        const profile = await loadProfile(options.profile);
         debug('%s.executeListModels()', profile.name);
         const models = new Models(profile.url);
         models.listModelRuns(options.project || profile.project, modelName, profile.token).then((response) => {
@@ -133,8 +133,8 @@ module.exports.DescribeModelCommand = class DescribeModelCommand {
         this.program = program;
     }
 
-    execute(modelName, options) {
-        const profile = loadProfile(options.profile);
+    async execute(modelName, options) {
+        const profile = await loadProfile(options.profile);
         const models = new Models(profile.url);
         debug('%s.executeDescribeModel(%s)', profile.name, modelName);
         models.describeModel(options.project || profile.project, profile.token, modelName, options.verbose).then((response) => {
@@ -156,18 +156,22 @@ module.exports.DeleteModelCommand = class {
         this.program = program;
     }
 
-    execute(modelName, options) {
-        const profile = loadProfile(options.profile);
+    async execute(modelName, options) {
+        const profile = await loadProfile(options.profile);
         debug('%s.executeDeleteModel(%s)', profile.name, modelName);
         const models = new Models(profile.url);
         models.deleteModel(options.project || profile.project, profile.token, modelName)
             .then((response) => {
                 if (response && response.success) {
                     const result = filterObject(response, options);
-                    printSuccess(JSON.stringify(result, null, 2), options);
-                } else {
-                    printError(`Model deletion failed: ${response.status} ${response.message}.`, options);
+                    return printSuccess(JSON.stringify(result, null, 2), options);
                 }
+                if (response.status === 403) { // has dependencies
+                    const tableFormat = DEPENDENCYTABLEFORMAT;
+                    printError(`Model deletion failed: ${response.message}.`, options, false);
+                    return printTable(tableFormat, response.details);
+                }
+                return printError(`Model deletion failed: ${response.status} ${response.message}.`, options);
             })
             .catch((err) => {
                 printError(`Failed to delete model: ${err.status} ${err.message}`, options);
@@ -181,7 +185,7 @@ module.exports.UpdateModelStatusCommand = class UpdateModelStatusCommand {
     }
 
     async execute(modelName, options, status) {
-        const profile = loadProfile(options.profile);
+        const profile = await loadProfile(options.profile);
         const models = new Models(profile.url);
         debug('%s.executeUpdateModelStatus(%s)', profile.name, modelName, status);
         try {
@@ -202,7 +206,7 @@ module.exports.RegisterModelCommand = class RegisterModelCommand {
     }
 
     async execute(modelDefinition, options) {
-        const profile = loadProfile(options.profile);
+        const profile = await loadProfile(options.profile);
 
         function printErrorDetails(response) {
             const tableSpec = [
