@@ -91,10 +91,16 @@ class Profile {
 }
 
 class Config {
-    constructor({ version, profiles, currentProfile }) {
+    constructor({ 
+        version, 
+        profiles, 
+        currentProfile, 
+        templateConfig,
+    }) {
         this.version = version || '3';
         this.profiles = profiles || {};
         this.currentProfile = currentProfile;
+        this.templateConfig = templateConfig;
         Object.keys(this.profiles).forEach((name) => {
             this.profiles[name] = new Profile(name, this.profiles[name]);
         });
@@ -128,7 +134,12 @@ class Config {
         Object.keys(this.profiles).forEach((name) => {
             profiles[name] = this.profiles[name].toJSON();
         });
-        return { version: this.version, profiles, currentProfile: this.currentProfile };
+        return { 
+            version: this.version, 
+            profiles, 
+            currentProfile: this.currentProfile, 
+            templateConfig: this.templateConfig, 
+        };
     }
 
     save() {

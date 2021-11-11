@@ -27,6 +27,14 @@ const path = require('path');
 const yaml = require('js-yaml');
 const { exec } = require('child_process');
 
+const MAX_NAME_LENGTH = 20;
+
+const space = /\s+/g;
+const specialCharsExceptHyphen = /[^A-Za-z0-9- ]/g;
+const beginAndEndWithHyphen = /^[-]+|[-]+$/g;
+const vaildationErrorMessage = "Must contain only lowercase a-z, 0-9, or -, and it can't begin or end with -";
+const suffixLength = 6;
+
 module.exports.constructError = (error) => {
     // fallback to text in message or standard error message
     const errResp = error.response;
@@ -311,3 +319,26 @@ module.exports.RUNTABLEFORMAT = [
     { column: 'Took', field: 'took', width: 50 },
     { column: 'Modified', field: '_updatedAt', width: 26 },
 ];
+
+module.exports.generateNameFromTitle = (title) => title.replace(specialCharsExceptHyphen, '')
+        .replace(space, '-')
+        .replace(beginAndEndWithHyphen, '')
+        .substr(0, MAX_NAME_LENGTH - suffixLength)
+        .replace(beginAndEndWithHyphen, '')
+        .toLowerCase();
+
+module.exports.hasUppercase = (s) => /[A-Z]/.test(s);
+
+module.exports.validateName = (name) => (space.test(name) 
+|| specialCharsExceptHyphen.test(name)
+|| beginAndEndWithHyphen.test(name)
+|| (name && name.length > MAX_NAME_LENGTH)
+|| module.exports.hasUppercase(name)
+    ? {
+        status: false,
+        message: vaildationErrorMessage,
+    }
+    : {
+        status: true,
+        message: '',
+    });
