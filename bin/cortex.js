@@ -35,7 +35,7 @@ program
     .command('deploy [cmd]', 'Work with Cortex Artifacts export for deployment')
     .command('docker [cmd]', 'Work with Docker')
     .command('experiments [cmd]', 'Work with Cortex Experiments')
-    .command('generate [cmd]', 'Scaffold Cortex Components')
+    .command('workspace [cmd]', 'Scaffold Cortex Components')
     .command('missions [cmd]', 'Work with Cortex Missions')
     .command('models [cmd]', 'Work with Cortex Models')
     .command('projects [cmd]', 'Work with Cortex Projects')
