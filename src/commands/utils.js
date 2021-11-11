@@ -304,6 +304,11 @@ module.exports.LISTTABLEFORMAT = [
     { column: 'Author', field: 'createdBy', width: 25 },
 ];
 
+module.exports.DEPENDENCYTABLEFORMAT = [
+    { column: 'Dependency Name', field: 'name', width: 60 },
+    { column: 'Dependency Type', field: 'type', width: 40 },
+];
+
 module.exports.RUNTABLEFORMAT = [
     { column: 'Run ID', field: 'runId', width: 30 },
     { column: 'Experiment Name', field: 'experimentName', width: 40 },
