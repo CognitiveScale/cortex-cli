@@ -20,10 +20,9 @@ const moment = require('moment');
 const { loadProfile } = require('../config');
 const Catalog = require('../client/catalog');
 const Agent = require('../client/agents');
-const { LISTTABLEFORMAT, DEPENDENCYTABLEFORMAT } = require('./utils');
 
 const {
-    printSuccess, printError, printWarning, filterObject, parseObject, printTable, formatValidationPath, LISTTABLEFORMAT,
+    printSuccess, printError, printWarning, filterObject, parseObject, printTable, formatValidationPath, LISTTABLEFORMAT, DEPENDENCYTABLEFORMAT,
 } = require('./utils');
 
 module.exports.SaveSkillCommand = class SaveSkillCommand {
