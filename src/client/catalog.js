@@ -497,4 +497,18 @@ module.exports = class Catalog {
             .then((skill) => ({ success: true, skill }))
             .catch((err) => constructError(err));
     }
+
+    deleteAgent(projectId, token, agentName) {
+        checkProject(projectId);
+        const endpoint = `${this.endpoints.agents(projectId)}/${encodeURIComponent(agentName)}`;
+        debug('deleteAgent(%s) => %s', agentName, endpoint);
+        return got
+            .delete(endpoint, {
+                headers: { Authorization: `Bearer ${token}` },
+                'user-agent': getUserAgent(),
+            })
+            .json()
+            .then((agent) => ({ success: true, agent }))
+            .catch((err) => constructError(err));
+    }
 };
