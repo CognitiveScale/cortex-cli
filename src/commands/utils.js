@@ -302,7 +302,11 @@ module.exports.LISTTABLEFORMAT = [
     { column: 'Description', field: 'description', width: 50 },
     { column: 'Modified', field: 'updatedAt', width: 26 },
     { column: 'Author', field: 'createdBy', width: 25 },
+];
 
+module.exports.DEPENDENCYTABLEFORMAT = [
+    { column: 'Dependency Name', field: 'name', width: 60 },
+    { column: 'Dependency Type', field: 'type', width: 40 },
 ];
 
 module.exports.RUNTABLEFORMAT = [

@@ -20,8 +20,9 @@ const moment = require('moment');
 const { loadProfile } = require('../config');
 const Catalog = require('../client/catalog');
 const Agent = require('../client/agents');
+
 const {
-    printSuccess, printError, printWarning, filterObject, parseObject, printTable, formatValidationPath, LISTTABLEFORMAT,
+    printSuccess, printError, printWarning, filterObject, parseObject, printTable, formatValidationPath, LISTTABLEFORMAT, DEPENDENCYTABLEFORMAT,
 } = require('./utils');
 
 module.exports.SaveSkillCommand = class SaveSkillCommand {
@@ -231,6 +232,34 @@ module.exports.InvokeSkillCommand = class InvokeSkillCommand {
                 } else {
                     printError(`Failed to invoke skill: ${err.status} ${err.message}`, options);
                 }
+            });
+    }
+};
+
+module.exports.DeleteSkillCommand = class DeleteSkillCommand {
+    constructor(program) {
+        this.program = program;
+    }
+
+    execute(skillName, options) {
+        const profile = loadProfile(options.profile);
+        debug('%s.executeDeleteSkill(%s)', profile.name, skillName);
+        const catalog = new Catalog(profile.url);
+        catalog.deleteSkill(options.project || profile.project, profile.token, skillName)
+            .then((response) => {
+                if (response.success) {
+                    const result = filterObject(response, options);
+                    return printSuccess(JSON.stringify(result, null, 2), options);
+                }
+                if (response.status === 403) { // has dependencies
+                    const tableFormat = DEPENDENCYTABLEFORMAT;
+                    printError(`Skill deletion failed: ${response.status} ${response.message}.`, options, false);
+                    return printTable(tableFormat, response.details);
+                }
+                return printError(`Skill deletion failed: ${response.status} ${response.message}.`, options);
+            })
+            .catch((err) => {
+                printError(`Failed to delete skill: ${err.status} ${err.message}`, options);
             });
     }
 };
