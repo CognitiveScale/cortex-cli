@@ -315,3 +315,9 @@ module.exports.RUNTABLEFORMAT = [
     { column: 'Took', field: 'took', width: 50 },
     { column: 'Modified', field: '_updatedAt', width: 26 },
 ];
+
+module.exports.SESSIONTABLEFORMAT = [
+    { column: 'Session ID', field: 'sessionId', width: 45 },
+    { column: 'TTL', field: 'ttl', width: 15 },
+    { column: 'Description', field: 'description', width: 70 },
+];
