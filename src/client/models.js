@@ -49,8 +49,8 @@ module.exports = class Models {
                 'user-agent': getUserAgent(),
                 json: {},
             }).json()
-            .then(res => ({ success: true, message: res }))
-            .catch(err => constructError(err));
+            .then((res) => ({ success: true, message: res }))
+            .catch((err) => constructError(err));
     }
 
     deleteModel(projectId, token, modelName) {

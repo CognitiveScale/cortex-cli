@@ -17,7 +17,7 @@
  */
 
 const chalk = require('chalk');
-const program = require('../src/commander');
+const program = require('commander');
 
 const { withCompatibilityCheck } = require('../src/compatibility');
 
@@ -31,6 +31,7 @@ const {
     ListModelRunsCommand,
 } = require('../src/commands/models');
 
+program.name('cortex models');
 program.description('Work with Cortex Models');
 
 // List Models
@@ -163,7 +164,7 @@ program
 // List model runs
 program
     .command('list-runs <modelName>')
-    .description('list model run')
+    .description('List model run')
     .option('--no-compat', 'Ignore API compatibility checks')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
@@ -178,4 +179,7 @@ program
         }
     }));
 
-program.parse(process.argv);
+if (require.main === module) {
+    program.showHelpAfterError().parseAsync(process.argv);
+}
+module.exports = program;
