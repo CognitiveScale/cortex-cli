@@ -33,10 +33,6 @@ pipelines:
       cortex-cli:
         git: git@github.com:CognitiveScale/cortex-cli.git
         branch: master
-      cortex-cli-develop:
-        type: dependency
-        pipeline: cortex-cli
-        stage: build
     stages:
       - build:
           clean_workspace: yes
@@ -45,18 +41,9 @@ pipelines:
               elastic_profile_id: gocd-test-agent-dind
               artifacts:
                 - build:
-                    source: masterBranchRevision.json
-                - build:
                     source: cortex-cli-docs.md
               tasks:
-                - fetch:
-                    pipeline: cortex-cli
-                    stage: build
-                    job: Build
-                    source: devBranchRevision.json
-                    is_file: yes
                 - script: |
-                    mv devBranchRevision.json masterBranchRevision.json
                     git clone git@github.com:CognitiveScale/gocd-pipeline-scripts.git
                     ./gocd-pipeline-scripts/common/c12e-common.sh master
                     echo ./gocd-pipeline-scripts/cortex5/docs/update-docs.sh cli

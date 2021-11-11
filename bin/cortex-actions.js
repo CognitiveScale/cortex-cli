@@ -17,7 +17,7 @@
  */
 
 const chalk = require('chalk');
-const program = require('../src/commander');
+const program = require('commander');
 
 const { withCompatibilityCheck } = require('../src/compatibility');
 
@@ -35,6 +35,7 @@ const {
     // TaskStatusActionCommand,
 } = require('../src/commands/actions');
 
+program.name('cortex actions');
 program.description('Work with Cortex Actions');
 
 // List Actions
@@ -114,12 +115,12 @@ program
     .description('Deploy an action')
     .storeOptionsAsProperties(false)
     .option('--name, --actionName [name]', 'Action name')
-    .option('--type, --actionType [job|daemon]', 'Type of action')
+    .option('--type, --actionType [job/daemon]', 'Type of action')
     .option('--cmd [cmd]', 'Command to be executed') // '["--daemon"]'
     .option('--image, --docker [image]', 'Docker image to use as the runner')
     .option('--environmentVariables [environmentVariables]', 'Docker container environment variables, only used for daemon action types')
     .option('--jobTimeout [jobTimeout]', 'Job Timeout in seconds, this will marked the job as FAILED (default: no timeout)')
-    .option('-k, --k8sResource [file...]', 'Additional kubernetes resources deployed and owned by the skill')
+    .option('-k, --k8sResource [file...]', 'Additional kubernetes resources deployed and owned by the skill, provide as last option specified or end list of files with "--"')
     .option('--no-compat', 'Ignore API compatibility checks')
     .option('--podspec [podspec]', 'A file containing either a JSON or YAML formatted pod spec to merge with the action definition, used for specifying resources (like memory, ephemeral storage, CPUs, and GPUs) and tolerations (like allowing pods to be scheduled on tainted nodes).')
     .option('--port [port]', 'Docker port') // '9091'
@@ -223,4 +224,7 @@ program
 //         }
 //     }));
 
-program.parse(process.argv);
+if (require.main === module) {
+    program.showHelpAfterError().parseAsync(process.argv);
+}
+module.exports = program;

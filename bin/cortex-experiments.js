@@ -17,7 +17,7 @@
  */
 
 const chalk = require('chalk');
-const program = require('../src/commander');
+const program = require('commander');
 
 const { withCompatibilityCheck } = require('../src/compatibility');
 
@@ -34,6 +34,7 @@ const {
     UploadArtifactCommand,
 } = require('../src/commands/experiments');
 
+program.name('cortex experiments');
 program.description('Work with Cortex Experiments');
 
 // List Experiments
@@ -217,4 +218,7 @@ program
         }
     }));
 
-program.parse(process.argv);
+if (require.main === module) {
+    program.showHelpAfterError().parseAsync(process.argv);
+}
+module.exports = program;

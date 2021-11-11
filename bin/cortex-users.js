@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 const chalk = require('chalk');
-const program = require('../src/commander');
+const program = require('commander');
 
 const { withCompatibilityCheck } = require('../src/compatibility');
 
@@ -29,6 +29,7 @@ const {
     UserDeleteCommand,
 } = require('../src/commands/users');
 
+program.name('cortex users');
 program.description('Work with Cortex User');
 
 program.command('describe')
@@ -119,4 +120,7 @@ program.command('list')
         }
     }));
 
-program.parse(process.argv);
+if (require.main === module) {
+    program.showHelpAfterError().parseAsync(process.argv);
+}
+module.exports = program;

@@ -17,7 +17,9 @@
  */
 
 const chalk = require('chalk');
-const program = require('../src/commander');
+const fs = require('fs');
+const program = require('commander');
+const { parseObject, printError } = require('../src/commands/utils');
 
 const { withCompatibilityCheck } = require('../src/compatibility');
 
@@ -30,6 +32,7 @@ const {
 
 const { InvokeAgentServiceCommand } = require('../src/commands/agents');
 
+program.name('cortex missions');
 program.description('Work with Cortex Missions');
 
 program
@@ -90,6 +93,32 @@ program
     .option('--params-file [paramsFile]', 'A file containing either JSON or YAML formatted params')
     .action(withCompatibilityCheck((campaignName, missionName, options) => {
         try {
+            let params = {};
+            if (options.params) {
+                try {
+                    params = parseObject(options.params, options);
+                } catch (e) {
+                    printError(`Failed to parse params: ${options.params} Error: ${e}`, options);
+                }
+            } else if (options.paramsFile) {
+                const paramsStr = fs.readFileSync(options.paramsFile);
+                params = parseObject(paramsStr, options);
+            }
+            if (params.payload) {
+                // apply validations
+                if (!params.payload.campaign_name || !params.payload.mission_name || !params.payload.profile_schema) {
+                    printError('payload must contain campaign_name, mission_name and profile_schema');
+                    throw new Error('Payload must contain campaign_name, mission_name and profile_schema');
+                }
+                // batch size can't be empty, can't be negative
+                if (!params.payload.batch_size || params.payload.batch_size <= 0) {
+                    printError(`batch_size cannot be "${params.payload.batch_size}"`);
+                    throw new Error('Inappropriate Batch Size passed in params');
+                }
+            } else {
+                printError('payload cannot be empty');
+                throw new Error('Empty payload received in params');
+            }
             new InvokeAgentServiceCommand(program).execute(`${missionName}-online-learner-agent`, 'online_learner_service', options);
         } catch (err) {
             console.error(chalk.red(err.message));
@@ -111,4 +140,7 @@ program
         }
     }));
 
-program.parse(process.argv);
+if (require.main === module) {
+    program.showHelpAfterError().parseAsync(process.argv);
+}
+module.exports = program;

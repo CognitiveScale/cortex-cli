@@ -17,7 +17,7 @@
  */
 
 const chalk = require('chalk');
-const program = require('../src/commander');
+const program = require('commander');
 
 const { withCompatibilityCheck } = require('../src/compatibility');
 
@@ -32,6 +32,7 @@ const {
     DeleteSkillCommand,
 } = require('../src/commands/skills');
 
+program.name('cortex skills');
 program.description('Work with Cortex Skills');
 
 // Deploy Skill
@@ -58,6 +59,7 @@ program
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
     .option('--project [project]', 'The project to use')
+    .option('-o, --output <json|yaml|k8s>', 'Format output as yaml or k8s resource')
     .option('--query [query]', 'A JMESPath query to use in filtering the response data.')
     .option('--verbose', 'Verbose output')
     .action(withCompatibilityCheck((skillName, options) => {
@@ -129,6 +131,7 @@ program
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
     .option('--project [project]', 'The project to use')
+    .option('-k, --k8sResource [file...]', 'Additional kubernetes resources deployed and owned by the skill')
     .option('-y, --yaml', 'Use YAML for skill definition format')
     .action(withCompatibilityCheck((skillDefinition, options) => {
         try {
@@ -170,4 +173,7 @@ program
         }
     }));
 
-program.parse(process.argv);
+if (require.main === module) {
+    program.showHelpAfterError().parseAsync(process.argv);
+}
+module.exports = program;

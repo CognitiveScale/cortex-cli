@@ -17,24 +17,28 @@
  */
 
 const chalk = require('chalk');
-const program = require('../src/commander');
+const program = require('commander');
 
 const {
     GenerateSkillCommand,
 } = require('../src/commands/generate');
 
+program.name('cortex generate');
 program.description('Scaffolding Cortex Components');
 
 program
-    .command('skill')
+    .command('skill [skillName] [type]')
     .description('Generates the structure and top level build script for a skill in current directory')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
-    .action((options) => { // deliberately not using withCompatibilityCheck()
+    .action((skillName, type, options) => { // deliberately not using withCompatibilityCheck()
         try {
-            new GenerateSkillCommand(program).execute(options);
+            new GenerateSkillCommand(program).execute(skillName, type, options);
         } catch (err) {
             console.error(chalk.red(err.message));
         }
     });
 
-program.parse(process.argv);
+if (require.main === module) {
+    program.showHelpAfterError().parseAsync(process.argv);
+}
+module.exports = program;
