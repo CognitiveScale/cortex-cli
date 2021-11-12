@@ -37,6 +37,7 @@ program
     .description('List session definitions')
     .alias('l')
     .option('--no-compat', 'Ignore API compatibility checks')
+    .option('--limit [limit]', 'Number of sessions to list')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
     .option('--project [project]', 'The project to use')
