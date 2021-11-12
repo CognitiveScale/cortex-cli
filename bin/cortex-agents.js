@@ -32,6 +32,7 @@ const {
     ListAgentSnapshotsCommand,
     DescribeAgentSnapshotCommand,
     CreateAgentSnapshotCommand,
+    DeleteAgentCommand,
 } = require('../src/commands/agents');
 
 program.name('cortex agents');
@@ -223,6 +224,22 @@ program
     .action(withCompatibilityCheck((snapshotDefinition, options) => {
         try {
             new CreateAgentSnapshotCommand(program).execute(snapshotDefinition, options);
+        } catch (err) {
+            console.error(chalk.red(err.message));
+        }
+    }));
+
+// Delete Agent
+program
+    .command('delete <agentName>')
+    .description('Delete an agent')
+    .option('--no-compat', 'Ignore API compatibility checks')
+    .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
+    .option('--profile [profile]', 'The profile to use')
+    .option('--project [project]', 'The project to use')
+    .action(withCompatibilityCheck((agentName, options) => {
+        try {
+            new DeleteAgentCommand(program).execute(agentName, options);
         } catch (err) {
             console.error(chalk.red(err.message));
         }

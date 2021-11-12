@@ -483,4 +483,32 @@ module.exports = class Catalog {
     //             return constructError(err);
     //         });
     // }
+
+    deleteSkill(projectId, token, skillName) {
+        checkProject(projectId);
+        const endpoint = `${this.endpoints.skills(projectId)}/${encodeURIComponent(skillName)}`;
+        debug('deleteSkill(%s) => %s', skillName, endpoint);
+        return got
+            .delete(endpoint, {
+                headers: { Authorization: `Bearer ${token}` },
+                'user-agent': getUserAgent(),
+            })
+            .json()
+            .then((skill) => ({ success: true, skill }))
+            .catch((err) => constructError(err));
+    }
+
+    deleteAgent(projectId, token, agentName) {
+        checkProject(projectId);
+        const endpoint = `${this.endpoints.agents(projectId)}/${encodeURIComponent(agentName)}`;
+        debug('deleteAgent(%s) => %s', agentName, endpoint);
+        return got
+            .delete(endpoint, {
+                headers: { Authorization: `Bearer ${token}` },
+                'user-agent': getUserAgent(),
+            })
+            .json()
+            .then((agent) => ({ success: true, agent }))
+            .catch((err) => constructError(err));
+    }
 };

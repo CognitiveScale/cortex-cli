@@ -39,6 +39,20 @@ module.exports = class Models {
             .catch((err) => constructError(err));
     }
 
+    updateModelStatus(projectId, token, modelName, status) {
+        checkProject(projectId);
+        const endpoint = `${this.endpointV4(projectId)}/${modelName}/${status}`;
+        debug('updateModelStatus(%s) => %s', modelName, status, endpoint);
+        return got
+            .post(endpoint, {
+                headers: { Authorization: `Bearer ${token}` },
+                'user-agent': getUserAgent(),
+                json: {},
+            }).json()
+            .then((res) => ({ success: true, message: res }))
+            .catch((err) => constructError(err));
+    }
+
     deleteModel(projectId, token, modelName) {
         checkProject(projectId);
         const endpoint = `${this.endpointV4(projectId)}/${encodeURIComponent(modelName)}`;
