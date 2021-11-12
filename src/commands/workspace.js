@@ -35,6 +35,14 @@ const DEFAULT_TEMPLATE_BRANCH = 'main';
 const GITHUB_DEVICECODE_REQUEST_URL = 'https://github.com/login/device/code';
 const GITHUB_DEVICECODE_RESPONSE_URL = 'https://github.com/login/oauth/access_token';
 
+function validateToken(config) {
+  const githubToken = _.get(config, 'templateConfig.githubToken');
+  if (githubToken) {
+    return ghGot('user', { token: githubToken.access_token }).catch(() => undefined).then((u) => ((u && u.statusCode === 200) ? githubToken.access_token : undefined));
+  }
+  return undefined;
+}
+
 module.exports.WorkspaceConfigureCommand = class WorkspaceConfigureCommand {
   constructor(program) {
     this.program = program;
@@ -60,19 +68,10 @@ module.exports.WorkspaceConfigureCommand = class WorkspaceConfigureCommand {
       },
     ])
       .then(async (answers) => {
-        let { githubToken } = config.templateConfig;
+        let githubToken = await validateToken(config);
 
-        if (githubToken) {
-          await ghGot('user', { token: githubToken.access_token }).catch((err) => {
-            if (err.status === 401) {
-              printError('Current Github credentials invalid.  Reauthorization required.', this.options);
-              githubToken = undefined;
-            }
-          }).then((u) => {
-            if (!this.options.refresh && u && u.status === 200) {
-              printSuccess('Github access is valid.', this.options);
-            }
-          });
+        if (!githubToken && !this.options.refresh) {
+          printError('Current Github credentials invalid.  Reauthorization required.', this.options, false);
         }
 
         if (!githubToken || this.options.refresh) {
@@ -90,76 +89,82 @@ module.exports.WorkspaceConfigureCommand = class WorkspaceConfigureCommand {
             console.log(`Opening browser at ${deviceCode.verification_uri}`);
             await open(deviceCode.verification_uri);
 
-            let expiry = deviceCode.expires_in;
-            let pollInterval = deviceCode.interval;
-            let accessToken;
+            await new Promise((resolve, reject) => {
+              let expiry = deviceCode.expires_in;
+              let pollInterval = deviceCode.interval;
+              let accessToken;
 
-            const mom = moment().add(expiry, 'seconds');
+              const mom = moment().add(expiry, 'seconds');
 
-            (function poller(options) {
-              process.stdout.write(`\x1b[0GPlease enter the following code to authorize the Cortex CLI: ${
-                options.color === 'on' ? chalk.bgGreen.whiteBright(deviceCode.user_code) : deviceCode.user_code
-              }`);
-              process.stdout.write(
-                moment(mom.diff()).format(' [( Expires in] mm [minutes and] ss [seconds ) - CTRL-C to abort]'),
-              );
+              (function poller(options) {
+                process.stdout.write(`\x1b[0GPlease enter the following code to authorize the Cortex CLI: ${options.color === 'on' ? chalk.bgBlackBright.whiteBright(`[ ${deviceCode.user_code} ]`) : deviceCode.user_code
+                  }`);
+                process.stdout.write(
+                  moment(mom.diff()).format(' [( Expires in] mm [minutes and] ss [seconds ) - CTRL-C to abort]'),
+                );
 
-              const pollTimer = setTimeout(async () => {
-                const { body } = await got.post(GITHUB_DEVICECODE_RESPONSE_URL, {
-                  json: {
-                    client_id: GITHUB_APP_CLIENTID,
-                    device_code: deviceCode.device_code,
-                    grant_type: 'urn:ietf:params:oauth:grant-type:device_code',
-                  },
-                  responseType: 'json',
-                  headers: {
-                    Accept: 'application/json',
-                  },
-                });
-                accessToken = body;
+                const pollTimer = setTimeout(async () => {
+                  const { body } = await got.post(GITHUB_DEVICECODE_RESPONSE_URL, {
+                    json: {
+                      client_id: GITHUB_APP_CLIENTID,
+                      device_code: deviceCode.device_code,
+                      grant_type: 'urn:ietf:params:oauth:grant-type:device_code',
+                    },
+                    responseType: 'json',
+                    headers: {
+                      Accept: 'application/json',
+                    },
+                  });
+                  accessToken = body;
 
-                if (accessToken.access_token) {
-                  clearTimeout(pollTimer);
-                  githubToken = accessToken;
-                  config.templateConfig = {
-                    ...answers,
-                    githubToken,
-                  };
-                  config.save();
-                  printSuccess('\x1b[0G\x1b[2KGithub token configuration successful.', options);
-                } else {
-                  switch (accessToken.error) {
-                    case 'authorization_pending':
-                      expiry = Math.max(expiry - pollInterval, 0);
-                      break;
+                  if (accessToken.access_token) {
+                    clearTimeout(pollTimer);
+                    githubToken = accessToken;
+                    config.templateConfig = {
+                      ...answers,
+                      githubToken,
+                    };
+                    config.save();
+                    printSuccess('\x1b[0G\x1b[2KGithub token configuration successful.', options);
+                    resolve();
+                  } else {
+                    switch (accessToken.error) {
+                      case 'authorization_pending':
+                        expiry = Math.max(expiry - pollInterval, 0);
+                        break;
 
-                    case 'slow_down':
-                      pollInterval += 5;
-                      break;
+                      case 'slow_down':
+                        pollInterval += 5;
+                        break;
 
-                    case 'expired_token':
-                      clearInterval(pollTimer);
-                      printError('\x1b[0G\x1b[2KAccess code entry expired.  Please re-run configure and try again.', options);
-                      return;
+                      case 'expired_token':
+                        clearInterval(pollTimer);
+                        printError('\x1b[0G\x1b[2KAccess code entry expired.  Please re-run configure and try again.', options);
+                        reject();
+                        return;
 
-                    case 'incorrect_device_code':
-                      printError('\x1b[0G\x1b[2KIncorrect Device Code entered.', options);
-                      return;
+                      case 'incorrect_device_code':
+                        printError('\x1b[0G\x1b[2KIncorrect Device Code entered.', options);
+                        reject();
+                        return;
 
-                    case 'access_denied':
-                      clearInterval(pollTimer);
-                      printError('\x1b[0G\x1b[2KAccess denied by user.', options);
-                      return;
+                      case 'access_denied':
+                        clearInterval(pollTimer);
+                        printError('\x1b[0G\x1b[2KAccess denied by user.', options);
+                        reject();
+                        return;
 
-                    default:
-                      clearInterval(pollTimer);
-                      printError(`\x1b[0G\x1b[2KAuthorization error: ${accessToken.error}.  Please re-run configure and try again.`, options);
-                      return;
+                      default:
+                        clearInterval(pollTimer);
+                        printError(`\x1b[0G\x1b[2KAuthorization error: ${accessToken.error}.  Please re-run configure and try again.`, options);
+                        reject();
+                        return;
+                    }
+                    poller(options);
                   }
-                  poller(options);
-                }
-              }, (pollInterval) * 1000);
-            }(this.options));
+                }, (pollInterval) * 1000);
+              }(this.options));
+            });
           } else {
             printError('\x1b[2KDevice Code request failed.  Please try again.', this.options);
           }
@@ -176,11 +181,8 @@ module.exports.WorkspaceGenerateCommand = class WorkspaceGenerateCommand {
     this.program = program;
   }
 
-  async loadTemplateTree() {
+  async loadTemplateTree({ repo, branch, githubToken }) {
     process.stdout.write('\x1b[0G\x1b[2KLoading templates...');
-
-    const config = readConfig();
-    const { repo, branch, githubToken } = config.templateConfig;
 
     this.gitRepo = repo;
     this.branch = branch;
@@ -200,7 +202,7 @@ module.exports.WorkspaceGenerateCommand = class WorkspaceGenerateCommand {
         return [];
       });
 
-      process.stdout.write('\x1b[0G\x1b[2KTemplates loaded.\x1b[1E');
+    process.stdout.write('\x1b[0G\x1b[2KTemplates loaded.\x1b[1E');
   }
 
   globTree(glob) {
@@ -215,10 +217,14 @@ module.exports.WorkspaceGenerateCommand = class WorkspaceGenerateCommand {
     return Buffer.from(response.body.content, 'base64');
   }
 
-  async selectTemplate() {
+  async getRegistry() {
     const profile = await loadProfile();
     const registryUrl = _.get(this, 'options.registry', (new URL(profile.url)).hostname.replace('api', 'private-registry'));
+    return registryUrl;
+  }
 
+  async selectTemplate() {
+    const registryUrl = await this.getRegistry();
     const fileNames = this.globTree(METADATA_FILENAME);
 
     const choices = await Promise.all(_.map(fileNames, async (value) => {
@@ -264,7 +270,21 @@ module.exports.WorkspaceGenerateCommand = class WorkspaceGenerateCommand {
     this.name = name;
     this.destination = destination;
 
-    await this.loadTemplateTree();
+    this.config = readConfig();
+    this.githubToken = await validateToken(this.config);
+
+    if (!this.githubToken) {
+      printError(
+        this.config.templateConfig
+          ? 'Github authorization is invalid. Running configuration now.\n'
+          : 'Workspace generator is not configured. Running configuration now.\n',
+          this.options, false,
+      );
+      await (new module.exports.WorkspaceConfigureCommand(this.program)).execute({ refresh: true });
+      this.config = readConfig();
+    }
+
+    await this.loadTemplateTree(this.config.templateConfig);
 
     if (this.tree.length) {
       const template = await this.selectTemplate();
@@ -285,7 +305,7 @@ module.exports.WorkspaceGenerateCommand = class WorkspaceGenerateCommand {
                   skillname: generateNameFromTitle(template.name),
                   repo: { url: template.registry },
                 };
-  
+
                 let buf = await this.readFile(f.path);
                 /// Try not to template any non-text files.
                 if (isText(null, buf)) {
@@ -293,10 +313,10 @@ module.exports.WorkspaceGenerateCommand = class WorkspaceGenerateCommand {
                     _.template(buf.toString(), { interpolate: /{{([\s\S]+?)}}/g })(templateVars),
                   );
                 }
-  
+
                 const sourcePath = _.template(f.path.replace(/^templates\/[A-Za-z0-9- ]+\//, ''), { interpolate: /__([\s\S]+?)__/g })(templateVars);
                 const targetPath = path.resolve(destinationPath, sourcePath);
-  
+
                 await mkdir(path.dirname(targetPath), { recursive: true });
                 await writeFile(targetPath, buf);
 
