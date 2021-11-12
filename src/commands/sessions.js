@@ -70,7 +70,7 @@ module.exports.ListSessionsCommand = class ListSessionsCommand {
         const profile = await loadProfile(options.profile);
         debug('%s.executeListSessions()', profile.name);
         const sessions = new Sessions(profile.url);
-        sessions.listSessions(options.project || profile.project, profile.token).then((response) => {
+        sessions.listSessions(options.project || profile.project, profile.token, options.limit).then((response) => {
             if (response.success) {
                 let result = response.sessions;
                 if (options.query) result = filterObject(result, options);

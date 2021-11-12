@@ -67,9 +67,9 @@ module.exports = class Sessions {
             .catch((err) => constructError(err));
     }
 
-    listSessions(projectId, token) {
+    listSessions(projectId, token, limit) {
         checkProject(projectId);
-        const endpoint = `${this.endpointV4(projectId)}`;
+        const endpoint = `${this.endpointV4(projectId)}?limit=${limit}`;
         debug('listSessions() => %s', endpoint);
         return got
             .get(endpoint, {
