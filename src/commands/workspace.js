@@ -97,7 +97,9 @@ module.exports.WorkspaceConfigureCommand = class WorkspaceConfigureCommand {
               const mom = moment().add(expiry, 'seconds');
 
               (function poller(options) {
-                process.stdout.write(`\x1b[0GPlease enter the following code to authorize the Cortex CLI: ${options.color === 'on' ? chalk.bgBlackBright.whiteBright(`[ ${deviceCode.user_code} ]`) : deviceCode.user_code
+                process.stdout.write(`\x1b[0GPlease enter the following code to authorize the Cortex CLI: ${options.color === 'on' 
+                ? chalk.bgBlackBright.whiteBright(`[ ${deviceCode.user_code} ]`) 
+                : deviceCode.user_code
                   }`);
                 process.stdout.write(
                   moment(mom.diff()).format(' [( Expires in] mm [minutes and] ss [seconds ) - CTRL-C to abort]'),
@@ -219,7 +221,11 @@ module.exports.WorkspaceGenerateCommand = class WorkspaceGenerateCommand {
 
   async getRegistry() {
     const profile = await loadProfile();
-    const registryUrl = _.get(this, 'options.registry', (new URL(profile.url)).hostname.replace('api', 'private-registry'));
+
+    const registryUrl = _.get(this, 'options.registry')
+    || _.get(profile, `registries['${profile.currentRegistry}'].url`)
+    || (new URL(profile.url)).hostname.replace('api', 'private-registry');
+
     return registryUrl;
   }
 
@@ -251,15 +257,9 @@ module.exports.WorkspaceGenerateCommand = class WorkspaceGenerateCommand {
           return validation.status || validation.message;
         },
       },
-      {
-        type: 'input',
-        name: 'registry',
-        message: 'Specify the Docker registry in which to publish the skills:',
-        default: registryUrl,
-      },
     ], {
       name: this.name,
-      registry: _.get(this, 'options.registry', undefined),
+      registry: registryUrl,
     }).catch(() => { });
 
     return answers;
