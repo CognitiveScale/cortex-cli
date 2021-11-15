@@ -69,13 +69,9 @@ module.exports.ConfigureCommand = class {
             }
     }
 
-    saveConfig(config, profileName, {
-         url, username, issuer, audience, jwk,
-    }, project) {
+    saveConfig(config, profileName, cfg, project) {
         if (!config) config = defaultConfig();
-        config.setProfile(profileName, {
-            url, username, issuer, audience, jwk, project,
-        });
+        config.setProfile(profileName, cfg, project);
         config.currentProfile = profileName;
         config.save();
     }
