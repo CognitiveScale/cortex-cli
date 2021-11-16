@@ -24,7 +24,7 @@ const {
     WorkspaceGenerateCommand,
 } = require('../src/commands/workspace');
 
-program.name('cortex workspace');
+program.name('cortex workspaces');
 program.description('Scaffolding Cortex Components');
 
 program
