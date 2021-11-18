@@ -420,8 +420,8 @@ module.exports.DeleteAgentCommand = class DeleteAgentCommand {
         this.program = program;
     }
 
-    execute(agentName, options) {
-        const profile = loadProfile(options.profile);
+    async execute(agentName, options) {
+        const profile = await loadProfile(options.profile);
         debug('%s.executeDeleteAgent(%s)', profile.name, agentName);
         const catalog = new Catalog(profile.url);
         catalog.deleteAgent(options.project || profile.project, profile.token, agentName)

@@ -241,8 +241,8 @@ module.exports.DeleteSkillCommand = class DeleteSkillCommand {
         this.program = program;
     }
 
-    execute(skillName, options) {
-        const profile = loadProfile(options.profile);
+    async execute(skillName, options) {
+        const profile = await loadProfile(options.profile);
         debug('%s.executeDeleteSkill(%s)', profile.name, skillName);
         const catalog = new Catalog(profile.url);
         catalog.deleteSkill(options.project || profile.project, profile.token, skillName)
