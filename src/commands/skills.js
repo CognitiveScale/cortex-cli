@@ -48,7 +48,7 @@ module.exports.SaveSkillCommand = class SaveSkillCommand {
             }
             const response = await catalog.saveSkill(options.project || profile.project, profile.token, skill);
             if (response.success) {
-                printSuccess('Skill saved', options);
+                printSuccess(`Skill saved: ${JSON.stringify(response.message)}`, options);
             } else {
                     console.log(`Failed to save skill: ${response.message}`);
                     if (response.details) {
