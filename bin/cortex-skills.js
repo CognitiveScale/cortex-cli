@@ -164,6 +164,7 @@ program
     .option('--profile [profile]', 'The profile to use')
     .option('--project [project]', 'The project to use')
     // TODO enable when we want to support tasks
+
     // .option('--type [type]', 'The type of action logs to fetch [skill|task]')
     .action(withCompatibilityCheck((skillName, actionName, options) => {
         try {

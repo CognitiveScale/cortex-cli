@@ -24,6 +24,7 @@ const { withCompatibilityCheck } = require('../src/compatibility');
 const {
     ListTasksCommand,
     DescribeTaskCommand,
+    TaskLogsCommand,
 } = require('../src/commands/tasks');
 
 program.name('cortex tasks');
@@ -70,6 +71,23 @@ program
     .action(withCompatibilityCheck((taskName, options) => {
         try {
             new DescribeTaskCommand(program).execute(taskName, options);
+        } catch (err) {
+            console.error(chalk.red(err.message));
+        }
+    }));
+
+// Get task logs
+program
+    .command('logs <taskName>')
+    .description('Get logs of a task')
+    .option('--no-compat', 'Ignore API compatibility checks')
+    .option('--profile [profile]', 'The profile to use')
+    .option('--project [project]', 'The project to use')
+    // TODO enable when we want to support tasks
+    // .option('--type [type]', 'The type of action logs to fetch [skill|task]')
+    .action(withCompatibilityCheck((taskName, options) => {
+        try {
+            new TaskLogsCommand(program).execute(taskName, options);
         } catch (err) {
             console.error(chalk.red(err.message));
         }
