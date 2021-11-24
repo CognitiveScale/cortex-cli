@@ -75,7 +75,7 @@ module.exports = class Tasks {
         const endpoint = `${this.endpointV4(projectId)}/tasks/${taskName}`;
         debug('deleteTask(%s) => %s', taskName, endpoint);
         return got
-            .get(endpoint, {
+            .delete(endpoint, {
                 headers: {Authorization: `Bearer ${token}`},
                 'user-agent': getUserAgent(),
                 searchParams: {verbose},
