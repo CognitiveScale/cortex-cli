@@ -58,3 +58,30 @@ module.exports.ListTasksCommand = class {
             });
     }
 };
+
+module.exports.DescribeTaskCommand = class {
+    constructor(program) {
+        this.program = program;
+    }
+
+    async execute(taskName, options) {
+        const profile = await loadProfile(options.profile);
+        debug('%s.describeTask(%s)', profile.name, taskName);
+
+        const tasks = new Tasks(profile.url);
+        const output = _.get(options, 'output', 'json');
+        try {
+            const response = await tasks.getTask(options.project || profile.project, taskName, profile.token);
+            if (response.success === false) {
+                return printError(`Failed to describe agent snapshot ${taskName}: ${response.message}`);
+            }
+            if (output.toLowerCase() === 'json') {
+                // const result = filterObject(JSON.parse(response), options);
+                return printSuccess(JSON.stringify(response, null, 2), options);
+            }
+            return printSuccess(response);
+        } catch (err) {
+            return printError(`Failed to fetch task ${taskName}: ${err.status} ${err.message}`, options);
+        }
+    }
+};

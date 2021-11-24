@@ -23,6 +23,7 @@ const { withCompatibilityCheck } = require('../src/compatibility');
 
 const {
     ListTasksCommand,
+    DescribeTaskCommand,
 } = require('../src/commands/tasks');
 
 program.name('cortex tasks');
@@ -52,6 +53,23 @@ program
     .action(withCompatibilityCheck((options) => {
         try {
             new ListTasksCommand(program).execute(options);
+        } catch (err) {
+            console.error(chalk.red(err.message));
+        }
+    }));
+
+program
+    .command('describe <taskName>')
+    .alias('get')
+    .description('Describe a task')
+    .option('--no-compat', 'Ignore API compatibility checks')
+    .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
+    .option('--profile [profile]', 'The profile to use')
+    .option('--project [project]', 'The project to use')
+    .option('-o, --output <json|yaml|k8s>', 'Format output as yaml or k8s resources')
+    .action(withCompatibilityCheck((taskName, options) => {
+        try {
+            new DescribeTaskCommand(program).execute(taskName, options);
         } catch (err) {
             console.error(chalk.red(err.message));
         }

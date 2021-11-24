@@ -41,7 +41,20 @@ module.exports = class Tasks {
             .catch((err) => constructError(err));
     }
 
-    // todo get task
+    getTask(projectId, taskName, token) {
+        checkProject(projectId);
+        const endpoint = `${this.endpointV4(projectId)}/tasks/${taskName}`;
+        debug('getTask(%s, %s) => %s', projectId, taskName, endpoint);
+        const opts = {
+            headers: { Authorization: `Bearer ${token}` },
+            'user-agent': getUserAgent(),
+        };
+
+        return got
+            .get(endpoint, opts).json()
+            .catch((err) => constructError(err));
+    }
+
     // todo delete/cancel Task
 
 };
