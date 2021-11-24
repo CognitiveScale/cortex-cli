@@ -25,6 +25,7 @@ const {
     ListTasksCommand,
     DescribeTaskCommand,
     TaskLogsCommand,
+    TaskDeleteCommand,
 } = require('../src/commands/tasks');
 
 program.name('cortex tasks');
@@ -88,6 +89,21 @@ program
     .action(withCompatibilityCheck((taskName, options) => {
         try {
             new TaskLogsCommand(program).execute(taskName, options);
+        } catch (err) {
+            console.error(chalk.red(err.message));
+        }
+    }));
+
+// Delete a task
+program
+    .command('delete <taskName>')
+    .description('Delete a task, if it exists')
+    .option('--no-compat', 'Ignore API compatibility checks')
+    .option('--profile [profile]', 'The profile to use')
+    .option('--project [project]', 'The project to use')
+    .action(withCompatibilityCheck((taskName, options) => {
+        try {
+            new TaskDeleteCommand(program).execute(taskName, options);
         } catch (err) {
             console.error(chalk.red(err.message));
         }

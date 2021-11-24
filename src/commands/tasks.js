@@ -108,3 +108,25 @@ module.exports.TaskLogsCommand = class TaskLogsCommand {
         );
     }
 };
+
+module.exports.TaskDeleteCommand = class TaskDeleteCommand {
+    constructor(program) {
+        this.program = program;
+    }
+
+    async execute(taskName, options) {
+        const profile = await loadProfile(options.profile);
+        debug('%s.executeDeleteTask(%s)', profile.name, taskName);
+        const tasks = new Tasks(profile.url);
+        tasks.deleteTask(options.project || profile.project, profile.token, taskName, options.verbose).then((response) => {
+            if (response.success) {
+                printSuccess(JSON.stringify(response), options);
+            } else {
+                printError(`Failed to delete ${taskName}: ${response.message}`, options);
+            }
+        }).catch((err) => {
+                printError(`Error deleting ${taskName}: ${err.status} ${err.message}`, options);
+            }
+        );
+    }
+};

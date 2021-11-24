@@ -29,7 +29,7 @@ module.exports = class Tasks {
         const endpoint = `${this.endpointV4(projectId)}/tasks`;
         debug('listTasks(%s) => %s', params.agentName, endpoint);
         const opts = {
-            headers: { Authorization: `Bearer ${token}` },
+            headers: {Authorization: `Bearer ${token}`},
             'user-agent': getUserAgent(),
         };
         if (params) {
@@ -37,7 +37,7 @@ module.exports = class Tasks {
         }
         return got
             .get(endpoint, opts).json()
-            .then((result) => ({ success: true, result }))
+            .then((result) => ({success: true, result}))
             .catch((err) => constructError(err));
     }
 
@@ -46,7 +46,7 @@ module.exports = class Tasks {
         const endpoint = `${this.endpointV4(projectId)}/tasks/${taskName}`;
         debug('getTask(%s, %s) => %s', projectId, taskName, endpoint);
         const opts = {
-            headers: { Authorization: `Bearer ${token}` },
+            headers: {Authorization: `Bearer ${token}`},
             'user-agent': getUserAgent(),
         };
 
@@ -61,14 +61,26 @@ module.exports = class Tasks {
         debug('taskLogs(%s) => %s', taskName, endpoint);
         return got
             .get(endpoint, {
-                headers: { Authorization: `Bearer ${token}` },
+                headers: {Authorization: `Bearer ${token}`},
                 'user-agent': getUserAgent(),
-                searchParams: { verbose },
+                searchParams: {verbose},
             }).json()
-            .then((res) => ({ ...res }))
+            .then((res) => ({...res}))
             .catch((err) => constructError(err));
     }
 
     // todo delete/cancel Task
-
+    deleteTask(projectId, token, taskName, verbose = false) {
+        checkProject(projectId);
+        const endpoint = `${this.endpointV4(projectId)}/tasks/${taskName}`;
+        debug('deleteTask(%s) => %s', taskName, endpoint);
+        return got
+            .get(endpoint, {
+                headers: {Authorization: `Bearer ${token}`},
+                'user-agent': getUserAgent(),
+                searchParams: {verbose},
+            }).json()
+            .then((res) => ({...res}))
+            .catch((err) => constructError(err));
+    }
 };
