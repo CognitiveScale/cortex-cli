@@ -25,6 +25,10 @@ const {
     printSuccess, printError, printWarning, filterObject, parseObject, printTable, formatValidationPath, LISTTABLEFORMAT, DEPENDENCYTABLEFORMAT,
 } = require('./utils');
 
+function isNumeric(value) {
+    return /^-?\d+$/.test(value);
+}
+
 module.exports.SaveSkillCommand = class SaveSkillCommand {
     constructor(program) {
         this.program = program;
@@ -45,6 +49,15 @@ module.exports.SaveSkillCommand = class SaveSkillCommand {
                     printWarning('Applying kubernetes resources to all actions');
                 }
                 skill.actions.map((a) => a.k8sResources = k8sResources);
+            }
+            if (options.scaleCount) {
+                if (!isNumeric(options.scaleCount)) {
+                    printError('--scaleCount must be a number', options);
+                }
+                if (skill.actions.length > 1) {
+                    printWarning('Applying kubernetes resources to all actions');
+                }
+                skill.actions.map((a) => a.scaleCount = parseInt(options.scaleCount, 10));
             }
             const response = await catalog.saveSkill(options.project || profile.project, profile.token, skill);
             if (response.success) {

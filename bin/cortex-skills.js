@@ -133,6 +133,7 @@ program
     .option('--project [project]', 'The project to use')
     .option('-k, --k8sResource [file...]', 'Additional kubernetes resources deployed and owned by the skill')
     .option('-y, --yaml', 'Use YAML for skill definition format')
+    .option('--scaleCount [count]', 'Scale count, only used for daemon action types')
     .action(withCompatibilityCheck((skillDefinition, options) => {
         try {
             new SaveSkillCommand(program).execute(skillDefinition, options);
