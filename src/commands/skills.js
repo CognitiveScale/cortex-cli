@@ -22,12 +22,9 @@ const Catalog = require('../client/catalog');
 const Agent = require('../client/agents');
 
 const {
-    printSuccess, printError, printWarning, filterObject, parseObject, printTable, formatValidationPath, LISTTABLEFORMAT, DEPENDENCYTABLEFORMAT,
+    printSuccess, printError, printWarning, filterObject, parseObject, printTable, formatValidationPath,
+    LISTTABLEFORMAT, DEPENDENCYTABLEFORMAT, isNumeric,
 } = require('./utils');
-
-function isNumeric(value) {
-    return /^-?\d+$/.test(value);
-}
 
 module.exports.SaveSkillCommand = class SaveSkillCommand {
     constructor(program) {
@@ -57,7 +54,8 @@ module.exports.SaveSkillCommand = class SaveSkillCommand {
                 if (skill.actions.length > 1) {
                     printWarning('Applying kubernetes resources to all actions');
                 }
-                skill.actions.map((a) => a.scaleCount = parseInt(options.scaleCount, 10));
+                const scaleCount = parseInt(options.scaleCount, 10);
+                skill.actions.map((a) => a.scaleCount = scaleCount);
             }
             const response = await catalog.saveSkill(options.project || profile.project, profile.token, skill);
             if (response.success) {

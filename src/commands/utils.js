@@ -321,3 +321,5 @@ module.exports.SESSIONTABLEFORMAT = [
     { column: 'TTL', field: 'ttl', width: 15 },
     { column: 'Description', field: 'description', width: 70 },
 ];
+
+module.exports.isNumeric = (value) => /^-?\d+$/.test(value);
