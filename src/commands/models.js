@@ -35,8 +35,8 @@ module.exports.SaveModelCommand = class SaveModelCommand {
         this.program = program;
     }
 
-    execute(modelDefinition, options) {
-        const profile = loadProfile(options.profile);
+    async execute(modelDefinition, options) {
+        const profile = await loadProfile(options.profile);
         debug('%s.executeSaveModel(%s)', profile.name, modelDefinition);
 
         const modelDefStr = fs.readFileSync(modelDefinition);
@@ -73,8 +73,8 @@ module.exports.ListModelsCommand = class ListModelsCommand {
         this.program = program;
     }
 
-    execute(options) {
-        const profile = loadProfile(options.profile);
+    async execute(options) {
+        const profile = await loadProfile(options.profile);
         debug('%s.executeListModels()', profile.name);
         const models = new Models(profile.url);
         models.listModels(options.project || profile.project, options.offset, options.limit, options.tags, profile.token).then((response) => {
@@ -103,8 +103,8 @@ module.exports.ListModelRunsCommand = class ListModelsCommand {
         this.program = program;
     }
 
-    execute(modelName, options) {
-        const profile = loadProfile(options.profile);
+    async execute(modelName, options) {
+        const profile = await loadProfile(options.profile);
         debug('%s.executeListModels()', profile.name);
         const models = new Models(profile.url);
         models.listModelRuns(options.project || profile.project, modelName, profile.token).then((response) => {
@@ -133,8 +133,8 @@ module.exports.DescribeModelCommand = class DescribeModelCommand {
         this.program = program;
     }
 
-    execute(modelName, options) {
-        const profile = loadProfile(options.profile);
+    async execute(modelName, options) {
+        const profile = await loadProfile(options.profile);
         const models = new Models(profile.url);
         debug('%s.executeDescribeModel(%s)', profile.name, modelName);
         models.describeModel(options.project || profile.project, profile.token, modelName, options.verbose).then((response) => {
@@ -156,8 +156,8 @@ module.exports.DeleteModelCommand = class {
         this.program = program;
     }
 
-    execute(modelName, options) {
-        const profile = loadProfile(options.profile);
+    async execute(modelName, options) {
+        const profile = await loadProfile(options.profile);
         debug('%s.executeDeleteModel(%s)', profile.name, modelName);
         const models = new Models(profile.url);
         models.deleteModel(options.project || profile.project, profile.token, modelName)
@@ -181,7 +181,7 @@ module.exports.PublishModelCommand = class PublishModelCommand {
     }
 
     async execute(modelName, options) {
-        const profile = loadProfile(options.profile);
+        const profile = await loadProfile(options.profile);
         const models = new Models(profile.url);
         debug('%s.executePublishModel(%s)', profile.name, modelName);
         try {
@@ -209,7 +209,7 @@ module.exports.RegisterModelCommand = class RegisterModelCommand {
     }
 
     async execute(modelDefinition, options) {
-        const profile = loadProfile(options.profile);
+        const profile = await loadProfile(options.profile);
 
         function printErrorDetails(response) {
             const tableSpec = [

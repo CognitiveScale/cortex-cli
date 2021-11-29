@@ -17,7 +17,7 @@
  */
 
 const chalk = require('chalk');
-const program = require('../src/commander');
+const program = require('commander');
 
 const { withCompatibilityCheck } = require('../src/compatibility');
 
@@ -27,6 +27,7 @@ const {
     DescribeProjectCommand,
 } = require('../src/commands/projects');
 
+program.name('cortex projects');
 program.description('Work with Cortex Projects');
 
 // Create Project
@@ -83,4 +84,7 @@ program
         }
     }));
 
-program.parse(process.argv);
+if (require.main === module) {
+    program.showHelpAfterError().parseAsync(process.argv);
+}
+module.exports = program;

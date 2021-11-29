@@ -23,7 +23,7 @@ const sinon = require('sinon');
 const { expect } = require('chai');
 const yaml = require('js-yaml');
 const { stripAnsi } = require('./utils');
- const program = require('../bin/cortex-configure');
+const program = require('../bin/cortex-configure');
 
 let restore;
 describe('configure', () => {
@@ -52,24 +52,22 @@ describe('configure', () => {
         return _.flatten(printSpy.args).map((s) => stripAnsi(s));
     }
 
-    it('lists profiles', (done) => {
-        program.parse(['node', 'configure', 'list']);
+    it('lists profiles', async () => {
+        await program.parseAsync(['node', 'configure', 'list']);
         sinon.assert.calledTwice(printSpy);
         // default is set at default...
         expect(getPrintedLines()).to.eql(['default', 'other']);
-        done();
     });
 
-    it('get profile other', (done) => {
-        program.parse(['node', 'configure', 'describe', 'other']);
+    it('get profile other', async () => {
+        await program.parseAsync(['node', 'configure', 'describe', 'other']);
         const output = getPrintedLines();
         expect(output).to.length(5);
         expect(output[4]).to.eql('Project: otherProj');
-        done();
     });
 
-    it('create profile pat file', (done) => {
-        program.parse(['node', 'configure', '--file', './test/cortex/pat-file.json', '--project', 'test', '--profile', 'conftest']);
+    it('create profile pat file', async () => {
+        await program.parseAsync(['node', 'configure', '--file', './test/cortex/pat-file.json', '--project', 'test', '--profile', 'conftest']);
         const output = getPrintedLines();
         expect(output).to.length(2);
         expect(output[1]).to.eql('Configuration for profile conftest saved.');
@@ -78,6 +76,5 @@ describe('configure', () => {
         printSpy.resetHistory();
         program.parse(['node', 'configure', 'list']);
         expect(getPrintedLines()).to.eql(['default', 'other', 'conftest']);
-        done();
     });
 });

@@ -29,8 +29,8 @@ class ListExperiments {
         this.program = program;
     }
 
-    execute(options) {
-        const profile = loadProfile(options.profile);
+    async execute(options) {
+        const profile = await loadProfile(options.profile);
         debug('%s.listExperiments()', profile.name);
 
         const exp = new Experiments(profile.url);
@@ -68,8 +68,8 @@ class DescribeExperimentCommand {
         this.program = program;
     }
 
-    execute(experimentName, options) {
-        const profile = loadProfile(options.profile);
+    async execute(experimentName, options) {
+        const profile = await loadProfile(options.profile);
         debug('%s.executeDescribeExperiment(%s)', profile.name, experimentName);
 
         const exp = new Experiments(profile.url);
@@ -92,8 +92,8 @@ class DeleteExperimentCommand {
         this.program = program;
     }
 
-    execute(experimentName, options) {
-        const profile = loadProfile(options.profile);
+    async execute(experimentName, options) {
+        const profile = await loadProfile(options.profile);
         debug('%s.executeDeleteExperiment(%s)', profile.name, experimentName);
 
         const exp = new Experiments(profile.url);
@@ -116,8 +116,8 @@ class ListRuns {
         this.program = program;
     }
 
-    execute(experimentName, options) {
-        const profile = loadProfile(options.profile);
+    async execute(experimentName, options) {
+        const profile = await loadProfile(options.profile);
         debug('%s.listRuns()', profile.name);
 
         const exp = new Experiments(profile.url);
@@ -166,8 +166,8 @@ class DescribeRunCommand {
         this.program = program;
     }
 
-    execute(experimentName, runId, options) {
-        const profile = loadProfile(options.profile);
+    async execute(experimentName, runId, options) {
+        const profile = await loadProfile(options.profile);
         debug('%s.executeDescribeRun(%s)', profile.name, runId);
 
         const exp = new Experiments(profile.url);
@@ -190,8 +190,8 @@ class DeleteRunCommand {
         this.program = program;
     }
 
-    execute(experimentName, runId, options) {
-        const profile = loadProfile(options.profile);
+    async execute(experimentName, runId, options) {
+        const profile = await loadProfile(options.profile);
         debug('%s.executeDeleteRun(%s)', profile.name, runId);
 
         const exp = new Experiments(profile.url);
@@ -213,8 +213,8 @@ class DownloadArtifactCommand {
         this.program = program;
     }
 
-    execute(experimentName, runId, artifactName, options) {
-        const profile = loadProfile(options.profile);
+    async execute(experimentName, runId, artifactName, options) {
+        const profile = await loadProfile(options.profile);
         debug('%s.downloadArtifact(%s)', profile.name, artifactName);
 
         const exp = new Experiments(profile.url);
@@ -240,8 +240,8 @@ class SaveExperimentCommand {
         this.program = program;
     }
 
-    execute(experimentDefinition, options) {
-        const profile = loadProfile(options.profile);
+    async execute(experimentDefinition, options) {
+        const profile = await loadProfile(options.profile);
         debug('%s.executeSaveExperiment(%s)', profile.name, experimentDefinition);
 
         const experimentDefStr = fs.readFileSync(experimentDefinition);
@@ -277,8 +277,8 @@ class CreateRunCommand {
         this.program = program;
     }
 
-    execute(runDefinition, options) {
-        const profile = loadProfile(options.profile);
+    async execute(runDefinition, options) {
+        const profile = await loadProfile(options.profile);
         debug('%s.executeCreateRun(%s)', profile.name, runDefinition);
 
         const runDefinitionStr = fs.readFileSync(runDefinition);
@@ -314,8 +314,8 @@ class UploadArtifactCommand {
         this.program = program;
     }
 
-    execute(experimentName, runId, filePath, artifact, options) {
-        const profile = loadProfile(options.profile);
+    async execute(experimentName, runId, filePath, artifact, options) {
+        const profile = await loadProfile(options.profile);
         debug('%s.executeUploadArtifact()', profile.name);
 
         const experiments = new Experiments(profile.url);

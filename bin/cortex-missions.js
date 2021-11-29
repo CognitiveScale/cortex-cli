@@ -18,7 +18,7 @@
 
 const chalk = require('chalk');
 const fs = require('fs');
-const program = require('../src/commander');
+const program = require('commander');
 const { parseObject, printError } = require('../src/commands/utils');
 
 const { withCompatibilityCheck } = require('../src/compatibility');
@@ -32,6 +32,7 @@ const {
 
 const { InvokeAgentServiceCommand } = require('../src/commands/agents');
 
+program.name('cortex missions');
 program.description('Work with Cortex Missions');
 
 program
@@ -139,4 +140,7 @@ program
         }
     }));
 
-program.parse(process.argv);
+if (require.main === module) {
+    program.showHelpAfterError().parseAsync(process.argv);
+}
+module.exports = program;
