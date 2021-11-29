@@ -67,14 +67,16 @@ module.exports.DescribeTaskCommand = class {
 
     async execute(taskName, options) {
         const profile = await loadProfile(options.profile);
+        const queryParams = {};
         debug('%s.describeTask(%s)', profile.name, taskName);
 
+        if (options.k8s) queryParams.k8s = true;
         const tasks = new Tasks(profile.url);
         const output = _.get(options, 'output', 'json');
         try {
-            const response = await tasks.getTask(options.project || profile.project, taskName, profile.token);
+            const response = await tasks.getTask(options.project || profile.project, taskName, profile.token, queryParams);
             if (response.success === false) {
-                return printError(`Failed to describe agent snapshot ${taskName}: ${response.message}`);
+                return printError(`Failed to describe task ${taskName}: ${response.message}`);
             }
             if (output.toLowerCase() === 'json') {
                 // const result = filterObject(JSON.parse(response), options);

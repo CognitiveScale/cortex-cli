@@ -68,7 +68,8 @@ program
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
     .option('--project [project]', 'The project to use')
-    .option('-o, --output <json|yaml|k8s>', 'Format output as yaml or k8s resources')
+    .option('--k8s', 'Return the full k8sResource in the response')
+    // .option('-o, --output <json|yaml|k8s>', 'Format output as yaml or k8s resources')
     .action(withCompatibilityCheck((taskName, options) => {
         try {
             new DescribeTaskCommand(program).execute(taskName, options);

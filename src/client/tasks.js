@@ -41,7 +41,7 @@ module.exports = class Tasks {
             .catch((err) => constructError(err));
     }
 
-    getTask(projectId, taskName, token) {
+    getTask(projectId, taskName, token, params) {
         checkProject(projectId);
         const endpoint = `${this.endpointV4(projectId)}/tasks/${taskName}`;
         debug('getTask(%s, %s) => %s', projectId, taskName, endpoint);
@@ -49,6 +49,9 @@ module.exports = class Tasks {
             headers: {Authorization: `Bearer ${token}`},
             'user-agent': getUserAgent(),
         };
+        if (params) {
+            opts.searchParams = params;
+        }
 
         return got
             .get(endpoint, opts).json()
