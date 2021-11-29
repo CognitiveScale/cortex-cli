@@ -1,5 +1,0 @@
-version: 1
-kind: deployment-manifest
-cortex:
-  skills:
-    - skill.yaml
