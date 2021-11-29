@@ -19,10 +19,10 @@
 const chalk = require('chalk');
 const program = require('commander');
 
-const {
-    WorkspaceConfigureCommand,
-    WorkspaceGenerateCommand,
-} = require('../src/commands/workspace');
+const { WorkspaceConfigureCommand } = require('../src/commands/workspaces/configure');
+const { WorkspaceGenerateCommand } = require('../src/commands/workspaces/generate');
+const { WorkspaceBuildCommand } = require('../src/commands/workspaces/build');
+const { WorkspacePublishCommand } = require('../src/commands/workspaces/publish');
 
 program.name('cortex workspaces');
 program.description('Scaffolding Cortex Components');
@@ -40,7 +40,7 @@ program
         }
     });
 
-program
+    program
     .command('generate [name] [destination]')
     .option('--registry [registry]', 'Override the docker registry to publish to')
     .option('--color [on/off]', 'Turn on/off colors', 'on')
@@ -49,6 +49,32 @@ program
     .action((name, destination, options) => { // deliberately not using withCompatibilityCheck()
         try {
             new WorkspaceGenerateCommand(program).execute(name, destination, options);
+        } catch (err) {
+            console.error(chalk.red(err.message));
+        }
+    });
+
+    program
+    .command('build [folder]')
+    .option('--color [on/off]', 'Turn on/off colors', 'on')
+    .option('--skill [skill name]', 'Build only the specified skill')
+    .description('Builds all skills in the workspace, or optionally only the specified skill')
+    .action((folder, options) => { // deliberately not using withCompatibilityCheck()
+        try {
+            new WorkspaceBuildCommand(program).execute(folder, options);
+        } catch (err) {
+            console.error(chalk.red(err.message));
+        }
+    });
+
+    program
+    .command('publish [folder]')
+    .option('--color [on/off]', 'Turn on/off colors', 'on')
+    .option('--skill [skill name]', 'Publish only the specified skill')
+    .description('Publishes all skills and resources in the workspace')
+    .action((folder, options) => { // deliberately not using withCompatibilityCheck()
+        try {
+            new WorkspacePublishCommand(program).execute(folder, options);
         } catch (err) {
             console.error(chalk.red(err.message));
         }
