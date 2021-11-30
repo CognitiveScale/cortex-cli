@@ -40,7 +40,7 @@ module.exports.SaveSessionCommand = class SaveSessionCommand {
         const sessions = new Sessions(profile.url);
         sessions.saveSession(options.project || profile.project, profile.token, session).then((response) => {
             if (response.success) {
-                printSuccess('Session saved', options);
+                printSuccess(response.message.message, options);
             } else if (response.details) {
                 console.log(`Failed to save session: ${response.status} ${response.message}`);
                 console.log('The following issues were found:');
