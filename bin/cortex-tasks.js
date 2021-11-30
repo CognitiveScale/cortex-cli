@@ -39,7 +39,7 @@ program
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
     .option('--project [project]', 'The project to use')
-    // .option('--json', 'Output results using JSON')
+    .option('--json', 'Output results using JSON')
     // .option('--query [query]', 'A JMESPath query to use in filtering the response data.')
     // .option('--agentName [string]', 'Query activations by agentName')
     // .option('--skillName [string]', 'Query activations by skillName')

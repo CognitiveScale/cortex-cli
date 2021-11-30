@@ -14,19 +14,16 @@
  * limitations under the License.
  */
 
-const fs = require('fs');
 const debug = require('debug')('cortex:cli');
 const _ = require('lodash');
-const moment = require('moment');
 const { loadProfile } = require('../config');
-// const Catalog = require('../client/catalog');
 const Tasks = require('../client/tasks');
-const { LISTTABLEFORMAT, DEPENDENCYTABLEFORMAT } = require('./utils');
+// const { LISTTABLEFORMAT, DEPENDENCYTABLEFORMAT } = require('./utils');
 
 const {
- printSuccess, printError, filterObject, parseObject, printTable, formatValidationPath,
+ printSuccess, printError, filterObject, printTable, LISTTABLEFORMAT,
+    // filterObject, parseObject, printTable, formatValidationPath,
 } = require('./utils');
-const Catalog = require("../client/catalog");
 
 module.exports.ListTasksCommand = class {
     constructor(program) {
@@ -34,12 +31,6 @@ module.exports.ListTasksCommand = class {
     }
 
     async execute(options) {
-        // if (_.isEmpty(options.agentName)
-        //     && _.isEmpty(options.skillName)
-        //     && _.isEmpty(options.correlationId)
-        //     && _.isEmpty(options.status)) {
-        //     printError('Either --agentName, --skillName, --correlationId, or --status must be provided', options);
-        // }
         const profile = await loadProfile(options.profile);
         debug('%s.listTasks(%s)', profile.name);
 
@@ -49,14 +40,26 @@ module.exports.ListTasksCommand = class {
 
         tasks.listTasks(options.project || profile.project, profile.token, queryParams).then((response) => {
             if (response.success) {
-                printSuccess(JSON.stringify(response, null, 2), options);
+                const tasks = _.get(response, 'tasks', []);
+
+                const result = {
+                    tasks: _.map(tasks, (t) => {
+                        return {name: t};
+                    })
+                };
+
+                const tableFormat = [ { column: 'Task Name', field: 'name', width: 70 } ];
+
+                if (options.json) {
+                    return printSuccess(JSON.stringify(result, null, 2), options);
+                }
+                return printTable(tableFormat, result.tasks);
             } else {
                 printError(`Failed to list tasks: ${response.message}`, options);
             }
-        })
-            .catch((err) => {
-                printError(`Failed to query tasks: ${err.status} ${err.message}`, options);
-            });
+        }).catch((err) => {
+            printError(`Failed to query tasks: ${err.status} ${err.message} ${JSON.stringify(err)}`, options);
+        });
     }
 };
 
@@ -105,9 +108,8 @@ module.exports.TaskLogsCommand = class TaskLogsCommand {
                 printError(`Failed to List Task Logs ${taskName}: ${response.message}`, options);
             }
         }).catch((err) => {
-                printError(`Failed to query Task Logs ${taskName}: ${err.status} ${err.message}`, options);
-            }
-        );
+            printError(`Failed to query Task Logs ${taskName}: ${err.status} ${err.message}`, options);
+        });
     }
 };
 
@@ -127,8 +129,7 @@ module.exports.TaskDeleteCommand = class TaskDeleteCommand {
                 printError(`Failed to delete ${taskName}: ${response.message}`, options);
             }
         }).catch((err) => {
-                printError(`Error deleting ${taskName}: ${err.status} ${err.message}`, options);
-            }
-        );
+            printError(`Error deleting ${taskName}: ${err.status} ${err.message}`, options);
+        });
     }
 };
