@@ -18,12 +18,8 @@ const debug = require('debug')('cortex:cli');
 const _ = require('lodash');
 const { loadProfile } = require('../config');
 const Tasks = require('../client/tasks');
-// const { LISTTABLEFORMAT, DEPENDENCYTABLEFORMAT } = require('./utils');
 
-const {
- printSuccess, printError, filterObject, printTable, LISTTABLEFORMAT,
-    // filterObject, parseObject, printTable, formatValidationPath,
-} = require('./utils');
+const { printSuccess, printError, printTable } = require('./utils');
 
 module.exports.ListTasksCommand = class {
     constructor(program) {
@@ -32,31 +28,29 @@ module.exports.ListTasksCommand = class {
 
     async execute(options) {
         const profile = await loadProfile(options.profile);
+        const projectId = options.project || profile.project;
         debug('%s.listTasks(%s)', profile.name);
 
         const tasks = new Tasks(profile.url);
         // TODO validate param types?
         const queryParams = { ...options };
 
-        tasks.listTasks(options.project || profile.project, profile.token, queryParams).then((response) => {
+        tasks.listTasks(projectId, profile.token, queryParams).then((response) => {
             if (response.success) {
-                const tasks = _.get(response, 'tasks', []);
+                const taskList = _.get(response, 'tasks', []);
 
                 const result = {
-                    tasks: _.map(tasks, (t) => {
-                        return {name: t};
-                    })
+                    tasks: _.map(taskList, (t) => ({ name: t })),
                 };
 
-                const tableFormat = [ { column: 'Task Name', field: 'name', width: 70 } ];
+                const tableFormat = [{ column: 'Task Name', field: 'name', width: 70 }];
 
                 if (options.json) {
                     return printSuccess(JSON.stringify(result, null, 2), options);
                 }
                 return printTable(tableFormat, result.tasks);
-            } else {
-                printError(`Failed to list tasks: ${response.message}`, options);
             }
+            return printError(`Failed to list tasks: ${response.message}`, options);
         }).catch((err) => {
             printError(`Failed to query tasks: ${err.status} ${err.message} ${JSON.stringify(err)}`, options);
         });
@@ -75,17 +69,17 @@ module.exports.DescribeTaskCommand = class {
 
         if (options.k8s) queryParams.k8s = true;
         const tasks = new Tasks(profile.url);
-        const output = _.get(options, 'output', 'json');
+        // const output = _.get(options, 'output', 'json');
         try {
             const response = await tasks.getTask(options.project || profile.project, taskName, profile.token, queryParams);
             if (response.success === false) {
                 return printError(`Failed to describe task ${taskName}: ${response.message}`);
             }
-            if (output.toLowerCase() === 'json') {
+            // if (output.toLowerCase() === 'json') {
                 // const result = filterObject(JSON.parse(response), options);
-                return printSuccess(JSON.stringify(response, null, 2), options);
-            }
-            return printSuccess(response);
+            return printSuccess(JSON.stringify(response, null, 2), options);
+            // }
+            // return printSuccess(response);
         } catch (err) {
             return printError(`Failed to fetch task ${taskName}: ${err.status} ${err.message}`, options);
         }
