@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 const fs = require('fs');
+const _ = require('lodash');
 
 const debug = require('debug')('cortex:cli');
 const { loadProfile } = require('../config');
@@ -40,7 +41,7 @@ module.exports.SaveSessionCommand = class SaveSessionCommand {
         const sessions = new Sessions(profile.url);
         sessions.saveSession(options.project || profile.project, profile.token, session).then((response) => {
             if (response.success) {
-                printSuccess('Session saved', options);
+                printSuccess(_.get(response, 'message.message', 'Session saved'), options);
             } else if (response.details) {
                 console.log(`Failed to save session: ${response.status} ${response.message}`);
                 console.log('The following issues were found:');
