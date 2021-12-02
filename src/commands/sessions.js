@@ -33,7 +33,9 @@ module.exports.SaveSessionCommand = class SaveSessionCommand {
     async execute(sessionDefinition, options) {
         const profile = await loadProfile(options.profile);
         debug('%s.executeSaveSession(%s)', profile.name, sessionDefinition);
-
+        if (!fs.existsSync(sessionDefinition)) {
+            printError(`File does not exist at: ${sessionDefinition}`);
+        }
         const sessionDefStr = fs.readFileSync(sessionDefinition);
         const session = parseObject(sessionDefStr, options);
         debug('%o', session);

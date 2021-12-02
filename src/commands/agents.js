@@ -35,7 +35,9 @@ module.exports.SaveAgentCommand = class SaveAgentCommand {
     async execute(agentDefinition, options) {
         const profile = await loadProfile(options.profile);
         debug('%s.executeSaveAgent(%s)', profile.name, agentDefinition);
-
+        if (!fs.existsSync(agentDefinition)) {
+            printError(`File does not exist at: ${agentDefinition}`);
+        }
         const agentDefStr = fs.readFileSync(agentDefinition);
         const agent = parseObject(agentDefStr, options);
         debug('%o', agent);
@@ -150,6 +152,9 @@ module.exports.InvokeAgentServiceCommand = class {
                 printError(`Failed to parse params: ${options.params} Error: ${e}`, options);
             }
         } else if (options.paramsFile) {
+            if (!fs.existsSync(options.paramsFile)) {
+                printError(`File does not exist at: ${options.paramsFile}`);
+            }
             const paramsStr = fs.readFileSync(options.paramsFile);
             params = parseObject(paramsStr, options);
         }
