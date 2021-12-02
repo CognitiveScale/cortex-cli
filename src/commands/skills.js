@@ -35,6 +35,7 @@ module.exports.SaveSkillCommand = class SaveSkillCommand {
             const profile = await loadProfile(options.profile);
             const skillDefStr = fs.readFileSync(skillDefinition);
             const skill = parseObject(skillDefStr, options);
+             debug('%s.executeSaveSkill(%s)', profile.name,skillDefinition );
             const catalog = new Catalog(profile.url);
             if (!_.isEmpty(options.k8sResource)) {
                 const k8sResources = options.k8sResource.map((f) => JSON.stringify(parseObject(fs.readFileSync(f), options)));
