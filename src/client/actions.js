@@ -16,7 +16,6 @@
 const _ = require('lodash');
 const debug = require('debug')('cortex:cli');
 // eslint-disable-next-line import/no-unresolved
-const { jwtVerify } = require('jose-node-cjs-runtime/jwt/verify');
 const { got } = require('./apiutils');
 const {
  constructError, callMe, checkProject, getUserAgent, 
@@ -247,8 +246,9 @@ module.exports = class Actions {
         }
         const registryUrl = await this._cortexRegistryUrl(token);
         const imageName = image.replace(/.+\..+\//, '');
-        const { payload } = jwtVerify(token);
-        const cortexImageUrl = this._cortexRegistryImagePath(registryUrl, imageName, payload.tenant);
+        //const { payload } = jwtVerify(token);
+        // TODO fix path
+        const cortexImageUrl = this._cortexRegistryImagePath(registryUrl, imageName, '');
         await callMe(`docker login -u cli --password ${token} ${registryUrl}`);
         await callMe(`docker pull ${image} || echo "Docker pull failed using local image"`);
         await callMe(`docker tag ${image} ${cortexImageUrl}`);
