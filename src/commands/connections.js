@@ -17,10 +17,13 @@ const _ = require('lodash');
 const fs = require('fs');
 const debug = require('debug')('cortex:cli');
 const { loadProfile } = require('../config');
+const moment = require('moment');
 const Connections = require('../client/connections');
 const Content = require('../client/content');
+const { CONNECTIONTABLEFORMAT } = require('./utils');
+
 const {
- printSuccess, printError, filterObject, parseObject, printTable, 
+ printSuccess, printError, filterObject, parseObject, printTable, fileExists
 } = require('./utils');
 
 module.exports.ListConnections = class ListConnections {
@@ -41,16 +44,7 @@ module.exports.ListConnections = class ListConnections {
                 if (options.json) {
                     printSuccess(JSON.stringify(result, null, 2), options);
                 } else {
-                    const tableSpec = [
-                        { column: 'Name', field: 'name', width: 40 },
-                        { column: 'Title', field: 'title', width: 50 },
-                        { column: 'Description', field: 'description', width: 50 },
-                        { column: 'Connection Type', field: 'connectionType', width: 25 },
-                        { column: 'Writeable', field: 'allowWrite', width: 15 },
-                        { column: 'Created On', field: 'createdAt', width: 26 },
-                    ];
-
-                    printTable(tableSpec, result);
+                    printTable(CONNECTIONTABLEFORMAT, result, (o) => ({ ...o, createdAt: o.createdAt ? moment(o.createdAt).fromNow() : '-' }));
                 }
             } else {
                 printError(`Failed to list connections: ${response.status} ${response.message}`, options);
@@ -83,7 +77,9 @@ module.exports.SaveConnectionCommand = class SaveConnectionCommand {
    async execute(connectionDefinition, options) {
        const profile = await loadProfile(options.profile);
        debug('%s.executeSaveDefinition(%s)', profile.name, connectionDefinition);
-
+       if (!fileExists(connectionDefinition)) {
+            printError(`Connection Definition file does not exist at: ${connectionDefinition}`);
+        }
        const connDefStr = fs.readFileSync(connectionDefinition);
        const connObj = parseObject(connDefStr, options);
        debug('%o', connObj);
