@@ -38,7 +38,7 @@ module.exports.SaveModelCommand = class SaveModelCommand {
     async execute(modelDefinition, options) {
         const profile = await loadProfile(options.profile);
         debug('%s.executeSaveModel(%s)', profile.name, modelDefinition);
-         if (!fs.existsSync(modelDefinition)) {
+         if (!fileExists(modelDefinition)) {
             printError(`File does not exist at: ${modelDefinition}`);
         }
         const modelDefStr = fs.readFileSync(modelDefinition);

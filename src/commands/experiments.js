@@ -252,9 +252,8 @@ class SaveExperimentCommand {
         const profile = await loadProfile(options.profile);
         debug('%s.executeSaveExperiment(%s)', profile.name, experimentDefinition);
 
-         if (!fs.existsSync(experimentDefinition)) {
+         if (!fileExists(experimentDefinition)) {
             printError(`File does not exist at: ${experimentDefinition}`);
-
         }
         const experimentDefStr = fs.readFileSync(experimentDefinition);
         const experiment = parseObject(experimentDefStr, options);
