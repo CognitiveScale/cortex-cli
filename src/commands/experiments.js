@@ -21,7 +21,7 @@ const moment = require('moment');
 const { loadProfile } = require('../config');
 const Experiments = require('../client/experiments');
 const {
- printSuccess, printError, filterObject, printTable, parseObject, formatValidationPath, DEPENDENCYTABLEFORMAT,
+ printSuccess, printError, filterObject, printTable, parseObject, fileExists, formatValidationPath, DEPENDENCYTABLEFORMAT,
 } = require('./utils');
 
 class ListExperiments {

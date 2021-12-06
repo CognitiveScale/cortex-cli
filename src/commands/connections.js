@@ -16,14 +16,14 @@
 const _ = require('lodash');
 const fs = require('fs');
 const debug = require('debug')('cortex:cli');
-const { loadProfile } = require('../config');
 const moment = require('moment');
+const { loadProfile } = require('../config');
 const Connections = require('../client/connections');
 const Content = require('../client/content');
 const { CONNECTIONTABLEFORMAT } = require('./utils');
 
 const {
- printSuccess, printError, filterObject, parseObject, printTable, fileExists
+ printSuccess, printError, filterObject, parseObject, printTable, fileExists,
 } = require('./utils');
 
 module.exports.ListConnections = class ListConnections {

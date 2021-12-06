@@ -327,5 +327,5 @@ module.exports.CONNECTIONTABLEFORMAT = [
     { column: 'Title', field: 'title', width: 50 },
     { column: 'Description', field: 'description', width: 50 },
     { column: 'Connection Type', field: 'connectionType', width: 25 },
-    { column: 'Created On', field: 'createdAt', width: 26 }
+    { column: 'Created On', field: 'createdAt', width: 26 },
 ];
