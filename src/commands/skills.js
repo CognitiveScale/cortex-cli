@@ -35,6 +35,7 @@ module.exports.SaveSkillCommand = class SaveSkillCommand {
             const profile = await loadProfile(options.profile);
             const skillDefStr = fs.readFileSync(skillDefinition);
             const skill = parseObject(skillDefStr, options);
+            debug('%s.executeSaveSkill(%s)', profile.name, skillDefinition);
             const catalog = new Catalog(profile.url);
             if (!_.isEmpty(options.k8sResource)) {
                 const k8sResources = options.k8sResource.map((f) => JSON.stringify(parseObject(fs.readFileSync(f), options)));
@@ -212,6 +213,9 @@ module.exports.InvokeSkillCommand = class InvokeSkillCommand {
                 printError(`Failed to parse params: ${options.params} Error: ${e}`, options);
             }
         } else if (options.paramsFile) {
+            if (!fs.existsSync(options.paramsFile)) {
+                printError(`File does not exist at: ${options.paramsFile}`);
+            }
             const paramsStr = fs.readFileSync(options.paramsFile);
             params = parseObject(paramsStr, options);
         }

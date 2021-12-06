@@ -77,8 +77,8 @@ module.exports.SaveConnectionCommand = class SaveConnectionCommand {
    async execute(connectionDefinition, options) {
        const profile = await loadProfile(options.profile);
        debug('%s.executeSaveDefinition(%s)', profile.name, connectionDefinition);
-       if (!fileExists(connectionDefinition)) {
-            printError(`Connection definition file does not exist at: ${connectionDefinition}`);
+        if (!fs.existsSync(connectionDefinition)) {
+            printError(`File does not exist at: ${connectionDefinition}`);
         }
        const connDefStr = fs.readFileSync(connectionDefinition);
        const connObj = parseObject(connDefStr, options);

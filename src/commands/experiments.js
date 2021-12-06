@@ -251,8 +251,10 @@ class SaveExperimentCommand {
     async execute(experimentDefinition, options) {
         const profile = await loadProfile(options.profile);
         debug('%s.executeSaveExperiment(%s)', profile.name, experimentDefinition);
-        if (!fileExists(experimentDefinition)) {
-            printError(`Experiment definition file does not exist at: ${experimentDefinition}`);
+
+         if (!fs.existsSync(experimentDefinition)) {
+            printError(`File does not exist at: ${experimentDefinition}`);
+
         }
         const experimentDefStr = fs.readFileSync(experimentDefinition);
         const experiment = parseObject(experimentDefStr, options);
@@ -290,7 +292,9 @@ class CreateRunCommand {
     async execute(runDefinition, options) {
         const profile = await loadProfile(options.profile);
         debug('%s.executeCreateRun(%s)', profile.name, runDefinition);
-
+         if (!fs.existsSync(runDefinition)) {
+            printError(`File does not exist at: ${runDefinition}`);
+        }
         const runDefinitionStr = fs.readFileSync(runDefinition);
         const run = parseObject(runDefinitionStr, options);
 
