@@ -27,7 +27,7 @@ const Experiments = require('../client/experiments');
 const { LISTTABLEFORMAT, RUNTABLEFORMAT, DEPENDENCYTABLEFORMAT } = require('./utils');
 
 const {
-    printSuccess, printError, filterObject, parseObject, printTable, formatValidationPath,
+    printSuccess, printError, filterObject, parseObject, printTable, formatValidationPath, fileExists, 
 } = require('./utils');
 
 module.exports.SaveModelCommand = class SaveModelCommand {
