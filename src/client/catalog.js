@@ -202,6 +202,34 @@ module.exports = class Catalog {
             .catch((err) => constructError(err));
     }
 
+    deployAgent(projectId, token, agentName, verbose = false) {
+        checkProject(projectId);
+        const endpoint = `${this.endpoints.agents(projectId)}/${encodeURIComponent(agentName)}/deploy`;
+        debug('deployAgent(%s) => %s', agentName, endpoint);
+        return got
+            .get(endpoint, {
+                headers: { Authorization: `Bearer ${token}` },
+                'user-agent': getUserAgent(),
+                searchParams: { verbose },
+            }).json()
+            .then((res) => ({ ...res }))
+            .catch((err) => constructError(err));
+    }
+
+    unDeployAgent(projectId, token, agentName, verbose = false) {
+        checkProject(projectId);
+        const endpoint = `${this.endpoints.agents(projectId)}/${encodeURIComponent(agentName)}/undeploy`;
+        debug('undeployAgent(%s) => %s', agentName, endpoint);
+        return got
+            .get(endpoint, {
+                headers: { Authorization: `Bearer ${token}` },
+                'user-agent': getUserAgent(),
+                searchParams: { verbose },
+            }).json()
+            .then((res) => ({ ...res }))
+            .catch((err) => constructError(err));
+    }
+
     saveType(projectId, token, types) {
         checkProject(projectId);
         const endpoint = `${this.endpoints.types(projectId)}`;
