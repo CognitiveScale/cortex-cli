@@ -448,21 +448,22 @@ module.exports.DeployAgentCommand = class DeployAgentCommand {
         this.program = program;
     }
 
-    async execute(agentName, options) {
+    async execute(agentNames, options) {
         const profile = await loadProfile(options.profile);
-        debug('%s.executeDeployAgent(%s)', profile.name, agentName);
-
         const catalog = new Catalog(profile.url);
-        catalog.deployAgent(options.project || profile.project, profile.token, agentName, options.verbose).then((response) => {
-            if (response.success) {
-                printSuccess(`Deployed Agent ${agentName}: ${response.message}`, options);
-            } else {
-                printError(`Failed to deploy Agent ${agentName}: ${response.message}`, options);
-            }
-        })
-            .catch((err) => {
+        await Promise.all(agentNames.map(async (agentName) => {
+            debug('%s.executeDeployAgent(%s)', profile.name, agentName);
+            try {
+                const response = await catalog.deployAgent(options.project || profile.project, profile.token, agentName, options.verbose);
+                if (response.success) {
+                    printSuccess(`Deployed Agent ${agentName}: ${response.message}`, options);
+                } else {
+                    printError(`Failed to deploy Agent ${agentName}: ${response.message}`, options);
+                }
+            } catch (err) {
                 printError(`Failed to deploy Agent ${agentName}: ${err.status} ${err.message}`, options);
-            });
+            }
+        }));
     }
 };
 
@@ -472,19 +473,21 @@ module.exports.UndeployAgentCommand = class UndeployAgentCommand {
         this.program = program;
     }
 
-    async execute(agentName, options) {
+    async execute(agentNames, options) {
         const profile = await loadProfile(options.profile);
-        debug('%s.executeUndeployAgent(%s)', profile.name, agentName);
         const catalog = new Catalog(profile.url);
-        catalog.unDeployAgent(options.project || profile.project, profile.token, agentName, options.verbose).then((response) => {
-            if (response.success) {
-                printSuccess(`Undeploy agent ${agentName}: ${response.message}`, options);
-            } else {
-                printError(`Failed to Undeploy agent ${agentName}: ${response.message}`, options);
-            }
-        })
-            .catch((err) => {
+        await Promise.all(agentNames.map(async (agentName) => {
+            debug('%s.executeUndeployAgent(%s)', profile.name, agentName);
+            try {
+                const response = await catalog.unDeployAgent(options.project || profile.project, profile.token, agentName, options.verbose);
+                if (response.success) {
+                    printSuccess(`Undeploy agent ${agentName}: ${response.message}`, options);
+                } else {
+                    printError(`Failed to Undeploy agent ${agentName}: ${response.message}`, options);
+                }
+            } catch (err) {
                 printError(`Failed to Undeploy agent ${agentName}: ${err.status} ${err.message}`, options);
-            });
+            }
+        }));
     }
 };
