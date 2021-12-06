@@ -22,17 +22,19 @@ const program = require('commander');
 const { withCompatibilityCheck } = require('../src/compatibility');
 
 const {
-    SaveAgentCommand,
-    ListAgentsCommand,
-    DescribeAgentCommand,
-    InvokeAgentServiceCommand,
-    GetActivationCommand,
-    ListActivationsCommand,
-    ListServicesCommand,
-    ListAgentSnapshotsCommand,
-    DescribeAgentSnapshotCommand,
     CreateAgentSnapshotCommand,
     DeleteAgentCommand,
+    DeployAgentCommand,
+    DescribeAgentCommand,
+    DescribeAgentSnapshotCommand,
+    GetActivationCommand,
+    InvokeAgentServiceCommand,
+    ListActivationsCommand,
+    ListAgentSnapshotsCommand,
+    ListAgentsCommand,
+    ListServicesCommand,
+    SaveAgentCommand,
+    UndeployAgentCommand,
 } = require('../src/commands/agents');
 
 program.name('cortex agents');
@@ -69,6 +71,21 @@ program
     .action(withCompatibilityCheck((options) => {
         try {
             new ListAgentsCommand(program).execute(options);
+        } catch (err) {
+            console.error(chalk.red(err.message));
+        }
+    }));
+
+// Deploy agent
+program
+    .command('deploy <agentName>')
+    .description('Deploy the agent resource to the cluster')
+    .option('--no-compat', 'Ignore API compatibility checks')
+    .option('--profile [profile]', 'The profile to use')
+    .option('--project [project]', 'The project to use')
+    .action(withCompatibilityCheck((agentName, options) => {
+        try {
+            new DeployAgentCommand(program).execute(agentName, options);
         } catch (err) {
             console.error(chalk.red(err.message));
         }
@@ -172,6 +189,21 @@ program
     .action(withCompatibilityCheck((agentName, options) => {
         try {
             new ListServicesCommand(program).execute(agentName, options);
+        } catch (err) {
+            console.error(chalk.red(err.message));
+        }
+    }));
+
+// Undeploy agent
+program
+    .command('undeploy <agentName>')
+    .description('Undeploy the agent resource from the cluster')
+    .option('--no-compat', 'Ignore API compatibility checks')
+    .option('--profile [profile]', 'The profile to use')
+    .option('--project [project]', 'The project to use')
+    .action(withCompatibilityCheck((agentName, options) => {
+        try {
+            new UndeployAgentCommand(program).execute(agentName, options);
         } catch (err) {
             console.error(chalk.red(err.message));
         }
