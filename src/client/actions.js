@@ -246,7 +246,7 @@ module.exports = class Actions {
         }
         const registryUrl = await this._cortexRegistryUrl(token);
         const imageName = image.replace(/.+\..+\//, '');
-        //const { payload } = jwtVerify(token);
+        // const { payload } = jwtVerify(token);
         // TODO fix path
         const cortexImageUrl = this._cortexRegistryImagePath(registryUrl, imageName, '');
         await callMe(`docker login -u cli --password ${token} ${registryUrl}`);
