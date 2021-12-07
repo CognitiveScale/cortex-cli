@@ -37,14 +37,14 @@ program.description('Work with Cortex Skills');
 
 // Deploy Skill
 program
-    .command('deploy <skillName>')
+    .command('deploy <skillNames...>')
     .description('Deploy the skill resource to the cluster')
     .option('--no-compat', 'Ignore API compatibility checks')
     .option('--profile [profile]', 'The profile to use')
     .option('--project [project]', 'The project to use')
-    .action(withCompatibilityCheck((skillName, options) => {
+    .action(withCompatibilityCheck((skillNames, options) => {
         try {
-            new DeploySkillCommand(program).execute(skillName, options);
+            new DeploySkillCommand(program).execute(skillNames, options);
         } catch (err) {
             console.error(chalk.red(err.message));
         }
@@ -98,6 +98,7 @@ program
     .option('--project [project]', 'The project to use')
     .option('--json', 'Output results using JSON')
     .option('--nostatus', 'skip extra call for skill status')
+    .option('--noshared', 'do not list shared sills')
     .option('--query [query]', 'A JMESPath query to use in filtering the response data.')
     .action(withCompatibilityCheck((options) => {
         try {
@@ -143,14 +144,14 @@ program
 
 // Undeploy Skill
 program
-    .command('undeploy <skillName>')
+    .command('undeploy <skillNames...>')
     .description('Undeploy the skill resource from the cluster')
     .option('--no-compat', 'Ignore API compatibility checks')
     .option('--profile [profile]', 'The profile to use')
     .option('--project [project]', 'The project to use')
-    .action(withCompatibilityCheck((skillName, options) => {
+    .action(withCompatibilityCheck((skillNames, options) => {
         try {
-            new UndeploySkillCommand(program).execute(skillName, options);
+            new UndeploySkillCommand(program).execute(skillNames, options);
         } catch (err) {
             console.error(chalk.red(err.message));
         }

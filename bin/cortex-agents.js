@@ -78,14 +78,14 @@ program
 
 // Deploy agent
 program
-    .command('deploy <agentName>')
+    .command('deploy <agentNames...>')
     .description('Deploy the agent resource to the cluster')
     .option('--no-compat', 'Ignore API compatibility checks')
     .option('--profile [profile]', 'The profile to use')
     .option('--project [project]', 'The project to use')
-    .action(withCompatibilityCheck((agentName, options) => {
+    .action(withCompatibilityCheck((agentNames, options) => {
         try {
-            new DeployAgentCommand(program).execute(agentName, options);
+            new DeployAgentCommand(program).execute(agentNames, options);
         } catch (err) {
             console.error(chalk.red(err.message));
         }
@@ -196,14 +196,14 @@ program
 
 // Undeploy agent
 program
-    .command('undeploy <agentName>')
+    .command('undeploy <agentNames...>')
     .description('Undeploy the agent resource from the cluster')
     .option('--no-compat', 'Ignore API compatibility checks')
     .option('--profile [profile]', 'The profile to use')
     .option('--project [project]', 'The project to use')
-    .action(withCompatibilityCheck((agentName, options) => {
+    .action(withCompatibilityCheck((agentNames, options) => {
         try {
-            new UndeployAgentCommand(program).execute(agentName, options);
+            new UndeployAgentCommand(program).execute(agentNames, options);
         } catch (err) {
             console.error(chalk.red(err.message));
         }
