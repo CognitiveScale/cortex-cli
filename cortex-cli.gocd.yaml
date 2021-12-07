@@ -59,7 +59,7 @@ pipelines:
                     source: cortex-cli-docs.md
                     is_file: yes
                 - script: |
-                    git clone --branch master --single-branch git@github.com:CognitiveScale/cortex-fabric.git
+                    git clone --branch main --single-branch git@github.com:CognitiveScale/cortex-fabric.git
                     mv cortex-cli-docs.md cortex-fabric/docs/docs/reference-guides/cortex-cli.md
                     cd cortex-fabric
                     git commit -a -m "Publishing New CLI Docs"
