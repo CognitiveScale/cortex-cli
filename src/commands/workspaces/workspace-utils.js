@@ -62,13 +62,13 @@ module.exports.getCurrentRegistry = async function getCurrentRegistry() {
 };
 
 module.exports.buildImageTag = async function buildImageTag(actionName) {
+  if (actionName.includes('/')) {
+    return actionName;
+  }
+
   const registry = await module.exports.getCurrentRegistry();
   if (registry.url.includes('docker.io')) {
     return path.posix.join(registry.namespace || '', actionName);
-  }
-
-  if (actionName.startsWith(registry.url)) {
-    return actionName;
   }
 
   return path.posix.join(registry.url, registry.namespace || '', actionName);
