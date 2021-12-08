@@ -159,6 +159,20 @@ module.exports = class Experiments {
             .catch((err) => constructError(err));
     }
 
+    updateRun(projectId, token, runObj) {
+        checkProject(projectId);
+        const endpoint = `${this.endpoint(projectId)}/${encodeURIComponent(runObj.experimentName)}/runs/${runObj.runId}`;
+        debug('updateRun(%s) => %s', runObj.experimentName, endpoint);
+        return got
+            .post(endpoint, {
+                headers: { Authorization: `Bearer ${token}` },
+                'user-agent': getUserAgent(),
+                json: runObj,
+            }).json()
+            .then((result) => ({ success: true, result }))
+            .catch((err) => constructError(err));
+    }
+
     async uploadArtifact(projectId, token, experimentName, runId, content, artifact, contentType = 'application/octet-stream') {
         checkProject(projectId);
 
