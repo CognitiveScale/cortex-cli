@@ -22,6 +22,7 @@ const _ = {
   map: require('lodash/map'),
   find: require('lodash/find'),
   mean: require('lodash/mean'),
+  every: require('lodash/every'),
 };
 
 class DockerPushProgressTracker {
@@ -165,8 +166,7 @@ module.exports.WorkspacePublishCommand = class WorkspacePublishCommand {
     const imgPush = await img
       .push({
         authconfig: registryAuth,
-      })
-      .catch((err) => Promise.reject(err));
+      });
 
     return new Promise((resolve, reject) => {
       this.docker.modem.followProgress(
@@ -212,10 +212,10 @@ module.exports.WorkspacePublishCommand = class WorkspacePublishCommand {
       this.experimentClient = new Experiments(profile.url);
       this.contentClient = new Content(profile.url);
 
-      await Promise.all(_.map(skillInfo, async (info) => {
+      const published = await Promise.all(_.map(skillInfo, async (info) => {
         const skillName = info.skill.name;
         const actions = info.skill.actions ? info.skill.actions : [];
-        await Promise.all(_.map(actions, async (action) => {
+        const actionsPublished = await Promise.all(_.map(actions, async (action) => {
           const tag = await buildImageTag(action.image);
           const imglist = await this.docker.listImages({
             filters: JSON.stringify({
@@ -319,21 +319,30 @@ module.exports.WorkspacePublishCommand = class WorkspacePublishCommand {
               await this.pushAction(action, tag, regAuth);
             } catch (err) {
               console.error(err.message);
+              return false;
             }
           } else {
             console.error(`No image found for action ${action.name}.  Has it been built?`);
+            return false;
           }
+
+          return true;
         }));
 
-        this.catalogClient.saveSkill(profile.project, profile.token, info.skill);
-        console.log(`Published skill ${info.skill.name}`);
+        if (_.every(actionsPublished)) {
+          this.catalogClient.saveSkill(profile.project, profile.token, info.skill);
+          console.log(`Published skill ${info.skill.name}`);
+          return true;
+        }
+
+        return false;
       }));
 
       console.log('Publish Complete');
-      return Promise.resolve();
+      return _.every(published);
     }
 
     console.log('No skills found');
-    return Promise.resolve();
+    return false;
   }
 };
