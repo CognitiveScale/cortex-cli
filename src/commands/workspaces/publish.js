@@ -11,7 +11,7 @@ const {
   parseObject,
 } = require('../utils');
 
-const { getSkillInfo } = require('./workspace-utils');
+const { getSkillInfo, buildImageTag, getCurrentRegistry } = require('./workspace-utils');
 const { loadProfile, generateJwt } = require('../../config');
 const Catalog = require('../../client/catalog');
 const Models = require('../../client/models');
@@ -113,8 +113,8 @@ module.exports.WorkspacePublishCommand = class WorkspacePublishCommand {
     this.program = program;
   }
 
-  async getRegistryAuth(profile, imageName, options) {
-    const reg = _.find(profile.registries, (r) => imageName.startsWith(r.url));
+  async getRegistryAuth(profile, options) {
+    const reg = await getCurrentRegistry();
 
     if (!profile.token) {
       if (reg.isCortex) {
@@ -155,7 +155,7 @@ module.exports.WorkspacePublishCommand = class WorkspacePublishCommand {
     /// The cortex backend has a bug where the new image wont be used if the tag hasnt changed
     /// Remove this when this problem is fixed.
     const buildId = uuid().substr(0, 6);
-    const newTag = `${imageTag.split(':')[0]}:${buildId}`;
+    const newTag = `${imageTag}:${buildId}`;
     await img.tag({ repo: newTag });
     img = this.docker.getImage(newTag);
     /// -------------------------------------
@@ -216,15 +216,15 @@ module.exports.WorkspacePublishCommand = class WorkspacePublishCommand {
         const skillName = info.skill.name;
         const actions = info.skill.actions ? info.skill.actions : [];
         await Promise.all(_.map(actions, async (action) => {
+          const tag = await buildImageTag(action.image);
           const imglist = await this.docker.listImages({
             filters: JSON.stringify({
-              reference: [action.image],
+              reference: [tag],
             }),
           });
 
           if (imglist.length !== 0) {
             try {
-              const tag = imglist[0].RepoTags[0];
               const globOpts = {
                 root: target,
                 absolute: true,
