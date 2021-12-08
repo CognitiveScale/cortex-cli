@@ -23,10 +23,17 @@ const _ = {
 };
 
 const { readConfig, loadProfile } = require('../../config');
-const { printSuccess, printError } = require('./utils');
-const { printToTerminal, validateToken } = require('./utils');
+const { 
+  printToTerminal, 
+  validateToken, 
+} = require('./workspace-utils');
 
-const { generateNameFromTitle, validateName } = require('./utils');
+const { 
+  printSuccess, 
+  printError, 
+  validateName,
+  generateNameFromTitle,
+} = require('../utils');
 
 const METADATA_FILENAME = 'metadata.json';
 

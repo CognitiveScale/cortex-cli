@@ -4,7 +4,7 @@ const got = require('got');
 const open = require('open');
 const moment = require('moment');
 
-const { printToTerminal, validateToken } = require('./utils');
+const { printToTerminal, validateToken } = require('./workspace-utils');
 
 const _ = {
   get: require('lodash/get'),
@@ -20,7 +20,7 @@ const _ = {
 };
 
 const { readConfig } = require('../../config');
-const { printSuccess, printError } = require('./utils');
+const { printSuccess, printError } = require('../utils');
 
 const GITHUB_APP_CLIENTID = 'Iv1.e0e84c2a5fa7c935';
 const DEFAULT_TEMPLATE_REPO = 'CognitiveScale/cortex-code-templates';
@@ -86,10 +86,7 @@ module.exports.WorkspaceConfigureCommand = class WorkspaceConfigureCommand {
                 printToTerminal(`\x1b[0GPlease enter the following code to authorize the Cortex CLI: ${options.color === 'on'
                   ? chalk.bgBlackBright.whiteBright(`[ ${deviceCode.user_code} ]`)
                   : deviceCode.user_code
-                  }`);
-                printToTerminal(
-                  moment(mom.diff()).format(' [( Expires in] mm [minutes and] ss [seconds ) - CTRL-C to abort]'),
-                );
+                  }  ${moment(mom.diff()).format(' [( Expires in] mm [minutes and] ss [seconds ) - CTRL-C to abort]')}`);
 
                 const pollTimer = setTimeout(async () => {
                   const { body } = await got.post(GITHUB_DEVICECODE_RESPONSE_URL, {
