@@ -326,8 +326,10 @@ module.exports.WorkspacePublishCommand = class WorkspacePublishCommand {
         }));
 
         this.catalogClient.saveSkill(profile.project, profile.token, info.skill);
+        console.log(`Published skill ${info.skill.name}`);
       }));
 
+      console.log('Publish Complete');
       return Promise.resolve();
     }
 
