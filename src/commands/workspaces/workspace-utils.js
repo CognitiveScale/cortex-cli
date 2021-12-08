@@ -60,3 +60,16 @@ module.exports.getCurrentRegistry = async function getCurrentRegistry() {
   const profile = await loadProfile();
   return profile.registries[profile.currentRegistry];
 };
+
+module.exports.buildImageTag = async function buildImageTag(actionName) {
+  const registry = await module.exports.getCurrentRegistry();
+  if (registry.url.includes('docker.io')) {
+    return path.posix.join(registry.namespace || '', actionName);
+  }
+
+  if (actionName.startsWith(registry.url)) {
+    return actionName;
+  }
+
+  return path.posix.join(registry.url, registry.namespace || '', actionName);
+};

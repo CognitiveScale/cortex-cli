@@ -17,7 +17,7 @@ const _ = {
   mean: require('lodash/mean'),
 };
 
-const { getSkillInfo, getCurrentRegistry } = require('./workspace-utils');
+const { getSkillInfo, buildImageTag } = require('./workspace-utils');
 
 class DockerBuildProgressTracker {
   constructor() {
@@ -132,19 +132,7 @@ module.exports.WorkspaceBuildCommand = class WorkspaceBuildCommand {
     this.program = program;
   }
 
-  buildImageTag(registry, actionName) {
-    if (registry.url.includes('docker.io')) {
-      return path.posix.join(registry.namespace || '', actionName);
-    }
-  
-    if (actionName.startsWith(registry.url)) {
-      return actionName;
-    }
-  
-    return path.posix.join(registry.url, registry.namespace || '', actionName);
-  }
-
-  async buildAction(target, action, imageTag, status) {
+  async buildAction(target, action, status) {
     try {
       const actionPath = path.join(target, 'actions', action.name);
       const globList = glob.sync('/**/*', {
@@ -154,6 +142,7 @@ module.exports.WorkspaceBuildCommand = class WorkspaceBuildCommand {
 
       const buildList = _.map(globList, (g) => path.posix.join(...(path.relative(actionPath, g)).split(path.sep)));
       const docker = new Docker();
+      const imageTag = await buildImageTag(action.image);
 
       const stream = await docker.buildImage(
         {
@@ -204,23 +193,16 @@ module.exports.WorkspaceBuildCommand = class WorkspaceBuildCommand {
 
     const skillInfo = await getSkillInfo(target);
 
-    const curReg = getCurrentRegistry();
-    console.log(curReg);
-
     if (skillInfo.length > 0) {
       console.log('Building...');
       const status = new DockerBuildProgressTracker();
       await Promise.all(_.map(skillInfo, (info) => {
         const actions = info.skill.actions ? info.skill.actions : [];
-        return Promise.all(_.map(actions, (action) => {
-          const imageTag = action.image;
-          return this.buildAction(
+        return Promise.all(_.map(actions, (action) => this.buildAction(
             path.dirname(info.uri),
             action,
-            imageTag,
             status,
-          );
-        }));
+          )));
       }));
       status.stop();
       console.log('Build Complete');
