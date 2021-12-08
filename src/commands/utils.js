@@ -45,8 +45,10 @@ module.exports.constructError = (error) => {
     } catch (e) {
         // Guess it wasn't JSON!
     }
+    // todo make figuring out the status code more consistent? this might be a holdover from request vs got?
+    const status = _.get(errResp, 'statusCode') || error.code || error.status || '';
     return {
- success: false, message: errorText, details, status: error.status || error.code || _.get(errResp, 'statusCode') || '',
+ success: false, message: errorText, details, status,
 };
 };
 
