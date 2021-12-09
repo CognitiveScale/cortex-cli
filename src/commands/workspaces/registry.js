@@ -51,10 +51,10 @@ module.exports.WorkspaceAddRegistryCommand = class WorkspaceAddRegistryCommand {
         cfg.profiles[profile.name] = profile;
         cfg.save();
 
-        printSuccess(`Registry ${answers.name} added`);
+        printSuccess(`Registry ${answers.name} added`, opts);
       })
       .catch((error) => {
-        printError(error.message, this.options);
+        printError(error.message, opts);
       });
   }
 };
@@ -64,7 +64,7 @@ module.exports.WorkspaceRemoveRegistryCommand = class WorkspaceRemoveRegistryCom
     this.program = program;
   }
 
-  async execute(name) {
+  async execute(name, options) {
     const profile = await loadProfile();
 
     const choices = _.map(_.filter(profile.registries, { isCortex: false }), (r) => (
@@ -98,7 +98,7 @@ module.exports.WorkspaceRemoveRegistryCommand = class WorkspaceRemoveRegistryCom
         printSuccess(`Registry ${answers.name} removed`);
       })
       .catch((error) => {
-        printError(error.message, this.options);
+        printError(error.message, options);
       });
   }
 };
@@ -108,7 +108,7 @@ module.exports.WorkspaceActivateRegistryCommand = class WorkspaceActivateRegistr
     this.program = program;
   }
 
-  async execute(name) {
+  async execute(name, options) {
     const profile = await loadProfile();
 
     const choices = _.map(profile.registries, (r) => (
@@ -134,10 +134,10 @@ module.exports.WorkspaceActivateRegistryCommand = class WorkspaceActivateRegistr
         cfg.profiles[profile.name] = profile;
         cfg.save();
 
-        printSuccess(`Registry ${answers.name} activated`);
+        printSuccess(`Registry ${answers.name} activated`, options);
       })
       .catch((error) => {
-        printError(error.message, this.options);
+        printError(error.message, options);
       });
   }
 };
@@ -147,12 +147,12 @@ module.exports.WorkspaceListRegistryCommand = class WorkspaceListRegistryCommand
     this.program = program;
   }
 
-  async execute() {
+  async execute(options) {
     const profile = await loadProfile();
     _.forEach(profile.registries, (r) => {
       const logStr = `${r.name} - ${path.posix.join(r.url, r.namespace || '')}`;
       if (r.name === profile.currentRegistry) {
-        printSuccess(logStr);
+        printSuccess(logStr, options);
       } else {
         console.log(logStr);
       }
