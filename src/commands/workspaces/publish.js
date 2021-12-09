@@ -175,6 +175,7 @@ module.exports.WorkspacePublishCommand = class WorkspacePublishCommand {
           if (err) {
             return reject(err);
           }
+          action.image = newTag;
           status.complete();
           status.stop();
           console.log(`Pushed action ${action.name}`);
