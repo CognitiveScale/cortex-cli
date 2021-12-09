@@ -86,11 +86,11 @@ program
         }
     });
 
-    const registries = program
-    .command('registries')
+    const registry = program
+    .command('registry')
     .description('Manage image repositories.');
 
-    registries
+    registry
     .command('add [name]')
     .option('--color [on/off]', 'Turn on/off colors', 'on')
     .option('--url [registry url]', 'Registry URL')
@@ -104,7 +104,7 @@ program
         }
     });
 
-    registries
+    registry
     .command('remove [name]')
     .option('--color [on/off]', 'Turn on/off colors', 'on')
     .description('Removes the specified image registry.')
@@ -116,7 +116,7 @@ program
         }
     });
 
-    registries
+    registry
     .command('activate [name]')
     .option('--color [on/off]', 'Turn on/off colors', 'on')
     .description('Activates the specified image registry.')
@@ -128,7 +128,7 @@ program
         }
     });
 
-    registries
+    registry
     .command('list')
     .option('--color [on/off]', 'Turn on/off colors', 'on')
     .description('Lists all image registries')
