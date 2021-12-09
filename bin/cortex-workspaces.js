@@ -23,6 +23,12 @@ const { WorkspaceConfigureCommand } = require('../src/commands/workspaces/config
 const { WorkspaceGenerateCommand } = require('../src/commands/workspaces/generate');
 const { WorkspaceBuildCommand } = require('../src/commands/workspaces/build');
 const { WorkspacePublishCommand } = require('../src/commands/workspaces/publish');
+const { 
+    WorkspaceAddRegistryCommand, 
+    WorkspaceRemoveRegistryCommand, 
+    WorkspaceActivateRegistryCommand,
+    WorkspaceListRegistryCommand,
+} = require('../src/commands/workspaces/registry');
 
 program.name('cortex workspaces');
 program.description('Scaffolding Cortex Components');
@@ -75,6 +81,60 @@ program
     .action((folder, options) => { // deliberately not using withCompatibilityCheck()
         try {
             new WorkspacePublishCommand(program).execute(folder, options);
+        } catch (err) {
+            console.error(chalk.red(err.message));
+        }
+    });
+
+    const registries = program
+    .command('registries')
+    .description('Manage image repositories.');
+
+    registries
+    .command('add [name]')
+    .option('--color [on/off]', 'Turn on/off colors', 'on')
+    .option('--url [registry url]', 'Registry URL')
+    .option('--namespace [registry namespace]', 'Registry Namespace')
+    .description('Adds an image registry to publish to.')
+    .action((name, options) => { // deliberately not using withCompatibilityCheck()
+        try {
+            new WorkspaceAddRegistryCommand(program).execute(name, options);
+        } catch (err) {
+            console.error(chalk.red(err.message));
+        }
+    });
+
+    registries
+    .command('remove [name]')
+    .option('--color [on/off]', 'Turn on/off colors', 'on')
+    .description('Removes the specified image registry.')
+    .action((name, options) => { // deliberately not using withCompatibilityCheck()
+        try {
+            new WorkspaceRemoveRegistryCommand(program).execute(name, options);
+        } catch (err) {
+            console.error(chalk.red(err.message));
+        }
+    });
+
+    registries
+    .command('activate [name]')
+    .option('--color [on/off]', 'Turn on/off colors', 'on')
+    .description('Activates the specified image registry.')
+    .action((name, options) => { // deliberately not using withCompatibilityCheck()
+        try {
+            new WorkspaceActivateRegistryCommand(program).execute(name, options);
+        } catch (err) {
+            console.error(chalk.red(err.message));
+        }
+    });
+
+    registries
+    .command('list')
+    .option('--color [on/off]', 'Turn on/off colors', 'on')
+    .description('Lists all image registries')
+    .action((options) => { // deliberately not using withCompatibilityCheck()
+        try {
+            new WorkspaceListRegistryCommand(program).execute(options);
         } catch (err) {
             console.error(chalk.red(err.message));
         }
