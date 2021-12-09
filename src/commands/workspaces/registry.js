@@ -150,7 +150,12 @@ module.exports.WorkspaceListRegistryCommand = class WorkspaceListRegistryCommand
   async execute() {
     const profile = await loadProfile();
     _.forEach(profile.registries, (r) => {
-      printSuccess(`${r.name} - ${path.posix.join(r.url, r.namespace || '')}`);
+      const logStr = `${r.name} - ${path.posix.join(r.url, r.namespace || '')}`;
+      if (r.name === profile.currentRegistry) {
+        printSuccess(logStr);
+      } else {
+        console.log(logStr);
+      }
     });
   }
 };
