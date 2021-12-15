@@ -114,6 +114,7 @@ program
     .description('Delete a skill')
     .option('--no-compat', 'Ignore API compatibility checks')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
+    .option('--json', 'Output results using JSON')
     .option('--profile [profile]', 'The profile to use')
     .option('--project [project]', 'The project to use')
     .action(withCompatibilityCheck((skillName, options) => {
