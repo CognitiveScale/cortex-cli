@@ -520,7 +520,7 @@ module.exports = class Catalog {
                 'user-agent': getUserAgent(),
             })
             .json()
-            .then((skill) => ({ success: true, skill }))
+            .then((skill) => skill)
             .catch((err) => constructError(err));
     }
 

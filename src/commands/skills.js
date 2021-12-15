@@ -258,7 +258,10 @@ module.exports.DeleteSkillCommand = class DeleteSkillCommand {
             .then((response) => {
                 if (response.success) {
                     const result = filterObject(response, options);
-                    return printSuccess(JSON.stringify(result, null, 2), options);
+                    if (options.json) {
+                        return printSuccess(JSON.stringify(result, null, 2), options);
+                    }
+                    return printSuccess(result.message);
                 }
                 if (response.status === 403) { // has dependencies
                     const tableFormat = DEPENDENCYTABLEFORMAT;
