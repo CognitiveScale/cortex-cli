@@ -18,10 +18,10 @@ const _ = require('lodash');
 const os = require('os');
 const fs = require('fs');
 const path = require('path');
-const Joi = require('@hapi/joi');
+const Joi = require('joi');
 const debug = require('debug')('cortex:config');
-const { parseJwk } = require('jose-node-cjs-runtime/jwk/parse');
-const { SignJWT } = require('jose-node-cjs-runtime/jwt/sign');
+const jose = require('jose-node-cjs-runtime');
+//const { SignJWT } = require('jose-node-cjs-runtime/jwt/sign');
 const { printError } = require('./commands/utils');
 
 function configDir() {
@@ -32,8 +32,8 @@ async function generateJwt(profile, expiresIn = '2m') {
     const {
         username, issuer, audience, jwk,
     } = profile;
-    const jwtSigner = await parseJwk(jwk, 'Ed25519');
-    return new SignJWT({})
+    const jwtSigner = await jose.importJWK(jwk, 'Ed25519');
+    return new jose.SignJWT({})
         .setProtectedHeader({ alg: 'EdDSA', kid: jwk.kid })
         .setSubject(username)
         .setAudience(audience)
@@ -43,7 +43,7 @@ async function generateJwt(profile, expiresIn = '2m') {
         .sign(jwtSigner, { kid: jwk.kid });
 }
 
-const ProfileSchema = Joi.object().keys({
+const ProfileSchema = Joi.object({
     name: Joi.string().optional(),
     url: Joi.string().uri().required(),
     username: Joi.string().required(),

@@ -21,7 +21,7 @@ const moment = require('moment');
 const { loadProfile } = require('../config');
 const Experiments = require('../client/experiments');
 const {
- printSuccess, printError, filterObject, printTable, parseObject, formatValidationPath, DEPENDENCYTABLEFORMAT,
+ printSuccess, printError, filterObject, printTable, parseObject, fileExists, formatValidationPath, DEPENDENCYTABLEFORMAT,
 } = require('./utils');
 
 class ListExperiments {
@@ -252,6 +252,9 @@ class SaveExperimentCommand {
         const profile = await loadProfile(options.profile);
         debug('%s.executeSaveExperiment(%s)', profile.name, experimentDefinition);
 
+         if (!fileExists(experimentDefinition)) {
+            printError(`File does not exist at: ${experimentDefinition}`);
+        }
         const experimentDefStr = fs.readFileSync(experimentDefinition);
         const experiment = parseObject(experimentDefStr, options);
         debug('%o', experiment);
@@ -288,7 +291,9 @@ class CreateRunCommand {
     async execute(runDefinition, options) {
         const profile = await loadProfile(options.profile);
         debug('%s.executeCreateRun(%s)', profile.name, runDefinition);
-
+         if (!fs.existsSync(runDefinition)) {
+            printError(`File does not exist at: ${runDefinition}`);
+        }
         const runDefinitionStr = fs.readFileSync(runDefinition);
         const run = parseObject(runDefinitionStr, options);
 

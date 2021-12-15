@@ -35,18 +35,21 @@ module.exports.constructError = (error) => {
         errorText = error.message;
     }
     let details;
-
+    let respCode;
     // if JSON was returned, look for either a message or error in it
     try {
         const resp = errResp ? JSON.parse(errorText) : {};
+        respCode = resp.code;
         if (resp.message || resp.error) errorText = resp.message || resp.error;
         // eslint-disable-next-line prefer-destructuring
         details = resp.details;
     } catch (e) {
         // Guess it wasn't JSON!
     }
+    // todo make figuring out the status code more consistent? this might be a holdover from request vs got?
+    const status = _.get(errResp, 'statusCode') || respCode || error.code || error.status || '';
     return {
- success: false, message: errorText, details, status: error.status || error.code || _.get(errResp, 'statusCode') || '',
+ success: false, message: errorText, details, status,
 };
 };
 
@@ -320,4 +323,12 @@ module.exports.SESSIONTABLEFORMAT = [
     { column: 'Session ID', field: 'sessionId', width: 45 },
     { column: 'TTL', field: 'ttl', width: 15 },
     { column: 'Description', field: 'description', width: 70 },
+];
+
+module.exports.CONNECTIONTABLEFORMAT = [
+    { column: 'Name', field: 'name', width: 40 },
+    { column: 'Title', field: 'title', width: 50 },
+    { column: 'Description', field: 'description', width: 50 },
+    { column: 'Connection Type', field: 'connectionType', width: 25 },
+    { column: 'Created On', field: 'createdAt', width: 26 },
 ];
