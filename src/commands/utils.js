@@ -332,3 +332,8 @@ module.exports.CONNECTIONTABLEFORMAT = [
     { column: 'Connection Type', field: 'connectionType', width: 25 },
     { column: 'Created On', field: 'createdAt', width: 26 },
 ];
+
+module.exports.EXTERNALROLESFORMAT = [
+    { column: 'Group', field: 'group' },
+    { column: 'Roles', field: 'roles' },
+];
