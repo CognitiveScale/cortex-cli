@@ -34,6 +34,7 @@ program.description('Work with Cortex Secrets');
 program
     .command('list')
     .description('List secure keys')
+    .alias('l')
     .option('--no-compat', 'Ignore API compatibility checks')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--json', 'Output results using JSON')
