@@ -67,6 +67,7 @@ program
 program
     .command('list')
     .description('List configured profiles')
+    .alias('l')
     .action(() => {
         new ListProfilesCommand(program).execute({ color: program.color });
     });

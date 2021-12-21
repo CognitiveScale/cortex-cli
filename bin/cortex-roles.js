@@ -40,6 +40,7 @@ program.description('Work with Cortex Roles');
 
 program.command('list')
     .description('List roles by project and user')
+    .alias('l')
     .option('--no-compat', 'Ignore API compatibility checks')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
