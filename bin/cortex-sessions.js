@@ -53,7 +53,7 @@ program
 
 // Describe Session
 program
-    .command('describe <sessionName>')
+    .command('describe <session Id>')
     .description('Describe session')
     .alias('get')
     .option('--no-compat', 'Ignore API compatibility checks')
@@ -72,7 +72,7 @@ program
 
 // Delete Session
 program
-    .command('delete <sessionName>')
+    .command('delete <session Id>')
     .description('Delete a session')
     .option('--no-compat', 'Ignore API compatibility checks')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
