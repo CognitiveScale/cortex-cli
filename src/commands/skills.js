@@ -36,6 +36,7 @@ module.exports.SaveSkillCommand = class SaveSkillCommand {
             const profile = await loadProfile(options.profile);
             const skillDefStr = fs.readFileSync(skillDefinition);
             const skill = parseObject(skillDefStr, options);
+            debug('%s.executeSaveSkill(%s)', profile.name, skillDefinition);
             const catalog = new Catalog(profile.url);
             if (!_.isEmpty(options.k8sResource)) {
                 const k8sResources = options.k8sResource.map((f) => JSON.stringify(parseObject(fs.readFileSync(f), options)));
@@ -90,16 +91,18 @@ module.exports.ListSkillsCommand = class ListSkillsCommand {
 
         const catalog = new Catalog(profile.url);
         try {
-            const response = await catalog.listSkills(options.project || profile.project, profile.token, options.nostatus === undefined);
+            const status = !_.get(options, 'nostatus', false); // default show status, if nostatus==true status == false
+            const shared = !_.get(options, 'noshared', false);
+            const response = await catalog.listSkills(options.project || profile.project, profile.token, { status, shared });
             if (response.success) {
                 let result = response.skills;
                 const tableFormat = LISTTABLEFORMAT;
                 if (options.nostatus === undefined) {
-                    result = result.map((skill) => {
-                        const status = _.isEmpty(skill.actionStatuses) ? skill.deployStatus : skill.actionStatuses.map((s) => `${s.name}: ${s.state}`).join(' ');
+                    result = result.map((skillStat) => {
+                        const statuses = _.isEmpty(skillStat.actionStatuses) ? skillStat.deployStatus : skillStat.actionStatuses.map((s) => `${s.name}: ${s.state}`).join(' ');
                         return {
-                            ...skill,
-                            status,
+                            ...skillStat,
+                            status: statuses,
                         };
                     });
                     tableFormat.push({ column: 'Status', field: 'status', width: 30 });
@@ -144,20 +147,22 @@ module.exports.UndeploySkillCommand = class UndeploySkillCommand {
         this.program = program;
     }
 
-    async execute(skillName, options) {
+    async execute(skillNames, options) {
         const profile = await loadProfile(options.profile);
-        debug('%s.executeUndeploySkill(%s)', profile.name, skillName);
         const catalog = new Catalog(profile.url);
-        catalog.unDeploySkill(options.project || profile.project, profile.token, skillName, options.verbose).then((response) => {
-            if (response.success) {
-                printSuccess(`Undeploy Skill ${skillName}: ${response.message}`, options);
-            } else {
-                printError(`Failed to Undeploy Skill ${skillName}: ${response.message}`, options);
-            }
-        })
-            .catch((err) => {
+        await Promise.all(skillNames.map(async (skillName) => {
+            debug('%s.executeUndeploySkill(%s)', profile.name, skillName);
+            try {
+                const response = await catalog.unDeploySkill(options.project || profile.project, profile.token, skillName, options.verbose);
+                if (response.success) {
+                    printSuccess(`Undeploy Skill ${skillName}: ${response.message}`, options);
+                } else {
+                    printError(`Failed to Undeploy Skill ${skillName}: ${response.message}`, options);
+                }
+            } catch (err) {
                 printError(`Failed to Undeploy Skill ${skillName}: ${err.status} ${err.message}`, options);
-            });
+            }
+        }));
     }
 };
 
@@ -188,21 +193,22 @@ module.exports.DeploySkillCommand = class DeploySkillCommand {
         this.program = program;
     }
 
-    async execute(skillName, options) {
+    async execute(skillNames, options) {
         const profile = await loadProfile(options.profile);
-        debug('%s.executeDeploySkill(%s)', profile.name, skillName);
-
         const catalog = new Catalog(profile.url);
-        catalog.deploySkill(options.project || profile.project, profile.token, skillName, options.verbose).then((response) => {
-            if (response.success) {
-                printSuccess(`Deployed Skill ${skillName}: ${response.message}`, options);
-            } else {
-                printError(`Failed to deploy Skill ${skillName}: ${response.message}`, options);
-            }
-        })
-            .catch((err) => {
+        await Promise.all(skillNames.map(async (skillName) => {
+            debug('%s.executeDeploySkill(%s)', profile.name, skillName);
+            try {
+                const response = await catalog.deploySkill(options.project || profile.project, profile.token, skillName, options.verbose);
+                if (response.success) {
+                    printSuccess(`Deployed Skill ${skillName}: ${response.message}`, options);
+                } else {
+                    printError(`Failed to deploy Skill ${skillName}: ${response.message}`, options);
+                }
+            } catch (err) {
                 printError(`Failed to deploy Skill ${skillName}: ${err.status} ${err.message}`, options);
-            });
+            }
+        }));
     }
 };
 
@@ -223,6 +229,9 @@ module.exports.InvokeSkillCommand = class InvokeSkillCommand {
                 printError(`Failed to parse params: ${options.params} Error: ${e}`, options);
             }
         } else if (options.paramsFile) {
+            if (!fs.existsSync(options.paramsFile)) {
+                printError(`File does not exist at: ${options.paramsFile}`);
+            }
             const paramsStr = fs.readFileSync(options.paramsFile);
             params = parseObject(paramsStr, options);
         }
@@ -260,7 +269,10 @@ module.exports.DeleteSkillCommand = class DeleteSkillCommand {
             .then((response) => {
                 if (response.success) {
                     const result = filterObject(response, options);
-                    return printSuccess(JSON.stringify(result, null, 2), options);
+                    if (options.json) {
+                        return printSuccess(JSON.stringify(result, null, 2), options);
+                    }
+                    return printSuccess(result.message);
                 }
                 if (response.status === 403) { // has dependencies
                     const tableFormat = DEPENDENCYTABLEFORMAT;

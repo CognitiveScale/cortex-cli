@@ -41,6 +41,7 @@ program.description('Work with Cortex Experiments');
 program
     .command('list')
     .description('Find experiments')
+    .alias('l')
     .option('--no-compat', 'Ignore API compatibility checks')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
