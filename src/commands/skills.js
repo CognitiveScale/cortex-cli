@@ -58,6 +58,12 @@ module.exports.SaveSkillCommand = class SaveSkillCommand {
                 const scaleCount = parseInt(options.scaleCount, 10);
                 skill.actions.map((a) => a.scaleCount = scaleCount);
             }
+
+            if (options.podspec) {
+                const paramsStr = fs.readFileSync(options.podspec);
+                const podSpec = parseObject(paramsStr, options);
+                skill.actions.map((a) => a.podSpec = podSpec);
+            }
             const response = await catalog.saveSkill(options.project || profile.project, profile.token, skill);
             if (response.success) {
                 printSuccess('Skill saved', options);
