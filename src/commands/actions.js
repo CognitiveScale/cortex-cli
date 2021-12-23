@@ -21,7 +21,7 @@ const { loadProfile } = require('../config');
 const Actions = require('../client/actions');
 
 const {
- printSuccess, printError, filterObject, parseObject, printTable, DEPENDENCYTABLEFORMAT,
+ printSuccess, printError, filterObject, parseObject, printTable, DEPENDENCYTABLEFORMAT, isNumeric,
 } = require('./utils');
 
 module.exports.ListActionsCommand = class {
@@ -86,10 +86,6 @@ module.exports.DescribeActionCommand = class {
             });
     }
 };
-
-function isNumeric(value) {
-    return /^-?\d+$/.test(value);
-}
 
 module.exports.DeployActionCommand = class {
     constructor(program) {

@@ -325,6 +325,8 @@ module.exports.SESSIONTABLEFORMAT = [
     { column: 'Description', field: 'description', width: 70 },
 ];
 
+module.exports.isNumeric = (value) => /^-?\d+$/.test(value);
+
 module.exports.CONNECTIONTABLEFORMAT = [
     { column: 'Name', field: 'name', width: 40 },
     { column: 'Title', field: 'title', width: 50 },

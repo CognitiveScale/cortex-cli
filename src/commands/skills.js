@@ -22,7 +22,8 @@ const Catalog = require('../client/catalog');
 const Agent = require('../client/agents');
 
 const {
-    printSuccess, printError, printWarning, filterObject, parseObject, printTable, formatValidationPath, LISTTABLEFORMAT, DEPENDENCYTABLEFORMAT,
+    printSuccess, printError, printWarning, filterObject, parseObject, printTable, formatValidationPath,
+    LISTTABLEFORMAT, DEPENDENCYTABLEFORMAT, isNumeric,
 } = require('./utils');
 
 module.exports.SaveSkillCommand = class SaveSkillCommand {
@@ -46,6 +47,22 @@ module.exports.SaveSkillCommand = class SaveSkillCommand {
                     printWarning('Applying kubernetes resources to all actions');
                 }
                 skill.actions.map((a) => a.k8sResources = k8sResources);
+            }
+            if (options.scaleCount) {
+                if (!isNumeric(options.scaleCount)) {
+                    printError('--scaleCount must be a number', options);
+                }
+                if (skill.actions.length > 1) {
+                    printWarning('Applying kubernetes resources to all actions');
+                }
+                const scaleCount = parseInt(options.scaleCount, 10);
+                skill.actions.map((a) => a.scaleCount = scaleCount);
+            }
+
+            if (options.podspec) {
+                const paramsStr = fs.readFileSync(options.podspec);
+                const podSpec = parseObject(paramsStr, options);
+                skill.actions.map((a) => a.podSpec = podSpec);
             }
             const response = await catalog.saveSkill(options.project || profile.project, profile.token, skill);
             if (response.success) {
