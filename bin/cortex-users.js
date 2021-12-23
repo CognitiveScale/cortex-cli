@@ -111,6 +111,7 @@ program.command('list')
     .description('Lists all service users created within Cortex')
     .alias('l')
     .option('--no-compat', 'Ignore API compatibility checks')
+    .option('--json', 'Output results using JSON')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
     .action(withCompatibilityCheck((options) => {
