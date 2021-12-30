@@ -5,6 +5,9 @@ Long running Cortex skill serving REST API requests
 Note:
 > This project assumes a `fast api server` with one endpoint `/invoke` that is run with the Uvicorn python3 binary; you may change to another framework or language.
 
+#### Prerequisites
+* `cortex-cli`
+* `Docker`
 
 #### Files generated
 * `skill.yaml` Skill definition
@@ -12,11 +15,27 @@ Note:
 * `requirements.txt` Python3 libraries dependencies
 * `Dockerfile` to build Docker image for this skill
 
-#### Steps
+#### Steps to build and deploy
 
-A Makefile is provided to do these steps. Set environment variables `DOCKER_PREGISTRY_URL` (like <docker-registry-url>/<namespace-org>) and `PROJECT_NAME` (Cortex Project Name) and use Makefile to deploy Skill.
-`make all` will build and push Docker image, deploy Cortex Action and Skill, and then invoke Skill to test.
+Set environment variables `DOCKER_PREGISTRY_URL` (like <docker-registry-url>/<namespace-org>) and `PROJECT_NAME` (Cortex Project Name), and use build scripts to build and deploy.
 
+##### On *nix systems
+A Makefile is provided to do these steps. 
+* `export DOCKER_PREGISTRY_URL=<docker-registry-url>/<namespace-org>`
+* `export PROJECT_NAME=<cortex-project>`
+* `make all` will build and push Docker image, deploy Cortex Action and Skill, and then invoke Skill to test.
+
+##### On Windows systems
+A `make.bat` batch file is provided to do these steps.
+* `set DOCKER_PREGISTRY_URL=<docker-registry-url>/<namespace-org>`
+* `set PROJECT_NAME=<cortex-project>`
+  > Below commands will build and push Docker image, deploy Cortex Action and Skill, and then invoke Skill to test.
+* `make build`
+* `make push`
+* `make deploy`
+* `make tests`
+
+#### Guide to make changes as per the use case 
 1. Modify the main executable (`main.py` by default) run by the action image's entrypoint/command to handle the action's custom logic.
 2. Modify the `requirements.txt` file to provide packages or libraries that the action requires.
 3. Build the docker image (uses the `main.py` file)
