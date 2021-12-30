@@ -41,7 +41,7 @@ GOTO :checkenv %*
 :checkenv
 	echo Validating environment variables
 	IF "!DOCKER_PREGISTRY_URL!" == "" (
-		echo Eenvironment variable DOCKER_PREGISTRY_URL is not set. Set it like <docker-registry-url>/<namespace-org>"
+		echo Environment variable DOCKER_PREGISTRY_URL is not set. Set it like <docker-registry-url>/<namespace-org>"
 		exit/b 1
 	)
 	IF "!PROJECT_NAME!" == ""  (
