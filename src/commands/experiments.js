@@ -227,18 +227,10 @@ class DownloadArtifactCommand {
 
         const exp = new Experiments(profile.url);
         const showProgress = !!options.progress;
-
         // To download content from Secrets
-        exp.downloadArtifact(options.project || profile.project, profile.token, experimentName, runId, artifactName, showProgress).then((response) => {
-            if (response.success) {
-                // messages need to be on stderr as content is streamed to stdout
-                console.error(response.message);
-            } else {
-                printError(`Failed to download artifact: ${response.status} - ${response.message}`, options);
-            }
-        }).catch((err) => {
+        exp.downloadArtifact(options.project || profile.project, profile.token, experimentName, runId, artifactName, showProgress).catch((err) => {
             debug(err);
-            printError(`Failed to download artifact: ${err.status} - ${err.message}`, options);
+            printError(`Failed to download artifact: ${err.status ? err.status : ''}- ${err.message ? err.message : ''}`, options);
         });
     }
 }
