@@ -37,6 +37,7 @@ program.description('Work with Cortex Missions');
 
 program
     .command('list <campaignName>')
+    .alias('l')
     .description('List Missions of the Campaign')
     .option('--json', 'Output results using JSON')
     .option('--no-compat', 'Ignore API compatibility checks')
