@@ -4,7 +4,7 @@
   "description": "Command line tool for CognitiveScale Cortex.",
   "main": "./bin/cortex.js",
   "scripts": {
-    "preinstall": "npx check-node-version -p --package",
+    "preinstall": "npx npm-force-resolutions && npx check-node-version -p --package",
     "prepare": "husky install",
     "pretest": "eslint bin/**/*.js src/**/*.js test/**/*.js && audit-ci -h --allowlist 1002475",
     "test": "NODE_ENV=test mocha --exit"
@@ -71,5 +71,9 @@
     "nock": "13.2.1",
     "rewire": "6.0.0",
     "sinon": "12.0.1"
+  },
+  "resolutions": {
+    "mixin-deep": "^2.0.1",
+    "cache-base": "^2.0.0"
   }
 }
