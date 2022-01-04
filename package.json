@@ -32,6 +32,7 @@
   "homepage": "https://github.com/CognitiveScale/cortex-cli",
   "dependencies": {
     "boxen": "5.1.2",
+    "cache-base": "^2.0.0",
     "chalk": "4.1.2",
     "cli-table3": "0.6.0",
     "commander": "8.3.0",
@@ -50,8 +51,9 @@
     "js-yaml": "4.1.0",
     "lodash": "4.17.21",
     "moment": "2.29.1",
+    "mixin-deep": "^2.0.1",
     "npm-registry-fetch": "12.0.0",
-    "plop": "2.7.6",
+    "plop": "^2.7.6",
     "prompt": "1.2.0",
     "semver": "7.3.5",
     "url-join": "4.0.1",
