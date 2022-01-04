@@ -27,7 +27,7 @@ const Experiments = require('../client/experiments');
 const { LISTTABLEFORMAT, RUNTABLEFORMAT, DEPENDENCYTABLEFORMAT } = require('./utils');
 
 const {
-    printSuccess, printError, filterObject, parseObject, printTable, formatValidationPath,
+    printSuccess, printError, filterObject, parseObject, printTable, formatValidationPath, fileExists, 
 } = require('./utils');
 
 module.exports.SaveModelCommand = class SaveModelCommand {
@@ -38,7 +38,9 @@ module.exports.SaveModelCommand = class SaveModelCommand {
     async execute(modelDefinition, options) {
         const profile = await loadProfile(options.profile);
         debug('%s.executeSaveModel(%s)', profile.name, modelDefinition);
-
+         if (!fileExists(modelDefinition)) {
+            printError(`File does not exist at: ${modelDefinition}`);
+        }
         const modelDefStr = fs.readFileSync(modelDefinition);
         const model = parseObject(modelDefStr, options);
         debug('%o', model);

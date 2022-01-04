@@ -42,6 +42,7 @@ program.description('Work with Cortex Actions');
 program
     .command('list')
     .description('List the deployed actions')
+    .alias('l')
     .option('--no-compat', 'Ignore API compatibility checks')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')

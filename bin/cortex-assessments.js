@@ -119,6 +119,7 @@ program
 program
     .command('list')
     .description('List assessments')
+    .alias('l')
     .option('--skip [Skip records for pagination]', 'Skip records for pagination')
     .option('--limit [Limit records for pagination]', 'Limit records for pagination')
     .option('--no-compat', 'Ignore API compatibility checks')

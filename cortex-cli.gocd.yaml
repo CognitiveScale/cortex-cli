@@ -30,13 +30,13 @@ pipelines:
                     ./gocd-pipeline-scripts/common/c12e-common.sh dev
                     echo ./gocd-pipeline-scripts/cortex5/docs/update-docs.sh cli
   cortex-cli-master:
-    group: fabric6
+    group: fabric6-rc
     environment_variables:
       DOCKER_SECRET_FLAG: "id=npmrc,src=~/.npmrc"
     materials:
       cortex-cli:
         git: git@github.com:CognitiveScale/cortex-cli.git
-        branch: master
+        branch: main
     stages:
       - build:
           clean_workspace: yes
@@ -67,8 +67,8 @@ pipelines:
                     source: cortex-cli-docs.md
                     is_file: yes
                 - script: |
-                    git clone --branch master --single-branch git@github.com:CognitiveScale/cortex-fabric.git
+                    git clone --branch main --single-branch git@github.com:CognitiveScale/cortex-fabric.git
                     mv cortex-cli-docs.md cortex-fabric/docs/docs/reference-guides/cortex-cli.md
                     cd cortex-fabric
                     git commit -a -m "Publishing New CLI Docs"
-                    git push origin master
+                    git push origin main
