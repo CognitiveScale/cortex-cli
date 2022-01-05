@@ -93,9 +93,8 @@ module.exports.TaskLogsCommand = class TaskLogsCommand {
             const response = await tasks.taskLogs(options.project || profile.project, profile.token, taskName, options.verbose);
             if (response.success) {
                 return printSuccess(JSON.stringify(response.logs), options);
-            } else {
-                return printError(`Failed to List Task Logs ${taskName}: ${response.message}`, options);
             }
+            return printError(`Failed to List Task Logs ${taskName}: ${response.message}`, options);
         } catch (err) {
             return printError(`Failed to query Task Logs ${taskName}: ${err.status} ${err.message}`, options);
         }
@@ -112,12 +111,11 @@ module.exports.TaskDeleteCommand = class TaskDeleteCommand {
         debug('%s.executeDeleteTask(%s)', profile.name, taskName);
         const tasks = new Tasks(profile.url);
         try {
-            const response = await tasks.deleteTask(options.project || profile.project, profile.token, taskName, options.verbose)
+            const response = await tasks.deleteTask(options.project || profile.project, profile.token, taskName, options.verbose);
             if (response.success) {
                 return printSuccess(JSON.stringify(response), options);
-            } else {
-                return printError(`Failed to delete ${taskName}: ${response.message}`, options);
             }
+            return printError(`Failed to delete ${taskName}: ${response.message}`, options);
         } catch (err) {
             return printError(`Error deleting ${taskName}: ${err.status} ${err.message}`, options);
         }
