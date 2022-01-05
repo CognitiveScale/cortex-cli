@@ -21,7 +21,7 @@ const moment = require('moment');
 const { loadProfile } = require('../config');
 const Experiments = require('../client/experiments');
 const {
- printSuccess, printError, filterObject, printTable, parseObject, formatValidationPath, DEPENDENCYTABLEFORMAT,
+ printSuccess, printError, filterObject, printTable, parseObject, fileExists, formatValidationPath, DEPENDENCYTABLEFORMAT,
 } = require('./utils');
 
 class ListExperiments {
@@ -227,18 +227,10 @@ class DownloadArtifactCommand {
 
         const exp = new Experiments(profile.url);
         const showProgress = !!options.progress;
-
         // To download content from Secrets
-        exp.downloadArtifact(options.project || profile.project, profile.token, experimentName, runId, artifactName, showProgress).then((response) => {
-            if (response.success) {
-                // messages need to be on stderr as content is streamed to stdout
-                console.error(response.message);
-            } else {
-                printError(`Failed to download artifact: ${response.status} - ${response.message}`, options);
-            }
-        }).catch((err) => {
+        exp.downloadArtifact(options.project || profile.project, profile.token, experimentName, runId, artifactName, showProgress).catch((err) => {
             debug(err);
-            printError(`Failed to download artifact: ${err.status} - ${err.message}`, options);
+            printError(`Failed to download artifact: ${err.status ? err.status : ''}- ${err.message ? err.message : ''}`, options);
         });
     }
 }
@@ -252,6 +244,9 @@ class SaveExperimentCommand {
         const profile = await loadProfile(options.profile);
         debug('%s.executeSaveExperiment(%s)', profile.name, experimentDefinition);
 
+         if (!fileExists(experimentDefinition)) {
+            printError(`File does not exist at: ${experimentDefinition}`);
+        }
         const experimentDefStr = fs.readFileSync(experimentDefinition);
         const experiment = parseObject(experimentDefStr, options);
         debug('%o', experiment);
@@ -288,7 +283,9 @@ class CreateRunCommand {
     async execute(runDefinition, options) {
         const profile = await loadProfile(options.profile);
         debug('%s.executeCreateRun(%s)', profile.name, runDefinition);
-
+         if (!fs.existsSync(runDefinition)) {
+            printError(`File does not exist at: ${runDefinition}`);
+        }
         const runDefinitionStr = fs.readFileSync(runDefinition);
         const run = parseObject(runDefinitionStr, options);
 

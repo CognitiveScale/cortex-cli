@@ -17,7 +17,7 @@ const debug = require('debug')('cortex:cli');
 const { loadProfile } = require('../config');
 const Users = require('../client/users');
 const {
- printSuccess, printError, filterObject,
+ printSuccess, printError, filterObject, printTable,
 } = require('./utils');
 
 function createGrant(options) {
@@ -99,7 +99,7 @@ module.exports.UserCreateCommand = class {
         client.createServiceUser(profile.token, user).then((response) => {
             if (response.success) {
                 const result = filterObject(response.result, options);
-                printSuccess(JSON.stringify(result, null, 2), options);
+                printSuccess(JSON.stringify(result.config, null, 2), options);
             } else {
                 printError(`Failed to create user ${user} : ${response.message}`, options);
             }
@@ -123,7 +123,11 @@ module.exports.UserListCommand = class {
         client.listServiceUsers(profile.token).then((response) => {
             if (response.success) {
                 const result = filterObject(response.result, options);
-                printSuccess(JSON.stringify(result, null, 2), options);
+                if (options.json) {
+                    printSuccess(JSON.stringify(result, null, 2), options);
+                } else {
+                    printTable([{ column: 'User', field: 'user' }], result.users.map((x) => ({ user: x })));
+                }
             } else {
                 printError(`Failed to list service users : ${response.message}`, options);
             }

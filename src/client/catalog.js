@@ -49,11 +49,9 @@ module.exports = class Catalog {
             .catch((err) => constructError(err));
     }
 
-    listSkills(projectId, token, status = false) {
+    listSkills(projectId, token, query) {
         checkProject(projectId);
         debug('listSkills() => %s', this.endpoints.skills(projectId));
-        const query = {};
-        if (status) query.status = true;
         return got
             .get(this.endpoints.skills(projectId), {
                 headers: { Authorization: `Bearer ${token}` },
@@ -199,6 +197,34 @@ module.exports = class Catalog {
             })
             .json()
             .then((agent) => ({ success: true, agent }))
+            .catch((err) => constructError(err));
+    }
+
+    deployAgent(projectId, token, agentName, verbose = false) {
+        checkProject(projectId);
+        const endpoint = `${this.endpoints.agents(projectId)}/${encodeURIComponent(agentName)}/deploy`;
+        debug('deployAgent(%s) => %s', agentName, endpoint);
+        return got
+            .get(endpoint, {
+                headers: { Authorization: `Bearer ${token}` },
+                'user-agent': getUserAgent(),
+                searchParams: { verbose },
+            }).json()
+            .then((res) => ({ ...res }))
+            .catch((err) => constructError(err));
+    }
+
+    unDeployAgent(projectId, token, agentName, verbose = false) {
+        checkProject(projectId);
+        const endpoint = `${this.endpoints.agents(projectId)}/${encodeURIComponent(agentName)}/undeploy`;
+        debug('undeployAgent(%s) => %s', agentName, endpoint);
+        return got
+            .get(endpoint, {
+                headers: { Authorization: `Bearer ${token}` },
+                'user-agent': getUserAgent(),
+                searchParams: { verbose },
+            }).json()
+            .then((res) => ({ ...res }))
             .catch((err) => constructError(err));
     }
 
@@ -494,7 +520,7 @@ module.exports = class Catalog {
                 'user-agent': getUserAgent(),
             })
             .json()
-            .then((skill) => ({ success: true, skill }))
+            .then((skill) => skill)
             .catch((err) => constructError(err));
     }
 

@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 const fs = require('fs');
+const _ = require('lodash');
 
 const debug = require('debug')('cortex:cli');
 const { loadProfile } = require('../config');
@@ -32,7 +33,9 @@ module.exports.SaveSessionCommand = class SaveSessionCommand {
     async execute(sessionDefinition, options) {
         const profile = await loadProfile(options.profile);
         debug('%s.executeSaveSession(%s)', profile.name, sessionDefinition);
-
+        if (!fs.existsSync(sessionDefinition)) {
+            printError(`File does not exist at: ${sessionDefinition}`);
+        }
         const sessionDefStr = fs.readFileSync(sessionDefinition);
         const session = parseObject(sessionDefStr, options);
         debug('%o', session);
@@ -40,7 +43,7 @@ module.exports.SaveSessionCommand = class SaveSessionCommand {
         const sessions = new Sessions(profile.url);
         sessions.saveSession(options.project || profile.project, profile.token, session).then((response) => {
             if (response.success) {
-                printSuccess('Session saved', options);
+                printSuccess(_.get(response, 'message.message', 'Session saved'), options);
             } else if (response.details) {
                 console.log(`Failed to save session: ${response.status} ${response.message}`);
                 console.log('The following issues were found:');
