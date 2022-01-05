@@ -33,11 +33,11 @@ describe('Tasks', () => {
         restoreEnv = mockedEnv({
             CORTEX_CONFIG_DIR: './test/cortex',
         });
-        nock.disableNetConnect();
+        nock.activate();
     });
     after(() => {
         restoreEnv();
-        nock.enableNetConnect();
+        nock.restore();
     });
 
     afterEach(() => {
@@ -72,7 +72,7 @@ describe('Tasks', () => {
     });
 
     it('list tasks client', async () => {
-        const taskCtl = new Tasks(serverUrl);
+        const taskCtl = new Tasks('http://127.0.0.1:8000');
         const project = 'test';
         const options = {
             project,
@@ -81,7 +81,7 @@ describe('Tasks', () => {
 
         const requestPath = `/fabric/v4/projects/${project}/tasks?project=${project}&json=true`;
         const response = { success: true, tasks: ['task0', 'task1'] };
-        nock(serverUrl).get(requestPath).reply(200, response);
+        nock('http://127.0.0.1:8000').get(requestPath).reply(200, response);
         const taskList = await taskCtl.listTasks(project, '', options);
         console.log(`taskList: ${JSON.stringify(taskList)}`);
         expect(taskList).to.deep.equal(response);
