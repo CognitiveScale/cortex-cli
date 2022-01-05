@@ -35,25 +35,24 @@ module.exports.ListTasksCommand = class {
         // TODO validate param types?
         const queryParams = { ...options };
 
-        tasks.listTasks(projectId, profile.token, queryParams).then((response) => {
+        try {
+            const response = await tasks.listTasks(projectId, profile.token, queryParams);
             if (response.success) {
-                const taskList = _.get(response, 'tasks', []);
-
-                const result = {
-                    tasks: _.map(taskList, (t) => ({ name: t })),
-                };
-
-                const tableFormat = [{ column: 'Task Name', field: 'name', width: 70 }];
+                const taskResponse = _.get(response, 'tasks', []);
 
                 if (options.json) {
-                    return printSuccess(JSON.stringify(result, null, 2), options);
+                    return printSuccess(JSON.stringify(taskResponse, null, 2), options);
                 }
+                const result = {
+                    tasks: _.map(taskResponse, (t) => ({ name: t })),
+                };
+                const tableFormat = [{ column: 'Task Name', field: 'name', width: 70 }];
                 return printTable(tableFormat, result.tasks);
             }
             return printError(`Failed to list tasks: ${response.message}`, options);
-        }).catch((err) => {
-            printError(`Failed to query tasks: ${err.status} ${err.message} ${JSON.stringify(err)}`, options);
-        });
+        } catch (err) {
+            return printError(`Failed to query tasks: ${err.status} ${err.message} ${JSON.stringify(err)}`, options);
+        }
     }
 };
 
@@ -69,17 +68,12 @@ module.exports.DescribeTaskCommand = class {
 
         if (options.k8s) queryParams.k8s = true;
         const tasks = new Tasks(profile.url);
-        // const output = _.get(options, 'output', 'json');
         try {
             const response = await tasks.getTask(options.project || profile.project, taskName, profile.token, queryParams);
             if (response.success === false) {
                 return printError(`Failed to describe task ${taskName}: ${response.message}`);
             }
-            // if (output.toLowerCase() === 'json') {
-                // const result = filterObject(JSON.parse(response), options);
             return printSuccess(JSON.stringify(response, null, 2), options);
-            // }
-            // return printSuccess(response);
         } catch (err) {
             return printError(`Failed to fetch task ${taskName}: ${err.status} ${err.message}`, options);
         }
@@ -95,15 +89,16 @@ module.exports.TaskLogsCommand = class TaskLogsCommand {
         const profile = await loadProfile(options.profile);
         debug('%s.executeTaskLogs(%s)', profile.name, taskName);
         const tasks = new Tasks(profile.url);
-        tasks.taskLogs(options.project || profile.project, profile.token, taskName, options.verbose).then((response) => {
+        try {
+            const response = await tasks.taskLogs(options.project || profile.project, profile.token, taskName, options.verbose);
             if (response.success) {
-                printSuccess(JSON.stringify(response.logs), options);
+                return printSuccess(JSON.stringify(response.logs), options);
             } else {
-                printError(`Failed to List Task Logs ${taskName}: ${response.message}`, options);
+                return printError(`Failed to List Task Logs ${taskName}: ${response.message}`, options);
             }
-        }).catch((err) => {
-            printError(`Failed to query Task Logs ${taskName}: ${err.status} ${err.message}`, options);
-        });
+        } catch (err) {
+            return printError(`Failed to query Task Logs ${taskName}: ${err.status} ${err.message}`, options);
+        }
     }
 };
 
@@ -116,14 +111,15 @@ module.exports.TaskDeleteCommand = class TaskDeleteCommand {
         const profile = await loadProfile(options.profile);
         debug('%s.executeDeleteTask(%s)', profile.name, taskName);
         const tasks = new Tasks(profile.url);
-        tasks.deleteTask(options.project || profile.project, profile.token, taskName, options.verbose).then((response) => {
+        try {
+            const response = await tasks.deleteTask(options.project || profile.project, profile.token, taskName, options.verbose)
             if (response.success) {
-                printSuccess(JSON.stringify(response), options);
+                return printSuccess(JSON.stringify(response), options);
             } else {
-                printError(`Failed to delete ${taskName}: ${response.message}`, options);
+                return printError(`Failed to delete ${taskName}: ${response.message}`, options);
             }
-        }).catch((err) => {
-            printError(`Error deleting ${taskName}: ${err.status} ${err.message}`, options);
-        });
+        } catch (err) {
+            return printError(`Error deleting ${taskName}: ${err.status} ${err.message}`, options);
+        }
     }
 };
