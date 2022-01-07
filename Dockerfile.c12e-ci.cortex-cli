@@ -1,4 +1,4 @@
-FROM c12e/nodejs:dev-12.22.0
+FROM node:14-buster-slim
 
 COPY . /from_ci_cd_build
 
