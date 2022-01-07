@@ -32,7 +32,7 @@ module.exports = class Assessments {
         const url = `${this.endpointApiV4}/tree/${project}/${type}/${encodeURIComponent(name)}?${querystring.stringify({ missing })}`;
         debug('dependencyTree => %s', url);
         const body = {
-            headers: { Authorization: `Bearer ${token}` },
+            headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
             'user-agent': getUserAgent(),
         };
         if (json) {
