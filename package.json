@@ -7,7 +7,7 @@
     "preinstall": "npx npm-force-resolutions && npx check-node-version -p --package",
     "prepare": "husky install",
     "pretest": "eslint bin/**/*.js src/**/*.js test/**/*.js && audit-ci -h --allowlist 1002475",
-    "test": "NODE_ENV=test mocha --exit"
+    "test": "cross-env NODE_ENV=test mocha --exit --ignore uploadDirectory.js"
   },
   "engines": {
     "node": ">=14.0.0"
@@ -72,6 +72,7 @@
     "audit-ci": "5.1.2",
     "chai": "4.3.4",
     "chai-as-promised": "7.1.1",
+    "cross-env": "7.0.3",
     "eslint": "8.3.0",
     "eslint-config-airbnb-base": "15.0.0",
     "eslint-plugin-import": "2.25.3",

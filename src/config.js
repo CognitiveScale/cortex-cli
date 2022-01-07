@@ -21,7 +21,6 @@ const path = require('path');
 const Joi = require('joi');
 const debug = require('debug')('cortex:config');
 const jose = require('jose-node-cjs-runtime');
-//const { SignJWT } = require('jose-node-cjs-runtime/jwt/sign');
 const { printError } = require('./commands/utils');
 
 function configDir() {
