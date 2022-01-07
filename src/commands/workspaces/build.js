@@ -20,11 +20,12 @@ const _ = {
 const { getSkillInfo, buildImageTag } = require('./workspace-utils');
 
 class DockerBuildProgressTracker {
-  constructor() {
+  constructor(data) {
     this.layers = { download: {}, extract: {} };
     this.downloaded = 0;
     this.extracted = 0;
     this.streamData = '';
+    this.eventData = data || '';
 
     this.bars = new cliProgress.MultiBar({
       clearOnComplete: false,
@@ -32,6 +33,7 @@ class DockerBuildProgressTracker {
       format: (opts, params, payload) => this.statusFormatter(opts, params, payload),
     }, cliProgress.Presets.shades_grey);
 
+    this.sectionBar = this.bars.create(0, 0, { type: 'section' });
     this.dlBar = this.bars.create(100, 0, { type: 'download' });
     this.exBar = this.bars.create(100, 0, { type: 'extract' });
     this.statusBar = this.bars.create(0, 0, { type: 'status' });
@@ -49,14 +51,17 @@ class DockerBuildProgressTracker {
           return 'Extracting:  Complete';
         }
         return `Extracting:  [${BarFormat(params.progress, barOpts)}]`;
-      case 'status':
-        return `Status:      ${this.streamData.trim()}`;
-      default:
+        case 'status':
+          return `Status:      ${this.streamData.trim()}`;
+        case 'section':
+          return `Building:    ${this.eventData || ''}`;
+        default:
         return '';
     }
   }
 
   updateProgress() {
+    this.sectionBar.update(null);
     this.dlBar.update(this.downloaded);
     this.exBar.update(this.extracted);
     this.statusBar.update(null);
@@ -72,12 +77,16 @@ class DockerBuildProgressTracker {
     this.updateProgress();
   }
 
-  processEvent(evt) {
+  processEvent(evt, data) {
     const { progressDetail } = evt;
     let { status, id } = evt;
 
     status = status || '';
     id = id || '';
+
+    if (data) {
+      this.eventData = data;
+    }
 
     if (evt.stream) {
       const newStr = evt.stream.replace(/\n|\r/g, '');
@@ -194,8 +203,8 @@ module.exports.WorkspaceBuildCommand = class WorkspaceBuildCommand {
     const skillInfo = await getSkillInfo(target);
 
     if (skillInfo.length > 0) {
-      console.log('Building...');
-      const status = new DockerBuildProgressTracker();
+      const skillNameList = _.map(skillInfo, 'skill.name');
+      const status = new DockerBuildProgressTracker(skillNameList.join(', '));
       await Promise.all(_.map(skillInfo, (info) => {
         const actions = info.skill.actions ? info.skill.actions : [];
         return Promise.all(_.map(actions, (action) => this.buildAction(

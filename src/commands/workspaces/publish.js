@@ -168,7 +168,7 @@ module.exports.WorkspacePublishCommand = class WorkspacePublishCommand {
         authconfig: registryAuth,
       });
 
-    return new Promise((resolve, reject) => {
+    await new Promise((resolve, reject) => {
       this.docker.modem.followProgress(
         imgPush,
         (err) => {
@@ -178,7 +178,6 @@ module.exports.WorkspacePublishCommand = class WorkspacePublishCommand {
           action.image = newTag;
           status.complete();
           status.stop();
-          console.log(`Pushed action ${action.name}`);
           return resolve(true);
         },
         (evt) => {
@@ -332,7 +331,6 @@ module.exports.WorkspacePublishCommand = class WorkspacePublishCommand {
 
         if (_.every(actionsPublished)) {
           this.catalogClient.saveSkill(profile.project, profile.token, info.skill);
-          console.log(`Published skill ${info.skill.name}`);
           return true;
         }
 

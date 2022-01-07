@@ -175,7 +175,7 @@ module.exports.WorkspaceGenerateCommand = class WorkspaceGenerateCommand {
 
                 const relPath = f.path.slice(path.dirname(template.template.path).length);
                 const sourcePath = _.template(relPath, { interpolate: /__([\s\S]+?)__/g })(templateVars);
-                const targetPath = path.resolve(destinationPath, sourcePath);
+                const targetPath = path.join(destinationPath, sourcePath);
 
                 await mkdir(path.dirname(targetPath), { recursive: true });
                 await writeFile(targetPath, buf);
