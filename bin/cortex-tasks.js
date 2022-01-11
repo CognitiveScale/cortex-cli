@@ -31,10 +31,11 @@ const {
 program.name('cortex tasks');
 program.description('Work with Cortex Tasks');
 
-// List activations
+// List tasks
 program
     .command('list')
     .description('List tasks')
+    .alias('l')
     .option('--no-compat', 'Ignore API compatibility checks')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
