@@ -99,7 +99,7 @@ module.exports.UserCreateCommand = class {
         client.createServiceUser(profile.token, user).then((response) => {
             if (response.success) {
                 const result = filterObject(response.result, options);
-                printSuccess(JSON.stringify(result.config, null, 2), options);
+                printSuccess(JSON.stringify(result.config, null), options);
             } else {
                 printError(`Failed to create user ${user} : ${response.message}`, options);
             }
