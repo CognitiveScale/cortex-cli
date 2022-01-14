@@ -30,6 +30,7 @@ class DockerPushProgressTracker {
     this.layers = { upload: {} };
     this.pushed = 0;
     this.result = {};
+    this.stage = '';
 
     this.bars = new cliProgress.MultiBar({
       clearOnComplete: false,
@@ -44,9 +45,9 @@ class DockerPushProgressTracker {
     switch (payload.type) {
       case 'upload':
         if (params.progress >= 1) {
-          return 'Pushing: Complete';
+          return `Pushing ${this.stage}: Complete`;
         }
-        return `Pushing: [${BarFormat(params.progress, barOpts)}]`;
+        return `Pushing ${this.stage}: [${BarFormat(params.progress, barOpts)}]`;
       case 'status':
         return `Status:      ${this.streamData.trim()}`;
       default:
@@ -68,9 +69,13 @@ class DockerPushProgressTracker {
     return this.result;
   }
 
-  processEvent(evt) {
+  processEvent(evt, imgtag) {
     const { progressDetail } = evt;
     let { status, id } = evt;
+
+    if (imgtag) {
+      this.stage = imgtag;
+    }
 
     if (evt.aux) {
       this.result = evt.aux;
@@ -112,6 +117,7 @@ class DockerPushProgressTracker {
 module.exports.WorkspacePublishCommand = class WorkspacePublishCommand {
   constructor(program) {
     this.program = program;
+    this.docker = new Docker();
   }
 
   async getRegistryAuth(profile, options) {
@@ -181,7 +187,7 @@ module.exports.WorkspacePublishCommand = class WorkspacePublishCommand {
           return resolve(true);
         },
         (evt) => {
-          status.processEvent(evt);
+          status.processEvent(evt, action.name);
         },
       );
     });
@@ -204,8 +210,6 @@ module.exports.WorkspacePublishCommand = class WorkspacePublishCommand {
 
     if (skillInfo.length > 0) {
       const profile = await loadProfile();
-
-      this.docker = new Docker();
 
       this.catalogClient = new Catalog(profile.url);
       this.modelsClient = new Models(profile.url);

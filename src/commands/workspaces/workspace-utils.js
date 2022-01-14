@@ -2,9 +2,9 @@ const path = require('path');
 const glob = require('glob');
 const yaml = require('js-yaml');
 const {
-  readFile, stat,
+  readFile, 
 } = require('fs/promises');
-
+const { statSync } = require('fs');
 const ghGot = require('gh-got');
 
 const _ = {
@@ -36,16 +36,15 @@ module.exports.restoreTerminalPosition = function saveTerminalPosition() {
 };
 
 module.exports.getSkillInfo = function getSkillInfo(target) {
+  let skillFiles = [];
   if (target.endsWith('skill.yaml')) {
-    const fname = path.resolve(target);
-    return stat(fname)
-      .then(() => [fname])
-      .catch(() => []);
+    skillFiles = statSync(path.resolve(target)) ? [target] : [];
+  } else {
+    skillFiles = glob.sync('/skills/**/skill.yaml', {
+      root: target,
+      absolute: true,
+    });
   }
-  const skillFiles = glob.sync('/skills/**/skill.yaml', {
-    root: target,
-    absolute: true,
-  });
   return Promise.all(_.map(skillFiles, async (uri) => {
     const skill = await readFile(uri).catch(() => { });
     return {
