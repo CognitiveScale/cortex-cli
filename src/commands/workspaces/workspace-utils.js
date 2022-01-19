@@ -13,14 +13,23 @@ const _ = {
   mean: require('lodash/mean'),
 };
 
+const keytar = require('keytar');
+
 const { loadProfile } = require('../../config');
 
-module.exports.validateToken = function validateToken(config) {
-  const githubToken = _.get(config, 'templateConfig.githubToken');
-  if (githubToken) {
-    return ghGot('user', { token: githubToken.access_token }).catch(() => undefined).then((u) => ((u && u.statusCode === 200) ? githubToken.access_token : undefined));
+const CORTEX_CLI_AUTH_ID = 'cortex-cli:github';
+const CORTEX_CLI_AUTH_USER = 'cortex-cli';
+
+module.exports.validateToken = async function validateToken() {
+  const authorization = await keytar.getPassword(CORTEX_CLI_AUTH_ID, CORTEX_CLI_AUTH_USER);
+  if (authorization) {
+    return ghGot('user', { headers: { authorization } }).catch(() => undefined).then((u) => ((u && u.statusCode === 200) ? authorization : undefined));
   }
   return undefined;
+};
+
+module.exports.persistToken = async function persistToken(token) {
+  await keytar.setPassword(CORTEX_CLI_AUTH_ID, CORTEX_CLI_AUTH_USER, `${token.token_type} ${token.access_token}`);
 };
 
 module.exports.printToTerminal = function printToTerminal(txt) {
