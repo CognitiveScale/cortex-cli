@@ -4,7 +4,7 @@ const got = require('got');
 const open = require('open');
 const moment = require('moment');
 
-const { printToTerminal, validateToken } = require('./workspace-utils');
+const { printToTerminal, validateToken, persistToken } = require('./workspace-utils');
 
 const _ = {
   get: require('lodash/get'),
@@ -54,7 +54,7 @@ module.exports.WorkspaceConfigureCommand = class WorkspaceConfigureCommand {
       },
     ])
       .then(async (answers) => {
-        let githubToken = await validateToken(config);
+        const githubToken = await validateToken();
 
         if (!githubToken && !this.options.refresh) {
           printError('Current Github credentials invalid.  Reauthorization required.', this.options, false);
@@ -104,11 +104,8 @@ module.exports.WorkspaceConfigureCommand = class WorkspaceConfigureCommand {
 
                   if (accessToken.access_token) {
                     clearTimeout(pollTimer);
-                    githubToken = accessToken;
-                    config.templateConfig = {
-                      ...answers,
-                      githubToken,
-                    };
+                    persistToken(accessToken);
+                    config.templateConfig = answers;
                     config.save();
                     printSuccess('\x1b[0G\x1b[2KGithub token configuration successful.', options);
                     resolve();

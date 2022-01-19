@@ -48,7 +48,7 @@ module.exports.WorkspaceGenerateCommand = class WorkspaceGenerateCommand {
     this.gitRepo = repo;
     this.branch = branch;
 
-    this.authorization = `${githubToken.token_type} ${githubToken.access_token}`;
+    this.authorization = githubToken;
 
     this.tree = await ghGot(`repos/${repo}/branches/${branch || 'main'}`, {
       headers: { authorization: this.authorization },
@@ -130,7 +130,7 @@ module.exports.WorkspaceGenerateCommand = class WorkspaceGenerateCommand {
     this.destination = destination;
 
     this.config = readConfig();
-    this.githubToken = await validateToken(this.config);
+    this.githubToken = await validateToken();
 
     if (!this.githubToken) {
       printError(
