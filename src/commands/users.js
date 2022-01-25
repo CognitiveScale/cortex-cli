@@ -37,7 +37,7 @@ module.exports.UserGrantCommand = class {
     async execute(user, options) {
         const profile = await loadProfile(options.profile);
         const form = createGrant(options);
-        debug('%s.grantUser=%s', profile.name, user || 'self');
+        debug('%s.grantUser(%s)', profile.name, user || 'self');
         const client = new Users(profile.url, user);
         const call = (deleteFlag, token, body) => {
             if (deleteFlag) {
@@ -69,7 +69,7 @@ module.exports.UserDeleteCommand = class {
 
     async execute(user, options) {
         const profile = await loadProfile(options.profile);
-        debug('%s.deleteServiceUser=%s', profile.name, user);
+        debug('%s.deleteServiceUser(%s)', profile.name, user);
 
         const client = new Users(profile.url, user);
         client.deleteServiceUser(profile.token, user).then((response) => {
@@ -93,7 +93,7 @@ module.exports.UserCreateCommand = class {
 
     async execute(user, options) {
         const profile = await loadProfile(options.profile);
-        debug('%s.createServiceUser=%s', profile.name, user);
+        debug('%s.createServiceUser(%s)', profile.name, user);
 
         const client = new Users(profile.url, user);
         client.createServiceUser(profile.token, user).then((response) => {
@@ -145,7 +145,7 @@ module.exports.UserDescribeCommand = class {
 
     async execute(options) {
         const profile = await loadProfile(options.profile);
-        debug('%s.describeForUser=%s', profile.name, options.user || 'self');
+        debug('%s.describeForUser(%s)', profile.name, options.user || 'self');
 
         const flags = [];
 
@@ -177,7 +177,7 @@ module.exports.UserProjectAssignCommand = class {
 
     async execute(project, options) {
         const profile = await loadProfile(options.profile);
-        debug('%s.assignUserProject=%s', profile.name, project);
+        debug('%s.assignUserProject(%s)', profile.name, project);
 
         const client = new Users(profile.url, null);
         const call = (deleteFlag, token, assignProject, users) => {
