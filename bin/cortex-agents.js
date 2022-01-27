@@ -17,24 +17,27 @@
  */
 
 const chalk = require('chalk');
-const program = require('../src/commander');
+const program = require('commander');
 
 const { withCompatibilityCheck } = require('../src/compatibility');
 
 const {
-    SaveAgentCommand,
-    ListAgentsCommand,
-    DescribeAgentCommand,
-    InvokeAgentServiceCommand,
-    GetActivationCommand,
-    ListActivationsCommand,
-    ListServicesCommand,
-    ListAgentSnapshotsCommand,
-    DescribeAgentSnapshotCommand,
     CreateAgentSnapshotCommand,
     DeleteAgentCommand,
+    DeployAgentCommand,
+    DescribeAgentCommand,
+    DescribeAgentSnapshotCommand,
+    GetActivationCommand,
+    InvokeAgentServiceCommand,
+    ListActivationsCommand,
+    ListAgentSnapshotsCommand,
+    ListAgentsCommand,
+    ListServicesCommand,
+    SaveAgentCommand,
+    UndeployAgentCommand,
 } = require('../src/commands/agents');
 
+program.name('cortex agents');
 program.description('Work with Cortex Agents');
 
 // Save Agent
@@ -68,6 +71,21 @@ program
     .action(withCompatibilityCheck((options) => {
         try {
             new ListAgentsCommand(program).execute(options);
+        } catch (err) {
+            console.error(chalk.red(err.message));
+        }
+    }));
+
+// Deploy agent
+program
+    .command('deploy <agentNames...>')
+    .description('Deploy the agent resource to the cluster')
+    .option('--no-compat', 'Ignore API compatibility checks')
+    .option('--profile [profile]', 'The profile to use')
+    .option('--project [project]', 'The project to use')
+    .action(withCompatibilityCheck((agentNames, options) => {
+        try {
+            new DeployAgentCommand(program).execute(agentNames, options);
         } catch (err) {
             console.error(chalk.red(err.message));
         }
@@ -176,6 +194,21 @@ program
         }
     }));
 
+// Undeploy agent
+program
+    .command('undeploy <agentNames...>')
+    .description('Undeploy the agent resource from the cluster')
+    .option('--no-compat', 'Ignore API compatibility checks')
+    .option('--profile [profile]', 'The profile to use')
+    .option('--project [project]', 'The project to use')
+    .action(withCompatibilityCheck((agentNames, options) => {
+        try {
+            new UndeployAgentCommand(program).execute(agentNames, options);
+        } catch (err) {
+            console.error(chalk.red(err.message));
+        }
+    }));
+
 program
     .command('list-snapshots <agentName>')
     .description('List agent snapshots')
@@ -244,4 +277,7 @@ program
         }
     }));
 
-program.parse(process.argv);
+if (require.main === module) {
+    program.showHelpAfterError().parseAsync(process.argv);
+}
+module.exports = program;

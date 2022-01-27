@@ -21,7 +21,7 @@ const { loadProfile } = require('../config');
 const Actions = require('../client/actions');
 
 const {
- printSuccess, printError, filterObject, parseObject, printTable, DEPENDENCYTABLEFORMAT,
+ printSuccess, printError, filterObject, parseObject, printTable, DEPENDENCYTABLEFORMAT, isNumeric,
 } = require('./utils');
 
 module.exports.ListActionsCommand = class {
@@ -29,8 +29,8 @@ module.exports.ListActionsCommand = class {
         this.program = program;
     }
 
-    execute(options) {
-        const profile = loadProfile(options.profile);
+    async execute(options) {
+        const profile = await loadProfile(options.profile);
         debug('%s.executeListActions()', profile.name);
 
         const actions = new Actions(profile.url);
@@ -67,8 +67,8 @@ module.exports.DescribeActionCommand = class {
         this.program = program;
     }
 
-    execute(actionName, options) {
-        const profile = loadProfile(options.profile);
+    async execute(actionName, options) {
+        const profile = await loadProfile(options.profile);
         debug('%s.executeDescribeAction(%s)', profile.name, actionName);
 
         const actions = new Actions(profile.url);
@@ -87,80 +87,91 @@ module.exports.DescribeActionCommand = class {
     }
 };
 
-function isNumeric(value) {
-    return /^-?\d+$/.test(value);
-}
-
 module.exports.DeployActionCommand = class {
     constructor(program) {
         this.program = program;
     }
 
-    execute(actionDefinition, options) {
-        const profile = loadProfile(options.profile);
+    async execute(actionDefinition, options) {
+        try {
+            const profile = await loadProfile(options.profile);
 
-        let actionInst = {};
-        if (actionDefinition) {
-            debug('%s.createAgentSnapshot(%s)', profile.name, actionDefinition);
-            try {
-                const actionDefStr = fs.readFileSync(actionDefinition);
-                actionInst = parseObject(actionDefStr, options);
-            } catch (err) {
-                printError(`Failed to deploy action: ${err.message}`, options);
-            }
-        }
-        if (options.actionName) {
-            actionInst.name = options.actionName;
-        }
-        if (options.name) { actionInst.name = options.name; }
-        if (options.podspec) {
-            const paramsStr = fs.readFileSync(options.podspec);
-            actionInst.podSpec = parseObject(paramsStr, options);
-        }
-        if (!_.isEmpty(options.k8sResource)) {
-            const k8sResources = options.k8sResource.map((f) => parseObject(fs.readFileSync(f), options));
-            actionInst.k8sResources = k8sResources;
-        }
-        if (options.docker) { actionInst.image = options.docker; }
-        if (options.image) { actionInst.image = options.image; }
-
-        if (options.type) { actionInst.type = options.type; }
-        if (options.actionType) { actionInst.type = options.actionType; }
-        if (options.cmd) { actionInst.command = options.cmd; }
-        if (options.port) {
-            if (!isNumeric(options.port)) {
-                printError('--port must be a number', options);
-            }
-            actionInst.port = options.port;
-        }
-        if (options.environmentVariables) { actionInst.environmentVariables = options.environmentVariables; }
-        if (options.pushDocker) { actionInst.pushDocker = options.pushDocker; }
-        if (options.scaleCount) {
-            if (!isNumeric(options.scaleCount)) {
-                printError('--scaleCount must be a number', options);
-            }
-            actionInst.scaleCount = parseInt(options.scaleCount, 10);
-        }
-
-        if (options.jobTimeout) {
-            if (!isNumeric(options.jobTimeout)) {
-                printError('--jobTimeout must be a number', options);
-            }
-            actionInst.jobTimeout = parseInt(options.jobTimeout, 10);
-        }
-
-        const actions = new Actions(profile.url);
-        actions.deployAction(options.project || profile.project, profile.token, actionInst)
-            .then((response) => {
-                if (response.success) {
-                    printSuccess(JSON.stringify(response.message, null, 2), options);
-                } else {
-                    printError(`Action deployment failed: ${response.status} ${response.message}`, options);
+            let actionInst = {};
+            if (actionDefinition) {
+                debug('%s.deployActionCommand(%s)', profile.name, actionDefinition);
+                try {
+                    const actionDefStr = fs.readFileSync(actionDefinition);
+                    actionInst = parseObject(actionDefStr, options);
+                } catch (err) {
+                    printError(`Failed to deploy action: ${err.message}`, options);
                 }
-            })
-            .catch((err) => {
+            }
+            if (options.actionName) {
+                actionInst.name = options.actionName;
+            }
+            if (options.name) {
+                actionInst.name = options.name;
+            }
+            if (options.podspec) {
+                const paramsStr = fs.readFileSync(options.podspec);
+                actionInst.podSpec = parseObject(paramsStr, options);
+            }
+            if (!_.isEmpty(options.k8sResource)) {
+                const k8sResources = options.k8sResource.map((f) => parseObject(fs.readFileSync(f), options));
+                actionInst.k8sResources = k8sResources;
+            }
+            if (options.docker) {
+                actionInst.image = options.docker;
+            }
+            if (options.image) {
+                actionInst.image = options.image;
+            }
+
+            if (options.type) {
+                actionInst.type = options.type;
+            }
+            if (options.actionType) {
+                actionInst.type = options.actionType;
+            }
+            if (options.cmd) {
+                actionInst.command = options.cmd;
+            }
+            if (options.port) {
+                if (!isNumeric(options.port)) {
+                    printError('--port must be a number', options);
+                }
+                actionInst.port = options.port;
+            }
+            if (options.environmentVariables) {
+                actionInst.environmentVariables = options.environmentVariables;
+            }
+            if (options.pushDocker) {
+                actionInst.pushDocker = options.pushDocker;
+            }
+            if (options.scaleCount) {
+                if (!isNumeric(options.scaleCount)) {
+                    printError('--scaleCount must be a number', options);
+                }
+                actionInst.scaleCount = parseInt(options.scaleCount, 10);
+            }
+
+            if (options.jobTimeout) {
+                if (!isNumeric(options.jobTimeout)) {
+                    printError('--jobTimeout must be a number', options);
+                }
+                actionInst.jobTimeout = parseInt(options.jobTimeout, 10);
+            }
+
+            const actions = new Actions(profile.url);
+            const response = await actions.deployAction(options.project || profile.project, profile.token, actionInst);
+            if (response.success) {
+                printSuccess(JSON.stringify(response.message, null, 2), options);
+            } else {
+                printError(`Action deployment failed: ${response.status} ${response.message}`, options);
+            }
+        } catch (err) {
                 printError(`Failed to deploy action: ${err.status} ${err.message}`, options);
-            });
+        }
     }
 };
 
@@ -169,8 +180,8 @@ module.exports.DeleteActionCommand = class {
         this.program = program;
     }
 
-    execute(actionName, options) {
-        const profile = loadProfile(options.profile);
+    async execute(actionName, options) {
+        const profile = await loadProfile(options.profile);
         debug('%s.executeDeleteAction(%s)', profile.name, actionName);
         const actions = new Actions(profile.url);
         actions.deleteAction(options.project || profile.project, profile.token, actionName)
@@ -197,8 +208,8 @@ module.exports.TaskLogsActionCommand = class {
         this.program = program;
     }
 
-    execute(jobId, taskId, options) {
-        const profile = loadProfile(options.profile);
+    async execute(jobId, taskId, options) {
+        const profile = await loadProfile(options.profile);
         debug('%s.taskLogsActions (%s, %s)', profile.name, jobId, taskId);
         const actions = new Actions(profile.url);
         actions.taskLogs(options.project || profile.project, profile.token, jobId, taskId)
@@ -218,8 +229,8 @@ module.exports.TaskCancelActionCommand = class {
         this.program = program;
     }
 
-    execute(jobId, taskId, options) {
-        const profile = loadProfile(options.profile);
+    async execute(jobId, taskId, options) {
+        const profile = await loadProfile(options.profile);
         debug('%s.taskCancelActions (%s, %s)', profile.name, jobId, taskId);
         const actions = new Actions(profile.url);
         actions.taskCancel(options.project || profile.project, profile.token, jobId, taskId)
@@ -239,8 +250,8 @@ module.exports.TaskStatusActionCommand = class {
         this.program = program;
     }
 
-    execute(jobId, taskId, options) {
-        const profile = loadProfile(options.profile);
+    async execute(jobId, taskId, options) {
+        const profile = await loadProfile(options.profile);
         debug('%s.taskStatusActions (%s, %s)', profile.name, jobId, taskId);
         const actions = new Actions(profile.url);
         actions.taskStatus(options.project || profile.project, profile.token, jobId, taskId)
@@ -260,8 +271,8 @@ module.exports.JobTaskListActionCommand = class {
         this.program = program;
     }
 
-    execute(jobId, options) {
-        const profile = loadProfile(options.profile);
+    async execute(jobId, options) {
+        const profile = await loadProfile(options.profile);
         debug('%s.jobTaskListActions (%s, %s)', profile.name, jobId);
         const actions = new Actions(profile.url);
         actions.jobListTasks(options.project || profile.project, profile.token, jobId)
@@ -281,8 +292,8 @@ module.exports.TaskStatsActionCommand = class {
         this.program = program;
     }
 
-    execute(jobId, options) {
-        const profile = loadProfile(options.profile);
+    async execute(jobId, options) {
+        const profile = await loadProfile(options.profile);
         debug('%s.taskStatsActions (%s, %s)', profile.name, jobId);
         const actions = new Actions(profile.url);
         actions.taskStats(options.project || profile.project, profile.token, jobId)
@@ -302,8 +313,8 @@ module.exports.ListTaskByActivation = class {
         this.program = program;
     }
 
-    execute(activationId, options) {
-        const profile = loadProfile(options.profile);
+    async execute(activationId, options) {
+        const profile = await loadProfile(options.profile);
         debug('%s.listTasksByActivation (%s, %s)', profile.name, activationId);
         const actions = new Actions(profile.url);
         actions.listTasksByActivation(options.project || profile.project, profile.token, activationId)
@@ -323,8 +334,8 @@ module.exports.GetLogsCommand = class {
         this.program = program;
     }
 
-    execute(jobId, options) {
-        const profile = loadProfile(options.profile);
+    async execute(jobId, options) {
+        const profile = await loadProfile(options.profile);
         debug('%s.getLogsActions (%s, %s)', profile.name, jobId);
         const actions = new Actions(profile.url);
         actions.getLogsAction(options.project || profile.project, profile.token, jobId)

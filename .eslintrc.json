@@ -4,11 +4,15 @@
         "no-underscore-dangle": [
             0
         ],
+        "require-await": "error",
         "max-classes-per-file": "off",
         "no-console": "off", // This is a cli app..
         "indent": 0,
         "global-require":"off",
         "no-return-assign": "off",
+        "function-paren-newline": "off",
+        "function-call-argument-newline": "off",
+        "no-multiple-empty-lines": "off",
         "no-param-reassign": "warn",
         "no-undef": "error",
         "no-trailing-spaces": "off",

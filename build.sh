@@ -26,17 +26,14 @@ function local_docker(){
 
 # This runs inside a linux docker container
 function docker_build(){
-    npm -v
-    npm config set loglevel warn
-    npm cache clear --force
-    npm install -dd --verbose
+    npm ci --unsafe-perm --userconfig=/root/.npmrc
     npm test
     echo ${VERSION} > version.txt
     ./generate_docs.sh
     BRANCH=$(git symbolic-ref --short -q HEAD)
-    if [[ ${BRANCH} = "master" ]]; then
-        rm -rf node_modules
-        npm install --silent --only=production
+    if [[ ${BRANCH} = "main" ]]; then
+        npm prune --production
+#        TODO this should maybe be done as part of the gocd pipeline?.. or maybe get in the habit of pushing alpha versions to npm just like we do for cortex-python?..
         npm publish --registry=https://registry.npmjs.org/
     elif [[ ${BRANCH} = "develop" ]]; then
         npm config set always-auth true

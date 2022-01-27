@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 const chalk = require('chalk');
-const program = require('../src/commander');
+const program = require('commander');
 
 const { withCompatibilityCheck } = require('../src/compatibility');
 
@@ -29,6 +29,7 @@ const {
     UserDeleteCommand,
 } = require('../src/commands/users');
 
+program.name('cortex users');
 program.description('Work with Cortex User');
 
 program.command('describe')
@@ -108,7 +109,9 @@ program.command('create <user>')
 
 program.command('list')
     .description('Lists all service users created within Cortex')
+    .alias('l')
     .option('--no-compat', 'Ignore API compatibility checks')
+    .option('--json', 'Output results using JSON')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
     .action(withCompatibilityCheck((options) => {
@@ -119,4 +122,7 @@ program.command('list')
         }
     }));
 
-program.parse(process.argv);
+if (require.main === module) {
+    program.showHelpAfterError().parseAsync(process.argv);
+}
+module.exports = program;

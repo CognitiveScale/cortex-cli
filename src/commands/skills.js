@@ -20,10 +20,10 @@ const moment = require('moment');
 const { loadProfile } = require('../config');
 const Catalog = require('../client/catalog');
 const Agent = require('../client/agents');
-const { LISTTABLEFORMAT, DEPENDENCYTABLEFORMAT } = require('./utils');
 
 const {
- printSuccess, printError, filterObject, parseObject, printTable, formatValidationPath,
+    printSuccess, printError, printWarning, filterObject, parseObject, printTable, formatValidationPath,
+    LISTTABLEFORMAT, DEPENDENCYTABLEFORMAT, isNumeric,
 } = require('./utils');
 
 module.exports.SaveSkillCommand = class SaveSkillCommand {
@@ -32,15 +32,41 @@ module.exports.SaveSkillCommand = class SaveSkillCommand {
     }
 
     async execute(skillDefinition, options) {
-        const profile = loadProfile(options.profile);
-        debug('%s.executeSaveSkill(%s)', profile.name, skillDefinition);
         try {
+            const profile = await loadProfile(options.profile);
             const skillDefStr = fs.readFileSync(skillDefinition);
             const skill = parseObject(skillDefStr, options);
+            debug('%s.executeSaveSkill(%s)', profile.name, skillDefinition);
             const catalog = new Catalog(profile.url);
+            if (!_.isEmpty(options.k8sResource)) {
+                const k8sResources = options.k8sResource.map((f) => JSON.stringify(parseObject(fs.readFileSync(f), options)));
+                if (_.isEmpty(_.get(skill, 'actions', []))) {
+                    printError('Skill must contain an action to apply kubernetes resources', options, true);
+                }
+                if (skill.actions.length > 1) {
+                    printWarning('Applying kubernetes resources to all actions');
+                }
+                skill.actions.map((a) => a.k8sResources = k8sResources);
+            }
+            if (options.scaleCount) {
+                if (!isNumeric(options.scaleCount)) {
+                    printError('--scaleCount must be a number', options);
+                }
+                if (skill.actions.length > 1) {
+                    printWarning('Applying kubernetes resources to all actions');
+                }
+                const scaleCount = parseInt(options.scaleCount, 10);
+                skill.actions.map((a) => a.scaleCount = scaleCount);
+            }
+
+            if (options.podspec) {
+                const paramsStr = fs.readFileSync(options.podspec);
+                const podSpec = parseObject(paramsStr, options);
+                skill.actions.map((a) => a.podSpec = podSpec);
+            }
             const response = await catalog.saveSkill(options.project || profile.project, profile.token, skill);
             if (response.success) {
-                printSuccess('Skill saved', options);
+                printSuccess(`Skill saved: ${JSON.stringify(response.message)}`, options);
             } else {
                     console.log(`Failed to save skill: ${response.message}`);
                     if (response.details) {
@@ -66,21 +92,23 @@ module.exports.ListSkillsCommand = class ListSkillsCommand {
     }
 
     async execute(options) {
-        const profile = loadProfile(options.profile);
+        const profile = await loadProfile(options.profile);
         debug('%s.executeListSkills()', profile.name);
 
         const catalog = new Catalog(profile.url);
         try {
-            const response = await catalog.listSkills(options.project || profile.project, profile.token, options.nostatus === undefined);
+            const status = !_.get(options, 'nostatus', false); // default show status, if nostatus==true status == false
+            const shared = !_.get(options, 'noshared', false);
+            const response = await catalog.listSkills(options.project || profile.project, profile.token, { status, shared });
             if (response.success) {
                 let result = response.skills;
                 const tableFormat = LISTTABLEFORMAT;
                 if (options.nostatus === undefined) {
-                    result = result.map((skill) => {
-                        const status = _.isEmpty(skill.actionStatuses) ? skill.deployStatus : skill.actionStatuses.map((s) => `${s.name}: ${s.state}`).join(' ');
+                    result = result.map((skillStat) => {
+                        const statuses = _.isEmpty(skillStat.actionStatuses) ? skillStat.deployStatus : skillStat.actionStatuses.map((s) => `${s.name}: ${s.state}`).join(' ');
                         return {
-                            ...skill,
-                            status,
+                            ...skillStat,
+                            status: statuses,
                         };
                     });
                     tableFormat.push({ column: 'Status', field: 'status', width: 30 });
@@ -105,22 +133,18 @@ module.exports.DescribeSkillCommand = class DescribeSkillCommand {
         this.program = program;
     }
 
-    execute(skillName, options) {
-        const profile = loadProfile(options.profile);
+    async execute(skillName, options) {
+        const profile = await loadProfile(options.profile);
         debug('%s.executeDescribeSkill(%s)', profile.name, skillName);
 
         const catalog = new Catalog(profile.url);
-        catalog.describeSkill(options.project || profile.project, profile.token, skillName, options.verbose).then((response) => {
-            if (response.success) {
-                const result = filterObject(response.skill, options);
-                printSuccess(JSON.stringify(result, null, 2), options);
-            } else {
-                printError(`Failed to describe skill ${skillName}: ${response.message}`, options);
-            }
-        })
-        .catch((err) => {
+        try {
+            let response = await catalog.describeSkill(options.project || profile.project, profile.token, skillName, options.verbose, options.output);
+            if (_.get(options, 'output', 'json').toLowerCase() === 'json') response = JSON.stringify(filterObject(response, options), null, 2);
+            printSuccess(response, options);
+        } catch (err) {
             printError(`Failed to describe skill ${skillName}: ${err.status} ${err.message}`, options);
-        });
+        }
     }
 };
 
@@ -129,20 +153,22 @@ module.exports.UndeploySkillCommand = class UndeploySkillCommand {
         this.program = program;
     }
 
-    execute(skillName, options) {
-        const profile = loadProfile(options.profile);
-        debug('%s.executeUndeploySkill(%s)', profile.name, skillName);
+    async execute(skillNames, options) {
+        const profile = await loadProfile(options.profile);
         const catalog = new Catalog(profile.url);
-        catalog.unDeploySkill(options.project || profile.project, profile.token, skillName, options.verbose).then((response) => {
-            if (response.success) {
-                printSuccess(`Undeploy Skill ${skillName}: ${response.message}`, options);
-            } else {
-                printError(`Failed to Undeploy Skill ${skillName}: ${response.message}`, options);
-            }
-        })
-            .catch((err) => {
+        await Promise.all(skillNames.map(async (skillName) => {
+            debug('%s.executeUndeploySkill(%s)', profile.name, skillName);
+            try {
+                const response = await catalog.unDeploySkill(options.project || profile.project, profile.token, skillName, options.verbose);
+                if (response.success) {
+                    printSuccess(`Undeploy Skill ${skillName}: ${response.message}`, options);
+                } else {
+                    printError(`Failed to Undeploy Skill ${skillName}: ${response.message}`, options);
+                }
+            } catch (err) {
                 printError(`Failed to Undeploy Skill ${skillName}: ${err.status} ${err.message}`, options);
-            });
+            }
+        }));
     }
 };
 
@@ -151,8 +177,8 @@ module.exports.SkillLogsCommand = class SkillLogsCommand {
         this.program = program;
     }
 
-    execute(skillName, actionName, options) {
-        const profile = loadProfile(options.profile);
+    async execute(skillName, actionName, options) {
+        const profile = await loadProfile(options.profile);
         debug('%s.executeSkillLogs(%s,%s)', profile.name, skillName, actionName);
         const catalog = new Catalog(profile.url);
         catalog.skillLogs(options.project || profile.project, profile.token, skillName, actionName, options.verbose).then((response) => {
@@ -173,21 +199,22 @@ module.exports.DeploySkillCommand = class DeploySkillCommand {
         this.program = program;
     }
 
-    execute(skillName, options) {
-        const profile = loadProfile(options.profile);
-        debug('%s.executeDeploySkill(%s)', profile.name, skillName);
-
+    async execute(skillNames, options) {
+        const profile = await loadProfile(options.profile);
         const catalog = new Catalog(profile.url);
-        catalog.deploySkill(options.project || profile.project, profile.token, skillName, options.verbose).then((response) => {
-            if (response.success) {
-                printSuccess(`Deployed Skill ${skillName}: ${response.message}`, options);
-            } else {
-                printError(`Failed to deploy Skill ${skillName}: ${response.message}`, options);
-            }
-        })
-            .catch((err) => {
+        await Promise.all(skillNames.map(async (skillName) => {
+            debug('%s.executeDeploySkill(%s)', profile.name, skillName);
+            try {
+                const response = await catalog.deploySkill(options.project || profile.project, profile.token, skillName, options.verbose);
+                if (response.success) {
+                    printSuccess(`Deployed Skill ${skillName}: ${response.message}`, options);
+                } else {
+                    printError(`Failed to deploy Skill ${skillName}: ${response.message}`, options);
+                }
+            } catch (err) {
                 printError(`Failed to deploy Skill ${skillName}: ${err.status} ${err.message}`, options);
-            });
+            }
+        }));
     }
 };
 
@@ -196,8 +223,8 @@ module.exports.InvokeSkillCommand = class InvokeSkillCommand {
         this.program = program;
     }
 
-    execute(skillName, inputName, options) {
-        const profile = loadProfile(options.profile);
+    async execute(skillName, inputName, options) {
+        const profile = await loadProfile(options.profile);
         debug('%s.executeInvokeSkill(%s/%s)', profile.name, skillName, inputName);
 
         let params = {};
@@ -208,6 +235,9 @@ module.exports.InvokeSkillCommand = class InvokeSkillCommand {
                 printError(`Failed to parse params: ${options.params} Error: ${e}`, options);
             }
         } else if (options.paramsFile) {
+            if (!fs.existsSync(options.paramsFile)) {
+                printError(`File does not exist at: ${options.paramsFile}`);
+            }
             const paramsStr = fs.readFileSync(options.paramsFile);
             params = parseObject(paramsStr, options);
         }
@@ -237,15 +267,18 @@ module.exports.DeleteSkillCommand = class DeleteSkillCommand {
         this.program = program;
     }
 
-    execute(skillName, options) {
-        const profile = loadProfile(options.profile);
+    async execute(skillName, options) {
+        const profile = await loadProfile(options.profile);
         debug('%s.executeDeleteSkill(%s)', profile.name, skillName);
         const catalog = new Catalog(profile.url);
         catalog.deleteSkill(options.project || profile.project, profile.token, skillName)
             .then((response) => {
                 if (response.success) {
                     const result = filterObject(response, options);
-                    return printSuccess(JSON.stringify(result, null, 2), options);
+                    if (options.json) {
+                        return printSuccess(JSON.stringify(result, null, 2), options);
+                    }
+                    return printSuccess(result.message);
                 }
                 if (response.status === 403) { // has dependencies
                     const tableFormat = DEPENDENCYTABLEFORMAT;

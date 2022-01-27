@@ -17,7 +17,7 @@ const debug = require('debug')('cortex:cli');
 const { loadProfile } = require('../config');
 const Roles = require('../client/roles');
 const {
- printSuccess, printError, filterObject,
+ printSuccess, printError, filterObject, printTable, EXTERNALROLESFORMAT,
 } = require('./utils');
 
 function createGrant(options) {
@@ -34,8 +34,8 @@ module.exports.RoleDeleteCommand = class {
         this.program = program;
     }
 
-    execute(role, options) {
-        const profile = loadProfile(options.profile);
+    async execute(role, options) {
+        const profile = await loadProfile(options.profile);
         debug('%s.deleteRole=%s', profile.name, role);
 
         const client = new Roles(profile.url, role);
@@ -59,8 +59,8 @@ module.exports.RoleCreateCommand = class {
         this.program = program;
     }
 
-    execute(role, options) {
-        const profile = loadProfile(options.profile);
+    async execute(role, options) {
+        const profile = await loadProfile(options.profile);
         const form = createGrant(options);
         form.role = role;
         debug('%s.createRole=%s', profile.name);
@@ -86,8 +86,8 @@ module.exports.RoleAssignCommand = class {
         this.program = program;
     }
 
-    execute(role, options) {
-        const profile = loadProfile(options.profile);
+    async execute(role, options) {
+        const profile = await loadProfile(options.profile);
         debug('%s.grantRoler=%s', profile.name, role);
 
         const client = new Roles(profile.url, role);
@@ -119,8 +119,8 @@ module.exports.RoleGrantCommand = class {
         this.program = program;
     }
 
-    execute(role, options) {
-        const profile = loadProfile(options.profile);
+    async execute(role, options) {
+        const profile = await loadProfile(options.profile);
         const form = createGrant(options);
         debug('%s.grantRoler=%s', profile.name, role);
 
@@ -153,8 +153,8 @@ module.exports.RoleDescribeCommand = class {
         this.program = program;
     }
 
-    execute(role, options) {
-        const profile = loadProfile(options.profile);
+    async execute(role, options) {
+        const profile = await loadProfile(options.profile);
         debug('%s.describeForRole=%s', profile.name, role);
 
         const flags = [];
@@ -185,8 +185,8 @@ module.exports.RoleListCommand = class {
         this.program = program;
     }
 
-    execute(options) {
-        const profile = loadProfile(options.profile);
+    async execute(options) {
+        const profile = await loadProfile(options.profile);
         debug('%s.listRole=%s', profile.name);
 
         const flags = [];
@@ -195,7 +195,11 @@ module.exports.RoleListCommand = class {
         client.listRoles(profile.token, options.project).then((response) => {
             if (response.success) {
                 const result = filterObject(response.result, options);
-                printSuccess(JSON.stringify(result, null, 2), options);
+                if (options.json) {
+                    printSuccess(JSON.stringify(result, null, 2), options);
+                } else {
+                    printTable([{ column: 'Role', field: 'role' }], result.roles.map((x) => ({ role: x })));
+                }
             } else {
                 printError(`Failed to list roles : ${response.message}`, options);
             }
@@ -211,8 +215,8 @@ module.exports.RoleProjectAssignCommand = class {
         this.program = program;
     }
 
-    execute(project, options) {
-        const profile = loadProfile(options.profile);
+    async execute(project, options) {
+        const profile = await loadProfile(options.profile);
         debug('%s.assignRoleProject=%s', profile.name, project);
 
         const client = new Roles(profile.url, null);
@@ -244,15 +248,19 @@ module.exports.ExternalGroupListCommand = class {
         this.program = program;
     }
 
-    execute(options) {
-        const profile = loadProfile(options.profile);
+    async execute(options) {
+        const profile = await loadProfile(options.profile);
         debug('%s.listExternalGroup=%s', profile.name);
 
         const client = new Roles(profile.url, null);
         client.listExternalGroups(profile.token).then((response) => {
             if (response.success) {
                 const result = filterObject(response.result, options);
-                printSuccess(JSON.stringify(result, null, 2), options);
+                if (options.json) {
+                    printSuccess(JSON.stringify(result, null, 2), options);
+                } else {
+                    printTable(EXTERNALROLESFORMAT, result, (o) => ({ ...o, roles: o.roles.join(', ') }));
+                }
             } else {
                 printError(`Failed to list external groups : ${response.message}`, options);
             }
@@ -268,8 +276,8 @@ module.exports.ExternalGroupDescribeCommand = class {
         this.program = program;
     }
 
-    execute(externalGroup, options) {
-        const profile = loadProfile(options.profile);
+    async execute(externalGroup, options) {
+        const profile = await loadProfile(options.profile);
         debug('%s.describeExternalGroup=%s', profile.name, externalGroup);
 
         const flags = [];
@@ -300,8 +308,8 @@ module.exports.ExternalGroupDeleteCommand = class {
         this.program = program;
     }
 
-    execute(externalGroup, options) {
-        const profile = loadProfile(options.profile);
+    async execute(externalGroup, options) {
+        const profile = await loadProfile(options.profile);
         debug('%s.deleteExternalGroup=%s', profile.name, externalGroup);
 
         const client = new Roles(profile.url, null);
@@ -325,8 +333,8 @@ module.exports.ExternalGroupAssignCommand = class {
         this.program = program;
     }
 
-    execute(options) {
-        const profile = loadProfile(options.profile);
+    async execute(options) {
+        const profile = await loadProfile(options.profile);
         debug('%s.externalGroupAssign=%s', profile.name, options.role);
 
         const client = new Roles(profile.url, options.role);

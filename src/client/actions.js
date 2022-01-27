@@ -15,7 +15,7 @@
  */
 const _ = require('lodash');
 const debug = require('debug')('cortex:cli');
-const jose = require('jose');
+// eslint-disable-next-line import/no-unresolved
 const { got } = require('./apiutils');
 const {
  constructError, callMe, checkProject, getUserAgent, 
@@ -34,7 +34,7 @@ module.exports = class Actions {
             endpoint = `${endpoint}?actionType=${actionInst.actionType}`;
         }
         debug('deployAction(%s, docker=%s, ttl=%s) => %s',
-            actionInst.name, actionInst.dockerImage, actionInst.ttl, endpoint);
+            actionInst.name, actionInst.image, actionInst.ttl, endpoint);
         const body = { ...actionInst };
         // image & docker floating around fixup just in case..
         if (body.docker) {
@@ -42,7 +42,7 @@ module.exports = class Actions {
             delete body.docker;
         }
         try {
-            body.docker = await this._maybePushDockerImage(actionInst.dockerImage, token, actionInst.pushDocker);
+            body.docker = await this._maybePushDockerImage(actionInst.image, token, actionInst.pushDocker);
         } catch (error) {
             return { success: false, status: 400, message: error.message || error };
         }
@@ -246,7 +246,9 @@ module.exports = class Actions {
         }
         const registryUrl = await this._cortexRegistryUrl(token);
         const imageName = image.replace(/.+\..+\//, '');
-        const cortexImageUrl = this._cortexRegistryImagePath(registryUrl, imageName, jose.JWT.decode(token).tenant);
+        // const { payload } = jwtVerify(token);
+        // TODO fix path
+        const cortexImageUrl = this._cortexRegistryImagePath(registryUrl, imageName, '');
         await callMe(`docker login -u cli --password ${token} ${registryUrl}`);
         await callMe(`docker pull ${image} || echo "Docker pull failed using local image"`);
         await callMe(`docker tag ${image} ${cortexImageUrl}`);

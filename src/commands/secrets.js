@@ -31,8 +31,8 @@ module.exports.ListSecretsCommand = class {
         this.program = program;
     }
 
-    execute(options) {
-        const profile = loadProfile(options.profile);
+    async execute(options) {
+        const profile = await loadProfile(options.profile);
         debug('%s.listsecrets(%s)', profile.name);
 
         const secrets = new Secrets(profile.url);
@@ -62,8 +62,8 @@ module.exports.ReadSecretsCommand = class {
         this.program = program;
     }
 
-    execute(keyName, options) {
-        const profile = loadProfile(options.profile);
+    async execute(keyName, options) {
+        const profile = await loadProfile(options.profile);
         debug('%s.readsecret(%s)', profile.name, keyName);
 
         const secrets = new Secrets(profile.url);
@@ -93,8 +93,8 @@ module.exports.WriteSecretsCommand = class {
         this.program = program;
     }
 
-    execute(keyName, value, options) {
-        const profile = loadProfile(options.profile);
+    async execute(keyName, value, options) {
+        const profile = await loadProfile(options.profile);
         debug('%s.writeSecret(%s)', profile.name, keyName);
 
         let data = value;

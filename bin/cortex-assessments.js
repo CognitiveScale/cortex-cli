@@ -17,7 +17,7 @@
  */
 
 const chalk = require('chalk');
-const program = require('../src/commander');
+const program = require('commander');
 
 const { withCompatibilityCheck } = require('../src/compatibility');
 const {
@@ -34,6 +34,7 @@ const {
     DependencyTreeCommand,
 } = require('../src/commands/assessments');
 
+program.name('cortex assessments');
 program.description('Work with Cortex Assessments');
 
 program
@@ -56,8 +57,8 @@ program
     .description('Dependencies of a resource or find missing ones from dependencyFile')
     .storeOptionsAsProperties(false)
     .requiredOption('--scope [project]', 'project name of the resource')
-    .option('--name [Cortex component name]', 'Cortex component name')
-    .option('--type [Cortex component type]', 'Cortex resource type')
+    .option('--name [Cortex component name]', 'Cortex component name', ' ')
+    .option('--type [Cortex component type]', 'Cortex resource type', ' ')
     .option('--no-compat', 'Ignore API compatibility checks')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
@@ -118,6 +119,7 @@ program
 program
     .command('list')
     .description('List assessments')
+    .alias('l')
     .option('--skip [Skip records for pagination]', 'Skip records for pagination')
     .option('--limit [Limit records for pagination]', 'Limit records for pagination')
     .option('--no-compat', 'Ignore API compatibility checks')
@@ -223,4 +225,7 @@ program
         }
     }));
 
-program.parse(process.argv);
+if (require.main === module) {
+    program.showHelpAfterError().parseAsync(process.argv);
+}
+module.exports = program;

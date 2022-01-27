@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 const chalk = require('chalk');
-const program = require('../src/commander');
+const program = require('commander');
 
 const { withCompatibilityCheck } = require('../src/compatibility');
 const { nonEmptyStringParser } = require('../src/parsers');
@@ -35,11 +35,14 @@ const {
     RoleListCommand,
 } = require('../src/commands/roles');
 
+program.name('cortex roles');
 program.description('Work with Cortex Roles');
 
 program.command('list')
     .description('List roles by project and user')
+    .alias('l')
     .option('--no-compat', 'Ignore API compatibility checks')
+    .option('--json', 'Return raw json')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
     .option('--project [project', 'Project to list roles for')
@@ -148,6 +151,7 @@ program.command('project <project>')
 program.command('list-external')
     .description('List external groups')
     .option('--no-compat', 'Ignore API compatibility checks')
+    .option('--json', 'Output results using JSON')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
     .action(withCompatibilityCheck((options) => {
@@ -202,4 +206,7 @@ program.command('assign-external')
             console.error(chalk.red(err.message));
         }
     }));
-program.parse(process.argv);
+if (require.main === module) {
+    program.showHelpAfterError().parseAsync(process.argv);
+}
+module.exports = program;

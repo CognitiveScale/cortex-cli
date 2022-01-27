@@ -22,80 +22,82 @@ const program = require('commander');
 const { withCompatibilityCheck } = require('../src/compatibility');
 
 const {
-    ListSecretsCommand,
-    ReadSecretsCommand,
-    WriteSecretsCommand,
-    DeleteSecretCommand,
-} = require('../src/commands/secrets');
+    DeleteSessionCommand,
+    SaveSessionCommand,
+    DescribeSessionCommand,
+    ListSessionsCommand,
+} = require('../src/commands/sessions');
 
-program.name('cortex secrets');
-program.description('Work with Cortex Secrets');
+program.name('cortex sessions');
+program.description('Work with Cortex Sessions');
 
-// List Secure Keys
+// List Sessions
 program
     .command('list')
-    .description('List secure keys')
+    .description('List session definitions')
     .alias('l')
     .option('--no-compat', 'Ignore API compatibility checks')
+    .option('--limit [limit]', 'Number of sessions to list')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
-    .option('--json', 'Output results using JSON')
     .option('--profile [profile]', 'The profile to use')
     .option('--project [project]', 'The project to use')
+    .option('--json', 'Output results using JSON')
+    .option('--query [query]', 'A JMESPath query to use in filtering the response data. Ignored if output format is not JSON.')
     .action(withCompatibilityCheck((options) => {
         try {
-            new ListSecretsCommand(program).execute(options);
+            new ListSessionsCommand(program).execute(options);
         } catch (err) {
             console.error(chalk.red(err.message));
         }
     }));
 
-// Read Secure Value
+// Describe Session
 program
-    .command('describe <keyName>')
+    .command('describe <sessionId>')
+    .description('Describe session')
     .alias('get')
-    .description('Retrieve the value stored for the given key.')
     .option('--no-compat', 'Ignore API compatibility checks')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
-    .option('--json', 'Output results using JSON')
     .option('--profile [profile]', 'The profile to use')
     .option('--project [project]', 'The project to use')
-    .action(withCompatibilityCheck((keyName, options) => {
+    .option('--query [query]', 'A JMESPath query to use in filtering the response data.')
+    .option('--verbose', 'Verbose output')
+    .action(withCompatibilityCheck((sessionName, options) => {
         try {
-            new ReadSecretsCommand(program).execute(keyName, options);
+            new DescribeSessionCommand(program).execute(sessionName, options);
         } catch (err) {
             console.error(chalk.red(err.message));
         }
     }));
 
-// Write Secure Value
+// Delete Session
 program
-    .command('save <keyName> [value]')
-    .description('Save or overwrite a secure value. By default values are stored as strings but can also be saved as JSON or YAML.')
+    .command('delete <sessionId>')
+    .description('Delete a session')
     .option('--no-compat', 'Ignore API compatibility checks')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
-    .option('--data [data]', 'JSON value to save')
-    .option('--data-file [dataFile]', 'A file containing either JSON or YAML formatted value to save')
     .option('--profile [profile]', 'The profile to use')
     .option('--project [project]', 'The project to use')
-    .action(withCompatibilityCheck((keyName, value, options) => {
+    .action(withCompatibilityCheck((sessionName, options) => {
         try {
-            new WriteSecretsCommand(program).execute(keyName, value, options);
+            new DeleteSessionCommand(program).execute(sessionName, options);
         } catch (err) {
             console.error(chalk.red(err.message));
         }
     }));
 
-// Delete Secret
+// Save Session
 program
-    .command('delete <keyName>')
-    .description('Delete a secret')
+    .command('save <sessionDefinition>')
+    .description('Save a session definition')
     .option('--no-compat', 'Ignore API compatibility checks')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
     .option('--project [project]', 'The project to use')
-    .action(withCompatibilityCheck((keyName, options) => {
+    .option('-y, --yaml', 'Use YAML for session definition format')
+    .action(withCompatibilityCheck((sessionDefinition, options) => {
         try {
-            new DeleteSecretCommand(program).execute(keyName, options);
+            new SaveSessionCommand(program).execute(sessionDefinition, options);
         } catch (err) {
             console.error(chalk.red(err.message));
         }
