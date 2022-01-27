@@ -17,7 +17,7 @@
  */
 
 const chalk = require('chalk');
-const program = require('../src/commander');
+const program = require('commander');
 
 const { withCompatibilityCheck } = require('../src/compatibility');
 
@@ -28,13 +28,14 @@ const {
     DownloadContent,
 } = require('../src/commands/content');
 
-program.description('Work with Cortex Contents');
+program.name('cortex content');
+program.description('Work with Cortex Managed Content');
 
 // List Content
 program
     .command('list')
     .description('List content')
-    .alias('ls')
+    .alias('l')
     .option('--no-compat', 'Ignore API compatibility checks')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
@@ -103,4 +104,7 @@ program
         }
     }));
 
-program.parse(process.argv);
+if (require.main === module) {
+    program.showHelpAfterError().parseAsync(process.argv);
+}
+module.exports = program;

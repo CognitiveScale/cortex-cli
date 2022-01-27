@@ -56,7 +56,7 @@ module.exports = class Users {
 
     deleteServiceUser(token, user) {
         const endpoint = `${this.endpoint}/accounts/service/${user}`;
-        debug('createServiceUser => %s', endpoint);
+        debug('deleteServiceUser => %s', endpoint);
         return got
             .delete(endpoint, {
                 headers: { Authorization: `Bearer ${token}` },
@@ -68,7 +68,7 @@ module.exports = class Users {
 
     listServiceUsers(token) {
         const endpoint = `${this.endpoint}/accounts/service`;
-        debug('createServiceUser => %s', endpoint);
+        debug('listServiceUser => %s', endpoint);
         return got
             .get(endpoint, {
                 headers: { Authorization: `Bearer ${token}` },

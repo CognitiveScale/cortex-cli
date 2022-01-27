@@ -16,11 +16,13 @@
 const _ = require('lodash');
 const fs = require('fs');
 const debug = require('debug')('cortex:cli');
+const moment = require('moment');
 const { loadProfile } = require('../config');
 const Connections = require('../client/connections');
 const Content = require('../client/content');
+
 const {
- printSuccess, printError, filterObject, parseObject, printTable, DEPENDENCYTABLEFORMAT,
+ printSuccess, printError, filterObject, parseObject, printTable, DEPENDENCYTABLEFORMAT, CONNECTIONTABLEFORMAT, fileExists,
 } = require('./utils');
 
 module.exports.ListConnections = class ListConnections {
@@ -28,8 +30,8 @@ module.exports.ListConnections = class ListConnections {
         this.program = program;
     }
 
-    execute(options) {
-        const profile = loadProfile(options.profile);
+    async execute(options) {
+        const profile = await loadProfile(options.profile);
         debug('%s.listConnections()', profile.name);
 
         const conns = new Connections(profile.url);
@@ -41,16 +43,7 @@ module.exports.ListConnections = class ListConnections {
                 if (options.json) {
                     printSuccess(JSON.stringify(result, null, 2), options);
                 } else {
-                    const tableSpec = [
-                        { column: 'Name', field: 'name', width: 40 },
-                        { column: 'Title', field: 'title', width: 50 },
-                        { column: 'Description', field: 'description', width: 50 },
-                        { column: 'Connection Type', field: 'connectionType', width: 25 },
-                        { column: 'Writeable', field: 'allowWrite', width: 15 },
-                        { column: 'Created On', field: 'createdAt', width: 26 },
-                    ];
-
-                    printTable(tableSpec, result);
+                    printTable(CONNECTIONTABLEFORMAT, result, (o) => ({ ...o, createdAt: o.createdAt ? moment(o.createdAt).fromNow() : '-' }));
                 }
             } else {
                 printError(`Failed to list connections: ${response.status} ${response.message}`, options);
@@ -80,10 +73,12 @@ module.exports.SaveConnectionCommand = class SaveConnectionCommand {
        return params.filter((item) => item.name !== 'jdbc_jar_file');
    }
 
-   execute(connectionDefinition, options) {
-       const profile = loadProfile(options.profile);
+   async execute(connectionDefinition, options) {
+       const profile = await loadProfile(options.profile);
        debug('%s.executeSaveDefinition(%s)', profile.name, connectionDefinition);
-
+        if (!fileExists(connectionDefinition)) {
+            printError(`File does not exist at: ${connectionDefinition}`);
+        }
        const connDefStr = fs.readFileSync(connectionDefinition);
        const connObj = parseObject(connDefStr, options);
        debug('%o', connObj);
@@ -135,8 +130,8 @@ module.exports.DescribeConnectionCommand = class DescribeConnectionCommand {
         this.program = program;
     }
 
-    execute(connectionName, options) {
-        const profile = loadProfile(options.profile);
+    async execute(connectionName, options) {
+        const profile = await loadProfile(options.profile);
         debug('%s.executeDescribeConnection(%s)', profile.name, connectionName);
 
         const connection = new Connections(profile.url);
@@ -187,8 +182,8 @@ module.exports.ListConnectionsTypes = class ListConnectionsTypes {
         this.program = program;
     }
 
-    execute(options) {
-        const profile = loadProfile(options.profile);
+    async execute(options) {
+        const profile = await loadProfile(options.profile);
         debug('%s.listConnectionsTypes()', profile.name);
 
         const conns = new Connections(profile.url);

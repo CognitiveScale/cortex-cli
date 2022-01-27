@@ -21,7 +21,7 @@ const moment = require('moment');
 const { loadProfile } = require('../config');
 const Experiments = require('../client/experiments');
 const {
- printSuccess, printError, filterObject, printTable, parseObject, formatValidationPath,
+ printSuccess, printError, filterObject, printTable, parseObject, fileExists, formatValidationPath, DEPENDENCYTABLEFORMAT,
 } = require('./utils');
 
 class ListExperiments {
@@ -29,8 +29,8 @@ class ListExperiments {
         this.program = program;
     }
 
-    execute(options) {
-        const profile = loadProfile(options.profile);
+    async execute(options) {
+        const profile = await loadProfile(options.profile);
         debug('%s.listExperiments()', profile.name);
 
         const exp = new Experiments(profile.url);
@@ -68,8 +68,8 @@ class DescribeExperimentCommand {
         this.program = program;
     }
 
-    execute(experimentName, options) {
-        const profile = loadProfile(options.profile);
+    async execute(experimentName, options) {
+        const profile = await loadProfile(options.profile);
         debug('%s.executeDescribeExperiment(%s)', profile.name, experimentName);
 
         const exp = new Experiments(profile.url);
@@ -92,18 +92,22 @@ class DeleteExperimentCommand {
         this.program = program;
     }
 
-    execute(experimentName, options) {
-        const profile = loadProfile(options.profile);
+    async execute(experimentName, options) {
+        const profile = await loadProfile(options.profile);
         debug('%s.executeDeleteExperiment(%s)', profile.name, experimentName);
 
         const exp = new Experiments(profile.url);
         exp.deleteExperiment(options.project || profile.project, profile.token, experimentName).then((response) => {
             if (response.success) {
                 const result = filterObject(response.result, options);
-                printSuccess(JSON.stringify(result, null, 2), options);
-            } else {
-                printError(`Failed to delete experiment ${experimentName}: ${response.status} - ${response.message}`, options);
+                return printSuccess(JSON.stringify(result, null, 2), options);
             }
+            if (response.status === 403) { // has dependencies
+                const tableFormat = DEPENDENCYTABLEFORMAT;
+                printError(`Experiment deletion failed: ${response.message}.`, options, false);
+                return printTable(tableFormat, response.details);
+            }
+            return printError(`Failed to delete experiment ${experimentName}: ${response.status} - ${response.message}`, options);
         })
         .catch((err) => {
             printError(`Failed to delete experiment ${experimentName}: ${err.status} - ${err.message}`, options);
@@ -116,8 +120,8 @@ class ListRuns {
         this.program = program;
     }
 
-    execute(experimentName, options) {
-        const profile = loadProfile(options.profile);
+    async execute(experimentName, options) {
+        const profile = await loadProfile(options.profile);
         debug('%s.listRuns()', profile.name);
 
         const exp = new Experiments(profile.url);
@@ -166,8 +170,8 @@ class DescribeRunCommand {
         this.program = program;
     }
 
-    execute(experimentName, runId, options) {
-        const profile = loadProfile(options.profile);
+    async execute(experimentName, runId, options) {
+        const profile = await loadProfile(options.profile);
         debug('%s.executeDescribeRun(%s)', profile.name, runId);
 
         const exp = new Experiments(profile.url);
@@ -190,17 +194,21 @@ class DeleteRunCommand {
         this.program = program;
     }
 
-    execute(experimentName, runId, options) {
-        const profile = loadProfile(options.profile);
+    async execute(experimentName, runId, options) {
+        const profile = await loadProfile(options.profile);
         debug('%s.executeDeleteRun(%s)', profile.name, runId);
 
         const exp = new Experiments(profile.url);
         exp.deleteRun(options.project || profile.project, profile.token, experimentName, runId).then((response) => {
             if (response.success) {
-                printSuccess(`Run ${runId} in experiment ${experimentName} deleted`, options);
-            } else {
-                printError(`Failed to delete run ${experimentName}/${runId}: ${response.status} - ${response.message}`, options);
+                return printSuccess(`Run ${runId} in experiment ${experimentName} deleted`, options);
             }
+            if (response.status === 403) { // has dependencies
+               const tableFormat = DEPENDENCYTABLEFORMAT;
+               printError(`Run deletion failed: ${response.message}.`, options, false);
+               return printTable(tableFormat, response.details);
+            }
+            return printError(`Failed to delete run ${experimentName}/${runId}: ${response.status} - ${response.message}`, options);
         })
         .catch((err) => {
             printError(`Failed to delete run ${experimentName}/${runId}: ${err.status} - ${err.message}`, options);
@@ -213,24 +221,16 @@ class DownloadArtifactCommand {
         this.program = program;
     }
 
-    execute(experimentName, runId, artifactName, options) {
-        const profile = loadProfile(options.profile);
+    async execute(experimentName, runId, artifactName, options) {
+        const profile = await loadProfile(options.profile);
         debug('%s.downloadArtifact(%s)', profile.name, artifactName);
 
         const exp = new Experiments(profile.url);
         const showProgress = !!options.progress;
-
         // To download content from Secrets
-        exp.downloadArtifact(options.project || profile.project, profile.token, experimentName, runId, artifactName, showProgress).then((response) => {
-            if (response.success) {
-                // messages need to be on stderr as content is streamed to stdout
-                console.error(response.message);
-            } else {
-                printError(`Failed to download artifact: ${response.status} - ${response.message}`, options);
-            }
-        }).catch((err) => {
+        exp.downloadArtifact(options.project || profile.project, profile.token, experimentName, runId, artifactName, showProgress).catch((err) => {
             debug(err);
-            printError(`Failed to download artifact: ${err.status} - ${err.message}`, options);
+            printError(`Failed to download artifact: ${err.status ? err.status : ''}- ${err.message ? err.message : ''}`, options);
         });
     }
 }
@@ -240,10 +240,13 @@ class SaveExperimentCommand {
         this.program = program;
     }
 
-    execute(experimentDefinition, options) {
-        const profile = loadProfile(options.profile);
+    async execute(experimentDefinition, options) {
+        const profile = await loadProfile(options.profile);
         debug('%s.executeSaveExperiment(%s)', profile.name, experimentDefinition);
 
+         if (!fileExists(experimentDefinition)) {
+            printError(`File does not exist at: ${experimentDefinition}`);
+        }
         const experimentDefStr = fs.readFileSync(experimentDefinition);
         const experiment = parseObject(experimentDefStr, options);
         debug('%o', experiment);
@@ -277,10 +280,12 @@ class CreateRunCommand {
         this.program = program;
     }
 
-    execute(runDefinition, options) {
-        const profile = loadProfile(options.profile);
+    async execute(runDefinition, options) {
+        const profile = await loadProfile(options.profile);
         debug('%s.executeCreateRun(%s)', profile.name, runDefinition);
-
+         if (!fs.existsSync(runDefinition)) {
+            printError(`File does not exist at: ${runDefinition}`);
+        }
         const runDefinitionStr = fs.readFileSync(runDefinition);
         const run = parseObject(runDefinitionStr, options);
 
@@ -314,8 +319,8 @@ class UploadArtifactCommand {
         this.program = program;
     }
 
-    execute(experimentName, runId, filePath, artifact, options) {
-        const profile = loadProfile(options.profile);
+    async execute(experimentName, runId, filePath, artifact, options) {
+        const profile = await loadProfile(options.profile);
         debug('%s.executeUploadArtifact()', profile.name);
 
         const experiments = new Experiments(profile.url);

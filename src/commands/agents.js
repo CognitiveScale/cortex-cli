@@ -32,10 +32,12 @@ module.exports.SaveAgentCommand = class SaveAgentCommand {
         this.program = program;
     }
 
-    execute(agentDefinition, options) {
-        const profile = loadProfile(options.profile);
+    async execute(agentDefinition, options) {
+        const profile = await loadProfile(options.profile);
         debug('%s.executeSaveAgent(%s)', profile.name, agentDefinition);
-
+        if (!fs.existsSync(agentDefinition)) {
+            printError(`File does not exist at: ${agentDefinition}`);
+        }
         const agentDefStr = fs.readFileSync(agentDefinition);
         const agent = parseObject(agentDefStr, options);
         debug('%o', agent);
@@ -69,8 +71,8 @@ module.exports.ListAgentsCommand = class ListAgentsCommand {
         this.program = program;
     }
 
-    execute(options) {
-        const profile = loadProfile(options.profile);
+    async execute(options) {
+        const profile = await loadProfile(options.profile);
         debug('%s.executeListAgents()', profile.name);
 
         const catalog = new Catalog(profile.url);
@@ -100,8 +102,8 @@ module.exports.DescribeAgentCommand = class DescribeAgentCommand {
         this.program = program;
     }
 
-    execute(agentName, options) {
-        const profile = loadProfile(options.profile);
+    async execute(agentName, options) {
+        const profile = await loadProfile(options.profile);
         const catalog = new Catalog(profile.url);
         if (options.versions) {
             debug('%s.executeDescribeAgentVersions(%s)', profile.name, agentName);
@@ -138,8 +140,8 @@ module.exports.InvokeAgentServiceCommand = class {
         this.program = program;
     }
 
-    execute(agentName, serviceName, options) {
-        const profile = loadProfile(options.profile);
+    async execute(agentName, serviceName, options) {
+        const profile = await loadProfile(options.profile);
         debug('%s.invokeAgentService(%s, %s)', profile.name, agentName, serviceName);
 
         let params = {};
@@ -150,6 +152,9 @@ module.exports.InvokeAgentServiceCommand = class {
                 printError(`Failed to parse params: ${options.params} Error: ${e}`, options);
             }
         } else if (options.paramsFile) {
+            if (!fs.existsSync(options.paramsFile)) {
+                printError(`File does not exist at: ${options.paramsFile}`);
+            }
             const paramsStr = fs.readFileSync(options.paramsFile);
             params = parseObject(paramsStr, options);
         }
@@ -181,8 +186,8 @@ module.exports.GetActivationCommand = class {
         this.program = program;
     }
 
-    execute(activationId, options) {
-        const profile = loadProfile(options.profile);
+    async execute(activationId, options) {
+        const profile = await loadProfile(options.profile);
         debug('%s.getActivation(%s)', profile.name, activationId);
         const { report, verbose, project } = options;
         const agents = new Agents(profile.url);
@@ -218,14 +223,14 @@ module.exports.ListActivationsCommand = class {
         this.program = program;
     }
 
-    execute(options) {
+    async execute(options) {
         if (_.isEmpty(options.agentName) 
             && _.isEmpty(options.skillName) 
             && _.isEmpty(options.correlationId) 
             && _.isEmpty(options.status)) {
             printError('Either --agentName, --skillName, --correlationId, or --status must be provided', options);
         }
-        const profile = loadProfile(options.profile);
+        const profile = await loadProfile(options.profile);
         debug('%s.listActivations(%s)', profile.name);
 
         const agents = new Agents(profile.url);
@@ -289,8 +294,8 @@ module.exports.ListServicesCommand = class ListServicesCommand {
         this.program = program;
     }
 
-    execute(agentName, options) {
-        const profile = loadProfile(options.profile);
+    async execute(agentName, options) {
+        const profile = await loadProfile(options.profile);
         debug('%s.listServices(%s)', profile.name, agentName);
 
         const catalog = new Catalog(profile.url);
@@ -321,8 +326,8 @@ module.exports.ListAgentSnapshotsCommand = class {
         this.program = program;
     }
 
-    execute(agentName, options) {
-        const profile = loadProfile(options.profile);
+    async execute(agentName, options) {
+        const profile = await loadProfile(options.profile);
         debug('%s.listAgentSnapshots(%s)', profile.name, agentName);
 
         const agents = new Agents(profile.url);
@@ -360,7 +365,7 @@ module.exports.DescribeAgentSnapshotCommand = class {
     }
 
     async execute(snapshotId, options) {
-        const profile = loadProfile(options.profile);
+        const profile = await loadProfile(options.profile);
         debug('%s.describeAgentSnapshot(%s)', profile.name, snapshotId);
 
         const agents = new Agents(profile.url);
@@ -386,8 +391,8 @@ module.exports.CreateAgentSnapshotCommand = class {
         this.program = program;
     }
 
-    execute(snapshotDefinition, options) {
-        const profile = loadProfile(options.profile);
+    async execute(snapshotDefinition, options) {
+        const profile = await loadProfile(options.profile);
         let snapshot;
         if (snapshotDefinition) {
             debug('%s.createAgentSnapshot(%s)', profile.name, snapshotDefinition);
@@ -420,8 +425,8 @@ module.exports.DeleteAgentCommand = class DeleteAgentCommand {
         this.program = program;
     }
 
-    execute(agentName, options) {
-        const profile = loadProfile(options.profile);
+    async execute(agentName, options) {
+        const profile = await loadProfile(options.profile);
         debug('%s.executeDeleteAgent(%s)', profile.name, agentName);
         const catalog = new Catalog(profile.url);
         catalog.deleteAgent(options.project || profile.project, profile.token, agentName)
@@ -440,5 +445,54 @@ module.exports.DeleteAgentCommand = class DeleteAgentCommand {
             .catch((err) => {
                 printError(`Failed to delete agent: ${err.status} ${err.message}`, options);
             });
+    }
+};
+
+module.exports.DeployAgentCommand = class DeployAgentCommand {
+    constructor(program) {
+        this.program = program;
+    }
+
+    async execute(agentNames, options) {
+        const profile = await loadProfile(options.profile);
+        const catalog = new Catalog(profile.url);
+        await Promise.all(agentNames.map(async (agentName) => {
+            debug('%s.executeDeployAgent(%s)', profile.name, agentName);
+            try {
+                const response = await catalog.deployAgent(options.project || profile.project, profile.token, agentName, options.verbose);
+                if (response.success) {
+                    printSuccess(`Deployed Agent ${agentName}: ${response.message}`, options);
+                } else {
+                    printError(`Failed to deploy Agent ${agentName}: ${response.message}`, options);
+                }
+            } catch (err) {
+                printError(`Failed to deploy Agent ${agentName}: ${err.status} ${err.message}`, options);
+            }
+        }));
+    }
+};
+
+
+module.exports.UndeployAgentCommand = class UndeployAgentCommand {
+    constructor(program) {
+        this.program = program;
+    }
+
+    async execute(agentNames, options) {
+        const profile = await loadProfile(options.profile);
+        const catalog = new Catalog(profile.url);
+        await Promise.all(agentNames.map(async (agentName) => {
+            debug('%s.executeUndeployAgent(%s)', profile.name, agentName);
+            try {
+                const response = await catalog.unDeployAgent(options.project || profile.project, profile.token, agentName, options.verbose);
+                if (response.success) {
+                    printSuccess(`Undeploy agent ${agentName}: ${response.message}`, options);
+                } else {
+                    printError(`Failed to Undeploy agent ${agentName}: ${response.message}`, options);
+                }
+            } catch (err) {
+                printError(`Failed to Undeploy agent ${agentName}: ${err.status} ${err.message}`, options);
+            }
+        }));
     }
 };

@@ -22,22 +22,22 @@ const program = require('commander');
 const { withCompatibilityCheck } = require('../src/compatibility');
 
 const {
-    ListConnections,
-    SaveConnectionCommand,
-    DescribeConnectionCommand,
-    ListConnectionsTypes,
-    DeleteConnectionCommand,
-} = require('../src/commands/connections');
+    DeleteSessionCommand,
+    SaveSessionCommand,
+    DescribeSessionCommand,
+    ListSessionsCommand,
+} = require('../src/commands/sessions');
 
-program.name('cortex connections');
-program.description('Work with Cortex Connections');
+program.name('cortex sessions');
+program.description('Work with Cortex Sessions');
 
-// List Connections
+// List Sessions
 program
     .command('list')
-    .description('List connections definitions')
+    .description('List session definitions')
     .alias('l')
     .option('--no-compat', 'Ignore API compatibility checks')
+    .option('--limit [limit]', 'Number of sessions to list')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
     .option('--project [project]', 'The project to use')
@@ -45,85 +45,65 @@ program
     .option('--query [query]', 'A JMESPath query to use in filtering the response data. Ignored if output format is not JSON.')
     .action(withCompatibilityCheck((options) => {
         try {
-            new ListConnections(program).execute(options);
+            new ListSessionsCommand(program).execute(options);
         } catch (err) {
             console.error(chalk.red(err.message));
         }
     }));
 
-// Save Connections
+// Describe Session
 program
-    .command('save <connectionDefinition>')
-    .description('Save a connections definition. Takes JSON file by default.')
-    .option('--no-compat', 'Ignore API compatibility checks')
-    .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
-    .option('--profile [profile]', 'The profile to use')
-    .option('--project [project]', 'The project to use')
-    .option('-y, --yaml', 'Use YAML for agent definition format')
-    .action(withCompatibilityCheck((connDefinition, options) => {
-        try {
-            new SaveConnectionCommand(program).execute(connDefinition, options);
-        } catch (err) {
-            console.error(chalk.red(err.message));
-        }
-    }));
-
-// Describe Connection
-program
-    .command('describe <connectionName>')
+    .command('describe <sessionId>')
+    .description('Describe session')
     .alias('get')
-    .description('Describe connection')
     .option('--no-compat', 'Ignore API compatibility checks')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
     .option('--project [project]', 'The project to use')
     .option('--query [query]', 'A JMESPath query to use in filtering the response data.')
-    .action(withCompatibilityCheck((connectionName, options) => {
+    .option('--verbose', 'Verbose output')
+    .action(withCompatibilityCheck((sessionName, options) => {
         try {
-            new DescribeConnectionCommand(program).execute(connectionName, options);
+            new DescribeSessionCommand(program).execute(sessionName, options);
         } catch (err) {
             console.error(chalk.red(err.message));
         }
     }));
 
-// List Connections Types
+// Delete Session
 program
-    .command('list-types')
-    .description('List connections types')
+    .command('delete <sessionId>')
+    .description('Delete a session')
     .option('--no-compat', 'Ignore API compatibility checks')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
     .option('--project [project]', 'The project to use')
-    .option('--json', 'Output results using JSON')
-    .option('--query [query]', 'A JMESPath query to use in filtering the response data. Ignored if output format is not JSON.')
-    .action(withCompatibilityCheck((options) => {
+    .action(withCompatibilityCheck((sessionName, options) => {
         try {
-            new ListConnectionsTypes(program).execute(options);
+            new DeleteSessionCommand(program).execute(sessionName, options);
         } catch (err) {
             console.error(chalk.red(err.message));
         }
     }));
 
-// Delete Connection
+// Save Session
 program
-    .command('delete <connectionName>')
-    .description('Delete a connection')
+    .command('save <sessionDefinition>')
+    .description('Save a session definition')
     .option('--no-compat', 'Ignore API compatibility checks')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
     .option('--project [project]', 'The project to use')
-    .action(withCompatibilityCheck((connectionName, options) => {
+    .option('-y, --yaml', 'Use YAML for session definition format')
+    .action(withCompatibilityCheck((sessionDefinition, options) => {
         try {
-            new DeleteConnectionCommand(program).execute(connectionName, options);
+            new SaveSessionCommand(program).execute(sessionDefinition, options);
         } catch (err) {
             console.error(chalk.red(err.message));
         }
     }));
-
-program.parse(process.argv);
 
 if (require.main === module) {
     program.showHelpAfterError().parseAsync(process.argv);
 }
 module.exports = program;
-

@@ -17,7 +17,7 @@
  */
 
 const chalk = require('chalk');
-const program = require('../src/commander');
+const program = require('commander');
 
 const { withCompatibilityCheck } = require('../src/compatibility');
 
@@ -32,18 +32,19 @@ const {
     DeleteSkillCommand,
 } = require('../src/commands/skills');
 
+program.name('cortex skills');
 program.description('Work with Cortex Skills');
 
 // Deploy Skill
 program
-    .command('deploy <skillName>')
+    .command('deploy <skillNames...>')
     .description('Deploy the skill resource to the cluster')
     .option('--no-compat', 'Ignore API compatibility checks')
     .option('--profile [profile]', 'The profile to use')
     .option('--project [project]', 'The project to use')
-    .action(withCompatibilityCheck((skillName, options) => {
+    .action(withCompatibilityCheck((skillNames, options) => {
         try {
-            new DeploySkillCommand(program).execute(skillName, options);
+            new DeploySkillCommand(program).execute(skillNames, options);
         } catch (err) {
             console.error(chalk.red(err.message));
         }
@@ -58,6 +59,7 @@ program
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
     .option('--project [project]', 'The project to use')
+    .option('-o, --output <json|yaml|k8s>', 'Format output as yaml or k8s resource')
     .option('--query [query]', 'A JMESPath query to use in filtering the response data.')
     .option('--verbose', 'Verbose output')
     .action(withCompatibilityCheck((skillName, options) => {
@@ -90,12 +92,14 @@ program
 program
     .command('list')
     .description('List skill definitions')
+    .alias('l')
     .option('--no-compat', 'Ignore API compatibility checks')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
     .option('--project [project]', 'The project to use')
     .option('--json', 'Output results using JSON')
     .option('--nostatus', 'skip extra call for skill status')
+    .option('--noshared', 'do not list shared sills')
     .option('--query [query]', 'A JMESPath query to use in filtering the response data.')
     .action(withCompatibilityCheck((options) => {
         try {
@@ -111,6 +115,7 @@ program
     .description('Delete a skill')
     .option('--no-compat', 'Ignore API compatibility checks')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
+    .option('--json', 'Output results using JSON')
     .option('--profile [profile]', 'The profile to use')
     .option('--project [project]', 'The project to use')
     .action(withCompatibilityCheck((skillName, options) => {
@@ -129,7 +134,10 @@ program
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
     .option('--project [project]', 'The project to use')
+    .option('-k, --k8sResource [file...]', 'Additional kubernetes resources deployed and owned by the skill')
+    .option('--podspec [podspec]', 'A file containing either a JSON or YAML formatted pod spec to merge with the skill definition, used for specifying resources (like memory, ephemeral storage, CPUs, and GPUs) and tolerations (like allowing pods to be scheduled on tainted nodes).')
     .option('-y, --yaml', 'Use YAML for skill definition format')
+    .option('--scaleCount [count]', 'Scale count, only used for daemon action types')
     .action(withCompatibilityCheck((skillDefinition, options) => {
         try {
             new SaveSkillCommand(program).execute(skillDefinition, options);
@@ -140,14 +148,14 @@ program
 
 // Undeploy Skill
 program
-    .command('undeploy <skillName>')
+    .command('undeploy <skillNames...>')
     .description('Undeploy the skill resource from the cluster')
     .option('--no-compat', 'Ignore API compatibility checks')
     .option('--profile [profile]', 'The profile to use')
     .option('--project [project]', 'The project to use')
-    .action(withCompatibilityCheck((skillName, options) => {
+    .action(withCompatibilityCheck((skillNames, options) => {
         try {
-            new UndeploySkillCommand(program).execute(skillName, options);
+            new UndeploySkillCommand(program).execute(skillNames, options);
         } catch (err) {
             console.error(chalk.red(err.message));
         }
@@ -161,6 +169,7 @@ program
     .option('--profile [profile]', 'The profile to use')
     .option('--project [project]', 'The project to use')
     // TODO enable when we want to support tasks
+
     // .option('--type [type]', 'The type of action logs to fetch [skill|task]')
     .action(withCompatibilityCheck((skillName, actionName, options) => {
         try {
@@ -170,4 +179,7 @@ program
         }
     }));
 
-program.parse(process.argv);
+if (require.main === module) {
+    program.showHelpAfterError().parseAsync(process.argv);
+}
+module.exports = program;

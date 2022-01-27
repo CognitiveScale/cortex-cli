@@ -17,7 +17,7 @@
  */
 
 const chalk = require('chalk');
-const program = require('../src/commander');
+const program = require('commander');
 
 const { withCompatibilityCheck } = require('../src/compatibility');
 
@@ -27,6 +27,7 @@ const {
     DescribeProjectCommand,
 } = require('../src/commands/projects');
 
+program.name('cortex projects');
 program.description('Work with Cortex Projects');
 
 // Create Project
@@ -53,6 +54,7 @@ program
 program
     .command('list')
     .description('List project definitions')
+    .alias('l')
     .option('--no-compat', 'Ignore API compatibility checks')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
@@ -83,4 +85,7 @@ program
         }
     }));
 
-program.parse(process.argv);
+if (require.main === module) {
+    program.showHelpAfterError().parseAsync(process.argv);
+}
+module.exports = program;
