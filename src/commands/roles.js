@@ -36,7 +36,7 @@ module.exports.RoleDeleteCommand = class {
 
     async execute(role, options) {
         const profile = await loadProfile(options.profile);
-        debug('%s.deleteRole=%s', profile.name, role);
+        debug('%s.deleteRole(%s)', profile.name, role);
 
         const client = new Roles(profile.url, role);
 
@@ -63,7 +63,7 @@ module.exports.RoleCreateCommand = class {
         const profile = await loadProfile(options.profile);
         const form = createGrant(options);
         form.role = role;
-        debug('%s.createRole=%s', profile.name);
+        debug('%s.createRole(%s)', profile.name);
 
         const client = new Roles(profile.url);
 
@@ -88,7 +88,7 @@ module.exports.RoleAssignCommand = class {
 
     async execute(role, options) {
         const profile = await loadProfile(options.profile);
-        debug('%s.grantRoler=%s', profile.name, role);
+        debug('%s.grantRole(%s)', profile.name, role);
 
         const client = new Roles(profile.url, role);
         const call = (deleteFlag, token, users) => {
@@ -122,7 +122,7 @@ module.exports.RoleGrantCommand = class {
     async execute(role, options) {
         const profile = await loadProfile(options.profile);
         const form = createGrant(options);
-        debug('%s.grantRoler=%s', profile.name, role);
+        debug('%s.grantRole(%s)', profile.name, role);
 
         const client = new Roles(profile.url, role);
         const call = (deleteFlag, token, body) => {
@@ -155,7 +155,7 @@ module.exports.RoleDescribeCommand = class {
 
     async execute(role, options) {
         const profile = await loadProfile(options.profile);
-        debug('%s.describeForRole=%s', profile.name, role);
+        debug('%s.describeForRole(%s)', profile.name, role);
 
         const flags = [];
 
@@ -187,7 +187,7 @@ module.exports.RoleListCommand = class {
 
     async execute(options) {
         const profile = await loadProfile(options.profile);
-        debug('%s.listRole=%s', profile.name);
+        debug('%s.listRole(%s)', profile.name);
 
         const flags = [];
 
@@ -217,7 +217,7 @@ module.exports.RoleProjectAssignCommand = class {
 
     async execute(project, options) {
         const profile = await loadProfile(options.profile);
-        debug('%s.assignRoleProject=%s', profile.name, project);
+        debug('%s.assignRoleProject(%s)', profile.name, project);
 
         const client = new Roles(profile.url, null);
         const call = (deleteFlag, token, assignProject, roles) => {
@@ -250,7 +250,7 @@ module.exports.ExternalGroupListCommand = class {
 
     async execute(options) {
         const profile = await loadProfile(options.profile);
-        debug('%s.listExternalGroup=%s', profile.name);
+        debug('%s.listExternalGroup(%s)', profile.name);
 
         const client = new Roles(profile.url, null);
         client.listExternalGroups(profile.token).then((response) => {
@@ -278,7 +278,7 @@ module.exports.ExternalGroupDescribeCommand = class {
 
     async execute(externalGroup, options) {
         const profile = await loadProfile(options.profile);
-        debug('%s.describeExternalGroup=%s', profile.name, externalGroup);
+        debug('%s.describeExternalGroup(%s)', profile.name, externalGroup);
 
         const flags = [];
 
@@ -310,7 +310,7 @@ module.exports.ExternalGroupDeleteCommand = class {
 
     async execute(externalGroup, options) {
         const profile = await loadProfile(options.profile);
-        debug('%s.deleteExternalGroup=%s', profile.name, externalGroup);
+        debug('%s.deleteExternalGroup(%s)', profile.name, externalGroup);
 
         const client = new Roles(profile.url, null);
 
@@ -335,7 +335,7 @@ module.exports.ExternalGroupAssignCommand = class {
 
     async execute(options) {
         const profile = await loadProfile(options.profile);
-        debug('%s.externalGroupAssign=%s', profile.name, options.role);
+        debug('%s.externalGroupAssign(%s)', profile.name, options.role);
 
         const client = new Roles(profile.url, options.role);
         const call = (deleteFlag, token, externalGroup) => {

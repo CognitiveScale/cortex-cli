@@ -27,7 +27,7 @@ module.exports = class Tasks {
     listTasks(projectId, token, params) {
         checkProject(projectId);
         const endpoint = `${this.endpointV4(projectId)}/tasks`;
-        debug('listTasks(%s) => %s', params.agentName, endpoint);
+        debug('listTasks(%s) => %s', projectId, endpoint);
         const opts = {
             headers: { Authorization: `Bearer ${token}` },
             'user-agent': getUserAgent(),
