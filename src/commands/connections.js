@@ -154,8 +154,8 @@ module.exports.DeleteConnectionCommand = class DeleteConnectionCommand {
         this.program = program;
     }
 
-    execute(connectionName, options) {
-        const profile = loadProfile(options.profile);
+    async execute(connectionName, options) {
+        const profile = await loadProfile(options.profile);
         debug('%s.executeDeleteConnection(%s)', profile.name, connectionName);
 
         const connection = new Connections(profile.url);
