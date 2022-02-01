@@ -137,6 +137,9 @@ module.exports.DeployActionCommand = class {
                 actionInst.command = options.cmd;
             }
             if (options.port) {
+                if (actionInst.type === 'job') {
+                    printError('--port not valid on job action types');
+                }
                 if (!isNumeric(options.port)) {
                     printError('--port must be a number', options);
                 }
@@ -156,6 +159,9 @@ module.exports.DeployActionCommand = class {
             }
 
             if (options.jobTimeout) {
+                if (actionInst.type === 'daemon') {
+                    printError('--jobTimeout not valid on daemon action types');
+                }
                 if (!isNumeric(options.jobTimeout)) {
                     printError('--jobTimeout must be a number', options);
                 }
