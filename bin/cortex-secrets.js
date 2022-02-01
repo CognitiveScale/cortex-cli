@@ -25,6 +25,7 @@ const {
     ListSecretsCommand,
     ReadSecretsCommand,
     WriteSecretsCommand,
+    DeleteSecretCommand,
 } = require('../src/commands/secrets');
 
 program.name('cortex secrets');
@@ -79,6 +80,22 @@ program
     .action(withCompatibilityCheck((keyName, value, options) => {
         try {
             new WriteSecretsCommand(program).execute(keyName, value, options);
+        } catch (err) {
+            console.error(chalk.red(err.message));
+        }
+    }));
+
+// Delete Secret
+program
+    .command('delete <keyName>')
+    .description('Delete a secret')
+    .option('--no-compat', 'Ignore API compatibility checks')
+    .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
+    .option('--profile [profile]', 'The profile to use')
+    .option('--project [project]', 'The project to use')
+    .action(withCompatibilityCheck((keyName, options) => {
+        try {
+            new DeleteSecretCommand(program).execute(keyName, options);
         } catch (err) {
             console.error(chalk.red(err.message));
         }
