@@ -137,8 +137,8 @@ module.exports.DeleteSecretCommand = class {
         this.program = program;
     }
 
-    execute(keyName, options) {
-        const profile = loadProfile(options.profile);
+    async execute(keyName, options) {
+        const profile = await loadProfile(options.profile);
         debug('%s.deleteSecret(%s)', profile.name, keyName);
 
         const secrets = new Secrets(profile.url);
