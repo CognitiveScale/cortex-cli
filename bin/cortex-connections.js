@@ -120,7 +120,7 @@ program
         }
     }));
 
-program.parse(process.argv);
+// program.parse(process.argv);
 
 if (require.main === module) {
     program.showHelpAfterError().parseAsync(process.argv);
