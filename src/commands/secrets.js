@@ -141,8 +141,8 @@ module.exports.DeleteSecretCommand = class {
         const profile = await loadProfile(options.profile);
         debug('%s.deleteSecret(%s)', profile.name, keyName);
 
-        const secrets = new Secrets(profile.url);
-        secrets.deleteSecret(options.project || profile.project, profile.token, keyName).then((response) => {
+        const secretsClient = new Secrets(profile.url);
+        secretsClient.deleteSecret(options.project || profile.project, profile.token, keyName).then((response) => {
             if (response.success) {
                 const result = filterObject(response.result, options);
                 return printSuccess(JSON.stringify(result, null, 2), options);
