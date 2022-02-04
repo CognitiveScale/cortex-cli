@@ -120,11 +120,11 @@ program
     .option('--cmd [cmd]', 'Command to be executed') // '["--daemon"]'
     .option('--image, --docker [image]', 'Docker image to use as the runner')
     .option('--environmentVariables [environmentVariables]', 'Docker container environment variables, only used for daemon action types')
-    .option('--jobTimeout [jobTimeout]', 'Job Timeout in seconds, this will marked the job as FAILED (default: no timeout)')
+    .option('--jobTimeout [jobTimeout]', 'Job Timeout in seconds until the job is marked as FAILED (default: no timeout), only used for job action types')
     .option('-k, --k8sResource [file...]', 'Additional kubernetes resources deployed and owned by the skill, provide as last option specified or end list of files with "--"')
     .option('--no-compat', 'Ignore API compatibility checks')
     .option('--podspec [podspec]', 'A file containing either a JSON or YAML formatted pod spec to merge with the action definition, used for specifying resources (like memory, ephemeral storage, CPUs, and GPUs) and tolerations (like allowing pods to be scheduled on tainted nodes).')
-    .option('--port [port]', 'Docker port') // '9091'
+    .option('--port [port]', 'Docker port, only used for daemon action types') // '9091'
     .option('--profile [profile]', 'The profile to use')
     .option('--project [project]', 'The project to use')
     .option('--scaleCount [count]', 'Scale count, only used for daemon action types')
