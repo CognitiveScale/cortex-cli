@@ -20,10 +20,9 @@ const moment = require('moment');
 const { loadProfile } = require('../config');
 const Connections = require('../client/connections');
 const Content = require('../client/content');
-const { CONNECTIONTABLEFORMAT } = require('./utils');
 
 const {
- printSuccess, printError, filterObject, parseObject, printTable, fileExists,
+ printSuccess, printError, filterObject, parseObject, printTable, DEPENDENCYTABLEFORMAT, CONNECTIONTABLEFORMAT, fileExists,
 } = require('./utils');
 
 module.exports.ListConnections = class ListConnections {
@@ -146,6 +145,34 @@ module.exports.DescribeConnectionCommand = class DescribeConnectionCommand {
         })
         .catch((err) => {
             printError(`Failed to describe connection ${connectionName}: ${err.status} ${err.message}`, options);
+        });
+    }
+};
+
+module.exports.DeleteConnectionCommand = class DeleteConnectionCommand {
+    constructor(program) {
+        this.program = program;
+    }
+
+    async execute(connectionName, options) {
+        const profile = await loadProfile(options.profile);
+        debug('%s.executeDeleteConnection(%s)', profile.name, connectionName);
+
+        const connection = new Connections(profile.url);
+        connection.deleteConnection(options.project || profile.project, profile.token, connectionName).then((response) => {
+            if (response.success) {
+                const result = filterObject(response.result, options);
+                return printSuccess(JSON.stringify(result, null, 2), options);
+            }
+            if (response.status === 403) { // has dependencies
+                const tableFormat = DEPENDENCYTABLEFORMAT;
+                printError(`Connection deletion failed: ${response.message}.`, options, false);
+                return printTable(tableFormat, response.details);
+            }
+            return printError(`Failed to delete connection ${connectionName}: ${response.message}`, options);
+        })
+        .catch((err) => {
+            printError(`Failed to delete connection ${connectionName}: ${err.status} ${err.message}`, options);
         });
     }
 };

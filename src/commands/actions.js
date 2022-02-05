@@ -137,6 +137,9 @@ module.exports.DeployActionCommand = class {
                 actionInst.command = options.cmd;
             }
             if (options.port) {
+                if (actionInst.type === 'job') {
+                    printError('--port not valid on job action types');
+                }
                 if (!isNumeric(options.port)) {
                     printError('--port must be a number', options);
                 }
@@ -156,6 +159,9 @@ module.exports.DeployActionCommand = class {
             }
 
             if (options.jobTimeout) {
+                if (actionInst.type === 'daemon') {
+                    printError('--jobTimeout not valid on daemon action types');
+                }
                 if (!isNumeric(options.jobTimeout)) {
                     printError('--jobTimeout must be a number', options);
                 }
@@ -199,155 +205,6 @@ module.exports.DeleteActionCommand = class {
             })
             .catch((err) => {
                 printError(`Failed to delete action: ${err.status} ${err.message}`, options);
-            });
-    }
-};
-
-module.exports.TaskLogsActionCommand = class {
-     constructor(program) {
-        this.program = program;
-    }
-
-    async execute(jobId, taskId, options) {
-        const profile = await loadProfile(options.profile);
-        debug('%s.taskLogsActions (%s, %s)', profile.name, jobId, taskId);
-        const actions = new Actions(profile.url);
-        actions.taskLogs(options.project || profile.project, profile.token, jobId, taskId)
-            .then((response) => {
-                if (response.success) {
-                    const result = filterObject(response, options);
-                    printSuccess(JSON.stringify(result, null, 2), options);
-                } else {
-                    printError(`Action task logs failed: ${response.status} ${response.message}`, options);
-                }
-        });
-    }
-};
-
-module.exports.TaskCancelActionCommand = class {
-     constructor(program) {
-        this.program = program;
-    }
-
-    async execute(jobId, taskId, options) {
-        const profile = await loadProfile(options.profile);
-        debug('%s.taskCancelActions (%s, %s)', profile.name, jobId, taskId);
-        const actions = new Actions(profile.url);
-        actions.taskCancel(options.project || profile.project, profile.token, jobId, taskId)
-            .then((response) => {
-                if (response.success) {
-                    const result = filterObject(response, options);
-                    printSuccess(JSON.stringify(result, null, 2), options);
-                } else {
-                    printError(`Action cancel task failed: ${response.status} ${response.message}`, options);
-                }
-        });
-    }
-};
-
-module.exports.TaskStatusActionCommand = class {
-     constructor(program) {
-        this.program = program;
-    }
-
-    async execute(jobId, taskId, options) {
-        const profile = await loadProfile(options.profile);
-        debug('%s.taskStatusActions (%s, %s)', profile.name, jobId, taskId);
-        const actions = new Actions(profile.url);
-        actions.taskStatus(options.project || profile.project, profile.token, jobId, taskId)
-            .then((response) => {
-                if (response.success) {
-                    const result = filterObject(response, options);
-                    printSuccess(JSON.stringify(result, null, 2), options);
-                } else {
-                    printError(`Action task logs failed: ${response.status} ${response.message}`, options);
-                }
-        });
-    }
-};
-
-module.exports.JobTaskListActionCommand = class {
-    constructor(program) {
-        this.program = program;
-    }
-
-    async execute(jobId, options) {
-        const profile = await loadProfile(options.profile);
-        debug('%s.jobTaskListActions (%s, %s)', profile.name, jobId);
-        const actions = new Actions(profile.url);
-        actions.jobListTasks(options.project || profile.project, profile.token, jobId)
-            .then((response) => {
-                if (response.success) {
-                    const result = filterObject(response, options);
-                    printSuccess(JSON.stringify(result, null, 2), options);
-                } else {
-                    printError(`Action list job's tasks failed: ${response.status} ${response.message}`, options);
-                }
-            });
-    }
-};
-
-module.exports.TaskStatsActionCommand = class {
-    constructor(program) {
-        this.program = program;
-    }
-
-    async execute(jobId, options) {
-        const profile = await loadProfile(options.profile);
-        debug('%s.taskStatsActions (%s, %s)', profile.name, jobId);
-        const actions = new Actions(profile.url);
-        actions.taskStats(options.project || profile.project, profile.token, jobId)
-            .then((response) => {
-                if (response.success) {
-                    const result = filterObject(response, options);
-                    printSuccess(JSON.stringify(result, null, 2), options);
-                } else {
-                    printError(`Action get Job tasks stats failed: ${response.status} ${response.message}`, options);
-                }
-            });
-    }
-};
-
-module.exports.ListTaskByActivation = class {
-    constructor(program) {
-        this.program = program;
-    }
-
-    async execute(activationId, options) {
-        const profile = await loadProfile(options.profile);
-        debug('%s.listTasksByActivation (%s, %s)', profile.name, activationId);
-        const actions = new Actions(profile.url);
-        actions.listTasksByActivation(options.project || profile.project, profile.token, activationId)
-            .then((response) => {
-                if (response.success) {
-                    const result = filterObject(response, options);
-                    printSuccess(JSON.stringify(result, null, 2), options);
-                } else {
-                    printError(`Agent task list by activation failed: ${response.status} ${response.message}`, options);
-                }
-            });
-    }
-};
-
-module.exports.GetLogsCommand = class {
-    constructor(program) {
-        this.program = program;
-    }
-
-    async execute(jobId, options) {
-        const profile = await loadProfile(options.profile);
-        debug('%s.getLogsActions (%s, %s)', profile.name, jobId);
-        const actions = new Actions(profile.url);
-        actions.getLogsAction(options.project || profile.project, profile.token, jobId)
-            .then((response) => {
-                if (response.success) {
-                    if (options.json) {
-                        return printSuccess(JSON.stringify(response, null, 2), options);
-                    }
-                    const logsStr = _.get(response, 'logs', []).join('/n');
-                    return printSuccess(logsStr, options);
-                }
-                return printError(`Action get logs failed: ${response.status} ${response.message}`, options);
             });
     }
 };

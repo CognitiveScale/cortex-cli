@@ -67,6 +67,19 @@ module.exports = class Connections {
             .catch((err) => constructError(err));
     }
 
+    deleteConnection(projectId, token, connectionName) {
+        checkProject(projectId);
+        const endpoint = `${this.endpoint(projectId)}/${encodeURIComponent(connectionName)}`;
+        debug('deleteConnection(%s) => %s', connectionName, endpoint);
+        return got
+            .delete(endpoint, {
+                headers: { Authorization: `Bearer ${token}` },
+                'user-agent': getUserAgent(),
+            }).json()
+            .then((result) => ({ success: true, result }))
+            .catch((err) => constructError(err));
+    }
+
     listConnectionsTypes(token) {
         const endpoint = `${this.cortexUrl}/fabric/v4/connectiontypes`;
         debug('listConnectionsTypes() => %s', endpoint);
