@@ -26,6 +26,7 @@ const {
     SaveConnectionCommand,
     DescribeConnectionCommand,
     ListConnectionsTypes,
+    DeleteConnectionCommand,
 } = require('../src/commands/connections');
 
 program.name('cortex connections');
@@ -98,6 +99,22 @@ program
     .action(withCompatibilityCheck((options) => {
         try {
             new ListConnectionsTypes(program).execute(options);
+        } catch (err) {
+            console.error(chalk.red(err.message));
+        }
+    }));
+
+// Delete Connection
+program
+    .command('delete <connectionName>')
+    .description('Delete a connection')
+    .option('--no-compat', 'Ignore API compatibility checks')
+    .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
+    .option('--profile [profile]', 'The profile to use')
+    .option('--project [project]', 'The project to use')
+    .action(withCompatibilityCheck((connectionName, options) => {
+        try {
+            new DeleteConnectionCommand(program).execute(connectionName, options);
         } catch (err) {
             console.error(chalk.red(err.message));
         }

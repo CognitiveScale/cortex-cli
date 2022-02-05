@@ -51,6 +51,19 @@ module.exports = class Secrets {
             .catch((err) => constructError(err));
     }
 
+    deleteSecret(projectId, token, keyName) {
+        checkProject(projectId);
+        const endpoint = urljoin(this.endpoint(projectId), keyName);
+        debug('deleteSecret(%s) => %s', keyName, endpoint);
+        return got
+            .delete(endpoint, {
+                headers: { Authorization: `Bearer ${token}` },
+                'user-agent': getUserAgent(),
+            }).json()
+            .then((result) => ({ success: true, result }))
+            .catch((err) => constructError(err));
+    }
+
     writeSecret(projectId, token, keyName, value) {
         checkProject(projectId);
         const endpoint = urljoin(this.endpoint(projectId), keyName);
