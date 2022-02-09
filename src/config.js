@@ -41,7 +41,7 @@ async function generateJwt(profile, expiresIn = '2m') {
         .setSubject(username)
         .setAudience(audience)
         .setIssuer(issuer)
-        .setIssuedAt(serverTs)
+        .setIssuedAt(Math.floor(serverTs / 1000)) // in seconds
         .setExpirationTime(expiresIn)
         .sign(jwtSigner, { kid: jwk.kid });
 }
