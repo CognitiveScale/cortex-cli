@@ -27,7 +27,7 @@ const { loadProfile } = require('../config');
 const Assessments = require('../client/assessments');
 
 const {
-    printSuccess, printError, parseObject, printTable,
+    printSuccess, printError, parseObject, printTable, filterListObject,
 } = require('./utils');
 
 const handleTable = (spec, data, transformer, noDataMessage) => {
@@ -84,8 +84,9 @@ module.exports.ListResourceTypesCommand = class {
         client.listResourceTypes(profile.token)
             .then((response) => {
                 if (response.success === false) throw response;
-                const data = _.compact(response.data);
+                let data = _.compact(response.data);
                 if (options.json) {
+                    if (options.query) data = filterListObject(data, options);
                     printSuccess(JSON.stringify(data, null, 2), options);
                 } else {
                     const types = data.map((t) => ({ type: t }));
@@ -186,8 +187,10 @@ module.exports.ListAssessmentCommand = class {
         client.listAssessment(profile.token, options.skip, options.limit)
             .then((response) => {
                 if (response.success === false) throw response;
+                let result = response.data;
                 if (options.json) {
-                    printSuccess(JSON.stringify(response, null, 2), options);
+                    if (options.query) result = filterListObject(result, options);
+                    printSuccess(JSON.stringify(result, null, 2), options);
                 } else {
                     const tableSpec = [
                         { column: 'Name', field: 'name' },
@@ -198,7 +201,7 @@ module.exports.ListAssessmentCommand = class {
                         { column: 'Modified', field: '_updatedAt' },
                         { column: 'Author', field: '_createdBy' },
                     ];
-                    handleTable(tableSpec, response.data, (o) => ({ ...o, _updatedAt: o._updatedAt ? moment(o._updatedAt).fromNow() : '-' }), 'No Assessments found');
+                    handleTable(tableSpec, result, (o) => ({ ...o, _updatedAt: o._updatedAt ? moment(o._updatedAt).fromNow() : '-' }), 'No Assessments found');
                 }
             })
             .catch((err) => {

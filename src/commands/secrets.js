@@ -23,7 +23,7 @@ const map = require('lodash/fp/map');
 const { loadProfile } = require('../config');
 const Secrets = require('../client/secrets');
 const {
- printSuccess, printError, filterObject, parseObject, printTable, DEPENDENCYTABLEFORMAT,
+ printSuccess, printError, filterObject, parseObject, printTable, DEPENDENCYTABLEFORMAT, filterListObject,
 } = require('./utils');
 
 module.exports.ListSecretsCommand = class {
@@ -39,9 +39,11 @@ module.exports.ListSecretsCommand = class {
         secrets.listSecrets(options.project || profile.project, profile.token)
             .then((response) => {
                 if (response.success) {
-                    const result = filterObject(response.result, options);
-                    if (options.json) printSuccess(JSON.stringify(result, null, 2), options);
-                    else {
+                    let { result } = response;
+                    if (options.json) {
+                        if (options.query) result = filterListObject(result, options);
+                        printSuccess(JSON.stringify(result, null, 2), options);
+                    } else {
                         const tableSpec = [
                             { column: 'Secret Key Name', field: 'keyName', width: 50 },
                         ];
