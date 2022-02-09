@@ -23,6 +23,7 @@ const debug = require('debug')('cortex:config');
 const jose = require('jose-node-cjs-runtime');
 //const { SignJWT } = require('jose-node-cjs-runtime/jwt/sign');
 const { printError } = require('./commands/utils');
+const Info = require('./client/info');
 
 function configDir() {
     return process.env.CORTEX_CONFIG_DIR || path.join(os.homedir(), '.cortex');
@@ -33,12 +34,14 @@ async function generateJwt(profile, expiresIn = '2m') {
         username, issuer, audience, jwk,
     } = profile;
     const jwtSigner = await jose.importJWK(jwk, 'Ed25519');
+    const infoClient = new Info(profile.url);
+    const { serverTs } = await infoClient.getInfo();
     return new jose.SignJWT({})
         .setProtectedHeader({ alg: 'EdDSA', kid: jwk.kid })
         .setSubject(username)
         .setAudience(audience)
         .setIssuer(issuer)
-        .setIssuedAt()
+        .setIssuedAt(Math.floor(serverTs / 1000)) // in seconds
         .setExpirationTime(expiresIn)
         .sign(jwtSigner, { kid: jwk.kid });
 }
