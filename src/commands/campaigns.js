@@ -20,7 +20,7 @@ const Catalog = require('../client/catalog');
 
 const _ = { get: require('lodash/get') };
 const {
- printSuccess, printError, filterObject, printTable,
+ printSuccess, printError, filterObject, printTable, filterListObject,
 } = require('./utils');
 
 module.exports.ListCampaignsCommand = class ListCampaignsCommand {
@@ -36,8 +36,8 @@ module.exports.ListCampaignsCommand = class ListCampaignsCommand {
         try {
         const response = await cli.listCampaigns(options.project || profile.project, profile.token);
             let result = response;
-            if (options.query) result = filterObject(result, options);
             if (options.json) {
+                if (options.query) result = filterListObject(result, options);
                 printSuccess(JSON.stringify(result, null, 2), options);
             } else {
                 const tableSpec = [
@@ -214,8 +214,9 @@ module.exports.ListMissionsCommand = class ListMissionsCommand {
         try {
             cli.listMissions(options.project || profile.project, profile.token, campaign).then((response) => {
                 if (response.success === false) throw response;
-                const data = Object.values(response.data);
+                let data = Object.values(response.data);
                 if (options.json) {
+                    if (options.query) data = filterListObject(data, options);
                     printSuccess(JSON.stringify(data, null, 2), options);
                 } else {
                     const tableSpec = [

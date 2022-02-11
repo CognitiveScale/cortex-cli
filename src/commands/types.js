@@ -19,7 +19,7 @@ const debug = require('debug')('cortex:cli');
 const moment = require('moment');
 const { loadProfile } = require('../config');
 const Catalog = require('../client/catalog');
-const { LISTTABLEFORMAT } = require('./utils');
+const { LISTTABLEFORMAT, filterListObject } = require('./utils');
 
 const {
  printSuccess, printError, filterObject, parseObject, printTable, 
@@ -67,9 +67,8 @@ module.exports.ListTypesCommand = class ListTypesCommand {
         catalog.listTypes(options.project || profile.project, profile.token).then((response) => {
             if (response.success) {
                 let result = response.types;
-                if (options.query) result = filterObject(result, options);
-
                 if (options.json) {
+                    if (options.query) result = filterListObject(result, options);
                     printSuccess(JSON.stringify(result, null, 2), options);
                 } else {
                     printTable(LISTTABLEFORMAT, result, (o) => ({ ...o, updatedAt: o.updatedAt ? moment(o.updatedAt).fromNow() : '-' }));
