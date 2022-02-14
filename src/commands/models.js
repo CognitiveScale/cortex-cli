@@ -27,7 +27,7 @@ const Experiments = require('../client/experiments');
 const { LISTTABLEFORMAT, RUNTABLEFORMAT, DEPENDENCYTABLEFORMAT } = require('./utils');
 
 const {
-    printSuccess, printError, filterObject, filterListObject, parseObject, printTable, formatValidationPath, fileExists,
+    printSuccess, printError, filterObject, parseObject, printTable, formatValidationPath, fileExists,
 } = require('./utils');
 
 module.exports.SaveModelCommand = class SaveModelCommand {
@@ -84,7 +84,7 @@ module.exports.ListModelsCommand = class ListModelsCommand {
                 let result = response.models;
 
                 if (options.json) {
-                    if (options.query) result = filterListObject(result, options);
+                    if (options.query) result = filterObject(result, options);
                     printSuccess(JSON.stringify(result, null, 2), options);
                 } else {
                     printTable(LISTTABLEFORMAT, result, (o) => ({ ...o, updatedAt: o.updatedAt ? moment(o.updatedAt).fromNow() : '-' }));
@@ -114,7 +114,7 @@ module.exports.ListModelRunsCommand = class ListModelsCommand {
                 let result = response.runs;
 
                 if (options.json) {
-                    if (options.query) result = filterListObject(result, options);
+                    if (options.query) result = filterObject(result, options);
                     printSuccess(JSON.stringify(result, null, 2), options);
                 } else {
                     printTable(RUNTABLEFORMAT, result, (o) => ({ ...o, updatedAt: o.updatedAt ? moment(o.updatedAt).fromNow() : '-' }));

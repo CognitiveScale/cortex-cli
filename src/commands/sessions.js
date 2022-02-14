@@ -19,7 +19,7 @@ const _ = require('lodash');
 const debug = require('debug')('cortex:cli');
 const { loadProfile } = require('../config');
 const Sessions = require('../client/sessions');
-const { SESSIONTABLEFORMAT, formatValidationPath, filterListObject } = require('./utils');
+const { SESSIONTABLEFORMAT, formatValidationPath } = require('./utils');
 
 const {
     printSuccess, printError, filterObject, parseObject, printTable,
@@ -78,7 +78,7 @@ module.exports.ListSessionsCommand = class ListSessionsCommand {
                 let result = response.sessions;
 
                 if (options.json) {
-                    if (options.query) result = filterListObject(result, options);
+                    if (options.query) result = filterObject(result, options);
                     printSuccess(JSON.stringify(result, null, 2), options);
                 } else {
                     printTable(SESSIONTABLEFORMAT, result);

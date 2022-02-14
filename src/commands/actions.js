@@ -21,7 +21,7 @@ const { loadProfile } = require('../config');
 const Actions = require('../client/actions');
 
 const {
- printSuccess, printError, filterObject, parseObject, printTable, DEPENDENCYTABLEFORMAT, isNumeric, filterListObject,
+ printSuccess, printError, filterObject, parseObject, printTable, DEPENDENCYTABLEFORMAT, isNumeric,
 } = require('./utils');
 
 module.exports.ListActionsCommand = class {
@@ -40,7 +40,7 @@ module.exports.ListActionsCommand = class {
                     let result = response.actions;
 
                     if (options.json) {
-                        if (options.query) result = filterListObject(result, options);
+                        if (options.query) result = filterObject(result, options);
                         printSuccess(JSON.stringify(result, null, 2), options);
                     } else {
                         const tableSpec = [
