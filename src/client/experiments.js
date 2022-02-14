@@ -29,14 +29,20 @@ module.exports = class Experiments {
         this.endpoint = (projectId) => `${cortexUrl}/fabric/v4/projects/${projectId}/experiments`;
     }
 
-    listExperiments(projectId, modelId, token) {
+    listExperiments(projectId, modelId, token, filter, limit, skip, sort) {
         checkProject(projectId);
         const endpoint = `${this.endpoint(projectId)}?${modelId ? `modelId=${modelId}` : ''}`;
         debug('listExperiments() => %s', endpoint);
+        const query = {};
+        if (filter) query.filter = filter;
+        if (limit) query.limit = limit;
+        if (sort) query.sort = sort;
+        if (skip) query.skip = skip;
         return got
             .get(endpoint, {
                 headers: { Authorization: `Bearer ${token}` },
                 'user-agent': getUserAgent(),
+                searchParams: query,
             }).json()
             .then((result) => ({ success: true, result }))
             .catch((err) => constructError(err));
@@ -68,7 +74,7 @@ module.exports = class Experiments {
             .catch((err) => constructError(err));
     }
 
-    listRuns(projectId, token, experimentName, filter, limit, sort) {
+    listRuns(projectId, token, experimentName, filter, limit, sort, skip) {
         checkProject(projectId);
         const endpoint = `${this.endpoint(projectId)}/${encodeURIComponent(experimentName)}/runs`;
         debug('listRuns(%s) => %s', experimentName, endpoint);
@@ -76,6 +82,7 @@ module.exports = class Experiments {
         if (filter) query.filter = filter;
         if (limit) query.limit = limit;
         if (sort) query.sort = sort;
+        if (skip) query.skip = skip;
         return got
             .get(endpoint, {
                 headers: { Authorization: `Bearer ${token}` },
