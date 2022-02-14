@@ -23,7 +23,7 @@ const Catalog = require('../client/catalog');
 const Agents = require('../client/agents');
 const {
     printSuccess, printError, filterObject, parseObject, printTable, formatValidationPath,
-    LISTTABLEFORMAT, DEPENDENCYTABLEFORMAT, filterListObject,
+    LISTTABLEFORMAT, DEPENDENCYTABLEFORMAT,
 } = require('./utils');
 
 module.exports.SaveAgentCommand = class SaveAgentCommand {
@@ -79,7 +79,7 @@ module.exports.ListAgentsCommand = class ListAgentsCommand {
             if (response.success) {
                 let result = response.agents;
                 if (options.json) {
-                    if (options.query) result = filterListObject(result, options);
+                    if (options.query) result = filterObject(result, options);
                     printSuccess(JSON.stringify(result, null, 2), options);
                 } else {
                     printTable(LISTTABLEFORMAT, result, (o) => ({ ...o, updatedAt: o.updatedAt ? moment(o.updatedAt).fromNow() : '-' }));
@@ -301,7 +301,7 @@ module.exports.ListServicesCommand = class ListServicesCommand {
             if (response.success) {
                 let result = response.services;
                 if (options.json) {
-                    if (options.query) result = filterListObject(result, options);
+                    if (options.query) result = filterObject(result, options);
                     printSuccess(JSON.stringify(result, null, 2), options);
                 } else {
                     const tableSpec = [
@@ -335,7 +335,7 @@ module.exports.ListAgentSnapshotsCommand = class {
             if (response.success) {
                 let result = response.result.snapshots;
                 if (options.json) {
-                    if (options.query) result = filterListObject(result, options);
+                    if (options.query) result = filterObject(result, options);
                     printSuccess(JSON.stringify(result, null, 2), options);
                 } else {
                     const tableSpec = [

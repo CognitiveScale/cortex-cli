@@ -22,7 +22,6 @@ const { loadProfile } = require('../config');
 const Experiments = require('../client/experiments');
 const {
  printSuccess, printError, filterObject, printTable, parseObject, fileExists, formatValidationPath, DEPENDENCYTABLEFORMAT,
-    filterListObject,
 } = require('./utils');
 
 class ListExperiments {
@@ -39,7 +38,7 @@ class ListExperiments {
             if (response.success) {
                 let { result } = response;
                 if (options.json) {
-                    if (options.query) result = filterListObject(result, options);
+                    if (options.query) result = filterObject(result, options);
                     printSuccess(JSON.stringify(result, null, 2), options);
                 } else {
                     const tableSpec = [
@@ -131,7 +130,7 @@ class ListRuns {
                 let { result } = response;
 
                 if (options.json) {
-                    if (options.query) result = filterListObject(result, options);
+                    if (options.query) result = filterObject(result, options);
                     printSuccess(JSON.stringify(result, null, 2), options);
                 } else {
                     const tableSpec = [

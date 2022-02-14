@@ -23,7 +23,7 @@ const Agent = require('../client/agents');
 
 const {
     printSuccess, printError, printWarning, filterObject, parseObject, printTable, formatValidationPath,
-    LISTTABLEFORMAT, DEPENDENCYTABLEFORMAT, isNumeric, filterListObject,
+    LISTTABLEFORMAT, DEPENDENCYTABLEFORMAT, isNumeric,
 } = require('./utils');
 
 module.exports.SaveSkillCommand = class SaveSkillCommand {
@@ -115,7 +115,7 @@ module.exports.ListSkillsCommand = class ListSkillsCommand {
                 }
 
                 if (options.json) {
-                    if (options.query) result = filterListObject(result, options);
+                    if (options.query) result = filterObject(result, options);
                     return printSuccess(JSON.stringify(result, null, 2), options);
                 }
                 return printTable(tableFormat,

@@ -27,7 +27,7 @@ const { loadProfile } = require('../config');
 const Assessments = require('../client/assessments');
 
 const {
-    printSuccess, printError, parseObject, printTable, filterListObject,
+    printSuccess, printError, parseObject, printTable, filterObject,
 } = require('./utils');
 
 const handleTable = (spec, data, transformer, noDataMessage) => {
@@ -86,7 +86,7 @@ module.exports.ListResourceTypesCommand = class {
                 if (response.success === false) throw response;
                 let data = _.compact(response.data);
                 if (options.json) {
-                    if (options.query) data = filterListObject(data, options);
+                    if (options.query) data = filterObject(data, options);
                     printSuccess(JSON.stringify(data, null, 2), options);
                 } else {
                     const types = data.map((t) => ({ type: t }));
@@ -189,7 +189,7 @@ module.exports.ListAssessmentCommand = class {
                 if (response.success === false) throw response;
                 let result = response.data;
                 if (options.json) {
-                    if (options.query) result = filterListObject(result, options);
+                    if (options.query) result = filterObject(result, options);
                     printSuccess(JSON.stringify(result, null, 2), options);
                 } else {
                     const tableSpec = [

@@ -23,7 +23,6 @@ const Content = require('../client/content');
 
 const {
  printSuccess, printError, filterObject, parseObject, printTable, DEPENDENCYTABLEFORMAT, CONNECTIONTABLEFORMAT, fileExists,
-    filterListObject,
 } = require('./utils');
 
 module.exports.ListConnections = class ListConnections {
@@ -41,7 +40,7 @@ module.exports.ListConnections = class ListConnections {
                 let result = response.result.connections;
 
                 if (options.json) {
-                    if (options.query) result = filterListObject(result, options);
+                    if (options.query) result = filterObject(result, options);
                     printSuccess(JSON.stringify(result, null, 2), options);
                 } else {
                     printTable(CONNECTIONTABLEFORMAT, result, (o) => ({ ...o, createdAt: o.createdAt ? moment(o.createdAt).fromNow() : '-' }));
@@ -193,7 +192,7 @@ module.exports.ListConnectionsTypes = class ListConnectionsTypes {
                 let result = response.result.connectionTypes;
 
                 if (options.json) {
-                    if (options.query) result = filterListObject(result, options);
+                    if (options.query) result = filterObject(result, options);
                     printSuccess(JSON.stringify(result, null, 2), options);
                 } else {
                     const tableSpec = [
