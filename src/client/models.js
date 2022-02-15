@@ -102,14 +102,20 @@ module.exports = class Models {
             .catch((err) => constructError(err));
     }
 
-    listModelRuns(projectId, modelName, token) {
+    listModelRuns(projectId, modelName, token, filter, limit, skip, sort) {
         checkProject(projectId);
         const endpoint = `${this.endpointV4(projectId)}/${modelName}/experiments/runs`;
         debug('listModels() => %s', endpoint);
+        const query = {};
+        if (filter) query.filter = filter;
+        if (limit) query.limit = limit;
+        if (sort) query.sort = sort;
+        if (skip) query.skip = skip;
         return got
             .get(endpoint, {
                 headers: { Authorization: `Bearer ${token}` },
                 'user-agent': getUserAgent(),
+                searchParams: query,
             })
             .json()
             .then((modelsResp) => ({ success: true, ...modelsResp }))
