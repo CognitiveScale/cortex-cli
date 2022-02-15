@@ -81,14 +81,21 @@ module.exports = class Models {
             .catch((err) => constructError(err));
     }
 
-    listModels(projectId, offset, limit, tags, token) {
+    listModels(projectId, skip, limit, filter, sort, tags, token) {
         checkProject(projectId);
-        const endpoint = `${this.endpointV4(projectId)}?skip=${offset}&limit=${limit}${tags ? `&tags=${tags}` : ''}`;
+        const endpoint = `${this.endpointV4(projectId)}`;
         debug('listModels() => %s', endpoint);
+        const query = {};
+        if (filter) query.filter = filter;
+        if (limit) query.limit = limit;
+        if (sort) query.sort = sort;
+        if (skip) query.skip = skip;
+        if (tags) query.tags = tags;
         return got
             .get(endpoint, {
                 headers: { Authorization: `Bearer ${token}` },
                 'user-agent': getUserAgent(),
+                searchParams: query,
             })
             .json()
             .then((modelsResp) => ({ success: true, ...modelsResp }))
