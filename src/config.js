@@ -35,7 +35,8 @@ async function generateJwt(profile, expiresIn = '2m') {
     } = profile;
     const jwtSigner = await jose.importJWK(jwk, 'Ed25519');
     const infoClient = new Info(profile.url);
-    const { serverTs } = await infoClient.getInfo();
+    let { serverTs } = await infoClient.getInfo();
+    if (_.isNull(serverTs)) serverTs = Date.now();
     return new jose.SignJWT({})
         .setProtectedHeader({ alg: 'EdDSA', kid: jwk.kid })
         .setSubject(username)
