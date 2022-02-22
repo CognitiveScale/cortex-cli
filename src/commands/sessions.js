@@ -76,9 +76,9 @@ module.exports.ListSessionsCommand = class ListSessionsCommand {
         sessions.listSessions(options.project || profile.project, profile.token, options.limit).then((response) => {
             if (response.success) {
                 let result = response.sessions;
-                if (options.query) result = filterObject(result, options);
 
                 if (options.json) {
+                    if (options.query) result = filterObject(result, options);
                     printSuccess(JSON.stringify(result, null, 2), options);
                 } else {
                     printTable(SESSIONTABLEFORMAT, result);

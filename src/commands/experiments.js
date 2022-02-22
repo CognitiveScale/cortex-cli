@@ -37,10 +37,8 @@ class ListExperiments {
         exp.listExperiments(options.project || profile.project, options.model, profile.token).then((response) => {
             if (response.success) {
                 let { result } = response;
-                if (options.query) {
-                    result = filterObject(response.result, options);
-                }
                 if (options.json) {
+                    if (options.query) result = filterObject(result, options);
                     printSuccess(JSON.stringify(result, null, 2), options);
                 } else {
                     const tableSpec = [
@@ -130,10 +128,9 @@ class ListRuns {
         exp.listRuns(options.project || profile.project, profile.token, experimentName, options.filter, options.limit, sort).then((response) => {
             if (response.success) {
                 let { result } = response;
-                if (options.query) {
-                    result = filterObject(response.result, options);
-                }
+
                 if (options.json) {
+                    if (options.query) result = filterObject(result, options);
                     printSuccess(JSON.stringify(result, null, 2), options);
                 } else {
                     const tableSpec = [

@@ -113,9 +113,9 @@ module.exports.ListSkillsCommand = class ListSkillsCommand {
                     });
                     tableFormat.push({ column: 'Status', field: 'status', width: 30 });
                 }
-                if (options.query) result = filterObject(result, options);
 
                 if (options.json) {
+                    if (options.query) result = filterObject(result, options);
                     return printSuccess(JSON.stringify(result, null, 2), options);
                 }
                 return printTable(tableFormat,

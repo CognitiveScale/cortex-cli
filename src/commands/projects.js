@@ -66,8 +66,8 @@ module.exports.ListProjectsCommand = class ListProjectsCommand {
         try {
         const response = await cli.listProjects(profile.token);
             let result = response;
-            if (options.query) result = filterObject(result, options);
             if (options.json) {
+                if (options.query) result = filterObject(result, options);
                 printSuccess(JSON.stringify(result, null, 2), options);
             } else {
                 const tableSpec = [

@@ -39,9 +39,11 @@ module.exports.ListSecretsCommand = class {
         secrets.listSecrets(options.project || profile.project, profile.token)
             .then((response) => {
                 if (response.success) {
-                    const result = filterObject(response.result, options);
-                    if (options.json) printSuccess(JSON.stringify(result, null, 2), options);
-                    else {
+                    let { result } = response;
+                    if (options.json) {
+                        if (options.query) result = filterObject(result, options);
+                        printSuccess(JSON.stringify(result, null, 2), options);
+                    } else {
                         const tableSpec = [
                             { column: 'Secret Key Name', field: 'keyName', width: 50 },
                         ];

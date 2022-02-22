@@ -21,10 +21,9 @@ const moment = require('moment');
 const { loadProfile } = require('../config');
 const Catalog = require('../client/catalog');
 const Agents = require('../client/agents');
-const { LISTTABLEFORMAT, DEPENDENCYTABLEFORMAT } = require('./utils');
-
 const {
- printSuccess, printError, filterObject, parseObject, printTable, formatValidationPath,
+    printSuccess, printError, filterObject, parseObject, printTable, formatValidationPath,
+    LISTTABLEFORMAT, DEPENDENCYTABLEFORMAT,
 } = require('./utils');
 
 module.exports.SaveAgentCommand = class SaveAgentCommand {
@@ -79,9 +78,8 @@ module.exports.ListAgentsCommand = class ListAgentsCommand {
         catalog.listAgents(options.project || profile.project, profile.token).then((response) => {
             if (response.success) {
                 let result = response.agents;
-                if (options.query) result = filterObject(result, options);
-
                 if (options.json) {
+                    if (options.query) result = filterObject(result, options);
                     printSuccess(JSON.stringify(result, null, 2), options);
                 } else {
                     printTable(LISTTABLEFORMAT, result, (o) => ({ ...o, updatedAt: o.updatedAt ? moment(o.updatedAt).fromNow() : '-' }));
@@ -301,8 +299,9 @@ module.exports.ListServicesCommand = class ListServicesCommand {
         const catalog = new Catalog(profile.url);
         catalog.listServices(options.project || profile.project, profile.token, agentName, profile).then((response) => {
             if (response.success) {
-                const result = filterObject(response.services, options);
+                let result = response.services;
                 if (options.json) {
+                    if (options.query) result = filterObject(result, options);
                     printSuccess(JSON.stringify(result, null, 2), options);
                 } else {
                     const tableSpec = [
@@ -334,8 +333,9 @@ module.exports.ListAgentSnapshotsCommand = class {
         agents.listAgentSnapshots(options.project || profile.project, profile.token, agentName)
             .then((response) => {
             if (response.success) {
-                const result = filterObject(response.result.snapshots, options);
+                let result = response.result.snapshots;
                 if (options.json) {
+                    if (options.query) result = filterObject(result, options);
                     printSuccess(JSON.stringify(result, null, 2), options);
                 } else {
                     const tableSpec = [

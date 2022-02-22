@@ -41,6 +41,7 @@ program
     .option('--json', 'Output results using JSON')
     .option('--profile [profile]', 'The profile to use')
     .option('--project [project]', 'The project to use')
+    .option('--query [query]', 'A JMESPath query to use in filtering the response data. Ignored if output format is not JSON.')
     .action(withCompatibilityCheck((options) => {
         try {
             new ListSecretsCommand(program).execute(options);

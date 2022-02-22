@@ -38,9 +38,9 @@ module.exports.ListActionsCommand = class {
             .then((response) => {
                 if (response.success) {
                     let result = response.actions;
-                    if (options.query) result = filterObject(result, options);
 
                     if (options.json) {
+                        if (options.query) result = filterObject(result, options);
                         printSuccess(JSON.stringify(result, null, 2), options);
                     } else {
                         const tableSpec = [
@@ -137,9 +137,6 @@ module.exports.DeployActionCommand = class {
                 actionInst.command = options.cmd;
             }
             if (options.port) {
-                if (actionInst.type === 'job') {
-                    printError('--port not valid on job action types');
-                }
                 if (!isNumeric(options.port)) {
                     printError('--port must be a number', options);
                 }
@@ -159,13 +156,18 @@ module.exports.DeployActionCommand = class {
             }
 
             if (options.jobTimeout) {
-                if (actionInst.type === 'daemon') {
-                    printError('--jobTimeout not valid on daemon action types');
-                }
                 if (!isNumeric(options.jobTimeout)) {
                     printError('--jobTimeout must be a number', options);
                 }
                 actionInst.jobTimeout = parseInt(options.jobTimeout, 10);
+            }
+
+            // handle mutually exclusive options
+            if (actionInst.type === 'job' && _.has(actionInst, 'port')) {
+                printError('Option port not valid on job action types');
+            }
+            if (actionInst.type === 'daemon' && _.has(actionInst, 'jobTimeout')) {
+                printError('Option jobTimeout not valid on daemon action types');
             }
 
             const actions = new Actions(profile.url);
