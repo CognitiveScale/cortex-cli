@@ -29,7 +29,7 @@ const {
     WorkspaceActivateRegistryCommand,
     WorkspaceListRegistryCommand,
 } = require('../src/commands/workspaces/registry');
-const { WorkspaceTestCommand } = require('../src/commands/workspaces/test');
+// const { WorkspaceTestCommand } = require('../src/commands/workspaces/test');
 
 program.name('cortex workspaces');
 program.description('Scaffolding Cortex Components');
