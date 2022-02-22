@@ -89,14 +89,23 @@ module.exports = class Agents {
             .catch((err) => constructError(err));
     }
 
-    listAgentSnapshots(projectId, token, agentName) {
+    listAgentSnapshots(projectId, token, agentName, filter, limit, skip, sort) {
         checkProject(projectId);
         const endpoint = `${this.endpointV4(projectId)}/agents/${encodeURIComponent(agentName)}/snapshots`;
         debug('listAgentSnapshots(%s) => %s', agentName, endpoint);
+        const query = {};
+        if (filter) query.filter = filter;
+        if (limit) query.limit = limit;
+        if (sort) {
+            query.sort = sort;
+            query.mongoRawSort = true;
+        }
+        if (skip) query.skip = skip;
         return got
             .get(endpoint, {
                 headers: { Authorization: `Bearer ${token}` },
                 'user-agent': getUserAgent(),
+                searchParams: query,
             }).json()
             .then((result) => ({ success: true, result }))
             .catch((err) => constructError(err));

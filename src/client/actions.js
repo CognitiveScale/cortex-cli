@@ -57,13 +57,19 @@ module.exports = class Actions {
         .catch((err) => constructError(err));
     }
 
-    listActions(projectId, token) {
+    listActions(projectId, token, filter, limit, skip, sort) {
         checkProject(projectId);
         debug('listActions() => %s', this.endpointV4(projectId));
+        const query = {};
+        if (filter) query.filter = filter;
+        if (limit) query.limit = limit;
+        if (sort) query.sort = sort;
+        if (skip) query.skip = skip;
         return got
             .get(this.endpointV4(projectId), {
                 headers: { Authorization: `Bearer ${token}` },
                 'user-agent': getUserAgent(),
+                searchParams: query,
             }).json()
             .then((actions) => actions)
             .catch((err) => constructError(err));

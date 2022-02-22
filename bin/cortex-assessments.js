@@ -86,6 +86,8 @@ program
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
     .option('--json', 'Output results using JSON')
+    .option('--filter [filter]', 'A Mongo style filter to use.')
+    .option('--sort [sort]', 'A Mongo style sort statement to use in the query.')
     .action(withCompatibilityCheck((options) => {
         try {
             new ListResourcesCommand(program).execute(options);
@@ -128,6 +130,11 @@ program
     .option('--profile [profile]', 'The profile to use')
     .option('--json', 'Output results using JSON')
     .option('--query [query]', 'A JMESPath query to use in filtering the response data. Ignored if output format is not JSON.')
+    .option('--skip [skip]', 'Move the result cursor to this position before returning results.')
+    .option('--limit [limit]', 'Limit the number of rows returned')
+    .option('--filter [filter]', 'A Mongo style filter to use.')
+    .option('--sort [sort]', 'A Mongo style sort statement to use in the query.')
+
     .action(withCompatibilityCheck((options) => {
         try {
             new ListAssessmentCommand(program).execute(options);
