@@ -6,7 +6,7 @@
   "scripts": {
     "preinstall": "npx npm-force-resolutions && npx check-node-version -p --package",
     "prepare": "husky install",
-    "pretest": "eslint bin/**/*.js src/**/*.js test/**/*.js && audit-ci -h --allowlist 1002475",
+    "pretest": "eslint bin/**/*.js src/**/*.js test/**/*.js && audit-ci -h",
     "test": "cross-env NODE_ENV=test nyc mocha --recursive --exit --timeout 10000 --ignore uploadDirectory.js"
   },
   "engines": {
