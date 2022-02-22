@@ -65,8 +65,8 @@
     "semver": "7.3.5",
     "treeify": "1.1.0",
     "url-join": "4.0.1",
+    "url-parse": "1.5.10",
     "uuid": "8.3.2",
-    "url-parse": "1.5.4",
     "yauzl": "2.10.0"
   },
   "devDependencies": {
