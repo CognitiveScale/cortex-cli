@@ -57,7 +57,7 @@
     "prompt": "1.2.1",
     "semver": "7.3.5",
     "url-join": "4.0.1",
-    "url-parse": "1.5.4",
+    "url-parse": "1.5.9",
     "yauzl": "2.10.0"
   },
   "devDependencies": {
