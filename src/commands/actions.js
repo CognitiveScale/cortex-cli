@@ -34,7 +34,7 @@ module.exports.ListActionsCommand = class {
         debug('%s.executeListActions()', profile.name);
 
         const actions = new Actions(profile.url);
-        actions.listActions(options.project || profile.project, profile.token)
+        actions.listActions(options.project || profile.project, profile.token, options.filter, options.limit, options.skip, options.sort)
             .then((response) => {
                 if (response.success) {
                     let result = response.actions;

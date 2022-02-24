@@ -49,7 +49,7 @@ module.exports.ListResourcesCommand = class {
         debug('%s.ListResourcesCommand()', profile.name);
 
         const client = new Assessments(profile.url);
-        client.queryResources(profile.token, options.name, options.scope, options.type, options.skip, options.limit)
+        client.queryResources(profile.token, options.name, options.scope, options.type, options.skip, options.limit, options.filter, options.sort)
             .then((response) => {
                 if (response.success === false) throw response;
                 if (options.json) {
@@ -184,7 +184,7 @@ module.exports.ListAssessmentCommand = class {
         debug('%s.ListAssessmentCommand()', profile.name);
 
         const client = new Assessments(profile.url);
-        client.listAssessment(profile.token, options.skip, options.limit)
+        client.listAssessment(profile.token, options.skip, options.limit, options.filter, options.sort)
             .then((response) => {
                 if (response.success === false) throw response;
                 let result = response.data;

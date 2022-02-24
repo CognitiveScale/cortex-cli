@@ -35,7 +35,7 @@ module.exports.ListConnections = class ListConnections {
         debug('%s.listConnections()', profile.name);
 
         const conns = new Connections(profile.url);
-        conns.listConnections(options.project || profile.project, profile.token).then((response) => {
+        conns.listConnections(options.project || profile.project, profile.token, options.filter, options.limit, options.skip, options.sort).then((response) => {
             if (response.success) {
                 let result = response.result.connections;
 
@@ -187,7 +187,7 @@ module.exports.ListConnectionsTypes = class ListConnectionsTypes {
         debug('%s.listConnectionsTypes()', profile.name);
 
         const conns = new Connections(profile.url);
-        conns.listConnectionsTypes(profile.token).then((response) => {
+        conns.listConnectionsTypes(profile.token, options.filter, options.limit, options.skip, options.sort).then((response) => {
             if (response.success) {
                 let result = response.result.connectionTypes;
 

@@ -64,7 +64,7 @@ module.exports.ListTypesCommand = class ListTypesCommand {
         debug('%s.executeListTypes()', profile.name);
 
         const catalog = new Catalog(profile.url);
-        catalog.listTypes(options.project || profile.project, profile.token).then((response) => {
+        catalog.listTypes(options.project || profile.project, profile.token, options.filter, options.limit, options.skip, options.sort).then((response) => {
             if (response.success) {
                 let result = response.types;
                 if (options.json) {
