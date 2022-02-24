@@ -33,9 +33,11 @@ module.exports = class ApiServerClient {
      * @param token
      * @return {Promise<any>}
      */
-    async listProjects(token) {
+    async listProjects(token, filter, limit, skip, sort) {
         const fetched = await this._client(token)
-            .request(gql`{ projects { name, title, description} }`);
+            .request(gql`{
+            projects ( filter: "${filter}", limit: "${limit}",  skip: "${skip}",  sort: "${sort}" ) { name, title, description} }
+        `);
         return _.get(fetched, 'projects', []);
     }
 
@@ -70,9 +72,9 @@ module.exports = class ApiServerClient {
      * @param token
      * @return {Promise<any>}
      */
-    async listCampaigns(projectId, token) {
+    async listCampaigns(projectId, token, filter, limit, skip, sort) {
         const fetched = await this._client(token)
-            .request(gql`{ campaigns ( project: "${projectId}" ) { name, title, description} }`);
+            .request(gql`{ campaigns ( project: "${projectId}", filter: "${filter}", limit: "${limit}",  skip: "${skip}",  sort: "${sort}" ) { name, title, description} }`);
         return _.get(fetched, 'campaigns', []);
     }
 

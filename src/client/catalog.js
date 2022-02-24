@@ -402,14 +402,21 @@ module.exports = class Catalog {
             .catch((err) => constructError(err));
     }
 
-    listMissions(projectId, token, campaign) {
+    listMissions(projectId, token, campaign, filter, limit, skip, sort) {
         checkProject(projectId);
         const endpoint = `${this.endpoints.campaigns(projectId)}${campaign}/missions`;
         debug('listMissions() => %s', endpoint);
+        const query = {};
+        if (filter) query.filter = filter;
+        if (limit) query.limit = limit;
+        if (sort) query.sort = sort;
+        if (skip) query.skip = skip;
+
         return got
             .get(endpoint, {
                 headers: { Authorization: `Bearer ${token}` },
                 'user-agent': getUserAgent(),
+                searchParams: query,
             })
             .json()
             .then((res) => ({ success: true, data: res }))
