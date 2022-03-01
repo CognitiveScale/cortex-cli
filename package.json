@@ -47,7 +47,7 @@
     "is-installed-globally": "0.4.0",
     "jmespath": "0.15.0",
     "joi": "17.6.0",
-    "jose-node-cjs-runtime": "4.4.0",
+    "jose-node-cjs-runtime": "4.5.0",
     "js-yaml": "4.1.0",
     "lodash": "4.17.21",
     "mixin-deep": "^2.0.1",
