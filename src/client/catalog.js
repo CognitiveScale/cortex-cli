@@ -49,9 +49,14 @@ module.exports = class Catalog {
             .catch((err) => constructError(err));
     }
 
-    listSkills(projectId, token, query) {
+    listSkills(projectId, token, query, filter, limit, skip, sort) {
         checkProject(projectId);
         debug('listSkills() => %s', this.endpoints.skills(projectId));
+        if (filter) query.filter = filter;
+        if (limit) query.limit = limit;
+        if (sort) query.sort = sort;
+        if (skip) query.skip = skip;
+
         return got
             .get(this.endpoints.skills(projectId), {
                 headers: { Authorization: `Bearer ${token}` },
@@ -126,24 +131,35 @@ module.exports = class Catalog {
             .catch((err) => constructError(err));
     }
 
-    listAgents(projectId, token) {
+    listAgents(projectId, token, filter, limit, skip, sort) {
         checkProject(projectId);
         const endpoint = this.endpoints.agents(projectId);
         debug('listAgents() => %s', endpoint);
+        const query = {};
+        if (filter) query.filter = filter;
+        if (limit) query.limit = limit;
+        if (sort) query.sort = sort;
+        if (skip) query.skip = skip;
         return got
             .get(endpoint, {
                 headers: { Authorization: `Bearer ${token}` },
                 'user-agent': getUserAgent(),
+                searchParams: query,
             })
             .json()
             .then((agentResp) => ({ success: true, ...agentResp }))
             .catch((err) => constructError(err));
     }
 
-    listServices(projectId, token, agentName) {
+    listServices(projectId, token, agentName, filter, limit, skip, sort) {
         // TODO removed profile should I use that as the URL ??
         checkProject(projectId);
         debug('listServices() using describeAgent');
+        const query = {};
+        if (filter) query.filter = filter;
+        if (limit) query.limit = limit;
+        if (sort) query.sort = sort;
+        if (skip) query.skip = skip;
         return this.describeAgent(projectId, token, agentName).then((response) => {
             if (response.success) {
                 const urlBase = `${this.endpoints.agents(projectId)}/${encodeURIComponent(agentName)}/services`;
@@ -258,14 +274,21 @@ module.exports = class Catalog {
             .catch((err) => constructError(err));
     }
 
-    listTypes(projectId, token) {
+    listTypes(projectId, token, filter, limit, skip, sort) {
         checkProject(projectId);
         const endpoint = `${this.endpoints.types(projectId)}`;
         debug('listTypes() => %s', endpoint);
+        const query = {};
+        if (filter) query.filter = filter;
+        if (limit) query.limit = limit;
+        if (sort) query.sort = sort;
+        if (skip) query.skip = skip;
+
         return got
             .get(endpoint, {
                 headers: { Authorization: `Bearer ${token}` },
                 'user-agent': getUserAgent(),
+                searchParams: query,
             })
             .json()
             .then((types) => ({ success: true, ...types }))
@@ -379,14 +402,21 @@ module.exports = class Catalog {
             .catch((err) => constructError(err));
     }
 
-    listMissions(projectId, token, campaign) {
+    listMissions(projectId, token, campaign, filter, limit, skip, sort) {
         checkProject(projectId);
         const endpoint = `${this.endpoints.campaigns(projectId)}${campaign}/missions`;
         debug('listMissions() => %s', endpoint);
+        const query = {};
+        if (filter) query.filter = filter;
+        if (limit) query.limit = limit;
+        if (sort) query.sort = sort;
+        if (skip) query.skip = skip;
+
         return got
             .get(endpoint, {
                 headers: { Authorization: `Bearer ${token}` },
                 'user-agent': getUserAgent(),
+                searchParams: query,
             })
             .json()
             .then((res) => ({ success: true, data: res }))
