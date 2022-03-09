@@ -348,3 +348,16 @@ module.exports.EXTERNALROLESFORMAT = [
     { column: 'Group', field: 'group' },
     { column: 'Roles', field: 'roles' },
 ];
+
+// append relevant prefix to keys
+module.exports.transformDynamicParams = (params, prefix) => {
+    const jsonParams = JSON.parse(params);
+    Object.keys(jsonParams)
+        .forEach((key) => {
+            if (!_.startsWith(prefix, key)) {
+                jsonParams[`${prefix}${key}`] = jsonParams[key];
+                delete jsonParams[key];
+            }
+        });
+    return JSON.stringify(jsonParams);
+};

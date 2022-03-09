@@ -20,6 +20,7 @@ const _ = {
     sortBy: require('lodash/sortBy'),
     flatten: require('lodash/flatten'),
     compact: require('lodash/compact'),
+    startsWith: require('lodash/startsWith'),
 };
 const debug = require('debug')('cortex:cli');
 const moment = require('moment');
@@ -27,7 +28,7 @@ const { loadProfile } = require('../config');
 const Assessments = require('../client/assessments');
 
 const {
-    printSuccess, printError, parseObject, printTable, filterObject,
+    printSuccess, printError, parseObject, printTable, filterObject, transformDynamicParams,
 } = require('./utils');
 
 const handleTable = (spec, data, transformer, noDataMessage) => {
@@ -47,9 +48,13 @@ module.exports.ListResourcesCommand = class {
         const options = command;
         const profile = await loadProfile(options.profile);
         debug('%s.ListResourcesCommand()', profile.name);
-
+        let transformedFilter;
+        let transformedSort;
+        // sanitize the params
+        if (options.filter) transformedFilter = transformDynamicParams(options.filter, 'resource.');
+        if (options.sort) transformedSort = transformDynamicParams(options.sort, '_id.');
         const client = new Assessments(profile.url);
-        client.queryResources(profile.token, options.name, options.scope, options.type, options.skip, options.limit, options.filter, options.sort)
+        client.queryResources(profile.token, options.name, options.scope, options.type, options.skip, options.limit, transformedFilter, transformedSort)
             .then((response) => {
                 if (response.success === false) throw response;
                 if (options.json) {

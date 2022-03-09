@@ -119,7 +119,7 @@ module.exports.ListSkillsCommand = class ListSkillsCommand {
                     return printSuccess(JSON.stringify(result, null, 2), options);
                 }
                 return printTable(tableFormat,
-                    _.sortBy(result, ['name']), (o) => ({ ...o, updatedAt: o.updatedAt ? moment(o.updatedAt).fromNow() : '-' }));
+                    _.sortBy(result, options.sort ? [] : ['name']), (o) => ({ ...o, updatedAt: o.updatedAt ? moment(o.updatedAt).fromNow() : '-' }));
             }
             return printError(`Failed to list skills: ${response.status} ${response.message}`, options);
         } catch (err) {
