@@ -50,9 +50,9 @@ program
     .option('--json', 'Output results using JSON')
     .option('--query [query]', 'A JMESPath query to use in filtering the response data.')
     .option('--filter [filter]', 'A Mongo style filter to use.')
+    .option('--limit [limit]', 'Limit number of records')
+    .option('--skip [skip]', 'Skip number of records', '0')
     .option('--sort [sort]', 'A Mongo style sort statement to use in the query.')
-    .option('--limit [limit]', 'Limit the number of experiments returned.')
-    .option('--skip [skip]', 'Move the result cursor to this position before returning results.')
     .action(withCompatibilityCheck((options) => {
         try {
             new ListExperiments(program).execute(options);
@@ -106,9 +106,9 @@ program
     .option('--json', 'Output results using JSON')
     .option('--query [query]', 'A JMESPath query to use in filtering the response data.')
     .option('--filter [filter]', 'A Mongo style filter to use.')
+    .option('--limit [limit]', 'Limit number of records')
+    .option('--skip [skip]', 'Skip number of records', '0')
     .option('--sort [sort]', 'A Mongo style sort statement to use in the query.')
-    .option('--limit [limit]', 'Limit the number of experiments returned.')
-    .option('--skip [skip]', 'Move the result cursor to this position before returning results.')
     .action(withCompatibilityCheck((experimentName, options) => {
         try {
             new ListRuns(program).execute(experimentName, options);
