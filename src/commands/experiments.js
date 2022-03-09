@@ -22,6 +22,8 @@ const { loadProfile } = require('../config');
 const Experiments = require('../client/experiments');
 const {
  printSuccess, printError, filterObject, printTable, parseObject, fileExists, formatValidationPath, DEPENDENCYTABLEFORMAT,
+    validateOptions,
+    OPTIONSTABLEFORMAT,
 } = require('./utils');
 
 class ListExperiments {
@@ -29,11 +31,18 @@ class ListExperiments {
         this.program = program;
     }
 
+    // eslint-disable-next-line consistent-return
     async execute(options) {
         const profile = await loadProfile(options.profile);
         debug('%s.listExperiments()', profile.name);
 
         const exp = new Experiments(profile.url);
+        const { validOptions, errorDetails } = validateOptions(options, 'EXPERIMENT');
+        if (!validOptions) {
+            const optionTableFormat = OPTIONSTABLEFORMAT;
+            printError('Experiment list failed.', options, false);
+            return printTable(optionTableFormat, errorDetails);
+        }
         exp.listExperiments(options.project || profile.project, options.model, profile.token, options.filter, options.limit, options.skip, options.sort).then((response) => {
             if (response.success) {
                 let { result } = response;
@@ -118,13 +127,19 @@ class ListRuns {
         this.program = program;
     }
 
+    // eslint-disable-next-line consistent-return
     async execute(experimentName, options) {
         const profile = await loadProfile(options.profile);
         debug('%s.listRuns()', profile.name);
 
         const exp = new Experiments(profile.url);
         const sort = options.sort || JSON.stringify({ startTime: -1 });
-
+        const { validOptions, errorDetails } = validateOptions(options, 'RUN');
+        if (!validOptions) {
+            const optionTableFormat = OPTIONSTABLEFORMAT;
+            printError('Experiment-runs list failed.', options, false);
+            return printTable(optionTableFormat, errorDetails);
+        }
         exp.listRuns(options.project || profile.project, profile.token, experimentName, options.filter, options.limit, sort, options.skip).then((response) => {
             if (response.success) {
                 let { result } = response;

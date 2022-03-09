@@ -29,6 +29,8 @@ const Assessments = require('../client/assessments');
 
 const {
     printSuccess, printError, parseObject, printTable, filterObject, transformDynamicParams,
+    validateOptions,
+    OPTIONSTABLEFORMAT,
 } = require('./utils');
 
 const handleTable = (spec, data, transformer, noDataMessage) => {
@@ -44,16 +46,23 @@ module.exports.ListResourcesCommand = class {
         this.program = program;
     }
 
+    // eslint-disable-next-line consistent-return
     async execute(command) {
         const options = command;
         const profile = await loadProfile(options.profile);
         debug('%s.ListResourcesCommand()', profile.name);
         let transformedFilter;
         let transformedSort;
-        // sanitize the params
+        // add prefixes to the keys to query inside nested targetPath
         if (options.filter) transformedFilter = transformDynamicParams(options.filter, 'resource.');
         if (options.sort) transformedSort = transformDynamicParams(options.sort, '_id.');
         const client = new Assessments(profile.url);
+        const { validOptions, errorDetails } = validateOptions(options, 'RESOURCE');
+        if (!validOptions) {
+            const optionTableFormat = OPTIONSTABLEFORMAT;
+            printError('Resource list failed.', options, false);
+            return printTable(optionTableFormat, errorDetails);
+        }
         client.queryResources(profile.token, options.name, options.scope, options.type, options.skip, options.limit, transformedFilter, transformedSort)
             .then((response) => {
                 if (response.success === false) throw response;
@@ -184,11 +193,18 @@ module.exports.ListAssessmentCommand = class {
         this.program = program;
     }
 
+    // eslint-disable-next-line consistent-return
     async execute(options) {
         const profile = await loadProfile(options.profile);
         debug('%s.ListAssessmentCommand()', profile.name);
 
         const client = new Assessments(profile.url);
+        const { validOptions, errorDetails } = validateOptions(options, 'ASSESSMENT');
+        if (!validOptions) {
+            const optionTableFormat = OPTIONSTABLEFORMAT;
+            printError('Assessment list failed.', options, false);
+            return printTable(optionTableFormat, errorDetails);
+        }
         client.listAssessment(profile.token, options.skip, options.limit, options.filter, options.sort)
             .then((response) => {
                 if (response.success === false) throw response;

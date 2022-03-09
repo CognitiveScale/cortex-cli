@@ -20,7 +20,7 @@ const Catalog = require('../client/catalog');
 
 const _ = { get: require('lodash/get') };
 const {
- printSuccess, printError, filterObject, printTable,
+ printSuccess, printError, filterObject, printTable, validateOptions, OPTIONSTABLEFORMAT,
 } = require('./utils');
 
 module.exports.ListCampaignsCommand = class ListCampaignsCommand {
@@ -28,10 +28,16 @@ module.exports.ListCampaignsCommand = class ListCampaignsCommand {
         this.program = program;
     }
 
+    // eslint-disable-next-line consistent-return
     async execute(options) {
         const profile = await loadProfile(options.profile);
         debug('%s.executeListCampaigns()', profile.name);
-
+        const { validOptions, errorDetails } = validateOptions(options, 'CAMPAIGN');
+        if (!validOptions) {
+            const optionTableFormat = OPTIONSTABLEFORMAT;
+            printError('Campaign list failed.', options, false);
+            return printTable(optionTableFormat, errorDetails);
+        }
         const cli = new ApiServerClient(profile.url);
         try {
             const sortParam = (options.sort || '{}').replace(/"/g, '\'');
@@ -207,12 +213,19 @@ module.exports.ListMissionsCommand = class ListMissionsCommand {
         this.program = program;
     }
 
+    // eslint-disable-next-line consistent-return
     async execute(campaign, cmd) {
         const options = cmd;
         const profile = await loadProfile(options.profile);
+
+        const { validOptions, errorDetails } = validateOptions(options, 'MISSION');
+        if (!validOptions) {
+            const optionTableFormat = OPTIONSTABLEFORMAT;
+            printError('Mission list failed.', options, false);
+            return printTable(optionTableFormat, errorDetails);
+        }
         debug('%s.executeListMissionsCommand(%s)', profile.name, campaign);
         const cli = new Catalog(profile.url);
-
         try {
             const sortParam = (options.sort || '{}').replace(/"/g, '\'');
             const filterParam = (options.filter || '{}').replace(/"/g, '\'');

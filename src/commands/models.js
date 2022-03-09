@@ -24,7 +24,7 @@ const moment = require('moment');
 const { loadProfile } = require('../config');
 const Models = require('../client/models');
 const Experiments = require('../client/experiments');
-const { LISTTABLEFORMAT, RUNTABLEFORMAT, DEPENDENCYTABLEFORMAT } = require('./utils');
+const { LISTTABLEFORMAT, RUNTABLEFORMAT, DEPENDENCYTABLEFORMAT, validateOptions, OPTIONSTABLEFORMAT} = require('./utils');
 
 const {
     printSuccess, printError, filterObject, parseObject, printTable, formatValidationPath, fileExists,
@@ -75,10 +75,17 @@ module.exports.ListModelsCommand = class ListModelsCommand {
         this.program = program;
     }
 
+    // eslint-disable-next-line consistent-return
     async execute(options) {
         const profile = await loadProfile(options.profile);
         debug('%s.executeListModels()', profile.name);
         const models = new Models(profile.url);
+        const { validOptions, errorDetails } = validateOptions(options, 'MODEL');
+        if (!validOptions) {
+            const optionTableFormat = OPTIONSTABLEFORMAT;
+            printError('Model list failed.', options, false);
+            return printTable(optionTableFormat, errorDetails);
+        }
         models.listModels(options.project || profile.project, options.skip, options.limit, options.filter, options.sort, options.tags, profile.token).then((response) => {
             if (response.success) {
                 let result = response.models;
@@ -105,10 +112,17 @@ module.exports.ListModelRunsCommand = class ListModelsCommand {
         this.program = program;
     }
 
+    // eslint-disable-next-line consistent-return
     async execute(modelName, options) {
         const profile = await loadProfile(options.profile);
         debug('%s.executeListModels()', profile.name);
         const models = new Models(profile.url);
+        const { validOptions, errorDetails } = validateOptions(options, 'RUN');
+        if (!validOptions) {
+            const optionTableFormat = OPTIONSTABLEFORMAT;
+            printError('Model-runs list failed.', options, false);
+            return printTable(optionTableFormat, errorDetails);
+        }
         models.listModelRuns(options.project || profile.project, modelName, profile.token, options.filter, options.limit, options.skip, options.sort).then((response) => {
             if (response.success) {
                 let result = response.runs;

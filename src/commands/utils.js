@@ -321,6 +321,11 @@ module.exports.DEPENDENCYTABLEFORMAT = [
     { column: 'Dependency Type', field: 'type', width: 40 },
 ];
 
+module.exports.OPTIONSTABLEFORMAT = [
+    { column: 'Option Type', field: 'type', width: 20 },
+    { column: 'Message', field: 'message', width: 120 },
+];
+
 module.exports.RUNTABLEFORMAT = [
     { column: 'Run ID', field: 'runId', width: 30 },
     { column: 'Experiment Name', field: 'experimentName', width: 40 },
@@ -360,4 +365,105 @@ module.exports.transformDynamicParams = (params, prefix) => {
             }
         });
     return JSON.stringify(jsonParams);
+};
+
+const ALLOWED_QUERY_FIELDS = {
+    SKILL: {
+        sort: ['name', 'title', 'description', 'createdAt', 'createdBy'],
+    },
+    AGENT: {
+        filter: ['name', 'title', 'description', 'createdBy'],
+        sort: ['name', 'title', 'description', 'createdAt', 'updatedAt', 'createdBy'],
+    },
+    ACTION: {
+        filter: ['name', 'title', 'description', 'createdBy'],
+        sort: ['name', 'title', 'description', 'createdAt', 'updatedAt', 'createdBy'],
+    },
+    SNAPSHOT: {
+        filter: ['name', 'title', 'description', 'createdBy'],
+        sort: ['name', 'title', 'description', 'createdAt', 'updatedAt', 'createdBy'],
+    },
+    RESOURCE: {
+        filter: ['resourceName', 'resourceTitle', 'resourceType', '_projectId'],
+        sort: ['resourceName', 'resourceTitle', 'resourceType', '_projectId'],
+    },
+    ASSESSMENT: {
+        filter: ['name', 'title', 'componentName', 'reportCount', '_createdBy'],
+        sort: ['name', 'title', 'componentName', 'reportCount', '_createdBy', '_createdAt', '_updatedAt'],
+    },
+    CAMPAIGN: {
+        filter: ['name', 'title', 'description', 'createdBy'],
+        sort: ['name', 'title', 'description', 'createdAt', 'updatedAt', 'createdBy'],
+    },
+    MISSION: {
+        filter: ['name', 'title', 'description', 'createdBy'],
+        sort: ['name', 'title', 'description', 'createdAt', 'updatedAt', 'createdBy'],
+    },
+    CONNECTION: {
+        filter: ['name', 'title', 'description', 'createdBy'],
+        sort: ['name', 'title', 'description', 'createdAt', 'updatedAt', 'createdBy'],
+    },
+    CONNECTION_TYPE: {
+        filter: ['name', 'title', 'description', 'createdBy'],
+        sort: ['name', 'title', 'description', 'createdAt', 'updatedAt', 'createdBy'],
+    },
+    EXPERIMENT: {
+        filter: ['name', 'title', 'description', 'createdBy'],
+        sort: ['name', 'title', 'description', 'createdAt', 'updatedAt', 'createdBy'],
+    },
+    RUN: {
+        filter: ['name', 'title', 'description', 'createdBy'],
+        sort: ['name', 'title', 'description', 'createdAt', 'updatedAt', 'createdBy'],
+    },
+    MODEL: {
+        filter: ['name', 'title', 'description', 'createdBy'],
+        sort: ['name', 'title', 'description', 'createdAt', 'updatedAt', 'createdBy'],
+    },
+    PROJECT: {
+        filter: ['name', 'title', 'description', 'createdBy'],
+        sort: ['name', 'title', 'description', 'createdAt', 'updatedAt', 'createdBy'],
+    },
+    TYPE: {
+        filter: ['name', 'title', 'description', 'createdBy'],
+        sort: ['name', 'title', 'description', 'createdAt', 'updatedAt', 'createdBy'],
+    },
+};
+
+module.exports.validateOptions = (options, type) => {
+    const {
+        filter, limit, skip, sort,
+    } = options;
+    const errorDetails = [];
+    if (filter) {
+        try {
+            const filterObj = JSON.parse(filter);
+            if ((_.intersection(ALLOWED_QUERY_FIELDS[type].filter, Object.keys(filterObj))).length !== Object.keys(filterObj).length) {
+                errorDetails.push({ type: 'filter', message: `Invalid field present.Allowed fields: ${ALLOWED_QUERY_FIELDS[type].filter}` });
+            }
+        } catch (err) {
+            errorDetails.push({ type: 'filter', message: `Invalid filter expression: ${err.message}` });
+        }
+    }
+    if (sort) {
+        try {
+            const sortObj = JSON.parse(sort);
+            if ((_.intersection(ALLOWED_QUERY_FIELDS[type].sort, Object.keys(sortObj))).length !== Object.keys(sortObj).length) {
+                errorDetails.push({ type: 'sort', message: `Invalid field present. Allowed fields: ${ALLOWED_QUERY_FIELDS[type].sort}` });
+            }
+        } catch (err) {
+            errorDetails.push({ type: 'sort', message: `Invalid sort expression: ${err.message}` });
+        }
+    }
+    if ((limit && _.isNaN(Number(limit))) || limit <= 0) {
+        errorDetails.push({ type: 'limit', message: 'Invalid limit, limit should be a valid positive number' });
+    }
+    if ((skip && _.isNaN(Number(skip))) || skip < 0) {
+        errorDetails.push({ type: 'skip', message: 'Invalid skip, skip should be a valid non negative number' });
+    }
+    if (errorDetails.length) {
+        return { validOptions: false, errorDetails };
+    }
+    return {
+        validOptions: true, errorDetails,
+    };
 };

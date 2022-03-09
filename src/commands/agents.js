@@ -23,7 +23,7 @@ const Catalog = require('../client/catalog');
 const Agents = require('../client/agents');
 const {
     printSuccess, printError, filterObject, parseObject, printTable, formatValidationPath,
-    LISTTABLEFORMAT, DEPENDENCYTABLEFORMAT,
+    LISTTABLEFORMAT, DEPENDENCYTABLEFORMAT, validateOptions, OPTIONSTABLEFORMAT,
 } = require('./utils');
 
 module.exports.SaveAgentCommand = class SaveAgentCommand {
@@ -70,11 +70,18 @@ module.exports.ListAgentsCommand = class ListAgentsCommand {
         this.program = program;
     }
 
+    // eslint-disable-next-line consistent-return
     async execute(options) {
         const profile = await loadProfile(options.profile);
         debug('%s.executeListAgents()', profile.name);
 
         const catalog = new Catalog(profile.url);
+        const { validOptions, errorDetails } = validateOptions(options, 'AGENT');
+        if (!validOptions) {
+            const optionTableFormat = OPTIONSTABLEFORMAT;
+            printError('Agent list failed.', options, false);
+            return printTable(optionTableFormat, errorDetails);
+        }
         catalog.listAgents(options.project || profile.project, profile.token, options.filter, options.limit, options.skip, options.sort).then((response) => {
             if (response.success) {
                 let result = response.agents;
@@ -326,11 +333,18 @@ module.exports.ListAgentSnapshotsCommand = class {
         this.program = program;
     }
 
+    // eslint-disable-next-line consistent-return
     async execute(agentName, options) {
         const profile = await loadProfile(options.profile);
         debug('%s.listAgentSnapshots(%s)', profile.name, agentName);
 
         const agents = new Agents(profile.url);
+        const { validOptions, errorDetails } = validateOptions(options, 'SNAPSHOT');
+        if (!validOptions) {
+            const optionTableFormat = OPTIONSTABLEFORMAT;
+            printError('Snapshot list failed.', options, false);
+            return printTable(optionTableFormat, errorDetails);
+        }
         agents.listAgentSnapshots(options.project || profile.project, profile.token, agentName, options.filter, options.limit, options.skip, options.sort)
             .then((response) => {
             if (response.success) {

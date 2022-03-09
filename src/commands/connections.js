@@ -23,6 +23,8 @@ const Content = require('../client/content');
 
 const {
  printSuccess, printError, filterObject, parseObject, printTable, DEPENDENCYTABLEFORMAT, CONNECTIONTABLEFORMAT, fileExists,
+    validateOptions,
+    OPTIONSTABLEFORMAT,
 } = require('./utils');
 
 module.exports.ListConnections = class ListConnections {
@@ -30,11 +32,18 @@ module.exports.ListConnections = class ListConnections {
         this.program = program;
     }
 
+    // eslint-disable-next-line consistent-return
     async execute(options) {
         const profile = await loadProfile(options.profile);
         debug('%s.listConnections()', profile.name);
 
         const conns = new Connections(profile.url);
+        const { validOptions, errorDetails } = validateOptions(options, 'CONNECTION');
+        if (!validOptions) {
+            const optionTableFormat = OPTIONSTABLEFORMAT;
+            printError('Connection list failed.', options, false);
+            return printTable(optionTableFormat, errorDetails);
+        }
         conns.listConnections(options.project || profile.project, profile.token, options.filter, options.limit, options.skip, options.sort).then((response) => {
             if (response.success) {
                 let result = response.result.connections;
@@ -182,12 +191,19 @@ module.exports.ListConnectionsTypes = class ListConnectionsTypes {
         this.program = program;
     }
 
+    // eslint-disable-next-line consistent-return
     async execute(options) {
         const profile = await loadProfile(options.profile);
         debug('%s.listConnectionsTypes()', profile.name);
 
         const conns = new Connections(profile.url);
-        conns.listConnectionsTypes(profile.token, options.filter, options.limit, options.skip, options.sort).then((response) => {
+        const { validOptions, errorDetails } = validateOptions(options, 'CONNECTION_TYPE');
+        if (!validOptions) {
+            const optionTableFormat = OPTIONSTABLEFORMAT;
+            printError('Connection-types list failed.', options, false);
+            return printTable(optionTableFormat, errorDetails);
+        }
+        conns.listConnectionsTypes(profile.token, options.limit, options.skip, options.sort).then((response) => {
             if (response.success) {
                 let result = response.result.connectionTypes;
 

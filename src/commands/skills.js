@@ -23,7 +23,7 @@ const Agent = require('../client/agents');
 
 const {
     printSuccess, printError, printWarning, filterObject, parseObject, printTable, formatValidationPath,
-    LISTTABLEFORMAT, DEPENDENCYTABLEFORMAT, isNumeric,
+    LISTTABLEFORMAT, DEPENDENCYTABLEFORMAT, isNumeric, validateOptions, OPTIONSTABLEFORMAT,
 } = require('./utils');
 
 module.exports.SaveSkillCommand = class SaveSkillCommand {
@@ -99,7 +99,13 @@ module.exports.ListSkillsCommand = class ListSkillsCommand {
         try {
             const status = !_.get(options, 'nostatus', false); // default show status, if nostatus==true status == false
             const shared = !_.get(options, 'noshared', false);
-            const response = await catalog.listSkills(options.project || profile.project, profile.token, { status, shared }, options.filter, options.limit, options.skip, options.sort);
+            const { validOptions, errorDetails } = validateOptions(options, 'SKILL');
+            if (!validOptions) {
+                const optionTableFormat = OPTIONSTABLEFORMAT;
+                printError('Skill list failed.', options, false);
+                return printTable(optionTableFormat, errorDetails);
+            }
+            const response = await catalog.listSkills(options.project || profile.project, profile.token, { status, shared }, options.limit, options.skip, options.sort);
             if (response.success) {
                 let result = response.skills;
                 const tableFormat = LISTTABLEFORMAT;

@@ -49,10 +49,9 @@ module.exports = class Catalog {
             .catch((err) => constructError(err));
     }
 
-    listSkills(projectId, token, query, filter, limit, skip, sort) {
+    listSkills(projectId, token, query, limit, skip, sort) {
         checkProject(projectId);
         debug('listSkills() => %s', this.endpoints.skills(projectId));
-        if (filter) query.filter = filter;
         if (limit) query.limit = limit;
         if (sort) query.sort = sort;
         if (skip) query.skip = skip;
@@ -274,12 +273,11 @@ module.exports = class Catalog {
             .catch((err) => constructError(err));
     }
 
-    listTypes(projectId, token, filter, limit, skip, sort) {
+    listTypes(projectId, token, limit, skip, sort) {
         checkProject(projectId);
         const endpoint = `${this.endpoints.types(projectId)}`;
         debug('listTypes() => %s', endpoint);
         const query = {};
-        if (filter) query.filter = filter;
         if (limit) query.limit = limit;
         if (sort) query.sort = sort;
         if (skip) query.skip = skip;

@@ -86,11 +86,10 @@ module.exports = class Connections {
             .catch((err) => constructError(err));
     }
 
-    listConnectionsTypes(token, filter, limit, skip, sort) {
+    listConnectionsTypes(token, limit, skip, sort) {
         const endpoint = `${this.cortexUrl}/fabric/v4/connectiontypes`;
         debug('listConnectionsTypes() => %s', endpoint);
         const query = {};
-        if (filter) query.filter = filter;
         if (limit) query.limit = limit;
         if (sort) query.sort = sort;
         if (skip) query.skip = skip;
