@@ -24,7 +24,9 @@ const moment = require('moment');
 const { loadProfile } = require('../config');
 const Models = require('../client/models');
 const Experiments = require('../client/experiments');
-const { LISTTABLEFORMAT, RUNTABLEFORMAT, DEPENDENCYTABLEFORMAT, validateOptions, OPTIONSTABLEFORMAT} = require('./utils');
+const {
+    LISTTABLEFORMAT, RUNTABLEFORMAT, DEPENDENCYTABLEFORMAT, validateOptions, OPTIONSTABLEFORMAT,
+} = require('./utils');
 
 const {
     printSuccess, printError, filterObject, parseObject, printTable, formatValidationPath, fileExists,

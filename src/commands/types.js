@@ -19,7 +19,9 @@ const debug = require('debug')('cortex:cli');
 const moment = require('moment');
 const { loadProfile } = require('../config');
 const Catalog = require('../client/catalog');
-const { LISTTABLEFORMAT, filterObject, validateOptions, OPTIONSTABLEFORMAT} = require('./utils');
+const {
+    LISTTABLEFORMAT, filterObject, validateOptions, OPTIONSTABLEFORMAT,
+} = require('./utils');
 
 const {
  printSuccess, printError, parseObject, printTable,
