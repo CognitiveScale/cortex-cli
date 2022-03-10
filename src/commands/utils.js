@@ -447,7 +447,12 @@ module.exports.validateOptions = (options, type) => {
     if (sort) {
         try {
             const sortObj = JSON.parse(sort);
-            if ((_.intersection(ALLOWED_QUERY_FIELDS[type].sort, Object.keys(sortObj))).length !== Object.keys(sortObj).length) {
+            const sortKeys = Object.keys(sortObj);
+            const sortValues = Object.values(sortObj);
+            if (!sortValues.every((val) => Number(val) === 1 || Number(val) === -1)) {
+                errorDetails.push({ type: 'sort', message: 'Sort values can only be 1(ascending) or -1(descending)' });
+            }
+            if ((_.intersection(ALLOWED_QUERY_FIELDS[type].sort, sortKeys)).length !== sortKeys.length) {
                 errorDetails.push({ type: 'sort', message: `Invalid field present. Allowed fields: ${ALLOWED_QUERY_FIELDS[type].sort}` });
             }
         } catch (err) {
