@@ -28,10 +28,13 @@ const { loadProfile } = require('../config');
 const Assessments = require('../client/assessments');
 
 const {
-    printSuccess, printError, parseObject, printTable, filterObject, transformDynamicParams,
-    validateOptions,
-    OPTIONSTABLEFORMAT,
+    printSuccess, printError, parseObject, printTable, filterObject,
+    validateOptions, OPTIONSTABLEFORMAT,
 } = require('./utils');
+
+const {
+    transformDynamicParams,
+} = require('../parsers');
 
 const handleTable = (spec, data, transformer, noDataMessage) => {
   if (!data || data.length === 0) {
@@ -54,8 +57,6 @@ module.exports.ListResourcesCommand = class {
         let transformedFilter;
         let transformedSort;
         // add prefixes to the keys to query inside nested targetPath
-        if (options.filter) transformedFilter = transformDynamicParams(options.filter, 'resource.');
-        if (options.sort) transformedSort = transformDynamicParams(options.sort, '_id.');
         const client = new Assessments(profile.url);
         const { validOptions, errorDetails } = validateOptions(options, 'RESOURCE');
         if (!validOptions) {
@@ -63,6 +64,8 @@ module.exports.ListResourcesCommand = class {
             printError('Resource list failed.', options, false);
             return printTable(optionTableFormat, errorDetails);
         }
+        if (options.filter) transformedFilter = transformDynamicParams(options.filter, 'resource.');
+        if (options.sort) transformedSort = transformDynamicParams(options.sort, '_id.');
         client.queryResources(profile.token, options.name, options.scope, options.type, options.skip, options.limit, transformedFilter, transformedSort)
             .then((response) => {
                 if (response.success === false) throw response;

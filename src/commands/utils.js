@@ -26,6 +26,7 @@ const os = require('os');
 const path = require('path');
 const yaml = require('js-yaml');
 const { exec } = require('child_process');
+const { ALLOWED_QUERY_FIELDS } = require('../constants');
 
 module.exports.constructError = (error) => {
     // fallback to text in message or standard error message
@@ -354,79 +355,12 @@ module.exports.EXTERNALROLESFORMAT = [
     { column: 'Roles', field: 'roles' },
 ];
 
-// append relevant prefix to keys
-module.exports.transformDynamicParams = (params, prefix) => {
-    const jsonParams = JSON.parse(params);
-    Object.keys(jsonParams)
-        .forEach((key) => {
-            if (!_.startsWith(prefix, key)) {
-                jsonParams[`${prefix}${key}`] = jsonParams[key];
-                delete jsonParams[key];
-            }
-        });
-    return JSON.stringify(jsonParams);
-};
-
-const ALLOWED_QUERY_FIELDS = {
-    SKILL: {
-        sort: ['name', 'title', 'description', 'createdAt', 'createdBy'],
-    },
-    AGENT: {
-        filter: ['name', 'title', 'description', 'createdBy'],
-        sort: ['name', 'title', 'description', 'createdAt', 'updatedAt', 'createdBy'],
-    },
-    ACTION: {
-        filter: ['name', 'title', 'description', 'createdBy'],
-        sort: ['name', 'title', 'description', 'createdAt', 'updatedAt', 'createdBy'],
-    },
-    SNAPSHOT: {
-        filter: ['name', 'title', 'description', 'createdBy'],
-        sort: ['name', 'title', 'description', 'createdAt', 'updatedAt', 'createdBy'],
-    },
-    RESOURCE: {
-        filter: ['resourceName', 'resourceTitle', 'resourceType', '_projectId'],
-        sort: ['resourceName', 'resourceTitle', 'resourceType', '_projectId'],
-    },
-    ASSESSMENT: {
-        filter: ['name', 'title', 'componentName', 'reportCount', '_createdBy'],
-        sort: ['name', 'title', 'componentName', 'reportCount', '_createdBy', '_createdAt', '_updatedAt'],
-    },
-    CAMPAIGN: {
-        filter: ['name', 'title', 'description', 'createdBy'],
-        sort: ['name', 'title', 'description', 'createdAt', 'updatedAt', 'createdBy'],
-    },
-    MISSION: {
-        filter: ['name', 'title', 'description', 'createdBy'],
-        sort: ['name', 'title', 'description', 'createdAt', 'updatedAt', 'createdBy'],
-    },
-    CONNECTION: {
-        filter: ['name', 'title', 'description', 'createdBy'],
-        sort: ['name', 'title', 'description', 'createdAt', 'updatedAt', 'createdBy'],
-    },
-    CONNECTION_TYPE: {
-        filter: ['name', 'title', 'description', 'createdBy'],
-        sort: ['name', 'title', 'description', 'createdAt', 'updatedAt', 'createdBy'],
-    },
-    EXPERIMENT: {
-        filter: ['name', 'title', 'description', 'createdBy'],
-        sort: ['name', 'title', 'description', 'createdAt', 'updatedAt', 'createdBy'],
-    },
-    RUN: {
-        filter: ['name', 'title', 'description', 'createdBy'],
-        sort: ['name', 'title', 'description', 'createdAt', 'updatedAt', 'createdBy'],
-    },
-    MODEL: {
-        filter: ['name', 'title', 'description', 'createdBy'],
-        sort: ['name', 'title', 'description', 'createdAt', 'updatedAt', 'createdBy'],
-    },
-    PROJECT: {
-        filter: ['name', 'title', 'description', 'createdBy'],
-        sort: ['name', 'title', 'description', 'createdAt', 'updatedAt', 'createdBy'],
-    },
-    TYPE: {
-        filter: ['name', 'title', 'description', 'createdBy'],
-        sort: ['name', 'title', 'description', 'createdAt', 'updatedAt', 'createdBy'],
-    },
+module.exports.handleTable = (spec, data, transformer, noDataMessage) => {
+    if (!data || data.length === 0) {
+        this.printSuccess(noDataMessage);
+    } else {
+        this.printTable(spec, data, transformer);
+    }
 };
 
 module.exports.validateOptions = (options, type) => {
@@ -437,8 +371,9 @@ module.exports.validateOptions = (options, type) => {
     if (filter) {
         try {
             const filterObj = JSON.parse(filter);
-            if ((_.intersection(ALLOWED_QUERY_FIELDS[type].filter, Object.keys(filterObj))).length !== Object.keys(filterObj).length) {
-                errorDetails.push({ type: 'filter', message: `Invalid field present.Allowed fields: ${ALLOWED_QUERY_FIELDS[type].filter}` });
+            const filterKeys = Object.keys(filterObj);
+            if ((_.intersection(ALLOWED_QUERY_FIELDS[type].filter, filterKeys)).length !== filterKeys.length) {
+                errorDetails.push({ type: 'filter', message: `Invalid field present. Allowed fields: ${ALLOWED_QUERY_FIELDS[type].filter}` });
             }
         } catch (err) {
             errorDetails.push({ type: 'filter', message: `Invalid filter expression: ${err.message}` });
@@ -459,10 +394,10 @@ module.exports.validateOptions = (options, type) => {
             errorDetails.push({ type: 'sort', message: `Invalid sort expression: ${err.message}` });
         }
     }
-    if ((limit && _.isNaN(Number(limit))) || limit <= 0) {
+    if ((limit && _.isNaN(Number(limit))) || Number(limit) <= 0) {
         errorDetails.push({ type: 'limit', message: 'Invalid limit, limit should be a valid positive number' });
     }
-    if ((skip && _.isNaN(Number(skip))) || skip < 0) {
+    if ((skip && _.isNaN(Number(skip))) || Number(skip) < 0) {
         errorDetails.push({ type: 'skip', message: 'Invalid skip, skip should be a valid non negative number' });
     }
     if (errorDetails.length) {
