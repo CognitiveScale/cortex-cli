@@ -56,7 +56,6 @@ module.exports.ListResourcesCommand = class {
         debug('%s.ListResourcesCommand()', profile.name);
         let transformedFilter;
         let transformedSort;
-        // add prefixes to the keys to query inside nested targetPath
         const client = new Assessments(profile.url);
         const { validOptions, errorDetails } = validateOptions(options, 'RESOURCE');
         if (!validOptions) {
@@ -64,6 +63,7 @@ module.exports.ListResourcesCommand = class {
             printError('Resource list failed.', options, false);
             return printTable(optionTableFormat, errorDetails);
         }
+        // add prefixes to the keys to query inside nested targetPath
         if (options.filter) transformedFilter = transformDynamicParams(options.filter, 'resource.');
         if (options.sort) transformedSort = transformDynamicParams(options.sort, '_id.');
         client.queryResources(profile.token, options.name, options.scope, options.type, options.skip, options.limit, transformedFilter, transformedSort)
