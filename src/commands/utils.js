@@ -363,6 +363,7 @@ module.exports.handleTable = (spec, data, transformer, noDataMessage) => {
     }
 };
 
+// Todo: move to cortex-express-common FAB-4008
 module.exports.validateOptions = (options, type) => {
     const {
         filter, limit, skip, sort,
@@ -372,8 +373,11 @@ module.exports.validateOptions = (options, type) => {
         try {
             const filterObj = JSON.parse(filter);
             const filterKeys = Object.keys(filterObj);
-            if ((_.intersection(ALLOWED_QUERY_FIELDS[type].filter, filterKeys)).length !== filterKeys.length) {
-                errorDetails.push({ type: 'filter', message: `Invalid field present. Allowed fields: ${ALLOWED_QUERY_FIELDS[type].filter}` });
+            if (typeof (filterObj) !== 'object') {
+                errorDetails.push({ type: 'filter', message: 'Invalid filter expression' });
+            }
+            if (type && (_.intersection(ALLOWED_QUERY_FIELDS[type].filter, filterKeys)).length !== filterKeys.length) {
+                errorDetails.push({ type: 'filter', message: `Invalid filter params. Allowed fields: ${ALLOWED_QUERY_FIELDS[type].filter}` });
             }
         } catch (err) {
             errorDetails.push({ type: 'filter', message: `Invalid filter expression: ${err.message}` });
@@ -384,11 +388,14 @@ module.exports.validateOptions = (options, type) => {
             const sortObj = JSON.parse(sort);
             const sortKeys = Object.keys(sortObj);
             const sortValues = Object.values(sortObj);
+            if (typeof (sortObj) !== 'object') {
+                errorDetails.push({ type: 'sort', message: 'Invalid sort expression' });
+            }
             if (!sortValues.every((val) => Number(val) === 1 || Number(val) === -1)) {
                 errorDetails.push({ type: 'sort', message: 'Sort values can only be 1(ascending) or -1(descending)' });
             }
-            if ((_.intersection(ALLOWED_QUERY_FIELDS[type].sort, sortKeys)).length !== sortKeys.length) {
-                errorDetails.push({ type: 'sort', message: `Invalid field present. Allowed fields: ${ALLOWED_QUERY_FIELDS[type].sort}` });
+            if (type && (_.intersection(ALLOWED_QUERY_FIELDS[type].sort, sortKeys)).length !== sortKeys.length) {
+                errorDetails.push({ type: 'sort', message: `Invalid sort params. Allowed fields: ${ALLOWED_QUERY_FIELDS[type].sort}` });
             }
         } catch (err) {
             errorDetails.push({ type: 'sort', message: `Invalid sort expression: ${err.message}` });
