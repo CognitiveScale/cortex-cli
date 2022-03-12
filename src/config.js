@@ -19,9 +19,9 @@ const os = require('os');
 const fs = require('fs');
 const path = require('path');
 const Joi = require('joi');
+const moment = require("moment");
 const debug = require('debug')('cortex:config');
 const jose = require('jose-node-cjs-runtime');
-//const { SignJWT } = require('jose-node-cjs-runtime/jwt/sign');
 const { printError } = require('./commands/utils');
 const Info = require('./client/info');
 
@@ -29,6 +29,7 @@ function configDir() {
     return process.env.CORTEX_CONFIG_DIR || path.join(os.homedir(), '.cortex');
 }
 
+const durationRegex = /^([.\d]+)([smhdwMy])$/;
 async function generateJwt(profile, expiresIn = '2m') {
     const {
         username, issuer, audience, jwk,
@@ -37,13 +38,15 @@ async function generateJwt(profile, expiresIn = '2m') {
     const infoClient = new Info(profile.url);
     const infoResp = await infoClient.getInfo();
     const serverTs = _.get(infoResp, 'serverTs', Date.now());
+    const [, amount, unit] = durationRegex.exec(expiresIn);
+    const expiry = moment(serverTs).add(_.toNumber(amount), unit).unix();
     return new jose.SignJWT({})
         .setProtectedHeader({ alg: 'EdDSA', kid: jwk.kid })
         .setSubject(username)
         .setAudience(audience)
         .setIssuer(issuer)
         .setIssuedAt(Math.floor(serverTs / 1000)) // in seconds
-        .setExpirationTime(expiresIn)
+        .setExpirationTime(expiry)
         .sign(jwtSigner, { kid: jwk.kid });
 }
 
@@ -205,6 +208,7 @@ async function loadProfile(profileName, useenv = true) {
 }
 
 module.exports = {
+    durationRegex,
     loadProfile,
     generateJwt,
     defaultConfig,
