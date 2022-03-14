@@ -18,7 +18,7 @@ const debug = require('debug')('cortex:cli');
 const { loadProfile } = require('../config');
 const Content = require('../client/content');
 const {
- printSuccess, printError, filterObject, printTable, getSourceFiles, humanReadableFileSize,
+ printSuccess, printError, printTable, getSourceFiles, humanReadableFileSize, filterObject,
 } = require('./utils');
 
 module.exports.ListContent = class ListContent {

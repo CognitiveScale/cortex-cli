@@ -57,13 +57,19 @@ module.exports = class Actions {
         .catch((err) => constructError(err));
     }
 
-    listActions(projectId, token) {
+    listActions(projectId, token, filter, limit, skip, sort) {
         checkProject(projectId);
         debug('listActions() => %s', this.endpointV4(projectId));
+        const query = {};
+        if (filter) query.filter = filter;
+        if (limit) query.limit = limit;
+        if (sort) query.sort = sort;
+        if (skip) query.skip = skip;
         return got
             .get(this.endpointV4(projectId), {
                 headers: { Authorization: `Bearer ${token}` },
                 'user-agent': getUserAgent(),
+                searchParams: query,
             }).json()
             .then((actions) => actions)
             .catch((err) => constructError(err));
@@ -111,98 +117,6 @@ module.exports = class Actions {
             })
             .json()
             .then((action) => ({ success: true, action }))
-            .catch((err) => constructError(err));
-    }
-
-    taskLogs(projectId, token, jobId, taskId) {
-        checkProject(projectId);
-        const canonicalJobId = Actions.getCanonicalJobId(jobId);
-        const endpoint = `${this.endpointV4(projectId)}/${canonicalJobId}/tasks/${taskId}/logs`;
-        debug('taskLogs(%s, %s) => %s', jobId, taskId, endpoint);
-        return got
-            .get(endpoint, {
-                headers: { Authorization: `Bearer ${token}` },
-                'user-agent': getUserAgent(),
-            })
-            .json()
-            .then((res) => res)
-            .catch((err) => constructError(err));
-    }
-
-    taskCancel(projectId, token, jobId, taskId) {
-        checkProject(projectId);
-        const canonicalJobId = Actions.getCanonicalJobId(jobId);
-        const endpoint = `${this.endpointV4(projectId)}/${canonicalJobId}/tasks/${taskId}`;
-        debug('taskCancel(%s, %s) => %s', jobId, taskId, endpoint);
-        return got
-            .delete(endpoint, {
-                headers: { Authorization: `Bearer ${token}` },
-                'user-agent': getUserAgent(),
-            })
-            .json()
-            .then((res) => res)
-            .catch((err) => constructError(err));
-    }
-
-    taskStatus(projectId, token, jobId, taskId) {
-        checkProject(projectId);
-        const canonicalJobId = Actions.getCanonicalJobId(jobId);
-        const endpoint = `${this.endpointV4(projectId)}/${canonicalJobId}/tasks/${taskId}/status`;
-        debug('taskStatus(%s, %s) => %s', jobId, taskId, endpoint);
-        return got
-            .get(endpoint, {
-                headers: { Authorization: `Bearer ${token}` },
-                'user-agent': getUserAgent(),
-            })
-            .json()
-            .then((res) => {
-                    debug('resBody (with provider status as well): %s', res);
-                    return _.omit(res, '_providerStatus');
-            })
-            .catch((err) => constructError(err));
-    }
-
-    jobListTasks(projectId, token, jobId) {
-        checkProject(projectId);
-        const canonicalJobId = Actions.getCanonicalJobId(jobId);
-        const endpoint = `${this.endpointV4(projectId)}/${canonicalJobId}/tasks`;
-        debug('jobListTasks(%s) => %s', jobId, endpoint);
-        return got
-            .get(endpoint, {
-                headers: { Authorization: `Bearer ${token}` },
-                'user-agent': getUserAgent(),
-            })
-            .json()
-            .then((res) => res)
-            .catch((err) => constructError(err));
-    }
-
-    taskStats(projectId, token, jobId) {
-        checkProject(projectId);
-        const canonicalJobId = Actions.getCanonicalJobId(jobId);
-        const endpoint = `${this.endpointV4(projectId)}/${canonicalJobId}/stats`;
-        debug('taskStats(%s) => %s', jobId, endpoint);
-        return got
-            .get(endpoint, {
-                headers: { Authorization: `Bearer ${token}` },
-                'user-agent': getUserAgent(),
-            })
-            .json()
-            .then((res) => res)
-            .catch((err) => constructError(err));
-    }
-
-    listTasksByActivation(projectId, token, activationId) {
-        checkProject(projectId);
-        const endpoint = `${this.endpointV4(projectId)}/${activationId}`;
-        debug('listTasksByActivation(%s) => %s', activationId, endpoint);
-        return got
-            .get(endpoint, {
-                headers: { Authorization: `Bearer ${token}` },
-                'user-agent': getUserAgent(),
-            })
-            .json()
-            .then((res) => res)
             .catch((err) => constructError(err));
     }
 

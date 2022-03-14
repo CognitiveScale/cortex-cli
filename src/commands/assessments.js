@@ -27,7 +27,7 @@ const { loadProfile } = require('../config');
 const Assessments = require('../client/assessments');
 
 const {
-    printSuccess, printError, parseObject, printTable,
+    printSuccess, printError, parseObject, printTable, filterObject,
 } = require('./utils');
 
 const handleTable = (spec, data, transformer, noDataMessage) => {
@@ -49,7 +49,7 @@ module.exports.ListResourcesCommand = class {
         debug('%s.ListResourcesCommand()', profile.name);
 
         const client = new Assessments(profile.url);
-        client.queryResources(profile.token, options.name, options.scope, options.type, options.skip, options.limit)
+        client.queryResources(profile.token, options.name, options.scope, options.type, options.skip, options.limit, options.filter, options.sort)
             .then((response) => {
                 if (response.success === false) throw response;
                 if (options.json) {
@@ -84,8 +84,9 @@ module.exports.ListResourceTypesCommand = class {
         client.listResourceTypes(profile.token)
             .then((response) => {
                 if (response.success === false) throw response;
-                const data = _.compact(response.data);
+                let data = _.compact(response.data);
                 if (options.json) {
+                    if (options.query) data = filterObject(data, options);
                     printSuccess(JSON.stringify(data, null, 2), options);
                 } else {
                     const types = data.map((t) => ({ type: t }));
@@ -183,11 +184,13 @@ module.exports.ListAssessmentCommand = class {
         debug('%s.ListAssessmentCommand()', profile.name);
 
         const client = new Assessments(profile.url);
-        client.listAssessment(profile.token, options.skip, options.limit)
+        client.listAssessment(profile.token, options.skip, options.limit, options.filter, options.sort)
             .then((response) => {
                 if (response.success === false) throw response;
+                let result = response.data;
                 if (options.json) {
-                    printSuccess(JSON.stringify(response, null, 2), options);
+                    if (options.query) result = filterObject(result, options);
+                    printSuccess(JSON.stringify(result, null, 2), options);
                 } else {
                     const tableSpec = [
                         { column: 'Name', field: 'name' },
@@ -198,7 +201,7 @@ module.exports.ListAssessmentCommand = class {
                         { column: 'Modified', field: '_updatedAt' },
                         { column: 'Author', field: '_createdBy' },
                     ];
-                    handleTable(tableSpec, response.data, (o) => ({ ...o, _updatedAt: o._updatedAt ? moment(o._updatedAt).fromNow() : '-' }), 'No Assessments found');
+                    handleTable(tableSpec, result, (o) => ({ ...o, _updatedAt: o._updatedAt ? moment(o._updatedAt).fromNow() : '-' }), 'No Assessments found');
                 }
             })
             .catch((err) => {

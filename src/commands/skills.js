@@ -66,7 +66,7 @@ module.exports.SaveSkillCommand = class SaveSkillCommand {
             }
             const response = await catalog.saveSkill(options.project || profile.project, profile.token, skill);
             if (response.success) {
-                printSuccess('Skill saved', options);
+                printSuccess(`Skill saved: ${JSON.stringify(response.message)}`, options);
             } else {
                     console.log(`Failed to save skill: ${response.message}`);
                     if (response.details) {
@@ -99,7 +99,7 @@ module.exports.ListSkillsCommand = class ListSkillsCommand {
         try {
             const status = !_.get(options, 'nostatus', false); // default show status, if nostatus==true status == false
             const shared = !_.get(options, 'noshared', false);
-            const response = await catalog.listSkills(options.project || profile.project, profile.token, { status, shared });
+            const response = await catalog.listSkills(options.project || profile.project, profile.token, { status, shared }, options.filter, options.limit, options.skip, options.sort);
             if (response.success) {
                 let result = response.skills;
                 const tableFormat = LISTTABLEFORMAT;
@@ -113,9 +113,9 @@ module.exports.ListSkillsCommand = class ListSkillsCommand {
                     });
                     tableFormat.push({ column: 'Status', field: 'status', width: 30 });
                 }
-                if (options.query) result = filterObject(result, options);
 
                 if (options.json) {
+                    if (options.query) result = filterObject(result, options);
                     return printSuccess(JSON.stringify(result, null, 2), options);
                 }
                 return printTable(tableFormat,

@@ -19,10 +19,10 @@ const debug = require('debug')('cortex:cli');
 const moment = require('moment');
 const { loadProfile } = require('../config');
 const Catalog = require('../client/catalog');
-const { LISTTABLEFORMAT } = require('./utils');
+const { LISTTABLEFORMAT, filterObject } = require('./utils');
 
 const {
- printSuccess, printError, filterObject, parseObject, printTable, 
+ printSuccess, printError, parseObject, printTable,
 } = require('./utils');
 
 module.exports.SaveTypeCommand = class SaveTypeCommand {
@@ -64,12 +64,11 @@ module.exports.ListTypesCommand = class ListTypesCommand {
         debug('%s.executeListTypes()', profile.name);
 
         const catalog = new Catalog(profile.url);
-        catalog.listTypes(options.project || profile.project, profile.token).then((response) => {
+        catalog.listTypes(options.project || profile.project, profile.token, options.filter, options.limit, options.skip, options.sort).then((response) => {
             if (response.success) {
                 let result = response.types;
-                if (options.query) result = filterObject(result, options);
-
                 if (options.json) {
+                    if (options.query) result = filterObject(result, options);
                     printSuccess(JSON.stringify(result, null, 2), options);
                 } else {
                     printTable(LISTTABLEFORMAT, result, (o) => ({ ...o, updatedAt: o.updatedAt ? moment(o.updatedAt).fromNow() : '-' }));

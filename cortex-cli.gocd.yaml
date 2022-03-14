@@ -19,6 +19,10 @@ pipelines:
                     source: devBranchRevision.json
                 - build:
                     source: cortex-cli-docs.md
+                - test:
+                    source: coverage
+              tabs:
+                coverage: testoutput/coverage/index.html
               tasks:
                 - script: |
                     set -eux
@@ -42,6 +46,10 @@ pipelines:
               artifacts:
                 - build:
                     source: cortex-cli-docs.md
+                - test:
+                    source: coverage
+              tabs:
+                coverage: testoutput/coverage/index.html
               tasks:
                 - script: |
                     git clone git@github.com:CognitiveScale/gocd-pipeline-scripts.git

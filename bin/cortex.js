@@ -43,6 +43,7 @@ program
     .command('secrets [cmd]', 'Work with Cortex Secrets')
     .command('sessions [cmd]', 'Work with Cortex Sessions')
     .command('skills [cmd]', 'Work with Cortex Skills')
+    .command('tasks [cmd]', 'Work with Cortex Tasks')
     .command('types [cmd]', 'Work with Cortex Types')
     .command('users [cmd]', 'Work with a Cortex Users');
 

@@ -20,10 +20,9 @@ const moment = require('moment');
 const { loadProfile } = require('../config');
 const Connections = require('../client/connections');
 const Content = require('../client/content');
-const { CONNECTIONTABLEFORMAT } = require('./utils');
 
 const {
- printSuccess, printError, filterObject, parseObject, printTable, fileExists,
+ printSuccess, printError, filterObject, parseObject, printTable, DEPENDENCYTABLEFORMAT, CONNECTIONTABLEFORMAT, fileExists,
 } = require('./utils');
 
 module.exports.ListConnections = class ListConnections {
@@ -36,12 +35,12 @@ module.exports.ListConnections = class ListConnections {
         debug('%s.listConnections()', profile.name);
 
         const conns = new Connections(profile.url);
-        conns.listConnections(options.project || profile.project, profile.token).then((response) => {
+        conns.listConnections(options.project || profile.project, profile.token, options.filter, options.limit, options.skip, options.sort).then((response) => {
             if (response.success) {
                 let result = response.result.connections;
-                if (options.query) result = filterObject(result, options);
 
                 if (options.json) {
+                    if (options.query) result = filterObject(result, options);
                     printSuccess(JSON.stringify(result, null, 2), options);
                 } else {
                     printTable(CONNECTIONTABLEFORMAT, result, (o) => ({ ...o, createdAt: o.createdAt ? moment(o.createdAt).fromNow() : '-' }));
@@ -150,6 +149,34 @@ module.exports.DescribeConnectionCommand = class DescribeConnectionCommand {
     }
 };
 
+module.exports.DeleteConnectionCommand = class DeleteConnectionCommand {
+    constructor(program) {
+        this.program = program;
+    }
+
+    async execute(connectionName, options) {
+        const profile = await loadProfile(options.profile);
+        debug('%s.executeDeleteConnection(%s)', profile.name, connectionName);
+
+        const connection = new Connections(profile.url);
+        connection.deleteConnection(options.project || profile.project, profile.token, connectionName).then((response) => {
+            if (response.success) {
+                const result = filterObject(response.result, options);
+                return printSuccess(JSON.stringify(result, null, 2), options);
+            }
+            if (response.status === 403) { // has dependencies
+                const tableFormat = DEPENDENCYTABLEFORMAT;
+                printError(`Connection deletion failed: ${response.message}.`, options, false);
+                return printTable(tableFormat, response.details);
+            }
+            return printError(`Failed to delete connection ${connectionName}: ${response.message}`, options);
+        })
+        .catch((err) => {
+            printError(`Failed to delete connection ${connectionName}: ${err.status} ${err.message}`, options);
+        });
+    }
+};
+
 module.exports.ListConnectionsTypes = class ListConnectionsTypes {
     constructor(program) {
         this.program = program;
@@ -160,12 +187,12 @@ module.exports.ListConnectionsTypes = class ListConnectionsTypes {
         debug('%s.listConnectionsTypes()', profile.name);
 
         const conns = new Connections(profile.url);
-        conns.listConnectionsTypes(profile.token).then((response) => {
+        conns.listConnectionsTypes(profile.token, options.filter, options.limit, options.skip, options.sort).then((response) => {
             if (response.success) {
                 let result = response.result.connectionTypes;
-                if (options.query) result = filterObject(result, options);
 
                 if (options.json) {
+                    if (options.query) result = filterObject(result, options);
                     printSuccess(JSON.stringify(result, null, 2), options);
                 } else {
                     const tableSpec = [

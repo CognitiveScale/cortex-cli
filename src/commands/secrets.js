@@ -23,7 +23,7 @@ const map = require('lodash/fp/map');
 const { loadProfile } = require('../config');
 const Secrets = require('../client/secrets');
 const {
- printSuccess, printError, filterObject, parseObject, printTable,
+ printSuccess, printError, filterObject, parseObject, printTable, DEPENDENCYTABLEFORMAT,
 } = require('./utils');
 
 module.exports.ListSecretsCommand = class {
@@ -39,9 +39,11 @@ module.exports.ListSecretsCommand = class {
         secrets.listSecrets(options.project || profile.project, profile.token)
             .then((response) => {
                 if (response.success) {
-                    const result = filterObject(response.result, options);
-                    if (options.json) printSuccess(JSON.stringify(result, null, 2), options);
-                    else {
+                    let { result } = response;
+                    if (options.json) {
+                        if (options.query) result = filterObject(result, options);
+                        printSuccess(JSON.stringify(result, null, 2), options);
+                    } else {
                         const tableSpec = [
                             { column: 'Secret Key Name', field: 'keyName', width: 50 },
                         ];
@@ -128,6 +130,34 @@ module.exports.WriteSecretsCommand = class {
         })
         .catch((err) => {
             printError(`Failed to write secret : ${err.status} ${err.message}`, options);
+        });
+    }
+};
+
+module.exports.DeleteSecretCommand = class {
+    constructor(program) {
+        this.program = program;
+    }
+
+    async execute(keyName, options) {
+        const profile = await loadProfile(options.profile);
+        debug('%s.deleteSecret(%s)', profile.name, keyName);
+
+        const secretsClient = new Secrets(profile.url);
+        secretsClient.deleteSecret(options.project || profile.project, profile.token, keyName).then((response) => {
+            if (response.success) {
+                const result = filterObject(response.result, options);
+                return printSuccess(JSON.stringify(result, null, 2), options);
+            }
+            if (response.status === 403) { // has dependencies
+                const tableFormat = DEPENDENCYTABLEFORMAT;
+                printError(`Secret deletion failed: ${response.message}.`, options, false);
+                return printTable(tableFormat, response.details);
+            }
+            return printError(`Failed to delete secure secret : ${response.message}`, options);
+        })
+        .catch((err) => {
+            printError(`Failed to delete secure secret : ${err.status} ${err.message}`, options);
         });
     }
 };

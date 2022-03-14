@@ -88,6 +88,15 @@ module.exports.filterObject = (obj, options) => {
     return obj;
 };
 
+module.exports.filterListObject = (obj, options) => {
+    const { map, pick, partialRight } = _;
+    if (options.query) {
+        debug(`filtering results with query: ${options.query}`);
+        return map(obj, partialRight(pick, options.query.split(',')));
+    }
+    return obj;
+};
+
 // YAML 1.2 parses both yaml & json
 module.exports.parseObject = (str) => yaml.load(str);
 

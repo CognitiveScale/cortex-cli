@@ -34,13 +34,11 @@ class ListExperiments {
         debug('%s.listExperiments()', profile.name);
 
         const exp = new Experiments(profile.url);
-        exp.listExperiments(options.project || profile.project, options.model, profile.token).then((response) => {
+        exp.listExperiments(options.project || profile.project, options.model, profile.token, options.filter, options.limit, options.skip, options.sort).then((response) => {
             if (response.success) {
                 let { result } = response;
-                if (options.query) {
-                    result = filterObject(response.result, options);
-                }
                 if (options.json) {
+                    if (options.query) result = filterObject(result, options);
                     printSuccess(JSON.stringify(result, null, 2), options);
                 } else {
                     const tableSpec = [
@@ -127,13 +125,12 @@ class ListRuns {
         const exp = new Experiments(profile.url);
         const sort = options.sort || JSON.stringify({ startTime: -1 });
 
-        exp.listRuns(options.project || profile.project, profile.token, experimentName, options.filter, options.limit, sort).then((response) => {
+        exp.listRuns(options.project || profile.project, profile.token, experimentName, options.filter, options.limit, sort, options.skip).then((response) => {
             if (response.success) {
                 let { result } = response;
-                if (options.query) {
-                    result = filterObject(response.result, options);
-                }
+
                 if (options.json) {
+                    if (options.query) result = filterObject(result.runs, options);
                     printSuccess(JSON.stringify(result, null, 2), options);
                 } else {
                     const tableSpec = [

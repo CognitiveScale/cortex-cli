@@ -21,10 +21,9 @@ const moment = require('moment');
 const { loadProfile } = require('../config');
 const Catalog = require('../client/catalog');
 const Agents = require('../client/agents');
-const { LISTTABLEFORMAT, DEPENDENCYTABLEFORMAT } = require('./utils');
-
 const {
- printSuccess, printError, filterObject, parseObject, printTable, formatValidationPath,
+    printSuccess, printError, filterObject, parseObject, printTable, formatValidationPath,
+    LISTTABLEFORMAT, DEPENDENCYTABLEFORMAT,
 } = require('./utils');
 
 module.exports.SaveAgentCommand = class SaveAgentCommand {
@@ -76,12 +75,11 @@ module.exports.ListAgentsCommand = class ListAgentsCommand {
         debug('%s.executeListAgents()', profile.name);
 
         const catalog = new Catalog(profile.url);
-        catalog.listAgents(options.project || profile.project, profile.token).then((response) => {
+        catalog.listAgents(options.project || profile.project, profile.token, options.filter, options.limit, options.skip, options.sort).then((response) => {
             if (response.success) {
                 let result = response.agents;
-                if (options.query) result = filterObject(result, options);
-
                 if (options.json) {
+                    if (options.query) result = filterObject(result, options);
                     printSuccess(JSON.stringify(result, null, 2), options);
                 } else {
                     printTable(LISTTABLEFORMAT, result, (o) => ({ ...o, updatedAt: o.updatedAt ? moment(o.updatedAt).fromNow() : '-' }));
@@ -245,8 +243,9 @@ module.exports.ListActivationsCommand = class {
         if (options.agentName) queryParams.agentName = options.agentName;
         if (options.skillName) queryParams.skillName = options.skillName;
         if (options.limit) queryParams.limit = options.limit;
-        if (options.offset) queryParams.offset = options.offset;
+        if (options.offset) queryParams.offset = options.skip;
         if (options.sort) queryParams.sort = _.toLower(options.sort);
+        if (options.filter) queryParams.sort = _.toLower(options.filter);
 
         agents.listActivations(options.project || profile.project, profile.token, queryParams).then((response) => {
             if (response.success) {
@@ -299,10 +298,11 @@ module.exports.ListServicesCommand = class ListServicesCommand {
         debug('%s.listServices(%s)', profile.name, agentName);
 
         const catalog = new Catalog(profile.url);
-        catalog.listServices(options.project || profile.project, profile.token, agentName, profile).then((response) => {
+        catalog.listServices(options.project || profile.project, profile.token, agentName, profile, options.filter, options.limit, options.skip, options.sort).then((response) => {
             if (response.success) {
-                const result = filterObject(response.services, options);
+                let result = response.services;
                 if (options.json) {
+                    if (options.query) result = filterObject(result, options);
                     printSuccess(JSON.stringify(result, null, 2), options);
                 } else {
                     const tableSpec = [
@@ -331,11 +331,12 @@ module.exports.ListAgentSnapshotsCommand = class {
         debug('%s.listAgentSnapshots(%s)', profile.name, agentName);
 
         const agents = new Agents(profile.url);
-        agents.listAgentSnapshots(options.project || profile.project, profile.token, agentName)
+        agents.listAgentSnapshots(options.project || profile.project, profile.token, agentName, options.filter, options.limit, options.skip, options.sort)
             .then((response) => {
             if (response.success) {
-                const result = filterObject(response.result.snapshots, options);
+                let result = response.result.snapshots;
                 if (options.json) {
+                    if (options.query) result = filterObject(result, options);
                     printSuccess(JSON.stringify(result, null, 2), options);
                 } else {
                     const tableSpec = [

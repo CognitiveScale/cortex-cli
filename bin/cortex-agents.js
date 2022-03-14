@@ -68,6 +68,10 @@ program
     .option('--project [project]', 'The project to use')
     .option('--json', 'Output results using JSON')
     .option('--query [query]', 'A JMESPath query to use in filtering the response data. Ignored if output format is not JSON.')
+    .option('--skip [skip]', 'Move the result cursor to this position before returning results.')
+    .option('--limit [limit]', 'Limit the number of rows returned')
+    .option('--filter [filter]', 'A Mongo style filter to use.')
+    .option('--sort [sort]', 'A Mongo style sort statement to use in the query.')
     .action(withCompatibilityCheck((options) => {
         try {
             new ListAgentsCommand(program).execute(options);
@@ -167,8 +171,9 @@ program
     .option('--correlationId [string]', 'Query activations with same correlationId')
     .option('--status [status]', 'Filters activations by status [complete|error].')
     .option('--limit [limit]', 'Limit number of records', '100')
-    .option('--offset [offset]', 'Skip number of records', '0')
+    .option('--skip [skip]', 'Skip number of records', '0')
     .option('--sort [asc|desc]', 'Sort the activations by start timestamp ascending (asc) or descending (desc)')
+    .option('--filter [filter]', 'A Mongo style filter to use.')
     .action(withCompatibilityCheck((options) => {
         try {
             new ListActivationsCommand(program).execute(options);
@@ -183,10 +188,15 @@ program
     .option('--no-compat', 'Ignore API compatibility checks')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
-        .option('--project [project]', 'The project to use')
+    .option('--project [project]', 'The project to use')
     .option('--json', 'Output results using JSON')
     .option('--query [query]', 'A JMESPath query to use in filtering the response data.')
-    .action(withCompatibilityCheck((agentName, options) => {
+    .option('--skip [skip]', 'Move the result cursor to this position before returning results.')
+    .option('--limit [limit]', 'Limit the number of rows returned')
+    .option('--filter [filter]', 'A Mongo style filter to use.')
+    .option('--sort [sort]', 'A Mongo style sort statement to use in the query.')
+
+        .action(withCompatibilityCheck((agentName, options) => {
         try {
             new ListServicesCommand(program).execute(agentName, options);
         } catch (err) {
@@ -218,6 +228,10 @@ program
     .option('--project [project]', 'The project to use')
     .option('--json', 'Output results using JSON')
     .option('--query [query]', 'A JMESPath query to use in filtering the response data.')
+    .option('--skip [skip]', 'Move the result cursor to this position before returning results.')
+    .option('--limit [limit]', 'Limit the number of rows returned')
+    .option('--filter [filter]', 'A Mongo style filter to use.')
+    .option('--sort [sort]', 'A Mongo style sort statement to use in the query.')
     .action(withCompatibilityCheck((agentName, options) => {
         try {
             new ListAgentSnapshotsCommand(program).execute(agentName, options);

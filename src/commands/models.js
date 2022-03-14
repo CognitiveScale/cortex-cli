@@ -27,7 +27,7 @@ const Experiments = require('../client/experiments');
 const { LISTTABLEFORMAT, RUNTABLEFORMAT, DEPENDENCYTABLEFORMAT } = require('./utils');
 
 const {
-    printSuccess, printError, filterObject, parseObject, printTable, formatValidationPath, fileExists, 
+    printSuccess, printError, filterObject, parseObject, printTable, formatValidationPath, fileExists,
 } = require('./utils');
 
 module.exports.SaveModelCommand = class SaveModelCommand {
@@ -79,12 +79,12 @@ module.exports.ListModelsCommand = class ListModelsCommand {
         const profile = await loadProfile(options.profile);
         debug('%s.executeListModels()', profile.name);
         const models = new Models(profile.url);
-        models.listModels(options.project || profile.project, options.offset, options.limit, options.tags, profile.token).then((response) => {
+        models.listModels(options.project || profile.project, options.skip, options.limit, options.filter, options.sort, options.tags, profile.token).then((response) => {
             if (response.success) {
                 let result = response.models;
-                if (options.query) result = filterObject(result, options);
 
                 if (options.json) {
+                    if (options.query) result = filterObject(result, options);
                     printSuccess(JSON.stringify(result, null, 2), options);
                 } else {
                     printTable(LISTTABLEFORMAT, result, (o) => ({ ...o, updatedAt: o.updatedAt ? moment(o.updatedAt).fromNow() : '-' }));
@@ -109,12 +109,12 @@ module.exports.ListModelRunsCommand = class ListModelsCommand {
         const profile = await loadProfile(options.profile);
         debug('%s.executeListModels()', profile.name);
         const models = new Models(profile.url);
-        models.listModelRuns(options.project || profile.project, modelName, profile.token).then((response) => {
+        models.listModelRuns(options.project || profile.project, modelName, profile.token, options.filter, options.limit, options.skip, options.sort).then((response) => {
             if (response.success) {
                 let result = response.runs;
-                if (options.query) result = filterObject(result, options);
 
                 if (options.json) {
+                    if (options.query) result = filterObject(result, options);
                     printSuccess(JSON.stringify(result, null, 2), options);
                 } else {
                     printTable(RUNTABLEFORMAT, result, (o) => ({ ...o, updatedAt: o.updatedAt ? moment(o.updatedAt).fromNow() : '-' }));
