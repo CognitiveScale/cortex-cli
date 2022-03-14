@@ -53,7 +53,6 @@ module.exports.ConfigureCommand = class {
         console.log(`Configuring profile ${chalk.green.bold(profileName)}:`);
 
         const cmd = this;
-//        co(function* () {
             try {
                 let patData = null;
                 if (file) {
@@ -68,11 +67,9 @@ module.exports.ConfigureCommand = class {
                 }
                 cmd.saveConfig(config, profileName, patData, project);
                 console.log(`Configuration for profile ${chalk.green.bold(profileName)} saved.`);
-                // process.exit(0); //
             } catch (err) {
                 printError(err);
             }
- //       });
     }
 
     saveConfig(config, profileName, {
@@ -169,7 +166,8 @@ module.exports.GetAccessToken = class {
         this.program = program;
     }
 
-    async execute(options) {
+    async execute() {
+        const options = this.program.opts();
         const profile = await loadProfile(options.profile);
         const ttl = options.ttl || '1d';
         if (!durationRegex.test(ttl)) {
