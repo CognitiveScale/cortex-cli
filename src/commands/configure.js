@@ -25,6 +25,7 @@ const {
     defaultConfig,
     generateJwt,
     loadProfile,
+    durationRegex,
 } = require('../config');
 const { printSuccess, printError } = require('./utils');
 
@@ -171,6 +172,9 @@ module.exports.GetAccessToken = class {
     async execute(options) {
         const profile = await loadProfile(options.profile);
         const ttl = options.ttl || '1d';
+        if (!durationRegex.test(ttl)) {
+            printError(`Invalid --ttl "${ttl}" must be a number followed by s,m,h,d,w,M,y`);
+        }
         debug('%s.getAccesToken', profile.name);
         const jwt = await generateJwt(profile, ttl);
         return printSuccess(jwt, options);
