@@ -189,17 +189,3 @@ describe('List command sort option check', () => {
             .includes('Invalid sort expression') === true, 'Is invalid skip');
     });
 });
-
-describe('List model command option check', () => {
-    it('list valid command options', () => {
-        const options = {
-            filter: '{"name1": "name-1"}',
-            sort: '{"name2": 1}',
-            limit: -1,
-            skip: 0,
-        };
-        const { validOptions, errorDetails } = validateOptions(options, 'MODEL');
-        assert.ok(validOptions === false, 'Invalid options');
-        assert.ok(JSON.stringify(errorDetails).includes('Invalid filter params') === true, 'Is invalid filter');
-    });
-});
