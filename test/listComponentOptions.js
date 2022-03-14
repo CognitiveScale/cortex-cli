@@ -95,68 +95,6 @@ describe('List runs command option check', () => {
     });
 });
 
-describe('List runs command option check', () => {
-    it('should pass for valid filter and sort params', () => {
-        const options = {
-            filter: '{"runId": "test"}',
-            sort: '{"_createdAt": 1}',
-            limit: 1,
-            skip: 0,
-        };
-        const { validOptions, errorDetails } = validateOptions(options, 'RUN');
-        assert.ok(validOptions === true, 'Valid options');
-        assert.ok(errorDetails.length === 0, 'Valid options');
-    });
-
-    it('should fail for invalid filter and sort params', () => {
-        const options = {
-            filter: '{"key1": "test"}',
-            sort: '{"key2": 1}',
-            limit: 1,
-            skip: 0,
-        };
-        const { validOptions, errorDetails } = validateOptions(options, 'RUN');
-        assert.ok(validOptions === false, 'Invalid options');
-        assert.ok(JSON.stringify(errorDetails).includes(
-            'Invalid filter params. Allowed fields: runId,title,_createdAt,startTime,endTime,took,experimentName') === true,
-            'Is invalid filter');
-        assert.ok(JSON.stringify(errorDetails).includes(
-            'Invalid sort params. Allowed fields: runId,title,_createdAt,startTime,endTime,took,experimentName') === true,
-            'Is invalid sort');
-    });
-});
-
-describe('List runs command option check', () => {
-    it('should pass for valid filter and sort params', () => {
-        const options = {
-            filter: '{"runId": "test"}',
-            sort: '{"_createdAt": 1}',
-            limit: 1,
-            skip: 0,
-        };
-        const { validOptions, errorDetails } = validateOptions(options, 'RUN');
-        assert.ok(validOptions === true, 'Valid options');
-        assert.ok(errorDetails.length === 0, 'Valid options');
-    });
-
-    it('should fail for invalid filter and sort params', () => {
-        const options = {
-            filter: '{"key1": "test"}',
-            sort: '{"key2": 1}',
-            limit: 1,
-            skip: 0,
-        };
-        const { validOptions, errorDetails } = validateOptions(options, 'RUN');
-        assert.ok(validOptions === false, 'Invalid options');
-        assert.ok(JSON.stringify(errorDetails).includes(
-            'Invalid filter params. Allowed fields: runId,title,_createdAt,startTime,endTime,took,experimentName') === true,
-            'Is invalid filter');
-        assert.ok(JSON.stringify(errorDetails).includes(
-            'Invalid sort params. Allowed fields: runId,title,_createdAt,startTime,endTime,took,experimentName') === true,
-            'Is invalid sort');
-    });
-});
-
 describe('List actions command option check', () => {
     it('should pass for valid filter and sort params', () => {
         const options = {
