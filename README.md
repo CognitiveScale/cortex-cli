@@ -24,6 +24,18 @@ You can link your local copy of cortex-cli to your globally installed version:
 ```bash
 npm link
 ```
+
+The cortex cli can be run directly from the source with a simple wrapper script
+```
+git clone https://github.com/CognitiveScale/cortex-cli.git
+cat > /usr/local/bin/cortex <<EOM
+#!/bin/bash
+$PWD/cortex-cli/bin/cortex.js "\$@"
+EOM
+chmod +x /usr/local/bin/cortex
+```
+
+
 Changes you make to the source code will now be available immediately (locally).
 
 ### Usage:
