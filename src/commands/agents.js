@@ -250,9 +250,16 @@ module.exports.ListActivationsCommand = class {
         if (options.agentName) queryParams.agentName = options.agentName;
         if (options.skillName) queryParams.skillName = options.skillName;
         if (options.limit) queryParams.limit = options.limit;
-        if (options.offset) queryParams.offset = options.skip;
+        if (options.skip) queryParams.offset = options.skip;
         if (options.sort) queryParams.sort = _.toLower(options.sort);
-        if (options.filter) queryParams.sort = _.toLower(options.filter);
+        if (options.filter) queryParams.filter = options.filter;
+
+        const { validOptions, errorDetails } = validateOptions(options, 'ACTIVATION');
+        if (!validOptions) {
+            const optionTableFormat = OPTIONSTABLEFORMAT;
+            printError('Resource list failed.', options, false);
+            return printTable(optionTableFormat, errorDetails);
+        }
 
         agents.listActivations(options.project || profile.project, profile.token, queryParams).then((response) => {
             if (response.success) {

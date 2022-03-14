@@ -60,4 +60,8 @@ module.exports.ALLOWED_QUERY_FIELDS = {
         filter: ['name', 'title', 'description'],
         sort: ['name', 'title', 'description', '_createdAt'],
     },
+    ACTIVATION: {
+        filter: ['status', 'start', 'end', 'skillName', 'agentName'],
+        sort: ['status', 'start', 'end', 'skillName', 'agentName'],
+    },
 };
