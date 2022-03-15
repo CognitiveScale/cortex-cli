@@ -23,9 +23,13 @@ const sinon = require('sinon');
 const { expect } = require('chai');
 const yaml = require('js-yaml');
 const { stripAnsi } = require('./utils');
+const Info = require('../src/client/info');
 const program = require('../bin/cortex-configure');
+const utils = require('../src/commands/utils');
 
 let restore;
+let sandbox;
+
 describe('configure', () => {
     const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'cortex-cli'));
     let printSpy;
@@ -36,12 +40,16 @@ describe('configure', () => {
     });
 
     beforeEach(() => {
-        printSpy = sinon.spy(console, 'log');
+        sandbox = sinon.createSandbox();
+        sandbox.stub(Info.prototype, 'getInfo').callsFake(() => ({
+                serverTs: new Date('January 11, 2011 11:11:11'),
+        }));
+        printSpy = sandbox.spy(console, 'log');
         fs.copyFileSync('./test/cortex/config', path.join(tmpDir, 'config'));
     });
 
     afterEach(() => {
-        printSpy.restore();
+        sandbox.restore();
     });
 
     after(() => {
@@ -54,7 +62,7 @@ describe('configure', () => {
 
     it('lists profiles', async () => {
         await program.parseAsync(['node', 'configure', 'list']);
-        sinon.assert.calledTwice(printSpy);
+        sandbox.assert.calledTwice(printSpy);
         // default is set at default...
         expect(getPrintedLines()).to.eql(['default', 'other']);
     });
@@ -65,6 +73,37 @@ describe('configure', () => {
         expect(output).to.length(5);
         expect(output[4]).to.eql('Project: otherProj');
     });
+
+    // it('ttl token with ttl', async () => {
+    //     const spy = sandbox.spy(utils, 'printSuccess');
+    //     await program.parseAsync(['node', 'configure', 'token', '--ttl', '5m']);
+    //     const output = getPrintedLines();
+    //     expect(output).to.length(1);
+    // });
+    //
+    // it('ttl token with bad ttl', async () => {
+    //     await program.parseAsync(['node', 'configure', 'token', '--ttl', '99mx']);
+    //     const output = getPrintedLines();
+    //     expect(output).to.length(1);
+    // });
+    //
+    // it('ttl token default ttl', async () => {
+    //     await program.parseAsync(['node', 'configure', 'token']);
+    //     const output = getPrintedLines();
+    //     expect(output).to.length(1);
+    // });
+    //
+    // it('ttl token default with profile', async () => {
+    //     await program.parseAsync(['node', 'configure', 'token', '--profile', 'other']);
+    //     const output = getPrintedLines();
+    //     expect(output).to.length(1);
+    // });
+    //
+    // it('ttl token default with bad profile', async () => {
+    //     await program.parseAsync(['node', 'configure', 'token', '--profile', 'nohere']);
+    //     const output = getPrintedLines();
+    //     expect(output).to.length(1);
+    // });
 
     it('create profile pat file', async () => {
         await program.parseAsync(['node', 'configure', '--file', './test/cortex/pat-file.json', '--project', 'test', '--profile', 'conftest']);
