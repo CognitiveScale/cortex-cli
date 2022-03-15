@@ -29,21 +29,14 @@ const {
 program.name('cortex configure');
 program.description('Configure cortex connection profiles');
 
-program
-    .option('--file [file]', 'Personal access config file location')
-    .option('--profile [profile]', 'The profile to configure')
-    .option('--project [project]', 'The default project to use')
-    .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
-    .description('Configure the Cortex CLI');
-
 program.command('create', { isDefault: true })
     .description('Authenticate to cortex (default command)')
     .option('--file [file]', 'Personal access config file location')
     .option('--profile [profile]', 'The profile to configure', 'default')
     .option('--project [project]', 'The default project')
-    .action(() => {
+    .action((options, command) => {
         try {
-            new ConfigureCommand(program).execute();
+            new ConfigureCommand(command).execute(options);
         } catch (err) {
             console.error(chalk.red(err.message));
         }
@@ -54,8 +47,8 @@ program
     .description('Create access token')
     .option('--profile [profile]', 'The profile to use')
     .option('--project [project]', 'The project to use')
+    .option('--ttl [time]', 'The amount of time for this login to remain active, expressed as a number of hours, days, or weeks (e.g. 1h, 2d, 2w)')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
-    .option('--ttl [time]', 'The amount of time for this login to remain active, expressed as a number of hours, days, or weeks (e.g. 1h, 2d, 2w)', '1d')
     .action((options) => {
         try {
             new GetAccessToken(program).execute(options);
@@ -68,15 +61,17 @@ program
     .command('list')
     .description('List configured profiles')
     .alias('l')
-    .action(() => {
-        new ListProfilesCommand(program).execute({ color: program.color });
+    .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
+    .action((options) => {
+        new ListProfilesCommand(program).execute(options);
     });
 
 program
     .command('describe <profileName>')
     .alias('get')
+    .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .description('Describe a configured profile')
-    .action((profileName) => new DescribeProfileCommand(program).execute({ profile: profileName, color: program.color }));
+    .action((profileName, options) => new DescribeProfileCommand(program).execute({ profile: profileName, ...options }));
 
 program
     .command('env')
@@ -84,15 +79,15 @@ program
     .option('--project [project]', 'The project to use')
     .option('--ttl [time]', 'The amount of time for this login to remain active, expressed as a number of hours, days, or weeks (e.g. 1h, 2d, 2w)', '1d')
     .description('Print cortex environment variables')
-    .action(() => {
-        new PrintEnvVars(program).execute();
+    .action((options) => {
+        new PrintEnvVars(program).execute(options);
     });
 
 program
     .command('set-profile <profileName>')
     .description('Sets the current profile.')
-    .action((profileName) => {
-        new SetProfileCommand(program).execute(profileName, { color: program.color });
+    .action((profileName, options) => {
+        new SetProfileCommand(program).execute(profileName, options);
     });
 
 if (require.main === module) {
