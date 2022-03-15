@@ -61,3 +61,7 @@ module.exports.ALLOWED_QUERY_FIELDS = {
         sort: ['name', 'title', 'description', '_createdAt'],
     },
 };
+
+module.exports.DEFAULT_LIST_LIMIT_COUNT = '100';
+
+module.exports.DEFAULT_LIST_SKIP_COUNT = '0';
