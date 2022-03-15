@@ -106,7 +106,7 @@ module.exports.ListSkillsCommand = class ListSkillsCommand {
                 return printTable(optionTableFormat, errorDetails);
             }
             const response = await catalog.listSkills(
-                options.project || profile.project, profile.token, { status, shared }, options.filter, options.limit, options.skip, options.sort
+                options.project || profile.project, profile.token, { status, shared }, options.filter, options.limit, options.skip, options.sort,
             );
             if (response.success) {
                 let result = response.skills;
