@@ -49,9 +49,9 @@ program
     .option('--project [project]', 'The project to use')
     .option('--ttl [time]', 'The amount of time for this login to remain active, expressed as a number of hours, days, or weeks (e.g. 1h, 2d, 2w)')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
-    .action((options) => {
+    .action(async (options) => {
         try {
-            new GetAccessToken(program).execute(options);
+            await new GetAccessToken(program).execute(options);
         } catch (err) {
             console.error(chalk.red(err.message));
         }
@@ -62,8 +62,8 @@ program
     .description('List configured profiles')
     .alias('l')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
-    .action((options) => {
-        new ListProfilesCommand(program).execute(options);
+    .action(async (options) => {
+        await new ListProfilesCommand(program).execute(options);
     });
 
 program
