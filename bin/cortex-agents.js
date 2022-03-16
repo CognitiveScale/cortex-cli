@@ -20,6 +20,7 @@ const chalk = require('chalk');
 const program = require('commander');
 
 const { withCompatibilityCheck } = require('../src/compatibility');
+const { DEFAULT_LIST_SKIP_COUNT, DEFAULT_LIST_LIMIT_COUNT } = require('../src/constants');
 
 const {
     CreateAgentSnapshotCommand,
@@ -69,8 +70,8 @@ program
     .option('--json', 'Output results using JSON')
     .option('--query [query]', 'A JMESPath query to use in filtering the response data. Ignored if output format is not JSON.')
     .option('--filter [filter]', 'A Mongo style filter to use.')
-    .option('--limit [limit]', 'Limit number of records')
-    .option('--skip [skip]', 'Skip number of records', '0')
+    .option('--limit [limit]', 'Limit number of records', DEFAULT_LIST_LIMIT_COUNT)
+    .option('--skip [skip]', 'Skip number of records', DEFAULT_LIST_SKIP_COUNT)
     .option('--sort [sort]', 'A Mongo style sort statement to use in the query.')
     .action(withCompatibilityCheck((options) => {
         try {
@@ -170,8 +171,8 @@ program
     .option('--endAfter [timestamp]', 'Filters activations to include those that ended after the specified timestamp.')
     .option('--correlationId [string]', 'Query activations with same correlationId')
     .option('--status [status]', 'Filters activations by status [complete|error].')
-    .option('--limit [limit]', 'Limit number of records', '100')
-    .option('--skip [skip]', 'Skip number of records', '0')
+    .option('--limit [limit]', 'Limit number of records', DEFAULT_LIST_LIMIT_COUNT)
+    .option('--skip [skip]', 'Skip number of records', DEFAULT_LIST_SKIP_COUNT)
     .option('--sort [asc|desc]', 'Sort the activations by start timestamp ascending (asc) or descending (desc)')
     .option('--filter [filter]', 'A Mongo style filter to use.')
     .action(withCompatibilityCheck((options) => {
@@ -229,8 +230,8 @@ program
     .option('--json', 'Output results using JSON')
     .option('--query [query]', 'A JMESPath query to use in filtering the response data.')
     .option('--filter [filter]', 'A Mongo style filter to use.')
-    .option('--limit [limit]', 'Limit number of records', '100')
-    .option('--skip [skip]', 'Skip number of records', '0')
+    .option('--limit [limit]', 'Limit number of records', DEFAULT_LIST_LIMIT_COUNT)
+    .option('--skip [skip]', 'Skip number of records', DEFAULT_LIST_SKIP_COUNT)
     .option('--sort [sort]', 'A Mongo style sort statement to use in the query.')
     .action(withCompatibilityCheck((agentName, options) => {
         try {

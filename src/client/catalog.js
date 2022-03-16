@@ -49,13 +49,13 @@ module.exports = class Catalog {
             .catch((err) => constructError(err));
     }
 
-    listSkills(projectId, token, query, limit, skip, sort) {
+    listSkills(projectId, token, query, filter, limit, skip, sort) {
         checkProject(projectId);
         debug('listSkills() => %s', this.endpoints.skills(projectId));
+        if (filter) query.filter = filter;
         if (limit) query.limit = limit;
         if (sort) query.sort = sort;
         if (skip) query.skip = skip;
-
         return got
             .get(this.endpoints.skills(projectId), {
                 headers: { Authorization: `Bearer ${token}` },

@@ -65,3 +65,7 @@ module.exports.ALLOWED_QUERY_FIELDS = {
         sort: ['status', 'start', 'end', 'skillName', 'agentName'],
     },
 };
+
+module.exports.DEFAULT_LIST_LIMIT_COUNT = '100';
+
+module.exports.DEFAULT_LIST_SKIP_COUNT = '0';

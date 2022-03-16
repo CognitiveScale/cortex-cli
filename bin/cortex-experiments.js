@@ -20,6 +20,7 @@ const chalk = require('chalk');
 const program = require('commander');
 
 const { withCompatibilityCheck } = require('../src/compatibility');
+const { DEFAULT_LIST_SKIP_COUNT, DEFAULT_LIST_LIMIT_COUNT } = require('../src/constants');
 
 const {
     ListExperiments,
@@ -50,8 +51,8 @@ program
     .option('--json', 'Output results using JSON')
     .option('--query [query]', 'A JMESPath query to use in filtering the response data.')
     .option('--filter [filter]', 'A Mongo style filter to use.')
-    .option('--limit [limit]', 'Limit number of records')
-    .option('--skip [skip]', 'Skip number of records', '0')
+    .option('--limit [limit]', 'Limit number of records', DEFAULT_LIST_LIMIT_COUNT)
+    .option('--skip [skip]', 'Skip number of records', DEFAULT_LIST_SKIP_COUNT)
     .option('--sort [sort]', 'A Mongo style sort statement to use in the query.')
     .action(withCompatibilityCheck((options) => {
         try {
@@ -106,8 +107,8 @@ program
     .option('--json', 'Output results using JSON')
     .option('--query [query]', 'A JMESPath query to use in filtering the response data.')
     .option('--filter [filter]', 'A Mongo style filter to use.')
-    .option('--limit [limit]', 'Limit number of records')
-    .option('--skip [skip]', 'Skip number of records', '0')
+    .option('--limit [limit]', 'Limit number of records', DEFAULT_LIST_LIMIT_COUNT)
+    .option('--skip [skip]', 'Skip number of records', DEFAULT_LIST_SKIP_COUNT)
     .option('--sort [sort]', 'A Mongo style sort statement to use in the query.')
     .action(withCompatibilityCheck((experimentName, options) => {
         try {
