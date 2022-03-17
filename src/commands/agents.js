@@ -23,7 +23,7 @@ const Catalog = require('../client/catalog');
 const Agents = require('../client/agents');
 const {
     printSuccess, printError, filterObject, parseObject, printTable, formatValidationPath,
-    LISTTABLEFORMAT, DEPENDENCYTABLEFORMAT, validateOptions, OPTIONSTABLEFORMAT,
+    LISTTABLEFORMAT, DEPENDENCYTABLEFORMAT, validateOptions, OPTIONSTABLEFORMAT, handleTable,
 } = require('./utils');
 
 module.exports.SaveAgentCommand = class SaveAgentCommand {
@@ -89,7 +89,12 @@ module.exports.ListAgentsCommand = class ListAgentsCommand {
                     if (options.query) result = filterObject(result, options);
                     printSuccess(JSON.stringify(result, null, 2), options);
                 } else {
-                    printTable(LISTTABLEFORMAT, result, (o) => ({ ...o, updatedAt: o.updatedAt ? moment(o.updatedAt).fromNow() : '-' }));
+                    handleTable(
+                        LISTTABLEFORMAT,
+                        result,
+                        (o) => ({ ...o, updatedAt: o.updatedAt ? moment(o.updatedAt).fromNow() : '-' }),
+                        'No agents found',
+                    );
                 }
             } else {
                 printError(`Failed to list agents: ${response.status} ${response.message}`, options);
@@ -286,11 +291,11 @@ module.exports.ListActivationsCommand = class {
                         return '-';
                     };
 
-                    printTable(tableSpec, _.map(result, (o) => ({
+                    handleTable(tableSpec, _.map(result, (o) => ({
                         ...o,
                         name: genName(o),
                         start: o.start ? moment(o.start).fromNow() : '-',
-                    })));
+                    })), null, 'No activations found');
                 }
             } else {
                 printError(`Failed to list activations: ${response.message}`, options);
@@ -324,7 +329,7 @@ module.exports.ListServicesCommand = class ListServicesCommand {
                         { column: 'Service Endpoint URL', field: 'url', width: 115 },
                         { column: 'Parameters', field: 'formatted_types', width: 65 },
                     ];
-                    printTable(tableSpec, result);
+                    handleTable(tableSpec, result, null, 'No services found');
                 }
             } else {
                 printError(`Failed to return agent service information: ${agentName}: ${response.message}`, options);
@@ -368,7 +373,12 @@ module.exports.ListAgentSnapshotsCommand = class {
                         { column: 'Created', field: 'createdAt', width: 26 },
                         { column: 'Author', field: 'createdBy', width: 26 },
                     ];
-                    printTable(tableSpec, result, (o) => ({ ...o, createdAt: o.createdAt ? moment(o.createdAt).fromNow() : '-' }));
+                    handleTable(
+                        tableSpec,
+                        result,
+                        (o) => ({ ...o, createdAt: o.createdAt ? moment(o.createdAt).fromNow() : '-' }),
+                        'No snapshots found',
+                    );
                 }
             } else {
                 printError(`Failed to list agent snapshots ${agentName}: ${response.message}`, options);

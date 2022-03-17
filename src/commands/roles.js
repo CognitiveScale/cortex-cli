@@ -17,7 +17,7 @@ const debug = require('debug')('cortex:cli');
 const { loadProfile } = require('../config');
 const Roles = require('../client/roles');
 const {
- printSuccess, printError, filterObject, printTable, EXTERNALROLESFORMAT,
+ printSuccess, printError, filterObject, EXTERNALROLESFORMAT, handleTable,
 } = require('./utils');
 
 function createGrant(options) {
@@ -198,7 +198,7 @@ module.exports.RoleListCommand = class {
                 if (options.json) {
                     printSuccess(JSON.stringify(result, null, 2), options);
                 } else {
-                    printTable([{ column: 'Role', field: 'role' }], result.roles.map((x) => ({ role: x })));
+                    handleTable([{ column: 'Role', field: 'role' }], result.roles.map((x) => ({ role: x })), null, 'No roles found');
                 }
             } else {
                 printError(`Failed to list roles : ${response.message}`, options);
@@ -259,7 +259,7 @@ module.exports.ExternalGroupListCommand = class {
                 if (options.json) {
                     printSuccess(JSON.stringify(result, null, 2), options);
                 } else {
-                    printTable(EXTERNALROLESFORMAT, result, (o) => ({ ...o, roles: o.roles.join(', ') }));
+                    handleTable(EXTERNALROLESFORMAT, result, (o) => ({ ...o, roles: o.roles.join(', ') }), null, 'No external roles found');
                 }
             } else {
                 printError(`Failed to list external groups : ${response.message}`, options);

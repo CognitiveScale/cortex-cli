@@ -23,8 +23,7 @@ const Content = require('../client/content');
 
 const {
  printSuccess, printError, filterObject, parseObject, printTable, DEPENDENCYTABLEFORMAT, CONNECTIONTABLEFORMAT, fileExists,
-    validateOptions,
-    OPTIONSTABLEFORMAT,
+    validateOptions, OPTIONSTABLEFORMAT, handleTable,
 } = require('./utils');
 
 module.exports.ListConnections = class ListConnections {
@@ -52,7 +51,12 @@ module.exports.ListConnections = class ListConnections {
                     if (options.query) result = filterObject(result, options);
                     printSuccess(JSON.stringify(result, null, 2), options);
                 } else {
-                    printTable(CONNECTIONTABLEFORMAT, result, (o) => ({ ...o, createdAt: o.createdAt ? moment(o.createdAt).fromNow() : '-' }));
+                    handleTable(
+                        CONNECTIONTABLEFORMAT,
+                        result,
+                        (o) => ({ ...o, createdAt: o.createdAt ? moment(o.createdAt).fromNow() : '-' }),
+                        'No connections found',
+                    );
                 }
             } else {
                 printError(`Failed to list connections: ${response.status} ${response.message}`, options);
@@ -219,7 +223,7 @@ module.exports.ListConnectionsTypes = class ListConnectionsTypes {
                         { column: 'Updated On', field: 'updatedAt', width: 26 },
                     ];
 
-                    printTable(tableSpec, result);
+                    handleTable(tableSpec, result, null, 'No connection types found');
                 }
             } else {
                 printError(`Failed to list connection types: ${response.status} ${response.message}`, options);

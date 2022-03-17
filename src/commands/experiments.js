@@ -21,7 +21,7 @@ const moment = require('moment');
 const { loadProfile } = require('../config');
 const Experiments = require('../client/experiments');
 const {
- printSuccess, printError, filterObject, printTable, parseObject, fileExists, formatValidationPath, DEPENDENCYTABLEFORMAT,
+ printSuccess, printError, filterObject, printTable, parseObject, fileExists, formatValidationPath, DEPENDENCYTABLEFORMAT, handleTable,
     validateOptions,
     OPTIONSTABLEFORMAT,
 } = require('./utils');
@@ -57,7 +57,7 @@ class ListExperiments {
                         { column: 'Description', field: 'description', width: 50 },
                     ];
 
-                    printTable(tableSpec, result.experiments);
+                    handleTable(tableSpec, result.experiments, null, 'No experiments found');
                 }
             } else {
                 printError(`Failed to list experiments: ${response.status} - ${response.message}`, options);
@@ -164,7 +164,7 @@ class ListRuns {
                         o.artifacts = Object.keys(_.get(o, 'artifacts', {})).join(', ');
                         return o;
                     };
-                    printTable(tableSpec, _.get(result, 'runs', []), trans);
+                    handleTable(tableSpec, _.get(result, 'runs', []), trans, 'No runs found');
                 }
             } else {
                 printError(`Failed to list runs: ${response.status} ${response.status} - ${response.message}`, options);
