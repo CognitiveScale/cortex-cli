@@ -233,6 +233,7 @@ module.exports.ListActivationsCommand = class {
         this.program = program;
     }
 
+    // eslint-disable-next-line consistent-return
     async execute(options) {
         if (_.isEmpty(options.agentName) 
             && _.isEmpty(options.skillName) 
