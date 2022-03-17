@@ -43,7 +43,7 @@ describe('Handle table function test', () => {
         return _.flatten(printSpy.args).map((s) => stripAnsi(s));
     }
 
-    it('should print supplied no string when empty data', () => {
+    it('should print supplied error message when data is empty', () => {
         handleTable(tableSpec, [], null, 'No users found');
         expect(getPrintedLines()).to.eql(['No users found']);
     });
