@@ -29,7 +29,7 @@ const {
 } = require('./utils');
 
 const {
-    printSuccess, printError, filterObject, parseObject, printTable, formatValidationPath, fileExists,
+    printSuccess, printError, filterObject, parseObject, printTable, formatValidationPath, fileExists, handleTable,
 } = require('./utils');
 
 module.exports.SaveModelCommand = class SaveModelCommand {
@@ -96,7 +96,12 @@ module.exports.ListModelsCommand = class ListModelsCommand {
                     if (options.query) result = filterObject(result, options);
                     printSuccess(JSON.stringify(result, null, 2), options);
                 } else {
-                    printTable(LISTTABLEFORMAT, result, (o) => ({ ...o, updatedAt: o.updatedAt ? moment(o.updatedAt).fromNow() : '-' }));
+                    handleTable(
+                        LISTTABLEFORMAT,
+                        result,
+                        (o) => ({ ...o, updatedAt: o.updatedAt ? moment(o.updatedAt).fromNow() : '-' }),
+                        'No models found',
+                    );
                 }
             } else {
                 printError(`Failed to list models: ${response.status} ${response.message}`, options);
@@ -133,7 +138,12 @@ module.exports.ListModelRunsCommand = class ListModelsCommand {
                     if (options.query) result = filterObject(result, options);
                     printSuccess(JSON.stringify(result, null, 2), options);
                 } else {
-                    printTable(RUNTABLEFORMAT, result, (o) => ({ ...o, updatedAt: o.updatedAt ? moment(o.updatedAt).fromNow() : '-' }));
+                    handleTable(
+                        RUNTABLEFORMAT,
+                        result,
+                        (o) => ({ ...o, updatedAt: o.updatedAt ? moment(o.updatedAt).fromNow() : '-' }),
+                        'No runs found',
+                    );
                 }
             } else {
                 printError(`Failed to list model runs: ${response.status} ${response.message}`, options);

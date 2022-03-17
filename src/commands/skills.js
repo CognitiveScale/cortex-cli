@@ -23,7 +23,7 @@ const Agent = require('../client/agents');
 
 const {
     printSuccess, printError, printWarning, filterObject, parseObject, printTable, formatValidationPath,
-    LISTTABLEFORMAT, DEPENDENCYTABLEFORMAT, isNumeric, validateOptions, OPTIONSTABLEFORMAT,
+    LISTTABLEFORMAT, DEPENDENCYTABLEFORMAT, isNumeric, validateOptions, OPTIONSTABLEFORMAT, handleTable,
 } = require('./utils');
 
 module.exports.SaveSkillCommand = class SaveSkillCommand {
@@ -126,8 +126,12 @@ module.exports.ListSkillsCommand = class ListSkillsCommand {
                     if (options.query) result = filterObject(result, options);
                     return printSuccess(JSON.stringify(result, null, 2), options);
                 }
-                return printTable(tableFormat,
-                    _.sortBy(result, options.sort ? [] : ['name']), (o) => ({ ...o, updatedAt: o.updatedAt ? moment(o.updatedAt).fromNow() : '-' }));
+                return handleTable(
+                    tableFormat,
+                    _.sortBy(result, options.sort ? [] : ['name']), (o) => ({ ...o, updatedAt: o.updatedAt ? moment(o.updatedAt).fromNow() : '-' }),
+                    null,
+                    'No skills found',
+                );
             }
             return printError(`Failed to list skills: ${response.status} ${response.message}`, options);
         } catch (err) {

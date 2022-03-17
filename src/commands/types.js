@@ -24,7 +24,7 @@ const {
 } = require('./utils');
 
 const {
- printSuccess, printError, parseObject, printTable,
+ printSuccess, printError, parseObject, printTable, handleTable,
 } = require('./utils');
 
 module.exports.SaveTypeCommand = class SaveTypeCommand {
@@ -80,7 +80,12 @@ module.exports.ListTypesCommand = class ListTypesCommand {
                     if (options.query) result = filterObject(result, options);
                     printSuccess(JSON.stringify(result, null, 2), options);
                 } else {
-                    printTable(LISTTABLEFORMAT, result, (o) => ({ ...o, updatedAt: o.updatedAt ? moment(o.updatedAt).fromNow() : '-' }));
+                    handleTable(
+                        LISTTABLEFORMAT,
+                        result,
+                        (o) => ({ ...o, updatedAt: o.updatedAt ? moment(o.updatedAt).fromNow() : '-' }),
+                        'No types found',
+                    );
                 }
             } else {
                 printError(`Failed to list types: ${response.status} ${response.message}`, options);

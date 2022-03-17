@@ -23,7 +23,7 @@ const Actions = require('../client/actions');
 const {
  printSuccess, printError, filterObject, parseObject, printTable, DEPENDENCYTABLEFORMAT, isNumeric,
     validateOptions,
-    OPTIONSTABLEFORMAT,
+    OPTIONSTABLEFORMAT, handleTable,
 } = require('./utils');
 
 module.exports.ListActionsCommand = class {
@@ -59,7 +59,12 @@ module.exports.ListActionsCommand = class {
                             { column: 'Modified', field: 'updatedAt', width: 26 },
                             { column: 'Author', field: 'createdBy', width: 26 },
                         ];
-                        printTable(tableSpec, result, (o) => ({ ...o, updatedAt: o.updatedAt ? moment(o.updatedAt).fromNow() : '-' }));
+                        handleTable(
+                            tableSpec,
+                            result,
+                            (o) => ({ ...o, updatedAt: o.updatedAt ? moment(o.updatedAt).fromNow() : '-' }),
+                            'No actions found',
+                        );
                     }
                 } else {
                     printError(`Failed to list actions: ${response.status} ${response.message}`, options);
