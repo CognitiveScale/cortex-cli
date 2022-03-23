@@ -92,7 +92,7 @@ module.exports.TaskLogsCommand = class TaskLogsCommand {
         try {
             const response = await tasks.taskLogs(options.project || profile.project, profile.token, taskName, options.verbose);
             if (response.success) {
-                return printSuccess(JSON.stringify(response.logs), options);
+                return printSuccess(response.logs, options);
             }
             return printError(`Failed to List Task Logs ${taskName}: ${response.message}`, options);
         } catch (err) {
