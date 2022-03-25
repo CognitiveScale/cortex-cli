@@ -34,10 +34,12 @@ module.exports.ListCampaignsCommand = class ListCampaignsCommand {
 
         const cli = new ApiServerClient(profile.url);
         try {
-        const response = await cli.listCampaigns(options.project || profile.project, profile.token);
+            const sortParam = (options.sort || '{}').replace(/"/g, '\'');
+            const filterParam = (options.filter || '{}').replace(/"/g, '\'');
+            const response = await cli.listCampaigns(options.project || profile.project, profile.token, filterParam, options.limit, options.skip, sortParam);
             let result = response;
-            if (options.query) result = filterObject(result, options);
             if (options.json) {
+                if (options.query) result = filterObject(result, options);
                 printSuccess(JSON.stringify(result, null, 2), options);
             } else {
                 const tableSpec = [
@@ -212,10 +214,13 @@ module.exports.ListMissionsCommand = class ListMissionsCommand {
         const cli = new Catalog(profile.url);
 
         try {
-            cli.listMissions(options.project || profile.project, profile.token, campaign).then((response) => {
+            const sortParam = (options.sort || '{}').replace(/"/g, '\'');
+            const filterParam = (options.filter || '{}').replace(/"/g, '\'');
+            cli.listMissions(options.project || profile.project, profile.token, campaign, filterParam, options.limit, options.skip, sortParam).then((response) => {
                 if (response.success === false) throw response;
-                const data = Object.values(response.data);
+                let data = Object.values(response.data);
                 if (options.json) {
+                    if (options.query) data = filterObject(data, options);
                     printSuccess(JSON.stringify(data, null, 2), options);
                 } else {
                     const tableSpec = [

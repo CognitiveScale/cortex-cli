@@ -21,7 +21,7 @@ const moment = require('moment');
 const { loadProfile } = require('../config');
 const Experiments = require('../client/experiments');
 const {
- printSuccess, printError, filterObject, printTable, parseObject, formatValidationPath,
+ printSuccess, printError, filterObject, printTable, parseObject, fileExists, formatValidationPath, DEPENDENCYTABLEFORMAT,
 } = require('./utils');
 
 class ListExperiments {
@@ -34,13 +34,11 @@ class ListExperiments {
         debug('%s.listExperiments()', profile.name);
 
         const exp = new Experiments(profile.url);
-        exp.listExperiments(options.project || profile.project, options.model, profile.token).then((response) => {
+        exp.listExperiments(options.project || profile.project, options.model, profile.token, options.filter, options.limit, options.skip, options.sort).then((response) => {
             if (response.success) {
                 let { result } = response;
-                if (options.query) {
-                    result = filterObject(response.result, options);
-                }
                 if (options.json) {
+                    if (options.query) result = filterObject(result, options);
                     printSuccess(JSON.stringify(result, null, 2), options);
                 } else {
                     const tableSpec = [
@@ -100,10 +98,14 @@ class DeleteExperimentCommand {
         exp.deleteExperiment(options.project || profile.project, profile.token, experimentName).then((response) => {
             if (response.success) {
                 const result = filterObject(response.result, options);
-                printSuccess(JSON.stringify(result, null, 2), options);
-            } else {
-                printError(`Failed to delete experiment ${experimentName}: ${response.status} - ${response.message}`, options);
+                return printSuccess(JSON.stringify(result, null, 2), options);
             }
+            if (response.status === 403) { // has dependencies
+                const tableFormat = DEPENDENCYTABLEFORMAT;
+                printError(`Experiment deletion failed: ${response.message}.`, options, false);
+                return printTable(tableFormat, response.details);
+            }
+            return printError(`Failed to delete experiment ${experimentName}: ${response.status} - ${response.message}`, options);
         })
         .catch((err) => {
             printError(`Failed to delete experiment ${experimentName}: ${err.status} - ${err.message}`, options);
@@ -123,13 +125,12 @@ class ListRuns {
         const exp = new Experiments(profile.url);
         const sort = options.sort || JSON.stringify({ startTime: -1 });
 
-        exp.listRuns(options.project || profile.project, profile.token, experimentName, options.filter, options.limit, sort).then((response) => {
+        exp.listRuns(options.project || profile.project, profile.token, experimentName, options.filter, options.limit, sort, options.skip).then((response) => {
             if (response.success) {
                 let { result } = response;
-                if (options.query) {
-                    result = filterObject(response.result, options);
-                }
+
                 if (options.json) {
+                    if (options.query) result = filterObject(result.runs, options);
                     printSuccess(JSON.stringify(result, null, 2), options);
                 } else {
                     const tableSpec = [
@@ -197,10 +198,14 @@ class DeleteRunCommand {
         const exp = new Experiments(profile.url);
         exp.deleteRun(options.project || profile.project, profile.token, experimentName, runId).then((response) => {
             if (response.success) {
-                printSuccess(`Run ${runId} in experiment ${experimentName} deleted`, options);
-            } else {
-                printError(`Failed to delete run ${experimentName}/${runId}: ${response.status} - ${response.message}`, options);
+                return printSuccess(`Run ${runId} in experiment ${experimentName} deleted`, options);
             }
+            if (response.status === 403) { // has dependencies
+               const tableFormat = DEPENDENCYTABLEFORMAT;
+               printError(`Run deletion failed: ${response.message}.`, options, false);
+               return printTable(tableFormat, response.details);
+            }
+            return printError(`Failed to delete run ${experimentName}/${runId}: ${response.status} - ${response.message}`, options);
         })
         .catch((err) => {
             printError(`Failed to delete run ${experimentName}/${runId}: ${err.status} - ${err.message}`, options);
@@ -219,18 +224,10 @@ class DownloadArtifactCommand {
 
         const exp = new Experiments(profile.url);
         const showProgress = !!options.progress;
-
         // To download content from Secrets
-        exp.downloadArtifact(options.project || profile.project, profile.token, experimentName, runId, artifactName, showProgress).then((response) => {
-            if (response.success) {
-                // messages need to be on stderr as content is streamed to stdout
-                console.error(response.message);
-            } else {
-                printError(`Failed to download artifact: ${response.status} - ${response.message}`, options);
-            }
-        }).catch((err) => {
+        exp.downloadArtifact(options.project || profile.project, profile.token, experimentName, runId, artifactName, showProgress).catch((err) => {
             debug(err);
-            printError(`Failed to download artifact: ${err.status} - ${err.message}`, options);
+            printError(`Failed to download artifact: ${err.status ? err.status : ''}- ${err.message ? err.message : ''}`, options);
         });
     }
 }
@@ -244,6 +241,9 @@ class SaveExperimentCommand {
         const profile = await loadProfile(options.profile);
         debug('%s.executeSaveExperiment(%s)', profile.name, experimentDefinition);
 
+         if (!fileExists(experimentDefinition)) {
+            printError(`File does not exist at: ${experimentDefinition}`);
+        }
         const experimentDefStr = fs.readFileSync(experimentDefinition);
         const experiment = parseObject(experimentDefStr, options);
         debug('%o', experiment);
@@ -280,7 +280,9 @@ class CreateRunCommand {
     async execute(runDefinition, options) {
         const profile = await loadProfile(options.profile);
         debug('%s.executeCreateRun(%s)', profile.name, runDefinition);
-
+         if (!fs.existsSync(runDefinition)) {
+            printError(`File does not exist at: ${runDefinition}`);
+        }
         const runDefinitionStr = fs.readFileSync(runDefinition);
         const run = parseObject(runDefinitionStr, options);
 

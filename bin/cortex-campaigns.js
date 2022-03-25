@@ -37,12 +37,17 @@ program.description('Work with Cortex Campaigns');
 program
     .command('list')
     .description('List Campaigns')
+    .alias('l')
     .option('--no-compat', 'Ignore API compatibility checks')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
     .option('--project [project]', 'The project to use')
     .option('--json', 'Output results using JSON')
     .option('--query [query]', 'A JMESPath query to use in filtering the response data.')
+    .option('--skip [skip]', 'Move the result cursor to this position before returning results.')
+    .option('--limit [limit]', 'Limit the number of rows returned')
+    .option('--filter [filter]', 'A Mongo style filter to use.')
+    .option('--sort [sort]', 'A Mongo style sort statement to use in the query.')
     .action(withCompatibilityCheck((options) => {
         try {
             new ListCampaignsCommand(program).execute(options);

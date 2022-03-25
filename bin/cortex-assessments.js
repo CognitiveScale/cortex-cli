@@ -44,6 +44,7 @@ program
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
     .option('--json', 'Output results using JSON')
+    .option('--query [query]', 'A JMESPath query to use in filtering the response data. Ignored if output format is not JSON.')
     .action(withCompatibilityCheck((options) => {
         try {
             new ListResourceTypesCommand(program).execute(options);
@@ -57,8 +58,8 @@ program
     .description('Dependencies of a resource or find missing ones from dependencyFile')
     .storeOptionsAsProperties(false)
     .requiredOption('--scope [project]', 'project name of the resource')
-    .option('--name [Cortex component name]', 'Cortex component name')
-    .option('--type [Cortex component type]', 'Cortex resource type')
+    .option('--name [Cortex component name]', 'Cortex component name', ' ')
+    .option('--type [Cortex component type]', 'Cortex resource type', ' ')
     .option('--no-compat', 'Ignore API compatibility checks')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
@@ -85,6 +86,8 @@ program
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
     .option('--json', 'Output results using JSON')
+    .option('--filter [filter]', 'A Mongo style filter to use.')
+    .option('--sort [sort]', 'A Mongo style sort statement to use in the query.')
     .action(withCompatibilityCheck((options) => {
         try {
             new ListResourcesCommand(program).execute(options);
@@ -119,12 +122,19 @@ program
 program
     .command('list')
     .description('List assessments')
+    .alias('l')
     .option('--skip [Skip records for pagination]', 'Skip records for pagination')
     .option('--limit [Limit records for pagination]', 'Limit records for pagination')
     .option('--no-compat', 'Ignore API compatibility checks')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
     .option('--json', 'Output results using JSON')
+    .option('--query [query]', 'A JMESPath query to use in filtering the response data. Ignored if output format is not JSON.')
+    .option('--skip [skip]', 'Move the result cursor to this position before returning results.')
+    .option('--limit [limit]', 'Limit the number of rows returned')
+    .option('--filter [filter]', 'A Mongo style filter to use.')
+    .option('--sort [sort]', 'A Mongo style sort statement to use in the query.')
+
     .action(withCompatibilityCheck((options) => {
         try {
             new ListAssessmentCommand(program).execute(options);

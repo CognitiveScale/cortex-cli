@@ -27,7 +27,7 @@ const {
     DescribeModelCommand,
     ListModelsCommand,
     // RegisterModelCommand,
-    PublishModelCommand,
+    UpdateModelStatusCommand,
     ListModelRunsCommand,
 } = require('../src/commands/models');
 
@@ -43,11 +43,13 @@ program
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
     .option('--project [project]', 'The project to use')
-    .option('--offset [offset]', 'The offset to use')
-    .option('--limit [limit]', 'The limit to use')
+    .option('--skip [skip]', 'Move the result cursor to this position before returning results.')
+    .option('--limit [limit]', 'Limit the number of models returned')
     .option('--tags [tags]', 'The tags to use (comma separated values)')
     .option('--json', 'Output results using JSON')
     .option('--query [query]', 'A JMESPath query to use in filtering the response data. Ignored if output format is not JSON.')
+    .option('--filter [filter]', 'A Mongo style filter to use.')
+    .option('--sort [sort]', 'A Mongo style sort statement to use in the query.')
     .action(withCompatibilityCheck((options) => {
         try {
             new ListModelsCommand(program).execute(options);
@@ -125,7 +127,7 @@ program
 //        }
 //    }));
 
-// Publish Model
+// Publish a Model
 program
     .command('publish <modelName>')
     .description('Publish a model')
@@ -137,7 +139,25 @@ program
     .option('--content-type [MIME type]', 'Sets the `Content-Type` or MIME type of the content ( default: application/octet-stream )')
     .action(withCompatibilityCheck((modelName, options) => {
         try {
-            new PublishModelCommand(program).execute(modelName, options);
+            new UpdateModelStatusCommand(program).execute(modelName, options, 'publish');
+        } catch (err) {
+            console.error(chalk.red(err.message));
+        }
+    }));
+
+// Unpublish a Model
+program
+    .command('unpublish <modelName>')
+    .description('Unpublish a model')
+    .option('--no-compat', 'Ignore API compatibility checks')
+    .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
+    .option('--profile [profile]', 'The profile to use')
+    .option('--project [project]', 'The project to use')
+    .option('-y, --yaml', 'Use YAML for model definition format')
+    .option('--content-type [MIME type]', 'Sets the `Content-Type` or MIME type of the content ( default: application/octet-stream )')
+    .action(withCompatibilityCheck((modelName, options) => {
+        try {
+            new UpdateModelStatusCommand(program).execute(modelName, options, 'unpublish');
         } catch (err) {
             console.error(chalk.red(err.message));
         }
@@ -153,6 +173,10 @@ program
     .option('--project [project]', 'The project to use')
     .option('--json', 'Output results using JSON')
     .option('--query [query]', 'A JMESPath query to use in filtering the response data. Ignored if output format is not JSON.')
+    .option('--skip [skip]', 'Move the result cursor to this position before returning results.')
+    .option('--limit [limit]', 'Limit the number of runs returned')
+    .option('--filter [filter]', 'A Mongo style filter to use.')
+    .option('--sort [sort]', 'A Mongo style sort statement to use in the query.')
     .action(withCompatibilityCheck((modelName, options) => {
         try {
             new ListModelRunsCommand(program).execute(modelName, options);

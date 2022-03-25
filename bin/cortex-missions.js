@@ -37,12 +37,18 @@ program.description('Work with Cortex Missions');
 
 program
     .command('list <campaignName>')
+    .alias('l')
     .description('List Missions of the Campaign')
     .option('--json', 'Output results using JSON')
     .option('--no-compat', 'Ignore API compatibility checks')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
     .option('--project [project]', 'The project to use')
+    .option('--query [query]', 'A JMESPath query to use in filtering the response data. Ignored if output format is not JSON.')
+    .option('--skip [skip]', 'Move the result cursor to this position before returning results.')
+    .option('--limit [limit]', 'Limit the number of rows returned')
+    .option('--filter [filter]', 'A Mongo style filter to use.')
+    .option('--sort [sort]', 'A Mongo style sort statement to use in the query.')
     .action(withCompatibilityCheck((campaignName, options) => {
         try {
             new ListMissionsCommand(program).execute(campaignName, options);

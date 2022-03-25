@@ -17,7 +17,7 @@ const debug = require('debug')('cortex:cli');
 const { loadProfile } = require('../config');
 const Users = require('../client/users');
 const {
- printSuccess, printError, filterObject,
+ printSuccess, printError, filterObject, printTable,
 } = require('./utils');
 
 function createGrant(options) {
@@ -37,7 +37,7 @@ module.exports.UserGrantCommand = class {
     async execute(user, options) {
         const profile = await loadProfile(options.profile);
         const form = createGrant(options);
-        debug('%s.grantUser=%s', profile.name, user || 'self');
+        debug('%s.grantUser(%s)', profile.name, user || 'self');
         const client = new Users(profile.url, user);
         const call = (deleteFlag, token, body) => {
             if (deleteFlag) {
@@ -69,7 +69,7 @@ module.exports.UserDeleteCommand = class {
 
     async execute(user, options) {
         const profile = await loadProfile(options.profile);
-        debug('%s.deleteServiceUser=%s', profile.name, user);
+        debug('%s.deleteServiceUser(%s)', profile.name, user);
 
         const client = new Users(profile.url, user);
         client.deleteServiceUser(profile.token, user).then((response) => {
@@ -93,13 +93,13 @@ module.exports.UserCreateCommand = class {
 
     async execute(user, options) {
         const profile = await loadProfile(options.profile);
-        debug('%s.createServiceUser=%s', profile.name, user);
+        debug('%s.createServiceUser(%s)', profile.name, user);
 
         const client = new Users(profile.url, user);
         client.createServiceUser(profile.token, user).then((response) => {
             if (response.success) {
                 const result = filterObject(response.result, options);
-                printSuccess(JSON.stringify(result, null, 2), options);
+                printSuccess(JSON.stringify(result.config, null), options);
             } else {
                 printError(`Failed to create user ${user} : ${response.message}`, options);
             }
@@ -123,7 +123,11 @@ module.exports.UserListCommand = class {
         client.listServiceUsers(profile.token).then((response) => {
             if (response.success) {
                 const result = filterObject(response.result, options);
-                printSuccess(JSON.stringify(result, null, 2), options);
+                if (options.json) {
+                    printSuccess(JSON.stringify(result, null, 2), options);
+                } else {
+                    printTable([{ column: 'User', field: 'user' }], result.users.map((x) => ({ user: x })));
+                }
             } else {
                 printError(`Failed to list service users : ${response.message}`, options);
             }
@@ -141,7 +145,7 @@ module.exports.UserDescribeCommand = class {
 
     async execute(options) {
         const profile = await loadProfile(options.profile);
-        debug('%s.describeForUser=%s', profile.name, options.user || 'self');
+        debug('%s.describeForUser(%s)', profile.name, options.user || 'self');
 
         const flags = [];
 
@@ -173,7 +177,7 @@ module.exports.UserProjectAssignCommand = class {
 
     async execute(project, options) {
         const profile = await loadProfile(options.profile);
-        debug('%s.assignUserProject=%s', profile.name, project);
+        debug('%s.assignUserProject(%s)', profile.name, project);
 
         const client = new Users(profile.url, null);
         const call = (deleteFlag, token, assignProject, users) => {

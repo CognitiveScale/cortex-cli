@@ -24,14 +24,20 @@ module.exports = class Connections {
         this.cortexUrl = cortexUrl;
     }
 
-    listConnections(projectId, token) {
+    listConnections(projectId, token, filter, limit, skip, sort) {
         checkProject(projectId);
         const endpoint = `${this.endpoint(projectId)}`;
         debug('listConnections() => %s', endpoint);
+        const query = {};
+        if (filter) query.filter = filter;
+        if (limit) query.limit = limit;
+        if (sort) query.sort = sort;
+        if (skip) query.skip = skip;
         return got
             .get(endpoint, {
                 headers: { Authorization: `Bearer ${token}` },
                 'user-agent': getUserAgent(),
+                searchParams: query,
             }).json()
             .then((result) => ({ success: true, result }))
             .catch((err) => constructError(err));
@@ -67,13 +73,32 @@ module.exports = class Connections {
             .catch((err) => constructError(err));
     }
 
-    listConnectionsTypes(token) {
+    deleteConnection(projectId, token, connectionName) {
+        checkProject(projectId);
+        const endpoint = `${this.endpoint(projectId)}/${encodeURIComponent(connectionName)}`;
+        debug('deleteConnection(%s) => %s', connectionName, endpoint);
+        return got
+            .delete(endpoint, {
+                headers: { Authorization: `Bearer ${token}` },
+                'user-agent': getUserAgent(),
+            }).json()
+            .then((result) => ({ success: true, result }))
+            .catch((err) => constructError(err));
+    }
+
+    listConnectionsTypes(token, filter, limit, skip, sort) {
         const endpoint = `${this.cortexUrl}/fabric/v4/connectiontypes`;
         debug('listConnectionsTypes() => %s', endpoint);
+        const query = {};
+        if (filter) query.filter = filter;
+        if (limit) query.limit = limit;
+        if (sort) query.sort = sort;
+        if (skip) query.skip = skip;
           return got
             .get(endpoint, {
                 headers: { Authorization: `Bearer ${token}` },
                 'user-agent': getUserAgent(),
+                searchParams: query,
             }).json()
             .then((result) => ({ success: true, result }))
             .catch((err) => constructError(err));

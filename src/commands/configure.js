@@ -25,6 +25,7 @@ const {
     defaultConfig,
     generateJwt,
     loadProfile,
+    durationRegex,
 } = require('../config');
 const { printSuccess, printError } = require('./utils');
 
@@ -43,8 +44,8 @@ module.exports.ConfigureCommand = class {
         this.program = program;
     }
 
-    async execute() {
-        const { profile, file, project } = this.program.opts();
+    async execute(options) {
+        const { profile, file, project } = options;
         const config = readConfig();
         const profileName = profile || _.get(config, 'currentProfile', 'default');
 
@@ -52,7 +53,6 @@ module.exports.ConfigureCommand = class {
         console.log(`Configuring profile ${chalk.green.bold(profileName)}:`);
 
         const cmd = this;
-//        co(function* () {
             try {
                 let patData = null;
                 if (file) {
@@ -67,11 +67,9 @@ module.exports.ConfigureCommand = class {
                 }
                 cmd.saveConfig(config, profileName, patData, project);
                 console.log(`Configuration for profile ${chalk.green.bold(profileName)} saved.`);
-                // process.exit(0); //
             } catch (err) {
                 printError(err);
             }
- //       });
     }
 
     saveConfig(config, profileName, {
@@ -140,8 +138,7 @@ module.exports.ListProfilesCommand = class {
         this.program = program;
     }
 
-    execute() {
-        const options = this.program.opts();
+    execute(options) {
         const config = readConfig();
         if (config === undefined) {
             printError('Configuration not found.  Please run "cortex configure".', options);
@@ -171,6 +168,9 @@ module.exports.GetAccessToken = class {
     async execute(options) {
         const profile = await loadProfile(options.profile);
         const ttl = options.ttl || '1d';
+        if (!durationRegex.test(ttl)) {
+            printError(`Invalid --ttl "${ttl}" must be a number followed by ms,s,m,h,d,w,M,y`);
+        }
         debug('%s.getAccesToken', profile.name);
         const jwt = await generateJwt(profile, ttl);
         return printSuccess(jwt, options);
@@ -182,12 +182,14 @@ module.exports.PrintEnvVars = class {
         this.program = program;
     }
 
-    async execute() {
+    async execute(options) {
         try {
             const vars = [];
-            const options = this.program.opts();
             const profile = await loadProfile(options.profile, false);
             const ttl = options.ttl || '1d';
+            if (!durationRegex.test(ttl)) {
+                printError(`Invalid --ttl "${ttl}" must be a number followed by ms,s,m,h,d,w,M,y`);
+            }
             const jwt = await generateJwt(profile, ttl);
             vars.push(`export CORTEX_TOKEN=${jwt}`);
             vars.push(`export CORTEX_URI=${profile.url}`);

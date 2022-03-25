@@ -49,11 +49,14 @@ module.exports = class Catalog {
             .catch((err) => constructError(err));
     }
 
-    listSkills(projectId, token, status = false) {
+    listSkills(projectId, token, query, filter, limit, skip, sort) {
         checkProject(projectId);
         debug('listSkills() => %s', this.endpoints.skills(projectId));
-        const query = {};
-        if (status) query.status = true;
+        if (filter) query.filter = filter;
+        if (limit) query.limit = limit;
+        if (sort) query.sort = sort;
+        if (skip) query.skip = skip;
+
         return got
             .get(this.endpoints.skills(projectId), {
                 headers: { Authorization: `Bearer ${token}` },
@@ -128,24 +131,35 @@ module.exports = class Catalog {
             .catch((err) => constructError(err));
     }
 
-    listAgents(projectId, token) {
+    listAgents(projectId, token, filter, limit, skip, sort) {
         checkProject(projectId);
         const endpoint = this.endpoints.agents(projectId);
         debug('listAgents() => %s', endpoint);
+        const query = {};
+        if (filter) query.filter = filter;
+        if (limit) query.limit = limit;
+        if (sort) query.sort = sort;
+        if (skip) query.skip = skip;
         return got
             .get(endpoint, {
                 headers: { Authorization: `Bearer ${token}` },
                 'user-agent': getUserAgent(),
+                searchParams: query,
             })
             .json()
             .then((agentResp) => ({ success: true, ...agentResp }))
             .catch((err) => constructError(err));
     }
 
-    listServices(projectId, token, agentName) {
+    listServices(projectId, token, agentName, filter, limit, skip, sort) {
         // TODO removed profile should I use that as the URL ??
         checkProject(projectId);
         debug('listServices() using describeAgent');
+        const query = {};
+        if (filter) query.filter = filter;
+        if (limit) query.limit = limit;
+        if (sort) query.sort = sort;
+        if (skip) query.skip = skip;
         return this.describeAgent(projectId, token, agentName).then((response) => {
             if (response.success) {
                 const urlBase = `${this.endpoints.agents(projectId)}/${encodeURIComponent(agentName)}/services`;
@@ -202,6 +216,34 @@ module.exports = class Catalog {
             .catch((err) => constructError(err));
     }
 
+    deployAgent(projectId, token, agentName, verbose = false) {
+        checkProject(projectId);
+        const endpoint = `${this.endpoints.agents(projectId)}/${encodeURIComponent(agentName)}/deploy`;
+        debug('deployAgent(%s) => %s', agentName, endpoint);
+        return got
+            .get(endpoint, {
+                headers: { Authorization: `Bearer ${token}` },
+                'user-agent': getUserAgent(),
+                searchParams: { verbose },
+            }).json()
+            .then((res) => ({ ...res }))
+            .catch((err) => constructError(err));
+    }
+
+    unDeployAgent(projectId, token, agentName, verbose = false) {
+        checkProject(projectId);
+        const endpoint = `${this.endpoints.agents(projectId)}/${encodeURIComponent(agentName)}/undeploy`;
+        debug('undeployAgent(%s) => %s', agentName, endpoint);
+        return got
+            .get(endpoint, {
+                headers: { Authorization: `Bearer ${token}` },
+                'user-agent': getUserAgent(),
+                searchParams: { verbose },
+            }).json()
+            .then((res) => ({ ...res }))
+            .catch((err) => constructError(err));
+    }
+
     saveType(projectId, token, types) {
         checkProject(projectId);
         const endpoint = `${this.endpoints.types(projectId)}`;
@@ -232,14 +274,21 @@ module.exports = class Catalog {
             .catch((err) => constructError(err));
     }
 
-    listTypes(projectId, token) {
+    listTypes(projectId, token, filter, limit, skip, sort) {
         checkProject(projectId);
         const endpoint = `${this.endpoints.types(projectId)}`;
         debug('listTypes() => %s', endpoint);
+        const query = {};
+        if (filter) query.filter = filter;
+        if (limit) query.limit = limit;
+        if (sort) query.sort = sort;
+        if (skip) query.skip = skip;
+
         return got
             .get(endpoint, {
                 headers: { Authorization: `Bearer ${token}` },
                 'user-agent': getUserAgent(),
+                searchParams: query,
             })
             .json()
             .then((types) => ({ success: true, ...types }))
@@ -353,14 +402,21 @@ module.exports = class Catalog {
             .catch((err) => constructError(err));
     }
 
-    listMissions(projectId, token, campaign) {
+    listMissions(projectId, token, campaign, filter, limit, skip, sort) {
         checkProject(projectId);
         const endpoint = `${this.endpoints.campaigns(projectId)}${campaign}/missions`;
         debug('listMissions() => %s', endpoint);
+        const query = {};
+        if (filter) query.filter = filter;
+        if (limit) query.limit = limit;
+        if (sort) query.sort = sort;
+        if (skip) query.skip = skip;
+
         return got
             .get(endpoint, {
                 headers: { Authorization: `Bearer ${token}` },
                 'user-agent': getUserAgent(),
+                searchParams: query,
             })
             .json()
             .then((res) => ({ success: true, data: res }))
@@ -483,4 +539,32 @@ module.exports = class Catalog {
     //             return constructError(err);
     //         });
     // }
+
+    deleteSkill(projectId, token, skillName) {
+        checkProject(projectId);
+        const endpoint = `${this.endpoints.skills(projectId)}/${encodeURIComponent(skillName)}`;
+        debug('deleteSkill(%s) => %s', skillName, endpoint);
+        return got
+            .delete(endpoint, {
+                headers: { Authorization: `Bearer ${token}` },
+                'user-agent': getUserAgent(),
+            })
+            .json()
+            .then((skill) => skill)
+            .catch((err) => constructError(err));
+    }
+
+    deleteAgent(projectId, token, agentName) {
+        checkProject(projectId);
+        const endpoint = `${this.endpoints.agents(projectId)}/${encodeURIComponent(agentName)}`;
+        debug('deleteAgent(%s) => %s', agentName, endpoint);
+        return got
+            .delete(endpoint, {
+                headers: { Authorization: `Bearer ${token}` },
+                'user-agent': getUserAgent(),
+            })
+            .json()
+            .then((agent) => ({ success: true, agent }))
+            .catch((err) => constructError(err));
+    }
 };

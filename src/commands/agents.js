@@ -21,10 +21,9 @@ const moment = require('moment');
 const { loadProfile } = require('../config');
 const Catalog = require('../client/catalog');
 const Agents = require('../client/agents');
-const { LISTTABLEFORMAT } = require('./utils');
-
 const {
- printSuccess, printError, filterObject, parseObject, printTable, formatValidationPath,
+    printSuccess, printError, filterObject, parseObject, printTable, formatValidationPath,
+    LISTTABLEFORMAT, DEPENDENCYTABLEFORMAT,
 } = require('./utils');
 
 module.exports.SaveAgentCommand = class SaveAgentCommand {
@@ -35,7 +34,9 @@ module.exports.SaveAgentCommand = class SaveAgentCommand {
     async execute(agentDefinition, options) {
         const profile = await loadProfile(options.profile);
         debug('%s.executeSaveAgent(%s)', profile.name, agentDefinition);
-
+        if (!fs.existsSync(agentDefinition)) {
+            printError(`File does not exist at: ${agentDefinition}`);
+        }
         const agentDefStr = fs.readFileSync(agentDefinition);
         const agent = parseObject(agentDefStr, options);
         debug('%o', agent);
@@ -74,12 +75,11 @@ module.exports.ListAgentsCommand = class ListAgentsCommand {
         debug('%s.executeListAgents()', profile.name);
 
         const catalog = new Catalog(profile.url);
-        catalog.listAgents(options.project || profile.project, profile.token).then((response) => {
+        catalog.listAgents(options.project || profile.project, profile.token, options.filter, options.limit, options.skip, options.sort).then((response) => {
             if (response.success) {
                 let result = response.agents;
-                if (options.query) result = filterObject(result, options);
-
                 if (options.json) {
+                    if (options.query) result = filterObject(result, options);
                     printSuccess(JSON.stringify(result, null, 2), options);
                 } else {
                     printTable(LISTTABLEFORMAT, result, (o) => ({ ...o, updatedAt: o.updatedAt ? moment(o.updatedAt).fromNow() : '-' }));
@@ -150,6 +150,9 @@ module.exports.InvokeAgentServiceCommand = class {
                 printError(`Failed to parse params: ${options.params} Error: ${e}`, options);
             }
         } else if (options.paramsFile) {
+            if (!fs.existsSync(options.paramsFile)) {
+                printError(`File does not exist at: ${options.paramsFile}`);
+            }
             const paramsStr = fs.readFileSync(options.paramsFile);
             params = parseObject(paramsStr, options);
         }
@@ -240,8 +243,9 @@ module.exports.ListActivationsCommand = class {
         if (options.agentName) queryParams.agentName = options.agentName;
         if (options.skillName) queryParams.skillName = options.skillName;
         if (options.limit) queryParams.limit = options.limit;
-        if (options.offset) queryParams.offset = options.offset;
+        if (options.offset) queryParams.offset = options.skip;
         if (options.sort) queryParams.sort = _.toLower(options.sort);
+        if (options.filter) queryParams.sort = _.toLower(options.filter);
 
         agents.listActivations(options.project || profile.project, profile.token, queryParams).then((response) => {
             if (response.success) {
@@ -294,10 +298,11 @@ module.exports.ListServicesCommand = class ListServicesCommand {
         debug('%s.listServices(%s)', profile.name, agentName);
 
         const catalog = new Catalog(profile.url);
-        catalog.listServices(options.project || profile.project, profile.token, agentName, profile).then((response) => {
+        catalog.listServices(options.project || profile.project, profile.token, agentName, profile, options.filter, options.limit, options.skip, options.sort).then((response) => {
             if (response.success) {
-                const result = filterObject(response.services, options);
+                let result = response.services;
                 if (options.json) {
+                    if (options.query) result = filterObject(result, options);
                     printSuccess(JSON.stringify(result, null, 2), options);
                 } else {
                     const tableSpec = [
@@ -326,11 +331,12 @@ module.exports.ListAgentSnapshotsCommand = class {
         debug('%s.listAgentSnapshots(%s)', profile.name, agentName);
 
         const agents = new Agents(profile.url);
-        agents.listAgentSnapshots(options.project || profile.project, profile.token, agentName)
+        agents.listAgentSnapshots(options.project || profile.project, profile.token, agentName, options.filter, options.limit, options.skip, options.sort)
             .then((response) => {
             if (response.success) {
-                const result = filterObject(response.result.snapshots, options);
+                let result = response.result.snapshots;
                 if (options.json) {
+                    if (options.query) result = filterObject(result, options);
                     printSuccess(JSON.stringify(result, null, 2), options);
                 } else {
                     const tableSpec = [
@@ -412,5 +418,82 @@ module.exports.CreateAgentSnapshotCommand = class {
             .catch((err) => {
                 printError(`Failed to create agent snapshot ${agentName}: ${err.status} ${err.message}`, options);
             });
+    }
+};
+
+module.exports.DeleteAgentCommand = class DeleteAgentCommand {
+    constructor(program) {
+        this.program = program;
+    }
+
+    async execute(agentName, options) {
+        const profile = await loadProfile(options.profile);
+        debug('%s.executeDeleteAgent(%s)', profile.name, agentName);
+        const catalog = new Catalog(profile.url);
+        catalog.deleteAgent(options.project || profile.project, profile.token, agentName)
+            .then((response) => {
+                if (response.success) {
+                    const result = filterObject(response, options);
+                    return printSuccess(JSON.stringify(result, null, 2), options);
+                }
+                if (response.status === 403) { // has dependencies
+                    const tableFormat = DEPENDENCYTABLEFORMAT;
+                    printError(`Agent deletion failed: ${response.message}.`, options, false);
+                    return printTable(tableFormat, response.details);
+                }
+                return printError(`Agent deletion failed: ${response.status} ${response.message}.`, options);
+            })
+            .catch((err) => {
+                printError(`Failed to delete agent: ${err.status} ${err.message}`, options);
+            });
+    }
+};
+
+module.exports.DeployAgentCommand = class DeployAgentCommand {
+    constructor(program) {
+        this.program = program;
+    }
+
+    async execute(agentNames, options) {
+        const profile = await loadProfile(options.profile);
+        const catalog = new Catalog(profile.url);
+        await Promise.all(agentNames.map(async (agentName) => {
+            debug('%s.executeDeployAgent(%s)', profile.name, agentName);
+            try {
+                const response = await catalog.deployAgent(options.project || profile.project, profile.token, agentName, options.verbose);
+                if (response.success) {
+                    printSuccess(`Deployed Agent ${agentName}: ${response.message}`, options);
+                } else {
+                    printError(`Failed to deploy Agent ${agentName}: ${response.message}`, options);
+                }
+            } catch (err) {
+                printError(`Failed to deploy Agent ${agentName}: ${err.status} ${err.message}`, options);
+            }
+        }));
+    }
+};
+
+
+module.exports.UndeployAgentCommand = class UndeployAgentCommand {
+    constructor(program) {
+        this.program = program;
+    }
+
+    async execute(agentNames, options) {
+        const profile = await loadProfile(options.profile);
+        const catalog = new Catalog(profile.url);
+        await Promise.all(agentNames.map(async (agentName) => {
+            debug('%s.executeUndeployAgent(%s)', profile.name, agentName);
+            try {
+                const response = await catalog.unDeployAgent(options.project || profile.project, profile.token, agentName, options.verbose);
+                if (response.success) {
+                    printSuccess(`Undeploy agent ${agentName}: ${response.message}`, options);
+                } else {
+                    printError(`Failed to Undeploy agent ${agentName}: ${response.message}`, options);
+                }
+            } catch (err) {
+                printError(`Failed to Undeploy agent ${agentName}: ${err.status} ${err.message}`, options);
+            }
+        }));
     }
 };

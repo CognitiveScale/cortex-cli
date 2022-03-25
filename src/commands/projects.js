@@ -61,13 +61,14 @@ module.exports.ListProjectsCommand = class ListProjectsCommand {
     async execute(options) {
         const profile = await loadProfile(options.profile);
         debug('%s.executeListProjects()', profile.name);
-
         const cli = new ApiServerClient(profile.url);
         try {
-        const response = await cli.listProjects(profile.token);
+            const sortParam = (options.sort || '{}').replace(/"/g, '\'');
+            const filterParam = (options.filter || '{}').replace(/"/g, '\'');
+            const response = await cli.listProjects(profile.token, filterParam, options.limit, options.skip, sortParam);
             let result = response;
-            if (options.query) result = filterObject(result, options);
             if (options.json) {
+                if (options.query) result = filterObject(result, options);
                 printSuccess(JSON.stringify(result, null, 2), options);
             } else {
                 const tableSpec = [

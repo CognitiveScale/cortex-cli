@@ -39,6 +39,20 @@ module.exports = class Models {
             .catch((err) => constructError(err));
     }
 
+    updateModelStatus(projectId, token, modelName, status) {
+        checkProject(projectId);
+        const endpoint = `${this.endpointV4(projectId)}/${modelName}/${status}`;
+        debug('updateModelStatus(%s) => %s', modelName, status, endpoint);
+        return got
+            .post(endpoint, {
+                headers: { Authorization: `Bearer ${token}` },
+                'user-agent': getUserAgent(),
+                json: {},
+            }).json()
+            .then((res) => ({ success: true, message: res }))
+            .catch((err) => constructError(err));
+    }
+
     deleteModel(projectId, token, modelName) {
         checkProject(projectId);
         const endpoint = `${this.endpointV4(projectId)}/${encodeURIComponent(modelName)}`;
@@ -67,28 +81,41 @@ module.exports = class Models {
             .catch((err) => constructError(err));
     }
 
-    listModels(projectId, offset, limit, tags, token) {
+    listModels(projectId, skip, limit, filter, sort, tags, token) {
         checkProject(projectId);
-        const endpoint = `${this.endpointV4(projectId)}?skip=${offset}&limit=${limit}${tags ? `&tags=${tags}` : ''}`;
+        const endpoint = `${this.endpointV4(projectId)}`;
         debug('listModels() => %s', endpoint);
+        const query = {};
+        if (filter) query.filter = filter;
+        if (limit) query.limit = limit;
+        if (sort) query.sort = sort;
+        if (skip) query.skip = skip;
+        if (tags) query.tags = tags;
         return got
             .get(endpoint, {
                 headers: { Authorization: `Bearer ${token}` },
                 'user-agent': getUserAgent(),
+                searchParams: query,
             })
             .json()
             .then((modelsResp) => ({ success: true, ...modelsResp }))
             .catch((err) => constructError(err));
     }
 
-    listModelRuns(projectId, modelName, token) {
+    listModelRuns(projectId, modelName, token, filter, limit, skip, sort) {
         checkProject(projectId);
         const endpoint = `${this.endpointV4(projectId)}/${modelName}/experiments/runs`;
         debug('listModels() => %s', endpoint);
+        const query = {};
+        if (filter) query.filter = filter;
+        if (limit) query.limit = limit;
+        if (sort) query.sort = sort;
+        if (skip) query.skip = skip;
         return got
             .get(endpoint, {
                 headers: { Authorization: `Bearer ${token}` },
                 'user-agent': getUserAgent(),
+                searchParams: query,
             })
             .json()
             .then((modelsResp) => ({ success: true, ...modelsResp }))

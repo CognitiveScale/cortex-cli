@@ -35,18 +35,21 @@ module.exports.constructError = (error) => {
         errorText = error.message;
     }
     let details;
-
+    let respCode;
     // if JSON was returned, look for either a message or error in it
     try {
         const resp = errResp ? JSON.parse(errorText) : {};
+        respCode = resp.code;
         if (resp.message || resp.error) errorText = resp.message || resp.error;
         // eslint-disable-next-line prefer-destructuring
         details = resp.details;
     } catch (e) {
         // Guess it wasn't JSON!
     }
+    // todo make figuring out the status code more consistent? this might be a holdover from request vs got?
+    const status = _.get(errResp, 'statusCode') || respCode || error.code || error.status || '';
     return {
- success: false, message: errorText, details, status: error.status || error.code || _.get(errResp, 'statusCode') || '',
+ success: false, message: errorText, details, status,
 };
 };
 
@@ -72,7 +75,8 @@ module.exports.printError = (message, options, exit = true) => {
     } else {
         console.error(message);
     }
-    if (exit) {
+    // Don't exit when testing as this breaks negative unit tests
+    if (exit && _.toLower(process.env.NODE_ENV) !== 'test') {
         process.exit(1);
     }
 };
@@ -81,6 +85,15 @@ module.exports.filterObject = (obj, options) => {
     if (options.query) {
         debug(`filtering results with query: ${options.query}`);
         return jmsepath.search(obj, options.query);
+    }
+    return obj;
+};
+
+module.exports.filterListObject = (obj, options) => {
+    const { map, pick, partialRight } = _;
+    if (options.query) {
+        debug(`filtering results with query: ${options.query}`);
+        return map(obj, partialRight(pick, options.query.split(',')));
     }
     return obj;
 };
@@ -302,7 +315,11 @@ module.exports.LISTTABLEFORMAT = [
     { column: 'Description', field: 'description', width: 50 },
     { column: 'Modified', field: 'updatedAt', width: 26 },
     { column: 'Author', field: 'createdBy', width: 25 },
+];
 
+module.exports.DEPENDENCYTABLEFORMAT = [
+    { column: 'Dependency Name', field: 'name', width: 60 },
+    { column: 'Dependency Type', field: 'type', width: 40 },
 ];
 
 module.exports.RUNTABLEFORMAT = [
@@ -310,4 +327,25 @@ module.exports.RUNTABLEFORMAT = [
     { column: 'Experiment Name', field: 'experimentName', width: 40 },
     { column: 'Took', field: 'took', width: 50 },
     { column: 'Modified', field: '_updatedAt', width: 26 },
+];
+
+module.exports.SESSIONTABLEFORMAT = [
+    { column: 'Session ID', field: 'sessionId', width: 45 },
+    { column: 'TTL', field: 'ttl', width: 15 },
+    { column: 'Description', field: 'description', width: 70 },
+];
+
+module.exports.isNumeric = (value) => /^-?\d+$/.test(value);
+
+module.exports.CONNECTIONTABLEFORMAT = [
+    { column: 'Name', field: 'name', width: 40 },
+    { column: 'Title', field: 'title', width: 50 },
+    { column: 'Description', field: 'description', width: 50 },
+    { column: 'Connection Type', field: 'connectionType', width: 25 },
+    { column: 'Created On', field: 'createdAt', width: 26 },
+];
+
+module.exports.EXTERNALROLESFORMAT = [
+    { column: 'Group', field: 'group' },
+    { column: 'Roles', field: 'roles' },
 ];

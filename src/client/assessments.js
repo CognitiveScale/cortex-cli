@@ -32,7 +32,7 @@ module.exports = class Assessments {
         const url = `${this.endpointApiV4}/tree/${project}/${type}/${encodeURIComponent(name)}?${querystring.stringify({ missing })}`;
         debug('dependencyTree => %s', url);
         const body = {
-            headers: { Authorization: `Bearer ${token}` },
+            headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
             'user-agent': getUserAgent(),
         };
         if (json) {
@@ -45,13 +45,15 @@ module.exports = class Assessments {
             .catch((err) => constructError(err));
     }
 
-    queryResources(token, name, projectId, type, skip, limit) {
+    queryResources(token, name, projectId, type, skip, limit, filter, sort) {
         const url = `${this.endpointV4}/resources?${querystring.stringify({
             projectId, 
             name, 
             type, 
             skip, 
             limit,
+            filter,
+            sort,
         })}`;
         debug('queryResources => %s', url);
         return got
@@ -98,8 +100,10 @@ module.exports = class Assessments {
             .catch((err) => constructError(err));
     }
 
-    listAssessment(token, skip, limit) {
-        const url = `${this.endpointV4}/assessments?${querystring.stringify({ skip, limit })}`;
+    listAssessment(token, skip, limit, filter, sort) {
+        const url = `${this.endpointV4}/assessments?${querystring.stringify({
+            skip, limit, filter, sort,
+        })}`;
         debug('listAssessment => %s', url);
         return got
             .get(url, {

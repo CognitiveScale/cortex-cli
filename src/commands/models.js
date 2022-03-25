@@ -24,10 +24,10 @@ const moment = require('moment');
 const { loadProfile } = require('../config');
 const Models = require('../client/models');
 const Experiments = require('../client/experiments');
-const { LISTTABLEFORMAT, RUNTABLEFORMAT } = require('./utils');
+const { LISTTABLEFORMAT, RUNTABLEFORMAT, DEPENDENCYTABLEFORMAT } = require('./utils');
 
 const {
-    printSuccess, printError, filterObject, parseObject, printTable, formatValidationPath,
+    printSuccess, printError, filterObject, parseObject, printTable, formatValidationPath, fileExists,
 } = require('./utils');
 
 module.exports.SaveModelCommand = class SaveModelCommand {
@@ -38,7 +38,9 @@ module.exports.SaveModelCommand = class SaveModelCommand {
     async execute(modelDefinition, options) {
         const profile = await loadProfile(options.profile);
         debug('%s.executeSaveModel(%s)', profile.name, modelDefinition);
-
+         if (!fileExists(modelDefinition)) {
+            printError(`File does not exist at: ${modelDefinition}`);
+        }
         const modelDefStr = fs.readFileSync(modelDefinition);
         const model = parseObject(modelDefStr, options);
         debug('%o', model);
@@ -77,12 +79,12 @@ module.exports.ListModelsCommand = class ListModelsCommand {
         const profile = await loadProfile(options.profile);
         debug('%s.executeListModels()', profile.name);
         const models = new Models(profile.url);
-        models.listModels(options.project || profile.project, options.offset, options.limit, options.tags, profile.token).then((response) => {
+        models.listModels(options.project || profile.project, options.skip, options.limit, options.filter, options.sort, options.tags, profile.token).then((response) => {
             if (response.success) {
                 let result = response.models;
-                if (options.query) result = filterObject(result, options);
 
                 if (options.json) {
+                    if (options.query) result = filterObject(result, options);
                     printSuccess(JSON.stringify(result, null, 2), options);
                 } else {
                     printTable(LISTTABLEFORMAT, result, (o) => ({ ...o, updatedAt: o.updatedAt ? moment(o.updatedAt).fromNow() : '-' }));
@@ -107,12 +109,12 @@ module.exports.ListModelRunsCommand = class ListModelsCommand {
         const profile = await loadProfile(options.profile);
         debug('%s.executeListModels()', profile.name);
         const models = new Models(profile.url);
-        models.listModelRuns(options.project || profile.project, modelName, profile.token).then((response) => {
+        models.listModelRuns(options.project || profile.project, modelName, profile.token, options.filter, options.limit, options.skip, options.sort).then((response) => {
             if (response.success) {
                 let result = response.runs;
-                if (options.query) result = filterObject(result, options);
 
                 if (options.json) {
+                    if (options.query) result = filterObject(result, options);
                     printSuccess(JSON.stringify(result, null, 2), options);
                 } else {
                     printTable(RUNTABLEFORMAT, result, (o) => ({ ...o, updatedAt: o.updatedAt ? moment(o.updatedAt).fromNow() : '-' }));
@@ -164,10 +166,14 @@ module.exports.DeleteModelCommand = class {
             .then((response) => {
                 if (response && response.success) {
                     const result = filterObject(response, options);
-                    printSuccess(JSON.stringify(result, null, 2), options);
-                } else {
-                    printError(`Model deletion failed: ${response.status} ${response.message}.`, options);
+                    return printSuccess(JSON.stringify(result, null, 2), options);
                 }
+                if (response.status === 403) { // has dependencies
+                    const tableFormat = DEPENDENCYTABLEFORMAT;
+                    printError(`Model deletion failed: ${response.message}.`, options, false);
+                    return printTable(tableFormat, response.details);
+                }
+                return printError(`Model deletion failed: ${response.status} ${response.message}.`, options);
             })
             .catch((err) => {
                 printError(`Failed to delete model: ${err.status} ${err.message}`, options);
@@ -175,28 +181,21 @@ module.exports.DeleteModelCommand = class {
     }
 };
 
-module.exports.PublishModelCommand = class PublishModelCommand {
+module.exports.UpdateModelStatusCommand = class UpdateModelStatusCommand {
     constructor(program) {
         this.program = program;
     }
 
-    async execute(modelName, options) {
+    async execute(modelName, options, status) {
         const profile = await loadProfile(options.profile);
         const models = new Models(profile.url);
-        debug('%s.executePublishModel(%s)', profile.name, modelName);
+        debug('%s.executeUpdateModelStatus(%s)', profile.name, modelName, status);
         try {
-            const getModelObj = await models.describeModel(options.project || profile.project, profile.token, modelName, options.verbose);
-            if (!getModelObj.success) {
-                printError(JSON.stringify(getModelObj));
-                return;
+            const updateModelStatusObj = await models.updateModelStatus(options.project || profile.project, profile.token, modelName, status);
+            if (!updateModelStatusObj.success) {
+                printError(JSON.stringify(updateModelStatusObj));
             }
-            const model = { ...getModelObj.model };
-            model.status = 'Published';
-            const saveModelObj = await models.saveModel(options.project || profile.project, profile.token, model);
-            if (!saveModelObj.success) {
-                printError(JSON.stringify(saveModelObj));
-            }
-            printSuccess('Model published', options);
+            printSuccess(`Model ${status}ed`, options);
         } catch (err) {
             printError(`Failed to publish model ${modelName}: ${err.status} ${err.message}`, options);
         }

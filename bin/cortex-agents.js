@@ -22,16 +22,19 @@ const program = require('commander');
 const { withCompatibilityCheck } = require('../src/compatibility');
 
 const {
-    SaveAgentCommand,
-    ListAgentsCommand,
-    DescribeAgentCommand,
-    InvokeAgentServiceCommand,
-    GetActivationCommand,
-    ListActivationsCommand,
-    ListServicesCommand,
-    ListAgentSnapshotsCommand,
-    DescribeAgentSnapshotCommand,
     CreateAgentSnapshotCommand,
+    DeleteAgentCommand,
+    DeployAgentCommand,
+    DescribeAgentCommand,
+    DescribeAgentSnapshotCommand,
+    GetActivationCommand,
+    InvokeAgentServiceCommand,
+    ListActivationsCommand,
+    ListAgentSnapshotsCommand,
+    ListAgentsCommand,
+    ListServicesCommand,
+    SaveAgentCommand,
+    UndeployAgentCommand,
 } = require('../src/commands/agents');
 
 program.name('cortex agents');
@@ -65,9 +68,28 @@ program
     .option('--project [project]', 'The project to use')
     .option('--json', 'Output results using JSON')
     .option('--query [query]', 'A JMESPath query to use in filtering the response data. Ignored if output format is not JSON.')
+    .option('--skip [skip]', 'Move the result cursor to this position before returning results.')
+    .option('--limit [limit]', 'Limit the number of rows returned')
+    .option('--filter [filter]', 'A Mongo style filter to use.')
+    .option('--sort [sort]', 'A Mongo style sort statement to use in the query.')
     .action(withCompatibilityCheck((options) => {
         try {
             new ListAgentsCommand(program).execute(options);
+        } catch (err) {
+            console.error(chalk.red(err.message));
+        }
+    }));
+
+// Deploy agent
+program
+    .command('deploy <agentNames...>')
+    .description('Deploy the agent resource to the cluster')
+    .option('--no-compat', 'Ignore API compatibility checks')
+    .option('--profile [profile]', 'The profile to use')
+    .option('--project [project]', 'The project to use')
+    .action(withCompatibilityCheck((agentNames, options) => {
+        try {
+            new DeployAgentCommand(program).execute(agentNames, options);
         } catch (err) {
             console.error(chalk.red(err.message));
         }
@@ -149,8 +171,9 @@ program
     .option('--correlationId [string]', 'Query activations with same correlationId')
     .option('--status [status]', 'Filters activations by status [complete|error].')
     .option('--limit [limit]', 'Limit number of records', '100')
-    .option('--offset [offset]', 'Skip number of records', '0')
+    .option('--skip [skip]', 'Skip number of records', '0')
     .option('--sort [asc|desc]', 'Sort the activations by start timestamp ascending (asc) or descending (desc)')
+    .option('--filter [filter]', 'A Mongo style filter to use.')
     .action(withCompatibilityCheck((options) => {
         try {
             new ListActivationsCommand(program).execute(options);
@@ -165,12 +188,32 @@ program
     .option('--no-compat', 'Ignore API compatibility checks')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
-        .option('--project [project]', 'The project to use')
+    .option('--project [project]', 'The project to use')
     .option('--json', 'Output results using JSON')
     .option('--query [query]', 'A JMESPath query to use in filtering the response data.')
-    .action(withCompatibilityCheck((agentName, options) => {
+    .option('--skip [skip]', 'Move the result cursor to this position before returning results.')
+    .option('--limit [limit]', 'Limit the number of rows returned')
+    .option('--filter [filter]', 'A Mongo style filter to use.')
+    .option('--sort [sort]', 'A Mongo style sort statement to use in the query.')
+
+        .action(withCompatibilityCheck((agentName, options) => {
         try {
             new ListServicesCommand(program).execute(agentName, options);
+        } catch (err) {
+            console.error(chalk.red(err.message));
+        }
+    }));
+
+// Undeploy agent
+program
+    .command('undeploy <agentNames...>')
+    .description('Undeploy the agent resource from the cluster')
+    .option('--no-compat', 'Ignore API compatibility checks')
+    .option('--profile [profile]', 'The profile to use')
+    .option('--project [project]', 'The project to use')
+    .action(withCompatibilityCheck((agentNames, options) => {
+        try {
+            new UndeployAgentCommand(program).execute(agentNames, options);
         } catch (err) {
             console.error(chalk.red(err.message));
         }
@@ -185,6 +228,10 @@ program
     .option('--project [project]', 'The project to use')
     .option('--json', 'Output results using JSON')
     .option('--query [query]', 'A JMESPath query to use in filtering the response data.')
+    .option('--skip [skip]', 'Move the result cursor to this position before returning results.')
+    .option('--limit [limit]', 'Limit the number of rows returned')
+    .option('--filter [filter]', 'A Mongo style filter to use.')
+    .option('--sort [sort]', 'A Mongo style sort statement to use in the query.')
     .action(withCompatibilityCheck((agentName, options) => {
         try {
             new ListAgentSnapshotsCommand(program).execute(agentName, options);
@@ -223,6 +270,22 @@ program
     .action(withCompatibilityCheck((snapshotDefinition, options) => {
         try {
             new CreateAgentSnapshotCommand(program).execute(snapshotDefinition, options);
+        } catch (err) {
+            console.error(chalk.red(err.message));
+        }
+    }));
+
+// Delete Agent
+program
+    .command('delete <agentName>')
+    .description('Delete an agent')
+    .option('--no-compat', 'Ignore API compatibility checks')
+    .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
+    .option('--profile [profile]', 'The profile to use')
+    .option('--project [project]', 'The project to use')
+    .action(withCompatibilityCheck((agentName, options) => {
+        try {
+            new DeleteAgentCommand(program).execute(agentName, options);
         } catch (err) {
             console.error(chalk.red(err.message));
         }
