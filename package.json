@@ -4,13 +4,12 @@
   "description": "Command line tool for CognitiveScale Cortex.",
   "main": "./bin/cortex.js",
   "scripts": {
-    "preinstall": "npx npm-force-resolutions && npx check-node-version -p --package",
     "prepare": "husky install",
     "pretest": "eslint bin/**/*.js src/**/*.js test/**/*.js && audit-ci -h --allowlist 1002475",
     "test": "NODE_ENV=test nyc mocha --recursive --exit --timeout 10000"
   },
   "engines": {
-    "node": ">=12.0.0"
+    "node": ">=14.0.0"
   },
   "repository": {
     "type": "git",
@@ -81,9 +80,5 @@
       "text",
       "html"
     ]
-  },
-  "resolutions": {
-    "mixin-deep": "2.0.1",
-    "cache-base": "2.0.2"
   }
 }
