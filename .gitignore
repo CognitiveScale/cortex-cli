@@ -97,3 +97,6 @@ test/cortex/local.json
 
 dist/
 cortex-cli-docs.md
+package/
+*.tgz
+npm-shrinkwrap.json
