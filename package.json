@@ -1,11 +1,10 @@
 {
   "name": "cortex-cli",
-  "version": "2.0.9",
+  "version": "2.0.10",
   "description": "Command line tool for CognitiveScale Cortex.",
   "main": "./bin/cortex.js",
   "scripts": {
-    "prepare": "husky install",
-    "preinstall": "npx --quiet force-resolutions",
+    "prepare": "husky install && npx --quiet force-resolutions",
     "prepack": "cp package-lock.json npm-shrinkwrap.json",
     "postpack": "rm npm-shrinkwrap.json",
     "pretest": "eslint bin/**/*.js src/**/*.js test/**/*.js && audit-ci -h --allowlist 1002475",
