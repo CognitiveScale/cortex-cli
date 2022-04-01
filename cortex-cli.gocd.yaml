@@ -48,6 +48,8 @@ pipelines:
               artifacts:
                 - build:
                     source: cortex-cli-docs.md
+                - build:
+                    source: cortex-cli.tgz
                 - test:
                     source: coverage
               tabs:
