@@ -1,14 +1,22 @@
 {
   "name": "cortex-cli",
-  "version": "2.0.7",
+  "version": "2.0.10",
   "description": "Command line tool for CognitiveScale Cortex.",
   "main": "./bin/cortex.js",
   "scripts": {
-    "preinstall": "npx npm-force-resolutions && npx check-node-version -p --package",
-    "prepare": "husky install",
+    "prepare": "husky install && npx --quiet force-resolutions",
+    "prepack": "cp package-lock.json npm-shrinkwrap.json",
+    "postpack": "rm npm-shrinkwrap.json",
     "pretest": "eslint bin/**/*.js src/**/*.js test/**/*.js && audit-ci -h",
     "test": "cross-env NODE_ENV=test nyc mocha --recursive --exit --timeout 10000 --ignore uploadDirectory.js"
   },
+  "files": [
+    "bin/*",
+    "src/*",
+    "README.md",
+    "npm-shrinkwrap.json",
+    "LICENSE"
+  ],
   "engines": {
     "node": ">=14.0.0"
   },
@@ -32,7 +40,6 @@
   "homepage": "https://github.com/CognitiveScale/cortex-cli",
   "dependencies": {
     "boxen": "5.1.2",
-    "cache-base": "^2.0.0",
     "chalk": "4.1.2",
     "cli-progress": "3.9.1",
     "cli-table3": "0.6.0",
@@ -78,7 +85,6 @@
     "eslint-config-airbnb-base": "15.0.0",
     "eslint-plugin-import": "2.25.4",
     "husky": "7.0.4",
-    "madge": "4.0.2",
     "mocha": "9.2.2",
     "mocked-env": "1.3.5",
     "nock": "13.2.4",
@@ -94,6 +100,7 @@
   },
   "resolutions": {
     "mixin-deep": "2.0.1",
-    "cache-base": "2.0.2"
+    "cache-base": "2.0.2",
+    "ansi-regex": "5.0.1"
   }
 }
