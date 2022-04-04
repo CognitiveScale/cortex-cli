@@ -42,9 +42,10 @@ module.exports.SaveAgentCommand = class SaveAgentCommand {
         debug('%o', agent);
 
         const catalog = new Catalog(profile.url);
-        catalog.saveAgent(options.project || profile.project, profile.token, agent).then((response) => {
+        const project = options.project || profile.project;
+        catalog.saveAgent(project, profile.token, agent).then((response) => {
             if (response.success) {
-                printSuccess('Agent saved', options);
+                printSuccess(`Agent "${agent.name}" saved in project "${project}"`, options);
             } else if (response.details) {
             console.log(`Failed to save agent: ${response.status} ${response.message}`);
             console.log('The following issues were found:');
