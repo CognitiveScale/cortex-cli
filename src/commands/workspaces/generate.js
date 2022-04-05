@@ -22,6 +22,8 @@ const _ = {
   mean: require('lodash/mean'),
 };
 
+const { WorkspaceConfigureCommand } = require('./configure');
+
 const { readConfig, loadProfile } = require('../../config');
 const { 
   printToTerminal, 
@@ -139,7 +141,7 @@ module.exports.WorkspaceGenerateCommand = class WorkspaceGenerateCommand {
           : 'Workspace generator is not configured. Running configuration now.\n',
         this.options, false,
       );
-      await (new module.exports.WorkspaceConfigureCommand(this.program)).execute({ refresh: true });
+      await (new WorkspaceConfigureCommand(this.program)).execute({ refresh: true });
       this.config = readConfig();
     }
 
