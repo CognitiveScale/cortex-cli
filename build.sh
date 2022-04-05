@@ -26,18 +26,21 @@ function local_docker(){
 
 # This runs inside a linux docker container
 function docker_build(){
+    echo ${VERSION} > version.txt
+    if [[ ${BRANCH} != "main" ]]; then
+      sed  -i '/version/s/.*,/'"  \"version\": \"$VERSION\",/" package.json
+    fi
     npm ci --unsafe-perm --userconfig=/root/.npmrc
     npm test
-    echo ${VERSION} > version.txt
     ./generate_docs.sh
     BRANCH=$(git symbolic-ref --short -q HEAD)
     npm prune --production
     if [[ ${BRANCH} = "main" ]]; then
 #        TODO this should maybe be done as part of the gocd pipeline?.. or maybe get in the habit of pushing alpha versions to npm just like we do for cortex-python?..
-        npm publish --registry=https://registry.npmjs.org/
+        npm publish --tag latest --registry=https://registry.npmjs.org/
     elif [[ ${BRANCH} = "develop" ]]; then
-        npm config set always-auth true
-#        npm publish --tag "${BRANCH}" --registry=https://cognitivescale.jfrog.io/artifactory/api/npm/npm-local/
+#        npm config set always-auth true
+        npm publish --tag beta --registry=https://registry.npmjs.org/
     fi
 
     npm pack cortex-cli
