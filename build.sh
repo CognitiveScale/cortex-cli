@@ -40,7 +40,7 @@ function docker_build(){
 #        npm publish --tag "${BRANCH}" --registry=https://cognitivescale.jfrog.io/artifactory/api/npm/npm-local/
     fi
 
-    npm pack cortex-cli
+    npm pack .
     mv cortex-cli-*.tgz cortex-cli.tgz
 }
 
