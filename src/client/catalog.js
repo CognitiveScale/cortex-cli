@@ -295,6 +295,20 @@ module.exports = class Catalog {
             .catch((err) => constructError(err));
     }
 
+    deleteType(projectId, token, typeName) {
+        checkProject(projectId);
+        const endpoint = `${this.endpoints.types(projectId)}/${encodeURIComponent(typeName)}`;
+        debug('deleteType(%s) => %s', typeName, endpoint);
+        return got
+            .delete(endpoint, {
+                headers: { Authorization: `Bearer ${token}` },
+                'user-agent': getUserAgent(),
+            })
+            .json()
+            .then((type) => ({ success: true, type }))
+            .catch((err) => constructError(err));
+    }
+
     exportCampaign(projectId, token, campaignName, deployable, path) {
         checkProject(projectId);
 

@@ -3,6 +3,7 @@
   "version": "2.0.10",
   "description": "Command line tool for CognitiveScale Cortex.",
   "main": "./bin/cortex.js",
+  "types": "./client/index.d.ts",
   "scripts": {
     "prepare": "husky install && npx --quiet force-resolutions",
     "prepack": "cp package-lock.json npm-shrinkwrap.json",
