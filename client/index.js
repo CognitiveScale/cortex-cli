@@ -1,0 +1,11 @@
+exports.Info = require('../src/client/info');
+exports.Users = require('../src/client/users');
+exports.Catalog = require('../src/client/catalog');
+exports.Agents = require('../src/client/agents');
+exports.Connections = require('../src/client/connections');
+exports.Content = require('../src/client/content');
+exports.Experiments = require('../src/client/experiments');
+exports.Models = require('../src/client/models');
+exports.Secrets = require('../src/client/secrets');
+exports.Sessions = require('../src/client/sessions');
+exports.AmpServer = require('../src/client/apiServerClient');

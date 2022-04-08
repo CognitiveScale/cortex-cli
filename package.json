@@ -3,6 +3,7 @@
   "version": "2.0.7",
   "description": "Command line tool for CognitiveScale Cortex.",
   "main": "./bin/cortex.js",
+  "types": "./client/index.d.ts",
   "scripts": {
     "preinstall": "npx npm-force-resolutions && npx check-node-version -p --package",
     "prepare": "husky install",
