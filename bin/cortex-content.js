@@ -46,6 +46,7 @@ program
     .option('--limit [limit]', 'Limit the number of rows returned')
     .option('--filter [filter]', 'A Mongo style filter to use.')
     .option('--sort [sort]', 'A Mongo style sort statement to use in the query.')
+    .option('--prefix [prefix]', 'Filter contents with the given prefix.')
     .action(withCompatibilityCheck((options) => {
         try {
             new ListContent(program).execute(options);

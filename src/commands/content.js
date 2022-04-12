@@ -31,7 +31,7 @@ module.exports.ListContent = class ListContent {
         debug('%s.listContent()', profile.name);
 
         const content = new Content(profile.url);
-        content.listContent(options.project || profile.project, profile.token).then((response) => {
+        content.listContent(options.project || profile.project, profile.token, options.prefix).then((response) => {
             if (response.success) {
                 if (options.query || options.json) {
                     const result = filterObject(response.message, options);
