@@ -40,19 +40,12 @@ program
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .option('--profile [profile]', 'The profile to use')
     .option('--project [project]', 'The project to use')
+    .option('--actionName [string]', 'Filter tasks by action name')
+    .option('--activationId [string]', 'filter tasks by activation id')
     .option('--json', 'Output results using JSON')
-    // .option('--query [query]', 'A JMESPath query to use in filtering the response data.')
-    // .option('--agentName [string]', 'Query activations by agentName')
-    // .option('--skillName [string]', 'Query activations by skillName')
-    // .option('--startBefore [timestamp]', 'Filters activations to include those that started before the specified timestamp.')
-    // .option('--startAfter [timestamp]', 'Filters activations to include those that started after the specified timestamp.')
-    // .option('--endBefore [timestamp]', 'Filters activations to include those that ended before the specified timestamp.')
-    // .option('--endAfter [timestamp]', 'Filters activations to include those that ended after the specified timestamp.')
-    // .option('--correlationId [string]', 'Query activations with same correlationId')
-    // .option('--status [status]', 'Filters activations by status [complete|error].')
-    // .option('--limit [limit]', 'Limit number of records', '100')
-    // .option('--offset [offset]', 'Skip number of records', '0')
-    // .option('--sort [asc|desc]', 'Sort the activations by start timestamp ascending (asc) or descending (desc)')
+    .option('--skillName [string]', 'Filter tasks by skill name')
+    // This is a client-side sort
+    .option('--sort [asc|desc]', 'sort tasks by start timestamp ascending (asc) or descending (desc)')
     .action(withCompatibilityCheck((options) => {
         try {
             new ListTasksCommand(program).execute(options);

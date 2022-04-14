@@ -161,7 +161,7 @@ module.exports.InvokeAgentServiceCommand = class {
         debug('params: %o', params);
 
         const agents = new Agents(profile.url);
-        agents.invokeAgentService(options.project || profile.project, profile.token, agentName, serviceName, params).then((response) => {
+        agents.invokeAgentService(options.project || profile.project, profile.token, agentName, serviceName, params, options.sync).then((response) => {
             if (response.success) {
                 const result = filterObject(response.result, options);
                 printSuccess(JSON.stringify(result, null, 2), options);
