@@ -1,4 +1,4 @@
-FROM python:3.9.10-buster
+FROM python:buster
 ADD . /app
 WORKDIR /app
 RUN pip install -r requirements.txt
