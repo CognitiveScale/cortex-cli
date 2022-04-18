@@ -16,6 +16,7 @@
 
 const debug = require('debug')('cortex:cli');
 const _ = require('lodash');
+const moment = require('moment');
 const { loadProfile } = require('../config');
 const Tasks = require('../client/tasks');
 
@@ -32,22 +33,45 @@ module.exports.ListTasksCommand = class {
         debug('%s.listTasks(%s)', profile.name);
 
         const tasks = new Tasks(profile.url);
-        // TODO validate param types?
-        const queryParams = { ...options };
+        const queryParams = {};
+
+        ['activationId', 'skillName', 'actionName', 'sort'].forEach((validParam) => {
+               if (options[validParam]) queryParams[validParam] = options[validParam];
+            });
 
         try {
             const response = await tasks.listTasks(projectId, profile.token, queryParams);
             if (response.success) {
-                const taskResponse = _.get(response, 'tasks', []);
-
-                if (options.json) {
-                    return printSuccess(JSON.stringify(taskResponse, null, 2), options);
+                let taskList = _.get(response, 'tasks', []);
+                switch (_.lowerCase(options.sort)) {
+                    case 'asc':
+                        taskList = _.sortBy(tasks, ['startTime']);
+                        break;
+                    case 'desc':
+                        taskList = _.reverse(_.sortBy(tasks, ['startTime']));
+                        break;
+                    default:
+                        // return as-is order
+                        break;
                 }
-                const result = {
-                    tasks: _.map(taskResponse, (t) => ({ name: t })),
-                };
-                const tableFormat = [{ column: 'Task Name', field: 'name', width: 70 }];
-                return handleTable(tableFormat, result.tasks, null, 'No tasks found');
+                if (options.json) {
+                    return printSuccess(JSON.stringify(taskList, null, 2), options);
+                }
+                const result = _.map(taskList, (t) => ({
+                        ...t,
+                        start: t.startTime ? moment(t.startTime).fromNow() : '-',
+                        took: t.endTime ? moment.duration(t.endTime - t.startTime, 'millis').humanize() : '-',
+                    }));
+                const tableFormat = [
+                    { column: 'Name', field: 'name', width: 40 },
+                    { column: 'Activation Id', field: 'activationId', width: 40 },
+                    { column: 'Skill Name', field: 'skillName', width: 30 },
+                    { column: 'Action Name', field: 'actionName', width: 30 },
+                    { column: 'Status', field: 'status', width: 20 },
+                    { column: 'Started', field: 'start', width: 25 },
+                    { column: 'Took', field: 'took', width: 25 },
+                ];
+                return handleTable(tableFormat, result);
             }
             return printError(`Failed to list tasks: ${response.message}`, options);
         } catch (err) {
@@ -92,7 +116,7 @@ module.exports.TaskLogsCommand = class TaskLogsCommand {
         try {
             const response = await tasks.taskLogs(options.project || profile.project, profile.token, taskName, options.verbose);
             if (response.success) {
-                return printSuccess(JSON.stringify(response.logs), options);
+                return printSuccess(response.logs, options);
             }
             return printError(`Failed to List Task Logs ${taskName}: ${response.message}`, options);
         } catch (err) {

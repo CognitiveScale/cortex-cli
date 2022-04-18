@@ -76,7 +76,8 @@ module.exports.printError = (message, options, exit = true) => {
     } else {
         console.error(message);
     }
-    if (exit) {
+    // Don't exit when testing as this breaks negative unit tests
+    if (exit && _.toLower(process.env.NODE_ENV) !== 'test') {
         process.exit(1);
     }
 };

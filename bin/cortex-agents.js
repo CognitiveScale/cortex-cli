@@ -126,6 +126,7 @@ program
     .option('--project [project]', 'The project to use')
     .option('--params [params]', 'JSON params to send to the action')
     .option('--params-file [paramsFile]', 'A file containing either JSON or YAML formatted params')
+    .option('--sync', 'Invoke the agent synchronously')
     .action(withCompatibilityCheck((agentName, serviceName, options) => {
         try {
             new InvokeAgentServiceCommand(program).execute(agentName, serviceName, options);

@@ -19,7 +19,7 @@ const os = require('os');
 const fs = require('fs');
 const path = require('path');
 const Joi = require('joi');
-const moment = require("moment");
+const moment = require('moment');
 const debug = require('debug')('cortex:config');
 const jose = require('jose-node-cjs-runtime');
 const { printError } = require('./commands/utils');
@@ -29,7 +29,7 @@ function configDir() {
     return process.env.CORTEX_CONFIG_DIR || path.join(os.homedir(), '.cortex');
 }
 
-const durationRegex = /^([.\d]+)([smhdwMy])$/;
+const durationRegex = /^([.\d]+)(ms|[smhdwMy])$/;
 async function generateJwt(profile, expiresIn = '2m') {
     const {
         username, issuer, audience, jwk,
