@@ -29,20 +29,12 @@ const Assessments = require('../client/assessments');
 
 const {
     printSuccess, printError, parseObject, printTable, filterObject,
-    validateOptions, OPTIONSTABLEFORMAT,
+    validateOptions, OPTIONSTABLEFORMAT, handleTable,
 } = require('./utils');
 
 const {
     transformDynamicParams,
 } = require('../parsers');
-
-const handleTable = (spec, data, transformer, noDataMessage) => {
-  if (!data || data.length === 0) {
-      printSuccess(noDataMessage);
-  } else {
-      printTable(spec, data, transformer);
-  }
-};
 
 module.exports.ListResourcesCommand = class {
     constructor(program) {

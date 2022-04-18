@@ -19,7 +19,7 @@ const debug = require('debug')('cortex:cli');
 const { loadProfile } = require('../config');
 const ApiServerClient = require('../client/apiServerClient');
 const {
- printSuccess, printError, filterObject, parseObject, printTable, validateOptions, OPTIONSTABLEFORMAT,
+ printSuccess, printError, filterObject, parseObject, printTable, validateOptions, OPTIONSTABLEFORMAT, handleTable,
 } = require('./utils');
 
 module.exports.CreateProjectCommand = class CreateProjectCommand {
@@ -83,7 +83,7 @@ module.exports.ListProjectsCommand = class ListProjectsCommand {
                     { column: 'Title', field: 'title', width: 50 },
                     { column: 'Description', field: 'description', width: 80 },
                 ];
-                printTable(tableSpec, result);
+                handleTable(tableSpec, result, null, 'No projects found');
             }
         } catch (err) {
             printError(`Failed to list projects: ${err.status} ${err.message}`, options);

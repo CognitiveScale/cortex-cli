@@ -20,7 +20,7 @@ const Catalog = require('../client/catalog');
 
 const _ = { get: require('lodash/get') };
 const {
- printSuccess, printError, filterObject, printTable, validateOptions, OPTIONSTABLEFORMAT,
+ printSuccess, printError, filterObject, printTable, validateOptions, OPTIONSTABLEFORMAT, handleTable,
 } = require('./utils');
 
 module.exports.ListCampaignsCommand = class ListCampaignsCommand {
@@ -53,7 +53,7 @@ module.exports.ListCampaignsCommand = class ListCampaignsCommand {
                     { column: 'Title', field: 'title', width: 50 },
                     { column: 'Description', field: 'description', width: 80 },
                 ];
-                printTable(tableSpec, result);
+                handleTable(tableSpec, result, null, 'No campaigns found');
             }
         } catch (err) {
             printError(`Failed to list campaigns: ${err.status} ${err.message}`, options);
@@ -242,7 +242,7 @@ module.exports.ListMissionsCommand = class ListMissionsCommand {
                         { column: 'Description', field: 'description', width: 80 },
                         { column: 'Status', field: 'lifecycleState', width: 30 },
                     ];
-                    printTable(tableSpec, data);
+                    handleTable(tableSpec, data, null, 'No missions found');
                 }
             });
         } catch (err) {

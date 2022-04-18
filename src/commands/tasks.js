@@ -19,7 +19,7 @@ const _ = require('lodash');
 const { loadProfile } = require('../config');
 const Tasks = require('../client/tasks');
 
-const { printSuccess, printError, printTable } = require('./utils');
+const { printSuccess, printError, handleTable } = require('./utils');
 
 module.exports.ListTasksCommand = class {
     constructor(program) {
@@ -47,7 +47,7 @@ module.exports.ListTasksCommand = class {
                     tasks: _.map(taskResponse, (t) => ({ name: t })),
                 };
                 const tableFormat = [{ column: 'Task Name', field: 'name', width: 70 }];
-                return printTable(tableFormat, result.tasks);
+                return handleTable(tableFormat, result.tasks, null, 'No tasks found');
             }
             return printError(`Failed to list tasks: ${response.message}`, options);
         } catch (err) {
