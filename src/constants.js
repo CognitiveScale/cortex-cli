@@ -66,6 +66,6 @@ module.exports.ALLOWED_QUERY_FIELDS = {
     },
 };
 
-module.exports.DEFAULT_LIST_LIMIT_COUNT = '100';
+module.exports.DEFAULT_LIST_LIMIT_COUNT = '20';
 
 module.exports.DEFAULT_LIST_SKIP_COUNT = '0';
