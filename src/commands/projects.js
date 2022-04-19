@@ -19,7 +19,7 @@ const debug = require('debug')('cortex:cli');
 const { loadProfile } = require('../config');
 const ApiServerClient = require('../client/apiServerClient');
 const {
- printSuccess, printError, filterObject, parseObject, printTable,
+ printSuccess, printError, filterObject, parseObject, printTable, validateOptions, OPTIONSTABLEFORMAT, handleTable,
 } = require('./utils');
 
 module.exports.CreateProjectCommand = class CreateProjectCommand {
@@ -58,9 +58,16 @@ module.exports.ListProjectsCommand = class ListProjectsCommand {
         this.program = program;
     }
 
+    // eslint-disable-next-line consistent-return
     async execute(options) {
         const profile = await loadProfile(options.profile);
         debug('%s.executeListProjects()', profile.name);
+        const { validOptions, errorDetails } = validateOptions(options, 'PROJECT');
+        if (!validOptions) {
+            const optionTableFormat = OPTIONSTABLEFORMAT;
+            printError('Project list failed.', options, false);
+            return printTable(optionTableFormat, errorDetails);
+        }
         const cli = new ApiServerClient(profile.url);
         try {
             const sortParam = (options.sort || '{}').replace(/"/g, '\'');
@@ -76,7 +83,7 @@ module.exports.ListProjectsCommand = class ListProjectsCommand {
                     { column: 'Title', field: 'title', width: 50 },
                     { column: 'Description', field: 'description', width: 80 },
                 ];
-                printTable(tableSpec, result);
+                handleTable(tableSpec, result, null, 'No projects found');
             }
         } catch (err) {
             printError(`Failed to list projects: ${err.status} ${err.message}`, options);

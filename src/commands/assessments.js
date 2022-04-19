@@ -20,6 +20,7 @@ const _ = {
     sortBy: require('lodash/sortBy'),
     flatten: require('lodash/flatten'),
     compact: require('lodash/compact'),
+    startsWith: require('lodash/startsWith'),
 };
 const debug = require('debug')('cortex:cli');
 const moment = require('moment');
@@ -28,28 +29,36 @@ const Assessments = require('../client/assessments');
 
 const {
     printSuccess, printError, parseObject, printTable, filterObject,
+    validateOptions, OPTIONSTABLEFORMAT, handleTable,
 } = require('./utils');
 
-const handleTable = (spec, data, transformer, noDataMessage) => {
-  if (!data || data.length === 0) {
-      printSuccess(noDataMessage);
-  } else {
-      printTable(spec, data, transformer);
-  }
-};
+const {
+    transformDynamicParams,
+} = require('../parsers');
 
 module.exports.ListResourcesCommand = class {
     constructor(program) {
         this.program = program;
     }
 
+    // eslint-disable-next-line consistent-return
     async execute(command) {
         const options = command;
         const profile = await loadProfile(options.profile);
         debug('%s.ListResourcesCommand()', profile.name);
-
+        let transformedFilter;
+        let transformedSort;
         const client = new Assessments(profile.url);
-        client.queryResources(profile.token, options.name, options.scope, options.type, options.skip, options.limit, options.filter, options.sort)
+        const { validOptions, errorDetails } = validateOptions(options, 'RESOURCE');
+        if (!validOptions) {
+            const optionTableFormat = OPTIONSTABLEFORMAT;
+            printError('Resource list failed.', options, false);
+            return printTable(optionTableFormat, errorDetails);
+        }
+        // add prefixes to the keys to query inside nested targetPath
+        if (options.filter) transformedFilter = transformDynamicParams(options.filter, 'resource.');
+        if (options.sort) transformedSort = transformDynamicParams(options.sort, '_id.');
+        client.queryResources(profile.token, options.name, options.scope, options.type, options.skip, options.limit, transformedFilter, transformedSort)
             .then((response) => {
                 if (response.success === false) throw response;
                 if (options.json) {
@@ -179,11 +188,18 @@ module.exports.ListAssessmentCommand = class {
         this.program = program;
     }
 
+    // eslint-disable-next-line consistent-return
     async execute(options) {
         const profile = await loadProfile(options.profile);
         debug('%s.ListAssessmentCommand()', profile.name);
 
         const client = new Assessments(profile.url);
+        const { validOptions, errorDetails } = validateOptions(options, 'ASSESSMENT');
+        if (!validOptions) {
+            const optionTableFormat = OPTIONSTABLEFORMAT;
+            printError('Assessment list failed.', options, false);
+            return printTable(optionTableFormat, errorDetails);
+        }
         client.listAssessment(profile.token, options.skip, options.limit, options.filter, options.sort)
             .then((response) => {
                 if (response.success === false) throw response;

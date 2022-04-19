@@ -22,6 +22,7 @@ const program = require('commander');
 const { parseObject, printError } = require('../src/commands/utils');
 
 const { withCompatibilityCheck } = require('../src/compatibility');
+const { DEFAULT_LIST_SKIP_COUNT, DEFAULT_LIST_LIMIT_COUNT } = require('../src/constants');
 
 const {
     ListMissionsCommand,
@@ -45,9 +46,9 @@ program
     .option('--profile [profile]', 'The profile to use')
     .option('--project [project]', 'The project to use')
     .option('--query [query]', 'A JMESPath query to use in filtering the response data. Ignored if output format is not JSON.')
-    .option('--skip [skip]', 'Move the result cursor to this position before returning results.')
-    .option('--limit [limit]', 'Limit the number of rows returned')
     .option('--filter [filter]', 'A Mongo style filter to use.')
+    .option('--limit [limit]', 'Limit number of records', DEFAULT_LIST_LIMIT_COUNT)
+    .option('--skip [skip]', 'Skip number of records', DEFAULT_LIST_SKIP_COUNT)
     .option('--sort [sort]', 'A Mongo style sort statement to use in the query.')
     .action(withCompatibilityCheck((campaignName, options) => {
         try {

@@ -26,6 +26,7 @@ const {
     ListProjectsCommand,
     DescribeProjectCommand,
 } = require('../src/commands/projects');
+const { DEFAULT_LIST_SKIP_COUNT, DEFAULT_LIST_LIMIT_COUNT } = require('../src/constants');
 
 program.name('cortex projects');
 program.description('Work with Cortex Projects');
@@ -60,9 +61,9 @@ program
     .option('--profile [profile]', 'The profile to use')
     .option('--json', 'Output results using JSON')
     .option('--query [query]', 'A JMESPath query to use in filtering the response data.')
-    .option('--skip [skip]', 'Move the result cursor to this position before returning results.')
-    .option('--limit [limit]', 'Limit the number of rows returned')
     .option('--filter [filter]', 'A Mongo style filter to use.')
+    .option('--limit [limit]', 'Limit number of records', DEFAULT_LIST_LIMIT_COUNT)
+    .option('--skip [skip]', 'Skip number of records', DEFAULT_LIST_SKIP_COUNT)
     .option('--sort [sort]', 'A Mongo style sort statement to use in the query.')
     .action(withCompatibilityCheck((options) => {
         try {

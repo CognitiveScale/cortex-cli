@@ -17,7 +17,7 @@ const debug = require('debug')('cortex:cli');
 const { loadProfile } = require('../config');
 const Users = require('../client/users');
 const {
- printSuccess, printError, filterObject, printTable,
+ printSuccess, printError, filterObject, handleTable,
 } = require('./utils');
 
 function createGrant(options) {
@@ -126,7 +126,7 @@ module.exports.UserListCommand = class {
                 if (options.json) {
                     printSuccess(JSON.stringify(result, null, 2), options);
                 } else {
-                    printTable([{ column: 'User', field: 'user' }], result.users.map((x) => ({ user: x })));
+                    handleTable([{ column: 'User', field: 'user' }], result.users.map((x) => ({ user: x })), null, 'No service users found');
                 }
             } else {
                 printError(`Failed to list service users : ${response.message}`, options);

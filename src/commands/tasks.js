@@ -19,7 +19,8 @@ const _ = require('lodash');
 const moment = require('moment');
 const { loadProfile } = require('../config');
 const Tasks = require('../client/tasks');
-const { printSuccess, printError, printTable } = require('./utils');
+
+const { printSuccess, printError, handleTable } = require('./utils');
 
 module.exports.ListTasksCommand = class {
     constructor(program) {
@@ -70,7 +71,7 @@ module.exports.ListTasksCommand = class {
                     { column: 'Started', field: 'start', width: 25 },
                     { column: 'Took', field: 'took', width: 25 },
                 ];
-                return printTable(tableFormat, result);
+                return handleTable(tableFormat, result);
             }
             return printError(`Failed to list tasks: ${response.message}`, options);
         } catch (err) {

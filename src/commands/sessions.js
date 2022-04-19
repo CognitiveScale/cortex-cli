@@ -22,7 +22,7 @@ const Sessions = require('../client/sessions');
 const { SESSIONTABLEFORMAT, formatValidationPath } = require('./utils');
 
 const {
-    printSuccess, printError, filterObject, parseObject, printTable,
+    printSuccess, printError, filterObject, parseObject, printTable, handleTable,
 } = require('./utils');
 
 module.exports.SaveSessionCommand = class SaveSessionCommand {
@@ -81,7 +81,7 @@ module.exports.ListSessionsCommand = class ListSessionsCommand {
                     if (options.query) result = filterObject(result, options);
                     printSuccess(JSON.stringify(result, null, 2), options);
                 } else {
-                    printTable(SESSIONTABLEFORMAT, result);
+                    handleTable(SESSIONTABLEFORMAT, result, null, 'No sessions found');
                 }
             } else {
                 printError(`Failed to list sessions: ${response.status} ${response.message}`, options);
