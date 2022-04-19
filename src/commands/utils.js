@@ -399,7 +399,10 @@ module.exports.validateOptions = (options, type) => {
                 errorDetails.push({ type: 'sort', message: `Invalid sort params. Allowed fields: ${ALLOWED_QUERY_FIELDS[type].sort}` });
             }
         } catch (err) {
-            errorDetails.push({ type: 'sort', message: `Invalid sort expression: ${err.message}` });
+            // check if a string of 'asc' or 'desc' is provided for backwards compatibility
+            if (!(_.lowerCase(sort).startsWith('desc') || _.lowerCase(sort).startsWith('asc'))) {
+                errorDetails.push({ type: 'sort', message: `Invalid sort expression: ${err.message}` });
+            }
         }
     }
     if ((limit && _.isNaN(Number(limit))) || Number(limit) <= 0) {
