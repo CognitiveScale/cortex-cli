@@ -25,6 +25,7 @@ const {
     CreateProjectCommand,
     ListProjectsCommand,
     DescribeProjectCommand,
+    DeleteProjectCommand,
 } = require('../src/commands/projects');
 const { DEFAULT_LIST_SKIP_COUNT, DEFAULT_LIST_LIMIT_COUNT } = require('../src/constants');
 
@@ -85,6 +86,22 @@ program
     .action(withCompatibilityCheck((projectName, options) => {
         try {
             new DescribeProjectCommand(program).execute(projectName, options);
+        } catch (err) {
+            console.error(chalk.red(err.message));
+        }
+    }));
+
+    // Delete Project
+program
+    .command('delete <projectName>')
+    .alias('d')
+    .description('Delete project')
+    .option('--no-compat', 'Ignore API compatibility checks')
+    .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
+    .option('--profile [profile]', 'The profile to use')
+    .action(withCompatibilityCheck((projectName, options) => {
+        try {
+            new DeleteProjectCommand(program).execute(projectName, options);
         } catch (err) {
             console.error(chalk.red(err.message));
         }

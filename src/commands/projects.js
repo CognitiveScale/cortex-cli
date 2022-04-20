@@ -111,3 +111,22 @@ module.exports.DescribeProjectCommand = class DescribeProjectCommand {
         }
     }
 };
+
+module.exports.DeleteProjectCommand = class DeleteProjectCommand {
+    constructor(program) {
+        this.program = program;
+    }
+
+    async execute(projectName, command) {
+        const options = command;
+        const profile = await loadProfile(options.profile);
+        debug('%s.executeDeleteProject(%s)', profile.name, projectName);
+        try {
+            const cli = new ApiServerClient(profile.url);
+            await cli.deleteProject(profile.token, projectName);
+            printSuccess(`Project ${projectName} deleted`, options);
+        } catch (err) {
+            printError(`Failed to delete project: ${err.message}`, options);
+        }
+    }
+};
