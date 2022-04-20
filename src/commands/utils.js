@@ -70,7 +70,7 @@ module.exports.printWarning = (message, options) => {
     }
 };
 
-module.exports.printError = (message, options, exit = true) => {
+function printError(message, options, exit = true) {
     if (!options || options.color === 'on') {
         console.error(chalk.red(message));
     } else {
@@ -80,7 +80,8 @@ module.exports.printError = (message, options, exit = true) => {
     if (exit && _.toLower(process.env.NODE_ENV) !== 'test') {
         process.exit(1);
     }
-};
+}
+module.exports.printError = printError;
 
 module.exports.filterObject = (obj, options) => {
     if (options.query) {
@@ -300,8 +301,7 @@ module.exports.deleteFile = deleteFolderRecursive;
 
 module.exports.checkProject = (projectId) => {
     if (_.isEmpty(projectId)) {
-        console.error(chalk.red('\'project\' is required, please provide using \'cortex configure\' or --project'));
-        process.exit(1);
+        printError('\'project\' is required, please provide using \'cortex configure\' or --project');
     }
 };
 

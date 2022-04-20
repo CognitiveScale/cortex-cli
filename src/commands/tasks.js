@@ -43,6 +43,9 @@ module.exports.ListTasksCommand = class {
             const response = await tasks.listTasks(projectId, profile.token, queryParams);
             if (response.success) {
                 let taskList = _.get(response, 'tasks', []);
+                if (_.isEmpty(taskList)) {
+                    return printSuccess('no tasks found');
+                }
                 switch (_.lowerCase(options.sort)) {
                     case 'asc':
                         taskList = _.sortBy(tasks, ['startTime']);
@@ -57,11 +60,17 @@ module.exports.ListTasksCommand = class {
                 if (options.json) {
                     return printSuccess(JSON.stringify(taskList, null, 2), options);
                 }
-                const result = _.map(taskList, (t) => ({
+                let result;
+                // Old response format
+                if (_.isString(taskList[0])) {
+                    result = _.map(taskList, (t) => ({ name: t }));
+                } else {
+                    result = _.map(taskList, (t) => ({
                         ...t,
                         start: t.startTime ? moment(t.startTime).fromNow() : '-',
-                        took: t.endTime ? moment.duration(t.endTime - t.startTime, 'millis').humanize() : '-',
+                        took: t.endTime ? moment.duration(t.endTime - t.startTime).humanize() : '-',
                     }));
+                }
                 const tableFormat = [
                     { column: 'Name', field: 'name', width: 40 },
                     { column: 'Activation Id', field: 'activationId', width: 40 },

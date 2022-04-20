@@ -15,7 +15,7 @@
  */
 
 const _ = require('lodash');
-const boxen = require('boxen');
+const Table = require('cli-table3');
 const chalk = require('chalk');
 const concat = require('lodash/fp/concat');
 const debug = require('debug')('cortex:cli');
@@ -66,14 +66,6 @@ function getRequiredVersion(profile) {
 }
 
 function notifyUpdate({ required = false, current, latest }) {
-    const opts = {
-        padding: 1,
-        margin: 1,
-        align: 'center',
-        borderColor: 'yellow',
-        borderStyle: 'round',
-    };
-
     const message = `Update ${required ? chalk.bold('required') : 'available'} ${
          chalk.dim(current)
          }${chalk.reset(' → ')
@@ -81,8 +73,17 @@ function notifyUpdate({ required = false, current, latest }) {
          }\nRun ${
          chalk.cyan(`npm i ${isInstalledGlobally ? '-g ' : ''}${pkg.name}@${latest}`)
          } to update`;
-
-    console.warn(boxen(message, opts));
+    const table = new Table({
+        chars: {
+            'top-left': '╭',
+            'top-right': '╮',
+            'bottom-left': '╰',
+            'bottom-right': '╯',
+        },
+        style: { head: [], border: [] },
+    });
+    table.push([message]);
+    console.warn(table.toString());
 }
 
 function upgradeAvailable(args) {
@@ -146,6 +147,7 @@ function withCompatibilityCheck(fn) {
 }
 
 module.exports = {
+    notifyUpdate,
     getCompatibility,
     withCompatibilityCheck,
 };
