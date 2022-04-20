@@ -1,5 +1,3 @@
-#!/usr/bin/env node
-
 /*
  * Copyright 2020 Cognitive Scale, Inc. All Rights Reserved.
  *
@@ -46,9 +44,9 @@ program
     .option('--skillName [string]', 'Filter tasks by skill name')
     // This is a client-side sort
     .option('--sort [asc|desc]', 'sort tasks by start timestamp ascending (asc) or descending (desc)')
-    .action(withCompatibilityCheck((options) => {
+    .action(withCompatibilityCheck(async (options) => {
         try {
-            new ListTasksCommand(program).execute(options);
+            await new ListTasksCommand(program).execute(options);
         } catch (err) {
             console.error(chalk.red(err.message));
         }
@@ -96,9 +94,9 @@ program
     .option('--no-compat', 'Ignore API compatibility checks')
     .option('--profile [profile]', 'The profile to use')
     .option('--project [project]', 'The project to use')
-    .action(withCompatibilityCheck((taskName, options) => {
+    .action(withCompatibilityCheck(async (taskName, options) => {
         try {
-            new TaskDeleteCommand(program).execute(taskName, options);
+            await new TaskDeleteCommand(program).execute(taskName, options);
         } catch (err) {
             console.error(chalk.red(err.message));
         }
@@ -107,4 +105,5 @@ program
 if (require.main === module) {
     program.showHelpAfterError().parseAsync(process.argv);
 }
+
 module.exports = program;
