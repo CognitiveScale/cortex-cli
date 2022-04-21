@@ -22,6 +22,8 @@ const Actions = require('../client/actions');
 
 const {
  printSuccess, printError, filterObject, parseObject, printTable, DEPENDENCYTABLEFORMAT, isNumeric,
+    validateOptions,
+    OPTIONSTABLEFORMAT, handleTable,
 } = require('./utils');
 
 module.exports.ListActionsCommand = class {
@@ -29,11 +31,18 @@ module.exports.ListActionsCommand = class {
         this.program = program;
     }
 
+    // eslint-disable-next-line consistent-return
     async execute(options) {
         const profile = await loadProfile(options.profile);
         debug('%s.executeListActions()', profile.name);
 
         const actions = new Actions(profile.url);
+        const { validOptions, errorDetails } = validateOptions(options, 'ACTION');
+        if (!validOptions) {
+            const optionTableFormat = OPTIONSTABLEFORMAT;
+            printError('Action list failed.', options, false);
+            return printTable(optionTableFormat, errorDetails);
+        }
         actions.listActions(options.project || profile.project, profile.token, options.filter, options.limit, options.skip, options.sort)
             .then((response) => {
                 if (response.success) {
@@ -50,7 +59,12 @@ module.exports.ListActionsCommand = class {
                             { column: 'Modified', field: 'updatedAt', width: 26 },
                             { column: 'Author', field: 'createdBy', width: 26 },
                         ];
-                        printTable(tableSpec, result, (o) => ({ ...o, updatedAt: o.updatedAt ? moment(o.updatedAt).fromNow() : '-' }));
+                        handleTable(
+                            tableSpec,
+                            result,
+                            (o) => ({ ...o, updatedAt: o.updatedAt ? moment(o.updatedAt).fromNow() : '-' }),
+                            'No actions found',
+                        );
                     }
                 } else {
                     printError(`Failed to list actions: ${response.status} ${response.message}`, options);

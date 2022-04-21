@@ -56,7 +56,6 @@ module.exports = class Catalog {
         if (limit) query.limit = limit;
         if (sort) query.sort = sort;
         if (skip) query.skip = skip;
-
         return got
             .get(this.endpoints.skills(projectId), {
                 headers: { Authorization: `Bearer ${token}` },
@@ -274,12 +273,11 @@ module.exports = class Catalog {
             .catch((err) => constructError(err));
     }
 
-    listTypes(projectId, token, filter, limit, skip, sort) {
+    listTypes(projectId, token, limit, skip, sort) {
         checkProject(projectId);
         const endpoint = `${this.endpoints.types(projectId)}`;
         debug('listTypes() => %s', endpoint);
         const query = {};
-        if (filter) query.filter = filter;
         if (limit) query.limit = limit;
         if (sort) query.sort = sort;
         if (skip) query.skip = skip;

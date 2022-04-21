@@ -1,14 +1,14 @@
 {
   "name": "cortex-cli",
-  "version": "2.0.10",
+  "version": "2.0.11",
   "description": "Command line tool for CognitiveScale Cortex.",
   "main": "./bin/cortex.js",
   "scripts": {
-    "prepare": "husky install && npx --quiet force-resolutions",
+    "prepare": "is-ci || husky install",
     "prepack": "cp package-lock.json npm-shrinkwrap.json",
     "postpack": "rm npm-shrinkwrap.json",
     "pretest": "eslint bin/**/*.js src/**/*.js test/**/*.js && audit-ci -h --allowlist 1002475",
-    "test": "NODE_ENV=test nyc mocha --recursive --exit --timeout 10000"
+    "test": "NODE_ENV=test nyc mocha"
   },
   "files": [
     "bin/*",
@@ -39,11 +39,10 @@
   "license": "Apache-2.0",
   "homepage": "https://github.com/CognitiveScale/cortex-cli",
   "dependencies": {
-    "boxen": "5.1.2",
     "chalk": "4.1.2",
-    "cli-table3": "0.6.0",
-    "commander": "9.0.0",
-    "debug": "4.3.3",
+    "cli-table3": "0.6.2",
+    "commander": "9.2.0",
+    "debug": "4.3.4",
     "find-package-json": "1.2.0",
     "form-data": "4.0.0",
     "get-stream": "6.0.1",
@@ -52,16 +51,16 @@
     "graphql": "15.6.1",
     "graphql-request": "3.7.0",
     "is-installed-globally": "0.4.0",
-    "jmespath": "0.15.0",
+    "jmespath": "0.16.0",
     "joi": "17.6.0",
-    "jose-node-cjs-runtime": "4.6.0",
+    "jose-node-cjs-runtime": "4.6.2",
     "js-yaml": "4.1.0",
     "lodash": "4.17.21",
-    "moment": "2.29.1",
+    "moment": "2.29.3",
     "npm-registry-fetch": "12.0.1",
     "plop": "2.7.6",
-    "prompt": "1.2.2",
-    "semver": "7.3.5",
+    "prompts": "2.4.2",
+    "semver": "7.3.7",
     "url-join": "4.0.1",
     "url-parse": "1.5.10",
     "yauzl": "2.10.0"
@@ -70,10 +69,11 @@
     "audit-ci": "5.1.2",
     "chai": "4.3.6",
     "chai-as-promised": "7.1.1",
-    "eslint": "8.11.0",
+    "eslint": "8.13.0",
     "eslint-config-airbnb-base": "15.0.0",
-    "eslint-plugin-import": "2.25.4",
+    "eslint-plugin-import": "2.26.0",
     "husky": "7.0.4",
+    "is-ci": "3.0.1",
     "mocha": "9.2.2",
     "mocked-env": "1.3.5",
     "nock": "13.2.4",
@@ -87,7 +87,7 @@
       "html"
     ]
   },
-  "resolutions": {
+  "overrides": {
     "mixin-deep": "2.0.1",
     "cache-base": "2.0.2",
     "ansi-regex": "5.0.1"

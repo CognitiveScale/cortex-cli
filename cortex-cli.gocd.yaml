@@ -19,6 +19,8 @@ pipelines:
                     source: devBranchRevision.json
                 - build:
                     source: cortex-cli-docs.md
+                - build:
+                    source: cortex-cli.tgz
                 - test:
                     source: coverage
               tabs:
@@ -46,6 +48,8 @@ pipelines:
               artifacts:
                 - build:
                     source: cortex-cli-docs.md
+                - build:
+                    source: cortex-cli.tgz
                 - test:
                     source: coverage
               tabs:
@@ -72,3 +76,30 @@ pipelines:
                     cd cortex-fabric
                     git commit -a -m "Publishing New CLI Docs"
                     git push origin main
+  cortex-cli-pr:
+    group: pull-requests
+    label_template: ${COUNT}
+    materials:
+      cortex-cli:
+        plugin_configuration:
+          id: github.pr
+          version: 1
+        options:
+          url: git@github.com:CognitiveScale/cortex-cli.git
+          defaultBranch: develop
+    stages:
+      - build:
+          fetch_materials: true
+          clean_workspace: true
+          approval:
+            type: success
+            allow_only_on_success: false
+          jobs:
+            Build:
+              elastic_profile_id: gocd-test-agent-dind
+              timeout: 0
+              tasks:
+                - script: |
+                    set -eux
+                    git clone git@github.com:CognitiveScale/gocd-pipeline-scripts.git
+                    ./gocd-pipeline-scripts/common/c12e-common.sh dev

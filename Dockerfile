@@ -1,0 +1,1 @@
+Dockerfile.c12e-ci.cortex-cli

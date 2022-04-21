@@ -16,7 +16,7 @@
 
 const debug = require('debug')('cortex:cli');
 const _ = require('lodash');
-const prompt = require('prompt');
+const prompts = require('prompts');
 const chalk = require('chalk');
 const fs = require('fs');
 
@@ -36,9 +36,6 @@ function _validatePatFile(patFile) {
     return JSON.parse(fs.readFileSync(patFile));
 }
 
-prompt.message = '';
-prompt.delimiter = '';
-prompt.colors = false;
 module.exports.ConfigureCommand = class {
     constructor(program) {
         this.program = program;
@@ -58,11 +55,11 @@ module.exports.ConfigureCommand = class {
                 if (file) {
                     patData = _validatePatFile(file);
                 } else {
-                    const { patjson } = await prompt.get([{
+                    const { patjson } = await prompts({
+                        type: 'text',
                         name: 'patjson',
-                        required: true,
-                        description: 'Cortex Personal Access Config',
-                    }]);
+                        message: 'Cortex Personal Access Config:',
+                    });
                     patData = JSON.parse(patjson);
                 }
                 cmd.saveConfig(config, profileName, patData, project);

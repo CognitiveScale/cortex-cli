@@ -23,7 +23,7 @@ const Catalog = require('../client/catalog');
 const Agents = require('../client/agents');
 const {
     printSuccess, printError, filterObject, parseObject, printTable, formatValidationPath,
-    LISTTABLEFORMAT, DEPENDENCYTABLEFORMAT,
+    LISTTABLEFORMAT, DEPENDENCYTABLEFORMAT, validateOptions, OPTIONSTABLEFORMAT, handleTable,
 } = require('./utils');
 
 module.exports.SaveAgentCommand = class SaveAgentCommand {
@@ -42,9 +42,10 @@ module.exports.SaveAgentCommand = class SaveAgentCommand {
         debug('%o', agent);
 
         const catalog = new Catalog(profile.url);
-        catalog.saveAgent(options.project || profile.project, profile.token, agent).then((response) => {
+        const project = options.project || profile.project;
+        catalog.saveAgent(project, profile.token, agent).then((response) => {
             if (response.success) {
-                printSuccess('Agent saved', options);
+                printSuccess(`Agent "${agent.name}" saved in project "${project}"`, options);
             } else if (response.details) {
             console.log(`Failed to save agent: ${response.status} ${response.message}`);
             console.log('The following issues were found:');
@@ -70,11 +71,18 @@ module.exports.ListAgentsCommand = class ListAgentsCommand {
         this.program = program;
     }
 
+    // eslint-disable-next-line consistent-return
     async execute(options) {
         const profile = await loadProfile(options.profile);
         debug('%s.executeListAgents()', profile.name);
 
         const catalog = new Catalog(profile.url);
+        const { validOptions, errorDetails } = validateOptions(options, 'AGENT');
+        if (!validOptions) {
+            const optionTableFormat = OPTIONSTABLEFORMAT;
+            printError('Agent list failed.', options, false);
+            return printTable(optionTableFormat, errorDetails);
+        }
         catalog.listAgents(options.project || profile.project, profile.token, options.filter, options.limit, options.skip, options.sort).then((response) => {
             if (response.success) {
                 let result = response.agents;
@@ -82,7 +90,12 @@ module.exports.ListAgentsCommand = class ListAgentsCommand {
                     if (options.query) result = filterObject(result, options);
                     printSuccess(JSON.stringify(result, null, 2), options);
                 } else {
-                    printTable(LISTTABLEFORMAT, result, (o) => ({ ...o, updatedAt: o.updatedAt ? moment(o.updatedAt).fromNow() : '-' }));
+                    handleTable(
+                        LISTTABLEFORMAT,
+                        result,
+                        (o) => ({ ...o, updatedAt: o.updatedAt ? moment(o.updatedAt).fromNow() : '-' }),
+                        'No agents found',
+                    );
                 }
             } else {
                 printError(`Failed to list agents: ${response.status} ${response.message}`, options);
@@ -160,7 +173,7 @@ module.exports.InvokeAgentServiceCommand = class {
         debug('params: %o', params);
 
         const agents = new Agents(profile.url);
-        agents.invokeAgentService(options.project || profile.project, profile.token, agentName, serviceName, params).then((response) => {
+        agents.invokeAgentService(options.project || profile.project, profile.token, agentName, serviceName, params, options.sync).then((response) => {
             if (response.success) {
                 const result = filterObject(response.result, options);
                 printSuccess(JSON.stringify(result, null, 2), options);
@@ -221,6 +234,7 @@ module.exports.ListActivationsCommand = class {
         this.program = program;
     }
 
+    // eslint-disable-next-line consistent-return
     async execute(options) {
         if (_.isEmpty(options.agentName) 
             && _.isEmpty(options.skillName) 
@@ -243,9 +257,16 @@ module.exports.ListActivationsCommand = class {
         if (options.agentName) queryParams.agentName = options.agentName;
         if (options.skillName) queryParams.skillName = options.skillName;
         if (options.limit) queryParams.limit = options.limit;
-        if (options.offset) queryParams.offset = options.skip;
+        if (options.skip) queryParams.skip = options.skip;
         if (options.sort) queryParams.sort = _.toLower(options.sort);
-        if (options.filter) queryParams.sort = _.toLower(options.filter);
+        if (options.filter) queryParams.filter = options.filter;
+
+        const { validOptions, errorDetails } = validateOptions(options, 'ACTIVATION');
+        if (!validOptions) {
+            const optionTableFormat = OPTIONSTABLEFORMAT;
+            printError('Resource list failed.', options, false);
+            return printTable(optionTableFormat, errorDetails);
+        }
 
         agents.listActivations(options.project || profile.project, profile.token, queryParams).then((response) => {
             if (response.success) {
@@ -272,11 +293,11 @@ module.exports.ListActivationsCommand = class {
                         return '-';
                     };
 
-                    printTable(tableSpec, _.map(result, (o) => ({
+                    handleTable(tableSpec, _.map(result, (o) => ({
                         ...o,
                         name: genName(o),
                         start: o.start ? moment(o.start).fromNow() : '-',
-                    })));
+                    })), null, 'No activations found');
                 }
             } else {
                 printError(`Failed to list activations: ${response.message}`, options);
@@ -310,7 +331,7 @@ module.exports.ListServicesCommand = class ListServicesCommand {
                         { column: 'Service Endpoint URL', field: 'url', width: 115 },
                         { column: 'Parameters', field: 'formatted_types', width: 65 },
                     ];
-                    printTable(tableSpec, result);
+                    handleTable(tableSpec, result, null, 'No services found');
                 }
             } else {
                 printError(`Failed to return agent service information: ${agentName}: ${response.message}`, options);
@@ -326,11 +347,18 @@ module.exports.ListAgentSnapshotsCommand = class {
         this.program = program;
     }
 
+    // eslint-disable-next-line consistent-return
     async execute(agentName, options) {
         const profile = await loadProfile(options.profile);
         debug('%s.listAgentSnapshots(%s)', profile.name, agentName);
 
         const agents = new Agents(profile.url);
+        const { validOptions, errorDetails } = validateOptions(options, 'SNAPSHOT');
+        if (!validOptions) {
+            const optionTableFormat = OPTIONSTABLEFORMAT;
+            printError('Snapshot list failed.', options, false);
+            return printTable(optionTableFormat, errorDetails);
+        }
         agents.listAgentSnapshots(options.project || profile.project, profile.token, agentName, options.filter, options.limit, options.skip, options.sort)
             .then((response) => {
             if (response.success) {
@@ -347,7 +375,12 @@ module.exports.ListAgentSnapshotsCommand = class {
                         { column: 'Created', field: 'createdAt', width: 26 },
                         { column: 'Author', field: 'createdBy', width: 26 },
                     ];
-                    printTable(tableSpec, result, (o) => ({ ...o, createdAt: o.createdAt ? moment(o.createdAt).fromNow() : '-' }));
+                    handleTable(
+                        tableSpec,
+                        result,
+                        (o) => ({ ...o, createdAt: o.createdAt ? moment(o.createdAt).fromNow() : '-' }),
+                        'No snapshots found',
+                    );
                 }
             } else {
                 printError(`Failed to list agent snapshots ${agentName}: ${response.message}`, options);

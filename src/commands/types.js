@@ -19,10 +19,12 @@ const debug = require('debug')('cortex:cli');
 const moment = require('moment');
 const { loadProfile } = require('../config');
 const Catalog = require('../client/catalog');
-const { LISTTABLEFORMAT, filterObject } = require('./utils');
+const {
+    LISTTABLEFORMAT, filterObject, validateOptions, OPTIONSTABLEFORMAT,
+} = require('./utils');
 
 const {
- printSuccess, printError, parseObject, printTable,
+ printSuccess, printError, parseObject, printTable, handleTable,
 } = require('./utils');
 
 module.exports.SaveTypeCommand = class SaveTypeCommand {
@@ -59,19 +61,31 @@ module.exports.ListTypesCommand = class ListTypesCommand {
         this.program = program;
     }
 
+    // eslint-disable-next-line consistent-return
     async execute(options) {
         const profile = await loadProfile(options.profile);
         debug('%s.executeListTypes()', profile.name);
 
         const catalog = new Catalog(profile.url);
-        catalog.listTypes(options.project || profile.project, profile.token, options.filter, options.limit, options.skip, options.sort).then((response) => {
+        const { validOptions, errorDetails } = validateOptions(options, 'TYPE');
+        if (!validOptions) {
+            const optionTableFormat = OPTIONSTABLEFORMAT;
+            printError('Type list failed.', options, false);
+            return printTable(optionTableFormat, errorDetails);
+        }
+        catalog.listTypes(options.project || profile.project, profile.token, options.limit, options.skip, options.sort).then((response) => {
             if (response.success) {
                 let result = response.types;
                 if (options.json) {
                     if (options.query) result = filterObject(result, options);
                     printSuccess(JSON.stringify(result, null, 2), options);
                 } else {
-                    printTable(LISTTABLEFORMAT, result, (o) => ({ ...o, updatedAt: o.updatedAt ? moment(o.updatedAt).fromNow() : '-' }));
+                    handleTable(
+                        LISTTABLEFORMAT,
+                        result,
+                        (o) => ({ ...o, updatedAt: o.updatedAt ? moment(o.updatedAt).fromNow() : '-' }),
+                        'No types found',
+                    );
                 }
             } else {
                 printError(`Failed to list types: ${response.status} ${response.message}`, options);

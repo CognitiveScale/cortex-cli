@@ -24,10 +24,12 @@ const moment = require('moment');
 const { loadProfile } = require('../config');
 const Models = require('../client/models');
 const Experiments = require('../client/experiments');
-const { LISTTABLEFORMAT, RUNTABLEFORMAT, DEPENDENCYTABLEFORMAT } = require('./utils');
+const {
+    LISTTABLEFORMAT, RUNTABLEFORMAT, DEPENDENCYTABLEFORMAT, validateOptions, OPTIONSTABLEFORMAT,
+} = require('./utils');
 
 const {
-    printSuccess, printError, filterObject, parseObject, printTable, formatValidationPath, fileExists,
+    printSuccess, printError, filterObject, parseObject, printTable, formatValidationPath, fileExists, handleTable,
 } = require('./utils');
 
 module.exports.SaveModelCommand = class SaveModelCommand {
@@ -75,10 +77,17 @@ module.exports.ListModelsCommand = class ListModelsCommand {
         this.program = program;
     }
 
+    // eslint-disable-next-line consistent-return
     async execute(options) {
         const profile = await loadProfile(options.profile);
         debug('%s.executeListModels()', profile.name);
         const models = new Models(profile.url);
+        const { validOptions, errorDetails } = validateOptions(options, 'MODEL');
+        if (!validOptions) {
+            const optionTableFormat = OPTIONSTABLEFORMAT;
+            printError('Model list failed.', options, false);
+            return printTable(optionTableFormat, errorDetails);
+        }
         models.listModels(options.project || profile.project, options.skip, options.limit, options.filter, options.sort, options.tags, profile.token).then((response) => {
             if (response.success) {
                 let result = response.models;
@@ -87,7 +96,12 @@ module.exports.ListModelsCommand = class ListModelsCommand {
                     if (options.query) result = filterObject(result, options);
                     printSuccess(JSON.stringify(result, null, 2), options);
                 } else {
-                    printTable(LISTTABLEFORMAT, result, (o) => ({ ...o, updatedAt: o.updatedAt ? moment(o.updatedAt).fromNow() : '-' }));
+                    handleTable(
+                        LISTTABLEFORMAT,
+                        result,
+                        (o) => ({ ...o, updatedAt: o.updatedAt ? moment(o.updatedAt).fromNow() : '-' }),
+                        'No models found',
+                    );
                 }
             } else {
                 printError(`Failed to list models: ${response.status} ${response.message}`, options);
@@ -105,10 +119,17 @@ module.exports.ListModelRunsCommand = class ListModelsCommand {
         this.program = program;
     }
 
+    // eslint-disable-next-line consistent-return
     async execute(modelName, options) {
         const profile = await loadProfile(options.profile);
         debug('%s.executeListModels()', profile.name);
         const models = new Models(profile.url);
+        const { validOptions, errorDetails } = validateOptions(options, 'RUN');
+        if (!validOptions) {
+            const optionTableFormat = OPTIONSTABLEFORMAT;
+            printError('Model-runs list failed.', options, false);
+            return printTable(optionTableFormat, errorDetails);
+        }
         models.listModelRuns(options.project || profile.project, modelName, profile.token, options.filter, options.limit, options.skip, options.sort).then((response) => {
             if (response.success) {
                 let result = response.runs;
@@ -117,7 +138,12 @@ module.exports.ListModelRunsCommand = class ListModelsCommand {
                     if (options.query) result = filterObject(result, options);
                     printSuccess(JSON.stringify(result, null, 2), options);
                 } else {
-                    printTable(RUNTABLEFORMAT, result, (o) => ({ ...o, updatedAt: o.updatedAt ? moment(o.updatedAt).fromNow() : '-' }));
+                    handleTable(
+                        RUNTABLEFORMAT,
+                        result,
+                        (o) => ({ ...o, updatedAt: o.updatedAt ? moment(o.updatedAt).fromNow() : '-' }),
+                        'No runs found',
+                    );
                 }
             } else {
                 printError(`Failed to list model runs: ${response.status} ${response.message}`, options);

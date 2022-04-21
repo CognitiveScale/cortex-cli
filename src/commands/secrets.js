@@ -23,7 +23,7 @@ const map = require('lodash/fp/map');
 const { loadProfile } = require('../config');
 const Secrets = require('../client/secrets');
 const {
- printSuccess, printError, filterObject, parseObject, printTable, DEPENDENCYTABLEFORMAT,
+ printSuccess, printError, filterObject, parseObject, printTable, DEPENDENCYTABLEFORMAT, handleTable,
 } = require('./utils');
 
 module.exports.ListSecretsCommand = class {
@@ -47,7 +47,7 @@ module.exports.ListSecretsCommand = class {
                         const tableSpec = [
                             { column: 'Secret Key Name', field: 'keyName', width: 50 },
                         ];
-                        printTable(tableSpec, map((x) => ({ keyName: x }), result));
+                        handleTable(tableSpec, map((x) => ({ keyName: x }), result), null, 'No secrets found');
                     }
                 } else {
                     printError(`Failed to list secrets: ${response.message}`, options);
