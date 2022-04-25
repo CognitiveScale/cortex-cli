@@ -24,7 +24,7 @@ module.exports = class Agents {
         this.endpointV4 = (projectId) => `${cortexUrl}/fabric/v4/projects/${projectId}`;
     }
 
-    invokeAgentService(projectId, token, agentName, serviceName, params) {
+    invokeAgentService(projectId, token, agentName, serviceName, params, sync) {
         checkProject(projectId);
         const endpoint = `${this.endpointV4(projectId)}/agentinvoke/${encodeURIComponent(agentName)}/services/${serviceName}`;
         debug('invokeAgentService(%s, %s) => %s', agentName, serviceName, endpoint);
@@ -33,6 +33,7 @@ module.exports = class Agents {
                 headers: { Authorization: `Bearer ${token}` },
                 'user-agent': getUserAgent(),
                 json: params,
+                searchParams: { sync },
             }).json()
            .then((result) => ({ success: true, result }))
             .catch((err) => constructError(err));

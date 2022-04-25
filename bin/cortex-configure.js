@@ -34,9 +34,9 @@ program.command('create', { isDefault: true })
     .option('--file [file]', 'Personal access config file location')
     .option('--profile [profile]', 'The profile to configure', 'default')
     .option('--project [project]', 'The default project')
-    .action((options, command) => {
+    .action(async (options, command) => {
         try {
-            new ConfigureCommand(command).execute(options);
+            await new ConfigureCommand(command).execute(options);
         } catch (err) {
             console.error(chalk.red(err.message));
         }
@@ -71,7 +71,9 @@ program
     .alias('get')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
     .description('Describe a configured profile')
-    .action((profileName, options) => new DescribeProfileCommand(program).execute({ profile: profileName, ...options }));
+    .action(async (profileName, options) => {
+        await new DescribeProfileCommand(program).execute({ profile: profileName, ...options });
+    });
 
 program
     .command('env')
@@ -79,15 +81,15 @@ program
     .option('--project [project]', 'The project to use')
     .option('--ttl [time]', 'The amount of time for this login to remain active, expressed as a number of hours, days, or weeks (e.g. 1h, 2d, 2w)', '1d')
     .description('Print cortex environment variables')
-    .action((options) => {
-        new PrintEnvVars(program).execute(options);
+    .action(async (options) => {
+        await new PrintEnvVars(program).execute(options);
     });
 
 program
     .command('set-profile <profileName>')
     .description('Sets the current profile.')
-    .action((profileName, options) => {
-        new SetProfileCommand(program).execute(profileName, options);
+    .action(async (profileName, options) => {
+        await new SetProfileCommand(program).execute(profileName, options);
     });
 
 if (require.main === module) {

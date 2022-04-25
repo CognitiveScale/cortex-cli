@@ -23,7 +23,7 @@ const Agent = require('../client/agents');
 
 const {
     printSuccess, printError, printWarning, filterObject, parseObject, printTable, formatValidationPath,
-    LISTTABLEFORMAT, DEPENDENCYTABLEFORMAT, isNumeric,
+    LISTTABLEFORMAT, DEPENDENCYTABLEFORMAT, isNumeric, validateOptions, OPTIONSTABLEFORMAT, handleTable,
 } = require('./utils');
 
 module.exports.SaveSkillCommand = class SaveSkillCommand {
@@ -99,7 +99,15 @@ module.exports.ListSkillsCommand = class ListSkillsCommand {
         try {
             const status = !_.get(options, 'nostatus', false); // default show status, if nostatus==true status == false
             const shared = !_.get(options, 'noshared', false);
-            const response = await catalog.listSkills(options.project || profile.project, profile.token, { status, shared }, options.filter, options.limit, options.skip, options.sort);
+            const { validOptions, errorDetails } = validateOptions(options, 'SKILL');
+            if (!validOptions) {
+                const optionTableFormat = OPTIONSTABLEFORMAT;
+                printError('Skill list failed.', options, false);
+                return printTable(optionTableFormat, errorDetails);
+            }
+            const response = await catalog.listSkills(
+                options.project || profile.project, profile.token, { status, shared }, options.filter, options.limit, options.skip, options.sort,
+            );
             if (response.success) {
                 let result = response.skills;
                 const tableFormat = LISTTABLEFORMAT;
@@ -118,8 +126,12 @@ module.exports.ListSkillsCommand = class ListSkillsCommand {
                     if (options.query) result = filterObject(result, options);
                     return printSuccess(JSON.stringify(result, null, 2), options);
                 }
-                return printTable(tableFormat,
-                    _.sortBy(result, ['name']), (o) => ({ ...o, updatedAt: o.updatedAt ? moment(o.updatedAt).fromNow() : '-' }));
+                return handleTable(
+                    tableFormat,
+                    _.sortBy(result, options.sort ? [] : ['name']), (o) => ({ ...o, updatedAt: o.updatedAt ? moment(o.updatedAt).fromNow() : '-' }),
+                    null,
+                    'No skills found',
+                );
             }
             return printError(`Failed to list skills: ${response.status} ${response.message}`, options);
         } catch (err) {

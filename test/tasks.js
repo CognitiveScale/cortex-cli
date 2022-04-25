@@ -14,29 +14,42 @@
  * limitations under the License.
  */
 
-const commander = require('commander');
 const chai = require('chai');
 const mockedEnv = require('mocked-env');
 const nock = require('nock');
-const {
-    ListTasksCommand,
-    // DescribeTaskCommand,
-    // TaskLogsCommand,
-    // TaskDeleteCommand
-} = require('../src/commands/tasks');
+const _ = require('lodash');
+const sinon = require('sinon');
 const Tasks = require('../src/client/tasks');
+const { stripAnsi } = require('./utils');
 
 const { expect } = chai;
-let restoreEnv;
+
+const PROJECT = 'project';
 describe('Tasks', () => {
+    let restoreEnv;
+    let sandbox;
+    let printSpy;
+    let errorSpy;
     before(() => {
+        if (!nock.isActive()) {
+            nock.activate();
+        }
         restoreEnv = mockedEnv({
             CORTEX_CONFIG_DIR: './test/cortex',
         });
-        nock.activate();
+        sandbox = sinon.createSandbox();
+        printSpy = sandbox.spy(console, 'log');
+        errorSpy = sandbox.spy(console, 'error');
     });
+
+    beforeEach(() => {
+        delete require.cache[require.resolve('commander')];
+        delete require.cache[require.resolve('../bin/cortex-tasks')];
+    });
+
     after(() => {
         restoreEnv();
+        sandbox.restore();
         nock.restore();
     });
 
@@ -45,44 +58,87 @@ describe('Tasks', () => {
         nock.cleanAll();
     });
 
+    function getPrintedLines() {
+        return _.flatten(printSpy.args).map((s) => stripAnsi(s));
+    }
+
+    function getErrorLines() {
+        return _.flatten(errorSpy.args).map((s) => stripAnsi(s));
+    }
+
     const serverUrl = 'http://localhost:8000';
 
-    // this isn't the best way to test these commands.. might need to do a larger refactor
-    xit('list tasks command', async () => {
-        const program = new commander.Command();
-        const command = new ListTasksCommand(program);
-        const project = 'test';
-        const options = {
-            project,
-            json: true,
-        };
-
-        const requestPath = `/fabric/v4/projects/${project}/tasks?project=${project}&json=true`;
+    it('list tasks command (old response)', async () => {
+        const program = require('../bin/cortex-tasks');
+        const requestPath = `/fabric/v4/projects/${PROJECT}/tasks`;
         const response = { success: true, tasks: ['task0', 'task1'] };
         nock(serverUrl).get(requestPath).reply(200, response);
-        let body;
-        await command.execute(options)
-            .then((output) => {
-                console.log(`output: ${JSON.stringify(output)}`);
-                body = output;
-                nock.isDone();
-            });
-        console.log(`after await ${JSON.stringify(body)}`);
+        await program.parseAsync(['node', 'tasks', 'list', '--project', PROJECT]);
+        const output = getPrintedLines();
+        const errs = getErrorLines();
+        chai.expect(output.join('')).to.contain('task0');
+        chai.expect(output.join('')).to.contain('task1');
+        // eslint-disable-next-line no-unused-expressions
+        chai.expect(errs).to.be.empty;
         nock.isDone();
     });
 
-    it('list tasks client', async () => {
+    it('list tasks command JSON no tasks', async () => {
+        const program = require('../bin/cortex-tasks');
+        const requestPath = `/fabric/v4/projects/${PROJECT}/tasks`;
+        const response = { success: true, tasks: [] };
+        nock(serverUrl).get(requestPath).reply(200, response);
+        await program.parseAsync(['node', 'tasks', 'list', '--project', PROJECT, '--json']);
+        const output = getPrintedLines();
+        const errs = getErrorLines();
+        chai.expect(output.join('')).to.contain('no tasks found');
+        // eslint-disable-next-line no-unused-expressions
+        chai.expect(errs).to.be.empty;
+        nock.isDone();
+    });
+
+    it('list tasks command', async () => {
+        const program = require('../bin/cortex-tasks');
+        const now = Date.now();
+        const requestPath = `/fabric/v4/projects/${PROJECT}/tasks`;
+        const response = {
+            success: true,
+            tasks: [
+            {
+                name: 'task0', startTime: now - (30 * 60000), endTime: now - (10 * 60000), activationId: 'xxxxxx1', skillName: 'skill1', actionName: 'action1', status: 'COMPLETE',
+            },
+            {
+                name: 'task1', startTime: now - (40 * 60000), endTime: now - (10 * 60000), activationId: 'xxxxxx2', skillName: 'skill2', actionName: 'action1', status: 'FAIL',
+            },
+            ],
+        };
+        nock(serverUrl).get(requestPath).reply(200, response);
+
+        await program.parseAsync(['node', 'tasks', 'list', '--project', PROJECT]);
+        const output = getPrintedLines();
+        const errs = getErrorLines();
+        chai.expect(output.join('')).to.contain('task0');
+        chai.expect(output.join('')).to.contain('20 minutes');
+        chai.expect(output.join('')).to.contain('30 minutes');
+        chai.expect(output.join('')).to.contain('30 minutes ago');
+        chai.expect(output.join('')).to.contain('40 minutes ago');
+        chai.expect(output.join('')).to.contain('task0');
+        chai.expect(output.join('')).to.contain('task1');
+        // eslint-disable-next-line no-unused-expressions
+        chai.expect(errs).to.be.empty;
+        nock.isDone();
+    });
+
+    it('list tasks client JSON', async () => {
         const taskCtl = new Tasks('http://127.0.0.1:8000');
-        const project = 'test';
         const options = {
-            project,
             json: true,
         };
 
-        const requestPath = `/fabric/v4/projects/${project}/tasks?project=${project}&json=true`;
+        const requestPath = `/fabric/v4/projects/${PROJECT}/tasks?json=true`;
         const response = { success: true, tasks: ['task0', 'task1'] };
         nock('http://127.0.0.1:8000').get(requestPath).reply(200, response);
-        const taskList = await taskCtl.listTasks(project, '', options);
+        const taskList = await taskCtl.listTasks(PROJECT, '', options);
         console.log(`taskList: ${JSON.stringify(taskList)}`);
         expect(taskList).to.deep.equal(response);
     });

@@ -92,6 +92,11 @@ describe('compatibility checks', () => {
             const expected = { current: pkg.version, latest: nextMajorVersion, satisfied: false };
             return expect(compatibilityModule.getCompatibility(profile)).to.become(expected);
         });
+
+        // it('should resolve as box', () => {
+        //     // Just added a dumb test to test output..
+        //     compatibilityModule.notifyUpdate({ required: false, current: '1.0.0', latest: '2.0.0' });
+        // });
     });
 
     describe('when the compatibility service cannot be reached', () => {

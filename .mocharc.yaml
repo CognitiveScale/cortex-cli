@@ -1,0 +1,7 @@
+exit: true
+extension: ['js']
+bail: false
+slow: 1000
+timeout: 10000
+ui: 'bdd'
+recursive: true

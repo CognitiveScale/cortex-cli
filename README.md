@@ -121,6 +121,11 @@ cortex agents list --query "[].{name: name, title: title}"
 
 - [x] configure
     - [x] list
+- [x] projects
+    - [x] list
+    - [x] save [projectDefinition]
+    - [x] describe [projectName]
+    - [x] delete [projectName]
 - [ ] deploy
 - [x] functions
     - [x] list
