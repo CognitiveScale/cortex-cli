@@ -4,7 +4,7 @@ const got = require('got');
 const open = require('open');
 const moment = require('moment');
 
-const { printToTerminal, validateToken, persistToken } = require('./workspace-utils');
+const { validateToken, persistToken } = require('./workspace-utils');
 
 const _ = {
   get: require('lodash/get'),
