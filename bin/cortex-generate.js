@@ -26,7 +26,7 @@ program
     .command('skill [skillName] [type]')
     .description('Generates the structure and top level build script for a skill in current directory')
     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
-    .action((skillName, type, options) => { // deliberately not using withCompatibilityCheck()
+    .action(() => { // deliberately not using withCompatibilityCheck()
         console.error(chalk.red('Generate command has been superceded by the Workspaces command.'));
     });
 
