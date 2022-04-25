@@ -8,8 +8,8 @@
     "prepare": "is-ci || husky install",
     "prepack": "cp package-lock.json npm-shrinkwrap.json",
     "postpack": "rm npm-shrinkwrap.json",
-    "pretest": "eslint bin/**/*.js src/**/*.js test/**/*.js && audit-ci -h --allowlist 1002475",
-    "test": "NODE_ENV=test nyc mocha"
+    "pretest": "eslint bin/**/*.js src/**/*.js test/**/*.js && audit-ci -h",
+    "test": "cross-env NODE_ENV=test nyc mocha"
   },
   "files": [
     "bin/*",
