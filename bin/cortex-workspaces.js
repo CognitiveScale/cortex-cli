@@ -29,7 +29,6 @@ const {
     WorkspaceActivateRegistryCommand,
     WorkspaceListRegistryCommand,
 } = require('../src/commands/workspaces/registry');
-// const { WorkspaceTestCommand } = require('../src/commands/workspaces/test');
 
 program.name('cortex workspaces');
 program.description('Scaffolding Cortex Components');
@@ -140,20 +139,6 @@ program
             console.error(chalk.red(err.message));
         }
     });
-
-    // program
-    // .command('test [folder]')
-    // .option('--color [on/off]', 'Turn on/off colors', 'on')
-    // .option('--skill [skill name]', 'Test only the specified skill')
-    // .option('--input [input name]', 'Test only the specified input')
-    // .description('Tests the specified skill locally')
-    // .action((folder, options) => { // deliberately not using withCompatibilityCheck()
-    //     try {
-    //         new WorkspaceTestCommand(program).execute(folder, options);
-    //     } catch (err) {
-    //         console.error(chalk.red(err.message));
-    //     }
-    // });
 
 if (require.main === module) {
     program.showHelpAfterError().parseAsync(process.argv);
