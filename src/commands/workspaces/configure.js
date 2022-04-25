@@ -83,7 +83,7 @@ module.exports.WorkspaceConfigureCommand = class WorkspaceConfigureCommand {
               const mom = moment().add(expiry, 'seconds');
 
               (function poller(options) {
-                printToTerminal(`\x1b[0GPlease enter the following code to authorize the Cortex CLI: ${options.color === 'on'
+                process.stdout.write(`\x1b[0GPlease enter the following code to authorize the Cortex CLI: ${options.color === 'on'
                   ? chalk.bgBlackBright.whiteBright(`[ ${deviceCode.user_code} ]`)
                   : deviceCode.user_code
                   }  ${moment(mom.diff()).format(' [( Expires in] mm [minutes and] ss [seconds ) - CTRL-C to abort]')}`);
