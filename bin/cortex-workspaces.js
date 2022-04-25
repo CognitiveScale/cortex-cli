@@ -1,5 +1,3 @@
-#!/usr/bin/env node
-
 /*
  * Copyright 2020 Cognitive Scale, Inc. All Rights Reserved.
  *
@@ -51,13 +49,15 @@ program
     .option('--registry [registry]', 'Override the docker registry to publish to')
     .option('--color [on/off]', 'Turn on/off colors', 'on')
     .option('--notree', 'Do not display generated file tree', false)
+    .option('--template [templateName]', 'Name of template to use')
     .description('Generates a workspace based on a template from the template repository')
     .action((name, destination, options) => { // deliberately not using withCompatibilityCheck()
         try {
-            new WorkspaceGenerateCommand(program).execute(name, destination, options);
+            return new WorkspaceGenerateCommand(program).execute(name, destination, options);
         } catch (err) {
             console.error(chalk.red(err.message));
         }
+        return Promise.reject();
     });
 
     program
@@ -67,10 +67,11 @@ program
     .description('Builds all skills in the workspace, or optionally only the specified skill')
     .action((folder, options) => { // deliberately not using withCompatibilityCheck()
         try {
-            new WorkspaceBuildCommand(program).execute(folder, options);
+            return new WorkspaceBuildCommand(program).execute(folder, options);
         } catch (err) {
             console.error(chalk.red(err.message));
         }
+        return Promise.reject();
     });
 
     program
@@ -80,10 +81,11 @@ program
     .description('Publishes all skills and resources in the workspace')
     .action((folder, options) => { // deliberately not using withCompatibilityCheck()
         try {
-            new WorkspacePublishCommand(program).execute(folder, options);
+            return new WorkspacePublishCommand(program).execute(folder, options);
         } catch (err) {
             console.error(chalk.red(err.message));
         }
+        return Promise.reject();
     });
 
     const registry = program
