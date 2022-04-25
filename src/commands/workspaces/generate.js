@@ -20,6 +20,7 @@ const _ = {
   isEmpty: require('lodash/isEmpty'),
   set: require('lodash/set'),
   mean: require('lodash/mean'),
+  find: require('lodash/find'),
 };
 
 const { WorkspaceConfigureCommand } = require('./configure');
@@ -44,13 +45,13 @@ module.exports.WorkspaceGenerateCommand = class WorkspaceGenerateCommand {
     this.program = program;
   }
 
-  async loadTemplateTree({ repo, branch, githubToken }) {
+  async loadTemplateTree({ repo, branch }) {
     printToTerminal('\x1b[0G\x1b[2KLoading templates...');
 
     this.gitRepo = repo;
     this.branch = branch;
 
-    this.authorization = githubToken;
+    this.authorization = this.githubToken;
 
     this.tree = await ghGot(`repos/${repo}/branches/${branch || 'main'}`, {
       headers: { authorization: this.authorization },
@@ -90,7 +91,7 @@ module.exports.WorkspaceGenerateCommand = class WorkspaceGenerateCommand {
     return registryUrl;
   }
 
-  async selectTemplate() {
+  async selectTemplate(templateName) {
     const registryUrl = await this.getRegistry();
     const fileNames = this.globTree(METADATA_FILENAME);
 
@@ -101,6 +102,12 @@ module.exports.WorkspaceGenerateCommand = class WorkspaceGenerateCommand {
         value,
       };
     }));
+
+    let template;
+
+    if (templateName) {
+      template = _.find(choices, (c) => c.name === templateName).value;
+    }
 
     const answers = await inquirer.prompt([
       {
@@ -121,6 +128,7 @@ module.exports.WorkspaceGenerateCommand = class WorkspaceGenerateCommand {
     ], {
       name: this.name,
       registry: registryUrl,
+      template,
     }).catch(() => { });
 
     return answers;
@@ -148,7 +156,7 @@ module.exports.WorkspaceGenerateCommand = class WorkspaceGenerateCommand {
     await this.loadTemplateTree(this.config.templateConfig);
 
     if (this.tree.length) {
-      const template = await this.selectTemplate();
+      const template = await this.selectTemplate(options.template);
       if (template) {
         const templateFolder = path.posix.dirname(template.template.path);
         const templateFiles = this.globTree(`${templateFolder}/**`);

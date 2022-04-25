@@ -9,7 +9,8 @@
     "prepack": "cp package-lock.json npm-shrinkwrap.json",
     "postpack": "rm npm-shrinkwrap.json",
     "pretest": "eslint bin/**/*.js src/**/*.js test/**/*.js && audit-ci -h",
-    "test": "cross-env NODE_ENV=test nyc mocha"
+    "test": "cross-env NODE_ENV=test nyc mocha",
+    "test:workspaces": "cross-env NODE_ENV=test mocha --grep='Workspaces'"
   },
   "files": [
     "bin/*",
