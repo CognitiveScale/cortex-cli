@@ -418,3 +418,15 @@ module.exports.validateOptions = (options, type) => {
         validOptions: true, errorDetails,
     };
 };
+
+module.exports.printExtendedLogs = (type, data, options) => {
+    switch (type) {
+        case 'LIMIT':
+            if (Array.isArray(data) && data.length === Number(options.limit)) {
+                console.log(`Results limited to ${options.limit} rows`);
+            }
+            break;
+        default:
+        // code block
+    }
+};

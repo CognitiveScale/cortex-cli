@@ -23,7 +23,7 @@ const Actions = require('../client/actions');
 const {
  printSuccess, printError, filterObject, parseObject, printTable, DEPENDENCYTABLEFORMAT, isNumeric,
     validateOptions,
-    OPTIONSTABLEFORMAT, handleTable,
+    OPTIONSTABLEFORMAT, handleTable, printExtendedLogs,
 } = require('./utils');
 
 module.exports.ListActionsCommand = class {
@@ -47,7 +47,7 @@ module.exports.ListActionsCommand = class {
             .then((response) => {
                 if (response.success) {
                     let result = response.actions;
-
+                    printExtendedLogs('LIMIT', result, options);
                     if (options.json) {
                         if (options.query) result = filterObject(result, options);
                         printSuccess(JSON.stringify(result, null, 2), options);
