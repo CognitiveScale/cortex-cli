@@ -60,7 +60,8 @@ describe('Workspaces', () => {
         return _.flatten(errorSpy.args).map((s) => stripAnsi(s));
     }
 
-    it('should generate a job skill', async () => {
+    // eslint-disable-next-line func-names
+    it('should generate a job skill', async function () {
         if (!isCI) {
             const program = require('../bin/cortex-workspaces');
             await program.parseAsync(['node', 'workspaces', 'generate', 'job1', '--notree', '--template', 'Custom Job Skill']);
@@ -82,7 +83,8 @@ describe('Workspaces', () => {
         }
     });
 
-    it('should generate a daemon skill', async () => {
+    // eslint-disable-next-line func-names
+    it('should generate a daemon skill', async function () {
         if (!isCI) {
             const program = require('../bin/cortex-workspaces');
             await program.parseAsync(['node', 'workspaces', 'generate', 'dmn1', '--notree', '--template', 'Custom Daemon Skill']);
