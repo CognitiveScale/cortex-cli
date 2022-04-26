@@ -53,6 +53,19 @@ module.exports = class ApiServerClient {
         return _.get(fetched, 'createProject', {});
     }
 
+
+    /**
+     * Delete project using graphql
+     * @param token
+     * @param projectId
+     * @return {Promise<any>}
+     */
+    async deleteProject(token, projectId) {
+        const fetched = await this._client(token)
+            .request(gql`mutation { deleteProject(name: "${projectId}") }`);
+        return _.get(fetched, 'deleteProject', {});
+    }
+
     /**
      * Fetch campaign using graphql
      * @param projectId

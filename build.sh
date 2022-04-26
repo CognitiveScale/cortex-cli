@@ -1,4 +1,4 @@
-#!/bin/bash -eu
+#!/bin/bash -eux
 
 # Copied from: https://bitbucket.org/cognitivescale/cortex-console/src
 
@@ -26,12 +26,12 @@ function local_docker(){
 
 # This runs inside a linux docker container
 function docker_build(){
-    npm ci --unsafe-perm --userconfig=/root/.npmrc
+    export CI="script"
+    npm ci --unsafe-perm --userconfig=/root/.npmrc --ignore-scripts
     npm test
     echo ${VERSION} > version.txt
     ./generate_docs.sh
     BRANCH=$(git symbolic-ref --short -q HEAD)
-    npm prune --production
     if [[ ${BRANCH} = "main" ]]; then
 #        TODO this should maybe be done as part of the gocd pipeline?.. or maybe get in the habit of pushing alpha versions to npm just like we do for cortex-python?..
         npm publish --registry=https://registry.npmjs.org/
@@ -39,7 +39,6 @@ function docker_build(){
         npm config set always-auth true
 #        npm publish --tag "${BRANCH}" --registry=https://cognitivescale.jfrog.io/artifactory/api/npm/npm-local/
     fi
-
     npm pack .
     mv cortex-cli-*.tgz cortex-cli.tgz
 }

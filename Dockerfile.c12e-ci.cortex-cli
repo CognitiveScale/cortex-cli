@@ -1,8 +1,9 @@
-FROM node:14-bullseye
+FROM node:16-bullseye
 
-COPY . /from_ci_cd_build
-
-# Make sure the cortex executable is on the path ... 
-RUN ln -s /from_ci_cd_build/bin/cortex.js /usr/local/bin/cortex
-
-ENTRYPOINT ["/from_ci_cd_build/entrypoint.sh"]
+COPY cortex-cli.tgz /app/
+COPY scripts/entrypoint.sh /
+RUN npm install -g /app/cortex-cli.tgz \
+  && echo "default:x:1001:0:Default Application User:/app:/sbin/nologin" >> /etc/passwd \
+  && chown -R 1001 /app
+USER 1001
+ENTRYPOINT ["/entrypoint.sh"]

@@ -18,7 +18,7 @@ const debug = require('debug')('cortex:cli');
 const { loadProfile } = require('../config');
 const Content = require('../client/content');
 const {
- printSuccess, printError, printTable, getSourceFiles, humanReadableFileSize, filterObject,
+ printSuccess, printError, getSourceFiles, humanReadableFileSize, filterObject, handleTable,
 } = require('./utils');
 
 module.exports.ListContent = class ListContent {
@@ -44,7 +44,7 @@ module.exports.ListContent = class ListContent {
                         { column: 'Size (bytes)', field: 'Size', width: 20 },
                     ];
 
-                    printTable(tableSpec, response.message);
+                    handleTable(tableSpec, response.message, null, 'No content found');
                 }
             } else {
                 printError(`Failed to list content: ${response.status} ${response.message}`, options);

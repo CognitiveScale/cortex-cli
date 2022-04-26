@@ -35,6 +35,19 @@ function nonEmptyStringParser(opts) {
     };
 }
 
+// append relevant prefix to keys
+function transformDynamicParams(params, prefix) {
+    const jsonParams = JSON.parse(params);
+    Object.keys(jsonParams)
+        .forEach((key) => {
+            if (!_.startsWith(prefix, key)) {
+                jsonParams[`${prefix}${key}`] = jsonParams[key];
+                delete jsonParams[key];
+            }
+        });
+    return JSON.stringify(jsonParams);
+}
+
 module.exports = {
-    nonEmptyStringParser,
+    nonEmptyStringParser, transformDynamicParams,
 };
