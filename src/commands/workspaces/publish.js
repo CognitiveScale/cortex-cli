@@ -127,6 +127,7 @@ module.exports.WorkspacePublishCommand = class WorkspacePublishCommand {
       if (reg.isCortex) {
         const ttl = options.ttl || '1d';
         const jwt = await generateJwt(profile, ttl);
+        // eslint-disable-next-line no-param-reassign
         profile.token = jwt;
       } else {
         const answers = await inquirer.prompt([
@@ -181,6 +182,7 @@ module.exports.WorkspacePublishCommand = class WorkspacePublishCommand {
           if (err) {
             return reject(err);
           }
+          // eslint-disable-next-line no-param-reassign
           action.image = newTag;
           status.complete();
           status.stop();
