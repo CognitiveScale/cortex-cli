@@ -3,7 +3,7 @@
 # Copied from: https://bitbucket.org/cognitivescale/cortex-console/src
 
 IMAGE_NAME=$(git remote -v | grep "(fetch)" | sed -E "s/.*git@.*:.*\/(.*)\.git.*/\1/")
-BRANCH=$(git symbolic-ref --short -q HEAD)
+BRANCH="local"
 VERSION=$(git describe --long --always --dirty --match='v*.*' | sed 's/v//; s/-/./')
 
 function error_exit {
@@ -28,7 +28,7 @@ function local_docker(){
 function docker_build(){
     export CI="script"
     apt-get update
-    apt-get install -y libsecret-1-dev
+    apt-get install -y apt-utils libsecret-1-dev
     npm ci --unsafe-perm --userconfig=/root/.npmrc --ignore-scripts
     npm test
     echo ${VERSION} > version.txt
