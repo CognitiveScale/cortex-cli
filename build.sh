@@ -3,7 +3,7 @@
 # Copied from: https://bitbucket.org/cognitivescale/cortex-console/src
 
 IMAGE_NAME=$(git remote -v | grep "(fetch)" | sed -E "s/.*git@.*:.*\/(.*)\.git.*/\1/")
-BRANCH="local"
+BRANCH=$(git symbolic-ref --short -q HEAD)
 VERSION=$(git describe --long --always --dirty --match='v*.*' | sed 's/v//; s/-/./')
 
 function error_exit {
