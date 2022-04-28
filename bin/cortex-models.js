@@ -31,7 +31,7 @@ const {
     ListModelRunsCommand,
 } = require('../src/commands/models');
 const {
-    DEFAULT_LIST_SKIP_COUNT, DEFAULT_LIST_LIMIT_COUNT, DEFAULT_LIST_SORT_PARAMS, DEFAULT_LIST_SORT_PARAMS_2
+    DEFAULT_LIST_SKIP_COUNT, DEFAULT_LIST_LIMIT_COUNT, DEFAULT_LIST_SORT_PARAMS, DEFAULT_LIST_SORT_PARAMS_2,
 } = require('../src/constants');
 
 program.name('cortex models');
