@@ -2,19 +2,19 @@
 module.exports.ALLOWED_QUERY_FIELDS = {
     SKILL: {
         filter: ['name', 'title', 'description', 'createdBy'],
-        sort: ['name', 'title', 'description', 'createdAt', 'createdBy'],
+        sort: ['name', 'title', 'description', 'createdAt', 'createdBy', 'updatedAt'],
     },
     AGENT: {
         filter: ['name', 'title', 'description', 'createdBy'],
-        sort: ['name', 'title', 'description', 'createdAt', 'createdBy'],
+        sort: ['name', 'title', 'description', 'createdAt', 'createdBy', 'updatedAt'],
     },
     ACTION: {
         filter: ['name', 'title', 'type', 'image', 'description', 'createdBy'],
-        sort: ['name', 'title', 'type', 'image', 'description', 'createdAt', 'createdBy'],
+        sort: ['name', 'title', 'type', 'image', 'description', 'createdAt', 'createdBy', 'updatedAt'],
     },
     SNAPSHOT: {
         filter: ['snapshotId', 'title', '_isTip', '_createdBy'],
-        sort: ['snapshotId', 'title', '_isTip', '_createdAt', '_createdBy'],
+        sort: ['snapshotId', 'title', '_isTip', '_createdAt', '_createdBy', '_updatedAt'],
     },
     ASSESSMENT: {
         filter: ['name', 'title', 'componentName', 'reportCount', '_createdBy'],
@@ -22,11 +22,11 @@ module.exports.ALLOWED_QUERY_FIELDS = {
     },
     TYPE: {
         filter: ['name', 'title', 'description', 'createdBy'],
-        sort: ['name', 'title', 'description', 'createdAt', 'createdBy'],
+        sort: ['name', 'title', 'description', 'createdAt', 'createdBy', 'updatedAt'],
     },
     CONNECTION: {
         filter: ['name', 'title', 'description', 'createdBy', 'connectionType', 'allowWrite', 'contentType'],
-        sort: ['name', 'title', 'description', 'createdAt', 'connectionType', 'allowWrite', 'contentType'],
+        sort: ['name', 'title', 'description', 'createdAt', 'connectionType', 'allowWrite', 'contentType', 'updatedAt'],
     },
     CONNECTION_TYPE: {
         filter: ['name', 'title', 'description', 'type', 'group'],
@@ -42,7 +42,7 @@ module.exports.ALLOWED_QUERY_FIELDS = {
     },
     RUN: {
         filter: ['runId', 'title', '_createdAt', 'startTime', 'endTime', 'took', 'experimentName'],
-        sort: ['runId', 'title', '_createdAt', 'startTime', 'endTime', 'took', 'experimentName'],
+        sort: ['runId', 'title', '_createdAt', 'startTime', 'endTime', 'took', 'experimentName', '_updatedAt'],
     },
     MODEL: {
         filter: ['name', 'title', 'description', 'createdBy', 'type', 'status'],
@@ -50,15 +50,15 @@ module.exports.ALLOWED_QUERY_FIELDS = {
     },
     CAMPAIGN: {
         filter: ['name', 'title', 'description', '_createdBy', 'lifecycleState'],
-        sort: ['name', 'title', 'description', '_createdAt', '_createdBy', 'lifecycleState'],
+        sort: ['name', 'title', 'description', '_createdAt', '_createdBy', 'lifecycleState', '_updatedAt'],
     },
     MISSION: {
         filter: ['name', 'title', 'description', '_createdBy', 'lifecycleState'],
-        sort: ['name', 'title', 'description', '_createdAt', '_createdBy', 'lifecycleState'],
+        sort: ['name', 'title', 'description', '_createdAt', '_createdBy', 'lifecycleState', '_updatedAt'],
     },
     PROJECT: {
         filter: ['name', 'title', 'description'],
-        sort: ['name', 'title', 'description', '_createdAt'],
+        sort: ['name', 'title', 'description', '_createdAt', '_updatedAt'],
     },
     ACTIVATION: {
         filter: ['status', 'start', 'end', 'skillName', 'agentName'],
@@ -69,3 +69,7 @@ module.exports.ALLOWED_QUERY_FIELDS = {
 module.exports.DEFAULT_LIST_LIMIT_COUNT = '20';
 
 module.exports.DEFAULT_LIST_SKIP_COUNT = '0';
+
+module.exports.DEFAULT_LIST_SORT_PARAMS = '{"updatedAt": -1}';
+
+module.exports.DEFAULT_LIST_SORT_PARAMS_2 = '{"_updatedAt": -1}';

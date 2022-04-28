@@ -34,7 +34,7 @@ const {
     // TaskStatsActionCommand,
     // TaskStatusActionCommand,
 } = require('../src/commands/actions');
-const { DEFAULT_LIST_SKIP_COUNT, DEFAULT_LIST_LIMIT_COUNT } = require('../src/constants');
+const { DEFAULT_LIST_SKIP_COUNT, DEFAULT_LIST_LIMIT_COUNT, DEFAULT_LIST_SORT_PARAMS } = require('../src/constants');
 
 program.name('cortex actions');
 program.description('Work with Cortex Actions');
@@ -53,7 +53,7 @@ program
     .option('--filter [filter]', 'A Mongo style filter to use.')
     .option('--limit [limit]', 'Limit number of records', DEFAULT_LIST_LIMIT_COUNT)
     .option('--skip [skip]', 'Skip number of records', DEFAULT_LIST_SKIP_COUNT)
-    .option('--sort [sort]', 'A Mongo style sort statement to use in the query.')
+    .option('--sort [sort]', 'A Mongo style sort statement to use in the query.', DEFAULT_LIST_SORT_PARAMS)
     .action(withCompatibilityCheck((options) => {
         try {
             new ListActionsCommand(program).execute(options);
