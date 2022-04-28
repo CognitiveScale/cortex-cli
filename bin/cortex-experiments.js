@@ -20,7 +20,9 @@ const chalk = require('chalk');
 const program = require('commander');
 
 const { withCompatibilityCheck } = require('../src/compatibility');
-const { DEFAULT_LIST_SKIP_COUNT, DEFAULT_LIST_LIMIT_COUNT, DEFAULT_LIST_SORT_PARAMS, DEFAULT_LIST_SORT_PARAMS_2 } = require('../src/constants');
+const {
+    DEFAULT_LIST_SKIP_COUNT, DEFAULT_LIST_LIMIT_COUNT, DEFAULT_LIST_SORT_PARAMS, DEFAULT_LIST_SORT_PARAMS_2,
+} = require('../src/constants');
 
 const {
     ListExperiments,
