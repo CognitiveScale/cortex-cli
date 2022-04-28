@@ -100,7 +100,7 @@ program
     .option('--project [project]', 'The project to use')
     .option('--json', 'Output results using JSON')
     .option('--nostatus', 'skip extra call for skill status')
-    .option('--noshared', 'do not list shared sills')
+    .option('--noshared', 'do not list shared skills')
     .option('--query [query]', 'A JMESPath query to use in filtering the response data.')
     .option('--filter [filter]', 'A Mongo style filter to use.')
     .option('--limit [limit]', 'Limit number of records', DEFAULT_LIST_LIMIT_COUNT)

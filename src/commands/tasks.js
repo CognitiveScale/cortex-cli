@@ -44,7 +44,7 @@ module.exports.ListTasksCommand = class {
             if (response.success) {
                 let taskList = _.get(response, 'tasks', []);
                 if (_.isEmpty(taskList)) {
-                    return printSuccess('no tasks found');
+                    return printSuccess('No tasks found');
                 }
                 switch (_.lowerCase(options.sort)) {
                     case 'asc':
