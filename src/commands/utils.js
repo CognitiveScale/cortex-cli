@@ -423,6 +423,7 @@ module.exports.printExtendedLogs = (type, data, options) => {
     switch (type) {
         case 'LIMIT':
             if (Array.isArray(data) && data.length === Number(options.limit)) {
+                // don't log if showing all the results
                 console.log(`Results limited to ${options.limit} rows`);
             }
             break;
