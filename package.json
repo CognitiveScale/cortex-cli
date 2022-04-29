@@ -3,12 +3,14 @@
   "version": "2.0.11",
   "description": "Command line tool for CognitiveScale Cortex.",
   "main": "./bin/cortex.js",
+  "types": "./client/index.d.ts",
   "scripts": {
     "prepare": "is-ci || husky install",
     "prepack": "cp package-lock.json npm-shrinkwrap.json",
     "postpack": "rm npm-shrinkwrap.json",
-    "pretest": "eslint bin/**/*.js src/**/*.js test/**/*.js && audit-ci -h --allowlist 1002475",
-    "test": "NODE_ENV=test nyc mocha"
+    "pretest": "eslint bin/**/*.js src/**/*.js test/**/*.js && audit-ci -h",
+    "test": "cross-env NODE_ENV=test nyc mocha",
+    "test:workspaces": "cross-env NODE_ENV=test mocha --grep='Workspaces'"
   },
   "files": [
     "bin/*",
@@ -18,7 +20,7 @@
     "LICENSE"
   ],
   "engines": {
-    "node": ">=14.0.0"
+    "node": ">=16.0.0"
   },
   "repository": {
     "type": "git",
@@ -40,35 +42,46 @@
   "homepage": "https://github.com/CognitiveScale/cortex-cli",
   "dependencies": {
     "chalk": "4.1.2",
+    "cli-progress": "3.9.1",
+    "dockerode": "3.3.1",
     "cli-table3": "0.6.2",
     "commander": "9.2.0",
     "debug": "4.3.4",
     "find-package-json": "1.2.0",
     "form-data": "4.0.0",
     "get-stream": "6.0.1",
+    "gh-got": "9.0.0",
     "glob": "7.2.0",
     "got": "11.8.3",
     "graphql": "15.6.1",
     "graphql-request": "3.7.0",
+    "inquirer": "8.2.0",
     "is-installed-globally": "0.4.0",
+    "istextorbinary": "6.0.0",
     "jmespath": "0.16.0",
     "joi": "17.6.0",
     "jose-node-cjs-runtime": "4.6.2",
     "js-yaml": "4.1.0",
+    "keytar": "7.8.0",
     "lodash": "4.17.21",
+    "minimatch": "3.0.4",
+    "mixin-deep": "2.0.1",
     "moment": "2.29.3",
-    "npm-registry-fetch": "12.0.1",
-    "plop": "2.7.6",
+    "npm-registry-fetch": "12.0.0",
+    "open": "8.4.0",
+    "treeify": "1.1.0",
     "prompts": "2.4.2",
     "semver": "7.3.7",
     "url-join": "4.0.1",
     "url-parse": "1.5.10",
+    "uuid": "8.3.2",
     "yauzl": "2.10.0"
   },
   "devDependencies": {
     "audit-ci": "5.1.2",
     "chai": "4.3.6",
     "chai-as-promised": "7.1.1",
+    "cross-env": "7.0.3",
     "eslint": "8.13.0",
     "eslint-config-airbnb-base": "15.0.0",
     "eslint-plugin-import": "2.26.0",

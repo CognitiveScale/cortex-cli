@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+const path = require('path');
 const commander = require('commander');
 const chai = require('chai');
 const mockedEnv = require('mocked-env');
@@ -36,7 +37,9 @@ describe('Upload Directory', () => {
         const command = new UploadContent(program);
         const contentKey = '.shared';
 
-        const filePath = `${__dirname}/cortex`;
+        const dirname = __dirname.split(path.sep).join(path.posix.sep);
+
+        const filePath = path.join(dirname, 'cortex');
         const options = {
             recursive: true,
             test: true,
@@ -44,18 +47,18 @@ describe('Upload Directory', () => {
 
         const expectedFileDicts = [
             {
-                canonical: `${__dirname}/cortex/config`,
+                canonical: path.posix.join(dirname, 'cortex', 'config'),
                 relative: 'config',
-                size: 919,
+                size: 1478,
             },
             {
-                canonical: `${__dirname}/cortex/pat-file.json`,
+                canonical: path.posix.join(dirname, 'cortex', 'pat-file.json'),
                 relative: 'pat-file.json',
                 size: 326,
             },
             {
-                canonical: `${__dirname}/cortex/sample/upload/config`,
-                relative: 'sample/upload/config',
+                canonical: path.posix.join(dirname, 'cortex', 'sample', 'upload', 'config'),
+                relative: path.join('sample', 'upload', 'config'),
                 size: 483,
             },
         ];
