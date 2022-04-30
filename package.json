@@ -62,7 +62,7 @@
     "joi": "17.6.0",
     "jose-node-cjs-runtime": "4.6.2",
     "js-yaml": "4.1.0",
-    "keytar": "7.8.0",
+    "keytar": "7.9.0",
     "lodash": "4.17.21",
     "minimatch": "3.0.4",
     "mixin-deep": "2.0.1",
