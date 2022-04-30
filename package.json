@@ -42,7 +42,7 @@
   "homepage": "https://github.com/CognitiveScale/cortex-cli",
   "dependencies": {
     "chalk": "4.1.2",
-    "cli-progress": "3.9.1",
+    "cli-progress": "3.10.0",
     "dockerode": "3.3.1",
     "cli-table3": "0.6.2",
     "commander": "9.2.0",
