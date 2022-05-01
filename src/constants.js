@@ -41,8 +41,8 @@ module.exports.ALLOWED_QUERY_FIELDS = {
         sort: ['name', 'title', 'description', 'modelId', 'createdAt', 'updatedAt'],
     },
     RUN: {
-        filter: ['runId', 'title', '_createdAt', 'startTime', 'endTime', 'took', 'experimentName'],
-        sort: ['runId', 'title', '_createdAt', 'startTime', 'endTime', 'took', 'experimentName', '_updatedAt'],
+        filter: ['runId', '_createdAt', 'startTime', 'endTime', 'took', 'experimentName'],
+        sort: ['runId', '_createdAt', 'startTime', 'endTime', 'took', 'experimentName', '_updatedAt'],
     },
     MODEL: {
         filter: ['name', 'title', 'description', 'createdBy', 'type', 'status'],
@@ -70,6 +70,6 @@ module.exports.DEFAULT_LIST_LIMIT_COUNT = '20';
 
 module.exports.DEFAULT_LIST_SKIP_COUNT = '0';
 
-module.exports.DEFAULT_LIST_SORT_PARAMS = '{"updatedAt": -1}';
+module.exports.DEFAULT_LIST_SORT_PARAMS = '{"updatedAt": -1}'; // skills, agents, actions, connections, models, experiments, types
 
-module.exports.DEFAULT_LIST_SORT_PARAMS_2 = '{"_updatedAt": -1}';
+module.exports.DEFAULT_LIST_SORT_PARAMS_2 = '{"_updatedAt": -1}'; // projects, missions, campaigns, run, assessment, snapshot

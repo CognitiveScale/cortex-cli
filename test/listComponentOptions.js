@@ -87,10 +87,10 @@ describe('List runs command option check', () => {
         const { validOptions, errorDetails } = validateOptions(options, 'RUN');
         assert.ok(validOptions === false, 'Invalid options');
         assert.ok(JSON.stringify(errorDetails).includes(
-            'Invalid filter params. Allowed fields: runId,title,_createdAt,startTime,endTime,took,experimentName') === true,
+            'Invalid filter params. Allowed fields: runId,_createdAt,startTime,endTime,took,experimentName') === true,
             'Is invalid filter');
         assert.ok(JSON.stringify(errorDetails).includes(
-            'Invalid sort params. Allowed fields: runId,title,_createdAt,startTime,endTime,took,experimentName') === true,
+            'Invalid sort params. Allowed fields: runId,_createdAt,startTime,endTime,took,experimentName') === true,
             'Is invalid sort');
     });
 });
