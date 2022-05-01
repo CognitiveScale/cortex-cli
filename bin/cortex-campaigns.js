@@ -20,7 +20,7 @@ const chalk = require('chalk');
 const program = require('commander');
 
 const { withCompatibilityCheck } = require('../src/compatibility');
-const { DEFAULT_LIST_SKIP_COUNT, DEFAULT_LIST_LIMIT_COUNT, DEFAULT_LIST_SORT_PARAMS } = require('../src/constants');
+const { DEFAULT_LIST_SKIP_COUNT, DEFAULT_LIST_LIMIT_COUNT, DEFAULT_LIST_SORT_PARAMS_2 } = require('../src/constants');
 
 const {
     ListCampaignsCommand,
@@ -48,7 +48,7 @@ program
     .option('--filter [filter]', 'A Mongo style filter to use.')
     .option('--limit [limit]', 'Limit number of records', DEFAULT_LIST_LIMIT_COUNT)
     .option('--skip [skip]', 'Skip number of records', DEFAULT_LIST_SKIP_COUNT)
-    .option('--sort [sort]', 'A Mongo style sort statement to use in the query.', DEFAULT_LIST_SORT_PARAMS)
+    .option('--sort [sort]', 'A Mongo style sort statement to use in the query.', DEFAULT_LIST_SORT_PARAMS_2)
     .action(withCompatibilityCheck((options) => {
         try {
             new ListCampaignsCommand(program).execute(options);

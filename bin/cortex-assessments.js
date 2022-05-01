@@ -33,7 +33,7 @@ const {
     ExportAssessmentReportCommand,
     DependencyTreeCommand,
 } = require('../src/commands/assessments');
-const { DEFAULT_LIST_SKIP_COUNT, DEFAULT_LIST_LIMIT_COUNT, DEFAULT_LIST_SORT_PARAMS } = require('../src/constants');
+const { DEFAULT_LIST_SKIP_COUNT, DEFAULT_LIST_LIMIT_COUNT, DEFAULT_LIST_SORT_PARAMS_2 } = require('../src/constants');
 
 program.name('cortex assessments');
 program.description('Work with Cortex Assessments');
@@ -134,7 +134,7 @@ program
     .option('--filter [filter]', 'A Mongo style filter to use.')
     .option('--limit [limit]', 'Limit number of records', DEFAULT_LIST_LIMIT_COUNT)
     .option('--skip [skip]', 'Skip number of records', DEFAULT_LIST_SKIP_COUNT)
-    .option('--sort [sort]', 'A Mongo style sort statement to use in the query.', DEFAULT_LIST_SORT_PARAMS)
+    .option('--sort [sort]', 'A Mongo style sort statement to use in the query.', DEFAULT_LIST_SORT_PARAMS_2)
 
     .action(withCompatibilityCheck((options) => {
         try {
