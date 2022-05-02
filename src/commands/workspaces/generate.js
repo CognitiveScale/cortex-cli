@@ -21,6 +21,7 @@ const _ = {
   set: require('lodash/set'),
   mean: require('lodash/mean'),
   find: require('lodash/find'),
+  drop: require('lodash/drop'),
 };
 
 const { WorkspaceConfigureCommand } = require('./configure');
@@ -99,7 +100,7 @@ module.exports.WorkspaceGenerateCommand = class WorkspaceGenerateCommand {
       const data = JSON.parse((await this.readFile(value.path)).toString());
       return {
         name: data.title,
-        value,
+        value: { ...data, path: value.path },
       };
     }));
 
@@ -163,6 +164,21 @@ module.exports.WorkspaceGenerateCommand = class WorkspaceGenerateCommand {
         const destinationPath = path.resolve(destination || process.cwd());
         const treeObj = {};
 
+        const generatedFiles = _.map(templateFiles, (f) => {
+          try {
+            const rootPathComponents = templateFolder.split('/');
+            const destFile = _.drop(f.path.split('/'), rootPathComponents.length);
+            const targetPath = path.join(...destFile);
+  
+            return _.template(targetPath, { interpolate: /__([\s\S]+?)__/g })({
+                skillname: generateNameFromTitle(template.name),
+              });
+          } catch (err) {
+            printError(`Error processing template file ${f.path}: ${err.message}`);
+          }
+          return undefined;
+        }).join('<br>');
+
         console.log('');
 
         await Promise.all(
@@ -172,7 +188,8 @@ module.exports.WorkspaceGenerateCommand = class WorkspaceGenerateCommand {
               if (fileName !== METADATA_FILENAME) {
                 const templateVars = {
                   skillname: generateNameFromTitle(template.name),
-                  repo: { url: template.registry },
+                  generatedFiles,
+                  template: template.template,
                 };
 
                 let buf = await this.readFile(f.path);
