@@ -43,9 +43,9 @@ program
     .option('--no-compat', 'Ignore API compatibility checks')
     .option('--profile [profile]', 'The profile to use')
     .option('--project [project]', 'The project to use')
-    .action(withCompatibilityCheck((skillNames, options) => {
+    .action(withCompatibilityCheck(async (skillNames, options) => {
         try {
-            new DeploySkillCommand(program).execute(skillNames, options);
+            await new DeploySkillCommand(program).execute(skillNames, options);
         } catch (err) {
             console.error(chalk.red(err.message));
         }
@@ -63,9 +63,9 @@ program
     .option('-o, --output <json|yaml|k8s>', 'Format output as yaml or k8s resource')
     .option('--query [query]', 'A JMESPath query to use in filtering the response data.')
     .option('--verbose', 'Verbose output')
-    .action(withCompatibilityCheck((skillName, options) => {
+    .action(withCompatibilityCheck(async (skillName, options) => {
         try {
-            new DescribeSkillCommand(program).execute(skillName, options);
+            await new DescribeSkillCommand(program).execute(skillName, options);
         } catch (err) {
             console.error(chalk.red(err.message));
         }
@@ -81,9 +81,9 @@ program
     .option('--project [project]', 'The project to use')
     .option('--params [params]', 'JSON params to send to the action')
     .option('--params-file [paramsFile]', 'A file containing either JSON or YAML formatted params')
-    .action(withCompatibilityCheck((skillName, inputName, options) => {
+    .action(withCompatibilityCheck(async (skillName, inputName, options) => {
         try {
-            new InvokeSkillCommand(program).execute(skillName, inputName, options);
+            await new InvokeSkillCommand(program).execute(skillName, inputName, options);
         } catch (err) {
             console.error(chalk.red(err.message));
         }
@@ -107,9 +107,9 @@ program
     .option('--skip [skip]', 'Skip number of records', DEFAULT_LIST_SKIP_COUNT)
     .option('--sort [sort]', 'A Mongo style sort statement to use in the query.')
 
-    .action(withCompatibilityCheck((options) => {
+    .action(withCompatibilityCheck(async (options) => {
         try {
-            new ListSkillsCommand(program).execute(options);
+            await new ListSkillsCommand(program).execute(options);
         } catch (err) {
             console.error(chalk.red(err.message));
         }
@@ -124,9 +124,9 @@ program
     .option('--json', 'Output results using JSON')
     .option('--profile [profile]', 'The profile to use')
     .option('--project [project]', 'The project to use')
-    .action(withCompatibilityCheck((skillName, options) => {
+    .action(withCompatibilityCheck(async (skillName, options) => {
         try {
-            new DeleteSkillCommand(program).execute(skillName, options);
+            await new DeleteSkillCommand(program).execute(skillName, options);
         } catch (err) {
             console.error(chalk.red(err.message));
         }
@@ -144,9 +144,9 @@ program
     .option('--podspec [podspec]', 'A file containing either a JSON or YAML formatted pod spec to merge with the skill definition, used for specifying resources (like memory, ephemeral storage, CPUs, and GPUs) and tolerations (like allowing pods to be scheduled on tainted nodes).')
     .option('-y, --yaml', 'Use YAML for skill definition format')
     .option('--scaleCount [count]', 'Scale count, only used for daemon action types')
-    .action(withCompatibilityCheck((skillDefinition, options) => {
+    .action(withCompatibilityCheck(async (skillDefinition, options) => {
         try {
-            new SaveSkillCommand(program).execute(skillDefinition, options);
+            await new SaveSkillCommand(program).execute(skillDefinition, options);
         } catch (err) {
             console.error(chalk.red(err.message));
         }
@@ -159,9 +159,9 @@ program
     .option('--no-compat', 'Ignore API compatibility checks')
     .option('--profile [profile]', 'The profile to use')
     .option('--project [project]', 'The project to use')
-    .action(withCompatibilityCheck((skillNames, options) => {
+    .action(withCompatibilityCheck(async (skillNames, options) => {
         try {
-            new UndeploySkillCommand(program).execute(skillNames, options);
+            await new UndeploySkillCommand(program).execute(skillNames, options);
         } catch (err) {
             console.error(chalk.red(err.message));
         }
@@ -177,9 +177,9 @@ program
     // TODO enable when we want to support tasks
 
     // .option('--type [type]', 'The type of action logs to fetch [skill|task]')
-    .action(withCompatibilityCheck((skillName, actionName, options) => {
+    .action(withCompatibilityCheck(async (skillName, actionName, options) => {
         try {
-            new SkillLogsCommand(program).execute(skillName, actionName, options);
+            await new SkillLogsCommand(program).execute(skillName, actionName, options);
         } catch (err) {
             console.error(chalk.red(err.message));
         }
