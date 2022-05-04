@@ -65,6 +65,9 @@ module.exports = class Content {
                         'Content-Type': contentType,
                     },
                 }),
+                // https://github.com/sindresorhus/got/blob/HEAD/documentation/3-streams.md#stream-api
+                // new stream.PassThrough() is required to catch errors.
+                new stream.PassThrough(),
             );
             return { success: true, message };
         } catch (err) {
