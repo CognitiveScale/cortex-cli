@@ -37,12 +37,12 @@ program
     .description('List session definitions')
     .alias('l')
     .option('--no-compat', 'Ignore API compatibility checks')
-    .option('--limit [limit]', 'Number of sessions to list')
-    .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
-    .option('--profile [profile]', 'The profile to use')
-    .option('--project [project]', 'The project to use')
+    .option('--limit <limit>', 'Number of sessions to list')
+    .option('--color [boolean]', 'Turn on/off colors for JSON output.', 'true')
+    .option('--profile <profile>', 'The profile to use')
+    .option('--project <project>', 'The project to use')
     .option('--json', 'Output results using JSON')
-    .option('--query [query]', 'A JMESPath query to use in filtering the response data. Ignored if output format is not JSON.')
+    .option('--query <query>', 'A JMESPath query to use in filtering the response data. Ignored if output format is not JSON.')
     .action(withCompatibilityCheck((options) => {
         try {
             new ListSessionsCommand(program).execute(options);
@@ -57,10 +57,10 @@ program
     .description('Describe session')
     .alias('get')
     .option('--no-compat', 'Ignore API compatibility checks')
-    .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
-    .option('--profile [profile]', 'The profile to use')
-    .option('--project [project]', 'The project to use')
-    .option('--query [query]', 'A JMESPath query to use in filtering the response data.')
+    .option('--color [boolean]', 'Turn on/off colors for JSON output.', 'true')
+    .option('--profile <profile>', 'The profile to use')
+    .option('--project <project>', 'The project to use')
+    .option('--query <query>', 'A JMESPath query to use in filtering the response data.')
     .option('--verbose', 'Verbose output')
     .action(withCompatibilityCheck((sessionName, options) => {
         try {
@@ -75,9 +75,9 @@ program
     .command('delete <sessionId>')
     .description('Delete a session')
     .option('--no-compat', 'Ignore API compatibility checks')
-    .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
-    .option('--profile [profile]', 'The profile to use')
-    .option('--project [project]', 'The project to use')
+    .option('--color [boolean]', 'Turn on/off colors for JSON output.', 'true')
+    .option('--profile <profile>', 'The profile to use')
+    .option('--project <project>', 'The project to use')
     .action(withCompatibilityCheck((sessionName, options) => {
         try {
             new DeleteSessionCommand(program).execute(sessionName, options);
@@ -91,9 +91,9 @@ program
     .command('save <sessionDefinition>')
     .description('Save a session definition')
     .option('--no-compat', 'Ignore API compatibility checks')
-    .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
-    .option('--profile [profile]', 'The profile to use')
-    .option('--project [project]', 'The project to use')
+    .option('--color [boolean]', 'Turn on/off colors for JSON output.', 'true')
+    .option('--profile <profile>', 'The profile to use')
+    .option('--project <project>', 'The project to use')
     .option('-y, --yaml', 'Use YAML for session definition format')
     .action(withCompatibilityCheck((sessionDefinition, options) => {
         try {

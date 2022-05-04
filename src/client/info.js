@@ -15,8 +15,8 @@
  */
 
 const debug = require('debug')('cortex:cli');
-const { got } = require('./apiutils');
-const { constructError, getUserAgent } = require('../commands/utils');
+const { got, getUserAgent } = require('./apiutils');
+const { constructError } = require('../commands/utils');
 
 module.exports = class Info {
     constructor(cortexUrl) {
@@ -29,8 +29,7 @@ module.exports = class Info {
         debug('getInfo() => %s', endpoint);
         return got
             .get(endpoint, {
-                headers: {},
-                'user-agent': getUserAgent(),
+                headers: { 'user-agent': getUserAgent() },
             }).json()
             .then((result) => result)
             .catch((err) => constructError(err));

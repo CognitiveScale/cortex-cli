@@ -42,14 +42,14 @@ program
     .description('List Missions of the Campaign')
     .option('--json', 'Output results using JSON')
     .option('--no-compat', 'Ignore API compatibility checks')
-    .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
-    .option('--profile [profile]', 'The profile to use')
-    .option('--project [project]', 'The project to use')
-    .option('--query [query]', 'A JMESPath query to use in filtering the response data. Ignored if output format is not JSON.')
-    .option('--filter [filter]', 'A Mongo style filter to use.')
-    .option('--limit [limit]', 'Limit number of records', DEFAULT_LIST_LIMIT_COUNT)
-    .option('--skip [skip]', 'Skip number of records', DEFAULT_LIST_SKIP_COUNT)
-    .option('--sort [sort]', 'A Mongo style sort statement to use in the query.')
+    .option('--color [boolean]', 'Turn on/off colors for JSON output.', 'true')
+    .option('--profile <profile>', 'The profile to use')
+    .option('--project <project>', 'The project to use')
+    .option('--query <query>', 'A JMESPath query to use in filtering the response data. Ignored if output format is not JSON.')
+    .option('--filter <filter>', 'A Mongo style filter to use.')
+    .option('--limit <limit>', 'Limit number of records', DEFAULT_LIST_LIMIT_COUNT)
+    .option('--skip <skip>', 'Skip number of records', DEFAULT_LIST_SKIP_COUNT)
+    .option('--sort <sort>', 'A Mongo style sort statement to use in the query.')
     .action(withCompatibilityCheck((campaignName, options) => {
         try {
             new ListMissionsCommand(program).execute(campaignName, options);
@@ -63,9 +63,9 @@ program
     .alias('get')
     .description('Describe the selected Missions of the Campaign')
     .option('--no-compat', 'Ignore API compatibility checks')
-    .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
-    .option('--profile [profile]', 'The profile to use')
-    .option('--project [project]', 'The project to use')
+    .option('--color [boolean]', 'Turn on/off colors for JSON output.', 'true')
+    .option('--profile <profile>', 'The profile to use')
+    .option('--project <project>', 'The project to use')
     .action(withCompatibilityCheck((campaignName, missionName, options) => {
         try {
             new DescribeMissionCommand(program).execute(campaignName, missionName, options);
@@ -78,9 +78,9 @@ program
     .command('deploy <campaignName> <missionName>')
     .description('Deploy the selected Missions of the Campaign')
     .option('--no-compat', 'Ignore API compatibility checks')
-    .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
-    .option('--profile [profile]', 'The profile to use')
-    .option('--project [project]', 'The project to use')
+    .option('--color [boolean]', 'Turn on/off colors for JSON output.', 'true')
+    .option('--profile <profile>', 'The profile to use')
+    .option('--project <project>', 'The project to use')
     .action(withCompatibilityCheck((campaignName, missionName, options) => {
         try {
             new DeployMissionCommand(program).execute(campaignName, missionName, options);
@@ -93,11 +93,11 @@ program
     .command('invoke <campaignName> <missionName>')
     .description('Invoke the mission')
     .option('--no-compat', 'Ignore API compatibility checks')
-    .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
-    .option('--profile [profile]', 'The profile to use')
-    .option('--project [project]', 'The project to use')
-    .option('--params [params]', 'JSON params to send to the action')
-    .option('--params-file [paramsFile]', 'A file containing either JSON or YAML formatted params')
+    .option('--color [boolean]', 'Turn on/off colors for JSON output.', 'true')
+    .option('--profile <profile>', 'The profile to use')
+    .option('--project <project>', 'The project to use')
+    .option('--params <params>', 'JSON params to send to the action')
+    .option('--params-file <paramsFile>', 'A file containing either JSON or YAML formatted params')
     .action(withCompatibilityCheck((campaignName, missionName, options) => {
         try {
             let params = {};
@@ -136,9 +136,9 @@ program
     .command('undeploy <campaignName> <missionName>')
     .description('Undeploy the selected Missions of the Campaign')
     .option('--no-compat', 'Ignore API compatibility checks')
-    .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
-    .option('--profile [profile]', 'The profile to use')
-    .option('--project [project]', 'The project to use')
+    .option('--color [boolean]', 'Turn on/off colors for JSON output.', 'true')
+    .option('--profile <profile>', 'The profile to use')
+    .option('--project <project>', 'The project to use')
     .action(withCompatibilityCheck((campaignName, missionName, options) => {
         try {
             new UndeployMissionCommand(program).execute(campaignName, missionName, options);

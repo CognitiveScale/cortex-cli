@@ -1,5 +1,6 @@
 const _ = require('lodash');
 const { GraphQLClient, gql } = require('graphql-request');
+const { defaultHeaders } = require('./apiutils');
 
 module.exports = class ApiServerClient {
     constructor(cortexUrl) {
@@ -9,9 +10,7 @@ module.exports = class ApiServerClient {
 
     _client(token) {
         return new GraphQLClient(this.endpoint, {
-            headers: {
-                Authorization: `bearer ${token}`,
-            },
+            headers: defaultHeaders(token),
             redirect: 'error',
         });
     }

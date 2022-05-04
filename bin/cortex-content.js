@@ -37,12 +37,12 @@ program
     .description('List content')
     .alias('l')
     .option('--no-compat', 'Ignore API compatibility checks')
-    .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
-    .option('--profile [profile]', 'The profile to use')
-    .option('--project [project]', 'The project to use')
+    .option('--color [boolean]', 'Turn on/off colors for JSON output.', 'true')
+    .option('--profile <profile>', 'The profile to use')
+    .option('--project <project>', 'The project to use')
     .option('--json', 'Output results using JSON')
-    .option('--query [query]', 'A JMESPath query to use in filtering the response data. Ignored if output format is not JSON.')
-    .option('--prefix [prefix]', 'Filter contents with the given prefix.')
+    .option('--query <query>', 'A JMESPath query to use in filtering the response data. Ignored if output format is not JSON.')
+    .option('--prefix <prefix>', 'Filter contents with the given prefix.')
     .action(withCompatibilityCheck((options) => {
         try {
             new ListContent(program).execute(options);
@@ -59,11 +59,11 @@ program
     .option('--test', 'Show what would be uploaded along with file size')
     .option('--recursive', 'Recursively walk <filePath> and prefix each path stored with <contentKey>')
     .option('--no-compat', 'Ignore API compatibility checks')
-    .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
-    .option('--profile [profile]', 'The profile to use')
-    .option('--project [project]', 'The project to use')
-    .option('--content-type [MIME type]', 'Sets the `Content-Type` or MIME type of the content ( default: application/octet-stream )')
-    .option('--chunkSize [int]', 'Number of files to simultaneous upload', 10)
+    .option('--color [boolean]', 'Turn on/off colors for JSON output.', 'true')
+    .option('--profile <profile>', 'The profile to use')
+    .option('--project <project>', 'The project to use')
+    .option('--content-type <MIME type>', 'Sets the `Content-Type` or MIME type of the content ( default: application/octet-stream )')
+    .option('--chunkSize <int>', 'Number of files to simultaneous upload', 10)
     .action(withCompatibilityCheck((contentKey, filePath, options) => {
         try {
             new UploadContent(program).execute(contentKey, filePath, options);
@@ -77,9 +77,9 @@ program
     .command('delete <contentKey>')
     .description('Delete content')
     .option('--no-compat', 'Ignore API compatibility checks')
-    .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
-    .option('--profile [profile]', 'The profile to use')
-    .option('--project [project]', 'The project to use')
+    .option('--color [boolean]', 'Turn on/off colors for JSON output.', 'true')
+    .option('--profile <profile>', 'The profile to use')
+    .option('--project <project>', 'The project to use')
     .action(withCompatibilityCheck((contentKey, options) => {
         try {
             new DeleteContent(program).execute(contentKey, options);
@@ -94,9 +94,9 @@ program
     .description('Download content')
     .option('--progress', 'Show download progress')
     .option('--no-compat', 'Ignore API compatibility checks')
-    .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
-    .option('--profile [profile]', 'The profile to use')
-    .option('--project [project]', 'The project to use')
+    .option('--color [boolean]', 'Turn on/off colors for JSON output.', 'true')
+    .option('--profile <profile>', 'The profile to use')
+    .option('--project <project>', 'The project to use')
     .action(withCompatibilityCheck((contentKey, options) => {
         try {
             new DownloadContent(program).execute(contentKey, options);

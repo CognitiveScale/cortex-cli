@@ -15,8 +15,8 @@
  */
 
 const debug = require('debug')('cortex:cli');
-const { got } = require('./apiutils');
-const { constructError, getUserAgent, checkProject } = require('../commands/utils');
+const { got, defaultHeaders } = require('./apiutils');
+const { constructError, checkProject } = require('../commands/utils');
 
 module.exports = class Connections {
     constructor(cortexUrl) {
@@ -35,8 +35,7 @@ module.exports = class Connections {
         if (skip) query.skip = skip;
         return got
             .get(endpoint, {
-                headers: { Authorization: `Bearer ${token}` },
-                'user-agent': getUserAgent(),
+                headers: defaultHeaders(token),
                 searchParams: query,
             }).json()
             .then((result) => ({ success: true, result }))
@@ -50,8 +49,7 @@ module.exports = class Connections {
         try {
             const message = await got
             .post(endpoint, {
-                headers: { Authorization: `Bearer ${token}` },
-                'user-agent': getUserAgent(),
+                headers: defaultHeaders(token),
                 json: connObj,
             }).json();
             return { success: true, message };
@@ -66,8 +64,7 @@ module.exports = class Connections {
         debug('describeConnection(%s) => %s', connectionName, endpoint);
         return got
             .get(endpoint, {
-                headers: { Authorization: `Bearer ${token}` },
-                'user-agent': getUserAgent(),
+                headers: defaultHeaders(token),
             }).json()
             .then((result) => ({ success: true, result }))
             .catch((err) => constructError(err));
@@ -79,8 +76,7 @@ module.exports = class Connections {
         debug('deleteConnection(%s) => %s', connectionName, endpoint);
         return got
             .delete(endpoint, {
-                headers: { Authorization: `Bearer ${token}` },
-                'user-agent': getUserAgent(),
+                headers: defaultHeaders(token),
             }).json()
             .then((result) => ({ success: true, result }))
             .catch((err) => constructError(err));
@@ -95,8 +91,7 @@ module.exports = class Connections {
         if (skip) query.skip = skip;
           return got
             .get(endpoint, {
-                headers: { Authorization: `Bearer ${token}` },
-                'user-agent': getUserAgent(),
+                headers: defaultHeaders(token),
                 searchParams: query,
             }).json()
             .then((result) => ({ success: true, result }))

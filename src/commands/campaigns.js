@@ -95,11 +95,10 @@ module.exports.ExportCampaignCommand = class ExportCampaignCommand {
         const project = options.project || profile.project;
         const path = `./${options.o || `${campaignName}.amp`}`;
         try {
-            cli.exportCampaign(project, profile.token, campaignName, options.deployable, path)
-                .then(() => printSuccess(`Successfully exported Campaign ${campaignName} from project ${project} to file ${path}`))
-                .catch((e) => printError(`Failed to export Campaign ${campaignName} from project ${project}. Error: ${e}`));
-        } catch (err) {
-            printError(`Failed to export campaign: ${err.status} ${err.message}`, options);
+            await cli.exportCampaign(project, profile.token, campaignName, options.deployable, path);
+            printSuccess(`Successfully exported Campaign ${campaignName} from project ${project} to file ${path}`);
+        } catch (e) {
+            printError(`Failed to export Campaign ${campaignName} from project ${project}. Error: ${e}`);
         }
     }
 };

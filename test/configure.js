@@ -16,6 +16,7 @@
 
 const mockedEnv = require('mocked-env');
 const _ = require('lodash');
+const assert = require('assert');
 const os = require('os');
 const path = require('path');
 const fs = require('fs');
@@ -56,9 +57,11 @@ describe('configure', () => {
         delete require.cache[require.resolve('../bin/cortex-configure')];
 
         sandbox = sinon.createSandbox();
+        sandbox.stub(process, 'exit');
         sandbox.stub(Info.prototype, 'getInfo').callsFake(() => ({
-                serverTs: iatDate,
+            serverTs: iatDate,
         }));
+
         printSpy = sandbox.spy(console, 'log');
         errorSpy = sandbox.spy(console, 'error');
         fs.copyFileSync('./test/cortex/config', path.join(tmpDir, 'config'));
@@ -143,7 +146,7 @@ describe('configure', () => {
         await program.parseAsync(['node', 'configure', 'token', '--profile', 'nothere']);
         const output = getErrorLines();
         expect(output[0]).to.contain('Profile with name "nothere" could not be located in your configuration.');
-        expect(output).to.length(1);
+        assert(process.exit.calledWith(1));
     });
 
 

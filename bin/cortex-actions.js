@@ -26,13 +26,6 @@ const {
     DescribeActionCommand,
     DeleteActionCommand,
     DeployActionCommand,
-    // TODO re-add logs/task calls
-    // GetLogsCommand,
-    // JobTaskListActionCommand,
-    // TaskCancelActionCommand,
-    // TaskLogsActionCommand,
-    // TaskStatsActionCommand,
-    // TaskStatusActionCommand,
 } = require('../src/commands/actions');
 const { DEFAULT_LIST_SKIP_COUNT, DEFAULT_LIST_LIMIT_COUNT } = require('../src/constants');
 
@@ -45,15 +38,15 @@ program
     .description('List the deployed actions')
     .alias('l')
     .option('--no-compat', 'Ignore API compatibility checks')
-    .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
-    .option('--profile [profile]', 'The profile to use')
-    .option('--project [project]', 'The project to use')
+    .option('--color [boolean]', 'Turn on/off colors for JSON output.', 'true')
+    .option('--profile <profile>', 'The profile to use')
+    .option('--project <project>', 'The project to use')
     .option('--json', 'Output results using JSON')
-    .option('--query [query]', 'A JMESPath query to use in filtering the response data. Ignored if output format is not JSON.')
-    .option('--filter [filter]', 'A Mongo style filter to use.')
-    .option('--limit [limit]', 'Limit number of records', DEFAULT_LIST_LIMIT_COUNT)
-    .option('--skip [skip]', 'Skip number of records', DEFAULT_LIST_SKIP_COUNT)
-    .option('--sort [sort]', 'A Mongo style sort statement to use in the query.')
+    .option('--query <query>', 'A JMESPath query to use in filtering the response data. Ignored if output format is not JSON.')
+    .option('--filter <filter>', 'A Mongo style filter to use.')
+    .option('--limit <limit>', 'Limit number of records', DEFAULT_LIST_LIMIT_COUNT)
+    .option('--skip <skip>', 'Skip number of records', DEFAULT_LIST_SKIP_COUNT)
+    .option('--sort <sort>', 'A Mongo style sort statement to use in the query.')
     .action(withCompatibilityCheck((options) => {
         try {
             new ListActionsCommand(program).execute(options);
@@ -68,10 +61,10 @@ program
     .alias('get')
     .description('Describe an action')
     .option('--no-compat', 'Ignore API compatibility checks')
-    .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
-    .option('--profile [profile]', 'The profile to use')
-    .option('--project [project]', 'The project to use')
-    .option('--query [query]', 'A JMESPath query to use in filtering the response data.')
+    .option('--color [boolean]', 'Turn on/off colors for JSON output.', 'true')
+    .option('--profile <profile>', 'The profile to use')
+    .option('--project <project>', 'The project to use')
+    .option('--query <query>', 'A JMESPath query to use in filtering the response data.')
     .option('-d, --download', 'Download code binary in response')
     .action(withCompatibilityCheck((actionName, options) => {
         try {
@@ -86,9 +79,9 @@ program
     .command('delete <actionName>')
     .description('Delete an action')
     .option('--no-compat', 'Ignore API compatibility checks')
-    .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
-    .option('--profile [profile]', 'The profile to use')
-    .option('--project [project]', 'The project to use')
+    .option('--color [boolean]', 'Turn on/off colors for JSON output.', 'true')
+    .option('--profile <profile>', 'The profile to use')
+    .option('--project <project>', 'The project to use')
     .action(withCompatibilityCheck((actionName, options) => {
         try {
             new DeleteActionCommand(program).execute(actionName, options);
@@ -97,43 +90,26 @@ program
         }
     }));
 
-// // Get logs Action
-// program
-//     .command('logs <actionName>')
-//     .description('Get logs for an action')
-//     .option('--no-compat', 'Ignore API compatibility checks')
-//     .option('--json', 'Return raw JSON response')
-//     .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
-//     .option('--profile [profile]', 'The profile to use')
-//     .option('--project [project]', 'The project to use')
-//     .action(withCompatibilityCheck((actionName, options) => {
-//         try {
-//             new GetLogsCommand(program).execute(actionName, options);
-//         } catch (err) {
-//             console.error(chalk.red(err.message));
-//         }
-//     }));
-
 // Deploy Action
 program
-    .command('deploy [actionDefinition]')
+    .command('deploy <actionDefinition>')
     .alias('save')
     .description('Deploy an action')
     .storeOptionsAsProperties(false)
-    .option('--name, --actionName [name]', 'Action name')
-    .option('--type, --actionType [job/daemon]', 'Type of action')
-    .option('--cmd [cmd]', 'Command to be executed') // '["--daemon"]'
-    .option('--image, --docker [image]', 'Docker image to use as the runner')
-    .option('--environmentVariables [environmentVariables]', 'Docker container environment variables, only used for daemon action types')
-    .option('--jobTimeout [jobTimeout]', 'Job Timeout in seconds until the job is marked as FAILED (default: no timeout), only used for job action types')
-    .option('-k, --k8sResource [file...]', 'Additional kubernetes resources deployed and owned by the skill, provide as last option specified or end list of files with "--"')
+    .option('--name, --actionName <name>', 'Action name')
+    .option('--type, --actionType <job|daemon>', 'Type of action')
+    .option('--cmd <cmd>', 'Command to be executed') // '<"--daemon">'
+    .option('--image, --docker <name[:tag]>', 'Docker image to use as the runner')
+    .option('--environmentVariables <environmentVariables>', 'Docker container environment variables, only used for daemon action types')
+    .option('--jobTimeout <jobTimeout>', 'Job Timeout in seconds until the job is marked as FAILED (default: no timeout), only used for job action types')
+    .option('-k, --k8sResource <file...>', 'Additional kubernetes resources deployed and owned by the skill, provide as last option specified or end list of files with "--"')
     .option('--no-compat', 'Ignore API compatibility checks')
-    .option('--podspec [podspec]', 'A file containing either a JSON or YAML formatted pod spec to merge with the action definition, used for specifying resources (like memory, ephemeral storage, CPUs, and GPUs) and tolerations (like allowing pods to be scheduled on tainted nodes).')
-    .option('--port [port]', 'Docker port, only used for daemon action types') // '9091'
-    .option('--profile [profile]', 'The profile to use')
-    .option('--project [project]', 'The project to use')
-    .option('--scaleCount [count]', 'Scale count, only used for daemon action types')
-    .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
+    .option('--podspec <podspec>', 'A file containing either a JSON or YAML formatted pod spec to merge with the action definition, used for specifying resources (like memory, ephemeral storage, CPUs, and GPUs) and tolerations (like allowing pods to be scheduled on tainted nodes).')
+    .option('--port <port>', 'Docker port, only used for daemon action types') // '9091'
+    .option('--profile <profile>', 'The profile to use')
+    .option('--project <project>', 'The project to use')
+    .option('--scaleCount <count>', 'Scale count, only used for daemon action types')
+    .option('--color [boolean]', 'Turn on/off colors for JSON output.', 'true')
     .option('--push-docker', 'Push Docker image to the Cortex registry.')
     .option('-y, --yaml', 'Use YAML format')
     .action(withCompatibilityCheck((actionName, options) => {
