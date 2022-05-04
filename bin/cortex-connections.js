@@ -20,9 +20,7 @@ const chalk = require('chalk');
 const program = require('commander');
 
 const { withCompatibilityCheck } = require('../src/compatibility');
-const {
-    DEFAULT_LIST_SKIP_COUNT, DEFAULT_LIST_LIMIT_COUNT, DEFAULT_LIST_SORT_PARAMS, GET_DEFAULT_SORT_CLI_OPTION,
-} = require('../src/constants');
+const { DEFAULT_LIST_SKIP_COUNT, DEFAULT_LIST_LIMIT_COUNT } = require('../src/constants');
 
 const {
     ListConnections,
@@ -41,14 +39,15 @@ program
     .description('List connections definitions')
     .alias('l')
     .option('--no-compat', 'Ignore API compatibility checks')
-    .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
-    .option('--profile [profile]', 'The profile to use')
-    .option('--project [project]', 'The project to use')
+    .option('--color [boolean]', 'Turn on/off colors for JSON output.', 'true')
+    .option('--profile <profile>', 'The profile to use')
+    .option('--project <project>', 'The project to use')
     .option('--json', 'Output results using JSON')
-    .option('--query [query]', 'A JMESPath query to use in filtering the response data. Ignored if output format is not JSON.')
-    .option('--limit [limit]', 'Limit number of records', DEFAULT_LIST_LIMIT_COUNT)
-    .option('--skip [skip]', 'Skip number of records', DEFAULT_LIST_SKIP_COUNT)
-    .option('--sort [sort]', 'A Mongo style sort statement to use in the query.', GET_DEFAULT_SORT_CLI_OPTION(DEFAULT_LIST_SORT_PARAMS.updatedAt))
+    .option('--query <query>', 'A JMESPath query to use in filtering the response data. Ignored if output format is not JSON.')
+    .option('--filter <filter>', 'A Mongo style filter to use.')
+    .option('--limit <limit>', 'Limit number of records', DEFAULT_LIST_LIMIT_COUNT)
+    .option('--skip <skip>', 'Skip number of records', DEFAULT_LIST_SKIP_COUNT)
+    .option('--sort <sort>', 'A Mongo style sort statement to use in the query.')
     .action(withCompatibilityCheck((options) => {
         try {
             new ListConnections(program).execute(options);
@@ -62,9 +61,9 @@ program
     .command('save <connectionDefinition>')
     .description('Save a connections definition. Takes JSON file by default.')
     .option('--no-compat', 'Ignore API compatibility checks')
-    .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
-    .option('--profile [profile]', 'The profile to use')
-    .option('--project [project]', 'The project to use')
+    .option('--color [boolean]', 'Turn on/off colors for JSON output.', 'true')
+    .option('--profile <profile>', 'The profile to use')
+    .option('--project <project>', 'The project to use')
     .option('-y, --yaml', 'Use YAML for agent definition format')
     .action(withCompatibilityCheck((connDefinition, options) => {
         try {
@@ -80,10 +79,10 @@ program
     .alias('get')
     .description('Describe connection')
     .option('--no-compat', 'Ignore API compatibility checks')
-    .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
-    .option('--profile [profile]', 'The profile to use')
-    .option('--project [project]', 'The project to use')
-    .option('--query [query]', 'A JMESPath query to use in filtering the response data.')
+    .option('--color [boolean]', 'Turn on/off colors for JSON output.', 'true')
+    .option('--profile <profile>', 'The profile to use')
+    .option('--project <project>', 'The project to use')
+    .option('--query <query>', 'A JMESPath query to use in filtering the response data.')
     .action(withCompatibilityCheck((connectionName, options) => {
         try {
             new DescribeConnectionCommand(program).execute(connectionName, options);
@@ -97,14 +96,14 @@ program
     .command('list-types')
     .description('List connections types')
     .option('--no-compat', 'Ignore API compatibility checks')
-    .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
-    .option('--profile [profile]', 'The profile to use')
-    .option('--project [project]', 'The project to use')
+    .option('--color [boolean]', 'Turn on/off colors for JSON output.', 'true')
+    .option('--profile <profile>', 'The profile to use')
+    .option('--project <project>', 'The project to use')
     .option('--json', 'Output results using JSON')
-    .option('--query [query]', 'A JMESPath query to use in filtering the response data. Ignored if output format is not JSON.')
-    .option('--limit [limit]', 'Limit number of records', DEFAULT_LIST_LIMIT_COUNT)
-    .option('--skip [skip]', 'Skip number of records', DEFAULT_LIST_SKIP_COUNT)
-    .option('--sort [sort]', 'A Mongo style sort statement to use in the query.')
+    .option('--query <query>', 'A JMESPath query to use in filtering the response data. Ignored if output format is not JSON.')
+    .option('--limit <limit>', 'Limit number of records', DEFAULT_LIST_LIMIT_COUNT)
+    .option('--skip <skip>', 'Skip number of records', DEFAULT_LIST_SKIP_COUNT)
+    .option('--sort <sort>', 'A Mongo style sort statement to use in the query.')
     .action(withCompatibilityCheck((options) => {
         try {
             new ListConnectionsTypes(program).execute(options);
@@ -118,9 +117,9 @@ program
     .command('delete <connectionName>')
     .description('Delete a connection')
     .option('--no-compat', 'Ignore API compatibility checks')
-    .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
-    .option('--profile [profile]', 'The profile to use')
-    .option('--project [project]', 'The project to use')
+    .option('--color [boolean]', 'Turn on/off colors for JSON output.', 'true')
+    .option('--profile <profile>', 'The profile to use')
+    .option('--project <project>', 'The project to use')
     .action(withCompatibilityCheck((connectionName, options) => {
         try {
             new DeleteConnectionCommand(program).execute(connectionName, options);

@@ -19,8 +19,8 @@ const { promisify } = require('util');
 
 const pipeline = promisify(stream.pipeline);
 const debug = require('debug')('cortex:cli');
-const { got } = require('./apiutils');
-const { constructError, getUserAgent, checkProject } = require('../commands/utils');
+const { got, defaultHeaders } = require('./apiutils');
+const { constructError, checkProject } = require('../commands/utils');
 const Content = require('./content');
 
 module.exports = class Experiments {
@@ -40,8 +40,7 @@ module.exports = class Experiments {
         if (skip) query.skip = skip;
         return got
             .get(endpoint, {
-                headers: { Authorization: `Bearer ${token}` },
-                'user-agent': getUserAgent(),
+                headers: defaultHeaders(token),
                 searchParams: query,
             }).json()
             .then((result) => ({ success: true, result }))
@@ -54,8 +53,7 @@ module.exports = class Experiments {
         debug('describeExperiment(%s) => %s', name, endpoint);
         return got
             .get(endpoint, {
-                headers: { Authorization: `Bearer ${token}` },
-                'user-agent': getUserAgent(),
+                headers: defaultHeaders(token),
             }).json()
             .then((result) => ({ success: true, result }))
             .catch((err) => constructError(err));
@@ -67,8 +65,7 @@ module.exports = class Experiments {
         debug('deleteExperiment(%s) => %s', name, endpoint);
         return got
             .delete(endpoint, {
-                headers: { Authorization: `Bearer ${token}` },
-                'user-agent': getUserAgent(),
+                headers: defaultHeaders(token),
             }).json()
             .then((result) => ({ success: true, result }))
             .catch((err) => constructError(err));
@@ -85,8 +82,7 @@ module.exports = class Experiments {
         if (skip) query.skip = skip;
         return got
             .get(endpoint, {
-                headers: { Authorization: `Bearer ${token}` },
-                'user-agent': getUserAgent(),
+                headers: defaultHeaders(token),
                 searchParams: query,
             }).json()
             .then((result) => ({ success: true, result }))
@@ -99,8 +95,7 @@ module.exports = class Experiments {
         debug('describeRun(%s) => %s', runId, endpoint);
         return got
             .get(endpoint, {
-                headers: { Authorization: `Bearer ${token}` },
-                'user-agent': getUserAgent(),
+                headers: defaultHeaders(token),
             }).json()
             .then((result) => ({ success: true, result }))
             .catch((err) => constructError(err));
@@ -112,8 +107,7 @@ module.exports = class Experiments {
         debug('deleteRun(%s, %s) => %s', experimentName, runId, endpoint);
         return got
             .delete(endpoint, {
-                headers: { Authorization: `Bearer ${token}` },
-                'user-agent': getUserAgent(),
+                headers: defaultHeaders(token),
             }).json()
             .then((result) => ({ success: true, result }))
             .catch((err) => constructError(err));
@@ -144,8 +138,7 @@ module.exports = class Experiments {
         debug('saveExperiment(%s) => %s', experimentObj.name, endpoint);
         return got
             .post(endpoint, {
-                headers: { Authorization: `Bearer ${token}` },
-                'user-agent': getUserAgent(),
+                headers: defaultHeaders(token),
                 json: experimentObj,
             }).json()
             .then((result) => ({ success: true, result }))
@@ -158,8 +151,7 @@ module.exports = class Experiments {
         debug('createRun(%s) => %s', runObj.experimentName, endpoint);
         return got
             .post(endpoint, {
-                headers: { Authorization: `Bearer ${token}` },
-                'user-agent': getUserAgent(),
+                headers: defaultHeaders(token),
                 json: runObj,
             }).json()
             .then((result) => ({ success: true, result }))
@@ -172,8 +164,7 @@ module.exports = class Experiments {
         debug('updateRun(%s) => %s', runObj.experimentName, endpoint);
         return got
             .post(endpoint, {
-                headers: { Authorization: `Bearer ${token}` },
-                'user-agent': getUserAgent(),
+                headers: defaultHeaders(token),
                 json: runObj,
             }).json()
             .then((result) => ({ success: true, result }))
@@ -190,11 +181,7 @@ module.exports = class Experiments {
             const message = await pipeline(
                 fs.createReadStream(content),
                 got.stream.put(endpoint, {
-                    headers: {
-                        Authorization: `Bearer ${token}`,
-                        'Content-Type': contentType,
-                    },
-                    'user-agent': getUserAgent(),
+                    headers: defaultHeaders(token, { 'Content-Type': contentType }),
                 }),
             );
             return { success: true, message };

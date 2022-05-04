@@ -1,5 +1,13 @@
 const got = require('got');
+const findPackageJson = require('find-package-json');
+const os = require('os');
 
+const pkg = findPackageJson(__dirname).next().value;
+function getUserAgent() {
+    return `${pkg.name}/${pkg.version} (${os.platform()}; ${os.arch()}; ${os.release()}; ${os.platform()})`;
+}
+
+module.exports.getUserAgent = getUserAgent;
 module.exports.got = got.extend({
     followRedirect: false,
     hooks: {
@@ -14,6 +22,10 @@ module.exports.got = got.extend({
         ],
     }, 
 });
+
+
+module.exports.defaultHeaders = (token, otherHeaders = {}) => ({ Authorization: `Bearer ${token}`, 'user-agent': getUserAgent(), ...otherHeaders });
+
 /**
  * makes a request via superagent. proxy methods will be utilized
  * if the user (i.e. person running cli commands) has set environment

@@ -41,6 +41,7 @@
   "license": "Apache-2.0",
   "homepage": "https://github.com/CognitiveScale/cortex-cli",
   "dependencies": {
+    "boolean": "3.2.0",
     "chalk": "4.1.2",
     "cli-progress": "3.11.0",
     "cli-table3": "0.6.2",

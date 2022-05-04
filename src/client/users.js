@@ -15,8 +15,8 @@
  */
 
 const debug = require('debug')('cortex:cli');
-const { got } = require('./apiutils');
-const { constructError, getUserAgent } = require('../commands/utils');
+const { got, defaultHeaders } = require('./apiutils');
+const { constructError } = require('../commands/utils');
 
 module.exports = class Users {
     constructor(cortexUrl, user, flags = []) {
@@ -47,8 +47,7 @@ module.exports = class Users {
         debug('createServiceUser => %s', endpoint);
         return got
             .post(endpoint, {
-                headers: { Authorization: `Bearer ${token}` },
-                'user-agent': getUserAgent(),
+                headers: defaultHeaders(token),
             }).json()
             .then((res) => ({ success: true, result: res }))
             .catch((err) => constructError(err));
@@ -59,8 +58,7 @@ module.exports = class Users {
         debug('deleteServiceUser => %s', endpoint);
         return got
             .delete(endpoint, {
-                headers: { Authorization: `Bearer ${token}` },
-                'user-agent': getUserAgent(),
+                headers: defaultHeaders(token),
             }).json()
             .then((res) => ({ success: true, result: res }))
             .catch((err) => constructError(err));
@@ -71,8 +69,7 @@ module.exports = class Users {
         debug('listServiceUser => %s', endpoint);
         return got
             .get(endpoint, {
-                headers: { Authorization: `Bearer ${token}` },
-                'user-agent': getUserAgent(),
+                headers: defaultHeaders(token),
             }).json()
             .then((res) => ({ success: true, result: res }))
             .catch((err) => constructError(err));
@@ -83,8 +80,7 @@ module.exports = class Users {
         debug('describeUser => %s', endpoint);
         return got
             .get(endpoint, {
-                headers: { Authorization: `Bearer ${token}` },
-                'user-agent': getUserAgent(),
+                headers: defaultHeaders(token),
             }).json()
             .then((res) => ({ success: true, result: res }))
             .catch((err) => constructError(err));
@@ -95,8 +91,7 @@ module.exports = class Users {
         debug('createGrantForUser => %s', endpoint);
         return got
             .post(endpoint, {
-                headers: { Authorization: `Bearer ${token}` },
-                'user-agent': getUserAgent(),
+                headers: defaultHeaders(token),
                 json: body,
             }).json()
             .then((res) => ({ success: true, result: res }))
@@ -108,8 +103,7 @@ module.exports = class Users {
         debug('removeGrantFromUser => %s', endpoint);
         return got
             .delete(endpoint, {
-                headers: { Authorization: `Bearer ${token}` },
-                'user-agent': getUserAgent(),
+                headers: defaultHeaders(token),
                 json: body,
             }).json()
             .then((res) => ({ success: true, result: res }))
@@ -121,8 +115,7 @@ module.exports = class Users {
         debug('addUsersToProject => %s', endpoint);
         return got
             .post(endpoint, {
-                headers: { Authorization: `Bearer ${token}` },
-                'user-agent': getUserAgent(),
+                headers: defaultHeaders(token),
                 json: { project, users },
             }).json()
             .then((res) => ({ success: true, result: res }))
@@ -134,8 +127,7 @@ module.exports = class Users {
         debug('removeUsersFromProject => %s', endpoint);
         return got
             .delete(endpoint, {
-                headers: { Authorization: `Bearer ${token}` },
-                'user-agent': getUserAgent(),
+                headers: defaultHeaders(token),
                 json: { project, users },
             }).json()
             .then((res) => ({ success: true, result: res }))

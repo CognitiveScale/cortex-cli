@@ -20,9 +20,7 @@ const chalk = require('chalk');
 const program = require('commander');
 
 const { withCompatibilityCheck } = require('../src/compatibility');
-const {
-    DEFAULT_LIST_SKIP_COUNT, DEFAULT_LIST_LIMIT_COUNT, GET_DEFAULT_SORT_CLI_OPTION, DEFAULT_LIST_SORT_PARAMS,
-} = require('../src/constants');
+const { DEFAULT_LIST_SKIP_COUNT, DEFAULT_LIST_LIMIT_COUNT } = require('../src/constants');
 
 const {
     SaveTypeCommand,
@@ -38,9 +36,9 @@ program
     .command('save <typeDefinition>')
     .description('Save a type definition')
     .option('--no-compat', 'Ignore API compatibility checks')
-    .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
-    .option('--profile [profile]', 'The profile to use')
-    .option('--project [project]', 'The project to use')
+    .option('--color [boolean]', 'Turn on/off colors for JSON output.', 'true')
+    .option('--profile <profile>', 'The profile to use')
+    .option('--project <project>', 'The project to use')
     .option('-y, --yaml', 'Use YAML for type definition format')
     .action(withCompatibilityCheck((typeDefinition, options) => {
         try {
@@ -56,14 +54,14 @@ program
     .description('List type definitions')
     .alias('l')
     .option('--no-compat', 'Ignore API compatibility checks')
-    .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
-    .option('--profile [profile]', 'The profile to use')
-    .option('--project [project]', 'The project to use')
+    .option('--color [boolean]', 'Turn on/off colors for JSON output.', 'true')
+    .option('--profile <profile>', 'The profile to use')
+    .option('--project <project>', 'The project to use')
     .option('--json', 'Output results using JSON')
-    .option('--query [query]', 'A JMESPath query to use in filtering the response data.')
-    .option('--limit [limit]', 'Limit number of records', DEFAULT_LIST_LIMIT_COUNT)
-    .option('--skip [skip]', 'Skip number of records', DEFAULT_LIST_SKIP_COUNT)
-    .option('--sort [sort]', 'A Mongo style sort statement to use in the query.', GET_DEFAULT_SORT_CLI_OPTION(DEFAULT_LIST_SORT_PARAMS.updatedAt))
+    .option('--query <query>', 'A JMESPath query to use in filtering the response data.')
+    .option('--limit <limit>', 'Limit number of records', DEFAULT_LIST_LIMIT_COUNT)
+    .option('--skip <skip>', 'Skip number of records', DEFAULT_LIST_SKIP_COUNT)
+    .option('--sort <sort>', 'A Mongo style sort statement to use in the query.')
     .action(withCompatibilityCheck((options) => {
         try {
             new ListTypesCommand(program).execute(options);
@@ -78,10 +76,10 @@ program
     .alias('get')
     .description('Describe type')
     .option('--no-compat', 'Ignore API compatibility checks')
-    .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
-    .option('--profile [profile]', 'The profile to use')
-    .option('--project [project]', 'The project to use')
-    .option('--query [query]', 'A JMESPath query to use in filtering the response data.')
+    .option('--color [boolean]', 'Turn on/off colors for JSON output.', 'true')
+    .option('--profile <profile>', 'The profile to use')
+    .option('--project <project>', 'The project to use')
+    .option('--query <query>', 'A JMESPath query to use in filtering the response data.')
     .action(withCompatibilityCheck((typeName, options) => {
         try {
             new DescribeTypeCommand(program).execute(typeName, options);

@@ -17,10 +17,10 @@ const querystring = require('querystring');
 const { pipeline } = require('stream');
 const { createWriteStream } = require('fs');
 const debug = require('debug')('cortex:cli');
-const { got } = require('./apiutils');
+const { got, defaultHeaders } = require('./apiutils');
 const { printSuccess } = require('../commands/utils');
 const { printError } = require('../commands/utils');
-const { constructError, getUserAgent } = require('../commands/utils');
+const { constructError } = require('../commands/utils');
 
 module.exports = class Assessments {
     constructor(cortexUrl) {
@@ -31,10 +31,7 @@ module.exports = class Assessments {
     getDependenciesOfResource(token, project, type, name, json = null, missing = false) {
         const url = `${this.endpointApiV4}/tree/${project}/${type}/${encodeURIComponent(name)}?${querystring.stringify({ missing })}`;
         debug('dependencyTree => %s', url);
-        const body = {
-            headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
-            'user-agent': getUserAgent(),
-        };
+        const body = { headers: defaultHeaders(token) };
         if (json) {
             body.json = json;
         }
@@ -57,10 +54,7 @@ module.exports = class Assessments {
         })}`;
         debug('queryResources => %s', url);
         return got
-            .get(url, {
-                headers: { Authorization: `Bearer ${token}` },
-                'user-agent': getUserAgent(),
-            })
+            .get(url, { headers: defaultHeaders(token) })
             .json()
             .then((res) => res)
             .catch((err) => constructError(err));
@@ -70,10 +64,7 @@ module.exports = class Assessments {
         const url = `${this.endpointV4}/types`;
         debug('listResourceTypes => %s', url);
         return got
-            .get(url, {
-                headers: { Authorization: `Bearer ${token}` },
-                'user-agent': getUserAgent(),
-            })
+            .get(url, { headers: defaultHeaders(token) })
             .json()
             .then((res) => res)
             .catch((err) => constructError(err));
@@ -84,8 +75,7 @@ module.exports = class Assessments {
         debug('createAssessment => %s', url);
         return got
             .post(url, {
-                headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
-                'user-agent': getUserAgent(),
+                headers: defaultHeaders(token, { 'Content-Type': 'application/json' }),
                 body: JSON.stringify({
                     name,
                     title,
@@ -106,10 +96,7 @@ module.exports = class Assessments {
         })}`;
         debug('listAssessment => %s', url);
         return got
-            .get(url, {
-                headers: { Authorization: `Bearer ${token}` },
-                'user-agent': getUserAgent(),
-            }).json()
+            .get(url, { headers: defaultHeaders(token) }).json()
             .then((res) => res)
             .catch((err) => constructError(err));
     }
@@ -119,8 +106,7 @@ module.exports = class Assessments {
         debug('getAssessment => %s', url);
         return got
             .get(url, {
-                headers: { Authorization: `Bearer ${token}` },
-                'user-agent': getUserAgent(),
+                headers: defaultHeaders(token),
             }).json()
             .then((res) => res)
             .catch((err) => constructError(err));
@@ -131,8 +117,7 @@ module.exports = class Assessments {
         debug('deleteAssessment => %s', url);
         return got
             .delete(url, {
-                headers: { Authorization: `Bearer ${token}` },
-                'user-agent': getUserAgent(),
+                headers: defaultHeaders(token),
             }).json()
             .then((res) => res)
             .catch((err) => constructError(err));
@@ -143,8 +128,7 @@ module.exports = class Assessments {
         debug('runAssessment => %s', url);
         return got
             .post(url, {
-                headers: { Authorization: `Bearer ${token}` },
-                'user-agent': getUserAgent(),
+                headers: defaultHeaders(token),
             }).json()
             .then((res) => res)
             .catch((err) => constructError(err));
@@ -155,8 +139,7 @@ module.exports = class Assessments {
         debug('listAssessmentReports => %s', url);
         return got
             .get(url, {
-                headers: { Authorization: `Bearer ${token}` },
-                'user-agent': getUserAgent(),
+                headers: defaultHeaders(token),
             }).json()
             .then((res) => res)
             .catch((err) => constructError(err));
@@ -167,21 +150,20 @@ module.exports = class Assessments {
         debug('getAssessmentReport => %s', url);
         return got
             .get(url, {
-                headers: { Authorization: `Bearer ${token}` },
-                'user-agent': getUserAgent(),
+                headers: defaultHeaders(token),
             }).json()
             .then((res) => res)
             .catch((err) => constructError(err));
     }
 
     exportAssessmentReport(token, name, reportId, types) {
-        const options = { color: 'on' };
+        const options = { color: 'true' };
         const file = `${reportId.split('/').pop()}.csv`;
         const filter = types && types.trim() ? `?components=${types.trim()}` : '';
         const url = `${this.endpointV4}/assessments/${encodeURIComponent(name)}/reports/${encodeURIComponent(reportId)}/export${filter}`;
         debug('exportAssessmentReport => %s', url);
 
-        const rs = got.stream(url, { headers: { Authorization: `Bearer ${token}` }, 'user-agent': getUserAgent() });
+        const rs = got.stream(url, { headers: defaultHeaders(token) });
         pipeline(rs, createWriteStream(file), (e) => {
             if (e) {
                 const err = constructError(e);

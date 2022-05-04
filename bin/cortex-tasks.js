@@ -35,15 +35,15 @@ program
     .description('List tasks')
     .alias('l')
     .option('--no-compat', 'Ignore API compatibility checks')
-    .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
-    .option('--profile [profile]', 'The profile to use')
-    .option('--project [project]', 'The project to use')
-    .option('--actionName [string]', 'Filter tasks by action name')
-    .option('--activationId [string]', 'filter tasks by activation id')
+    .option('--color [boolean]', 'Turn on/off colors for JSON output.', 'true')
+    .option('--profile <profile>', 'The profile to use')
+    .option('--project <project>', 'The project to use')
+    .option('--actionName <string>', 'Filter tasks by action name')
+    .option('--activationId <string>', 'filter tasks by activation id')
     .option('--json', 'Output results using JSON')
-    .option('--skillName [string]', 'Filter tasks by skill name')
+    .option('--skillName <string>', 'Filter tasks by skill name')
     // This is a client-side sort
-    .option('--sort [asc|desc]', 'sort tasks by start timestamp ascending (asc) or descending (desc)')
+    .option('--sort <asc|desc>', 'sort tasks by start timestamp ascending (asc) or descending (desc)')
     .action(withCompatibilityCheck(async (options) => {
         try {
             await new ListTasksCommand(program).execute(options);
@@ -57,9 +57,9 @@ program
     .alias('get')
     .description('Describe a task')
     .option('--no-compat', 'Ignore API compatibility checks')
-    .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
-    .option('--profile [profile]', 'The profile to use')
-    .option('--project [project]', 'The project to use')
+    .option('--color [boolean]', 'Turn on/off colors for JSON output.', 'true')
+    .option('--profile <profile>', 'The profile to use')
+    .option('--project <project>', 'The project to use')
     .option('--k8s', 'Return the full k8sResource in the response')
     // .option('-o, --output <json|yaml|k8s>', 'Format output as yaml or k8s resources')
     .action(withCompatibilityCheck((taskName, options) => {
@@ -75,8 +75,8 @@ program
     .command('logs <taskName>')
     .description('Get logs of a task')
     .option('--no-compat', 'Ignore API compatibility checks')
-    .option('--profile [profile]', 'The profile to use')
-    .option('--project [project]', 'The project to use')
+    .option('--profile <profile>', 'The profile to use')
+    .option('--project <project>', 'The project to use')
     // TODO enable when we want to support tasks
     // .option('--type [type]', 'The type of action logs to fetch [skill|task]')
     .action(withCompatibilityCheck((taskName, options) => {
@@ -92,8 +92,8 @@ program
     .command('delete <taskName>')
     .description('Delete a task, if it exists')
     .option('--no-compat', 'Ignore API compatibility checks')
-    .option('--profile [profile]', 'The profile to use')
-    .option('--project [project]', 'The project to use')
+    .option('--profile <profile>', 'The profile to use')
+    .option('--project <project>', 'The project to use')
     .action(withCompatibilityCheck(async (taskName, options) => {
         try {
             await new TaskDeleteCommand(program).execute(taskName, options);

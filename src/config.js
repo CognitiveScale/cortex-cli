@@ -200,7 +200,7 @@ class ProfileV4 {
     validate() {
         const { error } = ProfileSchemaV4.validate(this, { abortEarly: false });
         if (error) {
-            throw new Error(`Invalid configuration profile <${this.name}>: ${error.details[0].message}. `
+            printError(`Invalid configuration profile <${this.name}>: ${error.details[0].message}. `
                 + 'Please get your Personal Access Token from the Cortex Console and run "cortex configure".');
         }
         return this;
@@ -343,13 +343,13 @@ function readConfig() {
 async function loadProfile(profileName, useenv = true) {
     const config = readConfig();
     if (config === undefined) {
-        throw new Error('Please configure the Cortex CLI by running "cortex configure"');
+        printError('Please configure the Cortex CLI by running "cortex configure"');
     }
 
     const name = profileName || config.currentProfile || 'default';
     const profile = await config.getProfile(name, useenv);
     if (!profile) {
-        throw new Error(`Profile with name "${name}" could not be located in your configuration.  Please run "cortex configure".`);
+        printError(`Profile with name "${name}" could not be located in your configuration.  Please run "cortex configure".`);
     }
     return profile;
 }

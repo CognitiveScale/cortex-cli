@@ -16,13 +16,12 @@
 
 const Table = require('cli-table3');
 const _ = require('lodash');
+const { boolean } = require('boolean');
 const chalk = require('chalk');
 const debug = require('debug')('cortex:cli');
-const findPackageJson = require('find-package-json');
 const fs = require('fs');
 const glob = require('glob');
 const jmsepath = require('jmespath');
-const os = require('os');
 const path = require('path');
 const yaml = require('js-yaml');
 const { exec } = require('child_process');
@@ -58,12 +57,17 @@ module.exports.constructError = (error) => {
     // todo make figuring out the status code more consistent? this might be a holdover from request vs got?
     const status = _.get(errResp, 'statusCode') || respCode || error.code || error.status || '';
     return {
- success: false, message: errorText, details, status,
-};
+        success: false, message: errorText, details, status,
+    };
 };
 
+function useColor(options) {
+    return boolean(_.get(options, 'color'));
+}
+module.exports.useColor = useColor;
+
 module.exports.printSuccess = (message, options) => {
-    if (!options || options.color === 'on') {
+    if (useColor(options)) {
         console.log(chalk.green(message));
     } else {
         console.log(message);
@@ -71,7 +75,7 @@ module.exports.printSuccess = (message, options) => {
 };
 
 module.exports.printWarning = (message, options) => {
-    if (!options || options.color === 'on') {
+    if (useColor(options)) {
         console.log(chalk.yellow(message));
     } else {
         console.log(message);
@@ -79,13 +83,12 @@ module.exports.printWarning = (message, options) => {
 };
 
 function printError(message, options, exit = true) {
-    if (!options || options.color === 'on') {
+    if (useColor(options)) {
         console.error(chalk.red(message));
     } else {
         console.error(message);
     }
-    // Don't exit when testing as this breaks negative unit tests
-    if (exit && _.toLower(process.env.NODE_ENV) !== 'test') {
+    if (exit) {
         process.exit(1);
     }
 }
@@ -313,11 +316,6 @@ module.exports.checkProject = (projectId) => {
     }
 };
 
-const pkg = findPackageJson(__dirname).next().value;
-module.exports.getUserAgent = function getUserAgent() {
-    return `${pkg.name}/${pkg.version} (${os.platform()}; ${os.arch()}; ${os.release()}; ${os.platform()})`;
-};
-
 module.exports.LISTTABLEFORMAT = [
     { column: 'Name', field: 'name', width: 30 },
     { column: 'Title', field: 'title', width: 40 },
@@ -449,9 +447,3 @@ module.exports.validateOptions = (options, type) => {
     };
 };
 
-module.exports.printExtendedLogs = (data, options) => {
-    if (options.limit && Array.isArray(data) && data.length === Number(options.limit)) {
-        // don't log if showing all the results
-        console.log(`Results limited to ${options.limit} rows`);
-    }
-};
