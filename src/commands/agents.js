@@ -257,8 +257,7 @@ module.exports.ListActivationsCommand = class {
         if (options.agentName) queryParams.agentName = options.agentName;
         if (options.skillName) queryParams.skillName = options.skillName;
         if (options.limit) queryParams.limit = options.limit;
-        // Todo replace with skip; offset is deprecated in 6.3.0 and replaced by skip for consistency
-        if (options.skip) queryParams.offset = options.skip;
+        if (options.skip) queryParams.skip = options.skip;
         if (options.sort) queryParams.sort = _.toLower(options.sort);
         if (options.filter) queryParams.filter = options.filter;
 
