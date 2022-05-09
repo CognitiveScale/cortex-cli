@@ -21,7 +21,8 @@ const program = require('commander');
 
 const { withCompatibilityCheck } = require('../src/compatibility');
 const {
-    DEFAULT_LIST_SKIP_COUNT, DEFAULT_LIST_LIMIT_COUNT, DEFAULT_LIST_SORT_PARAMS, DEFAULT_LIST_SORT_PARAMS_2,
+    DEFAULT_LIST_SKIP_COUNT, DEFAULT_LIST_LIMIT_COUNT, DEFAULT_LIST_SORT_PARAM_1, DEFAULT_LIST_SORT_PARAM_2,
+    DEFAULT_LIST_SORT_PARAM_3, BUILD_SORT_CLI_OPTION,
 } = require('../src/constants');
 
 const {
@@ -74,7 +75,7 @@ program
     .option('--filter [filter]', 'A Mongo style filter to use.')
     .option('--limit [limit]', 'Limit number of records', DEFAULT_LIST_LIMIT_COUNT)
     .option('--skip [skip]', 'Skip number of records', DEFAULT_LIST_SKIP_COUNT)
-    .option('--sort [sort]', 'A Mongo style sort statement to use in the query.', DEFAULT_LIST_SORT_PARAMS)
+    .option('--sort [sort]', 'A Mongo style sort statement to use in the query.', BUILD_SORT_CLI_OPTION(DEFAULT_LIST_SORT_PARAM_1))
     .action(withCompatibilityCheck((options) => {
         try {
             new ListAgentsCommand(program).execute(options);
@@ -176,7 +177,7 @@ program
     .option('--status [status]', 'Filters activations by status [complete|error].')
     .option('--limit [limit]', 'Limit number of records', DEFAULT_LIST_LIMIT_COUNT)
     .option('--skip [skip]', 'Skip number of records', DEFAULT_LIST_SKIP_COUNT)
-    .option('--sort [asc|desc]', 'Sort the activations by start timestamp ascending (asc) or descending (desc)')
+    .option('--sort [asc|desc]', 'Sort the activations by start timestamp ascending (asc) or descending (desc) or as mongo query', BUILD_SORT_CLI_OPTION(DEFAULT_LIST_SORT_PARAM_3))
     .option('--filter [filter]', 'A Mongo style filter to use.')
     .action(withCompatibilityCheck((options) => {
         try {
@@ -235,7 +236,7 @@ program
     .option('--filter [filter]', 'A Mongo style filter to use.')
     .option('--limit [limit]', 'Limit number of records', DEFAULT_LIST_LIMIT_COUNT)
     .option('--skip [skip]', 'Skip number of records', DEFAULT_LIST_SKIP_COUNT)
-    .option('--sort [sort]', 'A Mongo style sort statement to use in the query.', DEFAULT_LIST_SORT_PARAMS_2)
+    .option('--sort [sort]', 'A Mongo style sort statement to use in the query.', BUILD_SORT_CLI_OPTION(DEFAULT_LIST_SORT_PARAM_2))
     .action(withCompatibilityCheck((agentName, options) => {
         try {
             new ListAgentSnapshotsCommand(program).execute(agentName, options);
