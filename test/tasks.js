@@ -91,7 +91,7 @@ describe('Tasks', () => {
         await program.parseAsync(['node', 'tasks', 'list', '--project', PROJECT, '--json']);
         const output = getPrintedLines();
         const errs = getErrorLines();
-        chai.expect(output.join('')).to.contain('no tasks found');
+        chai.expect(output.join('')).to.contain('No tasks found');
         // eslint-disable-next-line no-unused-expressions
         chai.expect(errs).to.be.empty;
         nock.isDone();

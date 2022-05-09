@@ -36,14 +36,17 @@ module.exports = class Content {
         return key.replace(/^\//, '');
     }
 
-    listContent(projectId, token) {
+    listContent(projectId, token, prefix) {
         checkProject(projectId);
         const endpoint = this.endpoint(projectId);
         debug('listContent() => %s', endpoint);
+        const query = {};
+        if (prefix) query.filter = prefix;
         return got
             .get(endpoint, {
                 headers: { Authorization: `Bearer ${token}` },
                 'user-agent': getUserAgent(),
+                searchParams: query,
             }).json()
             .then((message) => ({ success: true, message }))
             .catch((err) => constructError(err));
@@ -65,6 +68,9 @@ module.exports = class Content {
                         'Content-Type': contentType,
                     },
                 }),
+                // https://github.com/sindresorhus/got/blob/HEAD/documentation/3-streams.md#stream-api
+                // new stream.PassThrough() is required to catch errors.
+                new stream.PassThrough(),
             );
             return { success: true, message };
         } catch (err) {

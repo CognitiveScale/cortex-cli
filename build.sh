@@ -27,6 +27,8 @@ function local_docker(){
 # This runs inside a linux docker container
 function docker_build(){
     export CI="script"
+    apt-get update
+    apt-get install -y apt-utils libsecret-1-dev
     npm ci --unsafe-perm --userconfig=/root/.npmrc --ignore-scripts
     npm test
     echo ${VERSION} > version.txt

@@ -42,6 +42,7 @@ program
     .option('--project [project]', 'The project to use')
     .option('--json', 'Output results using JSON')
     .option('--query [query]', 'A JMESPath query to use in filtering the response data. Ignored if output format is not JSON.')
+    .option('--prefix [prefix]', 'Filter contents with the given prefix.')
     .action(withCompatibilityCheck((options) => {
         try {
             new ListContent(program).execute(options);
