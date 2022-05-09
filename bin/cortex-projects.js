@@ -27,7 +27,9 @@ const {
     DescribeProjectCommand,
     DeleteProjectCommand,
 } = require('../src/commands/projects');
-const { DEFAULT_LIST_SKIP_COUNT, DEFAULT_LIST_LIMIT_COUNT, BUILD_SORT_CLI_OPTION, DEFAULT_LIST_SORT_PARAM_2 } = require('../src/constants');
+const {
+    DEFAULT_LIST_SKIP_COUNT, DEFAULT_LIST_LIMIT_COUNT, BUILD_SORT_CLI_OPTION, DEFAULT_LIST_SORT_PARAM_2,
+} = require('../src/constants');
 
 program.name('cortex projects');
 program.description('Work with Cortex Projects');
