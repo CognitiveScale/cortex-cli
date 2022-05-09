@@ -34,7 +34,7 @@ const {
     DependencyTreeCommand,
 } = require('../src/commands/assessments');
 const {
-    DEFAULT_LIST_SKIP_COUNT, DEFAULT_LIST_LIMIT_COUNT, BUILD_SORT_CLI_OPTION, DEFAULT_LIST_SORT_PARAM_2
+    DEFAULT_LIST_SKIP_COUNT, DEFAULT_LIST_LIMIT_COUNT, BUILD_SORT_CLI_OPTION, DEFAULT_LIST_SORT_PARAM_2,
 } = require('../src/constants');
 
 program.name('cortex assessments');

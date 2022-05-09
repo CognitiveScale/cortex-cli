@@ -22,7 +22,9 @@ const program = require('commander');
 const { parseObject, printError } = require('../src/commands/utils');
 
 const { withCompatibilityCheck } = require('../src/compatibility');
-const { DEFAULT_LIST_SKIP_COUNT, DEFAULT_LIST_LIMIT_COUNT, BUILD_SORT_CLI_OPTION, DEFAULT_LIST_SORT_PARAM_2 } = require('../src/constants');
+const {
+    DEFAULT_LIST_SKIP_COUNT, DEFAULT_LIST_LIMIT_COUNT, BUILD_SORT_CLI_OPTION, DEFAULT_LIST_SORT_PARAM_2,
+} = require('../src/constants');
 
 const {
     ListMissionsCommand,
