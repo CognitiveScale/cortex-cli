@@ -21,7 +21,7 @@ const program = require('commander');
 
 const { withCompatibilityCheck } = require('../src/compatibility');
 const {
-    DEFAULT_LIST_SKIP_COUNT, DEFAULT_LIST_LIMIT_COUNT, BUILD_SORT_CLI_OPTION, DEFAULT_LIST_SORT_PARAM_1,
+    DEFAULT_LIST_SKIP_COUNT, DEFAULT_LIST_LIMIT_COUNT, GET_DEFAULT_SORT_CLI_OPTION, DEFAULT_LIST_SORT_PARAMS,
 } = require('../src/constants');
 
 const {
@@ -107,7 +107,7 @@ program
     .option('--filter [filter]', 'A Mongo style filter to use.')
     .option('--limit [limit]', 'Limit number of records', DEFAULT_LIST_LIMIT_COUNT)
     .option('--skip [skip]', 'Skip number of records', DEFAULT_LIST_SKIP_COUNT)
-    .option('--sort [sort]', 'A Mongo style sort statement to use in the query.', BUILD_SORT_CLI_OPTION(DEFAULT_LIST_SORT_PARAM_1))
+    .option('--sort [sort]', 'A Mongo style sort statement to use in the query.', GET_DEFAULT_SORT_CLI_OPTION(DEFAULT_LIST_SORT_PARAMS[0]))
 
     .action(withCompatibilityCheck(async (options) => {
         try {
