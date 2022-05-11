@@ -31,6 +31,26 @@ describe('List model command option check', () => {
             'Invalid sort params. Allowed fields: name,title,description,createdAt,updatedAt,createdBy,type,status') === true,
             'Is invalid sort');
     });
+
+    it('should support default sort params', () => {
+        const options = {
+            sort: '{"updatedAt": -1}',
+        };
+        const { validOptions, errorDetails } = validateOptions(options, 'MODEL');
+        assert.ok(validOptions === true, 'Valid options');
+        assert.ok(errorDetails.length === 0, 'Valid options');
+    });
+
+    it('should fail on unsupported default sort params', () => {
+        const options = {
+            sort: '{"_updatedAt": -1}',
+        };
+        const { validOptions, errorDetails } = validateOptions(options, 'MODEL');
+        assert.ok(validOptions === false, 'Invalid options');
+        assert.ok(JSON.stringify(errorDetails).includes(
+            'Invalid sort params. Allowed fields: name,title,description,createdAt,updatedAt,createdBy,type,status') === true,
+            'Is invalid sort');
+    });
 });
 
 describe('List experiments command option check', () => {
@@ -58,6 +78,26 @@ describe('List experiments command option check', () => {
         assert.ok(JSON.stringify(errorDetails).includes(
             'Invalid filter params. Allowed fields: name,title,description,modelId') === true,
             'Is invalid filter');
+        assert.ok(JSON.stringify(errorDetails).includes(
+            'Invalid sort params. Allowed fields: name,title,description,modelId,createdAt,updatedAt') === true,
+            'Is invalid sort');
+    });
+
+    it('should support default sort params', () => {
+        const options = {
+            sort: '{"updatedAt": -1}',
+        };
+        const { validOptions, errorDetails } = validateOptions(options, 'EXPERIMENT');
+        assert.ok(validOptions === true, 'Valid options');
+        assert.ok(errorDetails.length === 0, 'Valid options');
+    });
+
+    it('should fail on unsupported default sort params', () => {
+        const options = {
+            sort: '{"_updatedAt": -1}',
+        };
+        const { validOptions, errorDetails } = validateOptions(options, 'EXPERIMENT');
+        assert.ok(validOptions === false, 'Invalid options');
         assert.ok(JSON.stringify(errorDetails).includes(
             'Invalid sort params. Allowed fields: name,title,description,modelId,createdAt,updatedAt') === true,
             'Is invalid sort');
@@ -93,6 +133,26 @@ describe('List runs command option check', () => {
             'Invalid sort params. Allowed fields: runId,_createdAt,startTime,endTime,took,experimentName') === true,
             'Is invalid sort');
     });
+
+    it('should support default sort params', () => {
+        const options = {
+            sort: '{"_updatedAt": -1}',
+        };
+        const { validOptions, errorDetails } = validateOptions(options, 'RUN');
+        assert.ok(validOptions === true, 'Valid options');
+        assert.ok(errorDetails.length === 0, 'Valid options');
+    });
+
+    it('should fail on unsupported default sort params', () => {
+        const options = {
+            sort: '{"updatedAt": -1}',
+        };
+        const { validOptions, errorDetails } = validateOptions(options, 'RUN');
+        assert.ok(validOptions === false, 'Invalid options');
+        assert.ok(JSON.stringify(errorDetails).includes(
+            'Invalid sort params. Allowed fields: runId,_createdAt,startTime,endTime,took,experimentName,_updatedAt') === true,
+            'Is invalid sort');
+    });
 });
 
 describe('List actions command option check', () => {
@@ -122,6 +182,26 @@ describe('List actions command option check', () => {
             'Is invalid filter');
         assert.ok(JSON.stringify(errorDetails).includes(
             'Invalid sort params. Allowed fields: name,title,type,image,description,createdAt,createdBy') === true,
+            'Is invalid sort');
+    });
+
+    it('should support default sort params', () => {
+        const options = {
+            sort: '{"updatedAt": -1}',
+        };
+        const { validOptions, errorDetails } = validateOptions(options, 'ACTION');
+        assert.ok(validOptions === true, 'Valid options');
+        assert.ok(errorDetails.length === 0, 'Valid options');
+    });
+
+    it('should fail on unsupported default sort params', () => {
+        const options = {
+            sort: '{"_updatedAt": -1}',
+        };
+        const { validOptions, errorDetails } = validateOptions(options, 'ACTION');
+        assert.ok(validOptions === false, 'Invalid options');
+        assert.ok(JSON.stringify(errorDetails).includes(
+            'Invalid sort params. Allowed fields: name,title,type,image,description,createdAt,createdBy,updatedAt') === true,
             'Is invalid sort');
     });
 });
@@ -155,6 +235,26 @@ describe('List agents command option check', () => {
             'Invalid sort params. Allowed fields: name,title,description,createdAt,createdBy') === true,
             'Is invalid sort');
     });
+
+    it('should support default sort params', () => {
+        const options = {
+            sort: '{"updatedAt": -1}',
+        };
+        const { validOptions, errorDetails } = validateOptions(options, 'AGENT');
+        assert.ok(validOptions === true, 'Valid options');
+        assert.ok(errorDetails.length === 0, 'Valid options');
+    });
+
+    it('should fail on unsupported default sort params', () => {
+        const options = {
+            sort: '{"_updatedAt": -1}',
+        };
+        const { validOptions, errorDetails } = validateOptions(options, 'AGENT');
+        assert.ok(validOptions === false, 'Invalid options');
+        assert.ok(JSON.stringify(errorDetails).includes(
+            'Invalid sort params. Allowed fields: name,title,description,createdAt,createdBy,updatedAt') === true,
+            'Is invalid sort');
+    });
 });
 
 describe('List skill command option check', () => {
@@ -184,6 +284,26 @@ describe('List skill command option check', () => {
             'Is invalid filter');
         assert.ok(JSON.stringify(errorDetails).includes(
             'Invalid sort params. Allowed fields: name,title,description,createdAt,createdBy') === true,
+            'Is invalid sort');
+    });
+
+    it('should support default sort params', () => {
+        const options = {
+            sort: '{"updatedAt": -1}',
+        };
+        const { validOptions, errorDetails } = validateOptions(options, 'SKILL');
+        assert.ok(validOptions === true, 'Valid options');
+        assert.ok(errorDetails.length === 0, 'Valid options');
+    });
+
+    it('should fail on unsupported default sort params', () => {
+        const options = {
+            sort: '{"_updatedAt": -1}',
+        };
+        const { validOptions, errorDetails } = validateOptions(options, 'SKILL');
+        assert.ok(validOptions === false, 'Invalid options');
+        assert.ok(JSON.stringify(errorDetails).includes(
+            'Invalid sort params. Allowed fields: name,title,description,createdAt,createdBy,updatedAt') === true,
             'Is invalid sort');
     });
 });
@@ -217,6 +337,26 @@ describe('List types command option check', () => {
             'Invalid sort params. Allowed fields: name,title,description,createdAt,createdBy') === true,
             'Is invalid sort');
     });
+
+    it('should support default sort params', () => {
+        const options = {
+            sort: '{"updatedAt": -1}',
+        };
+        const { validOptions, errorDetails } = validateOptions(options, 'TYPE');
+        assert.ok(validOptions === true, 'Valid options');
+        assert.ok(errorDetails.length === 0, 'Valid options');
+    });
+
+    it('should fail on unsupported default sort params', () => {
+        const options = {
+            sort: '{"_updatedAt": -1}',
+        };
+        const { validOptions, errorDetails } = validateOptions(options, 'TYPE');
+        assert.ok(validOptions === false, 'Invalid options');
+        assert.ok(JSON.stringify(errorDetails).includes(
+            'Invalid sort params. Allowed fields: name,title,description,createdAt,createdBy,updatedAt') === true,
+            'Is invalid sort');
+    });
 });
 
 describe('List snapshot command option check', () => {
@@ -248,6 +388,26 @@ describe('List snapshot command option check', () => {
             'Invalid sort params. Allowed fields: snapshotId,title,_isTip,_createdAt,_createdBy') === true,
             'Is invalid sort');
     });
+
+    it('should support default sort params', () => {
+        const options = {
+            sort: '{"_updatedAt": -1}',
+        };
+        const { validOptions, errorDetails } = validateOptions(options, 'SNAPSHOT');
+        assert.ok(validOptions === true, 'Valid options');
+        assert.ok(errorDetails.length === 0, 'Valid options');
+    });
+
+    it('should fail on unsupported default sort params', () => {
+        const options = {
+            sort: '{"updatedAt": -1}',
+        };
+        const { validOptions, errorDetails } = validateOptions(options, 'SNAPSHOT');
+        assert.ok(validOptions === false, 'Invalid options');
+        assert.ok(JSON.stringify(errorDetails).includes(
+            'Invalid sort params. Allowed fields: snapshotId,title,_isTip,_createdAt,_createdBy,_updatedAt') === true,
+            'Is invalid sort');
+    });
 });
 
 describe('List assessments command option check', () => {
@@ -275,6 +435,26 @@ describe('List assessments command option check', () => {
         assert.ok(JSON.stringify(errorDetails).includes(
             'Invalid filter params. Allowed fields: name,title,componentName,reportCount,_createdBy') === true,
             'Is invalid filter');
+        assert.ok(JSON.stringify(errorDetails).includes(
+            'Invalid sort params. Allowed fields: name,title,componentName,reportCount,_createdBy,_updatedAt') === true,
+            'Is invalid sort');
+    });
+
+    it('should support default sort params', () => {
+        const options = {
+            sort: '{"_updatedAt": -1}',
+        };
+        const { validOptions, errorDetails } = validateOptions(options, 'ASSESSMENT');
+        assert.ok(validOptions === true, 'Valid options');
+        assert.ok(errorDetails.length === 0, 'Valid options');
+    });
+
+    it('should fail on unsupported default sort params', () => {
+        const options = {
+            sort: '{"updatedAt": -1}',
+        };
+        const { validOptions, errorDetails } = validateOptions(options, 'ASSESSMENT');
+        assert.ok(validOptions === false, 'Invalid options');
         assert.ok(JSON.stringify(errorDetails).includes(
             'Invalid sort params. Allowed fields: name,title,componentName,reportCount,_createdBy,_updatedAt') === true,
             'Is invalid sort');
@@ -341,6 +521,26 @@ describe('List connections command option check', () => {
             'Invalid sort params. Allowed fields: name,title,description,createdAt,connectionType,allowWrite,contentType') === true,
             'Is invalid sort');
     });
+
+    it('should support default sort params', () => {
+        const options = {
+            sort: '{"updatedAt": -1}',
+        };
+        const { validOptions, errorDetails } = validateOptions(options, 'CONNECTION');
+        assert.ok(validOptions === true, 'Valid options');
+        assert.ok(errorDetails.length === 0, 'Valid options');
+    });
+
+    it('should fail on unsupported default sort params', () => {
+        const options = {
+            sort: '{"_updatedAt": -1}',
+        };
+        const { validOptions, errorDetails } = validateOptions(options, 'CONNECTION');
+        assert.ok(validOptions === false, 'Invalid options');
+        assert.ok(JSON.stringify(errorDetails).includes(
+            'Invalid sort params. Allowed fields: name,title,description,createdAt,connectionType,allowWrite,contentType,updatedAt') === true,
+            'Is invalid sort');
+    });
 });
 
 describe('List connection types command option check', () => {
@@ -400,7 +600,27 @@ describe('List campaigns command option check', () => {
             'Invalid filter params. Allowed fields: name,title,description,_createdBy,lifecycleState') === true,
             'Is invalid filter');
         assert.ok(JSON.stringify(errorDetails).includes(
-            'Invalid sort params. Allowed fields: name,title,description,_createdAt,_createdBy,lifecycleState') === true,
+            'Invalid sort params. Allowed fields: name,title,description,_createdAt,_createdBy,lifecycleState,_updatedAt') === true,
+            'Is invalid sort');
+    });
+
+    it('should support default sort params', () => {
+        const options = {
+            sort: '{"_updatedAt": -1}',
+        };
+        const { validOptions, errorDetails } = validateOptions(options, 'CAMPAIGN');
+        assert.ok(validOptions === true, 'Valid options');
+        assert.ok(errorDetails.length === 0, 'Valid options');
+    });
+
+    it('should fail on unsupported default sort params', () => {
+        const options = {
+            sort: '{"updatedAt": -1}',
+        };
+        const { validOptions, errorDetails } = validateOptions(options, 'CAMPAIGN');
+        assert.ok(validOptions === false, 'Invalid options');
+        assert.ok(JSON.stringify(errorDetails).includes(
+            'Invalid sort params. Allowed fields: name,title,description,_createdAt,_createdBy,lifecycleState,_updatedAt') === true,
             'Is invalid sort');
     });
 });
@@ -434,6 +654,26 @@ describe('List missions command option check', () => {
             'Invalid sort params. Allowed fields: name,title,description,_createdAt,_createdBy,lifecycleState') === true,
             'Is invalid sort');
     });
+
+    it('should support default sort params', () => {
+        const options = {
+            sort: '{"_updatedAt": -1}',
+        };
+        const { validOptions, errorDetails } = validateOptions(options, 'MISSION');
+        assert.ok(validOptions === true, 'Valid options');
+        assert.ok(errorDetails.length === 0, 'Valid options');
+    });
+
+    it('should fail on unsupported default sort params', () => {
+        const options = {
+            sort: '{"updatedAt": -1}',
+        };
+        const { validOptions, errorDetails } = validateOptions(options, 'MISSION');
+        assert.ok(validOptions === false, 'Invalid options');
+        assert.ok(JSON.stringify(errorDetails).includes(
+            'Invalid sort params. Allowed fields: name,title,description,_createdAt,_createdBy,lifecycleState,_updatedAt') === true,
+            'Is invalid sort');
+    });
 });
 
 describe('List projects command option check', () => {
@@ -463,6 +703,26 @@ describe('List projects command option check', () => {
             'Is invalid filter');
         assert.ok(JSON.stringify(errorDetails).includes(
             'Invalid sort params. Allowed fields: name,title,description,_createdAt') === true,
+            'Is invalid sort');
+    });
+
+    it('should support default sort params', () => {
+        const options = {
+            sort: '{"_updatedAt": -1}',
+        };
+        const { validOptions, errorDetails } = validateOptions(options, 'PROJECT');
+        assert.ok(validOptions === true, 'Valid options');
+        assert.ok(errorDetails.length === 0, 'Valid options');
+    });
+
+    it('should fail on unsupported default sort params', () => {
+        const options = {
+            sort: '{"updatedAt": -1}',
+        };
+        const { validOptions, errorDetails } = validateOptions(options, 'PROJECT');
+        assert.ok(validOptions === false, 'Invalid options');
+        assert.ok(JSON.stringify(errorDetails).includes(
+            'Invalid sort params. Allowed fields: name,title,description,_createdAt,_updatedAt') === true,
             'Is invalid sort');
     });
 });
