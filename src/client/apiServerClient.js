@@ -36,9 +36,9 @@ module.exports = class ApiServerClient {
     async listProjects(token, filter, limit, skip, sort) {
         const fetched = await this._client(token)
             .request(gql`{
-            projects ( filter: "${filter}", limit: "${limit}",  skip: "${skip}",  sort: "${sort}" ) { name, title, description} }
+            projects ( filter: "${filter}", limit: "${limit}",  skip: "${skip}",  sort: "${sort}" ) { count details { name title description }} }
         `);
-        return _.get(fetched, 'projects', []);
+        return _.get(fetched, 'projects.details', []);
     }
 
     /**
