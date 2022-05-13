@@ -46,7 +46,6 @@ program
     .option('--project [project]', 'The project to use')
     .option('--json', 'Output results using JSON')
     .option('--query [query]', 'A JMESPath query to use in filtering the response data. Ignored if output format is not JSON.')
-    .option('--filter [filter]', 'A Mongo style filter to use.')
     .option('--limit [limit]', 'Limit number of records', DEFAULT_LIST_LIMIT_COUNT)
     .option('--skip [skip]', 'Skip number of records', DEFAULT_LIST_SKIP_COUNT)
     .option('--sort [sort]', 'A Mongo style sort statement to use in the query.', GET_DEFAULT_SORT_CLI_OPTION(DEFAULT_LIST_SORT_PARAMS[0]))
