@@ -70,10 +70,10 @@ module.exports.DEFAULT_LIST_LIMIT_COUNT = '20';
 
 module.exports.DEFAULT_LIST_SKIP_COUNT = '0';
 
-module.exports.DEFAULT_LIST_SORT_PARAMS = [
-    'updatedAt', // skills, agents, actions, connections, models, experiments, types,
-    '_updatedAt', // projects, missions, campaigns, run, assessment, snapshot
-    'start', // activations
-];
+module.exports.DEFAULT_LIST_SORT_PARAMS = {
+    updatedAt: 'updatedAt', // skills, agents, actions, connections, models, experiments, types,
+    _updatedAt: '_updatedAt', // projects, missions, campaigns, run, assessment, snapshot
+    start: 'start', // activations
+};
 
 module.exports.GET_DEFAULT_SORT_CLI_OPTION = (param) => JSON.stringify({ [param]: -1 });

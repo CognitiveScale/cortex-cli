@@ -76,7 +76,7 @@ module.exports.ListTypesCommand = class ListTypesCommand {
         catalog.listTypes(options.project || profile.project, profile.token, options.limit, options.skip, options.sort).then((response) => {
             if (response.success) {
                 let result = response.types;
-                printExtendedLogs('LIMIT', result, options);
+                printExtendedLogs(result, options);
                 if (options.json) {
                     if (options.query) result = filterObject(result, options);
                     printSuccess(JSON.stringify(result, null, 2), options);

@@ -45,7 +45,7 @@ module.exports.ListCampaignsCommand = class ListCampaignsCommand {
             const filterParam = (options.filter || '{}').replace(/"/g, '\'');
             const response = await cli.listCampaigns(options.project || profile.project, profile.token, filterParam, options.limit, options.skip, sortParam);
             let result = response;
-            printExtendedLogs('LIMIT', result, options);
+            printExtendedLogs(result, options);
             if (options.json) {
                 if (options.query) result = filterObject(result, options);
                 printSuccess(JSON.stringify(result, null, 2), options);
@@ -234,7 +234,7 @@ module.exports.ListMissionsCommand = class ListMissionsCommand {
             cli.listMissions(options.project || profile.project, profile.token, campaign, filterParam, options.limit, options.skip, sortParam).then((response) => {
                 if (response.success === false) throw response;
                 let data = Object.values(response.data);
-                printExtendedLogs('LIMIT', data, options);
+                printExtendedLogs(data, options);
                 if (options.json) {
                     if (options.query) data = filterObject(data, options);
                     printSuccess(JSON.stringify(data, null, 2), options);
