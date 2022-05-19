@@ -13,14 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 const debug = require('debug')('cortex:cli');
 const FormData = require('form-data');
 const http = require('https');
 const fs = require('fs');
-const { got } = require('./apiutils');
+const { got, defaultHeaders } = require('./apiutils');
 const {
- constructError, formatAllServiceInputParameters, checkProject, getUserAgent, printSuccess, printError, printTable,
+ constructError, formatAllServiceInputParameters, checkProject, printSuccess, printError, printTable,
 } = require('../commands/utils');
 
 const createEndpoints = (baseUri) => ({
@@ -41,8 +40,7 @@ module.exports = class Catalog {
         debug('saveSkill(%s) => %s', skillObj.name, this.endpoints.skills(projectId));
         return got
             .post(this.endpoints.skills(projectId), {
-                headers: { Authorization: `Bearer ${token}` },
-                'user-agent': getUserAgent(),
+                headers: defaultHeaders(token),
                 json: skillObj,
             }).json()
             .then((res) => ({ success: true, message: res }))
@@ -58,8 +56,7 @@ module.exports = class Catalog {
         if (skip) query.skip = skip;
         return got
             .get(this.endpoints.skills(projectId), {
-                headers: { Authorization: `Bearer ${token}` },
-                'user-agent': getUserAgent(),
+                headers: defaultHeaders(token),
                 searchParams: query,
             }).json()
             .then((skills) => ({ success: true, ...skills }))
@@ -77,8 +74,7 @@ module.exports = class Catalog {
         }
         try {
             const res = got.get(endpoint, {
-                headers: { Authorization: `Bearer ${token}` },
-                'user-agent': getUserAgent(),
+                headers: defaultHeaders(token),
                 searchParams,
             });
             if (output === 'json') return res.json();
@@ -94,8 +90,7 @@ module.exports = class Catalog {
         debug('deploySkill(%s) => %s', skillName, endpoint);
         return got
             .get(endpoint, {
-                headers: { Authorization: `Bearer ${token}` },
-                'user-agent': getUserAgent(),
+                headers: defaultHeaders(token),
                 searchParams: { verbose },
             }).json()
             .then((res) => ({ ...res }))
@@ -108,8 +103,7 @@ module.exports = class Catalog {
         debug('undeploySkill(%s) => %s', skillName, endpoint);
         return got
             .get(endpoint, {
-                headers: { Authorization: `Bearer ${token}` },
-                'user-agent': getUserAgent(),
+                headers: defaultHeaders(token),
                 searchParams: { verbose },
             }).json()
             .then((res) => ({ ...res }))
@@ -122,8 +116,7 @@ module.exports = class Catalog {
         debug('skillLogs(%s, %s) => %s', skillName, actionName, endpoint);
         return got
             .get(endpoint, {
-                headers: { Authorization: `Bearer ${token}` },
-                'user-agent': getUserAgent(),
+                headers: defaultHeaders(token),
                 searchParams: { verbose },
             }).json()
             .then((res) => ({ ...res }))
@@ -141,8 +134,7 @@ module.exports = class Catalog {
         if (skip) query.skip = skip;
         return got
             .get(endpoint, {
-                headers: { Authorization: `Bearer ${token}` },
-                'user-agent': getUserAgent(),
+                headers: defaultHeaders(token),
                 searchParams: query,
             })
             .json()
@@ -179,8 +171,7 @@ module.exports = class Catalog {
         debug('saveAgent(%s) => %s', agentObj.name, endpoint);
         return got
             .post(endpoint, {
-                headers: { Authorization: `Bearer ${token}` },
-                'user-agent': getUserAgent(),
+                headers: defaultHeaders(token),
                 json: agentObj,
             }).json()
             .then((res) => ({ success: true, message: res }))
@@ -193,8 +184,7 @@ module.exports = class Catalog {
         debug('describeAgent(%s) => %s', agentName, endpoint);
         return got
             .get(endpoint, {
-                headers: { Authorization: `Bearer ${token}` },
-                'user-agent': getUserAgent(),
+                headers: defaultHeaders(token),
                 searchParams: { verbose },
             }).json()
             .then((agent) => ({ success: true, agent }))
@@ -207,8 +197,7 @@ module.exports = class Catalog {
         debug('describeAgentVersions(%s) => %s', agentName, endpoint);
         return got
             .get(endpoint, {
-                headers: { Authorization: `Bearer ${token}` },
-                'user-agent': getUserAgent(),
+                headers: defaultHeaders(token),
             })
             .json()
             .then((agent) => ({ success: true, agent }))
@@ -221,8 +210,7 @@ module.exports = class Catalog {
         debug('deployAgent(%s) => %s', agentName, endpoint);
         return got
             .get(endpoint, {
-                headers: { Authorization: `Bearer ${token}` },
-                'user-agent': getUserAgent(),
+                headers: defaultHeaders(token),
                 searchParams: { verbose },
             }).json()
             .then((res) => ({ ...res }))
@@ -235,8 +223,7 @@ module.exports = class Catalog {
         debug('undeployAgent(%s) => %s', agentName, endpoint);
         return got
             .get(endpoint, {
-                headers: { Authorization: `Bearer ${token}` },
-                'user-agent': getUserAgent(),
+                headers: defaultHeaders(token),
                 searchParams: { verbose },
             }).json()
             .then((res) => ({ ...res }))
@@ -250,8 +237,7 @@ module.exports = class Catalog {
         debug('saveType(%s) => %s', JSON.stringify(names), this.endpoints.types(projectId));
         return got
             .post(endpoint, {
-                headers: { Authorization: `Bearer ${token}` },
-                'user-agent': getUserAgent(),
+                headers: defaultHeaders(token),
                 json: types,
             })
             .json()
@@ -265,8 +251,7 @@ module.exports = class Catalog {
         debug('describeType(%s) => %s', typeName, endpoint);
         return got
             .get(endpoint, {
-                headers: { Authorization: `Bearer ${token}` },
-                'user-agent': getUserAgent(),
+                headers: defaultHeaders(token),
             })
             .json()
             .then((type) => ({ success: true, type }))
@@ -284,8 +269,7 @@ module.exports = class Catalog {
 
         return got
             .get(endpoint, {
-                headers: { Authorization: `Bearer ${token}` },
-                'user-agent': getUserAgent(),
+                headers: defaultHeaders(token),
                 searchParams: query,
             })
             .json()
@@ -299,8 +283,7 @@ module.exports = class Catalog {
         debug('deleteType(%s) => %s', typeName, endpoint);
         return got
             .delete(endpoint, {
-                headers: { Authorization: `Bearer ${token}` },
-                'user-agent': getUserAgent(),
+                headers: defaultHeaders(token),
             })
             .json()
             .then((type) => ({ success: true, type }))
@@ -309,25 +292,17 @@ module.exports = class Catalog {
 
     exportCampaign(projectId, token, campaignName, deployable, path) {
         checkProject(projectId);
-
         const url = `${this.endpoints.campaigns(projectId)}${campaignName}/export?deployable=${deployable}`;
         debug('exportCampaign(%s) => %s', campaignName, url);
-
         return new Promise((resolve, reject) => {
-            http.get(url,
-                { headers: { Authorization: `Bearer ${token}` } },
-                (response) => {
-                    if (response.statusCode === 200 || response.statusCode === 201) {
-                        const file = fs.createWriteStream(path);
-                        response.pipe(file).on('close', resolve).on('error', reject);
-                    } else {
-                        printError(`Failed to export Campaign ${campaignName} from project ${projectId}. Error: [${response.statusCode}] ${response.statusMessage}`);
-                        reject({ status: response.statusCode });
-                    }
-                }).on('error', (e) => {
-                    reject(e);
-                    printError(e);
-                });
+            const download = got.stream(url, {
+                headers: defaultHeaders(token),
+            });
+            download.on('error', (error) => reject(constructError(error).message));
+            const fileOutput = fs.createWriteStream(path);
+            fileOutput.on('error', (error) => reject(constructError(error).message));
+            fileOutput.on('finish', () => resolve);
+            download.pipe(fileOutput);
         });
     }
 
@@ -378,8 +353,7 @@ module.exports = class Catalog {
         debug('undeployCampaign() => %s', endpoint);
         return got
             .get(endpoint, {
-                headers: { Authorization: `Bearer ${token}` },
-                'user-agent': getUserAgent(),
+                headers: defaultHeaders(token),
             })
             .json()
             .then((res) => ({ success: true, data: res }))
@@ -392,8 +366,7 @@ module.exports = class Catalog {
         debug('deployCampaign() => %s', endpoint);
         return got
             .get(endpoint, {
-                headers: { Authorization: `Bearer ${token}` },
-                'user-agent': getUserAgent(),
+                headers: defaultHeaders(token),
             })
             .json()
             .then((res) => ({ success: true, data: res }))
@@ -406,8 +379,7 @@ module.exports = class Catalog {
         debug('undeployMissions() => %s', endpoint);
         return got
             .get(endpoint, {
-                headers: { Authorization: `Bearer ${token}` },
-                'user-agent': getUserAgent(),
+                headers: defaultHeaders(token),
             })
             .json()
             .then((res) => ({ success: true, data: res }))
@@ -426,8 +398,7 @@ module.exports = class Catalog {
 
         return got
             .get(endpoint, {
-                headers: { Authorization: `Bearer ${token}` },
-                'user-agent': getUserAgent(),
+                headers: defaultHeaders(token),
                 searchParams: query,
             })
             .json()
@@ -441,8 +412,7 @@ module.exports = class Catalog {
         debug('deployMissions() => %s', endpoint);
         return got
             .get(endpoint, {
-                headers: { Authorization: `Bearer ${token}` },
-                'user-agent': getUserAgent(),
+                headers: defaultHeaders(token),
             })
             .json()
             .then((res) => ({ success: true, data: res }))
@@ -455,8 +425,7 @@ module.exports = class Catalog {
         debug('getMissions() => %s', endpoint);
         return got
             .get(endpoint, {
-                headers: { Authorization: `Bearer ${token}` },
-                'user-agent': getUserAgent(),
+                headers: defaultHeaders(token),
             })
             .json()
             .then((res) => ({ success: true, data: res }))
@@ -558,8 +527,7 @@ module.exports = class Catalog {
         debug('deleteSkill(%s) => %s', skillName, endpoint);
         return got
             .delete(endpoint, {
-                headers: { Authorization: `Bearer ${token}` },
-                'user-agent': getUserAgent(),
+                headers: defaultHeaders(token),
             })
             .json()
             .then((skill) => skill)
@@ -572,8 +540,7 @@ module.exports = class Catalog {
         debug('deleteAgent(%s) => %s', agentName, endpoint);
         return got
             .delete(endpoint, {
-                headers: { Authorization: `Bearer ${token}` },
-                'user-agent': getUserAgent(),
+                headers: defaultHeaders(token),
             })
             .json()
             .then((agent) => ({ success: true, agent }))

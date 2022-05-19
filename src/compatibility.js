@@ -28,9 +28,9 @@ const last = require('lodash/fp/last');
 const npmFetch = require('npm-registry-fetch');
 const Semver = require('semver');
 const uniq = require('lodash/fp/uniq');
-const { got } = require('./client/apiutils');
+const { got, getUserAgent } = require('./client/apiutils');
 const { loadProfile } = require('./config');
-const { printError, printWarning, getUserAgent } = require('./commands/utils');
+const { printError, printWarning } = require('./commands/utils');
 
 const pkg = findPackageJson(__dirname).next().value;
 

@@ -16,9 +16,9 @@
 const _ = require('lodash');
 const debug = require('debug')('cortex:cli');
 // eslint-disable-next-line import/no-unresolved
-const { got } = require('./apiutils');
+const { got, defaultHeaders } = require('./apiutils');
 const {
- constructError, callMe, checkProject, getUserAgent, 
+ constructError, callMe, checkProject, 
 } = require('../commands/utils');
 
 module.exports = class Actions {
@@ -49,8 +49,7 @@ module.exports = class Actions {
 
         return got
         .post(endpoint, {
-                   headers: { Authorization: `Bearer ${token}` },
-                    'user-agent': getUserAgent(),
+            headers: defaultHeaders(token),
                    json: body,
             }).json()
         .then((res) => ({ success: true, message: res }))
@@ -67,8 +66,7 @@ module.exports = class Actions {
         if (skip) query.skip = skip;
         return got
             .get(this.endpointV4(projectId), {
-                headers: { Authorization: `Bearer ${token}` },
-                'user-agent': getUserAgent(),
+                headers: defaultHeaders(token),
                 searchParams: query,
             }).json()
             .then((actions) => actions)
@@ -80,7 +78,7 @@ module.exports = class Actions {
         const endpoint = `${this.endpointV4(projectId)}/${encodeURIComponent(actionName)}`;
         debug('describeAction(%s) => %s', actionName, endpoint);
         return got
-            .get(endpoint, { headers: { Authorization: `Bearer ${token}` } })
+            .get(endpoint, { headers: defaultHeaders(token) })
             .json()
             .then((action) => action)
             .catch((err) => constructError(err));
@@ -91,10 +89,7 @@ module.exports = class Actions {
         const endpoint = `${this.endpointV4(projectId)}/${encodeURIComponent(actionName)}/logs`;
         debug('getLogsAction(%s) => %s', actionName, endpoint);
         return got
-            .get(endpoint, {
-                headers: { Authorization: `Bearer ${token}` },
-                'user-agent': getUserAgent(),
-            })
+            .get(endpoint, { headers: defaultHeaders(token) })
             .json()
             .then((logs) => {
                     if (_.isArray(logs)) {
@@ -112,8 +107,7 @@ module.exports = class Actions {
         debug('deleteAction(%s) => %s', actionName, endpoint);
         return got
             .delete(endpoint, {
-                headers: { Authorization: `Bearer ${token}` },
-                'user-agent': getUserAgent(),
+                headers: defaultHeaders(token),
             })
             .json()
             .then((action) => ({ success: true, action }))
@@ -126,8 +120,7 @@ module.exports = class Actions {
         debug('getConfig() => %s', endpoint);
         return got
             .get(endpoint, {
-                headers: { Authorization: `Bearer ${token}` },
-                'user-agent': getUserAgent(),
+                headers: defaultHeaders(token),
             })
             .json()
             .then((config) => ({ success: true, config }))

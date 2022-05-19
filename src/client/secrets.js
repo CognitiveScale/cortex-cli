@@ -16,8 +16,8 @@
 
 const debug = require('debug')('cortex:cli');
 const urljoin = require('url-join');
-const { got } = require('./apiutils');
-const { constructError, getUserAgent, checkProject } = require('../commands/utils');
+const { got, defaultHeaders } = require('./apiutils');
+const { constructError, checkProject } = require('../commands/utils');
 
 module.exports = class Secrets {
     constructor(cortexUrl) {
@@ -31,8 +31,7 @@ module.exports = class Secrets {
         debug('listSecrets => %s', endpoint);
         return got
             .get(endpoint, {
-                headers: { Authorization: `Bearer ${token}` },
-                'user-agent': getUserAgent(),
+                headers: defaultHeaders(token),
             }).json()
             .then((result) => ({ success: true, result }))
             .catch((err) => constructError(err));
@@ -44,8 +43,7 @@ module.exports = class Secrets {
         debug('readSecret(%s) => %s', keyName, endpoint);
         return got
             .get(endpoint, {
-                headers: { Authorization: `Bearer ${token}` },
-                'user-agent': getUserAgent(),
+                headers: defaultHeaders(token),
             }).json()
             .then((result) => ({ success: true, result }))
             .catch((err) => constructError(err));
@@ -57,8 +55,7 @@ module.exports = class Secrets {
         debug('deleteSecret(%s) => %s', keyName, endpoint);
         return got
             .delete(endpoint, {
-                headers: { Authorization: `Bearer ${token}` },
-                'user-agent': getUserAgent(),
+                headers: defaultHeaders(token),
             }).json()
             .then((result) => ({ success: true, result }))
             .catch((err) => constructError(err));
@@ -71,8 +68,7 @@ module.exports = class Secrets {
         const body = { value };
         return got
             .post(endpoint, {
-                headers: { Authorization: `Bearer ${token}` },
-                'user-agent': getUserAgent(),
+                headers: defaultHeaders(token),
                 json: body,
             }).json()
             .then((result) => ({ ...result }))

@@ -37,11 +37,11 @@ program
     .description('List secure keys')
     .alias('l')
     .option('--no-compat', 'Ignore API compatibility checks')
-    .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
+    .option('--color [boolean]', 'Turn on/off colors for JSON output.', 'true')
     .option('--json', 'Output results using JSON')
-    .option('--profile [profile]', 'The profile to use')
-    .option('--project [project]', 'The project to use')
-    .option('--query [query]', 'A JMESPath query to use in filtering the response data. Ignored if output format is not JSON.')
+    .option('--profile <profile>', 'The profile to use')
+    .option('--project <project>', 'The project to use')
+    .option('--query <query>', 'A JMESPath query to use in filtering the response data. Ignored if output format is not JSON.')
     .action(withCompatibilityCheck((options) => {
         try {
             new ListSecretsCommand(program).execute(options);
@@ -56,10 +56,10 @@ program
     .alias('get')
     .description('Retrieve the value stored for the given key.')
     .option('--no-compat', 'Ignore API compatibility checks')
-    .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
+    .option('--color [boolean]', 'Turn on/off colors for JSON output.', 'true')
     .option('--json', 'Output results using JSON')
-    .option('--profile [profile]', 'The profile to use')
-    .option('--project [project]', 'The project to use')
+    .option('--profile <profile>', 'The profile to use')
+    .option('--project <project>', 'The project to use')
     .action(withCompatibilityCheck((keyName, options) => {
         try {
             new ReadSecretsCommand(program).execute(keyName, options);
@@ -73,11 +73,11 @@ program
     .command('save <keyName> [value]')
     .description('Save or overwrite a secure value. By default values are stored as strings but can also be saved as JSON or YAML.')
     .option('--no-compat', 'Ignore API compatibility checks')
-    .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
-    .option('--data [data]', 'JSON value to save')
-    .option('--data-file [dataFile]', 'A file containing either JSON or YAML formatted value to save')
-    .option('--profile [profile]', 'The profile to use')
-    .option('--project [project]', 'The project to use')
+    .option('--color [boolean]', 'Turn on/off colors for JSON output.', 'true')
+    .option('--data <data>', 'JSON value to save')
+    .option('--data-file <dataFile>', 'A file containing either JSON or YAML formatted value to save')
+    .option('--profile <profile>', 'The profile to use')
+    .option('--project <project>', 'The project to use')
     .action(withCompatibilityCheck((keyName, value, options) => {
         try {
             new WriteSecretsCommand(program).execute(keyName, value, options);
@@ -91,9 +91,9 @@ program
     .command('delete <keyName>')
     .description('Delete a secret')
     .option('--no-compat', 'Ignore API compatibility checks')
-    .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
-    .option('--profile [profile]', 'The profile to use')
-    .option('--project [project]', 'The project to use')
+    .option('--color [boolean]', 'Turn on/off colors for JSON output.', 'true')
+    .option('--profile <profile>', 'The profile to use')
+    .option('--project <project>', 'The project to use')
     .action(withCompatibilityCheck((keyName, options) => {
         try {
             new DeleteSecretCommand(program).execute(keyName, options);
