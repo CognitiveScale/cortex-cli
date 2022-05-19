@@ -26,6 +26,7 @@ const os = require('os');
 const path = require('path');
 const yaml = require('js-yaml');
 const { exec } = require('child_process');
+const { ALLOWED_QUERY_FIELDS } = require('../constants');
 
 const MAX_NAME_LENGTH = 20;
 
@@ -43,18 +44,21 @@ module.exports.constructError = (error) => {
         errorText = error.message;
     }
     let details;
-
+    let respCode;
     // if JSON was returned, look for either a message or error in it
     try {
         const resp = errResp ? JSON.parse(errorText) : {};
+        respCode = resp.code;
         if (resp.message || resp.error) errorText = resp.message || resp.error;
         // eslint-disable-next-line prefer-destructuring
         details = resp.details;
     } catch (e) {
         // Guess it wasn't JSON!
     }
+    // todo make figuring out the status code more consistent? this might be a holdover from request vs got?
+    const status = _.get(errResp, 'statusCode') || respCode || error.code || error.status || '';
     return {
- success: false, message: errorText, details, status: error.status || error.code || _.get(errResp, 'statusCode') || '',
+ success: false, message: errorText, details, status,
 };
 };
 
@@ -74,21 +78,32 @@ module.exports.printWarning = (message, options) => {
     }
 };
 
-module.exports.printError = (message, options, exit = true) => {
+function printError(message, options, exit = true) {
     if (!options || options.color === 'on') {
         console.error(chalk.red(message));
     } else {
         console.error(message);
     }
-    if (exit) {
+    // Don't exit when testing as this breaks negative unit tests
+    if (exit && _.toLower(process.env.NODE_ENV) !== 'test') {
         process.exit(1);
     }
-};
+}
+module.exports.printError = printError;
 
 module.exports.filterObject = (obj, options) => {
     if (options.query) {
         debug(`filtering results with query: ${options.query}`);
         return jmsepath.search(obj, options.query);
+    }
+    return obj;
+};
+
+module.exports.filterListObject = (obj, options) => {
+    const { map, pick, partialRight } = _;
+    if (options.query) {
+        debug(`filtering results with query: ${options.query}`);
+        return map(obj, partialRight(pick, options.query.split(',')));
     }
     return obj;
 };
@@ -294,8 +309,7 @@ module.exports.deleteFile = deleteFolderRecursive;
 
 module.exports.checkProject = (projectId) => {
     if (_.isEmpty(projectId)) {
-        console.error(chalk.red('\'project\' is required, please provide using \'cortex configure\' or --project'));
-        process.exit(1);
+        printError('\'project\' is required, please provide using \'cortex configure\' or --project');
     }
 };
 
@@ -310,7 +324,16 @@ module.exports.LISTTABLEFORMAT = [
     { column: 'Description', field: 'description', width: 50 },
     { column: 'Modified', field: 'updatedAt', width: 26 },
     { column: 'Author', field: 'createdBy', width: 25 },
+];
 
+module.exports.DEPENDENCYTABLEFORMAT = [
+    { column: 'Dependency Name', field: 'name', width: 60 },
+    { column: 'Dependency Type', field: 'type', width: 40 },
+];
+
+module.exports.OPTIONSTABLEFORMAT = [
+    { column: 'Option Type', field: 'type', width: 20 },
+    { column: 'Message', field: 'message', width: 120 },
 ];
 
 module.exports.RUNTABLEFORMAT = [
@@ -318,6 +341,26 @@ module.exports.RUNTABLEFORMAT = [
     { column: 'Experiment Name', field: 'experimentName', width: 40 },
     { column: 'Took', field: 'took', width: 50 },
     { column: 'Modified', field: '_updatedAt', width: 26 },
+];
+module.exports.SESSIONTABLEFORMAT = [
+    { column: 'Session ID', field: 'sessionId', width: 45 },
+    { column: 'TTL', field: 'ttl', width: 15 },
+    { column: 'Description', field: 'description', width: 70 },
+];
+
+module.exports.isNumeric = (value) => /^-?\d+$/.test(value);
+
+module.exports.CONNECTIONTABLEFORMAT = [
+    { column: 'Name', field: 'name', width: 40 },
+    { column: 'Title', field: 'title', width: 50 },
+    { column: 'Description', field: 'description', width: 50 },
+    { column: 'Connection Type', field: 'connectionType', width: 25 },
+    { column: 'Created On', field: 'createdAt', width: 26 },
+];
+
+module.exports.EXTERNALROLESFORMAT = [
+    { column: 'Group', field: 'group' },
+    { column: 'Roles', field: 'roles' },
 ];
 
 module.exports.generateNameFromTitle = (title) => title.replace(specialCharsExceptHyphen, '')
@@ -329,7 +372,7 @@ module.exports.generateNameFromTitle = (title) => title.replace(specialCharsExce
 
 module.exports.hasUppercase = (s) => /[A-Z]/.test(s);
 
-module.exports.validateName = (name) => (space.test(name)
+module.exports.validateName = (name) => (space.test(name) 
 || specialCharsExceptHyphen.test(name)
 || beginAndEndWithHyphen.test(name)
 || (name && name.length > MAX_NAME_LENGTH)
@@ -342,3 +385,73 @@ module.exports.validateName = (name) => (space.test(name)
         status: true,
         message: '',
     });
+
+module.exports.handleTable = (spec, data, transformer, noDataMessage) => {
+    if (!data || data.length === 0) {
+        this.printSuccess(noDataMessage);
+    } else {
+        this.printTable(spec, data, transformer);
+    }
+};
+
+// Todo: move to cortex-express-common FAB-4008
+module.exports.validateOptions = (options, type) => {
+    const {
+        filter, limit, skip, sort,
+    } = options;
+    const errorDetails = [];
+    if (filter) {
+        try {
+            const filterObj = JSON.parse(filter);
+            const filterKeys = Object.keys(filterObj);
+            if (typeof (filterObj) !== 'object') {
+                errorDetails.push({ type: 'filter', message: 'Invalid filter expression' });
+            }
+            if (type && (_.intersection(ALLOWED_QUERY_FIELDS[type].filter, filterKeys)).length !== filterKeys.length) {
+                errorDetails.push({ type: 'filter', message: `Invalid filter params. Allowed fields: ${ALLOWED_QUERY_FIELDS[type].filter}` });
+            }
+        } catch (err) {
+            errorDetails.push({ type: 'filter', message: `Invalid filter expression: ${err.message}` });
+        }
+    }
+    if (sort) {
+        try {
+            const sortObj = JSON.parse(sort);
+            const sortKeys = Object.keys(sortObj);
+            const sortValues = Object.values(sortObj);
+            if (typeof (sortObj) !== 'object') {
+                errorDetails.push({ type: 'sort', message: 'Invalid sort expression' });
+            }
+            if (!sortValues.every((val) => Number(val) === 1 || Number(val) === -1)) {
+                errorDetails.push({ type: 'sort', message: 'Sort values can only be 1(ascending) or -1(descending)' });
+            }
+            if (type && (_.intersection(ALLOWED_QUERY_FIELDS[type].sort, sortKeys)).length !== sortKeys.length) {
+                errorDetails.push({ type: 'sort', message: `Invalid sort params. Allowed fields: ${ALLOWED_QUERY_FIELDS[type].sort}` });
+            }
+        } catch (err) {
+            // check if a string of 'asc' or 'desc' is provided for backwards compatibility
+            if (!(_.lowerCase(sort).startsWith('desc') || _.lowerCase(sort).startsWith('asc'))) {
+                errorDetails.push({ type: 'sort', message: `Invalid sort expression: ${err.message}` });
+            }
+        }
+    }
+    if ((limit && _.isNaN(Number(limit))) || Number(limit) <= 0) {
+        errorDetails.push({ type: 'limit', message: 'Invalid limit, limit should be a valid positive number' });
+    }
+    if ((skip && _.isNaN(Number(skip))) || Number(skip) < 0) {
+        errorDetails.push({ type: 'skip', message: 'Invalid skip, skip should be a valid non negative number' });
+    }
+    if (errorDetails.length) {
+        return { validOptions: false, errorDetails };
+    }
+    return {
+        validOptions: true, errorDetails,
+    };
+};
+
+module.exports.printExtendedLogs = (data, options) => {
+    if (options.limit && Array.isArray(data) && data.length === Number(options.limit)) {
+        // don't log if showing all the results
+        console.log(`Results limited to ${options.limit} rows`);
+    }
+};

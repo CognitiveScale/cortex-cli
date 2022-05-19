@@ -5,6 +5,7 @@ const sinon = require('sinon');
 
 const {
     handleTable,
+    printExtendedLogs,
 } = require('../src/commands/utils');
 
 const { stripAnsi } = require('./utils');
@@ -63,5 +64,45 @@ describe('Handle table function test', () => {
                 + '└────────┴─────────────┘',
             ],
         );
+    });
+});
+
+describe('Test printExtendedLogs function', () => {
+    let printSpy;
+    const data = [
+        { key1: 'val1' },
+        { key2: 'val2' },
+        { key3: 'val3' },
+        { key4: 'val4' },
+    ];
+    const limit = 5;
+    before(() => {
+        restore = mockedEnv({});
+    });
+
+    beforeEach(() => {
+        printSpy = sinon.spy(console, 'log');
+    });
+
+    afterEach(() => {
+        printSpy.restore();
+    });
+
+    after(() => {
+        restore();
+    });
+
+    function getPrintedLines() {
+        return _.flatten(printSpy.args).map((s) => stripAnsi(s));
+    }
+
+    it('should print the result limited message if data length is equal to limit value', () => {
+        printExtendedLogs([...data, { key5: 'val5' }], { limit });
+        expect(getPrintedLines()).to.eql([`Results limited to ${limit} rows`]);
+    });
+
+    it('should not print the result limited message if data length is less than limit value', () => {
+        printExtendedLogs(data, { limit });
+        expect(getPrintedLines()).to.eql([]);
     });
 });

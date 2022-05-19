@@ -35,7 +35,7 @@ describe('List model command option check', () => {
 
     it('should support default sort params', () => {
         const options = {
-            sort: GET_DEFAULT_SORT_CLI_OPTION(DEFAULT_LIST_SORT_PARAMS[0]),
+            sort: GET_DEFAULT_SORT_CLI_OPTION(DEFAULT_LIST_SORT_PARAMS.updatedAt),
         };
         const { validOptions, errorDetails } = validateOptions(options, 'MODEL');
         assert.ok(validOptions === true, 'Valid options');
@@ -44,7 +44,7 @@ describe('List model command option check', () => {
 
     it('should fail on unsupported default sort params', () => {
         const options = {
-            sort: GET_DEFAULT_SORT_CLI_OPTION(DEFAULT_LIST_SORT_PARAMS[1]),
+            sort: GET_DEFAULT_SORT_CLI_OPTION(DEFAULT_LIST_SORT_PARAMS._updatedAt),
         };
         const { validOptions, errorDetails } = validateOptions(options, 'MODEL');
         assert.ok(validOptions === false, 'Invalid options');
@@ -86,7 +86,7 @@ describe('List experiments command option check', () => {
 
     it('should support default sort params', () => {
         const options = {
-            sort: GET_DEFAULT_SORT_CLI_OPTION(DEFAULT_LIST_SORT_PARAMS[0]),
+            sort: GET_DEFAULT_SORT_CLI_OPTION(DEFAULT_LIST_SORT_PARAMS.updatedAt),
         };
         const { validOptions, errorDetails } = validateOptions(options, 'EXPERIMENT');
         assert.ok(validOptions === true, 'Valid options');
@@ -95,7 +95,7 @@ describe('List experiments command option check', () => {
 
     it('should fail on unsupported default sort params', () => {
         const options = {
-            sort: GET_DEFAULT_SORT_CLI_OPTION(DEFAULT_LIST_SORT_PARAMS[1]),
+            sort: GET_DEFAULT_SORT_CLI_OPTION(DEFAULT_LIST_SORT_PARAMS._updatedAt),
         };
         const { validOptions, errorDetails } = validateOptions(options, 'EXPERIMENT');
         assert.ok(validOptions === false, 'Invalid options');
@@ -137,7 +137,7 @@ describe('List runs command option check', () => {
 
     it('should support default sort params', () => {
         const options = {
-            sort: GET_DEFAULT_SORT_CLI_OPTION(DEFAULT_LIST_SORT_PARAMS[1]),
+            sort: GET_DEFAULT_SORT_CLI_OPTION(DEFAULT_LIST_SORT_PARAMS._updatedAt),
         };
         const { validOptions, errorDetails } = validateOptions(options, 'RUN');
         assert.ok(validOptions === true, 'Valid options');
@@ -146,7 +146,7 @@ describe('List runs command option check', () => {
 
     it('should fail on unsupported default sort params', () => {
         const options = {
-            sort: GET_DEFAULT_SORT_CLI_OPTION(DEFAULT_LIST_SORT_PARAMS[0]),
+            sort: GET_DEFAULT_SORT_CLI_OPTION(DEFAULT_LIST_SORT_PARAMS.updatedAt),
         };
         const { validOptions, errorDetails } = validateOptions(options, 'RUN');
         assert.ok(validOptions === false, 'Invalid options');
@@ -188,7 +188,7 @@ describe('List actions command option check', () => {
 
     it('should support default sort params', () => {
         const options = {
-            sort: GET_DEFAULT_SORT_CLI_OPTION(DEFAULT_LIST_SORT_PARAMS[0]),
+            sort: GET_DEFAULT_SORT_CLI_OPTION(DEFAULT_LIST_SORT_PARAMS.updatedAt),
         };
         const { validOptions, errorDetails } = validateOptions(options, 'ACTION');
         assert.ok(validOptions === true, 'Valid options');
@@ -197,7 +197,7 @@ describe('List actions command option check', () => {
 
     it('should fail on unsupported default sort params', () => {
         const options = {
-            sort: GET_DEFAULT_SORT_CLI_OPTION(DEFAULT_LIST_SORT_PARAMS[1]),
+            sort: GET_DEFAULT_SORT_CLI_OPTION(DEFAULT_LIST_SORT_PARAMS._updatedAt),
         };
         const { validOptions, errorDetails } = validateOptions(options, 'ACTION');
         assert.ok(validOptions === false, 'Invalid options');
@@ -239,7 +239,7 @@ describe('List agents command option check', () => {
 
     it('should support default sort params', () => {
         const options = {
-            sort: GET_DEFAULT_SORT_CLI_OPTION(DEFAULT_LIST_SORT_PARAMS[0]),
+            sort: GET_DEFAULT_SORT_CLI_OPTION(DEFAULT_LIST_SORT_PARAMS.updatedAt),
         };
         const { validOptions, errorDetails } = validateOptions(options, 'AGENT');
         assert.ok(validOptions === true, 'Valid options');
@@ -248,7 +248,7 @@ describe('List agents command option check', () => {
 
     it('should fail on unsupported default sort params', () => {
         const options = {
-            sort: GET_DEFAULT_SORT_CLI_OPTION(DEFAULT_LIST_SORT_PARAMS[1]),
+            sort: GET_DEFAULT_SORT_CLI_OPTION(DEFAULT_LIST_SORT_PARAMS._updatedAt),
         };
         const { validOptions, errorDetails } = validateOptions(options, 'AGENT');
         assert.ok(validOptions === false, 'Invalid options');
@@ -290,7 +290,7 @@ describe('List skill command option check', () => {
 
     it('should support default sort params', () => {
         const options = {
-            sort: GET_DEFAULT_SORT_CLI_OPTION(DEFAULT_LIST_SORT_PARAMS[0]),
+            sort: GET_DEFAULT_SORT_CLI_OPTION(DEFAULT_LIST_SORT_PARAMS.updatedAt),
         };
         const { validOptions, errorDetails } = validateOptions(options, 'SKILL');
         assert.ok(validOptions === true, 'Valid options');
@@ -299,7 +299,7 @@ describe('List skill command option check', () => {
 
     it('should fail on unsupported default sort params', () => {
         const options = {
-            sort: GET_DEFAULT_SORT_CLI_OPTION(DEFAULT_LIST_SORT_PARAMS[1]),
+            sort: GET_DEFAULT_SORT_CLI_OPTION(DEFAULT_LIST_SORT_PARAMS._updatedAt),
         };
         const { validOptions, errorDetails } = validateOptions(options, 'SKILL');
         assert.ok(validOptions === false, 'Invalid options');
@@ -341,7 +341,7 @@ describe('List types command option check', () => {
 
     it('should support default sort params', () => {
         const options = {
-            sort: GET_DEFAULT_SORT_CLI_OPTION(DEFAULT_LIST_SORT_PARAMS[0]),
+            sort: GET_DEFAULT_SORT_CLI_OPTION(DEFAULT_LIST_SORT_PARAMS.updatedAt),
         };
         const { validOptions, errorDetails } = validateOptions(options, 'TYPE');
         assert.ok(validOptions === true, 'Valid options');
@@ -350,7 +350,7 @@ describe('List types command option check', () => {
 
     it('should fail on unsupported default sort params', () => {
         const options = {
-            sort: GET_DEFAULT_SORT_CLI_OPTION(DEFAULT_LIST_SORT_PARAMS[1]),
+            sort: GET_DEFAULT_SORT_CLI_OPTION(DEFAULT_LIST_SORT_PARAMS._updatedAt),
         };
         const { validOptions, errorDetails } = validateOptions(options, 'TYPE');
         assert.ok(validOptions === false, 'Invalid options');
@@ -392,7 +392,7 @@ describe('List snapshot command option check', () => {
 
     it('should support default sort params', () => {
         const options = {
-            sort: GET_DEFAULT_SORT_CLI_OPTION(DEFAULT_LIST_SORT_PARAMS[1]),
+            sort: GET_DEFAULT_SORT_CLI_OPTION(DEFAULT_LIST_SORT_PARAMS._updatedAt),
         };
         const { validOptions, errorDetails } = validateOptions(options, 'SNAPSHOT');
         assert.ok(validOptions === true, 'Valid options');
@@ -401,7 +401,7 @@ describe('List snapshot command option check', () => {
 
     it('should fail on unsupported default sort params', () => {
         const options = {
-            sort: GET_DEFAULT_SORT_CLI_OPTION(DEFAULT_LIST_SORT_PARAMS[0]),
+            sort: GET_DEFAULT_SORT_CLI_OPTION(DEFAULT_LIST_SORT_PARAMS.updatedAt),
         };
         const { validOptions, errorDetails } = validateOptions(options, 'SNAPSHOT');
         assert.ok(validOptions === false, 'Invalid options');
@@ -443,7 +443,7 @@ describe('List assessments command option check', () => {
 
     it('should support default sort params', () => {
         const options = {
-            sort: GET_DEFAULT_SORT_CLI_OPTION(DEFAULT_LIST_SORT_PARAMS[1]),
+            sort: GET_DEFAULT_SORT_CLI_OPTION(DEFAULT_LIST_SORT_PARAMS._updatedAt),
         };
         const { validOptions, errorDetails } = validateOptions(options, 'ASSESSMENT');
         assert.ok(validOptions === true, 'Valid options');
@@ -452,7 +452,7 @@ describe('List assessments command option check', () => {
 
     it('should fail on unsupported default sort params', () => {
         const options = {
-            sort: GET_DEFAULT_SORT_CLI_OPTION(DEFAULT_LIST_SORT_PARAMS[0]),
+            sort: GET_DEFAULT_SORT_CLI_OPTION(DEFAULT_LIST_SORT_PARAMS.updatedAt),
         };
         const { validOptions, errorDetails } = validateOptions(options, 'ASSESSMENT');
         assert.ok(validOptions === false, 'Invalid options');
@@ -525,7 +525,7 @@ describe('List connections command option check', () => {
 
     it('should support default sort params', () => {
         const options = {
-            sort: GET_DEFAULT_SORT_CLI_OPTION(DEFAULT_LIST_SORT_PARAMS[0]),
+            sort: GET_DEFAULT_SORT_CLI_OPTION(DEFAULT_LIST_SORT_PARAMS.updatedAt),
         };
         const { validOptions, errorDetails } = validateOptions(options, 'CONNECTION');
         assert.ok(validOptions === true, 'Valid options');
@@ -534,7 +534,7 @@ describe('List connections command option check', () => {
 
     it('should fail on unsupported default sort params', () => {
         const options = {
-            sort: GET_DEFAULT_SORT_CLI_OPTION(DEFAULT_LIST_SORT_PARAMS[1]),
+            sort: GET_DEFAULT_SORT_CLI_OPTION(DEFAULT_LIST_SORT_PARAMS._updatedAt),
         };
         const { validOptions, errorDetails } = validateOptions(options, 'CONNECTION');
         assert.ok(validOptions === false, 'Invalid options');
@@ -607,7 +607,7 @@ describe('List campaigns command option check', () => {
 
     it('should support default sort params', () => {
         const options = {
-            sort: GET_DEFAULT_SORT_CLI_OPTION(DEFAULT_LIST_SORT_PARAMS[1]),
+            sort: GET_DEFAULT_SORT_CLI_OPTION(DEFAULT_LIST_SORT_PARAMS._updatedAt),
         };
         const { validOptions, errorDetails } = validateOptions(options, 'CAMPAIGN');
         assert.ok(validOptions === true, 'Valid options');
@@ -616,7 +616,7 @@ describe('List campaigns command option check', () => {
 
     it('should fail on unsupported default sort params', () => {
         const options = {
-            sort: GET_DEFAULT_SORT_CLI_OPTION(DEFAULT_LIST_SORT_PARAMS[0]),
+            sort: GET_DEFAULT_SORT_CLI_OPTION(DEFAULT_LIST_SORT_PARAMS.updatedAt),
         };
         const { validOptions, errorDetails } = validateOptions(options, 'CAMPAIGN');
         assert.ok(validOptions === false, 'Invalid options');
@@ -658,7 +658,7 @@ describe('List missions command option check', () => {
 
     it('should support default sort params', () => {
         const options = {
-            sort: GET_DEFAULT_SORT_CLI_OPTION(DEFAULT_LIST_SORT_PARAMS[1]),
+            sort: GET_DEFAULT_SORT_CLI_OPTION(DEFAULT_LIST_SORT_PARAMS._updatedAt),
         };
         const { validOptions, errorDetails } = validateOptions(options, 'MISSION');
         assert.ok(validOptions === true, 'Valid options');
@@ -667,7 +667,7 @@ describe('List missions command option check', () => {
 
     it('should fail on unsupported default sort params', () => {
         const options = {
-            sort: GET_DEFAULT_SORT_CLI_OPTION(DEFAULT_LIST_SORT_PARAMS[0]),
+            sort: GET_DEFAULT_SORT_CLI_OPTION(DEFAULT_LIST_SORT_PARAMS.updatedAt),
         };
         const { validOptions, errorDetails } = validateOptions(options, 'MISSION');
         assert.ok(validOptions === false, 'Invalid options');
@@ -709,7 +709,7 @@ describe('List projects command option check', () => {
 
     it('should support default sort params', () => {
         const options = {
-            sort: GET_DEFAULT_SORT_CLI_OPTION(DEFAULT_LIST_SORT_PARAMS[1]),
+            sort: GET_DEFAULT_SORT_CLI_OPTION(DEFAULT_LIST_SORT_PARAMS._updatedAt),
         };
         const { validOptions, errorDetails } = validateOptions(options, 'PROJECT');
         assert.ok(validOptions === true, 'Valid options');
@@ -718,7 +718,7 @@ describe('List projects command option check', () => {
 
     it('should fail on unsupported default sort params', () => {
         const options = {
-            sort: GET_DEFAULT_SORT_CLI_OPTION(DEFAULT_LIST_SORT_PARAMS[0]),
+            sort: GET_DEFAULT_SORT_CLI_OPTION(DEFAULT_LIST_SORT_PARAMS.updatedAt),
         };
         const { validOptions, errorDetails } = validateOptions(options, 'PROJECT');
         assert.ok(validOptions === false, 'Invalid options');

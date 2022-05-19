@@ -92,7 +92,7 @@ module.exports.ListModelsCommand = class ListModelsCommand {
             if (response.success) {
                 let result = response.models;
 
-                printExtendedLogs('LIMIT', result, options);
+                printExtendedLogs(result, options);
                 if (options.json) {
                     if (options.query) result = filterObject(result, options);
                     printSuccess(JSON.stringify(result, null, 2), options);
@@ -135,7 +135,7 @@ module.exports.ListModelRunsCommand = class ListModelsCommand {
             if (response.success) {
                 let result = response.runs;
 
-                printExtendedLogs('LIMIT', result, options);
+                printExtendedLogs(result, options);
                 if (options.json) {
                     if (options.query) result = filterObject(result, options);
                     printSuccess(JSON.stringify(result, null, 2), options);

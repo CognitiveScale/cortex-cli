@@ -47,7 +47,7 @@ module.exports.ListActionsCommand = class {
             .then((response) => {
                 if (response.success) {
                     let result = response.actions;
-                    printExtendedLogs('LIMIT', result, options);
+                    printExtendedLogs(result, options);
                     if (options.json) {
                         if (options.query) result = filterObject(result, options);
                         printSuccess(JSON.stringify(result, null, 2), options);

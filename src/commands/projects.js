@@ -74,7 +74,7 @@ module.exports.ListProjectsCommand = class ListProjectsCommand {
             const filterParam = (options.filter || '{}').replace(/"/g, '\'');
             const response = await cli.listProjects(profile.token, filterParam, options.limit, options.skip, sortParam);
             let result = response;
-            printExtendedLogs('LIMIT', result, options);
+            printExtendedLogs(result, options);
             if (options.json) {
                 if (options.query) result = filterObject(result, options);
                 printSuccess(JSON.stringify(result, null, 2), options);

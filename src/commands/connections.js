@@ -48,7 +48,7 @@ module.exports.ListConnections = class ListConnections {
             if (response.success) {
                 let result = response.result.connections;
 
-                printExtendedLogs('LIMIT', result, options);
+                printExtendedLogs(result, options);
                 if (options.json) {
                     if (options.query) result = filterObject(result, options);
                     printSuccess(JSON.stringify(result, null, 2), options);
@@ -213,7 +213,7 @@ module.exports.ListConnectionsTypes = class ListConnectionsTypes {
             if (response.success) {
                 let result = response.result.connectionTypes;
 
-                printExtendedLogs('LIMIT', result, options);
+                printExtendedLogs(result, options);
                 if (options.json) {
                     if (options.query) result = filterObject(result, options);
                     printSuccess(JSON.stringify(result, null, 2), options);
