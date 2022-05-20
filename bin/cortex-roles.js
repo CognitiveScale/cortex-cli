@@ -163,7 +163,7 @@ program.command('list-external')
     }));
 
 program.command('describe-external <externalGroup>')
-    .alias('get')
+    .alias('get-external')
     .description('Describe external group roles and users')
     .option('--no-compat', 'Ignore API compatibility checks')
     .option('--color [boolean]', 'Turn on/off colors for JSON output.', 'true')
