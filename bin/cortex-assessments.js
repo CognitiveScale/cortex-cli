@@ -98,7 +98,7 @@ program
     }));
 
 program
-    .command('create <assessmentDefinition>')
+    .command('create [assessmentDefinition]')
     .alias('save')
     .description('Create an assessment. Do `list-resources` and `list-types` to select component and type')
     .storeOptionsAsProperties(false)
