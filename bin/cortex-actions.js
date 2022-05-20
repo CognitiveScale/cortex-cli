@@ -92,7 +92,7 @@ program
 
 // Deploy Action
 program
-    .command('deploy <actionDefinition>')
+    .command('deploy [actionDefinition]')
     .alias('save')
     .description('Deploy an action')
     .storeOptionsAsProperties(false)
