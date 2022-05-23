@@ -19,9 +19,9 @@ const stream = require('stream');
 
 const { promisify } = require('util');
 const debug = require('debug')('cortex:cli');
-const { got } = require('./apiutils');
+const { got, defaultHeaders } = require('./apiutils');
 const { createFileStream } = require('../commands/utils');
-const { constructError, getUserAgent, checkProject } = require('../commands/utils');
+const { constructError, checkProject } = require('../commands/utils');
 
 const pipeline = promisify(stream.pipeline);
 
@@ -44,8 +44,7 @@ module.exports = class Content {
         if (prefix) query.filter = prefix;
         return got
             .get(endpoint, {
-                headers: { Authorization: `Bearer ${token}` },
-                'user-agent': getUserAgent(),
+                headers: defaultHeaders(token),
                 searchParams: query,
             }).json()
             .then((message) => ({ success: true, message }))
@@ -63,10 +62,7 @@ module.exports = class Content {
             const message = await pipeline(
                 fs.createReadStream(content),
                 got.stream.post(endpoint, {
-                    headers: {
-                        Authorization: `Bearer ${token}`,
-                        'Content-Type': contentType,
-                    },
+                    headers: defaultHeaders(token, { 'Content-Type': contentType }),
                 }),
                 // https://github.com/sindresorhus/got/blob/HEAD/documentation/3-streams.md#stream-api
                 // new stream.PassThrough() is required to catch errors.
@@ -85,8 +81,7 @@ module.exports = class Content {
         debug('deleteContent() => %s', endpoint);
         return got
             .delete(endpoint, {
-                headers: { Authorization: `Bearer ${token}` },
-                'user-agent': getUserAgent(),
+                headers: defaultHeaders(token),
             }).json()
             .then((message) => ({ success: true, message }))
             .catch((err) => constructError(err));
@@ -106,10 +101,7 @@ module.exports = class Content {
                 toFile = process.stdout;
             }
             return pipeline(
-                got.stream(endpoint, {
-                    headers: { Authorization: `Bearer ${token}` },
-                    'user-agent': getUserAgent(),
-                }),
+                got.stream(endpoint, { headers: defaultHeaders(token) }),
                 toFile,
             );
         } catch (err) {

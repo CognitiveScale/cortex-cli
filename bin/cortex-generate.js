@@ -25,7 +25,7 @@ program.description('Scaffolding Cortex Components [DEPRECATED]');
 program
     .command('skill [skillName] [type]')
     .description('Generates the structure and top level build script for a skill in current directory')
-    .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
+    .option('--color [boolean]', 'Turn on/off colors for JSON output.', 'true')
     .action(() => { // deliberately not using withCompatibilityCheck()
         console.error(chalk.red('Generate command has been superceded by the Workspaces command.'));
     });

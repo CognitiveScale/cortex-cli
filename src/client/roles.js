@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 const debug = require('debug')('cortex:cli');
-const { got } = require('./apiutils');
-const { constructError, getUserAgent } = require('../commands/utils');
+const { got, defaultHeaders } = require('./apiutils');
+const { constructError } = require('../commands/utils');
 
 module.exports = class Roles {
     constructor(cortexUrl, role, flags = []) {
@@ -51,8 +51,7 @@ module.exports = class Roles {
         debug('describeRole => %s', endpoint);
         return got
             .get(endpoint, {
-                headers: { Authorization: `Bearer ${token}` },
-                'user-agent': getUserAgent(),
+                headers: defaultHeaders(token),
             }).json()
             .then((res) => ({ success: true, result: res }))
             .catch((err) => constructError(err));
@@ -63,8 +62,7 @@ module.exports = class Roles {
         debug('deleteRole => %s', endpoint);
         return got
             .delete(endpoint, {
-                headers: { Authorization: `Bearer ${token}` },
-                'user-agent': getUserAgent(),
+                headers: defaultHeaders(token),
             }).json()
             .then((res) => ({ success: true, result: res }))
             .catch((err) => constructError(err));
@@ -75,8 +73,7 @@ module.exports = class Roles {
         debug('createRole => %s', endpoint);
         return got
             .post(endpoint, {
-                headers: { Authorization: `Bearer ${token}` },
-                'user-agent': getUserAgent(),
+                headers: defaultHeaders(token),
                 json: body,
             }).json()
             .then((res) => ({ success: true, result: res }))
@@ -88,8 +85,7 @@ module.exports = class Roles {
         debug('addUsersToRole => %s', endpoint);
         return got
             .post(endpoint, {
-                headers: { Authorization: `Bearer ${token}` },
-                'user-agent': getUserAgent(),
+                headers: defaultHeaders(token),
                 json: { users },
             }).json()
             .then((res) => ({ success: true, result: res }))
@@ -101,8 +97,7 @@ module.exports = class Roles {
         debug('removeUsersFromRole => %s', endpoint);
         return got
             .delete(endpoint, {
-                headers: { Authorization: `Bearer ${token}` },
-                'user-agent': getUserAgent(),
+                headers: defaultHeaders(token),
                 json: { users },
             }).json()
             .then((res) => ({ success: true, result: res }))
@@ -114,8 +109,7 @@ module.exports = class Roles {
         debug('createGrantForRole => %s', endpoint);
         return got
             .post(endpoint, {
-                headers: { Authorization: `Bearer ${token}` },
-                'user-agent': getUserAgent(),
+                headers: defaultHeaders(token),
                 json: body,
             }).json()
             .then((res) => ({ success: true, result: res }))
@@ -127,8 +121,7 @@ module.exports = class Roles {
         debug('removeGrantFromRole => %s', endpoint);
         return got
             .delete(endpoint, {
-                headers: { Authorization: `Bearer ${token}` },
-                'user-agent': getUserAgent(),
+                headers: defaultHeaders(token),
                 json: body,
             }).json()
             .then((res) => ({ success: true, result: res }))
@@ -143,8 +136,7 @@ module.exports = class Roles {
         debug('listRoles => %s', endpoint);
         return got
             .get(endpoint, {
-                headers: { Authorization: `Bearer ${token}` },
-                'user-agent': getUserAgent(),
+                headers: defaultHeaders(token),
             }).json()
             .then((res) => ({ success: true, result: res }))
             .catch((err) => constructError(err));
@@ -155,8 +147,7 @@ module.exports = class Roles {
         debug('addRolesToProject(%s) => %s', roles, endpoint);
         return got
             .post(endpoint, {
-                headers: { Authorization: `Bearer ${token}` },
-                'user-agent': getUserAgent(),
+                headers: defaultHeaders(token),
                 json: { project, roles },
             }).json()
             .then((res) => ({ success: true, result: res }))
@@ -168,8 +159,7 @@ module.exports = class Roles {
         debug('removeRolesFromProject => %s', endpoint);
         return got
             .delete(endpoint, {
-                headers: { Authorization: `Bearer ${token}` },
-                'user-agent': getUserAgent(),
+                headers: defaultHeaders(token),
                 json: { project, roles },
             }).json()
             .then((res) => ({ success: true, result: res }))
@@ -181,8 +171,7 @@ module.exports = class Roles {
         debug('listExternalGroups => %s', endpoint);
         return got
             .get(endpoint, {
-                headers: { Authorization: `Bearer ${token}` },
-                'user-agent': getUserAgent(),
+                headers: defaultHeaders(token),
             }).json()
             .then((res) => ({ success: true, result: res }))
             .catch((err) => constructError(err));
@@ -193,8 +182,7 @@ module.exports = class Roles {
         debug('describeExternalGroup => %s', endpoint);
         return got
             .get(endpoint, {
-                headers: { Authorization: `Bearer ${token}` },
-                'user-agent': getUserAgent(),
+                headers: defaultHeaders(token),
             }).json()
             .then((res) => ({ success: true, result: res }))
             .catch((err) => constructError(err));
@@ -205,8 +193,7 @@ module.exports = class Roles {
         debug('deleteExternalGroup => %s', endpoint);
         return got
             .delete(endpoint, {
-                headers: { Authorization: `Bearer ${token}` },
-                'user-agent': getUserAgent(),
+                headers: defaultHeaders(token),
             }).json()
             .then((res) => ({ success: true, result: res }))
             .catch((err) => constructError(err));
@@ -217,8 +204,7 @@ module.exports = class Roles {
         debug('addExternalGroupToRole(%s) => %s', externalGroup, endpoint);
         return got
             .post(endpoint, {
-                headers: { Authorization: `Bearer ${token}` },
-                'user-agent': getUserAgent(),
+                headers: defaultHeaders(token),
                 json: { externalGroup },
             }).json()
             .then((res) => ({ success: true, result: res }))
@@ -230,8 +216,7 @@ module.exports = class Roles {
         debug('removeExternalGroupFromRole => %s', endpoint);
         return got
             .delete(endpoint, {
-                headers: { Authorization: `Bearer ${token}` },
-                'user-agent': getUserAgent(),
+                headers: defaultHeaders(token),
             }).json()
             .then((res) => ({ success: true, result: res }))
             .catch((err) => constructError(err));

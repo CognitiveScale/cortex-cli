@@ -14,10 +14,8 @@
  * limitations under the License.
  */
 const debug = require('debug')('cortex:cli');
-const { got } = require('./apiutils');
-const {
-    constructError, checkProject, getUserAgent,
-} = require('../commands/utils');
+const { got, defaultHeaders } = require('./apiutils');
+const { constructError, checkProject } = require('../commands/utils');
 
 module.exports = class Models {
     constructor(cortexUrl) {
@@ -31,8 +29,7 @@ module.exports = class Models {
         debug('saveModel(%s) => %s', modelObj.name, endpoint);
         return got
             .post(endpoint, {
-                headers: { Authorization: `Bearer ${token}` },
-                'user-agent': getUserAgent(),
+                headers: defaultHeaders(token),
                 json: modelObj,
             }).json()
             .then((res) => ({ success: true, message: res }))
@@ -45,8 +42,7 @@ module.exports = class Models {
         debug('updateModelStatus(%s) => %s', modelName, status, endpoint);
         return got
             .post(endpoint, {
-                headers: { Authorization: `Bearer ${token}` },
-                'user-agent': getUserAgent(),
+                headers: defaultHeaders(token),
                 json: {},
             }).json()
             .then((res) => ({ success: true, message: res }))
@@ -59,8 +55,7 @@ module.exports = class Models {
         debug('deleteAction(%s) => %s', modelName, endpoint);
         return got
             .delete(endpoint, {
-                headers: { Authorization: `Bearer ${token}` },
-                'user-agent': getUserAgent(),
+                headers: defaultHeaders(token),
             })
             .json()
             .then((model) => ({ success: true, model }))
@@ -73,8 +68,7 @@ module.exports = class Models {
         debug('describeModel(%s) => %s', modelName, endpoint);
         return got
             .get(endpoint, {
-                headers: { Authorization: `Bearer ${token}` },
-                'user-agent': getUserAgent(),
+                headers: defaultHeaders(token),
                 searchParams: { verbose },
             }).json()
             .then((model) => ({ success: true, model }))
@@ -93,8 +87,7 @@ module.exports = class Models {
         if (tags) query.tags = tags;
         return got
             .get(endpoint, {
-                headers: { Authorization: `Bearer ${token}` },
-                'user-agent': getUserAgent(),
+                headers: defaultHeaders(token),
                 searchParams: query,
             })
             .json()
@@ -113,8 +106,7 @@ module.exports = class Models {
         if (skip) query.skip = skip;
         return got
             .get(endpoint, {
-                headers: { Authorization: `Bearer ${token}` },
-                'user-agent': getUserAgent(),
+                headers: defaultHeaders(token),
                 searchParams: query,
             })
             .json()

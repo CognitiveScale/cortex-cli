@@ -43,16 +43,16 @@ program
     .description('List model definitions')
     .alias('l')
     .option('--no-compat', 'Ignore API compatibility checks')
-    .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
-    .option('--profile [profile]', 'The profile to use')
-    .option('--project [project]', 'The project to use')
-    .option('--tags [tags]', 'The tags to use (comma separated values)')
+    .option('--color [boolean]', 'Turn on/off colors for JSON output.', 'true')
+    .option('--profile <profile>', 'The profile to use')
+    .option('--project <project>', 'The project to use')
+    .option('--tags <tags>', 'The tags to use (comma separated values)')
     .option('--json', 'Output results using JSON')
-    .option('--query [query]', 'A JMESPath query to use in filtering the response data. Ignored if output format is not JSON.')
-    .option('--filter [filter]', 'A Mongo style filter to use.')
-    .option('--limit [limit]', 'Limit number of records', DEFAULT_LIST_LIMIT_COUNT)
-    .option('--skip [skip]', 'Skip number of records', DEFAULT_LIST_SKIP_COUNT)
-    .option('--sort [sort]', 'A Mongo style sort statement to use in the query.', GET_DEFAULT_SORT_CLI_OPTION(DEFAULT_LIST_SORT_PARAMS.updatedAt))
+    .option('--query <query>', 'A JMESPath query to use in filtering the response data. Ignored if output format is not JSON.')
+    .option('--filter <filter>', 'A Mongo style filter to use.')
+    .option('--limit <limit>', 'Limit number of records', DEFAULT_LIST_LIMIT_COUNT)
+    .option('--skip <skip>', 'Skip number of records', DEFAULT_LIST_SKIP_COUNT)
+    .option('--sort <sort>', 'A Mongo style sort statement to use in the query.', GET_DEFAULT_SORT_CLI_OPTION(DEFAULT_LIST_SORT_PARAMS.updatedAt))
     .action(withCompatibilityCheck((options) => {
         try {
             new ListModelsCommand(program).execute(options);
@@ -67,10 +67,10 @@ program
     .description('Describe model')
     .alias('get')
     .option('--no-compat', 'Ignore API compatibility checks')
-    .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
-    .option('--profile [profile]', 'The profile to use')
-    .option('--project [project]', 'The project to use')
-    .option('--query [query]', 'A JMESPath query to use in filtering the response data.')
+    .option('--color [boolean]', 'Turn on/off colors for JSON output.', 'true')
+    .option('--profile <profile>', 'The profile to use')
+    .option('--project <project>', 'The project to use')
+    .option('--query <query>', 'A JMESPath query to use in filtering the response data.')
     .option('--verbose', 'Verbose output')
     .action(withCompatibilityCheck((modelName, options) => {
         try {
@@ -85,9 +85,9 @@ program
     .command('delete <modelName>')
     .description('Delete a model')
     .option('--no-compat', 'Ignore API compatibility checks')
-    .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
-    .option('--profile [profile]', 'The profile to use')
-    .option('--project [project]', 'The project to use')
+    .option('--color [boolean]', 'Turn on/off colors for JSON output.', 'true')
+    .option('--profile <profile>', 'The profile to use')
+    .option('--project <project>', 'The project to use')
     .action(withCompatibilityCheck((modelName, options) => {
         try {
             new DeleteModelCommand(program).execute(modelName, options);
@@ -101,9 +101,9 @@ program
     .command('save <modelDefinition>')
     .description('Save a model definition')
     .option('--no-compat', 'Ignore API compatibility checks')
-    .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
-    .option('--profile [profile]', 'The profile to use')
-    .option('--project [project]', 'The project to use')
+    .option('--color [boolean]', 'Turn on/off colors for JSON output.', 'true')
+    .option('--profile <profile>', 'The profile to use')
+    .option('--project <project>', 'The project to use')
     .option('-y, --yaml', 'Use YAML for model definition format')
     .action(withCompatibilityCheck((modelDefinition, options) => {
         try {
@@ -113,33 +113,16 @@ program
         }
     }));
 
-// Register Model -
-// program
-//    .command('upload <modelDefinition>')
-//    .description('Upload a model')
-//    .option('--no-compat', 'Ignore API compatibility checks')
-//    .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
-//    .option('--profile [profile]', 'The profile to use')
-//    .option('--project [project]', 'The project to use')
-//    .option('-y, --yaml', 'Use YAML for model definition format')
-//    .action(withCompatibilityCheck((modelDefinition, options) => {
-//        try {
-//            new RegisterModelCommand(program).execute(modelDefinition, options);
-//        } catch (err) {
-//            console.error(chalk.red(err.message));
-//        }
-//    }));
-
 // Publish a Model
 program
     .command('publish <modelName>')
     .description('Publish a model')
     .option('--no-compat', 'Ignore API compatibility checks')
-    .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
-    .option('--profile [profile]', 'The profile to use')
-    .option('--project [project]', 'The project to use')
+    .option('--color [boolean]', 'Turn on/off colors for JSON output.', 'true')
+    .option('--profile <profile>', 'The profile to use')
+    .option('--project <project>', 'The project to use')
     .option('-y, --yaml', 'Use YAML for model definition format')
-    .option('--content-type [MIME type]', 'Sets the `Content-Type` or MIME type of the content ( default: application/octet-stream )')
+    .option('--content-type <MIME type>', 'Sets the `Content-Type` or MIME type of the content ( default: application/octet-stream )')
     .action(withCompatibilityCheck((modelName, options) => {
         try {
             new UpdateModelStatusCommand(program).execute(modelName, options, 'publish');
@@ -153,11 +136,11 @@ program
     .command('unpublish <modelName>')
     .description('Unpublish a model')
     .option('--no-compat', 'Ignore API compatibility checks')
-    .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
-    .option('--profile [profile]', 'The profile to use')
-    .option('--project [project]', 'The project to use')
+    .option('--color [boolean]', 'Turn on/off colors for JSON output.', 'true')
+    .option('--profile <profile>', 'The profile to use')
+    .option('--project <project>', 'The project to use')
     .option('-y, --yaml', 'Use YAML for model definition format')
-    .option('--content-type [MIME type]', 'Sets the `Content-Type` or MIME type of the content ( default: application/octet-stream )')
+    .option('--content-type <MIME type>', 'Sets the `Content-Type` or MIME type of the content ( default: application/octet-stream )')
     .action(withCompatibilityCheck((modelName, options) => {
         try {
             new UpdateModelStatusCommand(program).execute(modelName, options, 'unpublish');
@@ -171,15 +154,15 @@ program
     .command('list-runs <modelName>')
     .description('List model run')
     .option('--no-compat', 'Ignore API compatibility checks')
-    .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
-    .option('--profile [profile]', 'The profile to use')
-    .option('--project [project]', 'The project to use')
+    .option('--color [boolean]', 'Turn on/off colors for JSON output.', 'true')
+    .option('--profile <profile>', 'The profile to use')
+    .option('--project <project>', 'The project to use')
     .option('--json', 'Output results using JSON')
-    .option('--query [query]', 'A JMESPath query to use in filtering the response data. Ignored if output format is not JSON.')
-    .option('--filter [filter]', 'A Mongo style filter to use.')
-    .option('--limit [limit]', 'Limit number of records', DEFAULT_LIST_LIMIT_COUNT)
-    .option('--skip [skip]', 'Skip number of records', DEFAULT_LIST_SKIP_COUNT)
-    .option('--sort [sort]', 'A Mongo style sort statement to use in the query.', GET_DEFAULT_SORT_CLI_OPTION(DEFAULT_LIST_SORT_PARAMS.updatedAt))
+    .option('--query <query>', 'A JMESPath query to use in filtering the response data. Ignored if output format is not JSON.')
+    .option('--filter <filter>', 'A Mongo style filter to use.')
+    .option('--limit <limit>', 'Limit number of records', DEFAULT_LIST_LIMIT_COUNT)
+    .option('--skip <skip>', 'Skip number of records', DEFAULT_LIST_SKIP_COUNT)
+    .option('--sort <sort>', 'A Mongo style sort statement to use in the query.', GET_DEFAULT_SORT_CLI_OPTION(DEFAULT_LIST_SORT_PARAMS.updatedAt))
     .action(withCompatibilityCheck((modelName, options) => {
         try {
             new ListModelRunsCommand(program).execute(modelName, options);

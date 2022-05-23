@@ -97,6 +97,19 @@ pipelines:
           jobs:
             Build:
               elastic_profile_id: gocd-test-agent-dind
+              artifacts:
+                - build:
+                    source: cruise-output/buildReport*.json
+                - build:
+                    source: devBranchRevision.json
+                - build:
+                    source: cortex-cli-docs.md
+                - build:
+                    source: cortex-cli.tgz
+                - test:
+                    source: coverage
+              tabs:
+                coverage: testoutput/coverage/index.html
               timeout: 0
               tasks:
                 - script: |

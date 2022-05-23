@@ -40,11 +40,11 @@ program
     .description('Save a project definition')
     .storeOptionsAsProperties(false)
     .option('--no-compat', 'Ignore API compatibility checks')
-    .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
-    .option('--profile [profile]', 'The profile to use')
+    .option('--color [boolean]', 'Turn on/off colors for JSON output.', 'true')
+    .option('--profile <profile>', 'The profile to use')
     .option('-n, --name <string>', 'The project name')
-    .option('-t, --title [string]', 'The project title')
-    .option('-d, --description [string]', 'The project description')
+    .option('-t, --title <string>', 'The project title')
+    .option('-d, --description <string>', 'The project description')
     .option('-y, --yaml', 'Use YAML for project definition format')
     .action(withCompatibilityCheck((projectDefinition, options) => {
         try {
@@ -60,14 +60,14 @@ program
     .description('List project definitions')
     .alias('l')
     .option('--no-compat', 'Ignore API compatibility checks')
-    .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
-    .option('--profile [profile]', 'The profile to use')
+    .option('--color [boolean]', 'Turn on/off colors for JSON output.', 'true')
+    .option('--profile <profile>', 'The profile to use')
     .option('--json', 'Output results using JSON')
-    .option('--query [query]', 'A JMESPath query to use in filtering the response data.')
-    .option('--filter [filter]', 'A Mongo style filter to use.')
-    .option('--limit [limit]', 'Limit number of records', DEFAULT_LIST_LIMIT_COUNT)
-    .option('--skip [skip]', 'Skip number of records', DEFAULT_LIST_SKIP_COUNT)
-    .option('--sort [sort]', 'A Mongo style sort statement to use in the query.', GET_DEFAULT_SORT_CLI_OPTION(DEFAULT_LIST_SORT_PARAMS._updatedAt))
+    .option('--query <query>', 'A JMESPath query to use in filtering the response data.')
+    .option('--filter <filter>', 'A Mongo style filter to use.')
+    .option('--limit <limit>', 'Limit number of records', DEFAULT_LIST_LIMIT_COUNT)
+    .option('--skip <skip>', 'Skip number of records', DEFAULT_LIST_SKIP_COUNT)
+    .option('--sort <sort>', 'A Mongo style sort statement to use in the query.', GET_DEFAULT_SORT_CLI_OPTION(DEFAULT_LIST_SORT_PARAMS._updatedAt))
     .action(withCompatibilityCheck((options) => {
         try {
             new ListProjectsCommand(program).execute(options);
@@ -82,9 +82,9 @@ program
     .alias('get')
     .description('Describe project')
     .option('--no-compat', 'Ignore API compatibility checks')
-    .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
-    .option('--profile [profile]', 'The profile to use')
-    .option('--query [query]', 'A JMESPath query to use in filtering the response data.')
+    .option('--color [boolean]', 'Turn on/off colors for JSON output.', 'true')
+    .option('--profile <profile>', 'The profile to use')
+    .option('--query <query>', 'A JMESPath query to use in filtering the response data.')
     .action(withCompatibilityCheck((projectName, options) => {
         try {
             new DescribeProjectCommand(program).execute(projectName, options);
@@ -99,8 +99,8 @@ program
     .alias('d')
     .description('Delete project')
     .option('--no-compat', 'Ignore API compatibility checks')
-    .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
-    .option('--profile [profile]', 'The profile to use')
+    .option('--color [boolean]', 'Turn on/off colors for JSON output.', 'true')
+    .option('--profile <profile>', 'The profile to use')
     .action(withCompatibilityCheck((projectName, options) => {
         try {
             new DeleteProjectCommand(program).execute(projectName, options);

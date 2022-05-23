@@ -27,7 +27,7 @@ const {
     loadProfile,
     durationRegex,
 } = require('../config');
-const { printSuccess, printError } = require('./utils');
+const { printSuccess, printError, useColor } = require('./utils');
 
 function _validatePatFile(patFile) {
     if (!fs.existsSync(patFile)) {
@@ -141,7 +141,7 @@ module.exports.ListProfilesCommand = class {
         const profiles = Object.keys(config.profiles);
         profiles.forEach((name) => {
             if (name === config.currentProfile) {
-                if (options.color === 'on') {
+                if (useColor(options)) {
                     console.log(chalk.green.bold(name));
                 } else {
                     console.log(`${name} [active]`);

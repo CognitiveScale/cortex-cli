@@ -101,3 +101,4 @@ cortex-cli-docs.md
 package/
 *.tgz
 npm-shrinkwrap.json
+*.amp

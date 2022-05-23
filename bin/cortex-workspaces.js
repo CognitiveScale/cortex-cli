@@ -34,7 +34,7 @@ program.description('Scaffolding Cortex Components');
 program
     .command('configure')
     .option('--refresh', 'Refresh the Github access token')
-    .option('--color [on/off]', 'Turn on/off colors', 'on')
+    .option('--color [boolean]', 'Turn on/off colors', 'true')
     .description('Configures the Cortex Template System for generating skill templates')
     .action((options) => { // deliberately not using withCompatibilityCheck()
         try {
@@ -46,10 +46,10 @@ program
 
     program
     .command('generate [name] [destination]')
-    .option('--registry [registry]', 'Override the docker registry to publish to')
-    .option('--color [on/off]', 'Turn on/off colors', 'on')
+    .option('--registry <registry>', 'Override the docker registry to publish to')
+    .option('--color [boolean]', 'Turn on/off colors', 'true')
     .option('--notree', 'Do not display generated file tree', false)
-    .option('--template [templateName]', 'Name of template to use')
+    .option('--template <templateName>', 'Name of template to use')
     .description('Generates a workspace based on a template from the template repository')
     .action((name, destination, options) => { // deliberately not using withCompatibilityCheck()
         try {
@@ -62,8 +62,8 @@ program
 
     program
     .command('build [folder]')
-    .option('--color [on/off]', 'Turn on/off colors', 'on')
-    .option('--skill [skill name]', 'Build only the specified skill')
+    .option('--color [boolean]', 'Turn on/off colors', 'true')
+    .option('--skill <skill name>', 'Build only the specified skill')
     .description('Builds all skills in the workspace, or optionally only the specified skill')
     .action((folder, options) => { // deliberately not using withCompatibilityCheck()
         try {
@@ -75,9 +75,9 @@ program
     });
 
     program
-    .command('publish [folder]')
-    .option('--color [on/off]', 'Turn on/off colors', 'on')
-    .option('--skill [skill name]', 'Publish only the specified skill')
+    .command('publish folder]')
+    .option('--color [boolean]', 'Turn on/off colors', 'true')
+    .option('--skill <skill name>', 'Publish only the specified skill')
     .description('Publishes all skills and resources in the workspace')
     .action((folder, options) => { // deliberately not using withCompatibilityCheck()
         try {
@@ -93,10 +93,10 @@ program
     .description('Manage image repositories.');
 
     registry
-    .command('add [name]')
-    .option('--color [on/off]', 'Turn on/off colors', 'on')
-    .option('--url [registry url]', 'Registry URL')
-    .option('--namespace [registry namespace]', 'Registry Namespace')
+    .command('add <name>')
+    .option('--color [boolean]', 'Turn on/off colors', 'true')
+    .option('--url <registry url>', 'Registry URL')
+    .option('--namespace <registry namespace>', 'Registry Namespace')
     .description('Adds an image registry to publish to.')
     .action((name, options) => { // deliberately not using withCompatibilityCheck()
         try {
@@ -107,8 +107,8 @@ program
     });
 
     registry
-    .command('remove [name]')
-    .option('--color [on/off]', 'Turn on/off colors', 'on')
+    .command('remove <name>')
+    .option('--color [boolean]', 'Turn on/off colors', 'true')
     .description('Removes the specified image registry.')
     .action((name, options) => { // deliberately not using withCompatibilityCheck()
         try {
@@ -120,7 +120,7 @@ program
 
     registry
     .command('activate [name]')
-    .option('--color [on/off]', 'Turn on/off colors', 'on')
+    .option('--color [boolean]', 'Turn on/off colors', 'true')
     .description('Activates the specified image registry.')
     .action((name, options) => { // deliberately not using withCompatibilityCheck()
         try {
@@ -132,7 +132,7 @@ program
 
     registry
     .command('list')
-    .option('--color [on/off]', 'Turn on/off colors', 'on')
+    .option('--color [boolean]', 'Turn on/off colors', 'true')
     .description('Lists all image registries')
     .action((options) => { // deliberately not using withCompatibilityCheck()
         try {

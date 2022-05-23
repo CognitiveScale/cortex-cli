@@ -14,10 +14,8 @@
  * limitations under the License.
  */
 const debug = require('debug')('cortex:cli');
-const { got } = require('./apiutils');
-const {
-    constructError, checkProject, getUserAgent,
-} = require('../commands/utils');
+const { got, defaultHeaders } = require('./apiutils');
+const { constructError, checkProject } = require('../commands/utils');
 
 module.exports = class Sessions {
     constructor(cortexUrl) {
@@ -31,8 +29,7 @@ module.exports = class Sessions {
         debug('saveSession(%s) => %s', sessionObj.name, endpoint);
         return got
             .post(endpoint, {
-                headers: { Authorization: `Bearer ${token}` },
-                'user-agent': getUserAgent(),
+                headers: defaultHeaders(token),
                 json: sessionObj,
             }).json()
             .then((res) => ({ success: true, message: res }))
@@ -45,8 +42,7 @@ module.exports = class Sessions {
         debug('deleteSession(%s) => %s', sessionName, endpoint);
         return got
             .delete(endpoint, {
-                headers: { Authorization: `Bearer ${token}` },
-                'user-agent': getUserAgent(),
+                headers: defaultHeaders(token),
             })
             .json()
             .then((session) => ({ success: true, session }))
@@ -59,8 +55,7 @@ module.exports = class Sessions {
         debug('describeSession(%s) => %s', sessionName, endpoint);
         return got
             .get(endpoint, {
-                headers: { Authorization: `Bearer ${token}` },
-                'user-agent': getUserAgent(),
+                headers: defaultHeaders(token),
                 searchParams: { verbose },
             }).json()
             .then((session) => ({ success: true, session }))
@@ -73,8 +68,7 @@ module.exports = class Sessions {
         debug('listSessions() => %s', endpoint);
         return got
             .get(endpoint, {
-                headers: { Authorization: `Bearer ${token}` },
-                'user-agent': getUserAgent(),
+                headers: defaultHeaders(token),
             })
             .json()
             .then((sessionsResp) => ({ success: true, ...sessionsResp }))

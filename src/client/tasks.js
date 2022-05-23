@@ -15,8 +15,8 @@
  */
 
 const debug = require('debug')('cortex:cli');
-const { got } = require('./apiutils');
-const { constructError, getUserAgent, checkProject } = require('../commands/utils');
+const { got, defaultHeaders } = require('./apiutils');
+const { constructError, checkProject } = require('../commands/utils');
 
 module.exports = class Tasks {
     constructor(cortexUrl) {
@@ -29,8 +29,7 @@ module.exports = class Tasks {
         const endpoint = `${this.endpointV4(projectId)}/tasks`;
         debug('listTasks(%s) => %s', projectId, endpoint);
         const opts = {
-            headers: { Authorization: `Bearer ${token}` },
-            'user-agent': getUserAgent(),
+            headers: defaultHeaders(token),
         };
         if (params) {
             opts.searchParams = params;
@@ -45,8 +44,7 @@ module.exports = class Tasks {
         const endpoint = `${this.endpointV4(projectId)}/tasks/${taskName}`;
         debug('getTask(%s, %s) => %s', projectId, taskName, endpoint);
         const opts = {
-            headers: { Authorization: `Bearer ${token}` },
-            'user-agent': getUserAgent(),
+            headers: defaultHeaders(token),
         };
         if (params) {
             opts.searchParams = params;
@@ -63,8 +61,7 @@ module.exports = class Tasks {
         debug('taskLogs(%s) => %s', taskName, endpoint);
         return got
             .get(endpoint, {
-                headers: { Authorization: `Bearer ${token}` },
-                'user-agent': getUserAgent(),
+                headers: defaultHeaders(token),
                 searchParams: { verbose },
             }).json()
             .then((res) => ({ ...res }))
@@ -78,8 +75,7 @@ module.exports = class Tasks {
         debug('deleteTask(%s) => %s', taskName, endpoint);
         return got
             .delete(endpoint, {
-                headers: { Authorization: `Bearer ${token}` },
-                'user-agent': getUserAgent(),
+                headers: defaultHeaders(token),
                 searchParams: { verbose },
             }).json()
             .then((res) => ({ ...res }))

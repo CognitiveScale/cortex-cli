@@ -42,15 +42,15 @@ program
     .description('List Campaigns')
     .alias('l')
     .option('--no-compat', 'Ignore API compatibility checks')
-    .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
-    .option('--profile [profile]', 'The profile to use')
-    .option('--project [project]', 'The project to use')
+    .option('--color [boolean]', 'Turn on/off colors for JSON output.', 'true')
+    .option('--profile <profile>', 'The profile to use')
+    .option('--project <project>', 'The project to use')
     .option('--json', 'Output results using JSON')
-    .option('--query [query]', 'A JMESPath query to use in filtering the response data.')
-    .option('--filter [filter]', 'A Mongo style filter to use.')
-    .option('--limit [limit]', 'Limit number of records', DEFAULT_LIST_LIMIT_COUNT)
-    .option('--skip [skip]', 'Skip number of records', DEFAULT_LIST_SKIP_COUNT)
-    .option('--sort [sort]', 'A Mongo style sort statement to use in the query.', GET_DEFAULT_SORT_CLI_OPTION(DEFAULT_LIST_SORT_PARAMS._updatedAt))
+    .option('--query <query>', 'A JMESPath query to use in filtering the response data.')
+    .option('--filter <filter>', 'A Mongo style filter to use.')
+    .option('--limit <limit>', 'Limit number of records', DEFAULT_LIST_LIMIT_COUNT)
+    .option('--skip <skip>', 'Skip number of records', DEFAULT_LIST_SKIP_COUNT)
+    .option('--sort <sort>', 'A Mongo style sort statement to use in the query.', GET_DEFAULT_SORT_CLI_OPTION(DEFAULT_LIST_SORT_PARAMS._updatedAt))
     .action(withCompatibilityCheck((options) => {
         try {
             new ListCampaignsCommand(program).execute(options);
@@ -65,10 +65,10 @@ program
     .alias('get')
     .description('Describe Campaign')
     .option('--no-compat', 'Ignore API compatibility checks')
-    .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
-    .option('--profile [profile]', 'The profile to use')
-    .option('--project [project]', 'The project to use')
-    .option('--query [query]', 'A JMESPath query to use in filtering the response data.')
+    .option('--color [boolean]', 'Turn on/off colors for JSON output.', 'true')
+    .option('--profile <profile>', 'The profile to use')
+    .option('--project <project>', 'The project to use')
+    .option('--query <query>', 'A JMESPath query to use in filtering the response data.')
     .action(withCompatibilityCheck((campaignName, options) => {
         try {
             new DescribeCampaignCommand(program).execute(campaignName, options);
@@ -81,14 +81,14 @@ program
     .command('export <campaignName>')
     .description('Export Campaign Archive')
     .option('--no-compat', 'Ignore API compatibility checks')
-    .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
-    .option('--profile [profile]', 'The profile to use')
-    .option('--project [project]', 'The project to use')
+    .option('--color [boolean]', 'Turn on/off colors for JSON output.', 'true')
+    .option('--profile <profile>', 'The profile to use')
+    .option('--project <project>', 'The project to use')
     .option('--deployable [boolean]', 'Export only deployable missions', true)
-    .option('--o [output]', 'Export file name')
-    .action(withCompatibilityCheck((campaignName, options) => {
+    .option('--o <output>', 'Export file name')
+    .action(withCompatibilityCheck(async (campaignName, options) => {
         try {
-            new ExportCampaignCommand(program).execute(campaignName, options);
+            await new ExportCampaignCommand(program).execute(campaignName, options);
         } catch (err) {
             console.error(chalk.red(err.message));
         }
@@ -98,9 +98,9 @@ program
     .command('import <campaignExportFilepath>')
     .description('Import Campaign Archive')
     .option('--no-compat', 'Ignore API compatibility checks')
-    .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
-    .option('--profile [profile]', 'The profile to use')
-    .option('--project [project]', 'The project to use')
+    .option('--color [boolean]', 'Turn on/off colors for JSON output.', 'true')
+    .option('--profile <profile>', 'The profile to use')
+    .option('--project <project>', 'The project to use')
     .option('--deploy [boolean]', 'Set missions status Ready To Deploy', true)
     .option('--overwrite [boolean]', 'Overwrite existing deployed missions with the imported one', false)
     .action(withCompatibilityCheck((campaignName, options) => {
@@ -115,9 +115,9 @@ program
     .command('deploy <campaignName>')
     .description('Deploy Campaign')
     .option('--no-compat', 'Ignore API compatibility checks')
-    .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
-    .option('--profile [profile]', 'The profile to use')
-    .option('--project [project]', 'The project to use')
+    .option('--color [boolean]', 'Turn on/off colors for JSON output.', 'true')
+    .option('--profile <profile>', 'The profile to use')
+    .option('--project <project>', 'The project to use')
     .action(withCompatibilityCheck((campaignName, options) => {
         try {
             new DeployCampaignCommand(program).execute(campaignName, options);
@@ -130,9 +130,9 @@ program
     .command('undeploy <campaignName>')
     .description('Undeploy Campaign')
     .option('--no-compat', 'Ignore API compatibility checks')
-    .option('--color [on/off]', 'Turn on/off colors for JSON output.', 'on')
-    .option('--profile [profile]', 'The profile to use')
-    .option('--project [project]', 'The project to use')
+    .option('--color [boolean]', 'Turn on/off colors for JSON output.', 'true')
+    .option('--profile <profile>', 'The profile to use')
+    .option('--project <project>', 'The project to use')
     .action(withCompatibilityCheck((campaignName, options) => {
         try {
             new UndeployCampaignCommand(program).execute(campaignName, options);
