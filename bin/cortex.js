@@ -25,7 +25,7 @@ program
     .version(pkg.version, '-v, --version')
     .description('Cortex CLI')
     .option('--verbose', 'Verbose output', false)
-    .on('option:verbose', () => { process.env.DEBUG='*'; })
+    .on('option:verbose', () => { process.env.DEBUG = '*'; })
     .command('actions <cmd>', 'Work with Cortex Actions')
     .command('agents <cmd>', 'Work with Cortex Agents')
     .command('assessments <cmd>', 'Work with Cortex Impact Assessments')
