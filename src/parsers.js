@@ -15,7 +15,7 @@
  */
 
 const _ = require('lodash');
-const program = require('commander');
+const { program } = require('commander');
 
 function nonEmptyStringParser(opts) {
     const { message = 'empty string argument', variadic = false } = opts;

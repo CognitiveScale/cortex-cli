@@ -15,7 +15,7 @@
  */
 
 const chalk = require('chalk');
-const program = require('commander');
+const { program } = require('commander');
 
 const { withCompatibilityCheck } = require('../src/compatibility');
 

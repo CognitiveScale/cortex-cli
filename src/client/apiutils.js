@@ -1,4 +1,6 @@
+const _ = require('lodash');
 const got = require('got');
+const debug = require('debug')('cortex:cli');
 const findPackageJson = require('find-package-json');
 const os = require('os');
 
@@ -12,11 +14,27 @@ module.exports.getUserAgent = getUserAgent;
 module.exports.got = got.extend({
     followRedirect: false,
     hooks: {
+        beforeRequest: [
+            (options) => {
+                if (debug.enabled) {
+                    debug(`request url: ${options.url}`);
+                    debug(`request methods: ${options.method}`);
+                    debug(`request headers: ${JSON.stringify(options.headers)}`);
+                    debug(`request body: ${options.body || '{}'}`);
+                }
+            },
+        ],
         afterResponse: [
             (res) => {
                 if (res.headers['x-auth-error']) {
                     res.statusCode = 401;
                     throw new Error(`Auth Error: ${res.headers['x-auth-error']}`);
+                }
+                if (debug.enabled) {
+                    debug(`response http code: ${res.statusCode}`);
+                    debug(`response headers: ${JSON.stringify(res.headers)}`);
+                    debug(`response body: ${res.body}`);
+                    debug(`response time(ms): ${JSON.stringify(_.get(res, 'timings.phases'))}`);
                 }
                 return res;
             },
