@@ -18,7 +18,7 @@
 
 const chalk = require('chalk');
 const fs = require('fs');
-const program = require('commander');
+const { program } = require('commander');
 const { parseObject, printError } = require('../src/commands/utils');
 
 const { withCompatibilityCheck } = require('../src/compatibility');

@@ -17,7 +17,7 @@
  */
 
 const chalk = require('chalk');
-const program = require('commander');
+const { program } = require('commander');
 
 program.name('cortex generate');
 program.description('Scaffolding Cortex Components [DEPRECATED]');

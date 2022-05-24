@@ -15,7 +15,7 @@
  */
 
 const chalk = require('chalk');
-const program = require('commander');
+const { program } = require('commander');
 
 const { WorkspaceConfigureCommand } = require('../src/commands/workspaces/configure');
 const { WorkspaceGenerateCommand } = require('../src/commands/workspaces/generate');
