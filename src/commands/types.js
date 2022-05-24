@@ -20,7 +20,7 @@ const moment = require('moment');
 const { loadProfile } = require('../config');
 const Catalog = require('../client/catalog');
 const {
-    LISTTABLEFORMAT, filterObject, validateOptions, OPTIONSTABLEFORMAT,
+    LISTTABLEFORMAT, filterObject, validateOptions, OPTIONSTABLEFORMAT, printExtendedLogs,
 } = require('./utils');
 
 const {
@@ -76,6 +76,7 @@ module.exports.ListTypesCommand = class ListTypesCommand {
         catalog.listTypes(options.project || profile.project, profile.token, options.limit, options.skip, options.sort).then((response) => {
             if (response.success) {
                 let result = response.types;
+                printExtendedLogs(result, options);
                 if (options.json) {
                     if (options.query) result = filterObject(result, options);
                     printSuccess(JSON.stringify(result, null, 2), options);

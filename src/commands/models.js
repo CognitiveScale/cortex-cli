@@ -25,7 +25,7 @@ const { loadProfile } = require('../config');
 const Models = require('../client/models');
 const Experiments = require('../client/experiments');
 const {
-    LISTTABLEFORMAT, RUNTABLEFORMAT, DEPENDENCYTABLEFORMAT, validateOptions, OPTIONSTABLEFORMAT,
+    LISTTABLEFORMAT, RUNTABLEFORMAT, DEPENDENCYTABLEFORMAT, validateOptions, OPTIONSTABLEFORMAT, printExtendedLogs,
 } = require('./utils');
 
 const {
@@ -92,6 +92,7 @@ module.exports.ListModelsCommand = class ListModelsCommand {
             if (response.success) {
                 let result = response.models;
 
+                printExtendedLogs(result, options);
                 if (options.json) {
                     if (options.query) result = filterObject(result, options);
                     printSuccess(JSON.stringify(result, null, 2), options);
@@ -134,6 +135,7 @@ module.exports.ListModelRunsCommand = class ListModelsCommand {
             if (response.success) {
                 let result = response.runs;
 
+                printExtendedLogs(result, options);
                 if (options.json) {
                     if (options.query) result = filterObject(result, options);
                     printSuccess(JSON.stringify(result, null, 2), options);

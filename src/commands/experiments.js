@@ -24,6 +24,7 @@ const {
  printSuccess, printError, filterObject, printTable, parseObject, fileExists, formatValidationPath, DEPENDENCYTABLEFORMAT, handleTable,
     validateOptions,
     OPTIONSTABLEFORMAT,
+    printExtendedLogs,
 } = require('./utils');
 
 class ListExperiments {
@@ -46,6 +47,7 @@ class ListExperiments {
         exp.listExperiments(options.project || profile.project, options.model, profile.token, options.filter, options.limit, options.skip, options.sort).then((response) => {
             if (response.success) {
                 let { result } = response;
+                printExtendedLogs(result.experiments, options);
                 if (options.json) {
                     if (options.query) result = filterObject(result, options);
                     printSuccess(JSON.stringify(result, null, 2), options);
@@ -144,6 +146,7 @@ class ListRuns {
             if (response.success) {
                 let { result } = response;
 
+                printExtendedLogs(result.runs, options);
                 if (options.json) {
                     if (options.query) result = filterObject(result.runs, options);
                     printSuccess(JSON.stringify(result, null, 2), options);

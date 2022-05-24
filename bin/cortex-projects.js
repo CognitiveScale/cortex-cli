@@ -27,7 +27,9 @@ const {
     DescribeProjectCommand,
     DeleteProjectCommand,
 } = require('../src/commands/projects');
-const { DEFAULT_LIST_SKIP_COUNT, DEFAULT_LIST_LIMIT_COUNT } = require('../src/constants');
+const {
+    DEFAULT_LIST_SKIP_COUNT, DEFAULT_LIST_LIMIT_COUNT, GET_DEFAULT_SORT_CLI_OPTION, DEFAULT_LIST_SORT_PARAMS,
+} = require('../src/constants');
 
 program.name('cortex projects');
 program.description('Work with Cortex Projects');
@@ -65,7 +67,7 @@ program
     .option('--filter <filter>', 'A Mongo style filter to use.')
     .option('--limit <limit>', 'Limit number of records', DEFAULT_LIST_LIMIT_COUNT)
     .option('--skip <skip>', 'Skip number of records', DEFAULT_LIST_SKIP_COUNT)
-    .option('--sort <sort>', 'A Mongo style sort statement to use in the query.')
+    .option('--sort <sort>', 'A Mongo style sort statement to use in the query.', GET_DEFAULT_SORT_CLI_OPTION(DEFAULT_LIST_SORT_PARAMS._updatedAt))
     .action(withCompatibilityCheck((options) => {
         try {
             new ListProjectsCommand(program).execute(options);

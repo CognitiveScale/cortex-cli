@@ -29,7 +29,7 @@ const Assessments = require('../client/assessments');
 
 const {
     printSuccess, printError, parseObject, printTable, filterObject,
-    validateOptions, OPTIONSTABLEFORMAT, handleTable,
+    validateOptions, OPTIONSTABLEFORMAT, handleTable, printExtendedLogs,
 } = require('./utils');
 
 const {
@@ -61,6 +61,7 @@ module.exports.ListResourcesCommand = class {
         client.queryResources(profile.token, options.name, options.scope, options.type, options.skip, options.limit, transformedFilter, transformedSort)
             .then((response) => {
                 if (response.success === false) throw response;
+                printExtendedLogs(response.data, options);
                 if (options.json) {
                     printSuccess(JSON.stringify(response, null, 2), options);
                 } else {
@@ -204,6 +205,7 @@ module.exports.ListAssessmentCommand = class {
             .then((response) => {
                 if (response.success === false) throw response;
                 let result = response.data;
+                printExtendedLogs(result, options);
                 if (options.json) {
                     if (options.query) result = filterObject(result, options);
                     printSuccess(JSON.stringify(result, null, 2), options);

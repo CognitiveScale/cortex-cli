@@ -19,7 +19,7 @@ const debug = require('debug')('cortex:cli');
 const { loadProfile } = require('../config');
 const ApiServerClient = require('../client/apiServerClient');
 const {
- printSuccess, printError, filterObject, parseObject, printTable, validateOptions, OPTIONSTABLEFORMAT, handleTable,
+ printSuccess, printError, filterObject, parseObject, printTable, validateOptions, OPTIONSTABLEFORMAT, handleTable, printExtendedLogs,
 } = require('./utils');
 
 module.exports.CreateProjectCommand = class CreateProjectCommand {
@@ -74,6 +74,7 @@ module.exports.ListProjectsCommand = class ListProjectsCommand {
             const filterParam = (options.filter || '{}').replace(/"/g, '\'');
             const response = await cli.listProjects(profile.token, filterParam, options.limit, options.skip, sortParam);
             let result = response;
+            printExtendedLogs(result, options);
             if (options.json) {
                 if (options.query) result = filterObject(result, options);
                 printSuccess(JSON.stringify(result, null, 2), options);
