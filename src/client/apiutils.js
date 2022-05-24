@@ -8,6 +8,7 @@ function getUserAgent() {
 }
 
 module.exports.getUserAgent = getUserAgent;
+// TODO add debug for request response
 module.exports.got = got.extend({
     followRedirect: false,
     hooks: {
@@ -20,6 +21,7 @@ module.exports.got = got.extend({
                 return res;
             },
         ],
+
     }, 
 });
 
