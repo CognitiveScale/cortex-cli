@@ -7,3 +7,4 @@ Please check you fulfill ALL of the relevant checkboxes
 - [ ] Added tests that prove my fix is effective or that my feature works
 - [ ] Ran `npm test` and it passes
 - [ ] Changes generate no new warnings
+- [ ] Changes are backward compatible with older clusters
