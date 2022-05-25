@@ -447,3 +447,9 @@ module.exports.validateOptions = (options, type) => {
     };
 };
 
+module.exports.printExtendedLogs = (data, options) => {
+    if (options.limit && Array.isArray(data) && data.length === Number(options.limit)) {
+        // don't log if showing all the results
+        process.stderr.write(`Results limited to ${options.limit} rows\n`);
+    }
+};

@@ -81,7 +81,7 @@ describe('Test printExtendedLogs function', () => {
     });
 
     beforeEach(() => {
-        printSpy = sinon.spy(console, 'log');
+        printSpy = sinon.spy(process.stderr, 'write');
     });
 
     afterEach(() => {
@@ -98,7 +98,7 @@ describe('Test printExtendedLogs function', () => {
 
     it('should print the result limited message if data length is equal to limit value', () => {
         printExtendedLogs([...data, { key5: 'val5' }], { limit });
-        expect(getPrintedLines()).to.eql([`Results limited to ${limit} rows`]);
+        expect(getPrintedLines()).to.eql([`Results limited to ${limit} rows\n`]);
     });
 
     it('should not print the result limited message if data length is less than limit value', () => {
