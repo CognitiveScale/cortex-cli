@@ -15,9 +15,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 const findPackageJson = require('find-package-json');
-const program = require('commander');
+const { program } = require('commander');
 
 const pkg = findPackageJson(__dirname).next().value;
 
@@ -25,6 +24,8 @@ program.name('cortex');
 program
     .version(pkg.version, '-v, --version')
     .description('Cortex CLI')
+    .option('--verbose', 'Verbose output', false)
+    .on('option:verbose', () => { process.env.DEBUG = '*'; })
     .command('actions <cmd>', 'Work with Cortex Actions')
     .command('agents <cmd>', 'Work with Cortex Agents')
     .command('assessments <cmd>', 'Work with Cortex Impact Assessments')
