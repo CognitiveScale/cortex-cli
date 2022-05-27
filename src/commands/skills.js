@@ -32,43 +32,44 @@ module.exports.SaveSkillCommand = class SaveSkillCommand {
         this.program = program;
     }
 
-    async execute(skillDefinition, options) {
+    async execute(skillDefinitions, options) {
         try {
             const profile = await loadProfile(options.profile);
-            const skillDefStr = fs.readFileSync(skillDefinition);
-            const skill = parseObject(skillDefStr, options);
-            debug('%s.executeSaveSkill(%s)', profile.name, skillDefinition);
-            const catalog = new Catalog(profile.url);
-            if (!_.isEmpty(options.k8sResource)) {
-                const k8sResources = options.k8sResource.map((f) => JSON.stringify(parseObject(fs.readFileSync(f), options)));
-                if (_.isEmpty(_.get(skill, 'actions', []))) {
-                    printError('Skill must contain an action to apply kubernetes resources', options, true);
+            await Promise.all(skillDefinitions.map(async (skillDefinition) => {
+                const skillDefStr = fs.readFileSync(skillDefinition);
+                const skill = parseObject(skillDefStr, options);
+                debug('%s.executeSaveSkill(%s)', profile.name, skillDefinition);
+                const catalog = new Catalog(profile.url);
+                if (!_.isEmpty(options.k8sResource)) {
+                    const k8sResources = options.k8sResource.map((f) => JSON.stringify(parseObject(fs.readFileSync(f), options)));
+                    if (_.isEmpty(_.get(skill, 'actions', []))) {
+                        printError('Skill must contain an action to apply kubernetes resources', options, true);
+                    }
+                    if (skill.actions.length > 1) {
+                        printWarning('Applying kubernetes resources to all actions');
+                    }
+                    skill.actions.map((a) => a.k8sResources = k8sResources);
                 }
-                if (skill.actions.length > 1) {
-                    printWarning('Applying kubernetes resources to all actions');
+                if (options.scaleCount) {
+                    if (!isNumeric(options.scaleCount)) {
+                        printError('--scaleCount must be a number', options);
+                    }
+                    if (skill.actions.length > 1) {
+                        printWarning('Applying kubernetes resources to all actions');
+                    }
+                    const scaleCount = parseInt(options.scaleCount, 10);
+                    skill.actions.map((a) => a.scaleCount = scaleCount);
                 }
-                skill.actions.map((a) => a.k8sResources = k8sResources);
-            }
-            if (options.scaleCount) {
-                if (!isNumeric(options.scaleCount)) {
-                    printError('--scaleCount must be a number', options);
-                }
-                if (skill.actions.length > 1) {
-                    printWarning('Applying kubernetes resources to all actions');
-                }
-                const scaleCount = parseInt(options.scaleCount, 10);
-                skill.actions.map((a) => a.scaleCount = scaleCount);
-            }
 
-            if (options.podspec) {
-                const paramsStr = fs.readFileSync(options.podspec);
-                const podSpec = parseObject(paramsStr, options);
-                skill.actions.map((a) => a.podSpec = podSpec);
-            }
-            const response = await catalog.saveSkill(options.project || profile.project, profile.token, skill);
-            if (response.success) {
-                printSuccess(`Skill saved: ${JSON.stringify(response.message)}`, options);
-            } else {
+                if (options.podspec) {
+                    const paramsStr = fs.readFileSync(options.podspec);
+                    const podSpec = parseObject(paramsStr, options);
+                    skill.actions.map((a) => a.podSpec = podSpec);
+                }
+                const response = await catalog.saveSkill(options.project || profile.project, profile.token, skill);
+                if (response.success) {
+                    printSuccess(`Skill saved: ${JSON.stringify(response.message)}`, options);
+                } else {
                     console.log(`Failed to save skill: ${response.message}`);
                     if (response.details) {
                         console.log('The following issues were found:');
@@ -81,6 +82,7 @@ module.exports.SaveSkillCommand = class SaveSkillCommand {
                     }
                     printError(''); // Just exit
                 }
+            }));
         } catch (err) {
             printError(`Failed to save skill: ${_.get(err, 'status', '')} ${_.get(err, 'response.body.error', err.message)}`, options);
         }

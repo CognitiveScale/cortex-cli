@@ -46,16 +46,16 @@ program.description('Work with Cortex Agents');
 
 // Save Agent
 program
-    .command('save <agentDefinition>')
+    .command('save <agentDefinitions...>')
     .description('Save an agent definition')
     .option('--no-compat', 'Ignore API compatibility checks')
     .option('--color [boolean]', 'Turn on/off colors for JSON output.', 'true')
     .option('--profile <profile>', 'The profile to use')
     .option('--project <project>', 'The project to use')
     .option('-y, --yaml', 'Use YAML for agent definition format')
-    .action(withCompatibilityCheck((agentDefinition, options) => {
+    .action(withCompatibilityCheck((agentDefinitions, options) => {
         try {
-            new SaveAgentCommand(program).execute(agentDefinition, options);
+            new SaveAgentCommand(program).execute(agentDefinitions, options);
         } catch (err) {
             console.error(chalk.red(err.message));
         }
