@@ -135,7 +135,7 @@ program
 
 // Save Skill
 program
-    .command('save <skillDefinition>')
+    .command('save <skillDefinitions...>')
     .description('Save a skill definition')
     .option('--no-compat', 'Ignore API compatibility checks')
     .option('--color [boolean]', 'Turn on/off colors for JSON output.', 'true')
@@ -145,9 +145,9 @@ program
     .option('--podspec <podspec>', 'A file containing either a JSON or YAML formatted pod spec to merge with the skill definition, used for specifying resources (like memory, ephemeral storage, CPUs, and GPUs) and tolerations (like allowing pods to be scheduled on tainted nodes).')
     .option('-y, --yaml', 'Use YAML for skill definition format')
     .option('--scaleCount <count>', 'Scale count, only used for daemon action types')
-    .action(withCompatibilityCheck(async (skillDefinition, options) => {
+    .action(withCompatibilityCheck(async (skillDefinitions, options) => {
         try {
-            await new SaveSkillCommand(program).execute(skillDefinition, options);
+            await new SaveSkillCommand(program).execute(skillDefinitions, options);
         } catch (err) {
             console.error(chalk.red(err.message));
         }
