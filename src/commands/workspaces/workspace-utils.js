@@ -49,13 +49,13 @@ module.exports.getSkillInfo = function getSkillInfo(target) {
   if (target.endsWith('skill.yaml')) {
     skillFiles = statSync(path.resolve(target)) ? [target] : [];
   } else {
-    skillFiles = glob.sync('/skills/**/skill.yaml', {
+    skillFiles = glob.sync('./skills/**/skill.yaml', {
       root: target,
       absolute: true,
     });
   }
   return Promise.all(_.map(skillFiles, async (uri) => {
-    const skill = await readFile(uri).catch(() => { });
+    const skill = await readFile(uri).catch((err) => { console.error(`Unable to open skill: ${err.message}`)});
     return {
       name: path.basename(uri),
       uri,
