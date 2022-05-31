@@ -146,8 +146,8 @@ program
     .option('--json', 'Output results as JSON')
     .option('--profile <profile>', 'The profile to use')
     .option('--project <project>', 'The project to use')
-    .option('--verbose', 'Get debugging info in activation response')
-    .option('--report', 'Get additional debugging info in activation response')
+    .option('--verbose [boolean]', 'Get debugging info in activation response')
+    .option('--report [boolean]', 'Get additional debugging info in activation response')
     .option('--query <query>', 'A JMESPath query to use in filtering the response data.')
     .action(withCompatibilityCheck((activationId, options) => {
         try {

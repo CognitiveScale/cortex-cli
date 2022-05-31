@@ -55,15 +55,15 @@ json: params,
     getActivation(projectId, token, activationId, verbose, report) {
         checkProject(projectId);
         const endpoint = `${this.endpointV4(projectId)}/activations/${activationId}`;
-        debug('getActivation(%s) => %s', activationId, endpoint);
+        debug('getActivation(%s, %s, %s) => %s', activationId, verbose, report, endpoint);
         const opts = {
             headers: defaultHeaders(token),
         };
         if (verbose) {
-            opts.searchParams = { verbose: true };
+            opts.searchParams = { verbose };
         }
         if (report) {
-            opts.searchParams = { report: true };
+            opts.searchParams = { report };
         }
         return got
             .get(endpoint, opts).json()
