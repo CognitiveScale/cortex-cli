@@ -200,7 +200,7 @@ module.exports.GetActivationCommand = class {
 
     async execute(activationId, options) {
         const profile = await loadProfile(options.profile);
-        debug('%s.getActivation(%s)', profile.name, activationId);
+        debug('%s.getActivation(%s, %s)', profile.name, activationId, JSON.stringify(options));
         const { report, verbose, project } = options;
         const agents = new Agents(profile.url);
         agents.getActivation(project || profile.project, profile.token, activationId, verbose, report).then((response) => {
