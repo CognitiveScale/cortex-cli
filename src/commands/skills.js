@@ -129,8 +129,8 @@ module.exports.ListSkillsCommand = class ListSkillsCommand {
                 }
                 return handleTable(
                     tableFormat,
-                    _.sortBy(result, options.sort ? [] : ['name']), (o) => ({ ...o, updatedAt: o.updatedAt ? moment(o.updatedAt).fromNow() : '-' }),
-                    null,
+                    _.sortBy(result, options.sort ? [] : ['name']),
+                    (o) => ({ ...o, updatedAt: o.updatedAt ? moment(o.updatedAt).fromNow() : '-' }),
                     'No skills found',
                 );
             }
