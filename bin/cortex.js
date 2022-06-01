@@ -24,7 +24,7 @@ program.name('cortex');
 program
     .version(pkg.version, '-v, --version')
     .description('Cortex CLI')
-    .option('--debug', 'Enables verbose output for debugging', false)
+    .option('--debug', 'Enables enhanced log output for debugging', false)
     .on('option:debug', () => { process.env.DEBUG = '*'; })
     .command('actions <cmd>', 'Work with Cortex Actions')
     .command('agents <cmd>', 'Work with Cortex Agents')
