@@ -144,7 +144,7 @@ module.exports.WorkspaceBuildCommand = class WorkspaceBuildCommand {
   async buildAction(target, action, status) {
     try {
       const actionPath = path.join(target, 'actions', action.name);
-      const globList = glob.sync('/**/*', {
+      const globList = glob.sync('./**/*', {
         root: actionPath,
         absolute: true,
       });
@@ -206,6 +206,7 @@ module.exports.WorkspaceBuildCommand = class WorkspaceBuildCommand {
       const skillNameList = _.map(skillInfo, 'skill.name');
       const status = new DockerBuildProgressTracker(skillNameList.join(', '));
       await Promise.all(_.map(skillInfo, (info) => {
+
         const actions = info.skill.actions ? info.skill.actions : [];
         return Promise.all(_.map(actions, (action) => this.buildAction(
             path.dirname(info.uri),
