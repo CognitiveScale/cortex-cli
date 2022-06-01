@@ -138,6 +138,7 @@ program
         }
     }));
 
+// Get activation
 program
     .command('get-activation <activationId>')
     .description('Get dataset or service activation')
