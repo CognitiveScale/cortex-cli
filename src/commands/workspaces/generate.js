@@ -107,7 +107,12 @@ module.exports.WorkspaceGenerateCommand = class WorkspaceGenerateCommand {
     let template;
 
     if (templateName) {
-      template = _.find(choices, (c) => c.name === templateName).value;
+      const templateChoice = _.find(choices, { name: templateName });
+      if (templateChoice) {
+        template = templateChoice.value;
+      } else {
+        printError(`Template ${templateName} not found!`);        
+      }
     }
 
     const answers = await inquirer.prompt([
