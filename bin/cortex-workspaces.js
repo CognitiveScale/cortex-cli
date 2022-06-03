@@ -75,7 +75,8 @@ program
     });
 
     program
-    .command('publish folder]')
+    .command('publish [folder]')
+    .option('--project <project name>', 'Publish to the specified project')
     .option('--color [boolean]', 'Turn on/off colors', 'true')
     .option('--skill <skill name>', 'Publish only the specified skill')
     .description('Publishes all skills and resources in the workspace')
