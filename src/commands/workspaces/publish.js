@@ -17,6 +17,8 @@ const Catalog = require('../../client/catalog');
 const Models = require('../../client/models');
 const Content = require('../../client/content');
 const Experiments = require('../../client/experiments');
+const ApiServerClient = require('../../client/apiServerClient');
+const { printError } = require('../utils');
 
 const _ = {
   map: require('lodash/map'),
@@ -213,6 +215,15 @@ module.exports.WorkspacePublishCommand = class WorkspacePublishCommand {
     if (skillInfo.length > 0) {
       const profile = await loadProfile();
 
+      /// If the user passed in a project name, validate it with the cluster
+      let { project } = profile;
+      if (options.project) {
+        const apiServer = new ApiServerClient(profile.url);
+        await apiServer.getProject(profile.token, options.project)
+        .then((prj) => project = prj.name)
+        .catch(() => printError(`Could not find project ${options.project}`));
+      }
+
       this.catalogClient = new Catalog(profile.url);
       this.modelsClient = new Models(profile.url);
       this.experimentClient = new Experiments(profile.url);
@@ -246,7 +257,7 @@ module.exports.WorkspacePublishCommand = class WorkspacePublishCommand {
                       let normalizedType = {};
                       if (!('types' in type)) normalizedType.types = [type];
                       else normalizedType = type;
-                      await this.catalogClient.saveType(profile.project, profile.token, normalizedType);
+                      await this.catalogClient.saveType(project, profile.token, normalizedType);
                       console.log(`Published type ${path.basename(f)}`);
                     }
                   }),
@@ -258,7 +269,7 @@ module.exports.WorkspacePublishCommand = class WorkspacePublishCommand {
                     const modelData = await readFile(f).catch(() => { });
                     if (modelData) {
                       const model = parseObject(modelData.toString());
-                      await this.modelsClient.saveModel(profile.project, profile.token, model);
+                      await this.modelsClient.saveModel(project, profile.token, model);
                       console.log(`Published model ${model.name}`);
                     }
                   }),
@@ -272,7 +283,7 @@ module.exports.WorkspacePublishCommand = class WorkspacePublishCommand {
                     if (experimentData) {
                       const experiment = parseObject(experimentData.toString());
 
-                      const result = await this.experimentClient.saveExperiment(profile.project, profile.token, experiment).then((response) => response.success)
+                      const result = await this.experimentClient.saveExperiment(project, profile.token, experiment).then((response) => response.success)
                         .catch(() => false);
 
                       if (result) {
@@ -290,15 +301,15 @@ module.exports.WorkspacePublishCommand = class WorkspacePublishCommand {
                               ///
                               ///        In the interim, I just delete the run (if it exists) and then re-add it.
                               ///
-                              await this.experimentClient.deleteRun(profile.project, profile.token, experiment.name, run.runId);
+                              await this.experimentClient.deleteRun(project, profile.token, experiment.name, run.runId);
                               run.experimentName = experiment.name;
-                              await this.experimentClient.createRun(profile.project, profile.token, run);
+                              await this.experimentClient.createRun(project, profile.token, run);
                               console.log(`Published run ${run.runId}`);
 
                               const artifacts = glob.sync(`experiments/${skillName}/${experiment.name}/runs/${run.runId}/artifacts/*`, globOpts);
                               await Promise.all(_.map(artifacts, async (artifactUri) => {
                                 const artifactName = path.basename(artifactUri).split('.')[0];
-                                await this.experimentClient.uploadArtifact(profile.project, profile.token, experiment.name, run.runId, artifactUri, artifactName);
+                                await this.experimentClient.uploadArtifact(project, profile.token, experiment.name, run.runId, artifactUri, artifactName);
                                 console.log(`Published artifact ${artifactName}`);
                               }));
                             }
@@ -317,7 +328,7 @@ module.exports.WorkspacePublishCommand = class WorkspacePublishCommand {
                   _.map(contentFiles, async (f) => {
                     const filePath = path.join(contentFolder, f);
                     const key = `${path.posix.dirname(f)}/${path.posix.basename(f, path.posix.extname(f))}`;
-                    await this.contentClient.uploadContentStreaming(profile.project, profile.token, key, filePath);
+                    await this.contentClient.uploadContentStreaming(project, profile.token, key, filePath);
                     console.log(`Published content ${key}`);
                   }),
                 );
@@ -336,7 +347,7 @@ module.exports.WorkspacePublishCommand = class WorkspacePublishCommand {
         }));
 
         if (_.every(actionsPublished)) {
-          this.catalogClient.saveSkill(profile.project, profile.token, info.skill);
+          this.catalogClient.saveSkill(project, profile.token, info.skill);
           return true;
         }
 
