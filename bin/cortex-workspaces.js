@@ -46,7 +46,6 @@ program
 
     program
     .command('generate [name] [destination]')
-    .option('--registry <registry>', 'Override the docker registry to publish to')
     .option('--color [boolean]', 'Turn on/off colors', 'true')
     .option('--notree', 'Do not display generated file tree', false)
     .option('--template <templateName>', 'Name of template to use')
