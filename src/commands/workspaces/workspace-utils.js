@@ -55,7 +55,7 @@ module.exports.getSkillInfo = function getSkillInfo(target) {
     });
   }
   return Promise.all(_.map(skillFiles, async (uri) => {
-    const skill = await readFile(uri).catch((err) => { console.error(`Unable to open skill: ${err.message}`)});
+    const skill = await readFile(uri).catch((err) => { console.error(`Unable to open skill: ${err.message}`); });
     return {
       name: path.basename(uri),
       uri,
