@@ -31,38 +31,40 @@ module.exports.SaveAgentCommand = class SaveAgentCommand {
         this.program = program;
     }
 
-    async execute(agentDefinition, options) {
+    async execute(agentDefinitions, options) {
         const profile = await loadProfile(options.profile);
-        debug('%s.executeSaveAgent(%s)', profile.name, agentDefinition);
-        if (!fs.existsSync(agentDefinition)) {
-            printError(`File does not exist at: ${agentDefinition}`);
-        }
-        const agentDefStr = fs.readFileSync(agentDefinition);
-        const agent = parseObject(agentDefStr, options);
-        debug('%o', agent);
+        await Promise.all(agentDefinitions.map(async (agentDefinition) => {
+            debug('%s.executeSaveAgent(%s)', profile.name, agentDefinition);
+            if (!fs.existsSync(agentDefinition)) {
+                printError(`File does not exist at: ${agentDefinition}`);
+            }
+            const agentDefStr = fs.readFileSync(agentDefinition);
+            const agent = parseObject(agentDefStr, options);
+            debug('%o', agent);
 
-        const catalog = new Catalog(profile.url);
-        const project = options.project || profile.project;
-        catalog.saveAgent(project, profile.token, agent).then((response) => {
-            if (response.success) {
-                printSuccess(`Agent "${agent.name}" saved in project "${project}"`, options);
-            } else if (response.details) {
-            console.log(`Failed to save agent: ${response.status} ${response.message}`);
-            console.log('The following issues were found:');
-            const tableSpec = [
-                { column: 'Path', field: 'path', width: 50 },
-                { column: 'Message', field: 'message', width: 100 },
-            ];
-            response.details.map((d) => d.path = formatValidationPath(d.path));
-            printTable(tableSpec, response.details);
-            printError(''); // Just exit
-        } else {
-            printError(JSON.stringify(response));
-        }
-        })
-        .catch((err) => {
-            printError(`Failed to save agent: ${err.status} ${err.message}`, options);
-        });
+            const catalog = new Catalog(profile.url);
+            const project = options.project || profile.project;
+            try {
+                const response = await catalog.saveAgent(project, profile.token, agent);
+                if (response.success) {
+                    printSuccess(`Agent "${agent.name}" saved in project "${project}"`, options);
+                } else if (response.details) {
+                    console.log(`Failed to save agent: ${response.status} ${response.message}`);
+                    console.log('The following issues were found:');
+                    const tableSpec = [
+                        { column: 'Path', field: 'path', width: 50 },
+                        { column: 'Message', field: 'message', width: 100 },
+                    ];
+                    response.details.map((d) => d.path = formatValidationPath(d.path));
+                    printTable(tableSpec, response.details);
+                    printError(''); // Just exit
+                } else {
+                    printError(JSON.stringify(response));
+                }
+            } catch (err) {
+                    printError(`Failed to save agent: ${err.status} ${err.message}`, options);
+            }
+        }));
     }
 };
 
