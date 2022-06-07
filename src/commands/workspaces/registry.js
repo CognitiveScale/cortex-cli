@@ -67,7 +67,7 @@ module.exports.WorkspaceRemoveRegistryCommand = class WorkspaceRemoveRegistryCom
   async execute(name, options) {
     const profile = await loadProfile();
 
-    const choices = _.map(_.filter(profile.registries, { isCortex: false }), (r) => (
+    const choices = _.map(_.filter(profile.registries, (r) => !r.isCortex), (r) => (
       {
         name: r.name,
         value: r.name,
