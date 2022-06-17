@@ -47,7 +47,7 @@ program
     program
     .command('generate [name] [destination]')
     .option('--color [boolean]', 'Turn on/off colors', 'true')
-    .option('--notree', 'Do not display generated file tree', false)
+    .option('--notree [boolean]', 'Do not display generated file tree', 'false')
     .option('--template <templateName>', 'Name of template to use')
     .description('Generates a workspace based on a template from the template repository')
     .action((name, destination, options) => { // deliberately not using withCompatibilityCheck()
