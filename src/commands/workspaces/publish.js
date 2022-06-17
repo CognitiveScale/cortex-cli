@@ -216,12 +216,12 @@ module.exports.WorkspacePublishCommand = class WorkspacePublishCommand {
       const profile = await loadProfile();
 
       /// If the user passed in a project name, validate it with the cluster
-      let { project } = profile;
-      if (options.project) {
+      let project = options.project || profile.project;
+      if (project) {
         const apiServer = new ApiServerClient(profile.url);
-        await apiServer.getProject(profile.token, options.project)
+        await apiServer.getProject(profile.token, project)
         .then((prj) => project = prj.name)
-        .catch(() => printError(`Could not find project ${options.project}`));
+        .catch(() => printError(`Project ${project} not found.`));
       }
 
       this.catalogClient = new Catalog(profile.url);
