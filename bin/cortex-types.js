@@ -98,9 +98,9 @@ program
     .option('--json', 'Output results using JSON')
     .option('--profile <profile>', 'The profile to use')
     .option('--project <project>', 'The project to use')
-    .action(withCompatibilityCheck(async (skillName, options) => {
+    .action(withCompatibilityCheck(async (typeName, options) => {
         try {
-            await new DeleteTypeCommand(program).execute(skillName, options);
+            await new DeleteTypeCommand(program).execute(typeName, options);
         } catch (err) {
             console.error(chalk.red(err.message));
         }
