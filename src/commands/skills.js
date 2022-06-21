@@ -64,6 +64,9 @@ module.exports.SaveSkillCommand = class SaveSkillCommand {
                 if (options.podspec) {
                     const paramsStr = fs.readFileSync(options.podspec);
                     const podSpec = parseObject(paramsStr, options);
+                    if (_.isEmpty(_.get(skill, 'actions', []))) {
+                        printError('Skill must contain an action', options, true);
+                    }
                     skill.actions.map((a) => a.podSpec = podSpec);
                 }
                 const response = await catalog.saveSkill(options.project || profile.project, profile.token, skill);
