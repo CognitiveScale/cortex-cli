@@ -28,6 +28,7 @@ const {
     SaveTypeCommand,
     ListTypesCommand,
     DescribeTypeCommand,
+    DeleteTypeCommand,
 } = require('../src/commands/types');
 
 program.name('cortex types');
@@ -85,6 +86,23 @@ program
     .action(withCompatibilityCheck((typeName, options) => {
         try {
             new DescribeTypeCommand(program).execute(typeName, options);
+        } catch (err) {
+            console.error(chalk.red(err.message));
+        }
+    }));
+
+    program
+    .command('delete <typeName>')
+    .alias('get')
+    .description('Delete a type')
+    .option('--no-compat', 'Ignore API compatibility checks')
+    .option('--color [boolean]', 'Turn on/off colors for JSON output.', 'true')
+    .option('--json', 'Output results using JSON')
+    .option('--profile <profile>', 'The profile to use')
+    .option('--project <project>', 'The project to use')
+    .action(withCompatibilityCheck(async (skillName, options) => {
+        try {
+            await new DeleteTypeCommand(program).execute(skillName, options);
         } catch (err) {
             console.error(chalk.red(err.message));
         }
