@@ -217,7 +217,6 @@ module.exports.DeploySnapshotCommand = class {
         const profile = await loadProfile(options.profile);
         const project = options.project || profile.project;
         debug('%s.exportDeploymentSnapshot(%s)', profile.name, snapshotIds);
-
         const agents = new Agents(profile.url);
         const promises = [];
         snapshotIds.split(' ').forEach((snapshotId) => {
