@@ -137,11 +137,11 @@ module.exports.DeleteTypeCommand = class DeleteTypeCommand {
                 const result = filterObject(response.type, options);
                 printSuccess(JSON.stringify(result, null, 2), options);
             } else {
-                printError(`Failed to describe type ${typeName}: ${response.message}`, options);
+                printError(`Failed to delete type ${typeName}: ${response.message}`, options);
             }
         })
         .catch((err) => {
-            printError(`Failed to describe type ${typeName}: ${err.status} ${err.message}`, options);
+            printError(`Failed to delete type ${typeName}: ${err.status} ${err.message}`, options);
         });
     }
 };
