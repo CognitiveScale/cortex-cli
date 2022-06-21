@@ -453,3 +453,12 @@ module.exports.printExtendedLogs = (data, options) => {
         process.stderr.write(`Results limited to ${options.limit} rows\n`);
     }
 };
+
+module.exports.handleListFailure = (response, options, type) => {
+    if (response.status === 400) {
+        const optionTableFormat = this.OPTIONSTABLEFORMAT;
+        printError(`${type} list failed.`, options, false);
+        return this.printTable(optionTableFormat, response.details);
+    }
+    return printError(`Failed to list ${type}: ${response.status} ${response.message}`, options);
+};

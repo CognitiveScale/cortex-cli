@@ -20,7 +20,7 @@ const moment = require('moment');
 const { loadProfile } = require('../config');
 const Catalog = require('../client/catalog');
 const {
-    LISTTABLEFORMAT, filterObject, validateOptions, OPTIONSTABLEFORMAT, printExtendedLogs,
+    LISTTABLEFORMAT, filterObject, validateOptions, OPTIONSTABLEFORMAT, printExtendedLogs, handleListFailure,
 } = require('./utils');
 
 const {
@@ -67,12 +67,6 @@ module.exports.ListTypesCommand = class ListTypesCommand {
         debug('%s.executeListTypes()', profile.name);
 
         const catalog = new Catalog(profile.url);
-        const { validOptions, errorDetails } = validateOptions(options, 'TYPE');
-        if (!validOptions) {
-            const optionTableFormat = OPTIONSTABLEFORMAT;
-            printError('Type list failed.', options, false);
-            return printTable(optionTableFormat, errorDetails);
-        }
         catalog.listTypes(options.project || profile.project, profile.token, options.limit, options.skip, options.sort).then((response) => {
             if (response.success) {
                 let result = response.types;
@@ -89,7 +83,7 @@ module.exports.ListTypesCommand = class ListTypesCommand {
                     );
                 }
             } else {
-                printError(`Failed to list types: ${response.status} ${response.message}`, options);
+                return handleListFailure(response, options, 'Types');
             }
         })
         .catch((err) => {

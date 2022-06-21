@@ -26,6 +26,7 @@ const Models = require('../client/models');
 const Experiments = require('../client/experiments');
 const {
     LISTTABLEFORMAT, RUNTABLEFORMAT, DEPENDENCYTABLEFORMAT, validateOptions, OPTIONSTABLEFORMAT, printExtendedLogs,
+    handleListFailure,
 } = require('./utils');
 
 const {
@@ -82,16 +83,9 @@ module.exports.ListModelsCommand = class ListModelsCommand {
         const profile = await loadProfile(options.profile);
         debug('%s.executeListModels()', profile.name);
         const models = new Models(profile.url);
-        const { validOptions, errorDetails } = validateOptions(options, 'MODEL');
-        if (!validOptions) {
-            const optionTableFormat = OPTIONSTABLEFORMAT;
-            printError('Model list failed.', options, false);
-            return printTable(optionTableFormat, errorDetails);
-        }
         models.listModels(options.project || profile.project, options.skip, options.limit, options.filter, options.sort, options.tags, profile.token).then((response) => {
             if (response.success) {
                 let result = response.models;
-
                 printExtendedLogs(result, options);
                 if (options.json) {
                     if (options.query) result = filterObject(result, options);
@@ -105,7 +99,7 @@ module.exports.ListModelsCommand = class ListModelsCommand {
                     );
                 }
             } else {
-                printError(`Failed to list models: ${response.status} ${response.message}`, options);
+                handleListFailure(response, options, 'Models');
             }
         })
             .catch((err) => {
@@ -125,12 +119,6 @@ module.exports.ListModelRunsCommand = class ListModelsCommand {
         const profile = await loadProfile(options.profile);
         debug('%s.executeListModels()', profile.name);
         const models = new Models(profile.url);
-        const { validOptions, errorDetails } = validateOptions(options, 'RUN');
-        if (!validOptions) {
-            const optionTableFormat = OPTIONSTABLEFORMAT;
-            printError('Model-runs list failed.', options, false);
-            return printTable(optionTableFormat, errorDetails);
-        }
         models.listModelRuns(options.project || profile.project, modelName, profile.token, options.filter, options.limit, options.skip, options.sort).then((response) => {
             if (response.success) {
                 let result = response.runs;
@@ -148,7 +136,7 @@ module.exports.ListModelRunsCommand = class ListModelsCommand {
                     );
                 }
             } else {
-                printError(`Failed to list model runs: ${response.status} ${response.message}`, options);
+                return handleListFailure(response, options, 'Model-runs');
             }
         })
             .catch((err) => {

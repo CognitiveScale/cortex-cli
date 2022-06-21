@@ -25,6 +25,7 @@ const {
     validateOptions,
     OPTIONSTABLEFORMAT,
     printExtendedLogs,
+    handleListFailure,
 } = require('./utils');
 
 class ListExperiments {
@@ -38,12 +39,6 @@ class ListExperiments {
         debug('%s.listExperiments()', profile.name);
 
         const exp = new Experiments(profile.url);
-        const { validOptions, errorDetails } = validateOptions(options, 'EXPERIMENT');
-        if (!validOptions) {
-            const optionTableFormat = OPTIONSTABLEFORMAT;
-            printError('Experiment list failed.', options, false);
-            return printTable(optionTableFormat, errorDetails);
-        }
         exp.listExperiments(options.project || profile.project, options.model, profile.token, options.filter, options.limit, options.skip, options.sort).then((response) => {
             if (response.success) {
                 let { result } = response;
@@ -62,7 +57,7 @@ class ListExperiments {
                     handleTable(tableSpec, result.experiments, null, 'No experiments found');
                 }
             } else {
-                printError(`Failed to list experiments: ${response.status} - ${response.message}`, options);
+                return handleListFailure(response, options, 'Experiments');
             }
         })
         .catch((err) => {
@@ -136,12 +131,6 @@ class ListRuns {
 
         const exp = new Experiments(profile.url);
         const sort = options.sort || JSON.stringify({ startTime: -1 });
-        const { validOptions, errorDetails } = validateOptions(options, 'RUN');
-        if (!validOptions) {
-            const optionTableFormat = OPTIONSTABLEFORMAT;
-            printError('Experiment-runs list failed.', options, false);
-            return printTable(optionTableFormat, errorDetails);
-        }
         exp.listRuns(options.project || profile.project, profile.token, experimentName, options.filter, options.limit, sort, options.skip).then((response) => {
             if (response.success) {
                 let { result } = response;
@@ -170,7 +159,7 @@ class ListRuns {
                     handleTable(tableSpec, _.get(result, 'runs', []), trans, 'No runs found');
                 }
             } else {
-                printError(`Failed to list runs: ${response.status} ${response.status} - ${response.message}`, options);
+                return handleListFailure(response, options, 'Experiment-runs');
             }
         })
         .catch((err) => {

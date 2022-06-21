@@ -23,7 +23,7 @@ const Actions = require('../client/actions');
 const {
  printSuccess, printError, filterObject, parseObject, printTable, DEPENDENCYTABLEFORMAT, isNumeric,
     validateOptions,
-    OPTIONSTABLEFORMAT, handleTable, printExtendedLogs,
+    OPTIONSTABLEFORMAT, handleTable, printExtendedLogs, handleListFailure,
 } = require('./utils');
 
 module.exports.ListActionsCommand = class {
@@ -37,12 +37,6 @@ module.exports.ListActionsCommand = class {
         debug('%s.executeListActions()', profile.name);
 
         const actions = new Actions(profile.url);
-        const { validOptions, errorDetails } = validateOptions(options, 'ACTION');
-        if (!validOptions) {
-            const optionTableFormat = OPTIONSTABLEFORMAT;
-            printError('Action list failed.', options, false);
-            return printTable(optionTableFormat, errorDetails);
-        }
         actions.listActions(options.project || profile.project, profile.token, options.filter, options.limit, options.skip, options.sort)
             .then((response) => {
                 if (response.success) {
@@ -67,7 +61,7 @@ module.exports.ListActionsCommand = class {
                         );
                     }
                 } else {
-                    printError(`Failed to list actions: ${response.status} ${response.message}`, options);
+                    return handleListFailure(response, options, 'Actions');
                 }
             })
             .catch((err) => {
