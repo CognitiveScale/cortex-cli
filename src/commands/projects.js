@@ -19,7 +19,7 @@ const debug = require('debug')('cortex:cli');
 const { loadProfile } = require('../config');
 const ApiServerClient = require('../client/apiServerClient');
 const {
- printSuccess, printError, filterObject, parseObject, printTable, validateOptions, OPTIONSTABLEFORMAT, handleTable, printExtendedLogs,
+ printSuccess, printError, filterObject, parseObject, handleTable, printExtendedLogs,
 } = require('./utils');
 
 module.exports.CreateProjectCommand = class CreateProjectCommand {
@@ -62,12 +62,6 @@ module.exports.ListProjectsCommand = class ListProjectsCommand {
     async execute(options) {
         const profile = await loadProfile(options.profile);
         debug('%s.executeListProjects()', profile.name);
-        const { validOptions, errorDetails } = validateOptions(options, 'PROJECT');
-        if (!validOptions) {
-            const optionTableFormat = OPTIONSTABLEFORMAT;
-            printError('Project list failed.', options, false);
-            return printTable(optionTableFormat, errorDetails);
-        }
         const cli = new ApiServerClient(profile.url);
         try {
             const sortParam = (options.sort || '{}').replace(/"/g, '\'');

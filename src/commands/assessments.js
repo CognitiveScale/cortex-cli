@@ -28,8 +28,8 @@ const { loadProfile } = require('../config');
 const Assessments = require('../client/assessments');
 
 const {
-    printSuccess, printError, parseObject, printTable, filterObject,
-    validateOptions, OPTIONSTABLEFORMAT, handleTable, printExtendedLogs,
+    printSuccess, printError, parseObject, filterObject,
+    handleTable, printExtendedLogs, handleListFailure,
 } = require('./utils');
 
 const {
@@ -49,17 +49,14 @@ module.exports.ListResourcesCommand = class {
         let transformedFilter;
         let transformedSort;
         const client = new Assessments(profile.url);
-        const { validOptions, errorDetails } = validateOptions(options, 'RESOURCE');
-        if (!validOptions) {
-            const optionTableFormat = OPTIONSTABLEFORMAT;
-            printError('Resource list failed.', options, false);
-            return printTable(optionTableFormat, errorDetails);
-        }
         // add prefixes to the keys to query inside nested targetPath
         if (options.filter) transformedFilter = transformDynamicParams(options.filter, 'resource.');
         if (options.sort) transformedSort = transformDynamicParams(options.sort, '_id.');
         client.queryResources(profile.token, options.name, options.scope, options.type, options.skip, options.limit, transformedFilter, transformedSort)
             .then((response) => {
+                if (response.status === 400) {
+                    handleListFailure(response, options, 'Resources');
+                }
                 if (response.success === false) throw response;
                 printExtendedLogs(response.data, options);
                 if (options.json) {
@@ -195,14 +192,11 @@ module.exports.ListAssessmentCommand = class {
         debug('%s.ListAssessmentCommand()', profile.name);
 
         const client = new Assessments(profile.url);
-        const { validOptions, errorDetails } = validateOptions(options, 'ASSESSMENT');
-        if (!validOptions) {
-            const optionTableFormat = OPTIONSTABLEFORMAT;
-            printError('Assessment list failed.', options, false);
-            return printTable(optionTableFormat, errorDetails);
-        }
         client.listAssessment(profile.token, options.skip, options.limit, options.filter, options.sort)
             .then((response) => {
+                if (response.status === 400) {
+                    handleListFailure(response, options, 'Assessments');
+                }
                 if (response.success === false) throw response;
                 let result = response.data;
                 printExtendedLogs(result, options);

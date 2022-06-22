@@ -23,7 +23,7 @@ const Catalog = require('../client/catalog');
 const Agents = require('../client/agents');
 const {
     printSuccess, printError, filterObject, parseObject, printTable, formatValidationPath,
-    LISTTABLEFORMAT, DEPENDENCYTABLEFORMAT, validateOptions, OPTIONSTABLEFORMAT, handleTable, printExtendedLogs,
+    LISTTABLEFORMAT, DEPENDENCYTABLEFORMAT, handleTable, printExtendedLogs,
     handleListFailure,
 } = require('./utils');
 

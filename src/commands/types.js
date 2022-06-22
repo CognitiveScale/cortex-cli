@@ -20,11 +20,11 @@ const moment = require('moment');
 const { loadProfile } = require('../config');
 const Catalog = require('../client/catalog');
 const {
-    LISTTABLEFORMAT, filterObject, validateOptions, OPTIONSTABLEFORMAT, printExtendedLogs, handleListFailure,
+    LISTTABLEFORMAT, filterObject, printExtendedLogs, handleListFailure,
 } = require('./utils');
 
 const {
- printSuccess, printError, parseObject, printTable, handleTable,
+ printSuccess, printError, parseObject, handleTable,
 } = require('./utils');
 
 module.exports.SaveTypeCommand = class SaveTypeCommand {

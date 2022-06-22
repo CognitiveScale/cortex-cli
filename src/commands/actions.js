@@ -21,9 +21,8 @@ const { loadProfile } = require('../config');
 const Actions = require('../client/actions');
 
 const {
- printSuccess, printError, filterObject, parseObject, printTable, DEPENDENCYTABLEFORMAT, isNumeric,
-    validateOptions,
-    OPTIONSTABLEFORMAT, handleTable, printExtendedLogs, handleListFailure,
+    printSuccess, printError, filterObject, parseObject, printTable, DEPENDENCYTABLEFORMAT, isNumeric,
+    handleTable, printExtendedLogs, handleListFailure,
 } = require('./utils');
 
 module.exports.ListActionsCommand = class {
@@ -61,7 +60,7 @@ module.exports.ListActionsCommand = class {
                         );
                     }
                 } else {
-                    return handleListFailure(response, options, 'Actions');
+                    handleListFailure(response, options, 'Actions');
                 }
             })
             .catch((err) => {

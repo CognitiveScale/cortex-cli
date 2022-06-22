@@ -23,7 +23,7 @@ const Agent = require('../client/agents');
 
 const {
     printSuccess, printError, printWarning, filterObject, parseObject, printTable, formatValidationPath,
-    LISTTABLEFORMAT, DEPENDENCYTABLEFORMAT, isNumeric, validateOptions, OPTIONSTABLEFORMAT, handleTable,
+    LISTTABLEFORMAT, DEPENDENCYTABLEFORMAT, isNumeric, handleTable,
     printExtendedLogs, handleListFailure,
 } = require('./utils');
 

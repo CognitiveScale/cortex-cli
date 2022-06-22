@@ -23,7 +23,7 @@ const Content = require('../client/content');
 
 const {
  printSuccess, printError, filterObject, parseObject, printTable, DEPENDENCYTABLEFORMAT, CONNECTIONTABLEFORMAT, fileExists,
-    validateOptions, OPTIONSTABLEFORMAT, handleTable,
+    handleTable,
     printExtendedLogs,
     handleListFailure,
 } = require('./utils');

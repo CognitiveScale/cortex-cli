@@ -25,7 +25,7 @@ const { loadProfile } = require('../config');
 const Models = require('../client/models');
 const Experiments = require('../client/experiments');
 const {
-    LISTTABLEFORMAT, RUNTABLEFORMAT, DEPENDENCYTABLEFORMAT, validateOptions, OPTIONSTABLEFORMAT, printExtendedLogs,
+    LISTTABLEFORMAT, RUNTABLEFORMAT, DEPENDENCYTABLEFORMAT, printExtendedLogs,
     handleListFailure,
 } = require('./utils');
 
