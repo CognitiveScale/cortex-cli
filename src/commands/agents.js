@@ -80,6 +80,7 @@ module.exports.ListAgentsCommand = class ListAgentsCommand {
         debug('%s.executeListAgents()', profile.name);
 
         const catalog = new Catalog(profile.url);
+        // eslint-disable-next-line consistent-return
         catalog.listAgents(options.project || profile.project, profile.token, options.filter, options.limit, options.skip, options.sort).then((response) => {
             if (response.success) {
                 let result = response.agents;

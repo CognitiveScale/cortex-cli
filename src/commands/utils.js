@@ -25,7 +25,6 @@ const jmsepath = require('jmespath');
 const path = require('path');
 const yaml = require('js-yaml');
 const { exec } = require('child_process');
-const { ALLOWED_QUERY_FIELDS } = require('../constants');
 
 const MAX_NAME_LENGTH = 20;
 

@@ -67,6 +67,7 @@ module.exports.ListTypesCommand = class ListTypesCommand {
         debug('%s.executeListTypes()', profile.name);
 
         const catalog = new Catalog(profile.url);
+        // eslint-disable-next-line consistent-return
         catalog.listTypes(options.project || profile.project, profile.token, options.limit, options.skip, options.sort).then((response) => {
             if (response.success) {
                 let result = response.types;

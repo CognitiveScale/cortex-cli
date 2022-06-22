@@ -37,6 +37,7 @@ class ListExperiments {
         debug('%s.listExperiments()', profile.name);
 
         const exp = new Experiments(profile.url);
+        // eslint-disable-next-line consistent-return
         exp.listExperiments(options.project || profile.project, options.model, profile.token, options.filter, options.limit, options.skip, options.sort).then((response) => {
             if (response.success) {
                 let { result } = response;
@@ -129,6 +130,7 @@ class ListRuns {
 
         const exp = new Experiments(profile.url);
         const sort = options.sort || JSON.stringify({ startTime: -1 });
+        // eslint-disable-next-line consistent-return
         exp.listRuns(options.project || profile.project, profile.token, experimentName, options.filter, options.limit, sort, options.skip).then((response) => {
             if (response.success) {
                 let { result } = response;
