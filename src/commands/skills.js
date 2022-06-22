@@ -16,10 +16,13 @@
 const _ = require('lodash');
 const fs = require('fs');
 const debug = require('debug')('cortex:cli');
-const moment = require('moment');
+const dayjs = require('dayjs');
+const relativeTime = require('dayjs/plugin/relativeTime');
 const { loadProfile } = require('../config');
 const Catalog = require('../client/catalog');
 const Agent = require('../client/agents');
+
+dayjs.extend(relativeTime);
 
 const {
     printSuccess, printError, printWarning, filterObject, parseObject, printTable, formatValidationPath,
@@ -129,7 +132,7 @@ module.exports.ListSkillsCommand = class ListSkillsCommand {
                 return handleTable(
                     tableFormat,
                     _.sortBy(result, options.sort ? [] : ['name']),
-                    (o) => ({ ...o, updatedAt: o.updatedAt ? moment(o.updatedAt).fromNow() : '-' }),
+                    (o) => ({ ...o, updatedAt: o.updatedAt ? dayjs(o.updatedAt).fromNow() : '-' }),
                     'No skills found',
                 );
             }

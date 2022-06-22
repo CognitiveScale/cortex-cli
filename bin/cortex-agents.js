@@ -129,10 +129,43 @@ program
     .option('--project <project>', 'The project to use')
     .option('--params <params>', 'JSON params to send to the action')
     .option('--params-file <paramsFile>', 'A file containing either JSON or YAML formatted params')
+    .option('--scheduleName <name>', 'Identifier to uniquely identify an agents schedule, defaults to the agent\'s name')
+    .option('--scheduleCron <cron>', 'Schedule agent invoke periodically using a cron schedule string for example: "0 0 * * *", @hourly, or @daily')
     .option('--sync', 'Invoke the agent synchronously')
     .action(withCompatibilityCheck((agentName, serviceName, options) => {
         try {
             new InvokeAgentServiceCommand(program).execute(agentName, serviceName, options);
+        } catch (err) {
+            console.error(chalk.red(err.message));
+        }
+    }));
+
+// Delete Agent
+program
+    .command('delete <agentName>')
+    .description('Delete an agent')
+    .option('--no-compat', 'Ignore API compatibility checks')
+    .option('--color [boolean]', 'Turn on/off colors for JSON output.', 'true')
+    .option('--profile <profile>', 'The profile to use')
+    .option('--project <project>', 'The project to use')
+    .action(withCompatibilityCheck((agentName, options) => {
+        try {
+            new DeleteAgentCommand(program).execute(agentName, options);
+        } catch (err) {
+            console.error(chalk.red(err.message));
+        }
+    }));
+
+// Undeploy agent
+program
+    .command('undeploy <agentNames...>')
+    .description('Undeploy the agent resource from the cluster')
+    .option('--no-compat', 'Ignore API compatibility checks')
+    .option('--profile <profile>', 'The profile to use')
+    .option('--project <project>', 'The project to use')
+    .action(withCompatibilityCheck((agentNames, options) => {
+        try {
+            new UndeployAgentCommand(program).execute(agentNames, options);
         } catch (err) {
             console.error(chalk.red(err.message));
         }
@@ -210,16 +243,19 @@ program
         }
     }));
 
-// Undeploy agent
+// Create Agent Snapshot
 program
-    .command('undeploy <agentNames...>')
-    .description('Undeploy the agent resource from the cluster')
+    .command('create-snapshot <snapshotDefinition>')
+    .description('Create an agent snapshot')
     .option('--no-compat', 'Ignore API compatibility checks')
+    .option('--color [boolean]', 'Turn on/off colors for JSON output.', 'true')
     .option('--profile <profile>', 'The profile to use')
     .option('--project <project>', 'The project to use')
-    .action(withCompatibilityCheck((agentNames, options) => {
+    .option('--agentName <name[:version]>', 'The name of the agent to snapshot')
+    .option('--title <title>', 'A descriptive title for the snapshot')
+    .action(withCompatibilityCheck((snapshotDefinition, options) => {
         try {
-            new UndeployAgentCommand(program).execute(agentNames, options);
+            new CreateAgentSnapshotCommand(program).execute(snapshotDefinition, options);
         } catch (err) {
             console.error(chalk.red(err.message));
         }
@@ -258,40 +294,6 @@ program
     .action(withCompatibilityCheck((snapshotId, options) => {
         try {
             new DescribeAgentSnapshotCommand(program).execute(snapshotId, options);
-        } catch (err) {
-            console.error(chalk.red(err.message));
-        }
-    }));
-
-// Create Agent Snapshot
-program
-    .command('create-snapshot <snapshotDefinition>')
-    .description('Create an agent snapshot')
-    .option('--no-compat', 'Ignore API compatibility checks')
-    .option('--color [boolean]', 'Turn on/off colors for JSON output.', 'true')
-    .option('--profile <profile>', 'The profile to use')
-    .option('--project <project>', 'The project to use')
-    .option('--agentName <name[:version]>', 'The name of the agent to snapshot')
-    .option('--title <title>', 'A descriptive title for the snapshot')
-    .action(withCompatibilityCheck((snapshotDefinition, options) => {
-        try {
-            new CreateAgentSnapshotCommand(program).execute(snapshotDefinition, options);
-        } catch (err) {
-            console.error(chalk.red(err.message));
-        }
-    }));
-
-// Delete Agent
-program
-    .command('delete <agentName>')
-    .description('Delete an agent')
-    .option('--no-compat', 'Ignore API compatibility checks')
-    .option('--color [boolean]', 'Turn on/off colors for JSON output.', 'true')
-    .option('--profile <profile>', 'The profile to use')
-    .option('--project <project>', 'The project to use')
-    .action(withCompatibilityCheck((agentName, options) => {
-        try {
-            new DeleteAgentCommand(program).execute(agentName, options);
         } catch (err) {
             console.error(chalk.red(err.message));
         }

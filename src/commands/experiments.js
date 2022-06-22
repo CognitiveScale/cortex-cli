@@ -17,7 +17,8 @@
 const fs = require('fs');
 const _ = require('lodash');
 const debug = require('debug')('cortex:cli');
-const moment = require('moment');
+const dayjs = require('dayjs');
+const relativeTime = require('dayjs/plugin/relativeTime');
 const { loadProfile } = require('../config');
 const Experiments = require('../client/experiments');
 const {
@@ -25,6 +26,8 @@ const {
     printExtendedLogs,
     handleListFailure,
 } = require('./utils');
+
+dayjs.extend(relativeTime);
 
 class ListExperiments {
     constructor(program) {
@@ -149,8 +152,8 @@ class ListRuns {
                         { column: 'Artifacts', field: 'artifacts' },
                     ];
                     const trans = (o) => {
-                        o.startTime = o.startTime ? moment.unix(o.startTime).format('YYYY-MM-DD HH:mm a') : '';
-                        o.took = o.took ? moment.duration(o.took, 'seconds').humanize() : '';
+                        o.startTime = o.startTime ? dayjs(o.startTime).format('YYYY-MM-DD HH:mm a') : '';
+                        o.took = o.took ? dayjs.duration(o.took, 'seconds').humanize() : '';
                         o.params = _.map(o.params, (v, k) => `${k}: ${v}`).join('\n');
                         o.metrics = _.map(o.metrics, (v, k) => `${k}: ${v}`).join('\n');
                         o.artifacts = Object.keys(_.get(o, 'artifacts', {})).join(', ');

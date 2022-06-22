@@ -70,9 +70,8 @@ describe('Tasks', () => {
 
     it('list tasks command (old response)', async () => {
         const program = require('../bin/cortex-tasks');
-        const requestPath = `/fabric/v4/projects/${PROJECT}/tasks`;
         const response = { success: true, tasks: ['task0', 'task1'] };
-        nock(serverUrl).get(requestPath).reply(200, response);
+        nock(serverUrl).get(/\/fabric\/v4\/projects\/.*\/tasks.*/).reply(200, response);
         await program.parseAsync(['node', 'tasks', 'list', '--project', PROJECT]);
         const output = getPrintedLines();
         const errs = getErrorLines();
@@ -85,9 +84,8 @@ describe('Tasks', () => {
 
     it('list tasks command JSON no tasks', async () => {
         const program = require('../bin/cortex-tasks');
-        const requestPath = `/fabric/v4/projects/${PROJECT}/tasks`;
         const response = { success: true, tasks: [] };
-        nock(serverUrl).get(requestPath).reply(200, response);
+        nock(serverUrl).get(/\/fabric\/v4\/projects\/.*\/tasks.*/).reply(200, response);
         await program.parseAsync(['node', 'tasks', 'list', '--project', PROJECT, '--json']);
         const output = getPrintedLines();
         const errs = getErrorLines();
@@ -100,7 +98,6 @@ describe('Tasks', () => {
     it('list tasks command', async () => {
         const program = require('../bin/cortex-tasks');
         const now = Date.now();
-        const requestPath = `/fabric/v4/projects/${PROJECT}/tasks`;
         const response = {
             success: true,
             tasks: [
@@ -112,8 +109,7 @@ describe('Tasks', () => {
             },
             ],
         };
-        nock(serverUrl).get(requestPath).reply(200, response);
-
+        nock(serverUrl).get(/\/fabric\/v4\/projects\/.*\/tasks.*/).reply(200, response);
         await program.parseAsync(['node', 'tasks', 'list', '--project', PROJECT]);
         const output = getPrintedLines();
         const errs = getErrorLines();
@@ -130,14 +126,13 @@ describe('Tasks', () => {
     });
 
     it('list tasks client JSON', async () => {
-        const taskCtl = new Tasks('http://127.0.0.1:8000');
+        const taskCtl = new Tasks(serverUrl);
         const options = {
             json: true,
         };
 
-        const requestPath = `/fabric/v4/projects/${PROJECT}/tasks?json=true`;
         const response = { success: true, tasks: ['task0', 'task1'] };
-        nock('http://127.0.0.1:8000').get(requestPath).reply(200, response);
+        nock(serverUrl).get(/\/fabric\/v4\/projects\/.*\/tasks.*/).reply(200, response);
         const taskList = await taskCtl.listTasks(PROJECT, '', options);
         console.log(`taskList: ${JSON.stringify(taskList)}`);
         expect(taskList).to.deep.equal(response);

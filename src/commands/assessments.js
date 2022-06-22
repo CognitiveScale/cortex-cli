@@ -23,9 +23,12 @@ const _ = {
     startsWith: require('lodash/startsWith'),
 };
 const debug = require('debug')('cortex:cli');
-const moment = require('moment');
+const dayjs = require('dayjs');
+const relativeTime = require('dayjs/plugin/relativeTime');
 const { loadProfile } = require('../config');
 const Assessments = require('../client/assessments');
+
+dayjs.extend(relativeTime);
 
 const {
     printSuccess, printError, parseObject, filterObject,
@@ -200,7 +203,7 @@ module.exports.ListAssessmentCommand = class {
                         { column: 'Modified', field: '_updatedAt' },
                         { column: 'Author', field: '_createdBy' },
                     ];
-                    handleTable(tableSpec, result, (o) => ({ ...o, _updatedAt: o._updatedAt ? moment(o._updatedAt).fromNow() : '-' }), 'No Assessments found');
+                    handleTable(tableSpec, result, (o) => ({ ...o, _updatedAt: o._updatedAt ? dayjs(o._updatedAt).fromNow() : '-' }), 'No Assessments found');
                 }
             })
             .catch((err) => {
@@ -296,7 +299,7 @@ module.exports.ListAssessmentReportCommand = class {
                         { column: 'Author', field: '_createdBy' },
                     ];
                     response.data.forEach((r) => r.summary = JSON.stringify(Object.fromEntries(r.summary.map((item) => [item.type, item.count]))));
-                    handleTable(tableSpec, response.data, (o) => ({ ...o, _updatedAt: o._updatedAt ? moment(o._updatedAt).fromNow() : '-' }), `No report found for the Assessment ${name}`);
+                    handleTable(tableSpec, response.data, (o) => ({ ...o, _updatedAt: o._updatedAt ? dayjs(o._updatedAt).fromNow() : '-' }), `No report found for the Assessment ${name}`);
                 }
             })
             .catch((err) => {
