@@ -114,6 +114,36 @@ program
 
 // Pause a task
 program
+    .command('pause <taskNames...>')
+    .description('Pause a scheduled task, if it exists')
+    .option('--no-compat', 'Ignore API compatibility checks')
+    .option('--profile <profile>', 'The profile to use')
+    .option('--project <project>', 'The project to use')
+    .action(withCompatibilityCheck(async (taskName, options) => {
+        try {
+            await new TaskPauseCommand(program).execute(taskName, options);
+        } catch (err) {
+            console.error(chalk.red(err.message));
+        }
+    }));
+
+// Resume a task
+program
+    .command('resume <taskNames...>')
+    .description('Delete a task, if it exists')
+    .option('--no-compat', 'Ignore API compatibility checks')
+    .option('--profile <profile>', 'The profile to use')
+    .option('--project <project>', 'The project to use')
+    .action(withCompatibilityCheck(async (taskName, options) => {
+        try {
+            await new TaskResumeCommand(program).execute(taskName, options);
+        } catch (err) {
+            console.error(chalk.red(err.message));
+        }
+    }));
+
+// Pause a task
+program
     .command('pauseSchedule <taskNames...>')
     .description('Pause scheduling for a scheduled task')
     .option('--no-compat', 'Ignore API compatibility checks')

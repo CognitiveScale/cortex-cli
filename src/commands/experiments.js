@@ -19,6 +19,7 @@ const _ = require('lodash');
 const debug = require('debug')('cortex:cli');
 const dayjs = require('dayjs');
 const relativeTime = require('dayjs/plugin/relativeTime');
+const relativeTime = require('dayjs/plugin/relativeTime');
 const duration = require('dayjs/plugin/duration');
 const { loadProfile } = require('../config');
 const Experiments = require('../client/experiments');
