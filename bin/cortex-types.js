@@ -91,7 +91,6 @@ program
 
     program
     .command('delete <typeName>')
-    .alias('get')
     .description('Delete a type')
     .option('--no-compat', 'Ignore API compatibility checks')
     .option('--color [boolean]', 'Turn on/off colors for JSON output.', 'true')
