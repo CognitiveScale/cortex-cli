@@ -326,13 +326,11 @@ module.exports.WorkspacePublishCommand = class WorkspacePublishCommand {
                   }),
                 );
 
-                const contentFolder = path.join(target, 'content');
-                const contentFiles = glob.sync('**/*', { cwd: contentFolder, nodir: true, absolute: false });
+                const contentFiles = glob.sync(`content/${skillName}/*`, globOpts);
                 await Promise.all(
                   _.map(contentFiles, async (f) => {
-                    const filePath = path.join(contentFolder, f);
-                    const key = `${path.posix.dirname(f)}/${path.posix.basename(f, path.posix.extname(f))}`;
-                    await this.contentClient.uploadContentStreaming(project, profile.token, key, filePath);
+                    const key = `content/${skillName}/${path.posix.basename(f, path.posix.extname(f))}`;
+                    await this.contentClient.uploadContentStreaming(project, profile.token, key, f);
                     printSuccess(`Published content ${key}`, options);
                   }),
                 );
