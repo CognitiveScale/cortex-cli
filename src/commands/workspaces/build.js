@@ -4,6 +4,7 @@ const glob = require('glob');
 const Docker = require('dockerode');
 const cliProgress = require('cli-progress');
 const { BarFormat } = require('cli-progress').Format;
+const { printError, printSuccess } = require('../utils');
 
 const _ = {
   get: require('lodash/get'),
@@ -142,7 +143,7 @@ module.exports.WorkspaceBuildCommand = class WorkspaceBuildCommand {
     this.program = program;
   }
 
-  async buildAction(target, action, status) {
+  async buildAction(target, action, status, options) {
     try {
       const actionPath = path.join(target, 'actions', action.name);
       const globList = glob.sync('./**/*', {
@@ -178,12 +179,12 @@ module.exports.WorkspaceBuildCommand = class WorkspaceBuildCommand {
             },
           );
         } catch (err) {
-          console.log(err);
+          printSuccess(err, options);
           reject(err);
         }
       });
     } catch (err) {
-      console.error(err);
+      printError(err, options);
       return Promise.reject(err);
     }
   }
@@ -216,15 +217,16 @@ module.exports.WorkspaceBuildCommand = class WorkspaceBuildCommand {
             path.dirname(info.uri),
             action,
             status,
+            options,
           )));
         }));
         status.stop();
-        console.log('Build Complete');
+        printSuccess('Build Complete', options);
       } else {
-        console.log('No skills found');
+        printSuccess('No skills found', options);
       }
     } catch (err) {
-      console.log(err.message);
+      printError(err.message, options);
     }
   }
 };

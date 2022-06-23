@@ -1,4 +1,5 @@
 const glob = require('glob');
+const fs = require('fs');
 const path = require('path');
 const Docker = require('dockerode');
 const { readFile } = require('fs/promises');
@@ -6,9 +7,10 @@ const { v1: uuid } = require('uuid');
 const inquirer = require('inquirer');
 const cliProgress = require('cli-progress');
 const { BarFormat } = require('cli-progress').Format;
+const chalk = require('chalk');
 
 const {
-  parseObject,
+  parseObject, printSuccess, printError,
 } = require('../utils');
 
 const { getSkillInfo, buildImageTag, getCurrentRegistry } = require('./workspace-utils');
@@ -18,7 +20,6 @@ const Models = require('../../client/models');
 const Content = require('../../client/content');
 const Experiments = require('../../client/experiments');
 const ApiServerClient = require('../../client/apiServerClient');
-const { printError } = require('../utils');
 
 const _ = {
   map: require('lodash/map'),
@@ -47,11 +48,11 @@ class DockerPushProgressTracker {
     switch (payload.type) {
       case 'upload':
         if (params.progress >= 1) {
-          return `Pushing ${this.stage}: Complete`;
+          return chalk.green(`Pushing ${this.stage}: Complete`);
         }
-        return `Pushing ${this.stage}: [${BarFormat(params.progress, barOpts)}]`;
+        return chalk.green(`Pushing ${this.stage}: [${BarFormat(params.progress, barOpts)}]`);
       case 'status':
-        return `Status:      ${this.streamData.trim()}`;
+        return chalk.green(`Status:      ${this.streamData.trim()}`);
       default:
         return '';
     }
@@ -201,52 +202,55 @@ module.exports.WorkspacePublishCommand = class WorkspacePublishCommand {
     this.options = options;
     let target = process.cwd();
 
-    if (folder) {
-      const fldr = folder.replace(/'|"/g, '');
-      target = path.isAbsolute(fldr) ? folder : path.resolve(target, fldr);
-    }
-
-    if (options.skill) {
-      target = path.join(target, 'skills', options.skill, 'skill.yaml');
-    }
-
-    const skillInfo = await getSkillInfo(target);
-
-    if (skillInfo.length > 0) {
-      const profile = await loadProfile();
-
-      /// If the user passed in a project name, validate it with the cluster
-      let project = options.project || profile.project;
-      if (project) {
-        const apiServer = new ApiServerClient(profile.url);
-        await apiServer.getProject(profile.token, project)
-        .then((prj) => project = prj.name)
-        .catch(() => printError(`Project ${project} not found.`));
+    try {
+      if (folder) {
+        const fldr = folder.replace(/'|"/g, '');
+        target = path.isAbsolute(fldr) ? folder : path.resolve(target, fldr);
       }
 
-      this.catalogClient = new Catalog(profile.url);
-      this.modelsClient = new Models(profile.url);
-      this.experimentClient = new Experiments(profile.url);
-      this.contentClient = new Content(profile.url);
+      if (options.skill) {
+        target = path.join(target, 'skills', options.skill, 'skill.yaml');
+        if (!fs.existsSync(target)) {
+          throw new Error(`Skill ${options.skill} not found!`);
+        }
+      }
 
-      const published = await Promise.all(_.map(skillInfo, async (info) => {
-        const skillName = info.skill.name;
-        const actions = info.skill.actions ? info.skill.actions : [];
-        const actionsPublished = await Promise.all(_.map(actions, async (action) => {
-          const tag = await buildImageTag(action.image);
-          const imglist = await this.docker.listImages({
-            filters: JSON.stringify({
-              reference: [tag],
-            }),
-          });
+      const skillInfo = await getSkillInfo(target);
 
-          if (imglist.length !== 0) {
-            try {
-              const globOpts = {
-                root: target,
-                absolute: true,
-              };
-              const regAuth = await this.getRegistryAuth(profile, action.image, options);
+      if (skillInfo.length > 0) {
+        const profile = await loadProfile();
+
+        /// If the user passed in a project name, validate it with the cluster
+        let project = options.project || profile.project;
+        if (project) {
+          const apiServer = new ApiServerClient(profile.url);
+          await apiServer.getProject(profile.token, project)
+            .then((prj) => project = prj.name)
+            .catch(() => printError(`Project ${project} not found.`, options));
+        }
+
+        this.catalogClient = new Catalog(profile.url);
+        this.modelsClient = new Models(profile.url);
+        this.experimentClient = new Experiments(profile.url);
+        this.contentClient = new Content(profile.url);
+
+        const published = await Promise.all(_.map(skillInfo, async (info) => {
+          const skillName = info.skill.name;
+          const actions = info.skill.actions ? info.skill.actions : [];
+          const actionsPublished = await Promise.all(_.map(actions, async (action) => {
+            const tag = await buildImageTag(action.image);
+            const imglist = await this.docker.listImages({
+              filters: JSON.stringify({
+                reference: [tag],
+              }),
+            });
+
+            if (imglist.length !== 0) {
+                const globOpts = {
+                  root: target,
+                  absolute: true,
+                };
+                const regAuth = await this.getRegistryAuth(profile, action.image, options);
 
                 const typesFiles = glob.sync(`types/${skillName}/**/*.yaml`, globOpts);
                 await Promise.all(
@@ -258,7 +262,7 @@ module.exports.WorkspacePublishCommand = class WorkspacePublishCommand {
                       if (!('types' in type)) normalizedType.types = [type];
                       else normalizedType = type;
                       await this.catalogClient.saveType(project, profile.token, normalizedType);
-                      console.log(`Published type ${path.basename(f)}`);
+                      printSuccess(`Published type ${path.basename(f)}`, options);
                     }
                   }),
                 );
@@ -270,7 +274,7 @@ module.exports.WorkspacePublishCommand = class WorkspacePublishCommand {
                     if (modelData) {
                       const model = parseObject(modelData.toString());
                       await this.modelsClient.saveModel(project, profile.token, model);
-                      console.log(`Published model ${model.name}`);
+                      printSuccess(`Published model ${model.name}`, options);
                     }
                   }),
                 );
@@ -287,7 +291,7 @@ module.exports.WorkspacePublishCommand = class WorkspacePublishCommand {
                         .catch(() => false);
 
                       if (result) {
-                        console.log(`Published experiment ${experiment.name}`);
+                        printSuccess(`Published experiment ${experiment.name}`, options);
                         const runsFiles = glob.sync(`experiments/${skillName}/${experiment.name}/runs/**/*.yaml`, globOpts);
                         await Promise.all(
                           _.map(runsFiles, async (runFile) => {
@@ -304,19 +308,19 @@ module.exports.WorkspacePublishCommand = class WorkspacePublishCommand {
                               await this.experimentClient.deleteRun(project, profile.token, experiment.name, run.runId);
                               run.experimentName = experiment.name;
                               await this.experimentClient.createRun(project, profile.token, run);
-                              console.log(`Published run ${run.runId}`);
+                              printSuccess(`Published run ${run.runId}`, options);
 
                               const artifacts = glob.sync(`experiments/${skillName}/${experiment.name}/runs/${run.runId}/artifacts/*`, globOpts);
                               await Promise.all(_.map(artifacts, async (artifactUri) => {
                                 const artifactName = path.basename(artifactUri).split('.')[0];
                                 await this.experimentClient.uploadArtifact(project, profile.token, experiment.name, run.runId, artifactUri, artifactName);
-                                console.log(`Published artifact ${artifactName}`);
+                                printSuccess(`Published artifact ${artifactName}`, options);
                               }));
                             }
                           }),
                         );
                       } else {
-                        console.error('Failed to save experiment');
+                        printError('Failed to save experiment', options);
                       }
                     }
                   }),
@@ -329,36 +333,38 @@ module.exports.WorkspacePublishCommand = class WorkspacePublishCommand {
                     const filePath = path.join(contentFolder, f);
                     const key = `${path.posix.dirname(f)}/${path.posix.basename(f, path.posix.extname(f))}`;
                     await this.contentClient.uploadContentStreaming(project, profile.token, key, filePath);
-                    console.log(`Published content ${key}`);
+                    printSuccess(`Published content ${key}`, options);
                   }),
                 );
 
-              await this.pushAction(action, tag, regAuth);
-            } catch (err) {
-              console.error(err.message);
+                await this.pushAction(action, tag, regAuth);
+            } else {
+              printError(`No image found for action ${action.name}.  Has it been built?`, options);
               return false;
             }
-          } else {
-            console.error(`No image found for action ${action.name}.  Has it been built?`);
-            return false;
+
+            return true;
+          }));
+
+          if (_.every(actionsPublished)) {
+            this.catalogClient.saveSkill(project, profile.token, info.skill);
+            printSuccess('Publish Complete', options);
+            return true;
           }
 
-          return true;
+          printError('Publish Failed', options);
+
+          return false;
         }));
 
-        if (_.every(actionsPublished)) {
-          this.catalogClient.saveSkill(project, profile.token, info.skill);
-          return true;
-        }
+        return _.every(published);
+      }
 
-        return false;
-      }));
-
-      console.log('Publish Complete');
-      return _.every(published);
+      console.log('No skills found');
+      return false;
+    } catch (err) {
+      printError(err.message, options);
+      return false;
     }
-
-    console.log('No skills found');
-    return false;
   }
 };
