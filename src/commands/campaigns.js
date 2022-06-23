@@ -35,9 +35,7 @@ module.exports.ListCampaignsCommand = class ListCampaignsCommand {
         debug('%s.executeListCampaigns()', profile.name);
         const cli = new ApiServerClient(profile.url);
         try {
-            const sortOpt = JSON.parse(options.sort);
-            Object.keys(sortOpt).forEach((e) => sortOpt[e] = sortOpt[e].toString());
-            const sortParam = (JSON.stringify(sortOpt) || '{}').replace(/"/g, '\'');
+            const sortParam = (options.sort || '{}').replace(/"/g, '\'');
             const filterParam = (options.filter || '{}').replace(/"/g, '\'');
             const response = await cli.listCampaigns(options.project || profile.project, profile.token, filterParam, options.limit, options.skip, sortParam);
             let result = response;
@@ -54,10 +52,7 @@ module.exports.ListCampaignsCommand = class ListCampaignsCommand {
                 handleTable(tableSpec, result, null, 'No campaigns found');
             }
         } catch (err) {
-            // printError(`Failed to list campaigns: ${err.status} ${err.message}`, options);
-            // console.log("err==", err.response.errors[0])
             handleListFailure(_.get(err, 'response.errors[0]', err), options, 'Campaigns');
-            // printError(`Failed to list campaigns: ${err.status} ${err.message}`, options);
         }
     }
 };
@@ -243,7 +238,6 @@ module.exports.ListMissionsCommand = class ListMissionsCommand {
                 handleListFailure(_.get(err, 'response.errors[0]', err), options, 'Missions');
             });
         } catch (err) {
-            // handleListFailure(response, options, 'Missions');
             handleListFailure(_.get(err, 'response.errors[0]', err), options, 'Missions');
         }
     }

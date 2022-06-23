@@ -32,10 +32,6 @@ const {
     handleTable, printExtendedLogs, handleListFailure,
 } = require('./utils');
 
-const {
-    transformDynamicParams,
-} = require('../parsers');
-
 module.exports.ListResourcesCommand = class {
     constructor(program) {
         this.program = program;
@@ -46,16 +42,12 @@ module.exports.ListResourcesCommand = class {
         const options = command;
         const profile = await loadProfile(options.profile);
         debug('%s.ListResourcesCommand()', profile.name);
-        let transformedFilter;
-        let transformedSort;
         const client = new Assessments(profile.url);
-        // add prefixes to the keys to query inside nested targetPath
-        if (options.filter) transformedFilter = transformDynamicParams(options.filter, 'resource.');
-        if (options.sort) transformedSort = transformDynamicParams(options.sort, '_id.');
-        client.queryResources(profile.token, options.name, options.scope, options.type, options.skip, options.limit, transformedFilter, transformedSort)
+        client.queryResources(profile.token, options.name, options.scope, options.type, options.skip, options.limit, options.filter, options.sort)
+            // eslint-disable-next-line consistent-return
             .then((response) => {
                 if (response.status === 400) {
-                    handleListFailure(response, options, 'Resources');
+                    return handleListFailure(response, options, 'Resources');
                 }
                 if (response.success === false) throw response;
                 printExtendedLogs(response.data, options);
@@ -193,9 +185,10 @@ module.exports.ListAssessmentCommand = class {
 
         const client = new Assessments(profile.url);
         client.listAssessment(profile.token, options.skip, options.limit, options.filter, options.sort)
+            // eslint-disable-next-line consistent-return
             .then((response) => {
                 if (response.status === 400) {
-                    handleListFailure(response, options, 'Assessments');
+                    return handleListFailure(response, options, 'Assessments');
                 }
                 if (response.success === false) throw response;
                 let result = response.data;

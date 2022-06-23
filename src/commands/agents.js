@@ -97,7 +97,7 @@ module.exports.ListAgentsCommand = class ListAgentsCommand {
                     );
                 }
             } else {
-                return handleListFailure(response, options, 'Agents');
+                handleListFailure(response, options, 'Agents');
             }
         })
         .catch((err) => {
@@ -257,6 +257,7 @@ module.exports.ListActivationsCommand = class {
         if (options.skillName) queryParams.skillName = options.skillName;
         if (options.limit) queryParams.limit = options.limit;
         if (options.skip) queryParams.skip = options.skip;
+        if (options.sort) queryParams.sort = _.toLower(options.sort);
         if (options.filter) queryParams.filter = options.filter;
 
         agents.listActivations(options.project || profile.project, profile.token, queryParams).then((response) => {
