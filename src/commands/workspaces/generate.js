@@ -1,3 +1,4 @@
+const fs = require('fs');
 const path = require('path');
 const URL = require('url-parse');
 const {
@@ -149,6 +150,8 @@ module.exports.WorkspaceGenerateCommand = class WorkspaceGenerateCommand {
     this.config = readConfig();
     this.githubToken = await validateToken();
 
+    const destinationPath = path.resolve(destination || process.cwd());
+
     if (!this.githubToken) {
       printError(
         this.config.templateConfig
@@ -160,6 +163,11 @@ module.exports.WorkspaceGenerateCommand = class WorkspaceGenerateCommand {
       this.config = readConfig();
     }
 
+    if (name && fs.existsSync(path.join(destinationPath, 'skills', name))) {
+      printError(`Skill ${name} already exists!`, this.options);
+      return;
+    }
+
     await this.loadTemplateTree(this.config.templateConfig);
 
     if (this.tree.length) {
@@ -167,20 +175,24 @@ module.exports.WorkspaceGenerateCommand = class WorkspaceGenerateCommand {
       if (template) {
         const templateFolder = path.posix.dirname(template.template.path);
         const templateFiles = this.globTree(`${templateFolder}/**`);
-        const destinationPath = path.resolve(destination || process.cwd());
         const treeObj = {};
+
+        if (fs.existsSync(path.join(destinationPath, 'skills', template.name))) {
+          printError(`Skill ${template.name} already exists!`, this.options);
+          return;
+        }
 
         const generatedFiles = _.map(templateFiles, (f) => {
           try {
             const rootPathComponents = templateFolder.split('/');
             const destFile = _.drop(f.path.split('/'), rootPathComponents.length);
             const targetPath = path.join(...destFile);
-  
+
             return _.template(targetPath, { interpolate: /__([\s\S]+?)__/g })({
                 skillname: generateNameFromTitle(template.name),
               });
           } catch (err) {
-            printError(`Error processing template file ${f.path}: ${err.message}`);
+            printError(err.message, this.options);
           }
           return undefined;
         }).join('<br>');
@@ -216,7 +228,7 @@ module.exports.WorkspaceGenerateCommand = class WorkspaceGenerateCommand {
                 _.set(treeObj, sourcePath.split('/'), null);
               }
             } catch (err) {
-              printError(`Error processing template file ${f.path}: ${err.message}`, this.options);
+              printError(err.message, this.options);
             }
           }),
         );
@@ -227,7 +239,7 @@ module.exports.WorkspaceGenerateCommand = class WorkspaceGenerateCommand {
           console.log(treeify.asTree(treeObj, true));
         }
 
-        printSuccess('Workspace generation complete.');
+        printSuccess('Workspace generation complete.', this.options);
       }
     } else {
       printError('Unable to retrieve templates', this.options);
