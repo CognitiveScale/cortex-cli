@@ -5,6 +5,7 @@ const _ = {
   map: require('lodash/map'),
   filter: require('lodash/filter'),
   forEach: require('lodash/forEach'),
+  find: require('lodash/find'),
 };
 
 const { loadProfile, readConfig } = require('../../config');
@@ -117,6 +118,11 @@ module.exports.WorkspaceActivateRegistryCommand = class WorkspaceActivateRegistr
         name: r.name,
         value: r.name,
       }));
+
+    if (name && !_.find(choices, { name })) {
+      printError(`Registry ${name} not found`, options);
+      return;
+    }
 
     await inquirer.prompt([
       {
