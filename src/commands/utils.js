@@ -390,7 +390,7 @@ module.exports.validateName = (name) => {
             status: true,
             message: '',
         });
-}
+};
 
 module.exports.handleTable = (spec, data, transformer, noDataMessage) => {
     if (!data || data.length === 0) {
