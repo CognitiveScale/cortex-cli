@@ -29,10 +29,11 @@ const { ALLOWED_QUERY_FIELDS } = require('../constants');
 
 const MAX_NAME_LENGTH = 20;
 
-const space = /\s+/g;
-const specialCharsExceptHyphen = /[^A-Za-z0-9- ]/g;
-const beginAndEndWithHyphen = /^[-]+|[-]+$/g;
+const space = /\s+/;
+const specialCharsExceptHyphen = /[^A-Za-z0-9- ]/;
+const beginAndEndWithHyphen = /^[-]+|[-]+$/;
 const vaildationErrorMessage = 'Must be 20 characters or less, contain only lowercase a-z, 0-9, or -, and cannot begin or end with -';
+const nameRequirementMessage = 'You must provide a name for the skill.';
 
 module.exports.constructError = (error) => {
     // fallback to text in message or standard error message
@@ -369,28 +370,20 @@ module.exports.generateNameFromTitle = (title) => title.replace(specialCharsExce
 
 module.exports.hasUppercase = (s) => /[A-Z]/.test(s);
 
-module.exports.validateName = (name) => {
-    if (!name) {
-        return {
-            status: false,
-            message: 'You must provide a name for the skill',
-        };
+module.exports.validateName = (name) => (space.test(name)
+    || specialCharsExceptHyphen.test(name)
+    || beginAndEndWithHyphen.test(name)
+    || (!name)
+    || (name && name.length > MAX_NAME_LENGTH)
+    || module.exports.hasUppercase(name)
+    ? {
+        status: false,
+        message: name ? vaildationErrorMessage : nameRequirementMessage,
     }
-
-    return (space.test(name)
-        || specialCharsExceptHyphen.test(name)
-        || beginAndEndWithHyphen.test(name)
-        || (name && name.length > MAX_NAME_LENGTH)
-        || module.exports.hasUppercase(name)
-        ? {
-            status: false,
-            message: vaildationErrorMessage,
-        }
-        : {
-            status: true,
-            message: '',
-        });
-};
+    : {
+        status: true,
+        message: '',
+    });
 
 module.exports.handleTable = (spec, data, transformer, noDataMessage) => {
     if (!data || data.length === 0) {
