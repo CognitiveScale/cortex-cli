@@ -166,10 +166,10 @@ module.exports.getSourceFiles = (source, cb) => {
             cb(err, null);
         } else {
             const results = files.filter((fpath) => fs.lstatSync(fpath).isFile()).map((fpath) => ({
-                    canonical: fpath,
-                    relative: path.relative(normalizedSource, fpath),
-                    size: fs.lstatSync(fpath).size,
-                }));
+                canonical: fpath,
+                relative: path.relative(normalizedSource, fpath),
+                size: fs.lstatSync(fpath).size,
+            }));
             cb(null, results);
         }
     });
@@ -208,32 +208,32 @@ function formatServiceInputParameter(inputParameter) {
 }
 
 module.exports.formatAllServiceInputParameters = (allParameters) => {
-     if (allParameters.$ref != null) {
-         return `$ref:${allParameters.$ref}`;
-     }
+    if (allParameters.$ref != null) {
+        return `$ref:${allParameters.$ref}`;
+    }
 
-         return allParameters.map((inputParameters) => formatServiceInputParameter(inputParameters)).join('\n');
+    return allParameters.map((inputParameters) => formatServiceInputParameter(inputParameters)).join('\n');
 };
 
 module.exports.countLinesInFile = (filePath) => new Promise((resolve, reject) => {
     // Bug ... this code ignores the final line that does not end with a new line ... thats why leftovers was added
     // eslint-disable-next-line implicit-arrow-linebreak
-        let count = 0;
-        let leftovers = true;
-        fs.createReadStream(filePath)
-            .on('error', (e) => reject(e))
-            .on('data', (chunk) => {
-                for (let i = 0; i < chunk.length; i += 1) {
-                    if (chunk[i] === 10) {
-                        count += 1;
-                        leftovers = false;
-                    } else {
-                        leftovers = true;
-                    }
+    let count = 0;
+    let leftovers = true;
+    fs.createReadStream(filePath)
+        .on('error', (e) => reject(e))
+        .on('data', (chunk) => {
+            for (let i = 0; i < chunk.length; i += 1) {
+                if (chunk[i] === 10) {
+                    count += 1;
+                    leftovers = false;
+                } else {
+                    leftovers = true;
                 }
-            })
-            .on('end', () => (leftovers ? resolve(count + 1) : resolve(count)));
-    });
+            }
+        })
+        .on('end', () => (leftovers ? resolve(count + 1) : resolve(count)));
+});
 module.exports.formatValidationPath = (p) => {
     let cnt = 0;
     let res = '';
@@ -252,11 +252,11 @@ module.exports.formatValidationPath = (p) => {
 // connections get returns createdAt (not prefixed by _) field that cause saving exported connection to fail. Hence removing them manually
 const systemFields = ['createdAt', 'updatedAt', 'createdBy', 'updatedBy'];
 module.exports.cleanInternalFields = (jsobj) => JSON.stringify(jsobj, (a, obj) => {
-        if (a.startsWith('_') || systemFields.includes(a)) {
-            return undefined;
-        }
-        return obj;
-    }, 2);
+    if (a.startsWith('_') || systemFields.includes(a)) {
+        return undefined;
+    }
+    return obj;
+}, 2);
 
 module.exports.jsonToYaml = (json) => {
     if (typeof json === 'string') {
@@ -361,27 +361,36 @@ module.exports.EXTERNALROLESFORMAT = [
 ];
 
 module.exports.generateNameFromTitle = (title) => title.replace(specialCharsExceptHyphen, '')
-        .replace(space, '-')
-        .replace(beginAndEndWithHyphen, '')
-        .substr(0, MAX_NAME_LENGTH)
-        .replace(beginAndEndWithHyphen, '')
-        .toLowerCase();
+    .replace(space, '-')
+    .replace(beginAndEndWithHyphen, '')
+    .substr(0, MAX_NAME_LENGTH)
+    .replace(beginAndEndWithHyphen, '')
+    .toLowerCase();
 
 module.exports.hasUppercase = (s) => /[A-Z]/.test(s);
 
-module.exports.validateName = (name) => (space.test(name) 
-|| specialCharsExceptHyphen.test(name)
-|| beginAndEndWithHyphen.test(name)
-|| (name && name.length > MAX_NAME_LENGTH)
-|| module.exports.hasUppercase(name)
-    ? {
-        status: false,
-        message: vaildationErrorMessage,
+module.exports.validateName = (name) => {
+    if (!name) {
+        return {
+            status: false,
+            message: 'You must provide a name for the skill',
+        };
     }
-    : {
-        status: true,
-        message: '',
-    });
+
+    return (space.test(name)
+        || specialCharsExceptHyphen.test(name)
+        || beginAndEndWithHyphen.test(name)
+        || (name && name.length > MAX_NAME_LENGTH)
+        || module.exports.hasUppercase(name)
+        ? {
+            status: false,
+            message: vaildationErrorMessage,
+        }
+        : {
+            status: true,
+            message: '',
+        });
+}
 
 module.exports.handleTable = (spec, data, transformer, noDataMessage) => {
     if (!data || data.length === 0) {
