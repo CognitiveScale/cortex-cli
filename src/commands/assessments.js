@@ -46,7 +46,7 @@ module.exports.ListResourcesCommand = class {
         client.queryResources(profile.token, options.name, options.scope, options.type, options.skip, options.limit, options.filter, options.sort)
             // eslint-disable-next-line consistent-return
             .then((response) => {
-                if (response.success === false) return handleListFailure(response, options, 'Resources');
+                if (response.success === false) return handleListFailure(response, options, 'Cortex resources');
                 printExtendedLogs(response.data, options);
                 if (options.json) {
                     printSuccess(JSON.stringify(response, null, 2), options);
