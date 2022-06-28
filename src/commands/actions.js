@@ -60,7 +60,7 @@ module.exports.ListActionsCommand = class {
                         );
                     }
                 } else {
-                    handleListFailure(response, options, 'Actions');
+                    return handleListFailure(response, options, 'Actions');
                 }
             })
             .catch((err) => {

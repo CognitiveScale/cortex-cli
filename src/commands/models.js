@@ -99,7 +99,7 @@ module.exports.ListModelsCommand = class ListModelsCommand {
                     );
                 }
             } else {
-                handleListFailure(response, options, 'Models');
+                return handleListFailure(response, options, 'Models');
             }
         })
             .catch((err) => {

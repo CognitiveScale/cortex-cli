@@ -56,7 +56,7 @@ module.exports.ListConnections = class ListConnections {
                     );
                 }
             } else {
-                handleListFailure(response, options, 'Connections');
+                return handleListFailure(response, options, 'Connections');
             }
         })
         .catch((err) => {
@@ -217,7 +217,7 @@ module.exports.ListConnectionsTypes = class ListConnectionsTypes {
                     handleTable(tableSpec, result, null, 'No connection types found');
                 }
             } else {
-                handleListFailure(response, options, 'Connection-types');
+                return handleListFailure(response, options, 'Connection-types');
             }
         })
         .catch((err) => {

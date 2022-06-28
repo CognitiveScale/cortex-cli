@@ -97,7 +97,7 @@ module.exports.ListAgentsCommand = class ListAgentsCommand {
                     );
                 }
             } else {
-                handleListFailure(response, options, 'Agents');
+                return handleListFailure(response, options, 'Agents');
             }
         })
         .catch((err) => {
@@ -292,7 +292,7 @@ module.exports.ListActivationsCommand = class {
                     })), null, 'No activations found');
                 }
             } else {
-                handleListFailure(response, options, 'Activations');
+                return handleListFailure(response, options, 'Activations');
             }
         })
             .catch((err) => {
@@ -369,10 +369,9 @@ module.exports.ListAgentSnapshotsCommand = class {
                     );
                 }
             } else {
-                handleListFailure(response, options, 'Agent-snapshots');
+                return handleListFailure(response, options, 'Agent-snapshots');
             }
         })
-
             .catch((err) => {
                 printError(`Failed to list agent snapshots ${agentName}: ${err.status} ${err.message}`, options);
             });
