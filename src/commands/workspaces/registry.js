@@ -5,6 +5,7 @@ const _ = {
   map: require('lodash/map'),
   filter: require('lodash/filter'),
   forEach: require('lodash/forEach'),
+  find: require('lodash/find'),
 };
 
 const { loadProfile, readConfig } = require('../../config');
@@ -67,14 +68,15 @@ module.exports.WorkspaceRemoveRegistryCommand = class WorkspaceRemoveRegistryCom
   async execute(name, options) {
     const profile = await loadProfile();
 
-    const choices = _.map(_.filter(profile.registries, { isCortex: false }), (r) => (
+    /// Use a function iteratee instead of the property test
+    const choices = _.map(_.filter(profile.registries, (r) => !r.isCortex && (!name || name === r.name)), (r) => (
       {
         name: r.name,
         value: r.name,
       }));
 
     if (choices.length === 0) {
-      printError('No registries to remove');
+      printError(name ? `Registry ${name} not found` : 'No registries found to remove', options);
       return;
     }
 
@@ -95,7 +97,7 @@ module.exports.WorkspaceRemoveRegistryCommand = class WorkspaceRemoveRegistryCom
         cfg.profiles[profile.name] = profile;
         cfg.save();
 
-        printSuccess(`Registry ${answers.name} removed`);
+        printSuccess(`Registry ${answers.name} removed`, options);
       })
       .catch((error) => {
         printError(error.message, options);
@@ -111,11 +113,16 @@ module.exports.WorkspaceActivateRegistryCommand = class WorkspaceActivateRegistr
   async execute(name, options) {
     const profile = await loadProfile();
 
-    const choices = _.map(profile.registries, (r) => (
+    const choices = _.map(_.filter(profile.registries, (r) => !name || (r.name === name)), (r) => (
       {
         name: r.name,
         value: r.name,
       }));
+
+    if (choices.length === 0) {
+      printError(name ? `Registry ${name} not found` : 'No registries found to activate', options);
+      return;
+    }
 
     await inquirer.prompt([
       {

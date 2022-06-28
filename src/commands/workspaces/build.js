@@ -1,8 +1,10 @@
+const fs = require('fs');
 const path = require('path');
 const glob = require('glob');
 const Docker = require('dockerode');
 const cliProgress = require('cli-progress');
 const { BarFormat } = require('cli-progress').Format;
+const { printError, printSuccess } = require('../utils');
 
 const _ = {
   get: require('lodash/get'),
@@ -51,11 +53,11 @@ class DockerBuildProgressTracker {
           return 'Extracting:  Complete';
         }
         return `Extracting:  [${BarFormat(params.progress, barOpts)}]`;
-        case 'status':
-          return `Status:      ${this.streamData.trim()}`;
-        case 'section':
-          return `Building:    ${this.eventData || ''}`;
-        default:
+      case 'status':
+        return `Status:      ${this.streamData.trim()}`;
+      case 'section':
+        return `Building:    ${this.eventData || ''}`;
+      default:
         return '';
     }
   }
@@ -141,7 +143,7 @@ module.exports.WorkspaceBuildCommand = class WorkspaceBuildCommand {
     this.program = program;
   }
 
-  async buildAction(target, action, status) {
+  async buildAction(target, action, status, options) {
     try {
       const actionPath = path.join(target, 'actions', action.name);
       const globList = glob.sync('./**/*', {
@@ -177,12 +179,12 @@ module.exports.WorkspaceBuildCommand = class WorkspaceBuildCommand {
             },
           );
         } catch (err) {
-          console.log(err);
+          printSuccess(err, options);
           reject(err);
         }
       });
     } catch (err) {
-      console.error(err);
+      printError(err, options);
       return Promise.reject(err);
     }
   }
@@ -191,32 +193,40 @@ module.exports.WorkspaceBuildCommand = class WorkspaceBuildCommand {
     this.options = options;
     let target = process.cwd();
 
-    if (folder) {
-      const fldr = folder.replace(/'|"/g, '');
-      target = path.isAbsolute(fldr) ? folder : path.resolve(target, fldr);
-    }
+    try {
+      if (folder) {
+        const fldr = folder.replace(/'|"/g, '');
+        target = path.isAbsolute(fldr) ? folder : path.resolve(target, fldr);
+      }
 
-    if (options.skill) {
-      target = path.join(target, 'skills', options.skill, 'skill.yaml');
-    }
+      if (options.skill) {
+        target = path.join(target, 'skills', options.skill, 'skill.yaml');
+        if (!fs.existsSync(target)) {
+          throw new Error(`Skill ${options.skill} not found!`);
+        }
+      }
 
-    const skillInfo = await getSkillInfo(target);
+      const skillInfo = await getSkillInfo(target);
 
-    if (skillInfo.length > 0) {
-      const skillNameList = _.map(skillInfo, 'skill.name');
-      const status = new DockerBuildProgressTracker(skillNameList.join(', '));
-      await Promise.all(_.map(skillInfo, (info) => {
-        const actions = info.skill.actions ? info.skill.actions : [];
-        return Promise.all(_.map(actions, (action) => this.buildAction(
+      if (skillInfo.length > 0) {
+        const skillNameList = _.map(skillInfo, 'skill.name');
+        const status = new DockerBuildProgressTracker(skillNameList.join(', '));
+        await Promise.all(_.map(skillInfo, (info) => {
+          const actions = info.skill.actions ? info.skill.actions : [];
+          return Promise.all(_.map(actions, (action) => this.buildAction(
             path.dirname(info.uri),
             action,
             status,
+            options,
           )));
-      }));
-      status.stop();
-      console.log('Build Complete');
-    } else {
-      console.log('No skills found');
+        }));
+        status.stop();
+        printSuccess('Build Complete', options);
+      } else {
+        printSuccess('No skills found', options);
+      }
+    } catch (err) {
+      printError(err.message, options);
     }
   }
 };

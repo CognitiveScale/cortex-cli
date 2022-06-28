@@ -116,3 +116,27 @@ module.exports.DescribeTypeCommand = class DescribeTypeCommand {
         });
     }
 };
+
+module.exports.DeleteTypeCommand = class DeleteTypeCommand {
+    constructor(program) {
+        this.program = program;
+    }
+
+    async execute(typeName, options) {
+        const profile = await loadProfile(options.profile);
+        debug('%s.executeDeleteType(%s)', profile.name, typeName);
+
+        const catalog = new Catalog(profile.url);
+        catalog.deleteType(options.project || profile.project, profile.token, typeName).then((response) => {
+            if (response.success) {
+                const result = filterObject(response.type, options);
+                printSuccess(JSON.stringify(result, null, 2), options);
+            } else {
+                printError(`Failed to delete type ${typeName}: ${response.message}`, options);
+            }
+        })
+        .catch((err) => {
+            printError(`Failed to delete type ${typeName}: ${err.status} ${err.message}`, options);
+        });
+    }
+};

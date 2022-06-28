@@ -31,8 +31,7 @@ const MAX_NAME_LENGTH = 20;
 const space = /\s+/g;
 const specialCharsExceptHyphen = /[^A-Za-z0-9- ]/g;
 const beginAndEndWithHyphen = /^[-]+|[-]+$/g;
-const vaildationErrorMessage = "Must contain only lowercase a-z, 0-9, or -, and it can't begin or end with -";
-const suffixLength = 6;
+const vaildationErrorMessage = 'Must be 20 characters or less, contain only lowercase a-z, 0-9, or -, and cannot begin or end with -';
 
 module.exports.constructError = (error) => {
     // fallback to text in message or standard error message
@@ -363,7 +362,7 @@ module.exports.EXTERNALROLESFORMAT = [
 module.exports.generateNameFromTitle = (title) => title.replace(specialCharsExceptHyphen, '')
         .replace(space, '-')
         .replace(beginAndEndWithHyphen, '')
-        .substr(0, MAX_NAME_LENGTH - suffixLength)
+        .substr(0, MAX_NAME_LENGTH)
         .replace(beginAndEndWithHyphen, '')
         .toLowerCase();
 

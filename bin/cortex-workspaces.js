@@ -47,7 +47,7 @@ program
     program
     .command('generate [name] [destination]')
     .option('--color [boolean]', 'Turn on/off colors', 'true')
-    .option('--notree', 'Do not display generated file tree', false)
+    .option('--notree [boolean]', 'Do not display generated file tree', 'false')
     .option('--template <templateName>', 'Name of template to use')
     .description('Generates a workspace based on a template from the template repository')
     .action((name, destination, options) => { // deliberately not using withCompatibilityCheck()
@@ -93,7 +93,7 @@ program
     .description('Manage image repositories.');
 
     registry
-    .command('add <name>')
+    .command('add [name]')
     .option('--color [boolean]', 'Turn on/off colors', 'true')
     .option('--url <registry url>', 'Registry URL')
     .option('--namespace <registry namespace>', 'Registry Namespace')
@@ -107,7 +107,7 @@ program
     });
 
     registry
-    .command('remove <name>')
+    .command('remove [name]')
     .option('--color [boolean]', 'Turn on/off colors', 'true')
     .description('Removes the specified image registry.')
     .action((name, options) => { // deliberately not using withCompatibilityCheck()

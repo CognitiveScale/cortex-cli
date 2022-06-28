@@ -8,6 +8,7 @@ const inquirer = require('inquirer');
 const ghGot = require('gh-got');
 const { isText } = require('istextorbinary');
 const treeify = require('treeify');
+const { boolean } = require('boolean');
 
 const _ = {
   get: require('lodash/get'),
@@ -219,7 +220,7 @@ module.exports.WorkspaceGenerateCommand = class WorkspaceGenerateCommand {
             }
           }),
         );
-        if (!options || !options.notree) {
+        if (!options || !boolean(options.notree)) {
           printSuccess('Generated the following files:');
           console.log('');
           console.log(destinationPath);
