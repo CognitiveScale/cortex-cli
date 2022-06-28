@@ -83,6 +83,7 @@ module.exports.ListModelsCommand = class ListModelsCommand {
         const profile = await loadProfile(options.profile);
         debug('%s.executeListModels()', profile.name);
         const models = new Models(profile.url);
+        // eslint-disable-next-line consistent-return
         models.listModels(options.project || profile.project, options.skip, options.limit, options.filter, options.sort, options.tags, profile.token).then((response) => {
             if (response.success) {
                 let result = response.models;

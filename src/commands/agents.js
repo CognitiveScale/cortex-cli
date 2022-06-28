@@ -233,7 +233,6 @@ module.exports.ListActivationsCommand = class {
         this.program = program;
     }
 
-    // eslint-disable-next-line consistent-return
     async execute(options) {
         if (_.isEmpty(options.agentName) 
             && _.isEmpty(options.skillName) 
@@ -260,6 +259,7 @@ module.exports.ListActivationsCommand = class {
         if (options.sort) queryParams.sort = _.toLower(options.sort);
         if (options.filter) queryParams.filter = options.filter;
 
+        // eslint-disable-next-line consistent-return
         agents.listActivations(options.project || profile.project, profile.token, queryParams).then((response) => {
             if (response.success) {
                 let result = response.result.activations;
@@ -346,6 +346,7 @@ module.exports.ListAgentSnapshotsCommand = class {
 
         const agents = new Agents(profile.url);
         agents.listAgentSnapshots(options.project || profile.project, profile.token, agentName, options.filter, options.limit, options.skip, options.sort)
+            // eslint-disable-next-line consistent-return
             .then((response) => {
             if (response.success) {
                 let result = response.result.snapshots;

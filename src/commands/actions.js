@@ -37,6 +37,7 @@ module.exports.ListActionsCommand = class {
 
         const actions = new Actions(profile.url);
         actions.listActions(options.project || profile.project, profile.token, options.filter, options.limit, options.skip, options.sort)
+            // eslint-disable-next-line consistent-return
             .then((response) => {
                 if (response.success) {
                     let result = response.actions;
