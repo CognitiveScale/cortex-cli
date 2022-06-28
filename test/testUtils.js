@@ -6,6 +6,7 @@ const sinon = require('sinon');
 const {
     handleTable,
     printExtendedLogs,
+    handleListFailure,
 } = require('../src/commands/utils');
 
 const { stripAnsi } = require('./utils');
@@ -106,3 +107,50 @@ describe('Test printExtendedLogs function', () => {
         expect(getPrintedLines()).to.eql([]);
     });
 });
+
+describe('Test handleListFailure function', () => {
+    let printSpy;
+    before(() => {
+        restore = mockedEnv({});
+    });
+
+    beforeEach(() => {
+        printSpy = sinon.spy(console, 'log');
+    });
+
+    afterEach(() => {
+        printSpy.restore();
+    });
+
+    after(() => {
+        restore();
+    });
+
+    function getPrintedLines() {
+        return _.flatten(printSpy.args).map((s) => stripAnsi(s));
+    }
+
+    const errResponse = {
+        status: 400,
+        details: [
+            { type: 'type1', message: 'message1' },
+            { type: 'type2', message: 'message2' },
+            { type: 'type3', message: 'message3' },
+        ],
+    };
+    it('should print tabular output if status is 400', () => {
+        handleListFailure(errResponse, null, 'test-resource');
+        expect((getPrintedLines()[0])).to.equal(
+            '┌────────────────────┬────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┐\n'
+                + '│ Option Type        │ Message                                                                                                                │\n'
+                + '├────────────────────┼────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┤\n'
+                + '│ type1              │ message1                                                                                                               │\n'
+                + '├────────────────────┼────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┤\n'
+                + '│ type2              │ message2                                                                                                               │\n'
+                + '├────────────────────┼────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┤\n'
+                + '│ type3              │ message3                                                                                                               │\n'
+                + '└────────────────────┴────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘',
+        );
+    });
+});
+
