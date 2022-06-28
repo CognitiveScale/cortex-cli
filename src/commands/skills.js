@@ -133,7 +133,7 @@ module.exports.ListSkillsCommand = class ListSkillsCommand {
                     'No skills found',
                 );
             }
-            return handleListFailure(response, options, 'Models');
+            return handleListFailure(response, options, 'Skills');
         } catch (err) {
             return printError(`Failed to list skills: ${err.status} ${err.message}`, options);
         }
