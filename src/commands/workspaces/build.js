@@ -107,23 +107,23 @@ class DockerBuildProgressTracker {
       this.layers.extract[id] = { progress: 0 };
     }
 
-    if (status === 'Downloading') {
+    if (status === 'Downloading' && this.layers.download[id]) {
       this.layers.download[id].progress = progressDetail.current / progressDetail.total || 0;
     }
 
-    if (status === 'Extracting') {
+    if (status === 'Extracting' && this.layers.extract[id]) {
       this.layers.extract[id].progress = progressDetail.current / progressDetail.total || 0;
     }
 
-    if (status === 'Download complete') {
+    if (status === 'Download complete' && this.layers.download[id]) {
       this.layers.download[id].progress = 1;
     }
 
-    if (status === 'Pull complete') {
+    if (status === 'Pull complete' && this.layers.extract[id]) {
       this.layers.extract[id].progress = 1;
     }
 
-    if (status === 'Already exists') {
+    if (status === 'Already exists' && this.layers.download[id] && this.layers.extract[id]) {
       this.layers.download[id].progress = 1;
       this.layers.extract[id].progress = 1;
     }
@@ -175,11 +175,15 @@ module.exports.WorkspaceBuildCommand = class WorkspaceBuildCommand {
               return resolve(true);
             },
             (evt) => {
+              if (evt.error) {
+                reject(new Error(evt.error));
+                return;
+              }
               status.processEvent(evt);
             },
           );
         } catch (err) {
-          printSuccess(err, options);
+          printError(err, options);
           reject(err);
         }
       });
@@ -226,7 +230,7 @@ module.exports.WorkspaceBuildCommand = class WorkspaceBuildCommand {
         printSuccess('No skills found', options);
       }
     } catch (err) {
-      printError(err.message, options);
+      printError(`Build Failed: ${err.message}`, options);
     }
   }
 };
