@@ -20,8 +20,8 @@ const Catalog = require('../client/catalog');
 
 const _ = { get: require('lodash/get') };
 const {
- printSuccess, printError, filterObject, printTable, validateOptions, OPTIONSTABLEFORMAT, handleTable,
-    printExtendedLogs,
+ printSuccess, printError, filterObject, printTable, handleTable,
+    printExtendedLogs, handleListFailure,
 } = require('./utils');
 
 module.exports.ListCampaignsCommand = class ListCampaignsCommand {
@@ -33,12 +33,6 @@ module.exports.ListCampaignsCommand = class ListCampaignsCommand {
     async execute(options) {
         const profile = await loadProfile(options.profile);
         debug('%s.executeListCampaigns()', profile.name);
-        const { validOptions, errorDetails } = validateOptions(options, 'CAMPAIGN');
-        if (!validOptions) {
-            const optionTableFormat = OPTIONSTABLEFORMAT;
-            printError('Campaign list failed.', options, false);
-            return printTable(optionTableFormat, errorDetails);
-        }
         const cli = new ApiServerClient(profile.url);
         try {
             const sortParam = (options.sort || '{}').replace(/"/g, '\'');
@@ -58,7 +52,7 @@ module.exports.ListCampaignsCommand = class ListCampaignsCommand {
                 handleTable(tableSpec, result, null, 'No campaigns found');
             }
         } catch (err) {
-            printError(`Failed to list campaigns: ${err.status} ${err.message}`, options);
+            handleListFailure(_.get(err, 'response.errors[0]', err), options, 'Campaigns');
         }
     }
 };
@@ -219,12 +213,6 @@ module.exports.ListMissionsCommand = class ListMissionsCommand {
         const options = cmd;
         const profile = await loadProfile(options.profile);
 
-        const { validOptions, errorDetails } = validateOptions(options, 'MISSION');
-        if (!validOptions) {
-            const optionTableFormat = OPTIONSTABLEFORMAT;
-            printError('Mission list failed.', options, false);
-            return printTable(optionTableFormat, errorDetails);
-        }
         debug('%s.executeListMissionsCommand(%s)', profile.name, campaign);
         const cli = new Catalog(profile.url);
         try {
@@ -246,9 +234,11 @@ module.exports.ListMissionsCommand = class ListMissionsCommand {
                     ];
                     handleTable(tableSpec, data, null, 'No missions found');
                 }
+            }).catch((err) => {
+                handleListFailure(_.get(err, 'response.errors[0]', err), options, 'Missions');
             });
         } catch (err) {
-            printError(`Failed to list missions of campaign ${campaign}: ${err.status} ${err.message}`, options);
+            handleListFailure(_.get(err, 'response.errors[0]', err), options, 'Missions');
         }
     }
 };

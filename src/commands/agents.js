@@ -23,7 +23,8 @@ const Catalog = require('../client/catalog');
 const Agents = require('../client/agents');
 const {
     printSuccess, printError, filterObject, parseObject, printTable, formatValidationPath,
-    LISTTABLEFORMAT, DEPENDENCYTABLEFORMAT, validateOptions, OPTIONSTABLEFORMAT, handleTable, printExtendedLogs,
+    LISTTABLEFORMAT, DEPENDENCYTABLEFORMAT, handleTable, printExtendedLogs,
+    handleListFailure,
 } = require('./utils');
 
 module.exports.SaveAgentCommand = class SaveAgentCommand {
@@ -79,12 +80,7 @@ module.exports.ListAgentsCommand = class ListAgentsCommand {
         debug('%s.executeListAgents()', profile.name);
 
         const catalog = new Catalog(profile.url);
-        const { validOptions, errorDetails } = validateOptions(options, 'AGENT');
-        if (!validOptions) {
-            const optionTableFormat = OPTIONSTABLEFORMAT;
-            printError('Agent list failed.', options, false);
-            return printTable(optionTableFormat, errorDetails);
-        }
+        // eslint-disable-next-line consistent-return
         catalog.listAgents(options.project || profile.project, profile.token, options.filter, options.limit, options.skip, options.sort).then((response) => {
             if (response.success) {
                 let result = response.agents;
@@ -101,7 +97,7 @@ module.exports.ListAgentsCommand = class ListAgentsCommand {
                     );
                 }
             } else {
-                printError(`Failed to list agents: ${response.status} ${response.message}`, options);
+                return handleListFailure(response, options, 'Agents');
             }
         })
         .catch((err) => {
@@ -237,7 +233,6 @@ module.exports.ListActivationsCommand = class {
         this.program = program;
     }
 
-    // eslint-disable-next-line consistent-return
     async execute(options) {
         if (_.isEmpty(options.agentName) 
             && _.isEmpty(options.skillName) 
@@ -264,13 +259,7 @@ module.exports.ListActivationsCommand = class {
         if (options.sort) queryParams.sort = _.toLower(options.sort);
         if (options.filter) queryParams.filter = options.filter;
 
-        const { validOptions, errorDetails } = validateOptions(options, 'ACTIVATION');
-        if (!validOptions) {
-            const optionTableFormat = OPTIONSTABLEFORMAT;
-            printError('Resource list failed.', options, false);
-            return printTable(optionTableFormat, errorDetails);
-        }
-
+        // eslint-disable-next-line consistent-return
         agents.listActivations(options.project || profile.project, profile.token, queryParams).then((response) => {
             if (response.success) {
                 let result = response.result.activations;
@@ -303,7 +292,7 @@ module.exports.ListActivationsCommand = class {
                     })), null, 'No activations found');
                 }
             } else {
-                printError(`Failed to list activations: ${response.message}`, options);
+                return handleListFailure(response, options, 'Activations');
             }
         })
             .catch((err) => {
@@ -356,13 +345,8 @@ module.exports.ListAgentSnapshotsCommand = class {
         debug('%s.listAgentSnapshots(%s)', profile.name, agentName);
 
         const agents = new Agents(profile.url);
-        const { validOptions, errorDetails } = validateOptions(options, 'SNAPSHOT');
-        if (!validOptions) {
-            const optionTableFormat = OPTIONSTABLEFORMAT;
-            printError('Snapshot list failed.', options, false);
-            return printTable(optionTableFormat, errorDetails);
-        }
         agents.listAgentSnapshots(options.project || profile.project, profile.token, agentName, options.filter, options.limit, options.skip, options.sort)
+            // eslint-disable-next-line consistent-return
             .then((response) => {
             if (response.success) {
                 let result = response.result.snapshots;
@@ -386,10 +370,9 @@ module.exports.ListAgentSnapshotsCommand = class {
                     );
                 }
             } else {
-                printError(`Failed to list agent snapshots ${agentName}: ${response.message}`, options);
+                return handleListFailure(response, options, 'Agent-snapshots');
             }
         })
-
             .catch((err) => {
                 printError(`Failed to list agent snapshots ${agentName}: ${err.status} ${err.message}`, options);
             });

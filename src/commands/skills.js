@@ -23,8 +23,8 @@ const Agent = require('../client/agents');
 
 const {
     printSuccess, printError, printWarning, filterObject, parseObject, printTable, formatValidationPath,
-    LISTTABLEFORMAT, DEPENDENCYTABLEFORMAT, isNumeric, validateOptions, OPTIONSTABLEFORMAT, handleTable,
-    printExtendedLogs,
+    LISTTABLEFORMAT, DEPENDENCYTABLEFORMAT, isNumeric, handleTable,
+    printExtendedLogs, handleListFailure,
 } = require('./utils');
 
 module.exports.SaveSkillCommand = class SaveSkillCommand {
@@ -105,12 +105,6 @@ module.exports.ListSkillsCommand = class ListSkillsCommand {
         try {
             const status = !_.get(options, 'nostatus', false); // default show status, if nostatus==true status == false
             const shared = !_.get(options, 'noshared', false);
-            const { validOptions, errorDetails } = validateOptions(options, 'SKILL');
-            if (!validOptions) {
-                const optionTableFormat = OPTIONSTABLEFORMAT;
-                printError('Skill list failed.', options, false);
-                return printTable(optionTableFormat, errorDetails);
-            }
             const response = await catalog.listSkills(
                 options.project || profile.project, profile.token, { status, shared }, options.filter, options.limit, options.skip, options.sort,
             );
@@ -139,7 +133,7 @@ module.exports.ListSkillsCommand = class ListSkillsCommand {
                     'No skills found',
                 );
             }
-            return printError(`Failed to list skills: ${response.status} ${response.message}`, options);
+            return handleListFailure(response, options, 'Skills');
         } catch (err) {
             return printError(`Failed to list skills: ${err.status} ${err.message}`, options);
         }

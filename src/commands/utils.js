@@ -25,7 +25,6 @@ const jmsepath = require('jmespath');
 const path = require('path');
 const yaml = require('js-yaml');
 const { exec } = require('child_process');
-const { ALLOWED_QUERY_FIELDS } = require('../constants');
 
 const MAX_NAME_LENGTH = 20;
 
@@ -393,64 +392,18 @@ module.exports.handleTable = (spec, data, transformer, noDataMessage) => {
     }
 };
 
-// Todo: move to cortex-express-common FAB-4008
-module.exports.validateOptions = (options, type) => {
-    const {
-        filter, limit, skip, sort,
-    } = options;
-    const errorDetails = [];
-    if (filter) {
-        try {
-            const filterObj = JSON.parse(filter);
-            const filterKeys = Object.keys(filterObj);
-            if (typeof (filterObj) !== 'object') {
-                errorDetails.push({ type: 'filter', message: 'Invalid filter expression' });
-            }
-            if (type && (_.intersection(ALLOWED_QUERY_FIELDS[type].filter, filterKeys)).length !== filterKeys.length) {
-                errorDetails.push({ type: 'filter', message: `Invalid filter params. Allowed fields: ${ALLOWED_QUERY_FIELDS[type].filter}` });
-            }
-        } catch (err) {
-            errorDetails.push({ type: 'filter', message: `Invalid filter expression: ${err.message}` });
-        }
-    }
-    if (sort) {
-        try {
-            const sortObj = JSON.parse(sort);
-            const sortKeys = Object.keys(sortObj);
-            const sortValues = Object.values(sortObj);
-            if (typeof (sortObj) !== 'object') {
-                errorDetails.push({ type: 'sort', message: 'Invalid sort expression' });
-            }
-            if (!sortValues.every((val) => Number(val) === 1 || Number(val) === -1)) {
-                errorDetails.push({ type: 'sort', message: 'Sort values can only be 1(ascending) or -1(descending)' });
-            }
-            if (type && (_.intersection(ALLOWED_QUERY_FIELDS[type].sort, sortKeys)).length !== sortKeys.length) {
-                errorDetails.push({ type: 'sort', message: `Invalid sort params. Allowed fields: ${ALLOWED_QUERY_FIELDS[type].sort}` });
-            }
-        } catch (err) {
-            // check if a string of 'asc' or 'desc' is provided for backwards compatibility
-            if (!(_.lowerCase(sort).startsWith('desc') || _.lowerCase(sort).startsWith('asc'))) {
-                errorDetails.push({ type: 'sort', message: `Invalid sort expression: ${err.message}` });
-            }
-        }
-    }
-    if ((limit && _.isNaN(Number(limit))) || Number(limit) <= 0) {
-        errorDetails.push({ type: 'limit', message: 'Invalid limit, limit should be a valid positive number' });
-    }
-    if ((skip && _.isNaN(Number(skip))) || Number(skip) < 0) {
-        errorDetails.push({ type: 'skip', message: 'Invalid skip, skip should be a valid non negative number' });
-    }
-    if (errorDetails.length) {
-        return { validOptions: false, errorDetails };
-    }
-    return {
-        validOptions: true, errorDetails,
-    };
-};
-
 module.exports.printExtendedLogs = (data, options) => {
     if (options.limit && Array.isArray(data) && data.length === Number(options.limit)) {
         // don't log if showing all the results
         process.stderr.write(`Results limited to ${options.limit} rows\n`);
     }
+};
+
+module.exports.handleListFailure = (response, options, type) => {
+    if (response.status === 400) {
+        const optionTableFormat = this.OPTIONSTABLEFORMAT;
+        printError(`${type} list failed.`, options, false);
+        return this.printTable(optionTableFormat, response.details);
+    }
+    return printError(`Failed to list ${type}: ${response.status} ${response.message}`, options);
 };
