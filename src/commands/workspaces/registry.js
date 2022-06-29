@@ -110,7 +110,9 @@ module.exports.WorkspaceActivateRegistryCommand = class WorkspaceActivateRegistr
     this.program = program;
   }
 
-  async execute(name, options) {
+  async execute(regname, options) {
+    const name = regname || undefined;
+
     const profile = await loadProfile();
 
     const choices = _.map(_.filter(profile.registries, (r) => !name || (r.name === name)), (r) => (
