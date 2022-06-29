@@ -192,6 +192,11 @@ module.exports.WorkspacePublishCommand = class WorkspacePublishCommand {
           return resolve(true);
         },
         (evt) => {
+          if (evt.error) {
+            status.stop();
+            reject(new Error(evt.error));
+            return;
+          }
           status.processEvent(evt, action.name);
         },
       );
@@ -362,6 +367,7 @@ module.exports.WorkspacePublishCommand = class WorkspacePublishCommand {
       return false;
     } catch (err) {
       printError(err.message, options);
+      printError('Publish Failed', options);
       return false;
     }
   }
