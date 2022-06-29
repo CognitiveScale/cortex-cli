@@ -19,7 +19,7 @@ const debug = require('debug')('cortex:cli');
 const { loadProfile } = require('../config');
 const ApiServerClient = require('../client/apiServerClient');
 const {
- printSuccess, printError, filterObject, parseObject, printTable, validateOptions, OPTIONSTABLEFORMAT, handleTable, printExtendedLogs,
+ printSuccess, printError, filterObject, parseObject, handleTable, printExtendedLogs, handleListFailure,
 } = require('./utils');
 
 module.exports.CreateProjectCommand = class CreateProjectCommand {
@@ -62,12 +62,6 @@ module.exports.ListProjectsCommand = class ListProjectsCommand {
     async execute(options) {
         const profile = await loadProfile(options.profile);
         debug('%s.executeListProjects()', profile.name);
-        const { validOptions, errorDetails } = validateOptions(options, 'PROJECT');
-        if (!validOptions) {
-            const optionTableFormat = OPTIONSTABLEFORMAT;
-            printError('Project list failed.', options, false);
-            return printTable(optionTableFormat, errorDetails);
-        }
         const cli = new ApiServerClient(profile.url);
         try {
             const sortParam = (options.sort || '{}').replace(/"/g, '\'');
@@ -87,7 +81,7 @@ module.exports.ListProjectsCommand = class ListProjectsCommand {
                 handleTable(tableSpec, result, null, 'No projects found');
             }
         } catch (err) {
-            printError(`Failed to list projects: ${err.status} ${err.message}`, options);
+            handleListFailure(_.get(err, 'response.errors[0]', err), options, 'Projects');
         }
     }
 };

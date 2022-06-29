@@ -28,13 +28,9 @@ const { loadProfile } = require('../config');
 const Assessments = require('../client/assessments');
 
 const {
-    printSuccess, printError, parseObject, printTable, filterObject,
-    validateOptions, OPTIONSTABLEFORMAT, handleTable, printExtendedLogs,
+    printSuccess, printError, parseObject, filterObject,
+    handleTable, printExtendedLogs, handleListFailure,
 } = require('./utils');
-
-const {
-    transformDynamicParams,
-} = require('../parsers');
 
 module.exports.ListResourcesCommand = class {
     constructor(program) {
@@ -46,21 +42,11 @@ module.exports.ListResourcesCommand = class {
         const options = command;
         const profile = await loadProfile(options.profile);
         debug('%s.ListResourcesCommand()', profile.name);
-        let transformedFilter;
-        let transformedSort;
         const client = new Assessments(profile.url);
-        const { validOptions, errorDetails } = validateOptions(options, 'RESOURCE');
-        if (!validOptions) {
-            const optionTableFormat = OPTIONSTABLEFORMAT;
-            printError('Resource list failed.', options, false);
-            return printTable(optionTableFormat, errorDetails);
-        }
-        // add prefixes to the keys to query inside nested targetPath
-        if (options.filter) transformedFilter = transformDynamicParams(options.filter, 'resource.');
-        if (options.sort) transformedSort = transformDynamicParams(options.sort, '_id.');
-        client.queryResources(profile.token, options.name, options.scope, options.type, options.skip, options.limit, transformedFilter, transformedSort)
+        client.queryResources(profile.token, options.name, options.scope, options.type, options.skip, options.limit, options.filter, options.sort)
+            // eslint-disable-next-line consistent-return
             .then((response) => {
-                if (response.success === false) throw response;
+                if (response.success === false) return handleListFailure(response, options, 'Cortex resources');
                 printExtendedLogs(response.data, options);
                 if (options.json) {
                     printSuccess(JSON.stringify(response, null, 2), options);
@@ -195,15 +181,10 @@ module.exports.ListAssessmentCommand = class {
         debug('%s.ListAssessmentCommand()', profile.name);
 
         const client = new Assessments(profile.url);
-        const { validOptions, errorDetails } = validateOptions(options, 'ASSESSMENT');
-        if (!validOptions) {
-            const optionTableFormat = OPTIONSTABLEFORMAT;
-            printError('Assessment list failed.', options, false);
-            return printTable(optionTableFormat, errorDetails);
-        }
         client.listAssessment(profile.token, options.skip, options.limit, options.filter, options.sort)
+            // eslint-disable-next-line consistent-return
             .then((response) => {
-                if (response.success === false) throw response;
+                if (response.success === false) return handleListFailure(response, options, 'Assessments');
                 let result = response.data;
                 printExtendedLogs(result, options);
                 if (options.json) {
