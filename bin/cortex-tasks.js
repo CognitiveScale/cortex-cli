@@ -114,8 +114,8 @@ program
 
 // Pause a task
 program
-    .command('pause <taskNames...>')
-    .description('Pause a scheduled task, if it exists')
+    .command('pauseSchedule <taskNames...>')
+    .description('Pause scheduling for a scheduled task')
     .option('--no-compat', 'Ignore API compatibility checks')
     .option('--profile <profile>', 'The profile to use')
     .option('--project <project>', 'The project to use')
@@ -129,8 +129,8 @@ program
 
 // Resume a task
 program
-    .command('resume <taskNames...>')
-    .description('Delete a task, if it exists')
+    .command('resumeSchedule <taskNames...>')
+    .description('Resume paused schedule for a scheduled task')
     .option('--no-compat', 'Ignore API compatibility checks')
     .option('--profile <profile>', 'The profile to use')
     .option('--project <project>', 'The project to use')
