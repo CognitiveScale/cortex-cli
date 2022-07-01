@@ -215,16 +215,19 @@ module.exports.WorkspaceBuildCommand = class WorkspaceBuildCommand {
       if (skillInfo.length > 0) {
         const skillNameList = _.map(skillInfo, 'skill.name');
         const status = new DockerBuildProgressTracker(skillNameList.join(', '));
-        await Promise.all(_.map(skillInfo, (info) => {
-          const actions = info.skill.actions ? info.skill.actions : [];
-          return Promise.all(_.map(actions, (action) => this.buildAction(
-            path.dirname(info.uri),
-            action,
-            status,
-            options,
-          )));
-        }));
-        status.stop();
+        try {
+          await Promise.all(_.map(skillInfo, (info) => {
+            const actions = info.skill.actions ? info.skill.actions : [];
+            return Promise.all(_.map(actions, (action) => this.buildAction(
+              path.dirname(info.uri),
+              action,
+              status,
+              options,
+            )));
+          }));
+        } finally {
+          status.stop();
+        }
         printSuccess('Build Complete', options);
       } else {
         printSuccess('No skills found', options);
