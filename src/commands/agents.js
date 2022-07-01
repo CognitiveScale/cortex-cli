@@ -17,10 +17,14 @@
 const fs = require('fs');
 const debug = require('debug')('cortex:cli');
 const _ = require('lodash');
-const moment = require('moment');
+const dayjs = require('dayjs');
+const relativeTime = require('dayjs/plugin/relativeTime');
 const { loadProfile } = require('../config');
 const Catalog = require('../client/catalog');
 const Agents = require('../client/agents');
+
+dayjs.extend(relativeTime);
+
 const {
     printSuccess, printError, filterObject, parseObject, printTable, formatValidationPath,
     LISTTABLEFORMAT, DEPENDENCYTABLEFORMAT, handleTable, printExtendedLogs,
@@ -92,7 +96,7 @@ module.exports.ListAgentsCommand = class ListAgentsCommand {
                     handleTable(
                         LISTTABLEFORMAT,
                         result,
-                        (o) => ({ ...o, updatedAt: o.updatedAt ? moment(o.updatedAt).fromNow() : '-' }),
+                        (o) => ({ ...o, updatedAt: o.updatedAt ? dayjs(o.updatedAt).fromNow() : '-' }),
                         'No agents found',
                     );
                 }
@@ -172,7 +176,7 @@ module.exports.InvokeAgentServiceCommand = class {
         debug('params: %o', params);
 
         const agents = new Agents(profile.url);
-        agents.invokeAgentService(options.project || profile.project, profile.token, agentName, serviceName, params, options.sync).then((response) => {
+        agents.invokeAgentService(options.project || profile.project, profile.token, agentName, serviceName, params, options).then((response) => {
             if (response.success) {
                 const result = filterObject(response.result, options);
                 printSuccess(JSON.stringify(result, null, 2), options);
@@ -288,7 +292,7 @@ module.exports.ListActivationsCommand = class {
                     handleTable(tableSpec, _.map(result, (o) => ({
                         ...o,
                         name: genName(o),
-                        start: o.start ? moment(o.start).fromNow() : '-',
+                        start: o.start ? dayjs(o.start).fromNow() : '-',
                     })), null, 'No activations found');
                 }
             } else {
@@ -365,7 +369,7 @@ module.exports.ListAgentSnapshotsCommand = class {
                     handleTable(
                         tableSpec,
                         result,
-                        (o) => ({ ...o, createdAt: o.createdAt ? moment(o.createdAt).fromNow() : '-' }),
+                        (o) => ({ ...o, createdAt: o.createdAt ? dayjs(o.createdAt).fromNow() : '-' }),
                         'No snapshots found',
                     );
                 }

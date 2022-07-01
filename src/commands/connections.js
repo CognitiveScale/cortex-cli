@@ -16,10 +16,13 @@
 const _ = require('lodash');
 const fs = require('fs');
 const debug = require('debug')('cortex:cli');
-const moment = require('moment');
+const dayjs = require('dayjs');
+const relativeTime = require('dayjs/plugin/relativeTime');
 const { loadProfile } = require('../config');
 const Connections = require('../client/connections');
 const Content = require('../client/content');
+
+dayjs.extend(relativeTime);
 
 const {
  printSuccess, printError, filterObject, parseObject, printTable, DEPENDENCYTABLEFORMAT, CONNECTIONTABLEFORMAT, fileExists,
@@ -52,7 +55,7 @@ module.exports.ListConnections = class ListConnections {
                     handleTable(
                         CONNECTIONTABLEFORMAT,
                         result,
-                        (o) => ({ ...o, createdAt: o.createdAt ? moment(o.createdAt).fromNow() : '-' }),
+                        (o) => ({ ...o, createdAt: o.createdAt ? dayjs(o.createdAt).fromNow() : '-' }),
                         'No connections found',
                     );
                 }

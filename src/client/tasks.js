@@ -68,13 +68,38 @@ module.exports = class Tasks {
             .catch((err) => constructError(err));
     }
 
-    // todo delete/cancel Task
     deleteTask(projectId, token, taskName, verbose = false) {
         checkProject(projectId);
         const endpoint = `${this.endpointV4(projectId)}/tasks/${taskName}`;
         debug('deleteTask(%s) => %s', taskName, endpoint);
         return got
             .delete(endpoint, {
+                headers: defaultHeaders(token),
+                searchParams: { verbose },
+            }).json()
+            .then((res) => ({ ...res }))
+            .catch((err) => constructError(err));
+    }
+
+    pauseTask(projectId, token, taskName, verbose = false) {
+        checkProject(projectId);
+        const endpoint = `${this.endpointV4(projectId)}/tasks/${taskName}/pause`;
+        debug('pauseTask(%s) => %s', taskName, endpoint);
+        return got
+            .post(endpoint, {
+                headers: defaultHeaders(token),
+                searchParams: { verbose },
+            }).json()
+            .then((res) => ({ ...res }))
+            .catch((err) => constructError(err));
+    }
+
+    resumeTask(projectId, token, taskName, verbose = false) {
+        checkProject(projectId);
+        const endpoint = `${this.endpointV4(projectId)}/tasks/${taskName}/resume`;
+        debug('resumeTask(%s) => %s', taskName, endpoint);
+        return got
+            .post(endpoint, {
                 headers: defaultHeaders(token),
                 searchParams: { verbose },
             }).json()

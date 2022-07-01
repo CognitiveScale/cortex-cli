@@ -16,9 +16,12 @@
 const _ = require('lodash');
 const fs = require('fs');
 const debug = require('debug')('cortex:cli');
-const moment = require('moment');
+const dayjs = require('dayjs');
+const relativeTime = require('dayjs/plugin/relativeTime');
 const { loadProfile } = require('../config');
 const Actions = require('../client/actions');
+
+dayjs.extend(relativeTime);
 
 const {
     printSuccess, printError, filterObject, parseObject, printTable, DEPENDENCYTABLEFORMAT, isNumeric,
@@ -56,7 +59,7 @@ module.exports.ListActionsCommand = class {
                         handleTable(
                             tableSpec,
                             result,
-                            (o) => ({ ...o, updatedAt: o.updatedAt ? moment(o.updatedAt).fromNow() : '-' }),
+                            (o) => ({ ...o, updatedAt: o.updatedAt ? dayjs(o.updatedAt).fromNow() : '-' }),
                             'No actions found',
                         );
                     }

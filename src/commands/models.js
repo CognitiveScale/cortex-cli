@@ -20,7 +20,8 @@ const _ = {
     pick: require('lodash/pick'),
 };
 const debug = require('debug')('cortex:cli');
-const moment = require('moment');
+const dayjs = require('dayjs');
+const relativeTime = require('dayjs/plugin/relativeTime');
 const { loadProfile } = require('../config');
 const Models = require('../client/models');
 const Experiments = require('../client/experiments');
@@ -28,6 +29,8 @@ const {
     LISTTABLEFORMAT, RUNTABLEFORMAT, DEPENDENCYTABLEFORMAT, printExtendedLogs,
     handleListFailure,
 } = require('./utils');
+
+dayjs.extend(relativeTime);
 
 const {
     printSuccess, printError, filterObject, parseObject, printTable, formatValidationPath, fileExists, handleTable,
@@ -95,7 +98,7 @@ module.exports.ListModelsCommand = class ListModelsCommand {
                     handleTable(
                         LISTTABLEFORMAT,
                         result,
-                        (o) => ({ ...o, updatedAt: o.updatedAt ? moment(o.updatedAt).fromNow() : '-' }),
+                        (o) => ({ ...o, updatedAt: o.updatedAt ? dayjs(o.updatedAt).fromNow() : '-' }),
                         'No models found',
                     );
                 }
@@ -133,7 +136,7 @@ module.exports.ListModelRunsCommand = class ListModelsCommand {
                     handleTable(
                         RUNTABLEFORMAT,
                         result,
-                        (o) => ({ ...o, updatedAt: o.updatedAt ? moment(o.updatedAt).fromNow() : '-' }),
+                        (o) => ({ ...o, updatedAt: o.updatedAt ? dayjs(o.updatedAt).fromNow() : '-' }),
                         'No runs found',
                     );
                 }
