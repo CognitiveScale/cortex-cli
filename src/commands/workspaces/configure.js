@@ -2,8 +2,8 @@ const inquirer = require('inquirer');
 const chalk = require('chalk');
 const got = require('got');
 const open = require('open');
-const moment = require('moment');
-
+const dayjs = require('dayjs');
+const relativeTime = require('dayjs/plugin/relativeTime');
 const { validateToken, persistToken } = require('./workspace-utils');
 
 const _ = {
@@ -21,6 +21,8 @@ const _ = {
 
 const { readConfig } = require('../../config');
 const { printSuccess, printError, useColor } = require('../utils');
+
+dayjs.extend(relativeTime);
 
 const GITHUB_APP_CLIENTID = 'Iv1.e0e84c2a5fa7c935';
 const DEFAULT_TEMPLATE_REPO = 'CognitiveScale/cortex-code-templates';
@@ -80,13 +82,13 @@ module.exports.WorkspaceConfigureCommand = class WorkspaceConfigureCommand {
               let pollInterval = deviceCode.interval;
               let accessToken;
 
-              const mom = moment().add(expiry, 'seconds');
+              const mom = dayjs().add(expiry, 'seconds');
 
               (function poller(options) {
                 process.stdout.write(`\x1b[0GPlease enter the following code to authorize the Cortex CLI: ${useColor(options)
                   ? chalk.bgBlackBright.whiteBright(`[ ${deviceCode.user_code} ]`)
                   : deviceCode.user_code
-                  }  ${moment(mom.diff()).format(' [( Expires in] mm [minutes and] ss [seconds ) - CTRL-C to abort]')}`);
+                  }  ${dayjs(mom.diff()).format(' [( Expires in] mm [minutes and] ss [seconds ) - CTRL-C to abort]')}`);
 
                 const pollTimer = setTimeout(async () => {
                   const { body } = await got.post(GITHUB_DEVICECODE_RESPONSE_URL, {

@@ -24,7 +24,13 @@ const {
     DescribeTaskCommand,
     TaskLogsCommand,
     TaskDeleteCommand,
+    TaskPauseCommand,
+    TaskResumeCommand,
 } = require('../src/commands/tasks');
+const {
+    DEFAULT_LIST_LIMIT_COUNT,
+    DEFAULT_LIST_SKIP_COUNT,
+} = require('../src/constants');
 
 program.name('cortex tasks');
 program.description('Work with Cortex Tasks');
@@ -40,10 +46,14 @@ program
     .option('--project <project>', 'The project to use')
     .option('--actionName <string>', 'Filter tasks by action name')
     .option('--activationId <string>', 'filter tasks by activation id')
-    .option('--json', 'Output results using JSON')
     .option('--skillName <string>', 'Filter tasks by skill name')
+    .option('--scheduled', 'Show scheduled tasks only')
+    .option('--json', 'Output results using JSON')
     // This is a client-side sort
-    .option('--sort <asc|desc>', 'sort tasks by start timestamp ascending (asc) or descending (desc)')
+    .option('--filter <filter>', 'A Mongo style filter to use.')
+    .option('--limit <limit>', 'Limit number of records', DEFAULT_LIST_LIMIT_COUNT)
+    .option('--skip <skip>', 'Skip number of records', DEFAULT_LIST_SKIP_COUNT)
+    .option('--sort <asc|desc|sort>', 'Sort asc|desc on startTime or Mongo style sort statement.', 'asc')
     .action(withCompatibilityCheck(async (options) => {
         try {
             await new ListTasksCommand(program).execute(options);
@@ -89,7 +99,7 @@ program
 
 // Delete a task
 program
-    .command('delete <taskName>')
+    .command('delete <taskName...>')
     .description('Delete a task, if it exists')
     .option('--no-compat', 'Ignore API compatibility checks')
     .option('--profile <profile>', 'The profile to use')
@@ -97,6 +107,36 @@ program
     .action(withCompatibilityCheck(async (taskName, options) => {
         try {
             await new TaskDeleteCommand(program).execute(taskName, options);
+        } catch (err) {
+            console.error(chalk.red(err.message));
+        }
+    }));
+
+// Pause a task
+program
+    .command('pauseSchedule <taskNames...>')
+    .description('Pause scheduling for a scheduled task')
+    .option('--no-compat', 'Ignore API compatibility checks')
+    .option('--profile <profile>', 'The profile to use')
+    .option('--project <project>', 'The project to use')
+    .action(withCompatibilityCheck(async (taskName, options) => {
+        try {
+            await new TaskPauseCommand(program).execute(taskName, options);
+        } catch (err) {
+            console.error(chalk.red(err.message));
+        }
+    }));
+
+// Resume a task
+program
+    .command('resumeSchedule <taskNames...>')
+    .description('Resume paused schedule for a scheduled task')
+    .option('--no-compat', 'Ignore API compatibility checks')
+    .option('--profile <profile>', 'The profile to use')
+    .option('--project <project>', 'The project to use')
+    .action(withCompatibilityCheck(async (taskName, options) => {
+        try {
+            await new TaskResumeCommand(program).execute(taskName, options);
         } catch (err) {
             console.error(chalk.red(err.message));
         }

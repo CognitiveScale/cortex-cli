@@ -16,11 +16,32 @@
 
 const debug = require('debug')('cortex:cli');
 const _ = require('lodash');
-const moment = require('moment');
+const dayjs = require('dayjs');
+const relativeTime = require('dayjs/plugin/relativeTime');
 const { loadProfile } = require('../config');
 const Tasks = require('../client/tasks');
-
 const { printSuccess, printError, handleTable } = require('./utils');
+
+dayjs.extend(relativeTime);
+
+const TASK_LIST_TABLE = [
+        { column: 'Name', field: 'name', width: 40 },
+        { column: 'Activation Id', field: 'activationId', width: 40 },
+        { column: 'Skill Name', field: 'skillName', width: 30 },
+        { column: 'Action Name', field: 'actionName', width: 30 },
+        { column: 'Status', field: 'state', width: 20 },
+        { column: 'Started', field: 'start', width: 25 },
+        { column: 'Took', field: 'took', width: 25 },
+    ];
+
+const SCHED_LIST_TABLE = [
+    { column: 'Name', field: 'name', width: 40 },
+    { column: 'Skill Name', field: 'skillName', width: 30 },
+    { column: 'Action Name', field: 'actionName', width: 30 },
+    { column: 'Status', field: 'state', width: 20 },
+    { column: 'Started', field: 'start', width: 25 },
+    { column: 'Schedule', field: 'schedule', width: 12 },
+];
 
 module.exports.ListTasksCommand = class {
     constructor(program) {
@@ -31,56 +52,49 @@ module.exports.ListTasksCommand = class {
         const profile = await loadProfile(options.profile);
         const projectId = options.project || profile.project;
         debug('%s.listTasks(%s)', profile.name);
-
         const tasks = new Tasks(profile.url);
-        const queryParams = {};
-
-        ['activationId', 'skillName', 'actionName', 'sort'].forEach((validParam) => {
-               if (options[validParam]) queryParams[validParam] = options[validParam];
-            });
 
         try {
-            const response = await tasks.listTasks(projectId, profile.token, queryParams);
+            const response = await tasks.listTasks(projectId, profile.token, options);
+            let format = 'k8sFormat'; // Assume old format
             if (response.success) {
                 let taskList = _.get(response, 'tasks', []);
                 if (_.isEmpty(taskList)) {
                     return printSuccess('No tasks found');
                 }
-                switch (_.lowerCase(options.sort)) {
-                    case 'asc':
-                        taskList = _.sortBy(tasks, ['startTime']);
-                        break;
-                    case 'desc':
-                        taskList = _.reverse(_.sortBy(tasks, ['startTime']));
-                        break;
-                    default:
-                        // return as-is order
-                        break;
+
+                // Old response format ["taskName", "taskName",...]
+                if (_.isString(taskList[0])) {
+                    taskList = _.map(taskList, (t) => ({ name: t }));
+                } else {
+                    if (!_.has(taskList[0], 'status')) { // previous k8s format has [{ status},{},{}]
+                        format = 'dbFormat';
+                    }
+                    taskList = _.map(taskList, (t) => ({
+                        ...t,
+                        state: t.status || t.state, // remap just in case..
+                        start: t.startTime ? dayjs(t.startTime).fromNow() : '-',
+                        took: t.endTime ? dayjs(t.endTime).from(dayjs(t.startTime), true) : '-',
+                    }));
+                }
+                if (format === 'k8sFormat') {
+                    switch (_.lowerCase(options.sort)) {
+                        case 'asc':
+                            taskList = _.sortBy(taskList, ['startTime']);
+                            break;
+                        case 'desc':
+                            taskList = _.reverse(_.sortBy(taskList, ['startTime']));
+                            break;
+                        default:
+                            // return as-is order
+                            break;
+                    }
                 }
                 if (options.json) {
                     return printSuccess(JSON.stringify(taskList, null, 2), options);
                 }
-                let result;
-                // Old response format
-                if (_.isString(taskList[0])) {
-                    result = _.map(taskList, (t) => ({ name: t }));
-                } else {
-                    result = _.map(taskList, (t) => ({
-                        ...t,
-                        start: t.startTime ? moment(t.startTime).fromNow() : '-',
-                        took: t.endTime ? moment.duration(t.endTime - t.startTime).humanize() : '-',
-                    }));
-                }
-                const tableFormat = [
-                    { column: 'Name', field: 'name', width: 40 },
-                    { column: 'Activation Id', field: 'activationId', width: 40 },
-                    { column: 'Skill Name', field: 'skillName', width: 30 },
-                    { column: 'Action Name', field: 'actionName', width: 30 },
-                    { column: 'Status', field: 'status', width: 20 },
-                    { column: 'Started', field: 'start', width: 25 },
-                    { column: 'Took', field: 'took', width: 25 },
-                ];
-                return handleTable(tableFormat, result);
+                const tableCols = options.scheduled ? SCHED_LIST_TABLE : TASK_LIST_TABLE;
+                return handleTable(tableCols, taskList);
             }
             return printError(`Failed to list tasks: ${response.message}`, options);
         } catch (err) {
@@ -127,9 +141,9 @@ module.exports.TaskLogsCommand = class TaskLogsCommand {
             if (response.success) {
                 return printSuccess(response.logs, options);
             }
-            return printError(`Failed to List Task Logs ${taskName}: ${response.message}`, options);
+            return printError(`Failed to List Task Logs "${taskName}": ${response.message}`, options);
         } catch (err) {
-            return printError(`Failed to query Task Logs ${taskName}: ${err.status} ${err.message}`, options);
+            return printError(`Failed to query Task Logs "${taskName}": ${err.status} ${err.message}`, options);
         }
     }
 };
@@ -154,3 +168,50 @@ module.exports.TaskDeleteCommand = class TaskDeleteCommand {
         }
     }
 };
+
+module.exports.TaskPauseCommand = class TaskPauseCommand {
+    constructor(program) {
+        this.program = program;
+    }
+
+    async execute(taskNames, options) {
+        const profile = await loadProfile(options.profile);
+        debug('%s.executePauseTask(%s)', profile.name, taskNames.join(','));
+        const tasks = new Tasks(profile.url);
+        try {
+            return Promise.all(taskNames.map(async (taskName) => {
+                const response = await tasks.pauseTask(options.project || profile.project, profile.token, taskName, options.verbose);
+                if (response.success) {
+                    return printSuccess(JSON.stringify(response), options);
+                }
+                return printError(`Failed to pause "${taskName}": ${response.message}`, options);
+            }));
+        } catch (err) {
+            return printError(`Error pausing "${taskNames.join(',')}": ${err.status} ${err.message}`, options);
+        }
+    }
+};
+
+module.exports.TaskResumeCommand = class TaskResumeCommand {
+        constructor(program) {
+            this.program = program;
+        }
+
+        async execute(taskNames, options) {
+            const profile = await loadProfile(options.profile);
+            debug('%s.executeResumeTask(%s)', profile.name, taskNames.join(','));
+            const tasks = new Tasks(profile.url);
+            try {
+                return Promise.all(taskNames.map(async (taskName) => {
+                    const response = await tasks.resumeTask(options.project || profile.project, profile.token, taskName, options.verbose);
+                    if (response.success) {
+                        return printSuccess(JSON.stringify(response), options);
+                    }
+                    return printError(`Failed to resume task "${taskName}": ${response.message}`, options);
+                }));
+            } catch (err) {
+                return printError(`Error resume tasks "${taskNames.join(',')}": ${err.status} ${err.message}`, options);
+            }
+        }
+};
+
