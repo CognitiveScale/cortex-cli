@@ -20,7 +20,9 @@ const dayjs = require('dayjs');
 const relativeTime = require('dayjs/plugin/relativeTime');
 const { loadProfile } = require('../config');
 const Tasks = require('../client/tasks');
-const { printSuccess, printError, handleTable } = require('./utils');
+const {
+    printSuccess, printError, handleTable, printExtendedLogs,
+} = require('./utils');
 
 dayjs.extend(relativeTime);
 
@@ -59,6 +61,7 @@ module.exports.ListTasksCommand = class {
             let format = 'k8sFormat'; // Assume old format
             if (response.success) {
                 let taskList = _.get(response, 'tasks', []);
+                printExtendedLogs(taskList, options);
                 if (_.isEmpty(taskList)) {
                     return printSuccess('No tasks found');
                 }
