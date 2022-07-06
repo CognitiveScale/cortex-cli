@@ -32,7 +32,7 @@ module.exports = class Agents {
             .post(endpoint, {
                 headers: defaultHeaders(token),
                 json: params,
-                searchParams: { sync: options.sync, scheduleName: options.schecduleName, scheduleCron: options.scheduleCron },
+                searchParams: { sync: options.sync, scheduleName: options.scheduleName, scheduleCron: options.scheduleCron },
             }).json()
            .then((result) => ({ success: true, result }))
             .catch((err) => constructError(err));
