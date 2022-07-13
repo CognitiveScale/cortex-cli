@@ -45,27 +45,6 @@ const SCHED_LIST_TABLE = [
     { column: 'Schedule', field: 'schedule', width: 12 },
 ];
 
-dayjs.extend(relativeTime);
-
-const TASK_LIST_TABLE = [
-        { column: 'Name', field: 'name', width: 40 },
-        { column: 'Activation Id', field: 'activationId', width: 40 },
-        { column: 'Skill Name', field: 'skillName', width: 30 },
-        { column: 'Action Name', field: 'actionName', width: 30 },
-        { column: 'Status', field: 'state', width: 20 },
-        { column: 'Started', field: 'start', width: 25 },
-        { column: 'Took', field: 'took', width: 25 },
-    ];
-
-const SCHED_LIST_TABLE = [
-    { column: 'Name', field: 'name', width: 40 },
-    { column: 'Skill Name', field: 'skillName', width: 30 },
-    { column: 'Action Name', field: 'actionName', width: 30 },
-    { column: 'Status', field: 'state', width: 20 },
-    { column: 'Started', field: 'start', width: 25 },
-    { column: 'Schedule', field: 'schedule', width: 12 },
-];
-
 module.exports.ListTasksCommand = class {
     constructor(program) {
         this.program = program;
