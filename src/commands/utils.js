@@ -393,7 +393,7 @@ module.exports.handleTable = (spec, data, transformer, noDataMessage) => {
 };
 
 module.exports.printExtendedLogs = (data, options) => {
-    if (options.limit && Array.isArray(data) && data.length === Number(options.limit)) {
+    if (options.limit && Array.isArray(data) && data.length === Number(options.limit) && options.limit !== '0') {
         // don't log if showing all the results
         process.stderr.write(`Results limited to ${options.limit} rows\n`);
     }
