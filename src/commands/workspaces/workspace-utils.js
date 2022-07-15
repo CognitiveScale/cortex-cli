@@ -64,17 +64,17 @@ module.exports.getSkillInfo = function getSkillInfo(target) {
   }));
 };
 
-module.exports.getCurrentRegistry = async function getCurrentRegistry() {
-  const profile = await loadProfile();
-  return profile.registries[profile.currentRegistry];
+module.exports.getCurrentRegistry = async function getCurrentRegistry(profile = undefined) {
+  const regProfile = profile || await loadProfile(); // old behavior was always getting "current" profile
+  return regProfile.registries[regProfile.currentRegistry];
 };
 
-module.exports.buildImageTag = async function buildImageTag(actionName) {
+module.exports.buildImageTag = async function buildImageTag(profile, actionName) {
   if (actionName.includes('/')) {
     return actionName;
   }
 
-  const registry = await module.exports.getCurrentRegistry();
+  const registry = await module.exports.getCurrentRegistry(profile);
   if (registry.url.includes('docker.io')) {
     return path.posix.join(registry.namespace || '', actionName);
   }

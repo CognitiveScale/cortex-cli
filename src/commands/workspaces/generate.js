@@ -82,7 +82,7 @@ module.exports.WorkspaceGenerateCommand = class WorkspaceGenerateCommand {
   }
 
   async getRegistry() {
-    const profile = await loadProfile();
+    const profile = await loadProfile(this.options.profile);
 
     const registryUrl = _.get(this, 'options.registry')
       || _.get(profile, `registries['${profile.currentRegistry}'].url`)

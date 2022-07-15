@@ -40,7 +40,7 @@ module.exports.WorkspaceAddRegistryCommand = class WorkspaceAddRegistryCommand {
       namespace: opts.namespace,
     })
       .then(async (answers) => {
-        const profile = await loadProfile();
+        const profile = await loadProfile(opts.profile);
 
         profile.registries[answers.name] = {
           name: answers.name,
@@ -66,7 +66,7 @@ module.exports.WorkspaceRemoveRegistryCommand = class WorkspaceRemoveRegistryCom
   }
 
   async execute(name, options) {
-    const profile = await loadProfile();
+    const profile = await loadProfile(options.profile);
 
     /// Use a function iteratee instead of the property test
     const choices = _.map(_.filter(profile.registries, (r) => !r.isCortex && (!name || name === r.name)), (r) => (
@@ -113,7 +113,7 @@ module.exports.WorkspaceActivateRegistryCommand = class WorkspaceActivateRegistr
   async execute(regname, options) {
     const name = regname || undefined;
 
-    const profile = await loadProfile();
+    const profile = await loadProfile(options.profile);
 
     const choices = _.map(_.filter(profile.registries, (r) => !name || (r.name === name)), (r) => (
       {
@@ -157,7 +157,7 @@ module.exports.WorkspaceListRegistryCommand = class WorkspaceListRegistryCommand
   }
 
   async execute(options) {
-    const profile = await loadProfile();
+    const profile = await loadProfile(options.profile);
     _.forEach(profile.registries, (r) => {
       const logStr = `${r.name} - ${path.posix.join(r.url, r.namespace || '')}`;
       if (r.name === profile.currentRegistry) {

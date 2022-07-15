@@ -20,6 +20,7 @@ const _ = {
 };
 
 const { getSkillInfo, buildImageTag } = require('./workspace-utils');
+const {loadProfile} = require("../../config");
 
 class DockerBuildProgressTracker {
   constructor(data) {
@@ -153,7 +154,7 @@ module.exports.WorkspaceBuildCommand = class WorkspaceBuildCommand {
 
       const buildList = _.map(globList, (g) => path.posix.join(...(path.relative(actionPath, g)).split(path.sep)));
       const docker = new Docker();
-      const imageTag = await buildImageTag(action.image);
+      const imageTag = await buildImageTag(this.profile, action.image);
 
       const stream = await docker.buildImage(
         {
@@ -196,7 +197,7 @@ module.exports.WorkspaceBuildCommand = class WorkspaceBuildCommand {
   async execute(folder, options) {
     this.options = options;
     let target = process.cwd();
-
+    this.profile = await loadProfile(options.profile);
     try {
       if (folder) {
         const fldr = folder.replace(/'|"/g, '');
