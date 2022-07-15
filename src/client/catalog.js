@@ -25,6 +25,7 @@ const {
 const createEndpoints = (baseUri) => ({
         skills: (projectId) => `${baseUri}/fabric/v4/projects/${projectId}/skills`,
         agents: (projectId) => `${baseUri}/fabric/v4/projects/${projectId}/agents`,
+        agentinvoke: (projectId) => `${baseUri}/fabric/v4/projects/${projectId}/agentinvoke`,
         types: (projectId) => `${baseUri}/fabric/v4/projects/${projectId}/types`,
         campaigns: (projectId) => `${baseUri}/fabric/v4/projects/${projectId}/campaigns/`,
     });
@@ -142,7 +143,7 @@ module.exports = class Catalog {
             .catch((err) => constructError(err));
     }
 
-    listServices(projectId, token, agentName, filter, limit, skip, sort) {
+    async listServices(projectId, token, agentName, filter, limit, skip, sort) {
         // TODO removed profile should I use that as the URL ??
         checkProject(projectId);
         debug('listServices() using describeAgent');
@@ -151,18 +152,17 @@ module.exports = class Catalog {
         if (limit) query.limit = limit;
         if (sort) query.sort = sort;
         if (skip) query.skip = skip;
-        return this.describeAgent(projectId, token, agentName).then((response) => {
-            if (response.success) {
-                const urlBase = `${this.endpoints.agents(projectId)}/${encodeURIComponent(agentName)}/services`;
-                debug('listServices(%s) => %s', agentName, urlBase);
-                const servicesList = response.agent.inputs
-                    .filter((i) => i.signalType === 'Service')
-                    .map((i) => ({ ...i, url: `${urlBase}/${i.name}` }))
-                    .map((i) => ({ ...i, formatted_types: formatAllServiceInputParameters(i.parameters) }));
-                return { success: true, services: servicesList };
-            }
-                return response;
-        });
+        const response = await this.describeAgent(projectId, token, agentName);
+        if (response.success) {
+            const urlBase = `${this.endpoints.agentinvoke(projectId)}/${encodeURIComponent(agentName)}/services`;
+            debug('listServices(%s) => %s', agentName, urlBase);
+            const servicesList = response.agent.inputs
+                .filter((i) => i.signalType === 'Service')
+                .map((i) => ({ ...i, url: `${urlBase}/${i.name}` }))
+                .map((i) => ({ ...i, formatted_types: formatAllServiceInputParameters(i.parameters) }));
+            return { success: true, services: servicesList };
+        }
+        return response;
     }
 
     saveAgent(projectId, token, agentObj) {
