@@ -27,6 +27,7 @@ const {
     DescribeSessionCommand,
     ListSessionsCommand,
 } = require('../src/commands/sessions');
+const { DEFAULT_LIST_LIMIT_COUNT } = require('../src/constants');
 
 program.name('cortex sessions');
 program.description('Work with Cortex Sessions');
@@ -37,7 +38,7 @@ program
     .description('List session definitions')
     .alias('l')
     .option('--no-compat', 'Ignore API compatibility checks')
-    .option('--limit <limit>', 'Number of sessions to list')
+    .option('--limit <limit>', 'Number of sessions to list', DEFAULT_LIST_LIMIT_COUNT)
     .option('--color [boolean]', 'Turn on/off colors for JSON output.', 'true')
     .option('--profile <profile>', 'The profile to use')
     .option('--project <project>', 'The project to use')

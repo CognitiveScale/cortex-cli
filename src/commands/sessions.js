@@ -19,7 +19,11 @@ const _ = require('lodash');
 const debug = require('debug')('cortex:cli');
 const { loadProfile } = require('../config');
 const Sessions = require('../client/sessions');
-const { SESSIONTABLEFORMAT, formatValidationPath } = require('./utils');
+const {
+    SESSIONTABLEFORMAT,
+    formatValidationPath,
+    handleListFailure,
+} = require('./utils');
 
 const {
     printSuccess, printError, filterObject, parseObject, printTable, handleTable,
@@ -79,13 +83,11 @@ module.exports.ListSessionsCommand = class ListSessionsCommand {
 
                 if (options.json) {
                     if (options.query) result = filterObject(result, options);
-                    printSuccess(JSON.stringify(result, null, 2), options);
-                } else {
-                    handleTable(SESSIONTABLEFORMAT, result, null, 'No sessions found');
+                    return printSuccess(JSON.stringify(result, null, 2), options);
                 }
-            } else {
-                printError(`Failed to list sessions: ${response.status} ${response.message}`, options);
+                return handleTable(SESSIONTABLEFORMAT, result, null, 'No sessions found');
             }
+            return handleListFailure(response, options, 'Sessions');
         })
             .catch((err) => {
                 debug(err);
