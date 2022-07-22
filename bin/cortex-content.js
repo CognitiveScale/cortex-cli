@@ -91,7 +91,7 @@ program
 // Download Content
 program
     .command('download <contentKey>')
-    .description('Download content')
+    .description('Downloads content which can be piped to a file on disk. `cortex content download filename > filename.json`')
     .option('--progress', 'Show download progress')
     .option('--no-compat', 'Ignore API compatibility checks')
     .option('--color [boolean]', 'Turn on/off colors for JSON output.', 'true')
