@@ -113,7 +113,8 @@ program
     .option('--project <project>', 'The project to use')
     .option('--scaleCount <count>', 'Scale count, only used for daemon action types')
     .option('--color [boolean]', 'Turn on/off colors for JSON output.', 'true')
-    .option('--push-docker', 'Push Docker image to the Cortex registry.')
+    // TODO this command is non-functional, comment for now to avoid confusion
+    // .option('--push-docker', 'Push Docker image to the Cortex registry.')
     .option('-y, --yaml', 'Use YAML format')
     .action(withCompatibilityCheck((actionName, options) => {
         try {
