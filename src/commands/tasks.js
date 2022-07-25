@@ -27,19 +27,17 @@ const {
 dayjs.extend(relativeTime);
 
 const TASK_LIST_TABLE = [
-        { column: 'Name', field: 'name', width: 40 },
+        { column: 'Name', field: 'name', width: 60 },
         { column: 'Activation Id', field: 'activationId', width: 40 },
-        { column: 'Skill Name', field: 'skillName', width: 30 },
-        { column: 'Action Name', field: 'actionName', width: 30 },
+        { column: 'Skill Name', field: 'skillName', width: 40 },
         { column: 'Status', field: 'state', width: 20 },
         { column: 'Started', field: 'start', width: 25 },
         { column: 'Took', field: 'took', width: 25 },
     ];
 
 const SCHED_LIST_TABLE = [
-    { column: 'Name', field: 'name', width: 40 },
-    { column: 'Skill Name', field: 'skillName', width: 30 },
-    { column: 'Action Name', field: 'actionName', width: 30 },
+    { column: 'Name', field: 'name', width: 60 },
+    { column: 'Skill Name', field: 'skillName', width: 40 },
     { column: 'Status', field: 'state', width: 20 },
     { column: 'Started', field: 'start', width: 25 },
     { column: 'Schedule', field: 'schedule', width: 12 },
