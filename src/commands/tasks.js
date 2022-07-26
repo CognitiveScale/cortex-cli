@@ -57,7 +57,7 @@ module.exports.ListTasksCommand = class {
         const tasks = new Tasks(profile.url);
         if (options.limit) {
             const num = _.toNumber(options.limit);
-            if (Number.isNaN(num) || num <= 0) {
+            if (Number.isNaN(num) || num < 0) {
                 printError('--limit <limit> must be a positive integer value');
             }
         }
