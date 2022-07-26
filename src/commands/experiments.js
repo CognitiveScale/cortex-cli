@@ -154,7 +154,7 @@ class ListRuns {
                         { column: 'Artifacts', field: 'artifacts' },
                     ];
                     const trans = (o) => {
-                        o.startTime = o.startTime ? dayjs(o.startTime).format('YYYY-MM-DD HH:mm a') : '';
+                        o.startTime = o.startTime ? dayjs.unix(o.startTime).format('YYYY-MM-DD HH:mm a') : '';
                         o.took = o.took ? dayjs.duration(o.took, 'seconds').humanize() : '';
                         o.params = _.map(o.params, (v, k) => `${k}: ${v}`).join('\n');
                         o.metrics = _.map(o.metrics, (v, k) => `${k}: ${v}`).join('\n');
