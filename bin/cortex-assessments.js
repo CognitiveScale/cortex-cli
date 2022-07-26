@@ -190,7 +190,8 @@ program
     }));
 
 program
-    .command('report-list <assessmentName>')
+    .command('list-report <assessmentName>')
+    .alias('report-list')
     .description('Lists reports of the assessment')
     .option('--skip <Skip records for pagination>', 'Skip records for pagination')
     .option('--limit <Limit records for pagination>', 'Limit records for pagination')
@@ -207,7 +208,8 @@ program
     }));
 
 program
-    .command('report-get <assessmentName> <reportId>')
+    .command('get-report <assessmentName> <reportId>')
+    .alias('report-get')
     .description('Get report of the assessment')
     .option('--no-compat', 'Ignore API compatibility checks')
     .option('--color [boolean]', 'Turn on/off colors for JSON output.', 'true')
@@ -222,7 +224,8 @@ program
     }));
 
 program
-    .command('report-export <assessmentName> <reportId>')
+    .command('export-report <assessmentName> <reportId>')
+    .alias('report-export')
     .description('Export report of the assessment')
     .storeOptionsAsProperties(false)
     .option('--type <Cortex component types>', 'Component types to export (comma separated values)')
