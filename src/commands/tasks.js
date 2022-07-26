@@ -53,7 +53,12 @@ module.exports.ListTasksCommand = class {
         const projectId = options.project || profile.project;
         debug('%s.listTasks(%s)', profile.name);
         const tasks = new Tasks(profile.url);
-
+        if (options.limit) {
+            const num = _.toNumber(options.limit);
+            if (Number.isNaN(num) || num < 0) {
+                printError('--limit <limit> must be a positive integer value');
+            }
+        }
         try {
             const response = await tasks.listTasks(projectId, profile.token, options);
             let format = 'k8sFormat'; // Assume old format

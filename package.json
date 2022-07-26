@@ -5,6 +5,7 @@
   "main": "./bin/cortex.js",
   "types": "./client/index.d.ts",
   "scripts": {
+    "package": "pkg -t node16-macos-x64,node16-macos-arm64,node16-linux-x64,node16-win-x64 . -o cortex",
     "prepare": "is-ci || husky install",
     "prepack": "cp package-lock.json npm-shrinkwrap.json",
     "postpack": "rm npm-shrinkwrap.json",
@@ -92,6 +93,7 @@
     "mocked-env": "1.3.5",
     "nock": "13.2.7",
     "nyc": "15.1.0",
+    "pkg": "5.8.0",
     "rewire": "6.0.0",
     "sinon": "11.1.2"
   },
