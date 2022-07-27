@@ -19,7 +19,6 @@ const findPackageJson = require('find-package-json');
 const { program } = require('commander');
 
 const pkg = findPackageJson(__dirname).next().value;
-
 program.name('cortex');
 program
     .version(pkg.version, '-v, --version')
