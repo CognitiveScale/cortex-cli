@@ -403,7 +403,8 @@ module.exports.handleListFailure = (response, options, type) => {
     if (response.status === 400) {
         const optionTableFormat = this.OPTIONSTABLEFORMAT;
         printError(`${type} list failed.`, options, false);
-        return this.printTable(optionTableFormat, response.details);
+        this.printTable(optionTableFormat, response.details);
+        printError(''); // Just exit
     }
     return printError(`Failed to list ${type}: ${response.status} ${response.message}`, options);
 };

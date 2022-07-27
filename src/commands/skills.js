@@ -298,7 +298,8 @@ module.exports.DeleteSkillCommand = class DeleteSkillCommand {
                 if (response.status === 403) { // has dependencies
                     const tableFormat = DEPENDENCYTABLEFORMAT;
                     printError(`Skill deletion failed: ${response.message}.`, options, false);
-                    return printTable(tableFormat, response.details);
+                    printTable(tableFormat, response.details);
+                    printError(''); // Just exit
                 }
                 return printError(`Skill deletion failed: ${response.status} ${response.message}.`, options);
             })

@@ -152,7 +152,8 @@ module.exports.DeleteSecretCommand = class {
             if (response.status === 403) { // has dependencies
                 const tableFormat = DEPENDENCYTABLEFORMAT;
                 printError(`Secret deletion failed: ${response.message}.`, options, false);
-                return printTable(tableFormat, response.details);
+                printTable(tableFormat, response.details);
+                printError(''); // Just exit
             }
             return printError(`Failed to delete secure secret : ${response.message}`, options);
         })
