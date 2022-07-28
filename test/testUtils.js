@@ -116,10 +116,12 @@ describe('Test handleListFailure function', () => {
 
     beforeEach(() => {
         printSpy = sinon.spy(console, 'log');
+        sinon.stub(process, 'exit');
     });
 
     afterEach(() => {
         printSpy.restore();
+        process.exit.restore();
     });
 
     after(() => {
@@ -151,6 +153,8 @@ describe('Test handleListFailure function', () => {
                 + '│ type3              │ message3                                                                                                               │\n'
                 + '└────────────────────┴────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘',
         );
+        // eslint-disable-next-line no-unused-expressions
+        expect(process.exit.calledWith(1)).to.be.true;
     });
 });
 
