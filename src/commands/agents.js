@@ -27,8 +27,7 @@ dayjs.extend(relativeTime);
 
 const {
     printSuccess, printError, filterObject, parseObject, printTable, formatValidationPath,
-    LISTTABLEFORMAT, DEPENDENCYTABLEFORMAT, handleTable, printExtendedLogs,
-    handleListFailure,
+    LISTTABLEFORMAT, handleTable, printExtendedLogs, handleListFailure, handleDeleteFailure,
 } = require('./utils');
 
 module.exports.SaveAgentCommand = class SaveAgentCommand {
@@ -459,13 +458,8 @@ module.exports.DeleteAgentCommand = class DeleteAgentCommand {
                     const result = filterObject(response, options);
                     return printSuccess(JSON.stringify(result, null, 2), options);
                 }
-                if (response.status === 403) { // has dependencies
-                    const tableFormat = DEPENDENCYTABLEFORMAT;
-                    printError(`Agent deletion failed: ${response.message}.`, options, false);
-                    printTable(tableFormat, response.details);
-                    printError(''); // Just exit
-                }
-                return printError(`Agent deletion failed: ${response.status} ${response.message}.`, options);
+                return handleDeleteFailure(response, options, 'Agent',
+                    `Agent deletion failed: ${response.status} ${response.message}.`);
             })
             .catch((err) => {
                 printError(`Failed to delete agent: ${err.status} ${err.message}`, options);

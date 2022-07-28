@@ -23,9 +23,8 @@ const duration = require('dayjs/plugin/duration');
 const { loadProfile } = require('../config');
 const Experiments = require('../client/experiments');
 const {
- printSuccess, printError, filterObject, printTable, parseObject, fileExists, formatValidationPath, DEPENDENCYTABLEFORMAT, handleTable,
-    printExtendedLogs,
-    handleListFailure,
+    printSuccess, printError, filterObject, printTable, parseObject, fileExists, formatValidationPath,
+    handleTable, printExtendedLogs, handleListFailure, handleDeleteFailure,
 } = require('./utils');
 
 dayjs.extend(duration);
@@ -110,13 +109,8 @@ class DeleteExperimentCommand {
                 const result = filterObject(response.result, options);
                 return printSuccess(JSON.stringify(result, null, 2), options);
             }
-            if (response.status === 403) { // has dependencies
-                const tableFormat = DEPENDENCYTABLEFORMAT;
-                printError(`Experiment deletion failed: ${response.message}.`, options, false);
-                printTable(tableFormat, response.details);
-                printError(''); // Just exit
-            }
-            return printError(`Failed to delete experiment ${experimentName}: ${response.status} - ${response.message}`, options);
+            return handleDeleteFailure(response, options, 'Experiment',
+                `Failed to delete experiment ${experimentName}: ${response.status} - ${response.message}`);
         })
         .catch((err) => {
             printError(`Failed to delete experiment ${experimentName}: ${err.status} - ${err.message}`, options);
@@ -213,13 +207,8 @@ class DeleteRunCommand {
             if (response.success) {
                 return printSuccess(`Run ${runId} in experiment ${experimentName} deleted`, options);
             }
-            if (response.status === 403) { // has dependencies
-               const tableFormat = DEPENDENCYTABLEFORMAT;
-               printError(`Run deletion failed: ${response.message}.`, options, false);
-               printTable(tableFormat, response.details);
-               printError(''); // Just exit
-            }
-            return printError(`Failed to delete run ${experimentName}/${runId}: ${response.status} - ${response.message}`, options);
+            return handleDeleteFailure(response, options, 'Run',
+                `Failed to delete run ${experimentName}/${runId}: ${response.status} - ${response.message}`);
         })
         .catch((err) => {
             printError(`Failed to delete run ${experimentName}/${runId}: ${err.status} - ${err.message}`, options);

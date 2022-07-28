@@ -25,10 +25,8 @@ const Content = require('../client/content');
 dayjs.extend(relativeTime);
 
 const {
- printSuccess, printError, filterObject, parseObject, printTable, DEPENDENCYTABLEFORMAT, CONNECTIONTABLEFORMAT, fileExists,
-    handleTable,
-    printExtendedLogs,
-    handleListFailure,
+    printSuccess, printError, filterObject, parseObject, CONNECTIONTABLEFORMAT, fileExists,
+    handleTable, printExtendedLogs, handleListFailure, handleDeleteFailure,
 } = require('./utils');
 
 module.exports.ListConnections = class ListConnections {
@@ -178,13 +176,8 @@ module.exports.DeleteConnectionCommand = class DeleteConnectionCommand {
                 const result = filterObject(response.result, options);
                 return printSuccess(JSON.stringify(result, null, 2), options);
             }
-            if (response.status === 403) { // has dependencies
-                const tableFormat = DEPENDENCYTABLEFORMAT;
-                printError(`Connection deletion failed: ${response.message}.`, options, false);
-                printTable(tableFormat, response.details);
-                printError(''); // Just exit
-            }
-            return printError(`Failed to delete connection ${connectionName}: ${response.message}`, options);
+            return handleDeleteFailure(response, options, 'Connection',
+                `Failed to delete connection ${connectionName}: ${response.message}`);
         })
         .catch((err) => {
             printError(`Failed to delete connection ${connectionName}: ${err.status} ${err.message}`, options);

@@ -23,7 +23,7 @@ const map = require('lodash/fp/map');
 const { loadProfile } = require('../config');
 const Secrets = require('../client/secrets');
 const {
- printSuccess, printError, filterObject, parseObject, printTable, DEPENDENCYTABLEFORMAT, handleTable,
+ printSuccess, printError, filterObject, parseObject, printTable, handleTable, handleDeleteFailure,
 } = require('./utils');
 
 module.exports.ListSecretsCommand = class {
@@ -149,13 +149,8 @@ module.exports.DeleteSecretCommand = class {
                 const result = filterObject(response.result, options);
                 return printSuccess(JSON.stringify(result, null, 2), options);
             }
-            if (response.status === 403) { // has dependencies
-                const tableFormat = DEPENDENCYTABLEFORMAT;
-                printError(`Secret deletion failed: ${response.message}.`, options, false);
-                printTable(tableFormat, response.details);
-                printError(''); // Just exit
-            }
-            return printError(`Failed to delete secure secret : ${response.message}`, options);
+            return handleDeleteFailure(response, options, 'Secret',
+                `Failed to delete secure secret : ${response.message}`);
         })
         .catch((err) => {
             printError(`Failed to delete secure secret : ${err.status} ${err.message}`, options);

@@ -7,6 +7,7 @@ const {
     handleTable,
     printExtendedLogs,
     handleListFailure,
+    handleDeleteFailure,
 } = require('../src/commands/utils');
 
 const { stripAnsi } = require('./utils');
@@ -25,6 +26,7 @@ const tableSpec = [
 let restore;
 describe('Handle table function test', () => {
     let printSpy;
+
     before(() => {
         restore = mockedEnv({});
     });
@@ -158,3 +160,75 @@ describe('Test handleListFailure function', () => {
     });
 });
 
+describe('Test handleDeleteFailure', () => {
+    let printSpy;
+    let errorSpy;
+    before(() => {
+        restore = mockedEnv({});
+    });
+
+    beforeEach(() => {
+        printSpy = sinon.spy(console, 'log');
+        errorSpy = sinon.spy(console, 'error');
+        sinon.stub(process, 'exit');
+    });
+
+    afterEach(() => {
+        printSpy.restore();
+        errorSpy.restore();
+        process.exit.restore();
+    });
+
+    after(() => {
+        restore();
+    });
+
+    function getPrintedLines() {
+        return _.flatten(errorSpy.args).map((s) => stripAnsi(s));
+    }
+
+    function getErrorLines() {
+        return _.flatten(errorSpy.args).map((s) => stripAnsi(s));
+    }
+
+    const depErrorResponse = {
+        status: 403,
+        message: 'message',
+        details: [
+            { type: 'type1', name: 'name1' },
+            { type: 'type2', name: 'name2' },
+            { type: 'type3', name: 'name3' },
+        ],
+    };
+
+    const serverErrorResponse = {
+        status: 500,
+        message: 'server unavailable',
+        details: [],
+    };
+
+    it('should print tabular output if status is 403', () => {
+        handleDeleteFailure(depErrorResponse, null, 'test-resource', 'default error message');
+        expect(getErrorLines()[0]).to.equal('test-resource deletion failed: message');
+        expect((getPrintedLines()[0])).to.equal(
+            '┌────────────────────┬────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┐\n'
+                + '│ Dependency Name    │ Dependency Type                                                                                                        │\n'
+                + '├────────────────────┼────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┤\n'
+                + '│ name1              │ type1                                                                                                                  │\n'
+                + '├────────────────────┼────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┤\n'
+                + '│ name2              │ type2                                                                                                                  │\n'
+                + '├────────────────────┼────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┤\n'
+                + '│ name3              │ type3                                                                                                                  │\n'
+                + '└────────────────────┴────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘',
+        );
+        // eslint-disable-next-line no-unused-expressions
+        expect(process.exit.calledWith(1)).to.be.true;
+    });
+
+    it('should print the default error message is not 403 (500)', () => {
+        handleDeleteFailure(serverErrorResponse, null, 'test-resource', 'default error message');
+        expect(getErrorLines()[0]).to.equal('default error message.');
+        // eslint-disable-next-line no-unused-expressions
+        expect(process.exit.calledWith(1)).to.be.true;
+    });
+});

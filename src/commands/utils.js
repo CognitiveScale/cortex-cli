@@ -408,3 +408,13 @@ module.exports.handleListFailure = (response, options, type) => {
     }
     return printError(`Failed to list ${type}: ${response.status} ${response.message}`, options);
 };
+
+module.exports.handleDeleteFailure = (response, options, type, defaultErrorMesage) => {
+    if (response.status === 403) { // has dependencies
+        const tableFormat = this.DEPENDENCYTABLEFORMAT;
+        printError(`${type} deletion failed: ${response.message}.`, options, false);
+        this.printTable(tableFormat, response.details);
+        return printError(''); // Just exit
+    }
+    return printError(defaultErrorMesage, options);
+};

@@ -24,8 +24,8 @@ const Actions = require('../client/actions');
 dayjs.extend(relativeTime);
 
 const {
-    printSuccess, printError, filterObject, parseObject, printTable, DEPENDENCYTABLEFORMAT, isNumeric,
-    handleTable, printExtendedLogs, handleListFailure,
+    printSuccess, printError, filterObject, parseObject, isNumeric,
+    handleTable, printExtendedLogs, handleListFailure, handleDeleteFailure,
 } = require('./utils');
 
 module.exports.ListActionsCommand = class {
@@ -209,13 +209,8 @@ module.exports.DeleteActionCommand = class {
                     const result = filterObject(response, options);
                     return printSuccess(JSON.stringify(result, null, 2), options);
                 }
-                if (response.status === 403) { // has dependencies
-                    const tableFormat = DEPENDENCYTABLEFORMAT;
-                    printError(`Action deletion failed: ${response.message}.`, options, false);
-                    printTable(tableFormat, response.details);
-                    printError(''); // Just exit
-                }
-                return printError(`Action deletion failed: ${response.status} ${response.message}`, options);
+                return handleDeleteFailure(response, options, 'Action',
+                    `Action deletion failed: ${response.status} ${response.message}`);
             })
             .catch((err) => {
                 printError(`Failed to delete action: ${err.status} ${err.message}`, options);

@@ -26,8 +26,7 @@ dayjs.extend(relativeTime);
 
 const {
     printSuccess, printError, printWarning, filterObject, parseObject, printTable, formatValidationPath,
-    LISTTABLEFORMAT, DEPENDENCYTABLEFORMAT, isNumeric, handleTable,
-    printExtendedLogs, handleListFailure,
+    LISTTABLEFORMAT, isNumeric, handleTable, printExtendedLogs, handleListFailure, handleDeleteFailure,
 } = require('./utils');
 
 module.exports.SaveSkillCommand = class SaveSkillCommand {
@@ -295,13 +294,8 @@ module.exports.DeleteSkillCommand = class DeleteSkillCommand {
                     }
                     return printSuccess(result.message);
                 }
-                if (response.status === 403) { // has dependencies
-                    const tableFormat = DEPENDENCYTABLEFORMAT;
-                    printError(`Skill deletion failed: ${response.message}.`, options, false);
-                    printTable(tableFormat, response.details);
-                    printError(''); // Just exit
-                }
-                return printError(`Skill deletion failed: ${response.status} ${response.message}.`, options);
+                return handleDeleteFailure(response, options, 'Skill',
+                    `Skill deletion failed: ${response.status} ${response.message}.`);
             })
             .catch((err) => {
                 printError(`Failed to delete skill: ${err.status} ${err.message}`, options);
