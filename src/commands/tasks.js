@@ -27,19 +27,17 @@ const {
 dayjs.extend(relativeTime);
 
 const TASK_LIST_TABLE = [
-        { column: 'Name', field: 'name', width: 40 },
+        { column: 'Name', field: 'name', width: 60 },
         { column: 'Activation Id', field: 'activationId', width: 40 },
-        { column: 'Skill Name', field: 'skillName', width: 30 },
-        { column: 'Action Name', field: 'actionName', width: 30 },
+        { column: 'Skill Name', field: 'skillName', width: 40 },
         { column: 'Status', field: 'state', width: 20 },
         { column: 'Started', field: 'start', width: 25 },
         { column: 'Took', field: 'took', width: 25 },
     ];
 
 const SCHED_LIST_TABLE = [
-    { column: 'Name', field: 'name', width: 40 },
-    { column: 'Skill Name', field: 'skillName', width: 30 },
-    { column: 'Action Name', field: 'actionName', width: 30 },
+    { column: 'Name', field: 'name', width: 60 },
+    { column: 'Skill Name', field: 'skillName', width: 40 },
     { column: 'Status', field: 'state', width: 20 },
     { column: 'Started', field: 'start', width: 25 },
     { column: 'Schedule', field: 'schedule', width: 12 },
@@ -55,7 +53,12 @@ module.exports.ListTasksCommand = class {
         const projectId = options.project || profile.project;
         debug('%s.listTasks(%s)', profile.name);
         const tasks = new Tasks(profile.url);
-
+        if (options.limit) {
+            const num = _.toNumber(options.limit);
+            if (Number.isNaN(num) || num < 0) {
+                printError('--limit <limit> must be a positive integer value');
+            }
+        }
         try {
             const response = await tasks.listTasks(projectId, profile.token, options);
             let format = 'k8sFormat'; // Assume old format

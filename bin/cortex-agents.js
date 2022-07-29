@@ -245,7 +245,7 @@ program
 
 // Create Agent Snapshot
 program
-    .command('create-snapshot <snapshotDefinition>')
+    .command('create-snapshot [snapshotDefinition]')
     .description('Create an agent snapshot')
     .option('--no-compat', 'Ignore API compatibility checks')
     .option('--color [boolean]', 'Turn on/off colors for JSON output.', 'true')
