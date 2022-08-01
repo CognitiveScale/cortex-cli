@@ -184,7 +184,7 @@ describe('Test handleDeleteFailure', () => {
     });
 
     function getPrintedLines() {
-        return _.flatten(errorSpy.args).map((s) => stripAnsi(s));
+        return _.flatten(printSpy.args).map((s) => stripAnsi(s));
     }
 
     function getErrorLines() {
@@ -209,25 +209,25 @@ describe('Test handleDeleteFailure', () => {
 
     it('should print tabular output if status is 403', () => {
         handleDeleteFailure(depErrorResponse, null, 'test-resource', 'default error message');
-        expect(getErrorLines()[0]).to.equal('test-resource deletion failed: message');
-        expect((getPrintedLines()[0])).to.equal(
-            '┌────────────────────┬────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┐\n'
-                + '│ Dependency Name    │ Dependency Type                                                                                                        │\n'
-                + '├────────────────────┼────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┤\n'
-                + '│ name1              │ type1                                                                                                                  │\n'
-                + '├────────────────────┼────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┤\n'
-                + '│ name2              │ type2                                                                                                                  │\n'
-                + '├────────────────────┼────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┤\n'
-                + '│ name3              │ type3                                                                                                                  │\n'
-                + '└────────────────────┴────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘',
-        );
+        expect(getErrorLines()[0]).to.equal('test-resource deletion failed: message.');
+      expect((getPrintedLines()[0])).to.equal(
+        '┌────────────────────────────────────────────────────────────┬────────────────────────────────────────┐\n'
+        + '│ Dependency Name                                            │ Dependency Type                        │\n'
+        + '├────────────────────────────────────────────────────────────┼────────────────────────────────────────┤\n'
+        + '│ name1                                                      │ type1                                  │\n'
+        + '├────────────────────────────────────────────────────────────┼────────────────────────────────────────┤\n'
+        + '│ name2                                                      │ type2                                  │\n'
+        + '├────────────────────────────────────────────────────────────┼────────────────────────────────────────┤\n'
+        + '│ name3                                                      │ type3                                  │\n'
+        + '└────────────────────────────────────────────────────────────┴────────────────────────────────────────┘',
+      );
         // eslint-disable-next-line no-unused-expressions
         expect(process.exit.calledWith(1)).to.be.true;
     });
 
     it('should print the default error message is not 403 (500)', () => {
         handleDeleteFailure(serverErrorResponse, null, 'test-resource', 'default error message');
-        expect(getErrorLines()[0]).to.equal('default error message.');
+        expect(getErrorLines()[0]).to.equal('default error message');
         // eslint-disable-next-line no-unused-expressions
         expect(process.exit.calledWith(1)).to.be.true;
     });
