@@ -149,8 +149,7 @@ module.exports.DeleteSecretCommand = class {
                 const result = filterObject(response.result, options);
                 return printSuccess(JSON.stringify(result, null, 2), options);
             }
-            return handleDeleteFailure(response, options, 'Secret',
-                `Failed to delete secure secret : ${response.message}`);
+            return handleDeleteFailure(response, options, 'Secret');
         })
         .catch((err) => {
             printError(`Failed to delete secure secret : ${err.status} ${err.message}`, options);

@@ -209,8 +209,7 @@ module.exports.DeleteActionCommand = class {
                     const result = filterObject(response, options);
                     return printSuccess(JSON.stringify(result, null, 2), options);
                 }
-                return handleDeleteFailure(response, options, 'Action',
-                    `Action deletion failed: ${response.status} ${response.message}`);
+                return handleDeleteFailure(response, options, 'Action');
             })
             .catch((err) => {
                 printError(`Failed to delete action: ${err.status} ${err.message}`, options);

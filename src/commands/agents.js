@@ -458,8 +458,7 @@ module.exports.DeleteAgentCommand = class DeleteAgentCommand {
                     const result = filterObject(response, options);
                     return printSuccess(JSON.stringify(result, null, 2), options);
                 }
-                return handleDeleteFailure(response, options, 'Agent',
-                    `Agent deletion failed: ${response.status} ${response.message}.`);
+                return handleDeleteFailure(response, options, 'Agent');
             })
             .catch((err) => {
                 printError(`Failed to delete agent: ${err.status} ${err.message}`, options);

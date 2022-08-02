@@ -203,12 +203,12 @@ describe('Test handleDeleteFailure', () => {
 
     const serverErrorResponse = {
         status: 500,
-        message: 'server unavailable',
+        message: 'Server Unavailable',
         details: [],
     };
 
     it('should print tabular output if status is 403', () => {
-        handleDeleteFailure(depErrorResponse, null, 'test-resource', 'default error message');
+        handleDeleteFailure(depErrorResponse, null, 'test-resource');
         expect(getErrorLines()[0]).to.equal('test-resource deletion failed: message.');
       expect((getPrintedLines()[0])).to.equal(
         '┌────────────────────────────────────────────────────────────┬────────────────────────────────────────┐\n'
@@ -226,8 +226,8 @@ describe('Test handleDeleteFailure', () => {
     });
 
     it('should print the default error message is not 403 (500)', () => {
-        handleDeleteFailure(serverErrorResponse, null, 'test-resource', 'default error message');
-        expect(getErrorLines()[0]).to.equal('default error message');
+        handleDeleteFailure(serverErrorResponse, null, 'test-resource');
+        expect(getErrorLines()[0]).to.equal('test-resource deletion failed: 500 Server Unavailable.');
         // eslint-disable-next-line no-unused-expressions
         expect(process.exit.calledWith(1)).to.be.true;
     });

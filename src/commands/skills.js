@@ -294,8 +294,7 @@ module.exports.DeleteSkillCommand = class DeleteSkillCommand {
                     }
                     return printSuccess(result.message);
                 }
-                return handleDeleteFailure(response, options, 'Skill',
-                    `Skill deletion failed: ${response.status} ${response.message}.`);
+                return handleDeleteFailure(response, options, 'Skill');
             })
             .catch((err) => {
                 printError(`Failed to delete skill: ${err.status} ${err.message}`, options);

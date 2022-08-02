@@ -109,8 +109,7 @@ class DeleteExperimentCommand {
                 const result = filterObject(response.result, options);
                 return printSuccess(JSON.stringify(result, null, 2), options);
             }
-            return handleDeleteFailure(response, options, 'Experiment',
-                `Failed to delete experiment ${experimentName}: ${response.status} - ${response.message}`);
+            return handleDeleteFailure(response, options, 'Experiment');
         })
         .catch((err) => {
             printError(`Failed to delete experiment ${experimentName}: ${err.status} - ${err.message}`, options);
@@ -207,8 +206,7 @@ class DeleteRunCommand {
             if (response.success) {
                 return printSuccess(`Run ${runId} in experiment ${experimentName} deleted`, options);
             }
-            return handleDeleteFailure(response, options, 'Run',
-                `Failed to delete run ${experimentName}/${runId}: ${response.status} - ${response.message}`);
+            return handleDeleteFailure(response, options, 'Run');
         })
         .catch((err) => {
             printError(`Failed to delete run ${experimentName}/${runId}: ${err.status} - ${err.message}`, options);

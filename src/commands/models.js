@@ -185,8 +185,7 @@ module.exports.DeleteModelCommand = class {
                     const result = filterObject(response, options);
                     return printSuccess(JSON.stringify(result, null, 2), options);
                 }
-                return handleDeleteFailure(response, options, 'Model',
-                    `Model deletion failed: ${response.status} ${response.message}.`);
+                return handleDeleteFailure(response, options, 'Model');
             })
             .catch((err) => {
                 printError(`Failed to delete model: ${err.status} ${err.message}`, options);

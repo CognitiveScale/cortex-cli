@@ -176,8 +176,7 @@ module.exports.DeleteConnectionCommand = class DeleteConnectionCommand {
                 const result = filterObject(response.result, options);
                 return printSuccess(JSON.stringify(result, null, 2), options);
             }
-            return handleDeleteFailure(response, options, 'Connection',
-                `Failed to delete connection ${connectionName}: ${response.message}`);
+            return handleDeleteFailure(response, options, 'Connection');
         })
         .catch((err) => {
             printError(`Failed to delete connection ${connectionName}: ${err.status} ${err.message}`, options);
