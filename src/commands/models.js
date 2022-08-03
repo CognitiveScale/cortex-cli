@@ -26,15 +26,11 @@ const { loadProfile } = require('../config');
 const Models = require('../client/models');
 const Experiments = require('../client/experiments');
 const {
-    LISTTABLEFORMAT, RUNTABLEFORMAT, DEPENDENCYTABLEFORMAT, printExtendedLogs,
-    handleListFailure,
+    LISTTABLEFORMAT, RUNTABLEFORMAT, printExtendedLogs, handleListFailure, handleDeleteFailure,
+    printSuccess, printError, filterObject, parseObject, printTable, formatValidationPath, fileExists, handleTable,
 } = require('./utils');
 
 dayjs.extend(relativeTime);
-
-const {
-    printSuccess, printError, filterObject, parseObject, printTable, formatValidationPath, fileExists, handleTable,
-} = require('./utils');
 
 module.exports.SaveModelCommand = class SaveModelCommand {
     constructor(program) {
@@ -189,12 +185,7 @@ module.exports.DeleteModelCommand = class {
                     const result = filterObject(response, options);
                     return printSuccess(JSON.stringify(result, null, 2), options);
                 }
-                if (response.status === 403) { // has dependencies
-                    const tableFormat = DEPENDENCYTABLEFORMAT;
-                    printError(`Model deletion failed: ${response.message}.`, options, false);
-                    return printTable(tableFormat, response.details);
-                }
-                return printError(`Model deletion failed: ${response.status} ${response.message}.`, options);
+                return handleDeleteFailure(response, options, 'Model');
             })
             .catch((err) => {
                 printError(`Failed to delete model: ${err.status} ${err.message}`, options);

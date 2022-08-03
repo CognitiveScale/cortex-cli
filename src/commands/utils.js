@@ -403,7 +403,19 @@ module.exports.handleListFailure = (response, options, type) => {
     if (response.status === 400) {
         const optionTableFormat = this.OPTIONSTABLEFORMAT;
         printError(`${type} list failed.`, options, false);
-        return this.printTable(optionTableFormat, response.details);
+        this.printTable(optionTableFormat, response.details);
+        printError(''); // Just exit
     }
     return printError(`Failed to list ${type}: ${response.status} ${response.message}`, options);
+};
+
+module.exports.handleDeleteFailure = (response, options, type) => {
+    if (response.status === 403) { // has dependencies
+        const tableFormat = this.DEPENDENCYTABLEFORMAT;
+        printError(`${type} deletion failed: ${response.message}.`, options, false);
+        this.printTable(tableFormat, response.details);
+        return printError(''); // Just exit
+    }
+    const defaultErrorMessage = `${type} deletion failed: ${response.status} ${response.message}.`;
+    return printError(defaultErrorMessage, options);
 };
