@@ -43,7 +43,7 @@ pipelines:
               tasks:
                 - fetch:
                     stage: build
-                    job: create
+                    job: Build
                     source: devBranchRevision.json
                     is_file: yes
                 - script: |
