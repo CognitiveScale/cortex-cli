@@ -47,7 +47,7 @@
     "cli-progress": "3.11.1",
     "cli-table3": "0.6.2",
     "commander": "9.3.0",
-    "dayjs": "1.11.3",
+    "dayjs": "1.11.4",
     "debug": "4.3.4",
     "dockerode": "3.3.2",
     "find-package-json": "1.2.0",
