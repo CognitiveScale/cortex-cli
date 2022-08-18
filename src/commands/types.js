@@ -75,8 +75,9 @@ module.exports.ListTypesCommand = class ListTypesCommand {
             if (response.success) {
                 let result = response.types;
                 printExtendedLogs(result, options);
-                if (options.json) {
-                    if (options.query) result = filterObject(result, options);
+                const jsonVal = options.json;
+                if (jsonVal) {
+                    if (jsonVal !== true) result = filterObject(result, { query: jsonVal });
                     printSuccess(JSON.stringify(result, null, 2), options);
                 } else {
                     handleTable(

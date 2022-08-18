@@ -87,8 +87,9 @@ module.exports.ListModelsCommand = class ListModelsCommand {
             if (response.success) {
                 let result = response.models;
                 printExtendedLogs(result, options);
-                if (options.json) {
-                    if (options.query) result = filterObject(result, options);
+                const jsonVal = options.json;
+                if (jsonVal) {
+                    if (jsonVal !== true) result = filterObject(result, { query: jsonVal });
                     printSuccess(JSON.stringify(result, null, 2), options);
                 } else {
                     handleTable(
@@ -125,8 +126,9 @@ module.exports.ListModelRunsCommand = class ListModelsCommand {
                 let result = response.runs;
 
                 printExtendedLogs(result, options);
-                if (options.json) {
-                    if (options.query) result = filterObject(result, options);
+                const jsonVal = options.json;
+                if (jsonVal) {
+                    if (jsonVal !== true) result = filterObject(result, { query: jsonVal });
                     printSuccess(JSON.stringify(result, null, 2), options);
                 } else {
                     handleTable(

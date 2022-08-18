@@ -22,6 +22,7 @@ const { loadProfile } = require('../config');
 const Tasks = require('../client/tasks');
 const {
     printSuccess, printError, handleTable, printExtendedLogs,
+    filterObject,
 } = require('./utils');
 
 dayjs.extend(relativeTime);
@@ -96,7 +97,9 @@ module.exports.ListTasksCommand = class {
                             break;
                     }
                 }
-                if (options.json) {
+                const jsonVal = options.json;
+                if (jsonVal) {
+                    if (jsonVal !== true) taskList = filterObject(taskList, { query: jsonVal });
                     return printSuccess(JSON.stringify(taskList, null, 2), options);
                 }
                 const tableCols = options.scheduled ? SCHED_LIST_TABLE : TASK_LIST_TABLE;

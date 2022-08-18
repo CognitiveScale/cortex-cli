@@ -40,8 +40,7 @@ program
     .option('--color [boolean]', 'Turn on/off colors for JSON output.', 'true')
     .option('--profile <profile>', 'The profile to use')
     .option('--project <project>', 'The project to use')
-    .option('--json', 'Output results using JSON')
-    .option('--query <query>', 'A JMESPath query to use in filtering the response data. Ignored if output format is not JSON.')
+    .option('--query, --json [searchQuery]', 'Output results in JSON, supports JMESPath query to filter the response data')
     .option('--prefix <prefix>', 'Filter contents with the given prefix.')
     .action(withCompatibilityCheck((options) => {
         try {

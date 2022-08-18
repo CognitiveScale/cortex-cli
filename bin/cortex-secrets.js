@@ -38,10 +38,9 @@ program
     .alias('l')
     .option('--no-compat', 'Ignore API compatibility checks')
     .option('--color [boolean]', 'Turn on/off colors for JSON output.', 'true')
-    .option('--json', 'Output results using JSON')
+    .option('--query, --json [searchQuery]', 'Output results in JSON, supports JMESPath query to filter the response data')
     .option('--profile <profile>', 'The profile to use')
     .option('--project <project>', 'The project to use')
-    .option('--query <query>', 'A JMESPath query to use in filtering the response data. Ignored if output format is not JSON.')
     .action(withCompatibilityCheck((options) => {
         try {
             new ListSecretsCommand(program).execute(options);

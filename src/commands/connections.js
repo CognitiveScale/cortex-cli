@@ -46,8 +46,9 @@ module.exports.ListConnections = class ListConnections {
                 let result = response.result.connections;
 
                 printExtendedLogs(result, options);
-                if (options.json) {
-                    if (options.query) result = filterObject(result, options);
+                const jsonVal = options.json;
+                if (jsonVal) {
+                    if (jsonVal !== true) result = filterObject(result, { query: jsonVal });
                     printSuccess(JSON.stringify(result, null, 2), options);
                 } else {
                     handleTable(
@@ -201,8 +202,9 @@ module.exports.ListConnectionsTypes = class ListConnectionsTypes {
                 let result = response.result.connectionTypes;
 
                 printExtendedLogs(result, options);
-                if (options.json) {
-                    if (options.query) result = filterObject(result, options);
+                const jsonVal = options.json;
+                if (jsonVal) {
+                    if (jsonVal !== true) result = filterObject(result, { query: jsonVal });
                     printSuccess(JSON.stringify(result, null, 2), options);
                 } else {
                     const tableSpec = [

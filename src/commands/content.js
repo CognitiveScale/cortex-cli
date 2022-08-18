@@ -33,8 +33,10 @@ module.exports.ListContent = class ListContent {
         const content = new Content(profile.url);
         content.listContent(options.project || profile.project, profile.token, options.prefix).then((response) => {
             if (response.success) {
-                if (options.query || options.json) {
-                    const result = filterObject(response.message, options);
+                let result = response.message;
+                const jsonVal = options.json;
+                if (jsonVal) {
+                    if (jsonVal !== true) result = filterObject(result, { query: jsonVal });
                     printSuccess(JSON.stringify(result, null, 2), options);
                 } else {
                     const tableSpec = [

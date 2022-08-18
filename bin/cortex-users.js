@@ -111,7 +111,7 @@ program.command('list')
     .description('Lists all service users created within Cortex')
     .alias('l')
     .option('--no-compat', 'Ignore API compatibility checks')
-    .option('--json', 'Output results using JSON')
+    .option('--query, --json [searchQuery]', 'Output results in JSON, supports JMESPath query to filter the response data')
     .option('--color [boolean]', 'Turn on/off colors for JSON output.', 'true')
     .option('--profile <profile>', 'The profile to use')
     .action(withCompatibilityCheck((options) => {

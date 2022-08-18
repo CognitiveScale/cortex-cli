@@ -122,9 +122,10 @@ module.exports.UserListCommand = class {
         const client = new Users(profile.url, 'self');
         client.listServiceUsers(profile.token).then((response) => {
             if (response.success) {
-                const result = filterObject(response.result, options);
-                if (options.json) {
-                    printSuccess(JSON.stringify(result, null, 2), options);
+                let { result } = response;
+                const jsonVal = options.json;
+                if (jsonVal) {
+                    if (jsonVal !== true) result = filterObject(result, { query: jsonVal });
                 } else {
                     handleTable([{ column: 'User', field: 'user' }], result.users.map((x) => ({ user: x })), null, 'No service users found');
                 }

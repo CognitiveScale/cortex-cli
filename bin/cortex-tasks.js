@@ -48,7 +48,7 @@ program
     .option('--activationId <string>', 'filter tasks by activation id')
     .option('--skillName <string>', 'Filter tasks by skill name')
     .option('--scheduled', 'Show scheduled tasks only')
-    .option('--json', 'Output results using JSON')
+    .option('--query, --json [searchQuery]', 'Output results in JSON, supports JMESPath query to filter the response data')
     // This is a client-side sort
     .option('--filter <filter>', 'A Mongo style filter to use.')
     .option('--limit <limit>', 'Limit number of records', DEFAULT_LIST_LIMIT_COUNT)

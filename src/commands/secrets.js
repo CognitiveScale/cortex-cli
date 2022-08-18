@@ -40,8 +40,9 @@ module.exports.ListSecretsCommand = class {
             .then((response) => {
                 if (response.success) {
                     let { result } = response;
-                    if (options.json) {
-                        if (options.query) result = filterObject(result, options);
+                    const jsonVal = options.json;
+                    if (jsonVal) {
+                        if (jsonVal !== true) result = filterObject(result, { query: jsonVal });
                         printSuccess(JSON.stringify(result, null, 2), options);
                     } else {
                         const tableSpec = [
