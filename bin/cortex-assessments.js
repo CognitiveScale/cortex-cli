@@ -46,8 +46,7 @@ program
     .option('--no-compat', 'Ignore API compatibility checks')
     .option('--color [boolean]', 'Turn on/off colors for JSON output.', 'true')
     .option('--profile <profile>', 'The profile to use')
-    .option('--json', 'Output results using JSON')
-    .option('--query <query>', 'A JMESPath query to use in filtering the response data. Ignored if output format is not JSON.')
+    .option('--query, --json [searchQuery]', 'Output results in JSON, supports JMESPath query to filter the response data')
     .action(withCompatibilityCheck((options) => {
         try {
             new ListResourceTypesCommand(program).execute(options);
@@ -86,7 +85,7 @@ program
     .option('--no-compat', 'Ignore API compatibility checks')
     .option('--color [boolean]', 'Turn on/off colors for JSON output.', 'true')
     .option('--profile <profile>', 'The profile to use')
-    .option('--json', 'Output results using JSON')
+    .option('--query, --json [searchQuery]', 'Output results in JSON, supports JMESPath query to filter the response data')
     .option('--filter <filter>', 'A Mongo style filter to use.')
     .option('--limit <limit>', 'Limit number of records', DEFAULT_LIST_LIMIT_COUNT)
     .option('--skip <skip>', 'Skip number of records', DEFAULT_LIST_SKIP_COUNT)
@@ -131,8 +130,7 @@ program
     .option('--no-compat', 'Ignore API compatibility checks')
     .option('--color [boolean]', 'Turn on/off colors for JSON output.', 'true')
     .option('--profile <profile>', 'The profile to use')
-    .option('--json', 'Output results using JSON')
-    .option('--query <query>', 'A JMESPath query to use in filtering the response data. Ignored if output format is not JSON.')
+    .option('--query, --json [searchQuery]', 'Output results in JSON, supports JMESPath query to filter the response data')
     .option('--filter <filter>', 'A Mongo style filter to use.')
     .option('--limit <limit>', 'Limit number of records', DEFAULT_LIST_LIMIT_COUNT)
     .option('--skip <skip>', 'Skip number of records', DEFAULT_LIST_SKIP_COUNT)

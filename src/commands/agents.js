@@ -88,8 +88,9 @@ module.exports.ListAgentsCommand = class ListAgentsCommand {
             if (response.success) {
                 let result = response.agents;
                 printExtendedLogs(result, options);
-                if (options.json) {
-                    if (options.query) result = filterObject(result, options);
+                const jsonVal = options.json;
+                if (jsonVal) {
+                    if (jsonVal !== true) result = filterObject(result, { query: jsonVal });
                     printSuccess(JSON.stringify(result, null, 2), options);
                 } else {
                     handleTable(
@@ -266,9 +267,9 @@ module.exports.ListActivationsCommand = class {
         agents.listActivations(options.project || profile.project, profile.token, queryParams).then((response) => {
             if (response.success) {
                 let result = response.result.activations;
-                if (options.query) result = filterObject(result, options);
-
-                if (options.json) {
+                const jsonVal = options.json;
+                if (jsonVal) {
+                    if (jsonVal !== true) result = filterObject(result, { query: jsonVal });
                     printSuccess(JSON.stringify(result, null, 2), options);
                 } else {
                     const tableSpec = [
@@ -317,8 +318,9 @@ module.exports.ListServicesCommand = class ListServicesCommand {
         catalog.listServices(options.project || profile.project, profile.token, agentName, profile, options.filter, options.limit, options.skip, options.sort).then((response) => {
             if (response.success) {
                 let result = response.services;
-                if (options.json) {
-                    if (options.query) result = filterObject(result, options);
+                const jsonVal = options.json;
+                if (jsonVal) {
+                    if (jsonVal !== true) result = filterObject(result, { query: jsonVal });
                     printSuccess(JSON.stringify(result, null, 2), options);
                 } else {
                     const tableSpec = [
@@ -353,8 +355,9 @@ module.exports.ListAgentSnapshotsCommand = class {
             .then((response) => {
             if (response.success) {
                 let result = response.result.snapshots;
-                if (options.json) {
-                    if (options.query) result = filterObject(result, options);
+                const jsonVal = options.json;
+                if (jsonVal) {
+                    if (jsonVal !== true) result = filterObject(result, { query: jsonVal });
                     printSuccess(JSON.stringify(result, null, 2), options);
                 } else {
                     const tableSpec = [
