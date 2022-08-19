@@ -47,9 +47,8 @@ class ListExperiments {
             if (response.success) {
                 let { result } = response;
                 printExtendedLogs(result.experiments, options);
-                const jsonVal = options.json;
-                if (jsonVal) {
-                    if (jsonVal !== true) result = filterObject(result, { query: jsonVal });
+                if (options.json) {
+                    result = filterObject(result, getQueryOptions(options));
                     printSuccess(JSON.stringify(result, null, 2), options);
                 } else {
                     const tableSpec = [
@@ -137,9 +136,8 @@ class ListRuns {
                 let { result } = response;
 
                 printExtendedLogs(result.runs, options);
-                const jsonVal = options.json;
-                if (jsonVal) {
-                    if (jsonVal !== true) result = filterObject(result, { query: jsonVal });
+                if (options.json) {
+                    result = filterObject(result, getQueryOptions(options));
                     printSuccess(JSON.stringify(result, null, 2), options);
                 } else {
                     const tableSpec = [

@@ -81,10 +81,8 @@ module.exports.ListSessionsCommand = class ListSessionsCommand {
         sessions.listSessions(options.project || profile.project, profile.token, options.limit).then((response) => {
             if (response.success) {
                 let result = response.sessions;
-
-                const jsonVal = options.json;
-                if (jsonVal) {
-                    if (jsonVal !== true) result = filterObject(result, { query: jsonVal });
+                if (options.json) {
+                    result = filterObject(result, getQueryOptions(options));
                     return printSuccess(JSON.stringify(result, null, 2), options);
                 }
                 return handleTable(SESSIONTABLEFORMAT, result, null, 'No sessions found');

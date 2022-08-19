@@ -18,6 +18,7 @@ const { loadProfile } = require('../config');
 const Users = require('../client/users');
 const {
  printSuccess, printError, filterObject, handleTable,
+    getQueryOptions,
 } = require('./utils');
 
 function createGrant(options) {
@@ -123,9 +124,9 @@ module.exports.UserListCommand = class {
         client.listServiceUsers(profile.token).then((response) => {
             if (response.success) {
                 let { result } = response;
-                const jsonVal = options.json;
-                if (jsonVal) {
-                    if (jsonVal !== true) result = filterObject(result, { query: jsonVal });
+                if (options.json) {
+                    result = filterObject(result, getQueryOptions(options));
+                    printSuccess(JSON.stringify(result, null, 2), options);
                 } else {
                     handleTable([{ column: 'User', field: 'user' }], result.users.map((x) => ({ user: x })), null, 'No service users found');
                 }

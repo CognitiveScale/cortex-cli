@@ -125,9 +125,8 @@ module.exports.ListSkillsCommand = class ListSkillsCommand {
                     tableFormat.push({ column: 'Status', field: 'status', width: 30 });
                 }
                 printExtendedLogs(result, options);
-                const jsonVal = options.json;
-                if (jsonVal) {
-                    if (jsonVal !== true) result = filterObject(result, { query: jsonVal });
+                if (options.json) {
+                    result = filterObject(result, getQueryOptions(options));
                     return printSuccess(JSON.stringify(result, null, 2), options);
                 }
                 return handleTable(

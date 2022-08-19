@@ -70,9 +70,8 @@ module.exports.ListProjectsCommand = class ListProjectsCommand {
             const response = await cli.listProjects(profile.token, filterParam, options.limit, options.skip, sortParam);
             let result = response;
             printExtendedLogs(result, options);
-            const jsonVal = options.json;
-            if (jsonVal) {
-                if (jsonVal !== true) result = filterObject(result, { query: jsonVal });
+            if (options.json) {
+                result = filterObject(result, getQueryOptions(options));
                 printSuccess(JSON.stringify(result, null, 2), options);
             } else {
                 const tableSpec = [

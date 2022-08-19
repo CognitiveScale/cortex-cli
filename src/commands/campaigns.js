@@ -41,9 +41,8 @@ module.exports.ListCampaignsCommand = class ListCampaignsCommand {
             const response = await cli.listCampaigns(options.project || profile.project, profile.token, filterParam, options.limit, options.skip, sortParam);
             let result = response;
             printExtendedLogs(result, options);
-            const jsonVal = options.json;
-            if (jsonVal) {
-                if (jsonVal !== true) result = filterObject(result, { query: jsonVal });
+            if (options.json) {
+                result = filterObject(result, getQueryOptions(options));
                 printSuccess(JSON.stringify(result, null, 2), options);
             } else {
                 const tableSpec = [
@@ -224,9 +223,8 @@ module.exports.ListMissionsCommand = class ListMissionsCommand {
                 if (response.success === false) throw response;
                 let data = Object.values(response.data);
                 printExtendedLogs(data, options);
-                const jsonVal = options.json;
-                if (jsonVal) {
-                    if (jsonVal !== true) data = filterObject(data, { query: jsonVal });
+                if (options.json) {
+                    data = filterObject(data, getQueryOptions(options));
                     printSuccess(JSON.stringify(data, null, 2), options);
                 } else {
                     const tableSpec = [

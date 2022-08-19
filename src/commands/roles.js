@@ -18,6 +18,7 @@ const { loadProfile } = require('../config');
 const Roles = require('../client/roles');
 const {
  printSuccess, printError, filterObject, EXTERNALROLESFORMAT, handleTable,
+    getQueryOptions,
 } = require('./utils');
 
 function createGrant(options) {
@@ -195,9 +196,8 @@ module.exports.RoleListCommand = class {
         client.listRoles(profile.token, options.project).then((response) => {
             if (response.success) {
                 let { result } = response;
-                const jsonVal = options.json;
-                if (jsonVal) {
-                    if (jsonVal !== true) result = filterObject(result, { query: jsonVal });
+                if (options.json) {
+                    result = filterObject(result, getQueryOptions(options));
                     printSuccess(JSON.stringify(result, null, 2), options);
                 } else {
                     handleTable([{ column: 'Role', field: 'role' }], result.roles.map((x) => ({ role: x })), null, 'No roles found');
@@ -258,9 +258,8 @@ module.exports.ExternalGroupListCommand = class {
         client.listExternalGroups(profile.token).then((response) => {
             if (response.success) {
                 let { result } = response;
-                const jsonVal = options.json;
-                if (jsonVal) {
-                    if (jsonVal !== true) result = filterObject(result, { query: jsonVal });
+                if (options.json) {
+                    result = filterObject(result, getQueryOptions(options));
                     printSuccess(JSON.stringify(result, null, 2), options);
                 } else {
                     handleTable(EXTERNALROLESFORMAT, result, (o) => ({ ...o, roles: o.roles.join(', ') }), null, 'No external roles found');

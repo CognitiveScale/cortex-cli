@@ -33,6 +33,7 @@ dayjs.extend(relativeTime);
 const {
     printSuccess, printError, parseObject, filterObject,
     handleTable, printExtendedLogs, handleListFailure,
+    getQueryOptions,
 } = require('./utils');
 
 module.exports.ListResourcesCommand = class {
@@ -51,9 +52,8 @@ module.exports.ListResourcesCommand = class {
             .then((response) => {
                 if (response.success === false) return handleListFailure(response, options, 'Cortex resources');
                 printExtendedLogs(response.data, options);
-                const jsonVal = options.json;
-                if (jsonVal) {
-                    if (jsonVal !== true) response = filterObject(response, { query: jsonVal });
+                if (options.json) {
+                    response = filterObject(response, getQueryOptions(options));
                     printSuccess(JSON.stringify(response, null, 2), options);
                 } else {
                     const tableSpec = [
@@ -86,9 +86,8 @@ module.exports.ListResourceTypesCommand = class {
             .then((response) => {
                 if (response.success === false) throw response;
                 let data = _.compact(response.data);
-                const jsonVal = options.json;
-                if (jsonVal) {
-                    if (jsonVal !== true) data = filterObject(data, { query: jsonVal });
+                if (options.json) {
+                    data = filterObject(data, getQueryOptions(options));
                     printSuccess(JSON.stringify(data, null, 2), options);
                 } else {
                     const types = data.map((t) => ({ type: t }));
@@ -193,9 +192,8 @@ module.exports.ListAssessmentCommand = class {
                 if (response.success === false) return handleListFailure(response, options, 'Assessments');
                 let result = response.data;
                 printExtendedLogs(result, options);
-                const jsonVal = options.json;
-                if (jsonVal) {
-                    if (jsonVal !== true) result = filterObject(result, { query: jsonVal });
+                if (options.json) {
+                    result = filterObject(result, getQueryOptions(options));
                     printSuccess(JSON.stringify(result, null, 2), options);
                 } else {
                     const tableSpec = [

@@ -19,6 +19,7 @@ const { loadProfile } = require('../config');
 const Content = require('../client/content');
 const {
  printSuccess, printError, getSourceFiles, humanReadableFileSize, filterObject, handleTable,
+    getQueryOptions,
 } = require('./utils');
 
 module.exports.ListContent = class ListContent {
@@ -34,9 +35,8 @@ module.exports.ListContent = class ListContent {
         content.listContent(options.project || profile.project, profile.token, options.prefix).then((response) => {
             if (response.success) {
                 let result = response.message;
-                const jsonVal = options.json;
-                if (jsonVal) {
-                    if (jsonVal !== true) result = filterObject(result, { query: jsonVal });
+                if (options.json) {
+                    result = filterObject(result, getQueryOptions(options));
                     printSuccess(JSON.stringify(result, null, 2), options);
                 } else {
                     const tableSpec = [

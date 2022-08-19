@@ -24,6 +24,7 @@ const { loadProfile } = require('../config');
 const Secrets = require('../client/secrets');
 const {
  printSuccess, printError, filterObject, parseObject, printTable, handleTable, handleDeleteFailure,
+    getQueryOptions,
 } = require('./utils');
 
 module.exports.ListSecretsCommand = class {
@@ -40,9 +41,8 @@ module.exports.ListSecretsCommand = class {
             .then((response) => {
                 if (response.success) {
                     let { result } = response;
-                    const jsonVal = options.json;
-                    if (jsonVal) {
-                        if (jsonVal !== true) result = filterObject(result, { query: jsonVal });
+                    if (options.json) {
+                        result = filterObject(result, getQueryOptions(options));
                         printSuccess(JSON.stringify(result, null, 2), options);
                     } else {
                         const tableSpec = [
