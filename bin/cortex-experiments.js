@@ -72,7 +72,8 @@ program
     .option('--color [boolean]', 'Turn on/off colors for JSON output.', 'true')
     .option('--profile <profile>', 'The profile to use')
     .option('--project <project>', 'The project to use')
-    .option('--query <query>', 'A JMESPath query to use in filtering the response data.')
+    .option('--json <searchPath>', 'A JMESPath query to use in filtering the response data.')
+    .option('--query <query>', '[DEPRECATION WARNING] A JMESPath query to use in filtering the response data.')
     .action(withCompatibilityCheck((experimentName, options) => {
         try {
             new DescribeExperimentCommand(program).execute(experimentName, options);
@@ -127,7 +128,8 @@ program
     .option('--color [boolean]', 'Turn on/off colors for JSON output.', 'true')
     .option('--profile <profile>', 'The profile to use')
     .option('--project <project>', 'The project to use')
-    .option('--query <query>', 'A JMESPath query to use in filtering the response data.')
+    .option('--json <searchPath>', 'A JMESPath query to use in filtering the response data.')
+    .option('--query <query>', '[DEPRECATION WARNING] A JMESPath query to use in filtering the response data.')
     .action(withCompatibilityCheck((experimentName, runId, options) => {
         try {
             new DescribeRunCommand(program).execute(experimentName, runId, options);

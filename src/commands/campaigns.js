@@ -71,7 +71,7 @@ module.exports.DescribeCampaignCommand = class DescribeCampaignCommand {
 
         try {
             const response = await cli.getCampaign(options.project || profile.project, profile.token, campaignName);
-            const result = filterObject(response, options);
+            const result = filterObject(response, { query: options.json || options.query });
             printSuccess(JSON.stringify(result, null, 2), options);
         } catch (err) {
             printError(`Failed to describe campaign: ${err.status} ${err.message}`, options);

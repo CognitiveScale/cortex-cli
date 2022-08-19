@@ -150,7 +150,7 @@ module.exports.DescribeConnectionCommand = class DescribeConnectionCommand {
         const connection = new Connections(profile.url);
         connection.describeConnection(options.project || profile.project, profile.token, connectionName).then((response) => {
             if (response.success) {
-                const result = filterObject(response.result, options);
+                const result = filterObject(response.result, { query: options.json || options.query });
                 printSuccess(JSON.stringify(result, null, 2), options);
             } else {
                 printError(`Failed to describe connection ${connectionName}: ${response.message}`, options);

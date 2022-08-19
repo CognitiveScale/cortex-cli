@@ -83,7 +83,7 @@ class DescribeExperimentCommand {
         const exp = new Experiments(profile.url);
         exp.describeExperiment(options.project || profile.project, profile.token, experimentName).then((response) => {
             if (response.success) {
-                const result = filterObject(response.result, options);
+                const result = filterObject(response.result, { query: options.json || options.query });
                 printSuccess(JSON.stringify(result, null, 2), options);
             } else {
                 printError(`Failed to describe experiment ${experimentName}: ${response.status} - ${response.message}`, options);
@@ -182,7 +182,7 @@ class DescribeRunCommand {
         const exp = new Experiments(profile.url);
         exp.describeRun(options.project || profile.project, profile.token, experimentName, runId).then((response) => {
             if (response.success) {
-                const result = filterObject(response.result, options);
+                const result = filterObject(response.result, { query: options.json || options.query });
                 printSuccess(JSON.stringify(result, null, 2), options);
             } else {
                 printError(`Failed to describe run ${experimentName}/${runId}: ${response.status} - ${response.message}`, options);

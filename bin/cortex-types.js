@@ -81,7 +81,8 @@ program
     .option('--color [boolean]', 'Turn on/off colors for JSON output.', 'true')
     .option('--profile <profile>', 'The profile to use')
     .option('--project <project>', 'The project to use')
-    .option('--query <query>', 'A JMESPath query to use in filtering the response data.')
+    .option('--json <searchPath>', 'A JMESPath query to use in filtering the response data.')
+    .option('--query <query>', '[DEPRECATION WARNING] A JMESPath query to use in filtering the response data.')
     .action(withCompatibilityCheck((typeName, options) => {
         try {
             new DescribeTypeCommand(program).execute(typeName, options);

@@ -99,8 +99,8 @@ module.exports.DescribeProjectCommand = class DescribeProjectCommand {
         const cli = new ApiServerClient(profile.url);
 
         try {
-                const response = await cli.getProject(profile.token, projectName);
-            const result = filterObject(response, options);
+            const response = await cli.getProject(profile.token, projectName);
+            const result = filterObject(response, { query: options.json || options.query });
             printSuccess(JSON.stringify(result, null, 2), options);
         } catch (err) {
             printError(`Failed to describe project: ${err.status} ${err.message}`, options);
