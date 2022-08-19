@@ -103,7 +103,7 @@ module.exports.filterObject = (obj, options) => {
 
 module.exports.getQueryOptions = (options) => {
     const queryOptions = options.json || options.query;
-    // output JSON if JSMEpath isn't passed
+    // output JSON if JSMEpath isn't passed, default value is true
     return { query: queryOptions === true ? '' : queryOptions };
 };
 
