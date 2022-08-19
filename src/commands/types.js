@@ -22,6 +22,7 @@ const { loadProfile } = require('../config');
 const Catalog = require('../client/catalog');
 const {
     LISTTABLEFORMAT, filterObject, printExtendedLogs, handleListFailure,
+    getQueryOptions,
 } = require('./utils');
 
 const {
@@ -109,7 +110,7 @@ module.exports.DescribeTypeCommand = class DescribeTypeCommand {
         const catalog = new Catalog(profile.url);
         catalog.describeType(options.project || profile.project, profile.token, typeName).then((response) => {
             if (response.success) {
-                const result = filterObject(response.type, { query: options.json || options.query });
+                const result = filterObject(response.type, getQueryOptions(options));
                 printSuccess(JSON.stringify(result, null, 2), options);
             } else {
                 printError(`Failed to describe type ${typeName}: ${response.message}`, options);

@@ -27,6 +27,7 @@ dayjs.extend(relativeTime);
 const {
     printSuccess, printError, filterObject, parseObject, CONNECTIONTABLEFORMAT, fileExists,
     handleTable, printExtendedLogs, handleListFailure, handleDeleteFailure,
+    getQueryOptions,
 } = require('./utils');
 
 module.exports.ListConnections = class ListConnections {
@@ -150,7 +151,7 @@ module.exports.DescribeConnectionCommand = class DescribeConnectionCommand {
         const connection = new Connections(profile.url);
         connection.describeConnection(options.project || profile.project, profile.token, connectionName).then((response) => {
             if (response.success) {
-                const result = filterObject(response.result, { query: options.json || options.query });
+                const result = filterObject(response.result, getQueryOptions(options));
                 printSuccess(JSON.stringify(result, null, 2), options);
             } else {
                 printError(`Failed to describe connection ${connectionName}: ${response.message}`, options);

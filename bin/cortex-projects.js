@@ -83,7 +83,7 @@ program
     .option('--no-compat', 'Ignore API compatibility checks')
     .option('--color [boolean]', 'Turn on/off colors for JSON output.', 'true')
     .option('--profile <profile>', 'The profile to use')
-    .option('--json <searchPath>', 'A JMESPath query to use in filtering the response data.')
+    .option('--json [searchPath]', 'A JMESPath query to use in filtering the response data.')
     .option('--query <query>', '[DEPRECATION WARNING] A JMESPath query to use in filtering the response data.')
     .action(withCompatibilityCheck((projectName, options) => {
         try {

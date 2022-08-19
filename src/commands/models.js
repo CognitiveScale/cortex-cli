@@ -28,6 +28,7 @@ const Experiments = require('../client/experiments');
 const {
     LISTTABLEFORMAT, RUNTABLEFORMAT, printExtendedLogs, handleListFailure, handleDeleteFailure,
     printSuccess, printError, filterObject, parseObject, printTable, formatValidationPath, fileExists, handleTable,
+    getQueryOptions,
 } = require('./utils');
 
 dayjs.extend(relativeTime);
@@ -160,7 +161,7 @@ module.exports.DescribeModelCommand = class DescribeModelCommand {
         debug('%s.executeDescribeModel(%s)', profile.name, modelName);
         models.describeModel(options.project || profile.project, profile.token, modelName, options.verbose).then((response) => {
             if (response.success) {
-                const result = filterObject(response.model, { query: options.json || options.query });
+                const result = filterObject(response.model, getQueryOptions(options));
                 printSuccess(JSON.stringify(result, null, 2), options);
             } else {
                 printError(`Failed to describe model ${modelName}: ${response.message}`, options);

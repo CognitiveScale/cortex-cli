@@ -22,6 +22,7 @@ const _ = { get: require('lodash/get') };
 const {
  printSuccess, printError, filterObject, printTable, handleTable,
     printExtendedLogs, handleListFailure,
+    getQueryOptions,
 } = require('./utils');
 
 module.exports.ListCampaignsCommand = class ListCampaignsCommand {
@@ -71,7 +72,7 @@ module.exports.DescribeCampaignCommand = class DescribeCampaignCommand {
 
         try {
             const response = await cli.getCampaign(options.project || profile.project, profile.token, campaignName);
-            const result = filterObject(response, { query: options.json || options.query });
+            const result = filterObject(response.result, getQueryOptions(options));
             printSuccess(JSON.stringify(result, null, 2), options);
         } catch (err) {
             printError(`Failed to describe campaign: ${err.status} ${err.message}`, options);

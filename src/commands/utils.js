@@ -101,6 +101,12 @@ module.exports.filterObject = (obj, options) => {
     return obj;
 };
 
+module.exports.getQueryOptions = (options) => {
+    const queryOptions = options.json || options.query;
+    // output JSON if JSMEpath isn't passed
+    return { query: queryOptions === true ? '' : queryOptions };
+};
+
 module.exports.filterListObject = (obj, options) => {
     const { map, pick, partialRight } = _;
     if (options.query) {

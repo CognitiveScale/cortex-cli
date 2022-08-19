@@ -63,7 +63,7 @@ program
     .option('--profile <profile>', 'The profile to use')
     .option('--project <project>', 'The project to use')
     .option('-o, --output <json|yaml|k8s>', 'Format output as yaml or k8s resource')
-    .option('--json <searchPath>', 'A JMESPath query to use in filtering the response data.')
+    .option('--json [searchPath]', 'A JMESPath query to use in filtering the response data.')
     .option('--query <query>', '[DEPRECATION WARNING] A JMESPath query to use in filtering the response data.')
     .option('--verbose', 'Verbose output')
     .action(withCompatibilityCheck(async (skillName, options) => {

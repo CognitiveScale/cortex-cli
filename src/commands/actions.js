@@ -26,6 +26,7 @@ dayjs.extend(relativeTime);
 const {
     printSuccess, printError, filterObject, parseObject, isNumeric,
     handleTable, printExtendedLogs, handleListFailure, handleDeleteFailure,
+    getQueryOptions,
 } = require('./utils');
 
 module.exports.ListActionsCommand = class {
@@ -87,7 +88,7 @@ module.exports.DescribeActionCommand = class {
         actions.describeAction(options.project || profile.project, profile.token, actionName)
             .then((response) => {
                 if (response.success) {
-                    const result = filterObject(response.action, { query: options.json || options.query });
+                    const result = filterObject(response.action, getQueryOptions(options));
                     printSuccess(JSON.stringify(result, null, 2), options);
                 } else {
                     printError(`Failed to describe action: ${response.status} ${response.message}`, options);

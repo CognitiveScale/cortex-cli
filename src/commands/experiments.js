@@ -25,6 +25,7 @@ const Experiments = require('../client/experiments');
 const {
     printSuccess, printError, filterObject, printTable, parseObject, fileExists, formatValidationPath,
     handleTable, printExtendedLogs, handleListFailure, handleDeleteFailure,
+    getQueryOptions,
 } = require('./utils');
 
 dayjs.extend(duration);
@@ -83,7 +84,7 @@ class DescribeExperimentCommand {
         const exp = new Experiments(profile.url);
         exp.describeExperiment(options.project || profile.project, profile.token, experimentName).then((response) => {
             if (response.success) {
-                const result = filterObject(response.result, { query: options.json || options.query });
+                const result = filterObject(response.result, getQueryOptions(options));
                 printSuccess(JSON.stringify(result, null, 2), options);
             } else {
                 printError(`Failed to describe experiment ${experimentName}: ${response.status} - ${response.message}`, options);
@@ -182,7 +183,7 @@ class DescribeRunCommand {
         const exp = new Experiments(profile.url);
         exp.describeRun(options.project || profile.project, profile.token, experimentName, runId).then((response) => {
             if (response.success) {
-                const result = filterObject(response.result, { query: options.json || options.query });
+                const result = filterObject(response.result, getQueryOptions(options));
                 printSuccess(JSON.stringify(result, null, 2), options);
             } else {
                 printError(`Failed to describe run ${experimentName}/${runId}: ${response.status} - ${response.message}`, options);

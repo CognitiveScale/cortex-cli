@@ -28,6 +28,7 @@ dayjs.extend(relativeTime);
 const {
     printSuccess, printError, filterObject, parseObject, printTable, formatValidationPath,
     LISTTABLEFORMAT, handleTable, printExtendedLogs, handleListFailure, handleDeleteFailure,
+    getQueryOptions,
 } = require('./utils');
 
 module.exports.SaveAgentCommand = class SaveAgentCommand {
@@ -123,7 +124,7 @@ module.exports.DescribeAgentCommand = class DescribeAgentCommand {
             debug('%s.executeDescribeAgentVersions(%s)', profile.name, agentName);
             catalog.describeAgentVersions(options.project || profile.project, profile.token, agentName).then((response) => {
                 if (response.success) {
-                    const result = filterObject(response.agent, { query: options.json || options.query });
+                    const result = filterObject(response.result, getQueryOptions(options));
                     printSuccess(JSON.stringify(result, null, 2), options);
                 } else {
                     printError(`Failed to describe agent versions ${agentName}: ${response.message}`, options);
@@ -207,8 +208,8 @@ module.exports.GetActivationCommand = class {
         const agents = new Agents(profile.url);
         agents.getActivation(project || profile.project, profile.token, activationId, verbose, report).then((response) => {
             if (response.success) {
-                const result = filterObject(response.result, { query: options.json || options.query });
-                if (options.report) {
+                const result = filterObject(response.result, getQueryOptions(options));
+                if (options.report && !options.json) {
                     const tableSpec = [
                         { column: 'Name', field: 'name', width: 40 },
                         { column: 'Title', field: 'title', width: 40 },

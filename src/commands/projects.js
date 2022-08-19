@@ -20,6 +20,7 @@ const { loadProfile } = require('../config');
 const ApiServerClient = require('../client/apiServerClient');
 const {
  printSuccess, printError, filterObject, parseObject, handleTable, printExtendedLogs, handleListFailure,
+    getQueryOptions,
 } = require('./utils');
 
 module.exports.CreateProjectCommand = class CreateProjectCommand {
@@ -100,7 +101,7 @@ module.exports.DescribeProjectCommand = class DescribeProjectCommand {
 
         try {
             const response = await cli.getProject(profile.token, projectName);
-            const result = filterObject(response, { query: options.json || options.query });
+            const result = filterObject(response, getQueryOptions(options));
             printSuccess(JSON.stringify(result, null, 2), options);
         } catch (err) {
             printError(`Failed to describe project: ${err.status} ${err.message}`, options);

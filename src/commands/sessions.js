@@ -23,6 +23,7 @@ const {
     SESSIONTABLEFORMAT,
     formatValidationPath,
     handleListFailure,
+    getQueryOptions,
 } = require('./utils');
 
 const {
@@ -108,7 +109,7 @@ module.exports.DescribeSessionCommand = class DescribeSessionCommand {
         debug('%s.executeDescribeSession(%s)', profile.name, sessionName);
         sessions.describeSession(options.project || profile.project, profile.token, sessionName, options.verbose).then((response) => {
             if (response.success) {
-                const result = filterObject(response.session, { query: options.json || options.query });
+                const result = filterObject(response.session, getQueryOptions(options));
                 printSuccess(JSON.stringify(result, null, 2), options);
             } else {
                 printError(`Failed to describe session ${sessionName}: ${response.message}`, options);

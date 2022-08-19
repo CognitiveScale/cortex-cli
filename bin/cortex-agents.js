@@ -107,7 +107,7 @@ program
     .option('--color [boolean]', 'Turn on/off colors for JSON output.', 'true')
     .option('--profile <profile>', 'The profile to use')
     .option('--project <project>', 'The project to use')
-    .option('--json <searchPath>', 'A JMESPath query to use in filtering the response data.')
+    .option('--json [searchPath]', 'A JMESPath query to use in filtering the response data.')
     .option('--query <query>', '[DEPRECATION WARNING] A JMESPath query to use in filtering the response data.')
     .option('--versions', 'To get list of versions of an agent')
     .option('--verbose', 'Verbose output')
@@ -181,7 +181,7 @@ program
     .option('--project <project>', 'The project to use')
     .option('--verbose [boolean]', 'Get debugging info in activation response')
     .option('--report [boolean]', 'Get additional debugging info in activation response')
-    .option('--json <searchPath>', 'A JMESPath query to use in filtering the response data.')
+    .option('--json [searchPath]', 'A JMESPath query to use in filtering the response data.')
     .option('--query <query>', '[DEPRECATION WARNING] A JMESPath query to use in filtering the response data.')
     .action(withCompatibilityCheck((activationId, options) => {
         try {
