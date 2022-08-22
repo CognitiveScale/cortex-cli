@@ -95,6 +95,36 @@ describe('Tasks', () => {
         nock.isDone();
     });
 
+    it('list tasks command JSON without JSMEsearch', async () => {
+        const program = require('../bin/cortex-tasks');
+        const response = { success: true, tasks: ['task2', 'task3'] };
+        nock(serverUrl).get(/\/fabric\/v4\/projects\/.*\/tasks.*/).reply(200, response);
+        await program.parseAsync(['node', 'tasks', 'list', '--project', PROJECT, '--json']);
+        const output = getPrintedLines();
+        const errs = getErrorLines();
+        chai.expect(output.join('')).to.contain('name');
+        chai.expect(output.join('')).to.contain('task2');
+        chai.expect(output.join('')).to.contain('task3');
+        // eslint-disable-next-line no-unused-expressions
+        chai.expect(errs).to.be.empty;
+        nock.isDone();
+    });
+
+    it('list tasks command JSON with JSMEsearch', async () => {
+        const program = require('../bin/cortex-tasks');
+        const response = { success: true, tasks: ['task2', 'task3'] };
+        nock(serverUrl).get(/\/fabric\/v4\/projects\/.*\/tasks.*/).reply(200, response);
+        await program.parseAsync(['node', 'tasks', 'list', '--project', PROJECT, '--json', '[].name']);
+        const output = getPrintedLines();
+        const errs = getErrorLines();
+        chai.expect(output.join('')).to.not.contain('name');
+        chai.expect(output.join('')).to.contain('task2');
+        chai.expect(output.join('')).to.contain('task3');
+        // eslint-disable-next-line no-unused-expressions
+        chai.expect(errs).to.be.empty;
+        nock.isDone();
+    });
+
     it('list tasks command', async () => {
         const program = require('../bin/cortex-tasks');
         const now = Date.now();
