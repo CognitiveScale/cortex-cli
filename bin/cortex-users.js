@@ -28,6 +28,7 @@ const {
     UserListCommand,
     UserDeleteCommand,
 } = require('../src/commands/users');
+const { LIST_JSON_HELP_TEXT } = require('../src/constants');
 
 program.name('cortex users');
 program.description('Work with Cortex User');
@@ -111,7 +112,7 @@ program.command('list')
     .description('Lists all service users created within Cortex')
     .alias('l')
     .option('--no-compat', 'Ignore API compatibility checks')
-    .option('--query, --json [searchQuery]', 'Output results in JSON, supports JMESPath query to filter the response data')
+    .option('--query, --json [searchQuery]', LIST_JSON_HELP_TEXT)
     .option('--color [boolean]', 'Turn on/off colors for JSON output.', 'true')
     .option('--profile <profile>', 'The profile to use')
     .action(withCompatibilityCheck((options) => {

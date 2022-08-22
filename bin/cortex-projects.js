@@ -29,6 +29,8 @@ const {
 } = require('../src/commands/projects');
 const {
     DEFAULT_LIST_SKIP_COUNT, DEFAULT_LIST_LIMIT_COUNT, GET_DEFAULT_SORT_CLI_OPTION, DEFAULT_LIST_SORT_PARAMS,
+    LIST_JSON_HELP_TEXT,
+    GET_JSON_HELP_TEXT,
 } = require('../src/constants');
 
 program.name('cortex projects');
@@ -62,7 +64,7 @@ program
     .option('--no-compat', 'Ignore API compatibility checks')
     .option('--color [boolean]', 'Turn on/off colors for JSON output.', 'true')
     .option('--profile <profile>', 'The profile to use')
-    .option('--query, --json [searchQuery]', 'Output results in JSON, supports JMESPath query to filter the response data')
+    .option('--query, --json [searchQuery]', LIST_JSON_HELP_TEXT)
     .option('--filter <filter>', 'A Mongo style filter to use.')
     .option('--limit <limit>', 'Limit number of records', DEFAULT_LIST_LIMIT_COUNT)
     .option('--skip <skip>', 'Skip number of records', DEFAULT_LIST_SKIP_COUNT)
@@ -83,8 +85,8 @@ program
     .option('--no-compat', 'Ignore API compatibility checks')
     .option('--color [boolean]', 'Turn on/off colors for JSON output.', 'true')
     .option('--profile <profile>', 'The profile to use')
-    .option('--json [searchPath]', 'A JMESPath query to use in filtering the response data.')
-    .option('--query <query>', '[DEPRECATION WARNING] A JMESPath query to use in filtering the response data.')
+    .option('--json [searchPath]', GET_JSON_HELP_TEXT)
+    .option('--query <query>', `[DEPRECATION WARNING] ${GET_JSON_HELP_TEXT}`)
     .action(withCompatibilityCheck((projectName, options) => {
         try {
             new DescribeProjectCommand(program).execute(projectName, options);

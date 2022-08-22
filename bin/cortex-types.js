@@ -22,6 +22,8 @@ const { program } = require('commander');
 const { withCompatibilityCheck } = require('../src/compatibility');
 const {
     DEFAULT_LIST_SKIP_COUNT, DEFAULT_LIST_LIMIT_COUNT, GET_DEFAULT_SORT_CLI_OPTION, DEFAULT_LIST_SORT_PARAMS,
+    LIST_JSON_HELP_TEXT,
+    GET_JSON_HELP_TEXT,
 } = require('../src/constants');
 
 const {
@@ -60,7 +62,7 @@ program
     .option('--color [boolean]', 'Turn on/off colors for JSON output.', 'true')
     .option('--profile <profile>', 'The profile to use')
     .option('--project <project>', 'The project to use')
-    .option('--query, --json [searchQuery]', 'Output results in JSON, supports JMESPath query to filter the response data')
+    .option('--query, --json [searchQuery]', LIST_JSON_HELP_TEXT)
     .option('--limit <limit>', 'Limit number of records', DEFAULT_LIST_LIMIT_COUNT)
     .option('--skip <skip>', 'Skip number of records', DEFAULT_LIST_SKIP_COUNT)
     .option('--sort <sort>', 'A Mongo style sort statement to use in the query.', GET_DEFAULT_SORT_CLI_OPTION(DEFAULT_LIST_SORT_PARAMS.updatedAt))
@@ -81,8 +83,8 @@ program
     .option('--color [boolean]', 'Turn on/off colors for JSON output.', 'true')
     .option('--profile <profile>', 'The profile to use')
     .option('--project <project>', 'The project to use')
-    .option('--json [searchPath]', 'A JMESPath query to use in filtering the response data.')
-    .option('--query <query>', '[DEPRECATION WARNING] A JMESPath query to use in filtering the response data.')
+    .option('--json [searchPath]', GET_JSON_HELP_TEXT)
+    .option('--query <query>', `[DEPRECATION WARNING] ${GET_JSON_HELP_TEXT}`)
     .action(withCompatibilityCheck((typeName, options) => {
         try {
             new DescribeTypeCommand(program).execute(typeName, options);

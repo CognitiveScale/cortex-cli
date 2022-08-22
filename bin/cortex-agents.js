@@ -23,6 +23,8 @@ const { withCompatibilityCheck } = require('../src/compatibility');
 const {
     DEFAULT_LIST_SKIP_COUNT, DEFAULT_LIST_LIMIT_COUNT, DEFAULT_LIST_SORT_PARAMS,
     GET_DEFAULT_SORT_CLI_OPTION,
+    LIST_JSON_HELP_TEXT,
+    GET_JSON_HELP_TEXT,
 } = require('../src/constants');
 
 const {
@@ -70,7 +72,7 @@ program
     .option('--color [boolean]', 'Turn on/off colors for JSON output.', 'true')
     .option('--profile <profile>', 'The profile to use')
     .option('--project <project>', 'The project to use')
-    .option('--query, --json [searchQuery]', 'Output results in JSON, supports JMESPath query to filter the response data')
+    .option('--query, --json [searchQuery]', LIST_JSON_HELP_TEXT)
     .option('--filter <filter>', 'A Mongo style filter to use.')
     .option('--limit <limit>', 'Limit number of records', DEFAULT_LIST_LIMIT_COUNT)
     .option('--skip <skip>', 'Skip number of records', DEFAULT_LIST_SKIP_COUNT)
@@ -107,8 +109,8 @@ program
     .option('--color [boolean]', 'Turn on/off colors for JSON output.', 'true')
     .option('--profile <profile>', 'The profile to use')
     .option('--project <project>', 'The project to use')
-    .option('--json [searchPath]', 'A JMESPath query to use in filtering the response data.')
-    .option('--query <query>', '[DEPRECATION WARNING] A JMESPath query to use in filtering the response data.')
+    .option('--json [searchPath]', GET_JSON_HELP_TEXT)
+    .option('--query <query>', `[DEPRECATION WARNING] ${GET_JSON_HELP_TEXT}`)
     .option('--versions', 'To get list of versions of an agent')
     .option('--verbose', 'Verbose output')
     .action(withCompatibilityCheck((agentName, options) => {
@@ -181,8 +183,8 @@ program
     .option('--project <project>', 'The project to use')
     .option('--verbose [boolean]', 'Get debugging info in activation response')
     .option('--report [boolean]', 'Get additional debugging info in activation response')
-    .option('--json [searchPath]', 'A JMESPath query to use in filtering the response data.')
-    .option('--query <query>', '[DEPRECATION WARNING] A JMESPath query to use in filtering the response data.')
+    .option('--json [searchPath]', GET_JSON_HELP_TEXT)
+    .option('--query <query>', `[DEPRECATION WARNING] ${GET_JSON_HELP_TEXT}`)
     .action(withCompatibilityCheck((activationId, options) => {
         try {
             new GetActivationCommand(program).execute(activationId, options);
@@ -199,7 +201,7 @@ program
     .option('--color [boolean]', 'Turn on/off colors for JSON output.', 'true')
     .option('--profile <profile>', 'The profile to use')
     .option('--project <project>', 'The project to use')
-    .option('--query, --json [searchQuery]', 'Output results in JSON, supports JMESPath query to filter the response data')
+    .option('--query, --json [searchQuery]', LIST_JSON_HELP_TEXT)
     .option('--agentName <string>', 'Query activations by agentName')
     .option('--skillName <string>', 'Query activations by skillName')
     .option('--startBefore <timestamp>', 'Filters activations to include those that started before the specified timestamp.')
@@ -227,7 +229,7 @@ program
     .option('--color [boolean]', 'Turn on/off colors for JSON output.', 'true')
     .option('--profile <profile>', 'The profile to use')
     .option('--project <project>', 'The project to use')
-    .option('--query, --json [searchQuery]', 'Output results in JSON, supports JMESPath query to filter the response data')
+    .option('--query, --json [searchQuery]', LIST_JSON_HELP_TEXT)
     .option('--skip <skip>', 'Move the result cursor to this position before returning results.')
     .option('--limit <limit>', 'Limit the number of rows returned')
     .option('--filter <filter>', 'A Mongo style filter to use.')
@@ -266,7 +268,7 @@ program
     .option('--color [boolean]', 'Turn on/off colors for JSON output.', 'true')
     .option('--profile <profile>', 'The profile to use')
     .option('--project <project>', 'The project to use')
-    .option('--query, --json [searchQuery]', 'Output results in JSON, supports JMESPath query to filter the response data')
+    .option('--query, --json [searchQuery]', LIST_JSON_HELP_TEXT)
     .option('--filter <filter>', 'A Mongo style filter to use.')
     .option('--limit <limit>', 'Limit number of records', DEFAULT_LIST_LIMIT_COUNT)
     .option('--skip <skip>', 'Skip number of records', DEFAULT_LIST_SKIP_COUNT)

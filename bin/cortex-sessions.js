@@ -27,7 +27,11 @@ const {
     DescribeSessionCommand,
     ListSessionsCommand,
 } = require('../src/commands/sessions');
-const { DEFAULT_LIST_LIMIT_COUNT } = require('../src/constants');
+const {
+    DEFAULT_LIST_LIMIT_COUNT,
+    LIST_JSON_HELP_TEXT,
+    GET_JSON_HELP_TEXT,
+} = require('../src/constants');
 
 program.name('cortex sessions');
 program.description('Work with Cortex Sessions');
@@ -42,7 +46,7 @@ program
     .option('--color [boolean]', 'Turn on/off colors for JSON output.', 'true')
     .option('--profile <profile>', 'The profile to use')
     .option('--project <project>', 'The project to use')
-    .option('--query, --json [searchQuery]', 'Output results in JSON, supports JMESPath query to filter the response data')
+    .option('--query, --json [searchQuery]', LIST_JSON_HELP_TEXT)
     .action(withCompatibilityCheck((options) => {
         try {
             new ListSessionsCommand(program).execute(options);
@@ -60,8 +64,8 @@ program
     .option('--color [boolean]', 'Turn on/off colors for JSON output.', 'true')
     .option('--profile <profile>', 'The profile to use')
     .option('--project <project>', 'The project to use')
-    .option('--json [searchPath]', 'A JMESPath query to use in filtering the response data.')
-    .option('--query <query>', '[DEPRECATION WARNING] A JMESPath query to use in filtering the response data.')
+    .option('--json [searchPath]', GET_JSON_HELP_TEXT)
+    .option('--query <query>', `[DEPRECATION WARNING] ${GET_JSON_HELP_TEXT}`)
     .option('--verbose', 'Verbose output')
     .action(withCompatibilityCheck((sessionName, options) => {
         try {

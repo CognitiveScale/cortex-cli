@@ -30,6 +30,7 @@ const {
 const {
     DEFAULT_LIST_LIMIT_COUNT,
     DEFAULT_LIST_SKIP_COUNT,
+    LIST_JSON_HELP_TEXT,
 } = require('../src/constants');
 
 program.name('cortex tasks');
@@ -48,7 +49,7 @@ program
     .option('--activationId <string>', 'filter tasks by activation id')
     .option('--skillName <string>', 'Filter tasks by skill name')
     .option('--scheduled', 'Show scheduled tasks only')
-    .option('--query, --json [searchQuery]', 'Output results in JSON, supports JMESPath query to filter the response data')
+    .option('--query, --json [searchQuery]', LIST_JSON_HELP_TEXT)
     // This is a client-side sort
     .option('--filter <filter>', 'A Mongo style filter to use.')
     .option('--limit <limit>', 'Limit number of records', DEFAULT_LIST_LIMIT_COUNT)
