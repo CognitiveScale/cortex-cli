@@ -29,6 +29,14 @@ function configDir() {
     return process.env.CORTEX_CONFIG_DIR || path.join(os.homedir(), '.cortex');
 }
 
+// TODO deprecate CORTEX_URI
+function getCortexUrlFromEnv() {
+    if (process.env.CORTEX_URI) {
+        return process.env.CORTEX_URI;
+    }
+    return process.env.CORTEX_URL;
+}
+
 const durationRegex = /^([.\d]+)(ms|[smhdwMy])$/;
 async function generateJwt(profile, expiresIn = '2m') {
     const {
@@ -133,9 +141,12 @@ class Config {
         }
         const profileType = new Profile(name, profile).validate();
         if (useenv) {
-            profileType.url = process.env.CORTEX_URI || profileType.url;
+            profileType.url = getCortexUrlFromEnv() || profileType.url;
+            profileType.token = process.env.CORTEX_TOKEN || await generateJwt(profile);
+            profileType.project = process.env.CORTEX_PROJECT || profileType.project;
+        } else {
+            profileType.token = await generateJwt(profile);
         }
-        profileType.token = await generateJwt(profile);
         return profileType;
     }
 
@@ -268,9 +279,12 @@ class ConfigV4 {
         }
         const profileType = new ProfileV4(name, profile).validate();
         if (useenv) {
-            profileType.url = process.env.CORTEX_URI || profileType.url;
+            profileType.url = getCortexUrlFromEnv() || profileType.url;
+            profileType.token = process.env.CORTEX_TOKEN || await generateJwt(profileType);
+            profileType.project = process.env.CORTEX_PROJECT || profileType.project;
+        } else {
+            profileType.token = await generateJwt(profileType);
         }
-        profileType.token = await generateJwt(profile);
         return profileType;
     }
 
