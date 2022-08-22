@@ -123,7 +123,7 @@ module.exports.DescribeAgentCommand = class DescribeAgentCommand {
             debug('%s.executeDescribeAgentVersions(%s)', profile.name, agentName);
             catalog.describeAgentVersions(options.project || profile.project, profile.token, agentName).then((response) => {
                 if (response.success) {
-                    const result = filterObject(response.result, getQueryOptions(options));
+                    const result = filterObject(response.agent, getQueryOptions(options));
                     printSuccess(JSON.stringify(result, null, 2), options);
                 } else {
                     printError(`Failed to describe agent versions ${agentName}: ${response.message}`, options);
