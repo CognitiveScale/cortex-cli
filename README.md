@@ -117,102 +117,21 @@ cortex agents list --query "[].{name: name, title: title}"
 ]
 ```
 
-### Command List and Implementation Status:
+## Standalone binary
 
-- [x] configure
-    - [x] list
-- [x] projects
-    - [x] list
-    - [x] save [projectDefinition]
-    - [x] describe [projectName]
-    - [x] delete [projectName]
-- [ ] deploy
-- [x] functions
-    - [x] list
-    - [X] describe [functionName]
-    - [x] invoke [functionName]
-    - [X] deploy [functionName]
-    - [ ] delete [functionName]
-- [ ] stacks
-   - [ ] list
-   - [ ] describe
-   - [ ] deploy
-   - [ ] delete
-- [x] agents
-    - [x] list
-    - [x] save [agentDefinition]
-    - [x] describe [agentName]
-    - [ ] delete [agentName]
-    - [x] get-snapshots [agentName]
-    - [x] create-snapshots [snapshotDefinition]
-    - [x] invoke [serviceName]
-    - [x] get-service-activation [activationId]
-- [x] types
-    - [x] list
-    - [x] save [typeDefinition]
-    - [x] describe [typeName]
-    - [ ] delete [typeName]
-- [x] skills
-    - [x] list
-    - [x] save [skillDefinition]
-    - [x] describe [skillName]
-    - [ ] delete [skillName]
-    - [x] generate
-- [x] content
-    - [x] upload
-    - [x] download
-    - [x] delete
-    - [x] list
-- [ ] jobs
-    - [x] list
-    - [x] save
-    - [x] describe
-    - [x] status
-    - [ ] delete
-- [x] tasks
-    - [x] list
-    - [x] logs
-    - [x] cancel
-    - [x] describe
-- [ ] connections
-    - [x] list
-    - [x] list-types
-    - [x] save [connectionDefinition]
-    - [ ] delete [connectionName]
-    - [x] describe [connectionName]
-    - [x] test [connectionName]
-    - [x] generate
-- [ ] datasets
-    - [x] list
-    - [x] save [datasetDefinition]
-    - [ ] delete [datasetName]
-    - [x] describe [datasetName]
-    - [x] get-dataframe [datasetName]
-    - [x] get-stream [datasetName]
-    - [x] generate
-- [ ] snapshots
-- [ ] container-registries
-    - [ ] list
-    - [ ] save [registryName]
-    - [ ] delete [registryName]
-- [x] profiles
-    - [x] save-schema
-    - [x] list-schemas
-    - [x] describe-schema
-    - [x] delete-schema
-    - [x] list
-    - [x] list-versions
-    - [x] describe
-    - [x] delete
-    - [x] rebuild
-- [x] graph
-    - [x] find-events
-    - [x] publish
-- [x] experiments
-    - [x] list
-    - [x] describe
-    - [x] delete
-    - [x] list-runs
-    - [x] describe-runs
-    - [x] delete-run
-    - [x] download-artifact
+We use [pkg](https://www.npmjs.com/package/pkg) to bundle the Cortex cli's source, dependencies, and node runtime into a standalone executable
+
+Executables are created for the following platforms:
+  - Linux 64bit intel
+  - Windows 64bit intel
+  - macOS 64 bit intel. 
+  - macOS 64 bit M1/M2.
+
+__NOTE:__ Apple M1/M2 (arm64 binary) is experimental
+
+### Signed binaries status
+* windows: binaries are currently **unsigned**
+* macOS: adhoc signature using [ldid](https://github.com/xerub/ldid)
+
+**Known Issues**
+cortex workspaces - is non functional on Window and macOs until we can provide pre-compiled binaries for the following dependencies: ssh2, keytar, cpufeatures

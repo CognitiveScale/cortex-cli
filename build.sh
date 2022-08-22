@@ -29,6 +29,16 @@ function docker_build(){
     export CI="script"
     apt-get update
     apt-get install -y apt-utils libsecret-1-dev
+    # Grab signing util for MACOS
+    mkdir /tmp/macsign
+    OPWD=$PWD
+    cd /tmp/macsign
+    wget https://github.com/xerub/ldid/releases/download/42/ldid.zip
+    echo "b93efbc32136cf2778bfe7191dc2a7fb  ldid.zip" > ldid.md5
+    md5sum -c ldid.md5
+    unzip ldid.zip
+    cd $OPWD
+    export PATH=$PATH:/tmp/macsign/linux64
     npm ci --unsafe-perm --userconfig=/root/.npmrc --ignore-scripts
     npm test
     echo ${VERSION} > version.txt
@@ -42,6 +52,9 @@ function docker_build(){
 #        npm publish --tag "${BRANCH}" --registry=https://cognitivescale.jfrog.io/artifactory/api/npm/npm-local/
     fi
     npm pack .
+    # TODO Should we cache this distros ?
+    export PKG_CACHE_PATH=/tmp/pkg-cache
+    npm run build-binaries
     mv cortex-cli-*.tgz cortex-cli.tgz
 }
 
