@@ -7,11 +7,11 @@ describe('Test printExtendedLogs function', () => {
             json: true,
         };
         const queryOptions = getQueryOptions(options);
-        expect(queryOptions.query).to.eql('');
+        expect(queryOptions.query).to.eql(null);
     });
 
     it('should retain the query string if options.json is not true', () => {
-        const queryPath = '[].name';
+        const queryPath = '[].{name: name, title: title}';
         const options = {
             json: queryPath,
         };
