@@ -30,6 +30,7 @@ module.exports = class Info {
         return got
             .get(endpoint, {
                 headers: { 'user-agent': getUserAgent() },
+                followRedirect: false,
             }).json()
             .then((result) => result)
             .catch((err) => constructError(err));
