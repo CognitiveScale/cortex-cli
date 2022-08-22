@@ -29,6 +29,7 @@
   "files": [
     "bin/*",
     "src/*",
+    "client/*",
     "README.md",
     "npm-shrinkwrap.json",
     "LICENSE"
