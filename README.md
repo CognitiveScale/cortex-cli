@@ -95,12 +95,12 @@ cortex configure --profile myprofile
 cortex agents list --profile myprofile
 ```
 
-#### Filtering Results using the --query option
-Many of the commands support a __--query__ option for filtering JSON responses.  Queries use JMESPath to filter JSON documents. The specification for JMESPath can be found here: http://jmespath.org/.  It is similar to the popular JQ tool and supported by Amazon AWS and some other notable services.
+#### Filtering Results using the --json or --query option (DEPRECATION WARNING for --query)
+Many of the commands support a __--json / --query__ option for filtering JSON responses.  Queries use JMESPath to filter JSON documents. The specification for JMESPath can be found here: http://jmespath.org/.  It is similar to the popular JQ tool and supported by Amazon AWS and some other notable services.
 
 For example, if I want to select just the name and title from my previous output:
 ```bash
-cortex agents list --query "[].{name: name, title: title}"
+cortex agents list --json "[].{name: name, title: title}"
 [
   {
     "name": "tutorial/movie_recommendation",

@@ -65,7 +65,7 @@ program
     .option('--no-compat', 'Ignore API compatibility checks')
     .option('--color [boolean]', 'Turn on/off colors for JSON output.', 'true')
     .option('--profile <profile>', 'The profile to use')
-    .option('--json', 'Output results using JSON')
+    .option('--query, --json [searchQuery]', 'Output results in JSON, supports JMESPath query to filter the response data')
     .option('--missing [boolean]', 'Filter only missing dependencies')
     .action(withCompatibilityCheck((dependencyFile, options) => {
         try {
@@ -196,7 +196,7 @@ program
     .option('--no-compat', 'Ignore API compatibility checks')
     .option('--color [boolean]', 'Turn on/off colors for JSON output.', 'true')
     .option('--profile <profile>', 'The profile to use')
-    .option('--json', 'Output results using JSON')
+    .option('--query, --json [searchQuery]', 'Output results in JSON, supports JMESPath query to filter the response data')
     .action(withCompatibilityCheck((assessmentName, options) => {
         try {
             new ListAssessmentReportCommand(program).execute(assessmentName, options);
@@ -212,7 +212,7 @@ program
     .option('--no-compat', 'Ignore API compatibility checks')
     .option('--color [boolean]', 'Turn on/off colors for JSON output.', 'true')
     .option('--profile <profile>', 'The profile to use')
-    .option('--json', 'Output results using JSON')
+    .option('--query, --json [searchQuery]', 'Output results in JSON, supports JMESPath query to filter the response data')
     .action(withCompatibilityCheck((assessmentName, reportId, options) => {
         try {
             new GetAssessmentReportCommand(program).execute(assessmentName, reportId, options);

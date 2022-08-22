@@ -122,6 +122,7 @@ module.exports.DependencyTreeCommand = class {
             .then((response) => {
                 if (response.success === false) throw response;
                 if (options.json) {
+                    response = filterObject(response, getQueryOptions(options));
                     printSuccess(JSON.stringify(response, null, 2), options);
                 } else {
                     const tableSpec = [
@@ -291,6 +292,7 @@ module.exports.ListAssessmentReportCommand = class {
             .then((response) => {
                 if (response.success === false) throw response;
                 if (options.json) {
+                    response = filterObject(response, getQueryOptions(options));
                     printSuccess(JSON.stringify(response, null, 2), options);
                 } else {
                     const tableSpec = [
@@ -324,7 +326,7 @@ module.exports.GetAssessmentReportCommand = class {
             .then((response) => {
                 if (response.success === false) throw response;
                 if (options.json) {
-                    const output = {
+                    let output = {
                         name: response.reportId,
                         assessment: response.assessmentId,
                         summary: Object.fromEntries(response.summary.map((item) => [item.type, item.count])),
@@ -332,6 +334,7 @@ module.exports.GetAssessmentReportCommand = class {
                         _createdAt: response._createdAt,
                         _createdBy: response._createdBy,
                     };
+                    output = filterObject(output, getQueryOptions(options));
                     printSuccess(JSON.stringify(output, null, 2), options);
                 } else {
                     const flattenRefs = _.uniqBy(
