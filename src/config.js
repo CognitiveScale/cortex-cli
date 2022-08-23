@@ -141,6 +141,9 @@ class Config {
         }
         const profileType = new Profile(name, profile).validate();
         if (useenv) {
+            if (process.env.CORTEX_TOKEN) {
+                printError('Using token from "CORTEX_TOKEN" environment variable', {}, false);
+            }
             profileType.url = getCortexUrlFromEnv() || profileType.url;
             profileType.token = process.env.CORTEX_TOKEN || await generateJwt(profile);
             profileType.project = process.env.CORTEX_PROJECT || profileType.project;
@@ -279,6 +282,9 @@ class ConfigV4 {
         }
         const profileType = new ProfileV4(name, profile).validate();
         if (useenv) {
+            if (process.env.CORTEX_TOKEN) {
+                printError('Using token from "CORTEX_TOKEN" environment variable', {}, false);
+            }
             profileType.url = getCortexUrlFromEnv() || profileType.url;
             profileType.token = process.env.CORTEX_TOKEN || await generateJwt(profileType);
             profileType.project = process.env.CORTEX_PROJECT || profileType.project;
