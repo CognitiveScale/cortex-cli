@@ -131,7 +131,7 @@ describe('Test getFilteredOutput function', () => {
         };
         const data = { name: 'test-name', title: 'test-title' };
         getFilteredOutput(data, options);
-        expect(getPrintedLines()).to.not.contain(['[DEPRECATION WARNING] --query']);
+        expect(getPrintedLines()[0]).to.contain(['[DEPRECATION WARNING] --query']);
         expect(getPrintedConsoleLines()[0]).to.not.contain('title');
         expect(getPrintedConsoleLines()[0]).to.not.contain('test-title');
         expect(getPrintedConsoleLines()[0]).to.contain('test-name');
