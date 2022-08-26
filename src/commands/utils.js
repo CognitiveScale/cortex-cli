@@ -93,6 +93,7 @@ function printError(message, options, exit = true) {
 }
 module.exports.printError = printError;
 
+// eslint-disable-next-line consistent-return
 module.exports.filterObject = (obj, options) => {
     try {
         if (options.query) {
@@ -102,7 +103,7 @@ module.exports.filterObject = (obj, options) => {
         return obj;
     } catch (e) {
         // TODO remove --query on deprecation
-        return process.stderr.write(`error: option '--query <query>' has an invalid argument: ${options.query} \n`);
+        process.stderr.write(`error: option '--query <query>' has an invalid argument: ${options.query} \n`);
     }
 };
 
