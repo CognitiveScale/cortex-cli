@@ -118,7 +118,6 @@ module.exports.DeleteProjectCommand = class DeleteProjectCommand {
         debug('%s.executeDeleteProject(%s)', profile.name, projectName);
         try {
             const cli = new ApiServerClient(profile.url);
-            await cli.deleteProject(profile.token, projectName);
             const status = await cli.deleteProject(profile.token, projectName);
             if (status) {
                 printSuccess(`Project ${projectName} deleted`, options);
