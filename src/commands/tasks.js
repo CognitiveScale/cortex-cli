@@ -22,8 +22,7 @@ const { loadProfile } = require('../config');
 const Tasks = require('../client/tasks');
 const {
     printSuccess, printError, handleTable, printExtendedLogs,
-    filterObject,
-    getQueryOptions,
+    getFilteredOutput,
 } = require('./utils');
 
 dayjs.extend(relativeTime);
@@ -66,7 +65,6 @@ module.exports.ListTasksCommand = class {
             let format = 'k8sFormat'; // Assume old format
             if (response.success) {
                 let taskList = _.get(response, 'tasks', []);
-                printExtendedLogs(taskList, options);
                 if (_.isEmpty(taskList)) {
                     return printSuccess('No tasks found');
                 }
@@ -98,10 +96,11 @@ module.exports.ListTasksCommand = class {
                             break;
                     }
                 }
-                if (options.json) {
-                    taskList = filterObject(taskList, getQueryOptions(options));
-                    return printSuccess(JSON.stringify(taskList, null, 2), options);
+                // TODO remove --query on deprecation
+                if (options.json || options.query) {
+                    getFilteredOutput(taskList, options);
                 }
+                printExtendedLogs(taskList, options);
                 const tableCols = options.scheduled ? SCHED_LIST_TABLE : TASK_LIST_TABLE;
                 return handleTable(tableCols, taskList);
             }

@@ -22,7 +22,7 @@ const { loadProfile } = require('../config');
 const Catalog = require('../client/catalog');
 const {
     LISTTABLEFORMAT, filterObject, printExtendedLogs, handleListFailure,
-    getQueryOptions,
+    getFilteredOutput,
 } = require('./utils');
 
 const {
@@ -74,12 +74,12 @@ module.exports.ListTypesCommand = class ListTypesCommand {
         // eslint-disable-next-line consistent-return
         catalog.listTypes(options.project || profile.project, profile.token, options.limit, options.skip, options.sort).then((response) => {
             if (response.success) {
-                let result = response.types;
-                printExtendedLogs(result, options);
-                if (options.json) {
-                    result = filterObject(result, getQueryOptions(options));
-                    printSuccess(JSON.stringify(result, null, 2), options);
+                const result = response.types;
+                // TODO remove --query on deprecation
+                if (options.json || options.query) {
+                    getFilteredOutput(result, options);
                 } else {
+                    printExtendedLogs(result, options);
                     handleTable(
                         LISTTABLEFORMAT,
                         result,
@@ -109,8 +109,7 @@ module.exports.DescribeTypeCommand = class DescribeTypeCommand {
         const catalog = new Catalog(profile.url);
         catalog.describeType(options.project || profile.project, profile.token, typeName).then((response) => {
             if (response.success) {
-                const result = filterObject(response.type, getQueryOptions(options));
-                printSuccess(JSON.stringify(result, null, 2), options);
+                getFilteredOutput(response.type, options);
             } else {
                 printError(`Failed to describe type ${typeName}: ${response.message}`, options);
             }

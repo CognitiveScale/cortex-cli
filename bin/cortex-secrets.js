@@ -27,7 +27,7 @@ const {
     WriteSecretsCommand,
     DeleteSecretCommand,
 } = require('../src/commands/secrets');
-const { LIST_JSON_HELP_TEXT } = require('../src/constants');
+const { LIST_JSON_HELP_TEXT, QUERY_JSON_HELP_TEXT } = require('../src/constants');
 
 program.name('cortex secrets');
 program.description('Work with Cortex Secrets');
@@ -39,7 +39,8 @@ program
     .alias('l')
     .option('--no-compat', 'Ignore API compatibility checks')
     .option('--color [boolean]', 'Turn on/off colors for JSON output.', 'true')
-    .option('--query, --json [searchQuery]', LIST_JSON_HELP_TEXT)
+    .option('--json [searchQuery]', LIST_JSON_HELP_TEXT)
+    .option('--query <query>', `[DEPRECATION WARNING] ${QUERY_JSON_HELP_TEXT}`)
     .option('--profile <profile>', 'The profile to use')
     .option('--project <project>', 'The project to use')
     .action(withCompatibilityCheck((options) => {

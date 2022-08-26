@@ -33,7 +33,7 @@ const {
 const {
     DEFAULT_LIST_SKIP_COUNT, DEFAULT_LIST_LIMIT_COUNT, GET_DEFAULT_SORT_CLI_OPTION, DEFAULT_LIST_SORT_PARAMS,
     LIST_JSON_HELP_TEXT,
-    GET_JSON_HELP_TEXT,
+    QUERY_JSON_HELP_TEXT,
 } = require('../src/constants');
 
 program.name('cortex models');
@@ -49,7 +49,8 @@ program
     .option('--profile <profile>', 'The profile to use')
     .option('--project <project>', 'The project to use')
     .option('--tags <tags>', 'The tags to use (comma separated values)')
-    .option('--query, --json [searchQuery]', LIST_JSON_HELP_TEXT)
+    .option('--json [searchQuery]', LIST_JSON_HELP_TEXT)
+    .option('--query <query>', `[DEPRECATION WARNING] ${QUERY_JSON_HELP_TEXT}`)
     .option('--filter <filter>', 'A Mongo style filter to use.')
     .option('--limit <limit>', 'Limit number of records', DEFAULT_LIST_LIMIT_COUNT)
     .option('--skip <skip>', 'Skip number of records', DEFAULT_LIST_SKIP_COUNT)
@@ -71,8 +72,8 @@ program
     .option('--color [boolean]', 'Turn on/off colors for JSON output.', 'true')
     .option('--profile <profile>', 'The profile to use')
     .option('--project <project>', 'The project to use')
-    .option('--json [searchPath]', GET_JSON_HELP_TEXT)
-    .option('--query <query>', `[DEPRECATION WARNING] ${GET_JSON_HELP_TEXT}`)
+    .option('--json [searchPath]', QUERY_JSON_HELP_TEXT)
+    .option('--query <query>', `[DEPRECATION WARNING] ${QUERY_JSON_HELP_TEXT}`)
     .option('--verbose', 'Verbose output')
     .action(withCompatibilityCheck((modelName, options) => {
         try {
@@ -159,7 +160,8 @@ program
     .option('--color [boolean]', 'Turn on/off colors for JSON output.', 'true')
     .option('--profile <profile>', 'The profile to use')
     .option('--project <project>', 'The project to use')
-    .option('--query, --json [searchQuery]', LIST_JSON_HELP_TEXT)
+    .option('--json [searchQuery]', LIST_JSON_HELP_TEXT)
+    .option('--query <query>', `[DEPRECATION WARNING] ${QUERY_JSON_HELP_TEXT}`)
     .option('--filter <filter>', 'A Mongo style filter to use.')
     .option('--limit <limit>', 'Limit number of records', DEFAULT_LIST_LIMIT_COUNT)
     .option('--skip <skip>', 'Skip number of records', DEFAULT_LIST_SKIP_COUNT)

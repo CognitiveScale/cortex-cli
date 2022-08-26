@@ -23,7 +23,7 @@ const {
     SESSIONTABLEFORMAT,
     formatValidationPath,
     handleListFailure,
-    getQueryOptions,
+    getFilteredOutput,
 } = require('./utils');
 
 const {
@@ -80,10 +80,10 @@ module.exports.ListSessionsCommand = class ListSessionsCommand {
         const sessions = new Sessions(profile.url);
         sessions.listSessions(options.project || profile.project, profile.token, options.limit).then((response) => {
             if (response.success) {
-                let result = response.sessions;
-                if (options.json) {
-                    result = filterObject(result, getQueryOptions(options));
-                    return printSuccess(JSON.stringify(result, null, 2), options);
+                const result = response.sessions;
+                // TODO remove --query on deprecation
+                if (options.json || options.query) {
+                    return getFilteredOutput(result, options);
                 }
                 return handleTable(SESSIONTABLEFORMAT, result, null, 'No sessions found');
             }
@@ -107,8 +107,7 @@ module.exports.DescribeSessionCommand = class DescribeSessionCommand {
         debug('%s.executeDescribeSession(%s)', profile.name, sessionName);
         sessions.describeSession(options.project || profile.project, profile.token, sessionName, options.verbose).then((response) => {
             if (response.success) {
-                const result = filterObject(response.session, getQueryOptions(options));
-                printSuccess(JSON.stringify(result, null, 2), options);
+                getFilteredOutput(response.session, options);
             } else {
                 printError(`Failed to describe session ${sessionName}: ${response.message}`, options);
             }

@@ -27,7 +27,7 @@ const {
     DeleteContent,
     DownloadContent,
 } = require('../src/commands/content');
-const { LIST_JSON_HELP_TEXT } = require('../src/constants');
+const { LIST_JSON_HELP_TEXT, QUERY_JSON_HELP_TEXT } = require('../src/constants');
 
 program.name('cortex content');
 program.description('Work with Cortex Managed Content');
@@ -41,7 +41,8 @@ program
     .option('--color [boolean]', 'Turn on/off colors for JSON output.', 'true')
     .option('--profile <profile>', 'The profile to use')
     .option('--project <project>', 'The project to use')
-    .option('--query, --json [searchQuery]', LIST_JSON_HELP_TEXT)
+    .option('--json [searchQuery]', LIST_JSON_HELP_TEXT)
+    .option('--query <query>', `[DEPRECATION WARNING] ${QUERY_JSON_HELP_TEXT}`)
     .option('--prefix <prefix>', 'Filter contents with the given prefix.')
     .action(withCompatibilityCheck((options) => {
         try {

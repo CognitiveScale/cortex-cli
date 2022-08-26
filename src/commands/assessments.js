@@ -31,9 +31,9 @@ const Assessments = require('../client/assessments');
 dayjs.extend(relativeTime);
 
 const {
-    printSuccess, printError, parseObject, filterObject,
+    printSuccess, printError, parseObject,
     handleTable, printExtendedLogs, handleListFailure,
-    getQueryOptions,
+    getFilteredOutput,
 } = require('./utils');
 
 module.exports.ListResourcesCommand = class {
@@ -51,11 +51,11 @@ module.exports.ListResourcesCommand = class {
             // eslint-disable-next-line consistent-return
             .then((response) => {
                 if (response.success === false) return handleListFailure(response, options, 'Cortex resources');
-                printExtendedLogs(response.data, options);
-                if (options.json) {
-                    response = filterObject(response, getQueryOptions(options));
-                    printSuccess(JSON.stringify(response, null, 2), options);
+                // TODO remove --query on deprecation
+                if (options.json || options.query) {
+                    getFilteredOutput(response, options);
                 } else {
+                    printExtendedLogs(response.data, options);
                     const tableSpec = [
                         { column: 'Name', field: 'resourceName' },
                         { column: 'Title', field: 'resourceTitle' },
@@ -85,10 +85,10 @@ module.exports.ListResourceTypesCommand = class {
         client.listResourceTypes(profile.token)
             .then((response) => {
                 if (response.success === false) throw response;
-                let data = _.compact(response.data);
-                if (options.json) {
-                    data = filterObject(data, getQueryOptions(options));
-                    printSuccess(JSON.stringify(data, null, 2), options);
+                const data = _.compact(response.data);
+                // TODO remove --query on deprecation
+                if (options.json || options.query) {
+                    getFilteredOutput(data, options);
                 } else {
                     const types = data.map((t) => ({ type: t }));
                     const tableSpec = [
@@ -121,9 +121,9 @@ module.exports.DependencyTreeCommand = class {
         client.getDependenciesOfResource(profile.token, options.scope, options.type, options.name, body, options.missing)
             .then((response) => {
                 if (response.success === false) throw response;
-                if (options.json) {
-                    response = filterObject(response, getQueryOptions(options));
-                    printSuccess(JSON.stringify(response, null, 2), options);
+                // TODO remove --query on deprecation
+                if (options.json || options.query) {
+                    getFilteredOutput(response, options);
                 } else {
                     const tableSpec = [
                         { column: 'Name', field: 'name' },
@@ -191,12 +191,12 @@ module.exports.ListAssessmentCommand = class {
             // eslint-disable-next-line consistent-return
             .then((response) => {
                 if (response.success === false) return handleListFailure(response, options, 'Assessments');
-                let result = response.data;
-                printExtendedLogs(result, options);
-                if (options.json) {
-                    result = filterObject(result, getQueryOptions(options));
-                    printSuccess(JSON.stringify(result, null, 2), options);
+                const result = response.data;
+                // TODO remove --query on deprecation
+                if (options.json || options.query) {
+                    getFilteredOutput(result, options);
                 } else {
+                    printExtendedLogs(result, options);
                     const tableSpec = [
                         { column: 'Name', field: 'name' },
                         { column: 'Title', field: 'title' },
@@ -291,9 +291,9 @@ module.exports.ListAssessmentReportCommand = class {
         client.listAssessmentReports(profile.token, name)
             .then((response) => {
                 if (response.success === false) throw response;
-                if (options.json) {
-                    response = filterObject(response, getQueryOptions(options));
-                    printSuccess(JSON.stringify(response, null, 2), options);
+                // TODO remove --query on deprecation
+                if (options.json || options.query) {
+                    getFilteredOutput(response, options);
                 } else {
                     const tableSpec = [
                         { column: 'Assessment Name', field: 'assessmentId' },
@@ -325,8 +325,9 @@ module.exports.GetAssessmentReportCommand = class {
         client.getAssessmentReport(profile.token, name, reportId)
             .then((response) => {
                 if (response.success === false) throw response;
-                if (options.json) {
-                    let output = {
+                // TODO remove --query on deprecation
+                if (options.json || options.query) {
+                    const output = {
                         name: response.reportId,
                         assessment: response.assessmentId,
                         summary: Object.fromEntries(response.summary.map((item) => [item.type, item.count])),
@@ -334,8 +335,7 @@ module.exports.GetAssessmentReportCommand = class {
                         _createdAt: response._createdAt,
                         _createdBy: response._createdBy,
                     };
-                    output = filterObject(output, getQueryOptions(options));
-                    printSuccess(JSON.stringify(output, null, 2), options);
+                    getFilteredOutput(output, options);
                 } else {
                     const flattenRefs = _.uniqBy(
                         _.flatten(

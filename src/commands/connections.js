@@ -27,7 +27,7 @@ dayjs.extend(relativeTime);
 const {
     printSuccess, printError, filterObject, parseObject, CONNECTIONTABLEFORMAT, fileExists,
     handleTable, printExtendedLogs, handleListFailure, handleDeleteFailure,
-    getQueryOptions,
+    getFilteredOutput,
 } = require('./utils');
 
 module.exports.ListConnections = class ListConnections {
@@ -44,13 +44,12 @@ module.exports.ListConnections = class ListConnections {
         // eslint-disable-next-line consistent-return
         conns.listConnections(options.project || profile.project, profile.token, options.filter, options.limit, options.skip, options.sort).then((response) => {
             if (response.success) {
-                let result = response.result.connections;
-
-                printExtendedLogs(result, options);
-                if (options.json) {
-                    result = filterObject(result, getQueryOptions(options));
-                    printSuccess(JSON.stringify(result, null, 2), options);
+                const result = response.result.connections;
+                // TODO remove --query on deprecation
+                if (options.json || options.query) {
+                    getFilteredOutput(result, options);
                 } else {
+                    printExtendedLogs(result, options);
                     handleTable(
                         CONNECTIONTABLEFORMAT,
                         result,
@@ -150,8 +149,7 @@ module.exports.DescribeConnectionCommand = class DescribeConnectionCommand {
         const connection = new Connections(profile.url);
         connection.describeConnection(options.project || profile.project, profile.token, connectionName).then((response) => {
             if (response.success) {
-                const result = filterObject(response.result, getQueryOptions(options));
-                printSuccess(JSON.stringify(result, null, 2), options);
+                getFilteredOutput(response.result, options);
             } else {
                 printError(`Failed to describe connection ${connectionName}: ${response.message}`, options);
             }
@@ -199,13 +197,12 @@ module.exports.ListConnectionsTypes = class ListConnectionsTypes {
         // eslint-disable-next-line consistent-return
         conns.listConnectionsTypes(profile.token, options.limit, options.skip, options.sort).then((response) => {
             if (response.success) {
-                let result = response.result.connectionTypes;
-
-                printExtendedLogs(result, options);
-                if (options.json) {
-                    result = filterObject(result, getQueryOptions(options));
-                    printSuccess(JSON.stringify(result, null, 2), options);
+                const result = response.result.connectionTypes;
+                // TODO remove --query on deprecation
+                if (options.json || options.query) {
+                    getFilteredOutput(result, options);
                 } else {
+                    printExtendedLogs(result, options);
                     const tableSpec = [
                         { column: 'Name', field: 'name', width: 50 },
                         { column: 'Title', field: 'title', width: 25 },

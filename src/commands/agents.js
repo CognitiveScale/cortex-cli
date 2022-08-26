@@ -28,7 +28,7 @@ dayjs.extend(relativeTime);
 const {
     printSuccess, printError, filterObject, parseObject, printTable, formatValidationPath,
     LISTTABLEFORMAT, handleTable, printExtendedLogs, handleListFailure, handleDeleteFailure,
-    getQueryOptions,
+    getFilteredOutput, getQueryOptions,
 } = require('./utils');
 
 module.exports.SaveAgentCommand = class SaveAgentCommand {
@@ -87,12 +87,12 @@ module.exports.ListAgentsCommand = class ListAgentsCommand {
         // eslint-disable-next-line consistent-return
         catalog.listAgents(options.project || profile.project, profile.token, options.filter, options.limit, options.skip, options.sort).then((response) => {
             if (response.success) {
-                let result = response.agents;
-                printExtendedLogs(result, options);
-                if (options.json) {
-                    result = filterObject(result, getQueryOptions(options));
-                    printSuccess(JSON.stringify(result, null, 2), options);
+                const result = response.agents;
+                // TODO remove --query on deprecation
+                if (options.json || options.query) {
+                    getFilteredOutput(result, options);
                 } else {
+                    printExtendedLogs(result, options);
                     handleTable(
                         LISTTABLEFORMAT,
                         result,
@@ -123,8 +123,7 @@ module.exports.DescribeAgentCommand = class DescribeAgentCommand {
             debug('%s.executeDescribeAgentVersions(%s)', profile.name, agentName);
             catalog.describeAgentVersions(options.project || profile.project, profile.token, agentName).then((response) => {
                 if (response.success) {
-                    const result = filterObject(response.agent, getQueryOptions(options));
-                    printSuccess(JSON.stringify(result, null, 2), options);
+                    getFilteredOutput(response.agent, options);
                 } else {
                     printError(`Failed to describe agent versions ${agentName}: ${response.message}`, options);
                 }
@@ -207,8 +206,8 @@ module.exports.GetActivationCommand = class {
         const agents = new Agents(profile.url);
         agents.getActivation(project || profile.project, profile.token, activationId, verbose, report).then((response) => {
             if (response.success) {
-                const result = filterObject(response.result, getQueryOptions(options));
                 if (options.report && !options.json) {
+                    const result = filterObject(response.result, getQueryOptions(options));
                     const tableSpec = [
                         { column: 'Name', field: 'name', width: 40 },
                         { column: 'Title', field: 'title', width: 40 },
@@ -220,7 +219,7 @@ module.exports.GetActivationCommand = class {
                     printSuccess(`Elapsed Time (ms): ${result.elapsed}`);    
                     printTable(tableSpec, _.sortBy(result.transits, ['start', 'end']));
                 } else {
-                    printSuccess(JSON.stringify(result, null, 2), options);
+                    getFilteredOutput(response.result, options);
                 }
             } else {
                 printError(`Failed to get activation ${activationId}: ${response.message}`, options);
@@ -266,11 +265,12 @@ module.exports.ListActivationsCommand = class {
         // eslint-disable-next-line consistent-return
         agents.listActivations(options.project || profile.project, profile.token, queryParams).then((response) => {
             if (response.success) {
-                let result = response.result.activations;
-                if (options.json) {
-                    result = filterObject(result, getQueryOptions(options));
-                    printSuccess(JSON.stringify(result, null, 2), options);
+                const result = response.result.activations;
+                // TODO remove --query on deprecation
+                if (options.json || options.query) {
+                    getFilteredOutput(result, options);
                 } else {
+                    printExtendedLogs(result, options);
                     const tableSpec = [
                         { column: 'Name', field: 'name', width: 30 },
                         { column: 'Activation Id', field: 'activationId', width: 40 },
@@ -316,11 +316,12 @@ module.exports.ListServicesCommand = class ListServicesCommand {
         const catalog = new Catalog(profile.url);
         catalog.listServices(options.project || profile.project, profile.token, agentName, profile, options.filter, options.limit, options.skip, options.sort).then((response) => {
             if (response.success) {
-                let result = response.services;
-                if (options.json) {
-                    result = filterObject(result, getQueryOptions(options));
-                    printSuccess(JSON.stringify(result, null, 2), options);
+                const result = response.services;
+                // TODO remove --query on deprecation
+                if (options.json || options.query) {
+                    getFilteredOutput(result, options);
                 } else {
+                    printExtendedLogs(result, options);
                     const tableSpec = [
                         { column: 'Service Name', field: 'name', width: 25 },
                         { column: 'Service Endpoint URL', field: 'url', width: 115 },
@@ -352,11 +353,12 @@ module.exports.ListAgentSnapshotsCommand = class {
             // eslint-disable-next-line consistent-return
             .then((response) => {
             if (response.success) {
-                let result = response.result.snapshots;
-                if (options.json) {
-                    result = filterObject(result, getQueryOptions(options));
-                    printSuccess(JSON.stringify(result, null, 2), options);
+                const result = response.result.snapshots;
+                // TODO remove --query on deprecation
+                if (options.json || options.query) {
+                    getFilteredOutput(result, options);
                 } else {
+                    printExtendedLogs(result, options);
                     const tableSpec = [
                         { column: 'Snapshot ID', field: 'snapshotId', width: 40 },
                         { column: 'Title', field: 'title', width: 40 },

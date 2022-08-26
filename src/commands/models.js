@@ -28,7 +28,7 @@ const Experiments = require('../client/experiments');
 const {
     LISTTABLEFORMAT, RUNTABLEFORMAT, printExtendedLogs, handleListFailure, handleDeleteFailure,
     printSuccess, printError, filterObject, parseObject, printTable, formatValidationPath, fileExists, handleTable,
-    getQueryOptions,
+    getFilteredOutput,
 } = require('./utils');
 
 dayjs.extend(relativeTime);
@@ -86,12 +86,12 @@ module.exports.ListModelsCommand = class ListModelsCommand {
         // eslint-disable-next-line consistent-return
         models.listModels(options.project || profile.project, options.skip, options.limit, options.filter, options.sort, options.tags, profile.token).then((response) => {
             if (response.success) {
-                let result = response.models;
-                printExtendedLogs(result, options);
-                if (options.json) {
-                    result = filterObject(result, getQueryOptions(options));
-                    printSuccess(JSON.stringify(result, null, 2), options);
+                const result = response.models;
+                // TODO remove --query on deprecation
+                if (options.json || options.query) {
+                    getFilteredOutput(result, options);
                 } else {
+                    printExtendedLogs(result, options);
                     handleTable(
                         LISTTABLEFORMAT,
                         result,
@@ -123,13 +123,12 @@ module.exports.ListModelRunsCommand = class ListModelsCommand {
         // eslint-disable-next-line consistent-return
         models.listModelRuns(options.project || profile.project, modelName, profile.token, options.filter, options.limit, options.skip, options.sort).then((response) => {
             if (response.success) {
-                let result = response.runs;
-
-                printExtendedLogs(result, options);
-                if (options.json) {
-                    result = filterObject(result, getQueryOptions(options));
-                    printSuccess(JSON.stringify(result, null, 2), options);
+                const result = response.runs;
+                // TODO remove --query on deprecation
+                if (options.json || options.query) {
+                    getFilteredOutput(result, options);
                 } else {
+                    printExtendedLogs(result, options);
                     handleTable(
                         RUNTABLEFORMAT,
                         result,
@@ -159,8 +158,7 @@ module.exports.DescribeModelCommand = class DescribeModelCommand {
         debug('%s.executeDescribeModel(%s)', profile.name, modelName);
         models.describeModel(options.project || profile.project, profile.token, modelName, options.verbose).then((response) => {
             if (response.success) {
-                const result = filterObject(response.model, getQueryOptions(options));
-                printSuccess(JSON.stringify(result, null, 2), options);
+                getFilteredOutput(response.model, options);
             } else {
                 printError(`Failed to describe model ${modelName}: ${response.message}`, options);
             }
