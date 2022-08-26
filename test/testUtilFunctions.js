@@ -1,7 +1,7 @@
 const { expect } = require('chai');
 const { getQueryOptions } = require('../src/commands/utils');
 
-describe('Test printExtendedLogs function', () => {
+describe('Test getQueryOptions function', () => {
     it('should have empty query string if options.json is true', () => {
         const options = {
             json: true,
@@ -14,6 +14,17 @@ describe('Test printExtendedLogs function', () => {
         const queryPath = '[].{name: name, title: title}';
         const options = {
             json: queryPath,
+        };
+        const queryOptions = getQueryOptions(options);
+        expect(queryOptions.query).to.eql(queryPath);
+    });
+
+    it('should override --json [arg] the if --query arg is passed', () => {
+        const queryPath = '[].{name: name, title: title}';
+        const jsonPath = '[].{name: name}';
+        const options = {
+            json: jsonPath,
+            query: queryPath,
         };
         const queryOptions = getQueryOptions(options);
         expect(queryOptions.query).to.eql(queryPath);
