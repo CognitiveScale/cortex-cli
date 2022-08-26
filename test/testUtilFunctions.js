@@ -41,16 +41,19 @@ describe('Test getQueryOptions function', () => {
 describe('Test getFilteredOutput function', () => {
     let restore;
     let printSpy;
+    let printSpyConsole;
     before(() => {
         restore = mockedEnv({});
     });
 
     beforeEach(() => {
         printSpy = sinon.spy(process.stderr, 'write');
+        printSpyConsole = sinon.spy(console, 'log');
     });
 
     afterEach(() => {
         printSpy.restore();
+        printSpyConsole.restore();
     });
 
     after(() => {
@@ -59,6 +62,10 @@ describe('Test getFilteredOutput function', () => {
 
     function getPrintedLines() {
         return _.flatten(printSpy.args).map((s) => stripAnsi(s));
+    }
+
+    function getPrintedConsoleLines() {
+        return _.flatten(printSpyConsole.args).map((s) => stripAnsi(s));
     }
 
     it('should print Deprecation warning when query option is present', () => {
@@ -78,5 +85,55 @@ describe('Test getFilteredOutput function', () => {
         };
         getFilteredOutput([], options);
         expect(getPrintedLines()[1]).to.eql(`error: option '--query <query>' has an invalid argument: ${queryPath} \n`);
+    });
+
+    it('should print json output with correct params', () => {
+        // handle cases 'cortex entity command --query <path> --json'
+        const options = {
+            json: true,
+        };
+        const data = { name: 'test-name', title: 'test-title' };
+        getFilteredOutput(data, options);
+        expect(getPrintedConsoleLines()[0]).to.contain('name');
+        expect(getPrintedConsoleLines()[0]).to.contain('test-name');
+        expect(getPrintedConsoleLines()[0]).to.contain('title');
+        expect(getPrintedConsoleLines()[0]).to.contain('test-title');
+    });
+
+    it('should print json output with correct query args', () => {
+        const options = {
+            query: 'title',
+        };
+        const data = { name: 'test-name', title: 'test-title' };
+        getFilteredOutput(data, options);
+        expect(getPrintedLines()[0]).to.contain(['[DEPRECATION WARNING] --query']);
+        expect(getPrintedConsoleLines()[0]).to.not.contain('name');
+        expect(getPrintedConsoleLines()[0]).to.not.contain('test-name');
+        expect(getPrintedConsoleLines()[0]).to.contain('test-title');
+    });
+
+    it('should print json output with correct json args without Deprecation warning', () => {
+        const options = {
+            json: 'title',
+        };
+        const data = { name: 'test-name', title: 'test-title' };
+        getFilteredOutput(data, options);
+        expect(getPrintedLines()).to.not.contain(['[DEPRECATION WARNING] --query']);
+        expect(getPrintedConsoleLines()[0]).to.not.contain('name');
+        expect(getPrintedConsoleLines()[0]).to.not.contain('test-name');
+        expect(getPrintedConsoleLines()[0]).to.contain('test-title');
+    });
+
+    it('should override json path when both query and json path are passed', () => {
+        const options = {
+            json: 'title',
+            query: 'name',
+        };
+        const data = { name: 'test-name', title: 'test-title' };
+        getFilteredOutput(data, options);
+        expect(getPrintedLines()).to.not.contain(['[DEPRECATION WARNING] --query']);
+        expect(getPrintedConsoleLines()[0]).to.not.contain('title');
+        expect(getPrintedConsoleLines()[0]).to.not.contain('test-title');
+        expect(getPrintedConsoleLines()[0]).to.contain('test-name');
     });
 });
