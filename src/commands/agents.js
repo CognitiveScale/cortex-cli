@@ -417,7 +417,7 @@ module.exports.CreateAgentSnapshotCommand = class {
     async execute(snapshotDefinition, options) {
         const profile = await loadProfile(options.profile);
         let snapshot;
-        if (snapshotDefinition) {
+        if (fs.existsSync(snapshotDefinition)) {
             debug('%s.createAgentSnapshot(%s)', profile.name, snapshotDefinition);
             const snapshotDefStr = fs.readFileSync(snapshotDefinition);
             snapshot = parseObject(snapshotDefStr, options);
