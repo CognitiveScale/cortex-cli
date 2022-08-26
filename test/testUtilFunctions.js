@@ -2,7 +2,7 @@ const { expect } = require('chai');
 const _ = require('lodash');
 const mockedEnv = require('mocked-env');
 const sinon = require('sinon');
-const { getQueryOptions, getFilteredOutput, filterObject } = require('../src/commands/utils');
+const { getQueryOptions, getFilteredOutput } = require('../src/commands/utils');
 
 const { stripAnsi } = require('./utils');
 
