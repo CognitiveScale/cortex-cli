@@ -119,7 +119,12 @@ module.exports.DeleteProjectCommand = class DeleteProjectCommand {
         try {
             const cli = new ApiServerClient(profile.url);
             await cli.deleteProject(profile.token, projectName);
-            printSuccess(`Project ${projectName} deleted`, options);
+            const status = await cli.deleteProject(profile.token, projectName);
+            if (status) {
+                printSuccess(`Project ${projectName} deleted`, options);
+            } else {
+                printError(`Project ${projectName} does not exist.`, options);
+            }
         } catch (err) {
             printError(`Failed to delete project: ${err.message}`, options);
         }
