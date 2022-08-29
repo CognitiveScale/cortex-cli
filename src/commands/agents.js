@@ -215,9 +215,9 @@ module.exports.GetActivationCommand = class {
                         { column: 'Status', field: 'status', width: 20 },
                         { column: 'Elapsed (ms)', field: 'elapsed', width: 30 },
                     ];
-                    printSuccess(`Status: ${result.status}`);
-                    printSuccess(`Elapsed Time (ms): ${result.elapsed}`);    
-                    printTable(tableSpec, _.sortBy(result.transits, ['start', 'end']));
+                    printSuccess(`Status: ${_.get(result, 'status')}`);
+                    printSuccess(`Elapsed Time (ms): ${_.get(result, 'elapsed')}`);
+                    printTable(tableSpec, _.sortBy(_.get(result, 'transits'), ['start', 'end']));
                 } else {
                     getFilteredOutput(response.result, options);
                 }

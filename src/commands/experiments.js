@@ -135,7 +135,7 @@ class ListRuns {
                 const { result } = response;
                 // TODO remove --query on deprecation
                 if (options.json || options.query) {
-                    getFilteredOutput(result, options);
+                    getFilteredOutput(result.runs, options);
                 } else {
                     printExtendedLogs(result.runs, options);
                     const tableSpec = [
