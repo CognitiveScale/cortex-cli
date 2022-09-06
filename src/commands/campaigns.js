@@ -221,11 +221,11 @@ module.exports.ListMissionsCommand = class ListMissionsCommand {
             cli.listMissions(options.project || profile.project, profile.token, campaign, filterParam, options.limit, options.skip, sortParam).then((response) => {
                 if (response.success === false) throw response;
                 const data = Object.values(response.data);
-                printExtendedLogs(data, options);
                 // TODO remove --query on deprecation
                 if (options.json || options.query) {
                     getFilteredOutput(data, options);
                 } else {
+                    printExtendedLogs(data, options);
                     const tableSpec = [
                         { column: 'Name', field: 'name', width: 50 },
                         { column: 'Title', field: 'title', width: 50 },

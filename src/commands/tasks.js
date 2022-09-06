@@ -98,7 +98,7 @@ module.exports.ListTasksCommand = class {
                 }
                 // TODO remove --query on deprecation
                 if (options.json || options.query) {
-                    getFilteredOutput(taskList, options);
+                    return getFilteredOutput(taskList, options);
                 }
                 printExtendedLogs(taskList, options);
                 const tableCols = options.scheduled ? SCHED_LIST_TABLE : TASK_LIST_TABLE;
