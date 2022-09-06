@@ -103,13 +103,14 @@ module.exports.filterObject = (obj, options) => {
         return obj;
     } catch (e) {
         // TODO remove --query on deprecation
-        process.stderr.write(`error: option '--query <query>' has an invalid argument: ${options.query} \n`);
+        process.stderr.write(`error: invalid argument: ${options.query} \n`);
     }
 };
 
 module.exports.getQueryOptions = (options) => {
     // TODO remove --query on deprecation
     if (options.query) process.stderr.write('[DEPRECATION WARNING] --query\n');
+    if (options.query && options.json && typeof (options.json) === 'string') process.stderr.write('Warning! --query overrides --json args\n');
     // make --query override --json
     const queryOptions = options.query || options.json;
     // output JSON if JSMEpath isn't passed, default value is true

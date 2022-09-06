@@ -84,7 +84,7 @@ describe('Test getFilteredOutput function', () => {
             query: queryPath,
         };
         getFilteredOutput([], options);
-        expect(getPrintedLines()[1]).to.eql(`error: option '--query <query>' has an invalid argument: ${queryPath} \n`);
+        expect(getPrintedLines()[1]).to.eql(`error: invalid argument: ${queryPath} \n`);
     });
 
     it('should print json output with correct params', () => {

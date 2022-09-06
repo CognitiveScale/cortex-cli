@@ -233,8 +233,8 @@ program
     .option('--project <project>', 'The project to use')
     .option('--json [searchQuery]', LIST_JSON_HELP_TEXT)
     .option('--query <query>', `[DEPRECATION WARNING] ${QUERY_JSON_HELP_TEXT}`)
-    .option('--skip <skip>', 'Move the result cursor to this position before returning results.')
-    .option('--limit <limit>', 'Limit the number of rows returned')
+    .option('--limit <limit>', 'Limit number of records', DEFAULT_LIST_LIMIT_COUNT)
+    .option('--skip <skip>', 'Skip number of records', DEFAULT_LIST_SKIP_COUNT)
     .option('--filter <filter>', 'A Mongo style filter to use.')
     .option('--sort <sort>', 'A Mongo style sort statement to use in the query.')
 
