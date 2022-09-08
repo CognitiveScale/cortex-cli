@@ -20,7 +20,7 @@ module.exports.got = got.extend({
                     debug(`request url: ${options.url}`);
                     debug(`request methods: ${options.method}`);
                     debug(`request headers: ${JSON.stringify(options.headers)}`);
-                    debug(`request body: ${options.body || '{}'}`);
+                    debug(`request json: ${JSON.stringify(options.json)}`);
                 }
             },
         ],
