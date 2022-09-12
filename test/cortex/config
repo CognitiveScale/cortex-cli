@@ -1,5 +1,5 @@
 {
-  "version": "4",
+  "version": "5",
   "profiles": {
     "default": {
       "url": "http://localhost:8000",
@@ -20,7 +20,11 @@
           "isCortex": true
         }
       },
-      "currentRegistry": "Cortex Private Registry"
+      "currentRegistry": "Cortex Private Registry",
+      "templateConfig": {
+        "repo": "CognitiveScale/cortex-code-templates",
+        "branch": "main"
+      }
     },
     "other": {
       "url": "http://other:8000",
@@ -42,12 +46,12 @@
           "isCortex": true
         }
       },
-      "currentRegistry": "Cortex Private Registry"
+      "currentRegistry": "Cortex Private Registry",
+      "templateConfig": {
+        "repo": "CognitiveScale/cortex-code-templates",
+        "branch": "main"
+      }
     }
   },
-  "currentProfile": "default",
-  "templateConfig": {
-    "repo": "CognitiveScale/cortex-code-templates",
-    "branch": "main"
-  }
+  "currentProfile": "default"
 }

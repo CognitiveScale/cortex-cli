@@ -64,10 +64,7 @@ module.exports.WorkspaceGenerateCommand = class WorkspaceGenerateCommand {
         headers: { authorization: this.authorization },
       }))
       .then((resp) => resp.body.tree)
-      .catch((err) => {
-        console.log('error: ', err);
-        return [];
-      });
+      .catch(() => []);
 
     printToTerminal('\x1b[0G\x1b[2KTemplates loaded.\x1b[1E');
   }
@@ -154,7 +151,7 @@ module.exports.WorkspaceGenerateCommand = class WorkspaceGenerateCommand {
 
     if (!this.githubToken) {
       printError(
-        this.config.templateConfig
+        this.config.profiles[this.config.currentProfile].templateConfig
           ? 'Github authorization is invalid. Running configuration now.\n'
           : 'Workspace generator is not configured. Running configuration now.\n',
         this.options, false,
@@ -168,7 +165,7 @@ module.exports.WorkspaceGenerateCommand = class WorkspaceGenerateCommand {
       return;
     }
 
-    await this.loadTemplateTree(this.config.templateConfig);
+    await this.loadTemplateTree(this.config.profiles[this.config.currentProfile].templateConfig);
 
     if (this.tree.length) {
       const template = await this.selectTemplate(options.template);
