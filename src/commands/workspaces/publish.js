@@ -356,9 +356,10 @@ module.exports.WorkspacePublishCommand = class WorkspacePublishCommand {
           }));
 
           if (_.every(actionsPublished)) {
-            this.catalogClient.saveSkill(project, profile.token, info.skill);
-            printSuccess('Publish Complete', options);
-            return true;
+              const saveResult = await this.catalogClient.saveSkill(project, profile.token, info.skill);
+              if (saveResult.success) return true;
+              printError(`Skill save failed for ${info.skill.name}: ${saveResult.message}`, false);
+              return false;
           }
 
           printError('Publish Failed', options);
