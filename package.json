@@ -77,7 +77,7 @@
     "istextorbinary": "6.0.0",
     "jmespath": "0.16.0",
     "joi": "17.6.0",
-    "jose-node-cjs-runtime": "4.9.0",
+    "jose-node-cjs-runtime": "4.9.2",
     "js-yaml": "4.1.0",
     "keytar": "7.9.0",
     "lodash": "4.17.21",
