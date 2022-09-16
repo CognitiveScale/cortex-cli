@@ -197,7 +197,7 @@ module.exports.WorkspacePublishCommand = class WorkspacePublishCommand {
             reject(new Error(evt.error));
             return;
           }
-          status.processEvent(evt, action.name);
+          status.processEvent(evt, newTag);
         },
       );
     });
@@ -232,6 +232,8 @@ module.exports.WorkspacePublishCommand = class WorkspacePublishCommand {
           await apiServer.getProject(profile.token, project)
             .then((prj) => project = prj.name)
             .catch(() => printError(`Project ${project} not found.`, options));
+        } else {
+          throw new Error('Project must be specified');
         }
 
         this.catalogClient = new Catalog(profile.url);
