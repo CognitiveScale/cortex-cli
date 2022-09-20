@@ -19,7 +19,8 @@ const debug = require('debug')('cortex:cli');
 const { loadProfile } = require('../config');
 const ApiServerClient = require('../client/apiServerClient');
 const {
- printSuccess, printError, filterObject, parseObject, handleTable, printExtendedLogs, handleListFailure,
+ printSuccess, printError, parseObject, handleTable, printExtendedLogs, handleListFailure,
+    getFilteredOutput,
 } = require('./utils');
 
 module.exports.CreateProjectCommand = class CreateProjectCommand {
@@ -67,12 +68,12 @@ module.exports.ListProjectsCommand = class ListProjectsCommand {
             const sortParam = (options.sort || '{}').replace(/"/g, '\'');
             const filterParam = (options.filter || '{}').replace(/"/g, '\'');
             const response = await cli.listProjects(profile.token, filterParam, options.limit, options.skip, sortParam);
-            let result = response;
-            printExtendedLogs(result, options);
-            if (options.json) {
-                if (options.query) result = filterObject(result, options);
-                printSuccess(JSON.stringify(result, null, 2), options);
+            const result = response;
+            // TODO remove --query on deprecation
+            if (options.json || options.query) {
+                getFilteredOutput(result, options);
             } else {
+                printExtendedLogs(result, options);
                 const tableSpec = [
                     { column: 'Name', field: 'name', width: 30 },
                     { column: 'Title', field: 'title', width: 50 },
@@ -98,9 +99,8 @@ module.exports.DescribeProjectCommand = class DescribeProjectCommand {
         const cli = new ApiServerClient(profile.url);
 
         try {
-                const response = await cli.getProject(profile.token, projectName);
-            const result = filterObject(response, options);
-            printSuccess(JSON.stringify(result, null, 2), options);
+            const response = await cli.getProject(profile.token, projectName);
+            getFilteredOutput(response, options);
         } catch (err) {
             printError(`Failed to describe project: ${err.status} ${err.message}`, options);
         }

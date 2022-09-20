@@ -27,6 +27,7 @@ dayjs.extend(relativeTime);
 const {
     printSuccess, printError, printWarning, filterObject, parseObject, printTable, formatValidationPath,
     LISTTABLEFORMAT, isNumeric, handleTable, printExtendedLogs, handleListFailure, handleDeleteFailure,
+    getFilteredOutput,
 } = require('./utils');
 
 module.exports.SaveSkillCommand = class SaveSkillCommand {
@@ -123,11 +124,11 @@ module.exports.ListSkillsCommand = class ListSkillsCommand {
                     });
                     tableFormat.push({ column: 'Status', field: 'status', width: 30 });
                 }
-                printExtendedLogs(result, options);
-                if (options.json) {
-                    if (options.query) result = filterObject(result, options);
-                    return printSuccess(JSON.stringify(result, null, 2), options);
+                // TODO remove --query on deprecation
+                if (options.json || options.query) {
+                    return getFilteredOutput(result, options);
                 }
+                printExtendedLogs(result, options);
                 return handleTable(
                     tableFormat,
                     _.sortBy(result, options.sort ? [] : ['name']),
@@ -153,11 +154,11 @@ module.exports.DescribeSkillCommand = class DescribeSkillCommand {
 
         const catalog = new Catalog(profile.url);
         try {
-            let response = await catalog.describeSkill(options.project || profile.project, profile.token, skillName, options.verbose, options.output);
-            if (_.get(options, 'output', 'json').toLowerCase() === 'json') response = JSON.stringify(filterObject(response, options), null, 2);
-            printSuccess(response, options);
+            const response = await catalog.describeSkill(options.project || profile.project, profile.token, skillName, options.verbose, options.output);
+            if (_.get(options, 'output', 'json').toLowerCase() === 'json') return getFilteredOutput(response, options);
+            return printSuccess(response, options);
         } catch (err) {
-            printError(`Failed to describe skill ${skillName}: ${err.status} ${err.message}`, options);
+            return printError(`Failed to describe skill ${skillName}: ${err.status} ${err.message}`, options);
         }
     }
 };

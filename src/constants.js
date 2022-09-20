@@ -76,4 +76,8 @@ module.exports.DEFAULT_LIST_SORT_PARAMS = {
     start: 'start', // activations
 };
 
+module.exports.LIST_JSON_HELP_TEXT = 'Output results in JSON, supports JMESPath query to filter the response data';
+
+module.exports.QUERY_JSON_HELP_TEXT = 'A JMESPath query to use in filtering the response data';
+
 module.exports.GET_DEFAULT_SORT_CLI_OPTION = (param) => JSON.stringify({ [param]: -1 });

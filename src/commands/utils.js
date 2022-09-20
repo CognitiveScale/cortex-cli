@@ -93,12 +93,38 @@ function printError(message, options, exit = true) {
 }
 module.exports.printError = printError;
 
+// eslint-disable-next-line consistent-return
 module.exports.filterObject = (obj, options) => {
-    if (options.query) {
-        debug(`filtering results with query: ${options.query}`);
-        return jmsepath.search(obj, options.query);
+    try {
+        if (options.query) {
+            debug(`filtering results with query: ${options.query}`);
+            return jmsepath.search(obj, options.query);
+        }
+        return obj;
+    } catch (e) {
+        // TODO remove --query on deprecation
+        process.stderr.write(`error: invalid argument: ${options.query} \n`);
     }
-    return obj;
+};
+
+module.exports.getQueryOptions = (options) => {
+    // TODO remove --query on deprecation
+    if (options.query) process.stderr.write('[DEPRECATION WARNING] --query\n');
+    if (options.query && options.json && typeof (options.json) === 'string') process.stderr.write('Warning! --query overrides --json args\n');
+    // make --query override --json
+    const queryOptions = options.query || options.json;
+    // output JSON if JSMEpath isn't passed, default value is true
+    // set searchPath to null if there's no path
+    return { query: queryOptions === true ? null : queryOptions };
+};
+
+module.exports.getFilteredOutput = (result, options) => {
+    const filteredResult = this.filterObject(result, this.getQueryOptions(options));
+    if (filteredResult) {
+        // print extended logs iff --query arg is valid
+        this.printExtendedLogs(filteredResult, options);
+        this.printSuccess(JSON.stringify(filteredResult, null, 2), options);
+    }
 };
 
 module.exports.filterListObject = (obj, options) => {

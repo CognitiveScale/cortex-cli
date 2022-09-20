@@ -22,6 +22,8 @@ const { program } = require('commander');
 const { withCompatibilityCheck } = require('../src/compatibility');
 const {
     DEFAULT_LIST_SKIP_COUNT, DEFAULT_LIST_LIMIT_COUNT, GET_DEFAULT_SORT_CLI_OPTION, DEFAULT_LIST_SORT_PARAMS,
+    LIST_JSON_HELP_TEXT,
+    QUERY_JSON_HELP_TEXT,
 } = require('../src/constants');
 
 const {
@@ -63,7 +65,8 @@ program
     .option('--profile <profile>', 'The profile to use')
     .option('--project <project>', 'The project to use')
     .option('-o, --output <json|yaml|k8s>', 'Format output as yaml or k8s resource')
-    .option('--query <query>', 'A JMESPath query to use in filtering the response data.')
+    .option('--json [searchPath]', QUERY_JSON_HELP_TEXT)
+    .option('--query <query>', `[DEPRECATION WARNING] ${QUERY_JSON_HELP_TEXT}`)
     .option('--verbose', 'Verbose output')
     .action(withCompatibilityCheck(async (skillName, options) => {
         try {
@@ -101,10 +104,10 @@ program
     .option('--color [boolean]', 'Turn on/off colors for JSON output.', 'true')
     .option('--profile <profile>', 'The profile to use')
     .option('--project <project>', 'The project to use')
-    .option('--json', 'Output results using JSON')
+    .option('--json [searchQuery]', LIST_JSON_HELP_TEXT)
+    .option('--query <query>', `[DEPRECATION WARNING] ${QUERY_JSON_HELP_TEXT}`)
     .option('--nostatus', 'skip extra call for skill status')
     .option('--noshared', 'do not list shared skills')
-    .option('--query <query>', 'A JMESPath query to use in filtering the response data.')
     .option('--filter <filter>', 'A Mongo style filter to use.')
     .option('--limit <limit>', 'Limit number of records', DEFAULT_LIST_LIMIT_COUNT)
     .option('--skip <skip>', 'Skip number of records', DEFAULT_LIST_SKIP_COUNT)

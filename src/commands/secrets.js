@@ -24,6 +24,7 @@ const { loadProfile } = require('../config');
 const Secrets = require('../client/secrets');
 const {
  printSuccess, printError, filterObject, parseObject, printTable, handleTable, handleDeleteFailure,
+    getFilteredOutput,
 } = require('./utils');
 
 module.exports.ListSecretsCommand = class {
@@ -39,10 +40,10 @@ module.exports.ListSecretsCommand = class {
         secrets.listSecrets(options.project || profile.project, profile.token)
             .then((response) => {
                 if (response.success) {
-                    let { result } = response;
-                    if (options.json) {
-                        if (options.query) result = filterObject(result, options);
-                        printSuccess(JSON.stringify(result, null, 2), options);
+                    const { result } = response;
+                    // TODO remove --query on deprecation
+                    if (options.json || options.query) {
+                        getFilteredOutput(result, options);
                     } else {
                         const tableSpec = [
                             { column: 'Secret Key Name', field: 'keyName', width: 50 },

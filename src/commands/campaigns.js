@@ -20,8 +20,9 @@ const Catalog = require('../client/catalog');
 
 const _ = { get: require('lodash/get') };
 const {
- printSuccess, printError, filterObject, printTable, handleTable,
+ printSuccess, printError, printTable, handleTable,
     printExtendedLogs, handleListFailure,
+    getFilteredOutput,
 } = require('./utils');
 
 module.exports.ListCampaignsCommand = class ListCampaignsCommand {
@@ -38,12 +39,12 @@ module.exports.ListCampaignsCommand = class ListCampaignsCommand {
             const sortParam = (options.sort || '{}').replace(/"/g, '\'');
             const filterParam = (options.filter || '{}').replace(/"/g, '\'');
             const response = await cli.listCampaigns(options.project || profile.project, profile.token, filterParam, options.limit, options.skip, sortParam);
-            let result = response;
-            printExtendedLogs(result, options);
-            if (options.json) {
-                if (options.query) result = filterObject(result, options);
-                printSuccess(JSON.stringify(result, null, 2), options);
+            const result = response;
+            // TODO remove --query on deprecation
+            if (options.json || options.query) {
+                getFilteredOutput(result, options);
             } else {
+                printExtendedLogs(result, options);
                 const tableSpec = [
                     { column: 'Name', field: 'name', width: 30 },
                     { column: 'Title', field: 'title', width: 50 },
@@ -70,8 +71,7 @@ module.exports.DescribeCampaignCommand = class DescribeCampaignCommand {
 
         try {
             const response = await cli.getCampaign(options.project || profile.project, profile.token, campaignName);
-            const result = filterObject(response, options);
-            printSuccess(JSON.stringify(result, null, 2), options);
+            getFilteredOutput(response, options);
         } catch (err) {
             printError(`Failed to describe campaign: ${err.status} ${err.message}`, options);
         }
@@ -220,12 +220,12 @@ module.exports.ListMissionsCommand = class ListMissionsCommand {
             const filterParam = (options.filter || '{}').replace(/"/g, '\'');
             cli.listMissions(options.project || profile.project, profile.token, campaign, filterParam, options.limit, options.skip, sortParam).then((response) => {
                 if (response.success === false) throw response;
-                let data = Object.values(response.data);
-                printExtendedLogs(data, options);
-                if (options.json) {
-                    if (options.query) data = filterObject(data, options);
-                    printSuccess(JSON.stringify(data, null, 2), options);
+                const data = Object.values(response.data);
+                // TODO remove --query on deprecation
+                if (options.json || options.query) {
+                    getFilteredOutput(data, options);
                 } else {
+                    printExtendedLogs(data, options);
                     const tableSpec = [
                         { column: 'Name', field: 'name', width: 50 },
                         { column: 'Title', field: 'title', width: 50 },

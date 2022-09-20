@@ -26,6 +26,7 @@ dayjs.extend(relativeTime);
 const {
     printSuccess, printError, filterObject, parseObject, isNumeric,
     handleTable, printExtendedLogs, handleListFailure, handleDeleteFailure,
+    getFilteredOutput,
 } = require('./utils');
 
 module.exports.ListActionsCommand = class {
@@ -43,12 +44,12 @@ module.exports.ListActionsCommand = class {
             // eslint-disable-next-line consistent-return
             .then((response) => {
                 if (response.success) {
-                    let result = response.actions;
-                    printExtendedLogs(result, options);
-                    if (options.json) {
-                        if (options.query) result = filterObject(result, options);
-                        printSuccess(JSON.stringify(result, null, 2), options);
+                    const result = response.actions;
+                    // TODO remove --query on deprecation
+                    if (options.json || options.query) {
+                        getFilteredOutput(result, options);
                     } else {
+                        printExtendedLogs(result, options);
                         const tableSpec = [
                             { column: 'Name', field: 'name', width: 30 },
                             { column: 'Type', field: 'type', width: 8 },
@@ -86,8 +87,7 @@ module.exports.DescribeActionCommand = class {
         actions.describeAction(options.project || profile.project, profile.token, actionName)
             .then((response) => {
                 if (response.success) {
-                    const result = filterObject(response.action, options);
-                    printSuccess(JSON.stringify(result, null, 2), options);
+                    getFilteredOutput(response.action, options);
                 } else {
                     printError(`Failed to describe action: ${response.status} ${response.message}`, options);
                 }

@@ -18,7 +18,8 @@ const debug = require('debug')('cortex:cli');
 const { loadProfile } = require('../config');
 const Content = require('../client/content');
 const {
- printSuccess, printError, getSourceFiles, humanReadableFileSize, filterObject, handleTable,
+ printSuccess, printError, getSourceFiles, humanReadableFileSize, handleTable,
+    getFilteredOutput,
 } = require('./utils');
 
 module.exports.ListContent = class ListContent {
@@ -33,9 +34,10 @@ module.exports.ListContent = class ListContent {
         const content = new Content(profile.url);
         content.listContent(options.project || profile.project, profile.token, options.prefix).then((response) => {
             if (response.success) {
-                if (options.query || options.json) {
-                    const result = filterObject(response.message, options);
-                    printSuccess(JSON.stringify(result, null, 2), options);
+                const result = response.message;
+                // TODO remove --query on deprecation
+                if (options.json || options.query) {
+                    getFilteredOutput(result, options);
                 } else {
                     const tableSpec = [
                         { column: 'Key', field: 'Key', width: 70 },

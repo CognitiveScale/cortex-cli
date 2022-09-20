@@ -25,6 +25,7 @@ const Experiments = require('../client/experiments');
 const {
     printSuccess, printError, filterObject, printTable, parseObject, fileExists, formatValidationPath,
     handleTable, printExtendedLogs, handleListFailure, handleDeleteFailure,
+    getFilteredOutput,
 } = require('./utils');
 
 dayjs.extend(duration);
@@ -44,12 +45,12 @@ class ListExperiments {
         // eslint-disable-next-line consistent-return
         exp.listExperiments(options.project || profile.project, options.model, profile.token, options.filter, options.limit, options.skip, options.sort).then((response) => {
             if (response.success) {
-                let { result } = response;
-                printExtendedLogs(result.experiments, options);
-                if (options.json) {
-                    if (options.query) result = filterObject(result, options);
-                    printSuccess(JSON.stringify(result, null, 2), options);
+                const { result } = response;
+                // TODO remove --query on deprecation
+                if (options.json || options.query) {
+                    getFilteredOutput(result, options);
                 } else {
+                    printExtendedLogs(result.experiments, options);
                     const tableSpec = [
                         { column: 'Name', field: 'name', width: 40 },
                         { column: 'Title', field: 'title', width: 50 },
@@ -82,8 +83,7 @@ class DescribeExperimentCommand {
         const exp = new Experiments(profile.url);
         exp.describeExperiment(options.project || profile.project, profile.token, experimentName).then((response) => {
             if (response.success) {
-                const result = filterObject(response.result, options);
-                printSuccess(JSON.stringify(result, null, 2), options);
+                getFilteredOutput(response.result, options);
             } else {
                 printError(`Failed to describe experiment ${experimentName}: ${response.status} - ${response.message}`, options);
             }
@@ -132,13 +132,12 @@ class ListRuns {
         // eslint-disable-next-line consistent-return
         exp.listRuns(options.project || profile.project, profile.token, experimentName, options.filter, options.limit, sort, options.skip).then((response) => {
             if (response.success) {
-                let { result } = response;
-
-                printExtendedLogs(result.runs, options);
-                if (options.json) {
-                    if (options.query) result = filterObject(result.runs, options);
-                    printSuccess(JSON.stringify(result, null, 2), options);
+                const { result } = response;
+                // TODO remove --query on deprecation
+                if (options.json || options.query) {
+                    getFilteredOutput(result.runs, options);
                 } else {
+                    printExtendedLogs(result.runs, options);
                     const tableSpec = [
                         { column: 'Run ID', field: 'runId', width: 25 },
                         { column: 'Start', field: 'startTime', width: 25 },
@@ -180,8 +179,7 @@ class DescribeRunCommand {
         const exp = new Experiments(profile.url);
         exp.describeRun(options.project || profile.project, profile.token, experimentName, runId).then((response) => {
             if (response.success) {
-                const result = filterObject(response.result, options);
-                printSuccess(JSON.stringify(result, null, 2), options);
+                getFilteredOutput(response.result, options);
             } else {
                 printError(`Failed to describe run ${experimentName}/${runId}: ${response.status} - ${response.message}`, options);
             }

@@ -143,15 +143,10 @@ module.exports = class Catalog {
             .catch((err) => constructError(err));
     }
 
-    async listServices(projectId, token, agentName, filter, limit, skip, sort) {
+    async listServices(projectId, token, agentName) {
         // TODO removed profile should I use that as the URL ??
         checkProject(projectId);
         debug('listServices() using describeAgent');
-        const query = {};
-        if (filter) query.filter = filter;
-        if (limit) query.limit = limit;
-        if (sort) query.sort = sort;
-        if (skip) query.skip = skip;
         const response = await this.describeAgent(projectId, token, agentName);
         if (response.success) {
             const urlBase = `${this.endpoints.agentinvoke(projectId)}/${encodeURIComponent(agentName)}/services`;
