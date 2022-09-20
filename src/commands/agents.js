@@ -314,7 +314,7 @@ module.exports.ListServicesCommand = class ListServicesCommand {
         debug('%s.listServices(%s)', profile.name, agentName);
 
         const catalog = new Catalog(profile.url);
-        catalog.listServices(options.project || profile.project, profile.token, agentName, profile, options.filter, options.limit, options.skip, options.sort).then((response) => {
+        catalog.listServices(options.project || profile.project, profile.token, agentName, profile).then((response) => {
             if (response.success) {
                 const result = response.services;
                 // TODO remove --query on deprecation
