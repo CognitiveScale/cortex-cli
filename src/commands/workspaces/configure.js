@@ -40,19 +40,22 @@ module.exports.WorkspaceConfigureCommand = class WorkspaceConfigureCommand {
     this.options = opts;
 
     const config = readConfig();
+    const currentProfile = config.profiles[config.currentProfile];
+
+    console.log(`Configuring workspaces for profile ${chalk.green(config.currentProfile)}`);
 
     await inquirer.prompt([
       {
         type: 'input',
         name: 'repo',
         message: 'Template Repository URL:   ',
-        default: _.get(config, 'templateConfig.repo', DEFAULT_TEMPLATE_REPO),
+        default: _.get(currentProfile, 'templateConfig.repo', DEFAULT_TEMPLATE_REPO),
       },
       {
         type: 'input',
         name: 'branch',
         message: 'Template Repository Branch:',
-        default: _.get(config, 'templateConfig.branch', DEFAULT_TEMPLATE_BRANCH),
+        default: _.get(currentProfile, 'templateConfig.branch', DEFAULT_TEMPLATE_BRANCH),
       },
     ])
       .then(async (answers) => {
@@ -107,7 +110,7 @@ module.exports.WorkspaceConfigureCommand = class WorkspaceConfigureCommand {
                   if (accessToken.access_token) {
                     clearTimeout(pollTimer);
                     persistToken(accessToken);
-                    config.templateConfig = answers;
+                    config.profiles[config.currentProfile].templateConfig = answers;
                     config.save();
                     printSuccess('\x1b[0G\x1b[2KGithub token configuration successful.', options);
                     resolve();
@@ -152,6 +155,9 @@ module.exports.WorkspaceConfigureCommand = class WorkspaceConfigureCommand {
           } else {
             printError('\x1b[2KDevice Code request failed.  Please try again.', this.options);
           }
+        } else {
+          config.profiles[config.currentProfile].templateConfig = answers;
+          config.save();
         }
       })
       .catch((error) => {

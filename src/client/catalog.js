@@ -301,7 +301,7 @@ module.exports = class Catalog {
             download.on('error', (error) => reject(constructError(error).message));
             const fileOutput = fs.createWriteStream(path);
             fileOutput.on('error', (error) => reject(constructError(error).message));
-            fileOutput.on('finish', () => resolve);
+            fileOutput.on('finish', resolve);
             download.pipe(fileOutput);
         });
     }

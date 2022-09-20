@@ -39,7 +39,7 @@ describe('Upload Directory', () => {
 
         const dirname = __dirname.split(path.sep).join(path.posix.sep);
 
-        const filePath = path.join(dirname, 'cortex');
+        const filePath = path.posix.join(dirname, 'cortex');
         const options = {
             recursive: true,
             test: true,
@@ -49,7 +49,7 @@ describe('Upload Directory', () => {
             {
                 canonical: path.posix.join(dirname, 'cortex', 'config'),
                 relative: 'config',
-                size: 1478,
+                size: 1610,
             },
             {
                 canonical: path.posix.join(dirname, 'cortex', 'pat-file.json'),

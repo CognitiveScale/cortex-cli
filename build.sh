@@ -40,6 +40,7 @@ function docker_build(){
     cd $OPWD
     export PATH=$PATH:/tmp/macsign/linux64
     npm ci --unsafe-perm --userconfig=/root/.npmrc --ignore-scripts
+    npm rebuild
     npm test
     echo ${VERSION} > version.txt
     ./generate_docs.sh

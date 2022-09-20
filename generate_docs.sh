@@ -42,7 +42,7 @@ EOF
 #echo
 #echo "Done -> ${OUTFILE}"
 echo "$(header)" > ${OUTFILE}
-for CMD in $(ls -1 ./bin/cortex-*.js | grep -v 'cortex-workspaces' | sort); do
+for CMD in $(ls -1 ./bin/cortex-*.js | sort); do
   echo $CMD
   node generate_docs.js $CMD >> $OUTFILE
 done

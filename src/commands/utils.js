@@ -185,7 +185,7 @@ module.exports.callMe = callMe;
 module.exports.getSourceFiles = (source, cb) => {
     const options = { silent: true };
     const normalizedSource = (source.endsWith('/')) ? source : `${source}/`;
-    const normalizedPath = path.join(normalizedSource, '**', '*');
+    const normalizedPath = path.posix.join(normalizedSource, '**', '*');
     glob(normalizedPath, options, (err, files) => {
         // files is an array of filenames.
         if (err) {
