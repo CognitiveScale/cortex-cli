@@ -181,7 +181,7 @@ module.exports.WorkspaceBuildCommand = class WorkspaceBuildCommand {
             },
             (evt) => {
               if (evt.error) {
-                reject(new Error(evt.error));
+                reject(new Error(`${actionPath}: ${evt.error}`));
                 return;
               }
               status.processEvent(evt);
