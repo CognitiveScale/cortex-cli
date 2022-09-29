@@ -523,5 +523,6 @@ module.exports = {
     loadProfile,
     generateJwt,
     defaultConfig,
+    configDir,
     readConfig,
 };

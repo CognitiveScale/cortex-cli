@@ -102,3 +102,4 @@ package/
 *.tgz
 npm-shrinkwrap.json
 *.amp
+test/cortex/cache.dat

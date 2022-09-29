@@ -1,35 +1,92 @@
+const _ = require('lodash');
 const path = require('path');
 const glob = require('glob');
 const yaml = require('js-yaml');
+const fs = require('fs');
+const os = require('os');
 const {
+  stat,
   readFile, 
 } = require('fs/promises');
 const { statSync } = require('fs');
 const ghGot = require('gh-got');
 
-const _ = {
-  get: require('lodash/get'),
-  map: require('lodash/map'),
-  mean: require('lodash/mean'),
-};
+const { configDir } = require('../../config');
+const {
+  printWarning,
+} = require('../utils');
 
-const keytar = require('keytar');
+let keytar;
+// Is loading keytar fails, use headless fallback for secrets..
+try {
+  // Don't load keytar for tests
+  if (process.env.NODE_ENV !== 'test') {
+    keytar = require('keytar');
+  }
+} catch (err) {
+  printWarning(`Unable to use keyring service, falling back to file-based keystore: ${err.message}`);
+}
 
 const { loadProfile } = require('../../config');
+const buffer = require("buffer");
 
 const CORTEX_CLI_AUTH_ID = 'cortex-cli:github';
 const CORTEX_CLI_AUTH_USER = 'cortex-cli';
 
+async function getPasswordHeaded() {
+  return await keytar.getPassword(CORTEX_CLI_AUTH_ID, CORTEX_CLI_AUTH_USER);
+}
+
+function readLocaFile() {
+  const dataFile = path.join(configDir(), 'cache.dat');
+  // nothing stored
+  if (!fs.existsSync(dataFile)) return {};
+  const rawData = fs.readFileSync(dataFile);
+  const decoded = Buffer.from(rawData.toString(), 'base64').toString();
+  return JSON.parse(decoded);
+}
+
+async function getPasswordHeadless() {
+  return _.get(readLocaFile(),[CORTEX_CLI_AUTH_ID, CORTEX_CLI_AUTH_USER]);
+}
+
+async function storePasswordHeaded(val) {
+  await keytar.setPassword(CORTEX_CLI_AUTH_ID, CORTEX_CLI_AUTH_USER, val);
+}
+
+async function storePasswordHeadless(val) {
+  const dataFile = path.join(configDir(), 'cache.dat');
+  const originaldata = readLocaFile();
+  const updated = _.set(originaldata, [CORTEX_CLI_AUTH_ID, CORTEX_CLI_AUTH_USER],  val);
+  fs.writeFileSync(dataFile, Buffer.from(JSON.stringify(updated)).toString('base64'));
+}
+
+
 module.exports.validateToken = async function validateToken() {
-  const authorization = await keytar.getPassword(CORTEX_CLI_AUTH_ID, CORTEX_CLI_AUTH_USER);
-  if (authorization) {
-    return ghGot('user', { headers: { authorization } }).catch(() => undefined).then((u) => ((u && u.statusCode === 200) ? authorization : undefined));
+  try {
+    let authorization;
+    if (keytar !== undefined) {
+      authorization = await getPasswordHeaded();
+    } else {
+      authorization = await getPasswordHeadless();
+    }
+    if (authorization) {
+      const u = await ghGot('user', { headers: { authorization } })
+      if (u?.statusCode === 200)
+        return authorization;
+    }
+  } catch (err) {
+    console.error(err.message)
   }
   return undefined;
 };
 
 module.exports.persistToken = async function persistToken(token) {
-  await keytar.setPassword(CORTEX_CLI_AUTH_ID, CORTEX_CLI_AUTH_USER, `${token.token_type} ${token.access_token}`);
+  const val = `${token.token_type} ${token.access_token}`
+  if (keytar) {
+    return storePasswordHeaded(val);
+  }
+  return storePasswordHeadless(val);
 };
 
 module.exports.printToTerminal = function printToTerminal(txt) {
