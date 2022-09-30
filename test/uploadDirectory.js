@@ -47,11 +47,6 @@ describe('Upload Directory', () => {
 
         const expectedFileDicts = [
             {
-                canonical: path.posix.join(dirname, 'cortex', 'cache.dat'),
-                relative: path.join('cache.dat'),
-                size: 84,
-            },
-            {
                 canonical: path.posix.join(dirname, 'cortex', 'config'),
                 relative: 'config',
                 size: 1611,

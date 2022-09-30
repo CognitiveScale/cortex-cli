@@ -50,6 +50,7 @@ describe('Workspaces', () => {
         restoreEnv();
         sandbox.restore();
         process.chdir('..');
+        fs.rmSync('cortex/cache.dat');
         fs.rmSync('workspaces', { recursive: true });
     });
 
