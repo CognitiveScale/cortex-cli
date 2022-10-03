@@ -146,9 +146,9 @@ module.exports.WorkspaceBuildCommand = class WorkspaceBuildCommand {
   }
 
   async buildAction(target, action, status, options) {
+    const actionPath = path.join(target, 'actions', action.name);
+    const expectedDockerfile = path.join(actionPath, 'Dockerfile');
     try {
-      const actionPath = path.join(target, 'actions', action.name);
-      const expectedDockerfile = path.join(actionPath,"Dockerfile");
       if (!fs.existsSync(expectedDockerfile)) {
         throw Error(`Unable to build action '${action.name}': Missing Dockerfile '${expectedDockerfile}', \nCheck that the 'actions/<name>' folder and action's name match or add a 'Dockerfile' in the path provided`);
       }
@@ -181,19 +181,19 @@ module.exports.WorkspaceBuildCommand = class WorkspaceBuildCommand {
             },
             (evt) => {
               if (evt.error) {
-                reject(new Error(`${actionPath}: ${evt.error}`));
+                reject(evt.error);
                 return;
               }
               status.processEvent(evt);
             },
           );
         } catch (err) {
-          printError(err, options);
+          printError(`${expectedDockerfile}:\n\t ${err.message}`, options);
           reject(err);
         }
       });
     } catch (err) {
-      printError(err, options);
+      printError(`${expectedDockerfile}:\n\t ${err.message}`, options);
       return Promise.reject(err);
     }
   }
