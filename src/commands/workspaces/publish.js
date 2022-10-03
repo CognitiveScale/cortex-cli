@@ -258,7 +258,7 @@ module.exports.WorkspacePublishCommand = class WorkspacePublishCommand {
 
             if (imglist.length !== 0) {
                 const globOpts = {
-                  root: target,
+                  cwd: target,
                   absolute: true,
                 };
                 const regAuth = await this.getRegistryAuth(profile, action.image, options);

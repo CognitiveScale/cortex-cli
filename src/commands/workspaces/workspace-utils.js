@@ -107,7 +107,7 @@ module.exports.getSkillInfo = function getSkillInfo(target) {
     skillFiles = statSync(path.resolve(target)) ? [target] : [];
   } else {
     skillFiles = glob.sync('./skills/**/skill.yaml', {
-      root: target,
+      cwd: target,
       absolute: true,
     });
   }

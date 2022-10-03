@@ -153,7 +153,7 @@ module.exports.WorkspaceBuildCommand = class WorkspaceBuildCommand {
         throw Error(`Unable to build action '${action.name}': Missing Dockerfile '${expectedDockerfile}', \nCheck that the 'actions/<name>' folder and action's name match or add a 'Dockerfile' in the path provided`);
       }
       const globList = glob.sync('./**/*', {
-        root: actionPath,
+        cwd: actionPath,
         absolute: true,
       });
 
