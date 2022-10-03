@@ -49,7 +49,7 @@ describe('Upload Directory', () => {
             {
                 canonical: path.posix.join(dirname, 'cortex', 'config'),
                 relative: 'config',
-                size: 1610,
+                size: 1611,
             },
             {
                 canonical: path.posix.join(dirname, 'cortex', 'pat-file.json'),

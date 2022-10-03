@@ -124,7 +124,7 @@ module.exports.WorkspacePublishCommand = class WorkspacePublishCommand {
   }
 
   async getRegistryAuth(profile, options) {
-    const reg = await getCurrentRegistry();
+    const reg = await getCurrentRegistry(profile);
 
     if (!profile.token) {
       if (reg.isCortex) {
@@ -158,7 +158,7 @@ module.exports.WorkspacePublishCommand = class WorkspacePublishCommand {
     };
   }
 
-  async pushAction(action, imageTag, registryAuth) {
+  async pushAction(action, imageTag, registryAuth, { skipPush }) {
     let img = this.docker.getImage(imageTag);
 
     /// -------------------------------------
@@ -170,7 +170,14 @@ module.exports.WorkspacePublishCommand = class WorkspacePublishCommand {
     await img.tag({ repo: newTag });
     img = this.docker.getImage(newTag);
     /// -------------------------------------
+    // Set image tag to new image tag for skill/action deployment later
+    // eslint-disable-next-line no-param-reassign
+    action.image = newTag;
 
+    if (skipPush) {
+      printSuccess(`Skipping docker push for: ${newTag}`);
+      return true;
+    }
     const status = new DockerPushProgressTracker();
 
     const imgPush = await img
@@ -178,15 +185,13 @@ module.exports.WorkspacePublishCommand = class WorkspacePublishCommand {
         authconfig: registryAuth,
       });
 
-    await new Promise((resolve, reject) => {
+    return new Promise((resolve, reject) => {
       this.docker.modem.followProgress(
         imgPush,
         (err) => {
           if (err) {
             return reject(err);
           }
-          // eslint-disable-next-line no-param-reassign
-          action.image = newTag;
           status.complete();
           status.stop();
           return resolve(true);
@@ -219,11 +224,10 @@ module.exports.WorkspacePublishCommand = class WorkspacePublishCommand {
           throw new Error(`Skill ${options.skill} not found!`);
         }
       }
-
       const skillInfo = await getSkillInfo(target);
 
       if (skillInfo.length > 0) {
-        const profile = await loadProfile();
+        const profile = await loadProfile(options.profile);
 
         /// If the user passed in a project name, validate it with the cluster
         let project = options.project || profile.project;
@@ -245,7 +249,7 @@ module.exports.WorkspacePublishCommand = class WorkspacePublishCommand {
           const skillName = info.skill.name;
           const actions = info.skill.actions ? info.skill.actions : [];
           const actionsPublished = await Promise.all(_.map(actions, async (action) => {
-            const tag = await buildImageTag(action.image);
+            const tag = await buildImageTag(profile, action.image);
             const imglist = await this.docker.listImages({
               filters: JSON.stringify({
                 reference: [tag],
@@ -341,8 +345,8 @@ module.exports.WorkspacePublishCommand = class WorkspacePublishCommand {
                     printSuccess(`Published content ${key}`, options);
                   }),
                 );
-
-                await this.pushAction(action, tag, regAuth);
+                // pass options if we want to skip docker push for example
+                await this.pushAction(action, tag, regAuth, options);
             } else {
               printError(`No image found for action ${action.name}.  Has it been built?`, options);
               return false;
@@ -352,9 +356,10 @@ module.exports.WorkspacePublishCommand = class WorkspacePublishCommand {
           }));
 
           if (_.every(actionsPublished)) {
-            this.catalogClient.saveSkill(project, profile.token, info.skill);
-            printSuccess('Publish Complete', options);
-            return true;
+              const saveResult = await this.catalogClient.saveSkill(project, profile.token, info.skill);
+              if (saveResult.success) return true;
+              printError(`Skill save failed for ${info.skill.name}: ${saveResult.message}`, false);
+              return false;
           }
 
           printError('Publish Failed', options);

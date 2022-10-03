@@ -63,7 +63,7 @@
     "commander": "9.4.0",
     "dayjs": "1.11.5",
     "debug": "4.3.4",
-    "dockerode": "3.3.3",
+    "dockerode": "3.3.4",
     "find-package-json": "1.2.0",
     "form-data": "4.0.0",
     "get-stream": "6.0.1",
@@ -76,8 +76,8 @@
     "is-installed-globally": "0.4.0",
     "istextorbinary": "6.0.0",
     "jmespath": "0.16.0",
-    "joi": "17.6.0",
-    "jose-node-cjs-runtime": "4.9.0",
+    "joi": "17.6.2",
+    "jose-node-cjs-runtime": "4.10.0",
     "js-yaml": "4.1.0",
     "keytar": "7.9.0",
     "lodash": "4.17.21",
@@ -117,7 +117,6 @@
     ]
   },
   "overrides": {
-    "got": "11.8.5",
-    "ansi-regex": "5.0.1"
+    "got": "11.8.5"
   }
 }

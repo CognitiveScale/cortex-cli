@@ -4,6 +4,7 @@ const glob = require('glob');
 const Docker = require('dockerode');
 const cliProgress = require('cli-progress');
 const { BarFormat } = require('cli-progress').Format;
+const debug = require('debug')('cortex:cli');
 const { printError, printSuccess } = require('../utils');
 
 const _ = {
@@ -20,6 +21,7 @@ const _ = {
 };
 
 const { getSkillInfo, buildImageTag } = require('./workspace-utils');
+const { loadProfile } = require('../../config');
 
 class DockerBuildProgressTracker {
   constructor(data) {
@@ -146,6 +148,10 @@ module.exports.WorkspaceBuildCommand = class WorkspaceBuildCommand {
   async buildAction(target, action, status, options) {
     try {
       const actionPath = path.join(target, 'actions', action.name);
+      const expectedDockerfile = path.join(actionPath,"Dockerfile");
+      if (!fs.existsSync(expectedDockerfile)) {
+        throw Error(`Unable to build skill '${options.skill}': Missing Dockerfile '${expectedDockerfile}', Check that the 'actions/<name>' folder and action's name match or add a 'Dockerfile' in the path provided`);
+      }
       const globList = glob.sync('./**/*', {
         root: actionPath,
         absolute: true,
@@ -153,8 +159,7 @@ module.exports.WorkspaceBuildCommand = class WorkspaceBuildCommand {
 
       const buildList = _.map(globList, (g) => path.posix.join(...(path.relative(actionPath, g)).split(path.sep)));
       const docker = new Docker();
-      const imageTag = await buildImageTag(action.image);
-
+      const imageTag = await buildImageTag(this.profile, action.image);
       const stream = await docker.buildImage(
         {
           context: actionPath,
@@ -176,7 +181,7 @@ module.exports.WorkspaceBuildCommand = class WorkspaceBuildCommand {
             },
             (evt) => {
               if (evt.error) {
-                reject(new Error(evt.error));
+                reject(new Error(`${actionPath}: ${evt.error}`));
                 return;
               }
               status.processEvent(evt);
@@ -196,7 +201,7 @@ module.exports.WorkspaceBuildCommand = class WorkspaceBuildCommand {
   async execute(folder, options) {
     this.options = options;
     let target = process.cwd();
-
+    this.profile = await loadProfile(options.profile);
     try {
       if (folder) {
         const fldr = folder.replace(/'|"/g, '');

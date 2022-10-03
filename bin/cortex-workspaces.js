@@ -61,6 +61,7 @@ program
 
     program
     .command('build [folder]')
+    .option('--profile <profile>', 'The profile to use')
     .option('--color [boolean]', 'Turn on/off colors', 'true')
     .option('--skill <skill name>', 'Build only the specified skill')
     .description('Builds all skills in the workspace, or optionally only the specified skill')
@@ -75,8 +76,10 @@ program
 
     program
     .command('publish [folder]')
+    .option('--profile <profile>', 'The profile to use')
     .option('--project <project name>', 'Publish to the specified project')
     .option('--color [boolean]', 'Turn on/off colors', 'true')
+    .option('--skip-push', 'Don\'t push images to docker registry')
     .option('--skill <skill name>', 'Publish only the specified skill')
     .description('Publishes all skills and resources in the workspace')
     .action((folder, options) => { // deliberately not using withCompatibilityCheck()
@@ -94,6 +97,7 @@ program
 
     registry
     .command('add [name]')
+    .option('--profile <profile>', 'The profile to use')
     .option('--color [boolean]', 'Turn on/off colors', 'true')
     .option('--url <registry url>', 'Registry URL')
     .option('--namespace <registry namespace>', 'Registry Namespace')
@@ -108,6 +112,7 @@ program
 
     registry
     .command('remove [name]')
+    .option('--profile <profile>', 'The profile to use')
     .option('--color [boolean]', 'Turn on/off colors', 'true')
     .description('Removes the specified image registry.')
     .action((name, options) => { // deliberately not using withCompatibilityCheck()
@@ -120,6 +125,7 @@ program
 
     registry
     .command('activate [name]')
+    .option('--profile <profile>', 'The profile to use')
     .option('--color [boolean]', 'Turn on/off colors', 'true')
     .description('Activates the specified image registry.')
     .action((name, options) => { // deliberately not using withCompatibilityCheck()
@@ -132,6 +138,7 @@ program
 
     registry
     .command('list')
+    .option('--profile <profile>', 'The profile to use')
     .option('--color [boolean]', 'Turn on/off colors', 'true')
     .description('Lists all image registries')
     .action((options) => { // deliberately not using withCompatibilityCheck()
