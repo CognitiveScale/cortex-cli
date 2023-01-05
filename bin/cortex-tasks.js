@@ -58,7 +58,7 @@ program
     .option('--filter <filter>', 'A Mongo style filter to use.')
     .option('--limit <limit>', 'Limit number of records', DEFAULT_LIST_LIMIT_COUNT)
     .option('--skip <skip>', 'Skip number of records', DEFAULT_LIST_SKIP_COUNT)
-    .option('--sort <asc|desc|sort>', 'Sort asc|desc on startTime or Mongo style sort statement.', GET_DEFAULT_SORT_CLI_OPTION(DEFAULT_LIST_SORT_PARAMS.startTime))
+    .option('--sort <mongo-style-sort-expr>', 'Mongo style sort statement.', GET_DEFAULT_SORT_CLI_OPTION(DEFAULT_LIST_SORT_PARAMS.startTime))
     .action(withCompatibilityCheck(async (options) => {
         try {
             await new ListTasksCommand(program).execute(options);
