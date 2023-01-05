@@ -64,6 +64,10 @@ module.exports.ALLOWED_QUERY_FIELDS = {
         filter: ['status', 'start', 'end', 'skillName', 'agentName'],
         sort: ['status', 'start', 'end', 'skillName', 'agentName'],
     },
+    TASK: {
+        filter: ['name', 'state', 'startTime', 'endTime', 'skillName', 'actionName', 'jobType', 'scheduled'],
+        sort: ['name', 'state', 'startTime', 'endTime', 'skillName', 'actionName', 'jobType'],
+    },
 };
 
 module.exports.DEFAULT_LIST_LIMIT_COUNT = '20';
@@ -74,6 +78,7 @@ module.exports.DEFAULT_LIST_SORT_PARAMS = {
     updatedAt: 'updatedAt', // skills, agents, actions, connections, models, experiments, types,
     _updatedAt: '_updatedAt', // projects, missions, campaigns, run, assessment, snapshot
     start: 'start', // activations
+    startTime: 'startTime', // tasks
 };
 
 module.exports.LIST_JSON_HELP_TEXT = 'Output results in JSON, supports JMESPath query to filter the response data';
