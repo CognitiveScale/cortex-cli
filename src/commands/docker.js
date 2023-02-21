@@ -16,7 +16,9 @@
 
 const debug = require('debug')('cortex:cli');
 const URL = require('url-parse');
-const { printSuccess, printError } = require('./utils');
+const { printSuccess, printError,
+    printWarning
+} = require('./utils');
 const { callMe } = require('./utils');
 const {
     generateJwt,
@@ -31,10 +33,14 @@ module.exports.DockerLoginCommand = class {
     async execute(options) {
         const profile = await loadProfile(options.profile);
         const ttl = options.ttl || '14d';
-
         try {
-            // TODO fetch this from new endpoint or maybe store this in the profile??
-            const registryUrl = (new URL(profile.url)).hostname.replace('api', 'private-registry');
+            // First try to see if we have of registries from /v4/info,  grab the first one with isCortex == true
+            let registryUrl = Object.values(profile?.registries ?? {}).find((v) => v?.isCortex === true)?.url;
+            // If not found try to guess the url, assuming our recommended install api.<my dns>  and private-registry.<my dns>
+            if (registryUrl === undefined) {
+                registryUrl = (new URL(profile.url)).hostname.replace('api', 'private-registry');
+                printWarning(`Using default docker registry url: ${registryUrl}`);
+            }
             const jwt = await generateJwt(profile, ttl);
             const command = `docker login -u cli --password ${jwt} ${registryUrl}`;
             debug('%s.executeDockerLogin(%s)', profile.name, command);
