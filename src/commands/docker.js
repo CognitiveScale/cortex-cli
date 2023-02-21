@@ -1,7 +1,3 @@
-import debugSetup from 'debug';
-import URL from 'url-parse';
-import { printSuccess, printError, callMe } from './utils.js';
-import { generateJwt, loadProfile } from '../config.js';
 /*
  * Copyright 2023 Cognitive Scale, Inc. All Rights Reserved.
  *
@@ -17,6 +13,11 @@ import { generateJwt, loadProfile } from '../config.js';
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import debugSetup from 'debug';
+import URL from 'url-parse';
+import { printSuccess, printError, callMe } from './utils.js';
+import { generateJwt, loadProfile } from '../config.js';
+
 const debug = debugSetup('cortex:cli');
 export default class DockerLoginCommand {
     constructor(program) {
@@ -27,8 +28,13 @@ export default class DockerLoginCommand {
         const profile = await loadProfile(options.profile);
         const ttl = options.ttl || '14d';
         try {
-            // TODO fetch this from new endpoint or maybe store this in the profile??
-            const registryUrl = (new URL(profile.url)).hostname.replace('api', 'private-registry');
+            // First try to see if we have of registries from /v4/info,  grab the first one with isCortex == true
+            let registryUrl = Object.values(profile?.registries ?? {}).find((v) => v?.isCortex === true)?.url;
+            // If not found try to guess the url, assuming our recommended install api.<my dns>  and private-registry.<my dns>
+            if (registryUrl === undefined) {
+                registryUrl = (new URL(profile.url)).hostname.replace('api', 'private-registry');
+                printWarning(`Using default docker registry url: ${registryUrl}`);
+            }
             const jwt = await generateJwt(profile, ttl);
             const command = `docker login -u cli --password ${jwt} ${registryUrl}`;
             debug('%s.executeDockerLogin(%s)', profile.name, command);
