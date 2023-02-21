@@ -4,6 +4,9 @@
         "sourceType": "module"
     },
     "extends": "airbnb-base",
+    "parserOptions": {
+        "ecmaVersion": 2020
+    },
     "rules": {
         "no-underscore-dangle": [
             0
