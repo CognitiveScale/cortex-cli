@@ -16,8 +16,8 @@
 
 const debug = require('debug')('cortex:cli');
 const URL = require('url-parse');
-const { printSuccess, printError,
-    printWarning
+const {
+    printSuccess, printError, printWarning,
 } = require('./utils');
 const { callMe } = require('./utils');
 const {
