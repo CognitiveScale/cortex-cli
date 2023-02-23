@@ -31,7 +31,7 @@ const MAX_NAME_LENGTH = 20;
 const space = /\s+/;
 const specialCharsExceptHyphen = /[^A-Za-z0-9- ]/;
 const beginAndEndWithHyphen = /^[-]+|[-]+$/;
-const vaildationErrorMessage = 'Must be 20 characters or less, contain only lowercase a-z, 0-9, or -, and cannot begin or end with -';
+const validationErrorMessage = 'Must be 20 characters or less, contain only lowercase a-z, 0-9, or -, and cannot begin or end with -';
 const nameRequirementMessage = 'You must provide a name for the skill.';
 
 module.exports.constructError = (error) => {
@@ -403,7 +403,7 @@ module.exports.validateName = (name) => (space.test(name)
     || module.exports.hasUppercase(name)
     ? {
         status: false,
-        message: name ? vaildationErrorMessage : nameRequirementMessage,
+        message: name ? validationErrorMessage : nameRequirementMessage,
     }
     : {
         status: true,
@@ -426,10 +426,15 @@ module.exports.printExtendedLogs = (data, options) => {
 };
 
 module.exports.handleListFailure = (response, options, type) => {
+    printError(response);
     if (response.status === 400) {
         const optionTableFormat = this.OPTIONSTABLEFORMAT;
         printError(`${type} list failed.`, options, false);
-        this.printTable(optionTableFormat, response.details);
+        if (response.message !== undefined && response.message !== null) {
+            this.printTable(optionTableFormat, response.message);
+        } else {
+            this.printTable(optionTableFormat, response.details);
+        }
         printError(''); // Just exit
     }
     return printError(`Failed to list ${type}: ${response.status} ${response.message}`, options);
