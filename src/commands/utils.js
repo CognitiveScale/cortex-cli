@@ -426,7 +426,6 @@ module.exports.printExtendedLogs = (data, options) => {
 };
 
 module.exports.handleListFailure = (response, options, type) => {
-    printError(response);
     if (response.status === 400) {
         const optionTableFormat = this.OPTIONSTABLEFORMAT;
         printError(`${type} list failed.`, options, false);
