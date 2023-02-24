@@ -432,7 +432,7 @@ module.exports.handleListFailure = (response, options, type) => {
         if (response.details !== undefined && response.details !== null) {
             this.printTable(optionTableFormat, response.details);
         } else {
-            this.printError(response.message,options);
+            this.printError(response.message, options);
         }
         printError(''); // Just exit
     }
