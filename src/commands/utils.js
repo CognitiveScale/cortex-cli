@@ -429,10 +429,10 @@ module.exports.handleListFailure = (response, options, type) => {
     if (response.status === 400) {
         const optionTableFormat = this.OPTIONSTABLEFORMAT;
         printError(`${type} list failed.`, options, false);
-        if (response.message !== undefined && response.message !== null) {
-            this.printTable(optionTableFormat, response.message);
-        } else {
+        if (response.details !== undefined && response.details !== null) {
             this.printTable(optionTableFormat, response.details);
+        } else {
+            this.printError(response.message, options);
         }
         printError(''); // Just exit
     }
