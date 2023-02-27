@@ -1,5 +1,14 @@
+import debugSetup from 'debug';
+import _ from 'lodash';
+import dayjs from 'dayjs';
+import relativeTime from 'dayjs/plugin/relativeTime.js';
+import { loadProfile } from '../config.js';
+import Tasks from '../client/tasks.js';
+import {
+ printSuccess, printError, handleTable, printExtendedLogs, getFilteredOutput, 
+} from './utils.js';
 /*
- * Copyright 2020 Cognitive Scale, Inc. All Rights Reserved.
+ * Copyright 2023 Cognitive Scale, Inc. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the “License”);
  * you may not use this file except in compliance with the License.
@@ -13,29 +22,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-const debug = require('debug')('cortex:cli');
-const _ = require('lodash');
-const dayjs = require('dayjs');
-const relativeTime = require('dayjs/plugin/relativeTime');
-const { loadProfile } = require('../config');
-const Tasks = require('../client/tasks');
-const {
-    printSuccess, printError, handleTable, printExtendedLogs,
-    getFilteredOutput,
-} = require('./utils');
-
+const debug = debugSetup('cortex:cli');
 dayjs.extend(relativeTime);
-
 const TASK_LIST_TABLE = [
-        { column: 'Name', field: 'name', width: 60 },
-        { column: 'Activation Id', field: 'activationId', width: 40 },
-        { column: 'Skill Name', field: 'skillName', width: 40 },
-        { column: 'Status', field: 'state', width: 20 },
-        { column: 'Started', field: 'start', width: 25 },
-        { column: 'Took', field: 'took', width: 25 },
-    ];
-
+    { column: 'Name', field: 'name', width: 60 },
+    { column: 'Activation Id', field: 'activationId', width: 40 },
+    { column: 'Skill Name', field: 'skillName', width: 40 },
+    { column: 'Status', field: 'state', width: 20 },
+    { column: 'Started', field: 'start', width: 25 },
+    { column: 'Took', field: 'took', width: 25 },
+];
 const SCHED_LIST_TABLE = [
     { column: 'Name', field: 'name', width: 60 },
     { column: 'Skill Name', field: 'skillName', width: 40 },
@@ -43,8 +39,7 @@ const SCHED_LIST_TABLE = [
     { column: 'Started', field: 'start', width: 25 },
     { column: 'Schedule', field: 'schedule', width: 12 },
 ];
-
-module.exports.ListTasksCommand = class {
+export const ListTasksCommand = class {
     constructor(program) {
         this.program = program;
     }
@@ -68,7 +63,6 @@ module.exports.ListTasksCommand = class {
                 if (_.isEmpty(taskList)) {
                     return printSuccess('No tasks found');
                 }
-
                 // Old response format ["taskName", "taskName",...]
                 if (_.isString(taskList[0])) {
                     taskList = _.map(taskList, (t) => ({ name: t }));
@@ -78,7 +72,7 @@ module.exports.ListTasksCommand = class {
                     }
                     taskList = _.map(taskList, (t) => ({
                         ...t,
-                        state: t.status || t.state, // remap just in case..
+                        state: t.status || t.state,
                         start: t.startTime ? dayjs(t.startTime).fromNow() : '-',
                         took: t.endTime ? dayjs(t.endTime).from(dayjs(t.startTime), true) : '-',
                     }));
@@ -110,8 +104,7 @@ module.exports.ListTasksCommand = class {
         }
     }
 };
-
-module.exports.DescribeTaskCommand = class {
+export const DescribeTaskCommand = class {
     constructor(program) {
         this.program = program;
     }
@@ -120,7 +113,6 @@ module.exports.DescribeTaskCommand = class {
         const profile = await loadProfile(options.profile);
         const queryParams = {};
         debug('%s.describeTask(%s)', profile.name, taskName);
-
         if (options.k8s) queryParams.k8s = true;
         const tasks = new Tasks(profile.url);
         try {
@@ -134,8 +126,7 @@ module.exports.DescribeTaskCommand = class {
         }
     }
 };
-
-module.exports.TaskLogsCommand = class TaskLogsCommand {
+export class TaskLogsCommand {
     constructor(program) {
         this.program = program;
     }
@@ -154,9 +145,8 @@ module.exports.TaskLogsCommand = class TaskLogsCommand {
             return printError(`Failed to query Task Logs "${taskName}": ${err.status} ${err.message}`, options);
         }
     }
-};
-
-module.exports.TaskDeleteCommand = class TaskDeleteCommand {
+}
+export class TaskDeleteCommand {
     constructor(program) {
         this.program = program;
     }
@@ -175,9 +165,8 @@ module.exports.TaskDeleteCommand = class TaskDeleteCommand {
             return printError(`Error deleting ${taskName}: ${err.status} ${err.message}`, options);
         }
     }
-};
-
-module.exports.TaskPauseCommand = class TaskPauseCommand {
+}
+export class TaskPauseCommand {
     constructor(program) {
         this.program = program;
     }
@@ -198,28 +187,26 @@ module.exports.TaskPauseCommand = class TaskPauseCommand {
             return printError(`Error pausing "${taskNames.join(',')}": ${err.status} ${err.message}`, options);
         }
     }
-};
+}
+export class TaskResumeCommand {
+    constructor(program) {
+        this.program = program;
+    }
 
-module.exports.TaskResumeCommand = class TaskResumeCommand {
-        constructor(program) {
-            this.program = program;
+    async execute(taskNames, options) {
+        const profile = await loadProfile(options.profile);
+        debug('%s.executeResumeTask(%s)', profile.name, taskNames.join(','));
+        const tasks = new Tasks(profile.url);
+        try {
+            return Promise.all(taskNames.map(async (taskName) => {
+                const response = await tasks.resumeTask(options.project || profile.project, profile.token, taskName, options.verbose);
+                if (response.success) {
+                    return printSuccess(JSON.stringify(response), options);
+                }
+                return printError(`Failed to resume task "${taskName}": ${response.message}`, options);
+            }));
+        } catch (err) {
+            return printError(`Error resume tasks "${taskNames.join(',')}": ${err.status} ${err.message}`, options);
         }
-
-        async execute(taskNames, options) {
-            const profile = await loadProfile(options.profile);
-            debug('%s.executeResumeTask(%s)', profile.name, taskNames.join(','));
-            const tasks = new Tasks(profile.url);
-            try {
-                return Promise.all(taskNames.map(async (taskName) => {
-                    const response = await tasks.resumeTask(options.project || profile.project, profile.token, taskName, options.verbose);
-                    if (response.success) {
-                        return printSuccess(JSON.stringify(response), options);
-                    }
-                    return printError(`Failed to resume task "${taskName}": ${response.message}`, options);
-                }));
-            } catch (err) {
-                return printError(`Error resume tasks "${taskNames.join(',')}": ${err.status} ${err.message}`, options);
-            }
-        }
-};
-
+    }
+}

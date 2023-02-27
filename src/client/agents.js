@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Cognitive Scale, Inc. All Rights Reserved.
+ * Copyright 2023 Cognitive Scale, Inc. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the “License”);
  * you may not use this file except in compliance with the License.
@@ -13,12 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import debugSetup from 'debug';
+import { got, defaultHeaders } from './apiutils.js';
+import { constructError, checkProject } from '../commands/utils.js';
 
-const debug = require('debug')('cortex:cli');
-const { got, defaultHeaders } = require('./apiutils');
-const { constructError, checkProject } = require('../commands/utils');
-
-module.exports = class Agents {
+const debug = debugSetup('cortex:cli');
+export default (class Agents {
     constructor(cortexUrl) {
         this.cortexUrl = cortexUrl;
         this.endpointV4 = (projectId) => `${cortexUrl}/fabric/v4/projects/${projectId}`;
@@ -30,11 +30,11 @@ module.exports = class Agents {
         debug('invokeAgentService(%s, %s) => %s', agentName, serviceName, endpoint);
         return got
             .post(endpoint, {
-                headers: defaultHeaders(token),
-                json: params,
-                searchParams: { sync: options.sync, scheduleName: options.scheduleName, scheduleCron: options.scheduleCron },
-            }).json()
-           .then((result) => ({ success: true, result }))
+            headers: defaultHeaders(token),
+            json: params,
+            searchParams: { sync: options.sync, scheduleName: options.scheduleName, scheduleCron: options.scheduleCron },
+        }).json()
+            .then((result) => ({ success: true, result }))
             .catch((err) => constructError(err));
     }
 
@@ -44,10 +44,10 @@ module.exports = class Agents {
         debug('invokeSkill(%s, %s) => %s', skillName, inputName, endpoint);
         return got
             .post(endpoint, {
-                headers: defaultHeaders(token),
-                json: params,
-                searchParams: { sync },
-            }).json()
+            headers: defaultHeaders(token),
+            json: params,
+            searchParams: { sync },
+        }).json()
             .then((result) => ({ success: true, result }))
             .catch((err) => constructError(err));
     }
@@ -99,9 +99,9 @@ module.exports = class Agents {
         if (skip) query.skip = skip;
         return got
             .get(endpoint, {
-                headers: defaultHeaders(token),
-                searchParams: query,
-            }).json()
+            headers: defaultHeaders(token),
+            searchParams: query,
+        }).json()
             .then((result) => ({ success: true, result }))
             .catch((err) => constructError(err));
     }
@@ -112,9 +112,9 @@ module.exports = class Agents {
         debug('describeAgentSnapshot(%s) => %s', snapshotId, endpoint);
         return got
             .get(endpoint, {
-                headers: defaultHeaders(token),
-                searchParams: { output, deps: true },
-            }).text()
+            headers: defaultHeaders(token),
+            searchParams: { output, deps: true },
+        }).text()
             .catch((err) => constructError(err));
     }
 
@@ -124,10 +124,10 @@ module.exports = class Agents {
         debug('createAgentSnapshot(%s)=> %s', snapshot, endpoint);
         return got
             .post(endpoint, {
-                headers: defaultHeaders(token),
-                json: snapshot,
-            }).json()
+            headers: defaultHeaders(token),
+            json: snapshot,
+        }).json()
             .then((result) => ({ success: true, result }))
             .catch((err) => constructError(err));
     }
-};
+});

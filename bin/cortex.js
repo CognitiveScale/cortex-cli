@@ -1,27 +1,10 @@
-#!/usr/bin/env node
+#!/usr/bin/env -S node --no-warnings
+import { program } from 'commander/esm.mjs';
+import info from '../package.json' assert { type: 'json' };
 
-/*
- * Copyright 2020 Cognitive Scale, Inc. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the “License”);
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an “AS IS” BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-const findPackageJson = require('find-package-json');
-const { program } = require('commander');
-
-const pkg = findPackageJson(__dirname).next().value;
 program.name('cortex');
 program
-    .version(pkg.version, '-v, --version')
+    .version(info?.version, '-v, --version')
     .description('Cortex CLI')
     .option('--debug', 'Enables enhanced log output for debugging', false)
     .on('option:debug', () => { process.env.DEBUG = '*'; })
@@ -48,7 +31,8 @@ program
     .command('types <cmd>', 'Work with Cortex Types')
     .command('users <cmd>', 'Work with a Cortex Users');
 
-if (require.main === module) {
+if (import.meta.url === `file://${process.argv[1]}`) {
+    // module was not imported but called directly
     program.showHelpAfterError().parseAsync(process.argv);
 }
-module.exports = program;
+export default program;

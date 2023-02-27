@@ -1,27 +1,10 @@
-/*
- * Copyright 2020 Cognitive Scale, Inc. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the “License”);
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an “AS IS” BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-const _ = require('lodash');
-const debug = require('debug')('cortex:cli');
-// eslint-disable-next-line import/no-unresolved
-const { got, defaultHeaders } = require('./apiutils');
-const {
- constructError, callMe, checkProject, 
-} = require('../commands/utils');
+import _ from 'lodash';
+import debugSetup from 'debug';
+import { got, defaultHeaders } from './apiutils.js';
+import { constructError, callMe, checkProject } from '../commands/utils.js';
 
-module.exports = class Actions {
+const debug = debugSetup('cortex:cli');
+export default class Actions {
     constructor(cortexUrl) {
         this.cortexUrl = cortexUrl;
         this.endpointV4 = (projectId) => `${cortexUrl}/fabric/v4/projects/${projectId}/actions`;
@@ -33,8 +16,7 @@ module.exports = class Actions {
         if (actionInst.actionType) {
             endpoint = `${endpoint}?actionType=${actionInst.actionType}`;
         }
-        debug('deployAction(%s, docker=%s, ttl=%s) => %s',
-            actionInst.name, actionInst.image, actionInst.ttl, endpoint);
+        debug('deployAction(%s, docker=%s, ttl=%s) => %s', actionInst.name, actionInst.image, actionInst.ttl, endpoint);
         const body = { ...actionInst };
         // image & docker floating around fixup just in case..
         if (body.docker) {
@@ -46,14 +28,13 @@ module.exports = class Actions {
         } catch (error) {
             return { success: false, status: 400, message: error.message || error };
         }
-
         return got
-        .post(endpoint, {
+            .post(endpoint, {
             headers: defaultHeaders(token),
-                   json: body,
-            }).json()
-        .then((res) => ({ success: true, message: res }))
-        .catch((err) => constructError(err));
+            json: body,
+        }).json()
+            .then((res) => ({ success: true, message: res }))
+            .catch((err) => constructError(err));
     }
 
     listActions(projectId, token, filter, limit, skip, sort) {
@@ -66,9 +47,9 @@ module.exports = class Actions {
         if (skip) query.skip = skip;
         return got
             .get(this.endpointV4(projectId), {
-                headers: defaultHeaders(token),
-                searchParams: query,
-            }).json()
+            headers: defaultHeaders(token),
+            searchParams: query,
+        }).json()
             .then((actions) => actions)
             .catch((err) => constructError(err));
     }
@@ -92,12 +73,12 @@ module.exports = class Actions {
             .get(endpoint, { headers: defaultHeaders(token) })
             .json()
             .then((logs) => {
-                    if (_.isArray(logs)) {
-                        // returns plain array for Rancher daemons
-                        return { success: true, logs };
-                    }
-                    return logs;
-            })
+            if (_.isArray(logs)) {
+                // returns plain array for Rancher daemons
+                return { success: true, logs };
+            }
+            return logs;
+        })
             .catch((err) => constructError(err));
     }
 
@@ -107,8 +88,8 @@ module.exports = class Actions {
         debug('deleteAction(%s) => %s', actionName, endpoint);
         return got
             .delete(endpoint, {
-                headers: defaultHeaders(token),
-            })
+            headers: defaultHeaders(token),
+        })
             .json()
             .then((action) => ({ success: true, action }))
             .catch((err) => constructError(err));
@@ -120,8 +101,8 @@ module.exports = class Actions {
         debug('getConfig() => %s', endpoint);
         return got
             .get(endpoint, {
-                headers: defaultHeaders(token),
-            })
+            headers: defaultHeaders(token),
+        })
             .json()
             .then((config) => ({ success: true, config }))
             .catch((err) => constructError(err));
@@ -162,4 +143,4 @@ module.exports = class Actions {
         await callMe(`docker push ${cortexImageUrl}`);
         return cortexImageUrl;
     }
-};
+}

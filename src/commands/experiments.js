@@ -1,36 +1,18 @@
-/*
- * Copyright 2020 Cognitive Scale, Inc. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the “License”);
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an “AS IS” BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import fs from 'node:fs';
+import _ from 'lodash';
+import debugSetup from 'debug';
+import dayjs from 'dayjs';
+import relativeTime from 'dayjs/plugin/relativeTime.js';
+import duration from 'dayjs/plugin/duration';
+import { loadProfile } from '../config.js';
+import Experiments from '../client/experiments.js';
+import {
+ printSuccess, printError, filterObject, printTable, parseObject, fileExists, formatValidationPath, handleTable, printExtendedLogs, handleListFailure, handleDeleteFailure, getFilteredOutput, 
+} from './utils.js';
 
-const fs = require('fs');
-const _ = require('lodash');
-const debug = require('debug')('cortex:cli');
-const dayjs = require('dayjs');
-const relativeTime = require('dayjs/plugin/relativeTime');
-const duration = require('dayjs/plugin/duration');
-const { loadProfile } = require('../config');
-const Experiments = require('../client/experiments');
-const {
-    printSuccess, printError, filterObject, printTable, parseObject, fileExists, formatValidationPath,
-    handleTable, printExtendedLogs, handleListFailure, handleDeleteFailure,
-    getFilteredOutput,
-} = require('./utils');
-
+const debug = debugSetup('cortex:cli');
 dayjs.extend(duration);
 dayjs.extend(relativeTime);
-
 class ListExperiments {
     constructor(program) {
         this.program = program;
@@ -40,7 +22,6 @@ class ListExperiments {
     async execute(options) {
         const profile = await loadProfile(options.profile);
         debug('%s.listExperiments()', profile.name);
-
         const exp = new Experiments(profile.url);
         // eslint-disable-next-line consistent-return
         exp.listExperiments(options.project || profile.project, options.model, profile.token, options.filter, options.limit, options.skip, options.sort).then((response) => {
@@ -57,20 +38,18 @@ class ListExperiments {
                         { column: 'Version', field: '_version', width: 25 },
                         { column: 'Description', field: 'description', width: 50 },
                     ];
-
                     handleTable(tableSpec, result.experiments, null, 'No experiments found');
                 }
             } else {
                 return handleListFailure(response, options, 'Experiments');
             }
         })
-        .catch((err) => {
+            .catch((err) => {
             debug(err);
             printError(`Failed to list experiments: ${err.status} - ${err.message}`, options);
         });
     }
 }
-
 class DescribeExperimentCommand {
     constructor(program) {
         this.program = program;
@@ -79,7 +58,6 @@ class DescribeExperimentCommand {
     async execute(experimentName, options) {
         const profile = await loadProfile(options.profile);
         debug('%s.executeDescribeExperiment(%s)', profile.name, experimentName);
-
         const exp = new Experiments(profile.url);
         exp.describeExperiment(options.project || profile.project, profile.token, experimentName).then((response) => {
             if (response.success) {
@@ -88,12 +66,11 @@ class DescribeExperimentCommand {
                 printError(`Failed to describe experiment ${experimentName}: ${response.status} - ${response.message}`, options);
             }
         })
-        .catch((err) => {
+            .catch((err) => {
             printError(`Failed to describe experiment ${experimentName}: ${err.status} - ${err.message}`, options);
         });
     }
 }
-
 class DeleteExperimentCommand {
     constructor(program) {
         this.program = program;
@@ -102,7 +79,6 @@ class DeleteExperimentCommand {
     async execute(experimentName, options) {
         const profile = await loadProfile(options.profile);
         debug('%s.executeDeleteExperiment(%s)', profile.name, experimentName);
-
         const exp = new Experiments(profile.url);
         exp.deleteExperiment(options.project || profile.project, profile.token, experimentName).then((response) => {
             if (response.success) {
@@ -111,12 +87,11 @@ class DeleteExperimentCommand {
             }
             return handleDeleteFailure(response, options, 'Experiment');
         })
-        .catch((err) => {
+            .catch((err) => {
             printError(`Failed to delete experiment ${experimentName}: ${err.status} - ${err.message}`, options);
         });
     }
 }
-
 class ListRuns {
     constructor(program) {
         this.program = program;
@@ -126,7 +101,6 @@ class ListRuns {
     async execute(experimentName, options) {
         const profile = await loadProfile(options.profile);
         debug('%s.listRuns()', profile.name);
-
         const exp = new Experiments(profile.url);
         const sort = options.sort || JSON.stringify({ startTime: -1 });
         // eslint-disable-next-line consistent-return
@@ -160,13 +134,12 @@ class ListRuns {
                 return handleListFailure(response, options, 'Experiment-runs');
             }
         })
-        .catch((err) => {
+            .catch((err) => {
             debug(err);
             printError(`Failed to list runs: ${err.status} - ${err.message}`, options);
         });
     }
 }
-
 class DescribeRunCommand {
     constructor(program) {
         this.program = program;
@@ -175,7 +148,6 @@ class DescribeRunCommand {
     async execute(experimentName, runId, options) {
         const profile = await loadProfile(options.profile);
         debug('%s.executeDescribeRun(%s)', profile.name, runId);
-
         const exp = new Experiments(profile.url);
         exp.describeRun(options.project || profile.project, profile.token, experimentName, runId).then((response) => {
             if (response.success) {
@@ -184,12 +156,11 @@ class DescribeRunCommand {
                 printError(`Failed to describe run ${experimentName}/${runId}: ${response.status} - ${response.message}`, options);
             }
         })
-        .catch((err) => {
+            .catch((err) => {
             printError(`Failed to describe run ${experimentName}/${runId}: ${err.status} - ${err.message}`, options);
         });
     }
 }
-
 class DeleteRunCommand {
     constructor(program) {
         this.program = program;
@@ -198,7 +169,6 @@ class DeleteRunCommand {
     async execute(experimentName, runId, options) {
         const profile = await loadProfile(options.profile);
         debug('%s.executeDeleteRun(%s)', profile.name, runId);
-
         const exp = new Experiments(profile.url);
         exp.deleteRun(options.project || profile.project, profile.token, experimentName, runId).then((response) => {
             if (response.success) {
@@ -206,12 +176,11 @@ class DeleteRunCommand {
             }
             return handleDeleteFailure(response, options, 'Run');
         })
-        .catch((err) => {
+            .catch((err) => {
             printError(`Failed to delete run ${experimentName}/${runId}: ${err.status} - ${err.message}`, options);
         });
     }
 }
-
 class DownloadArtifactCommand {
     constructor(program) {
         this.program = program;
@@ -220,7 +189,6 @@ class DownloadArtifactCommand {
     async execute(experimentName, runId, artifactName, options) {
         const profile = await loadProfile(options.profile);
         debug('%s.downloadArtifact(%s)', profile.name, artifactName);
-
         const exp = new Experiments(profile.url);
         const showProgress = !!options.progress;
         // To download content from Secrets
@@ -230,7 +198,6 @@ class DownloadArtifactCommand {
         });
     }
 }
-
 class SaveExperimentCommand {
     constructor(program) {
         this.program = program;
@@ -239,14 +206,12 @@ class SaveExperimentCommand {
     async execute(experimentDefinition, options) {
         const profile = await loadProfile(options.profile);
         debug('%s.executeSaveExperiment(%s)', profile.name, experimentDefinition);
-
-         if (!fileExists(experimentDefinition)) {
+        if (!fileExists(experimentDefinition)) {
             printError(`File does not exist at: ${experimentDefinition}`);
         }
         const experimentDefStr = fs.readFileSync(experimentDefinition);
         const experiment = parseObject(experimentDefStr, options);
         debug('%o', experiment);
-
         const experiments = new Experiments(profile.url);
         experiments.saveExperiment(options.project || profile.project, profile.token, experiment).then((response) => {
             if (response.success) {
@@ -266,11 +231,10 @@ class SaveExperimentCommand {
             }
         })
             .catch((err) => {
-                printError(`Failed to save experiment: ${err.status} ${err.message}`, options);
-            });
+            printError(`Failed to save experiment: ${err.status} ${err.message}`, options);
+        });
     }
 }
-
 class CreateRunCommand {
     constructor(program) {
         this.program = program;
@@ -279,12 +243,11 @@ class CreateRunCommand {
     async execute(runDefinition, options) {
         const profile = await loadProfile(options.profile);
         debug('%s.executeCreateRun(%s)', profile.name, runDefinition);
-         if (!fs.existsSync(runDefinition)) {
+        if (!fs.existsSync(runDefinition)) {
             printError(`File does not exist at: ${runDefinition}`);
         }
         const runDefinitionStr = fs.readFileSync(runDefinition);
         const run = parseObject(runDefinitionStr, options);
-
         const experiments = new Experiments(profile.url);
         experiments.createRun(options.project || profile.project, profile.token, run).then((response) => {
             if (response.success) {
@@ -305,11 +268,10 @@ class CreateRunCommand {
             }
         })
             .catch((err) => {
-                printError(`Failed to create run: ${err.status} ${err.message}`, options);
-            });
+            printError(`Failed to create run: ${err.status} ${err.message}`, options);
+        });
     }
 }
-
 class UploadArtifactCommand {
     constructor(program) {
         this.program = program;
@@ -318,11 +280,8 @@ class UploadArtifactCommand {
     async execute(experimentName, runId, filePath, artifact, options) {
         const profile = await loadProfile(options.profile);
         debug('%s.executeUploadArtifact()', profile.name);
-
         const experiments = new Experiments(profile.url);
-
         const upload = _.partial(UploadArtifactCommand.upload, experiments, profile, options);
-
         upload(filePath, artifact, experimentName, runId);
     }
 
@@ -336,14 +295,23 @@ class UploadArtifactCommand {
                 printError(`Failed to upload Artifact: ${response.status} ${response.message}`, options);
             }
         })
-        .catch((err) => {
+            .catch((err) => {
             debug(err);
             printError(`Failed to upload Artifact: ${err.status} ${err.message}`, options);
         });
     }
 }
-
-module.exports = {
+export { ListExperiments };
+export { ListRuns };
+export { DescribeExperimentCommand };
+export { DescribeRunCommand };
+export { DeleteRunCommand };
+export { DeleteExperimentCommand };
+export { DownloadArtifactCommand };
+export { SaveExperimentCommand };
+export { CreateRunCommand };
+export { UploadArtifactCommand };
+export default {
     ListExperiments,
     ListRuns,
     DescribeExperimentCommand,

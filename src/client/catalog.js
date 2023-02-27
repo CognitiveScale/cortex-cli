@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Cognitive Scale, Inc. All Rights Reserved.
+ * Copyright 2023 Cognitive Scale, Inc. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the “License”);
  * you may not use this file except in compliance with the License.
@@ -13,24 +13,25 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-const debug = require('debug')('cortex:cli');
-const FormData = require('form-data');
-const http = require('https');
-const fs = require('fs');
-const { got, defaultHeaders } = require('./apiutils');
-const {
- constructError, formatAllServiceInputParameters, checkProject, printSuccess, printError, printTable,
-} = require('../commands/utils');
 
+import debugSetup from 'debug';
+import FormData from 'form-data';
+import http from 'https';
+import fs from 'node:fs';
+import { got, defaultHeaders } from './apiutils.js';
+import {
+ constructError, formatAllServiceInputParameters, checkProject, printSuccess, printError, printTable, 
+} from '../commands/utils.js';
+
+const debug = debugSetup('cortex:cli');
 const createEndpoints = (baseUri) => ({
-        skills: (projectId) => `${baseUri}/fabric/v4/projects/${projectId}/skills`,
-        agents: (projectId) => `${baseUri}/fabric/v4/projects/${projectId}/agents`,
-        agentinvoke: (projectId) => `${baseUri}/fabric/v4/projects/${projectId}/agentinvoke`,
-        types: (projectId) => `${baseUri}/fabric/v4/projects/${projectId}/types`,
-        campaigns: (projectId) => `${baseUri}/fabric/v4/projects/${projectId}/campaigns/`,
-    });
-
-module.exports = class Catalog {
+    skills: (projectId) => `${baseUri}/fabric/v4/projects/${projectId}/skills`,
+    agents: (projectId) => `${baseUri}/fabric/v4/projects/${projectId}/agents`,
+    agentinvoke: (projectId) => `${baseUri}/fabric/v4/projects/${projectId}/agentinvoke`,
+    types: (projectId) => `${baseUri}/fabric/v4/projects/${projectId}/types`,
+    campaigns: (projectId) => `${baseUri}/fabric/v4/projects/${projectId}/campaigns/`,
+});
+export default (class Catalog {
     constructor(cortexUrl) {
         this.cortexUrl = cortexUrl;
         this.endpoints = createEndpoints(cortexUrl);
@@ -41,9 +42,9 @@ module.exports = class Catalog {
         debug('saveSkill(%s) => %s', skillObj.name, this.endpoints.skills(projectId));
         return got
             .post(this.endpoints.skills(projectId), {
-                headers: defaultHeaders(token),
-                json: skillObj,
-            }).json()
+            headers: defaultHeaders(token),
+            json: skillObj,
+        }).json()
             .then((res) => ({ success: true, message: res }))
             .catch((err) => constructError(err));
     }
@@ -57,9 +58,9 @@ module.exports = class Catalog {
         if (skip) query.skip = skip;
         return got
             .get(this.endpoints.skills(projectId), {
-                headers: defaultHeaders(token),
-                searchParams: query,
-            }).json()
+            headers: defaultHeaders(token),
+            searchParams: query,
+        }).json()
             .then((skills) => ({ success: true, ...skills }))
             .catch((err) => constructError(err));
     }
@@ -91,9 +92,9 @@ module.exports = class Catalog {
         debug('deploySkill(%s) => %s', skillName, endpoint);
         return got
             .get(endpoint, {
-                headers: defaultHeaders(token),
-                searchParams: { verbose },
-            }).json()
+            headers: defaultHeaders(token),
+            searchParams: { verbose },
+        }).json()
             .then((res) => ({ ...res }))
             .catch((err) => constructError(err));
     }
@@ -104,9 +105,9 @@ module.exports = class Catalog {
         debug('undeploySkill(%s) => %s', skillName, endpoint);
         return got
             .get(endpoint, {
-                headers: defaultHeaders(token),
-                searchParams: { verbose },
-            }).json()
+            headers: defaultHeaders(token),
+            searchParams: { verbose },
+        }).json()
             .then((res) => ({ ...res }))
             .catch((err) => constructError(err));
     }
@@ -117,9 +118,9 @@ module.exports = class Catalog {
         debug('skillLogs(%s, %s) => %s', skillName, actionName, endpoint);
         return got
             .get(endpoint, {
-                headers: defaultHeaders(token),
-                searchParams: { verbose },
-            }).json()
+            headers: defaultHeaders(token),
+            searchParams: { verbose },
+        }).json()
             .then((res) => ({ ...res }))
             .catch((err) => constructError(err));
     }
@@ -135,9 +136,9 @@ module.exports = class Catalog {
         if (skip) query.skip = skip;
         return got
             .get(endpoint, {
-                headers: defaultHeaders(token),
-                searchParams: query,
-            })
+            headers: defaultHeaders(token),
+            searchParams: query,
+        })
             .json()
             .then((agentResp) => ({ success: true, ...agentResp }))
             .catch((err) => constructError(err));
@@ -166,9 +167,9 @@ module.exports = class Catalog {
         debug('saveAgent(%s) => %s', agentObj.name, endpoint);
         return got
             .post(endpoint, {
-                headers: defaultHeaders(token),
-                json: agentObj,
-            }).json()
+            headers: defaultHeaders(token),
+            json: agentObj,
+        }).json()
             .then((res) => ({ success: true, message: res }))
             .catch((err) => constructError(err));
     }
@@ -179,9 +180,9 @@ module.exports = class Catalog {
         debug('describeAgent(%s) => %s', agentName, endpoint);
         return got
             .get(endpoint, {
-                headers: defaultHeaders(token),
-                searchParams: { verbose },
-            }).json()
+            headers: defaultHeaders(token),
+            searchParams: { verbose },
+        }).json()
             .then((agent) => ({ success: true, agent }))
             .catch((err) => constructError(err));
     }
@@ -192,8 +193,8 @@ module.exports = class Catalog {
         debug('describeAgentVersions(%s) => %s', agentName, endpoint);
         return got
             .get(endpoint, {
-                headers: defaultHeaders(token),
-            })
+            headers: defaultHeaders(token),
+        })
             .json()
             .then((agent) => ({ success: true, agent }))
             .catch((err) => constructError(err));
@@ -205,9 +206,9 @@ module.exports = class Catalog {
         debug('deployAgent(%s) => %s', agentName, endpoint);
         return got
             .get(endpoint, {
-                headers: defaultHeaders(token),
-                searchParams: { verbose },
-            }).json()
+            headers: defaultHeaders(token),
+            searchParams: { verbose },
+        }).json()
             .then((res) => ({ ...res }))
             .catch((err) => constructError(err));
     }
@@ -218,9 +219,9 @@ module.exports = class Catalog {
         debug('undeployAgent(%s) => %s', agentName, endpoint);
         return got
             .get(endpoint, {
-                headers: defaultHeaders(token),
-                searchParams: { verbose },
-            }).json()
+            headers: defaultHeaders(token),
+            searchParams: { verbose },
+        }).json()
             .then((res) => ({ ...res }))
             .catch((err) => constructError(err));
     }
@@ -232,9 +233,9 @@ module.exports = class Catalog {
         debug('saveType(%s) => %s', JSON.stringify(names), this.endpoints.types(projectId));
         return got
             .post(endpoint, {
-                headers: defaultHeaders(token),
-                json: types,
-            })
+            headers: defaultHeaders(token),
+            json: types,
+        })
             .json()
             .then((message) => ({ success: true, message }))
             .catch((err) => constructError(err));
@@ -246,8 +247,8 @@ module.exports = class Catalog {
         debug('describeType(%s) => %s', typeName, endpoint);
         return got
             .get(endpoint, {
-                headers: defaultHeaders(token),
-            })
+            headers: defaultHeaders(token),
+        })
             .json()
             .then((type) => ({ success: true, type }))
             .catch((err) => constructError(err));
@@ -261,12 +262,11 @@ module.exports = class Catalog {
         if (limit) query.limit = limit;
         if (sort) query.sort = sort;
         if (skip) query.skip = skip;
-
         return got
             .get(endpoint, {
-                headers: defaultHeaders(token),
-                searchParams: query,
-            })
+            headers: defaultHeaders(token),
+            searchParams: query,
+        })
             .json()
             .then((types) => ({ success: true, ...types }))
             .catch((err) => constructError(err));
@@ -278,8 +278,8 @@ module.exports = class Catalog {
         debug('deleteType(%s) => %s', typeName, endpoint);
         return got
             .delete(endpoint, {
-                headers: defaultHeaders(token),
-            })
+            headers: defaultHeaders(token),
+        })
             .json()
             .then((type) => ({ success: true, type }))
             .catch((err) => constructError(err));
@@ -310,13 +310,10 @@ module.exports = class Catalog {
             printError(`Campaign export file ${filepath} doesn't exists or not a valid export file`);
         }
         const readStream = fs.createReadStream(filepath);
-
         const form = new FormData();
         form.append('file', readStream);
-
         const headers = form.getHeaders();
         headers.Authorization = `Bearer ${token}`;
-
         const req = http.request(importUrl, {
             method: 'POST',
             headers,
@@ -348,8 +345,8 @@ module.exports = class Catalog {
         debug('undeployCampaign() => %s', endpoint);
         return got
             .get(endpoint, {
-                headers: defaultHeaders(token),
-            })
+            headers: defaultHeaders(token),
+        })
             .json()
             .then((res) => ({ success: true, data: res }))
             .catch((err) => constructError(err));
@@ -361,8 +358,8 @@ module.exports = class Catalog {
         debug('deployCampaign() => %s', endpoint);
         return got
             .get(endpoint, {
-                headers: defaultHeaders(token),
-            })
+            headers: defaultHeaders(token),
+        })
             .json()
             .then((res) => ({ success: true, data: res }))
             .catch((err) => constructError(err));
@@ -374,8 +371,8 @@ module.exports = class Catalog {
         debug('undeployMissions() => %s', endpoint);
         return got
             .get(endpoint, {
-                headers: defaultHeaders(token),
-            })
+            headers: defaultHeaders(token),
+        })
             .json()
             .then((res) => ({ success: true, data: res }))
             .catch((err) => constructError(err));
@@ -390,12 +387,11 @@ module.exports = class Catalog {
         if (limit) query.limit = limit;
         if (sort) query.sort = sort;
         if (skip) query.skip = skip;
-
         return got
             .get(endpoint, {
-                headers: defaultHeaders(token),
-                searchParams: query,
-            })
+            headers: defaultHeaders(token),
+            searchParams: query,
+        })
             .json()
             .then((res) => ({ success: true, data: res }))
             .catch((err) => constructError(err));
@@ -407,8 +403,8 @@ module.exports = class Catalog {
         debug('deployMissions() => %s', endpoint);
         return got
             .get(endpoint, {
-                headers: defaultHeaders(token),
-            })
+            headers: defaultHeaders(token),
+        })
             .json()
             .then((res) => ({ success: true, data: res }))
             .catch((err) => constructError(err));
@@ -420,8 +416,8 @@ module.exports = class Catalog {
         debug('getMissions() => %s', endpoint);
         return got
             .get(endpoint, {
-                headers: defaultHeaders(token),
-            })
+            headers: defaultHeaders(token),
+        })
             .json()
             .then((res) => ({ success: true, data: res }))
             .catch((err) => constructError(err));
@@ -515,15 +511,14 @@ module.exports = class Catalog {
     //             return constructError(err);
     //         });
     // }
-
     deleteSkill(projectId, token, skillName) {
         checkProject(projectId);
         const endpoint = `${this.endpoints.skills(projectId)}/${encodeURIComponent(skillName)}`;
         debug('deleteSkill(%s) => %s', skillName, endpoint);
         return got
             .delete(endpoint, {
-                headers: defaultHeaders(token),
-            })
+            headers: defaultHeaders(token),
+        })
             .json()
             .then((skill) => skill)
             .catch((err) => constructError(err));
@@ -535,10 +530,10 @@ module.exports = class Catalog {
         debug('deleteAgent(%s) => %s', agentName, endpoint);
         return got
             .delete(endpoint, {
-                headers: defaultHeaders(token),
-            })
+            headers: defaultHeaders(token),
+        })
             .json()
             .then((agent) => ({ success: true, agent }))
             .catch((err) => constructError(err));
     }
-};
+});

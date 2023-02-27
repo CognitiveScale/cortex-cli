@@ -1,31 +1,13 @@
-/*
- * Copyright 2020 Cognitive Scale, Inc. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the “License”);
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an “AS IS” BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import fs from 'node:fs';
+import process from 'node:process';
+import { PassThrough } from 'node:stream';
+import { pipeline } from 'node:stream/promises';
+import debugSetup from 'debug';
+import { got, defaultHeaders } from './apiutils.js';
+import { createFileStream, constructError, checkProject } from '../commands/utils.js';
 
-const fs = require('fs');
-const stream = require('stream');
-
-const { promisify } = require('util');
-const debug = require('debug')('cortex:cli');
-const { got, defaultHeaders } = require('./apiutils');
-const { createFileStream } = require('../commands/utils');
-const { constructError, checkProject } = require('../commands/utils');
-
-const pipeline = promisify(stream.pipeline);
-
-module.exports = class Content {
+const debug = debugSetup('cortex:cli');
+export default (class Content {
     constructor(cortexUrl) {
         this.cortexUrl = cortexUrl;
         this.endpoint = (projectId) => `${cortexUrl}/fabric/v4/projects/${projectId}/content`;
@@ -44,9 +26,9 @@ module.exports = class Content {
         if (prefix) query.filter = prefix;
         return got
             .get(endpoint, {
-                headers: defaultHeaders(token),
-                searchParams: query,
-            }).json()
+            headers: defaultHeaders(token),
+            searchParams: query,
+        }).json()
             .then((message) => ({ success: true, message }))
             .catch((err) => constructError(err));
     }
@@ -59,15 +41,12 @@ module.exports = class Content {
         // todo show progress..
         debug('uploadContentStreaming(%s, %s) => %s', key, content, endpoint);
         try {
-            const message = await pipeline(
-                fs.createReadStream(content),
-                got.stream.post(endpoint, {
-                    headers: defaultHeaders(token, { 'Content-Type': contentType }),
-                }),
-                // https://github.com/sindresorhus/got/blob/HEAD/documentation/3-streams.md#stream-api
-                // new stream.PassThrough() is required to catch errors.
-                new stream.PassThrough(),
-            );
+            const message = await pipeline(fs.createReadStream(content), got.stream.post(endpoint, {
+                headers: defaultHeaders(token, { 'Content-Type': contentType }),
+            }), 
+            // https://github.com/sindresorhus/got/blob/HEAD/documentation/3-streams.md#stream-api
+            // new stream.PassThrough() is required to catch errors.
+            new PassThrough());
             return { success: true, message };
         } catch (err) {
             return constructError(err);
@@ -81,8 +60,8 @@ module.exports = class Content {
         debug('deleteContent() => %s', endpoint);
         return got
             .delete(endpoint, {
-                headers: defaultHeaders(token),
-            }).json()
+            headers: defaultHeaders(token),
+        }).json()
             .then((message) => ({ success: true, message }))
             .catch((err) => constructError(err));
     }
@@ -95,17 +74,15 @@ module.exports = class Content {
         const endpoint = `${this.endpoint(projectId)}/${contentKey}`;
         debug('downloadContent() => %s', endpoint);
         try {
+            let toFileStream;
             if (toFile) {
-                toFile = createFileStream(toFile);
+                toFileStream = createFileStream(toFile);
             } else {
-                toFile = process.stdout;
+                toFileStream = process.stdout;
             }
-            return pipeline(
-                got.stream(endpoint, { headers: defaultHeaders(token) }),
-                toFile,
-            );
+            return pipeline(got.stream(endpoint, { headers: defaultHeaders(token) }), toFileStream);
         } catch (err) {
             return constructError(err);
         }
     }
-};
+});

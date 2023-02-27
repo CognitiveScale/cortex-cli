@@ -1,9 +1,20 @@
 {
+    "parser": "@babel/eslint-parser",
+    "parserOptions": {
+        "requireConfigFile": false,
+        "babelOptions": {
+            "plugins": [
+                "@babel/plugin-syntax-import-assertions"
+            ]
+        },
+        "ecmaVersion": 2022
+    },
     "extends": "airbnb-base",
     "rules": {
         "no-underscore-dangle": [
             0
         ],
+        "import/extensions": "off",
         "require-await": "error",
         "max-classes-per-file": "off",
         "no-console": "off", // This is a cli app..

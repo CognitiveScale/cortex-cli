@@ -1,7 +1,7 @@
 /**
  * Opted to use pure JS versus adding handlebars as a dep, as handlebars always has vulns..
  */
-const _ = require('lodash');
+import _ from 'lodash';
 
 function docObject(program) {
     return program.commands.map((c) => ({
