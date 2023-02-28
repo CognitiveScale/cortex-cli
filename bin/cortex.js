@@ -1,5 +1,6 @@
 #!/usr/bin/env -S node --no-warnings
 import { program } from 'commander/esm.mjs';
+import esMain from 'es-main';
 import info from '../package.json' assert { type: 'json' };
 
 program.name('cortex');
@@ -31,7 +32,7 @@ program
     .command('types <cmd>', 'Work with Cortex Types')
     .command('users <cmd>', 'Work with a Cortex Users');
 
-if (import.meta.url === `file://${process.argv[1]}`) {
+if (esMain(import.meta)) {
     // module was not imported but called directly
     program.showHelpAfterError().parseAsync(process.argv);
 }

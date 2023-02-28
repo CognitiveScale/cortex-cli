@@ -1,6 +1,7 @@
 #!/usr/bin/env -S node --no-warnings
 import chalk from 'chalk';
 import { Command } from 'commander';
+import esMain from 'es-main';
 
 function create() {
     const program = new Command();
@@ -16,7 +17,7 @@ function create() {
         });
     return program;
 }
-if (import.meta.url === `file://${process.argv[1]}`) {
+if (esMain(import.meta)) {
     create().showHelpAfterError().parseAsync(process.argv);
 }
 export default create();

@@ -1,5 +1,6 @@
 #!/usr/bin/env -S node --no-warnings
 import chalk from 'chalk';
+import esMain from 'es-main';
 import process from 'node:process';
 import { Command } from 'commander';
 import { withCompatibilityCheck } from '../src/compatibility.js';
@@ -86,7 +87,7 @@ export function create() {
         }));
     return program;
 }
-if (import.meta.url === `file://${process.argv[1]}`) {
+if (esMain(import.meta)) {
     create().showHelpAfterError().parseAsync(process.argv);
 }
 export default create();

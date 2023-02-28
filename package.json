@@ -1,6 +1,6 @@
 {
   "name": "cortex-cli",
-  "version": "2.1.2",
+  "version": "2.2.0",
   "description": "Command line tool for CognitiveScale Cortex.",
   "main": "./bin/cortex.js",
   "type": "module",
@@ -62,9 +62,11 @@
     "cli-progress": "3.12.0",
     "cli-table3": "0.6.3",
     "commander": "10.0.0",
+    "cortex-cli": "file:cortex-cli-2.2.0.tgz",
     "dayjs": "1.11.7",
     "debug": "4.3.4",
     "dockerode": "3.3.4",
+    "es-main": "1.2.0",
     "form-data": "4.0.0",
     "get-stream": "6.0.1",
     "gh-got": "10.0.0",
@@ -110,19 +112,20 @@
     "nock": "13.3.0",
     "pkg": "5.8.0",
     "sinon": "15.0.1"
-  },  "c8": {
-  "check-coverage": true,
-  "statements": 40,
-  "branches": 72,
-  "functions": 25,
-  "lines": 40,
-  "include": [
-    "bin",
-    "src"
-  ],
-  "reporter": [
-    "text",
-    "html"
-  ]
-}
+  },
+  "c8": {
+    "check-coverage": true,
+    "statements": 40,
+    "branches": 72,
+    "functions": 25,
+    "lines": 40,
+    "include": [
+      "bin",
+      "src"
+    ],
+    "reporter": [
+      "text",
+      "html"
+    ]
+  }
 }

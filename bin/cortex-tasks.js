@@ -1,4 +1,5 @@
 import chalk from 'chalk';
+import esMain from 'es-main';
 import { Command } from 'commander';
 import { withCompatibilityCheck } from '../src/compatibility.js';
 import {
@@ -116,7 +117,7 @@ export function create() {
         }));
     return program;
 }
-if (import.meta.url === `file://${process.argv[1]}`) {
+if (esMain(import.meta)) {
     create().showHelpAfterError().parseAsync(process.argv);
 }
 export default create();
