@@ -1,5 +1,5 @@
 import debugSetup from 'debug';
-import get from 'lodash/get';
+import get from 'lodash/get.js';
 import { loadProfile } from '../config.js';
 import ApiServerClient from '../client/apiServerClient.js';
 import Catalog from '../client/catalog.js';
