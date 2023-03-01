@@ -3,7 +3,7 @@ import _ from 'lodash';
 import debugSetup from 'debug';
 import dayjs from 'dayjs';
 import relativeTime from 'dayjs/plugin/relativeTime.js';
-import duration from 'dayjs/plugin/duration';
+import duration from 'dayjs/plugin/duration.js';
 import { loadProfile } from '../config.js';
 import Experiments from '../client/experiments.js';
 import {
