@@ -135,7 +135,7 @@ export class DownloadContent {
         const showProgress = !!options.progress;
         content.downloadContent(options.project || profile.project, profile.token, contentKey, showProgress).catch((err) => {
             debug(err);
-            printError(`Failed to download content: ${err.status} ${err.message}`, options);
+            printError(`Failed to download content: ${err.message}`, options);
         });
     }
 }
