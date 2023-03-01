@@ -1,8 +1,8 @@
 import fs from 'node:fs';
 import debugSetup from 'debug';
-import getOr from 'lodash/fp/getOr';
-import isUndefined from 'lodash/fp/isUndefined';
-import map from 'lodash/fp/map';
+import getOr from 'lodash/fp/getOr.js';
+import isUndefined from 'lodash/fp/isUndefined.js';
+import map from 'lodash/fp/map.js';
 import { loadProfile } from '../config.js';
 import Secrets from '../client/secrets.js';
 import {
