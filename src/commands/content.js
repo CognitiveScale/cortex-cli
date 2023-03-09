@@ -1,12 +1,32 @@
 import _ from 'lodash';
+import process from 'node:process';
+import fs from 'node:fs';
+import { PromisePool } from '@supercharge/promise-pool';
 import debugSetup from 'debug';
 import { loadProfile } from '../config.js';
 import Content from '../client/content.js';
 import {
- printSuccess, printError, getSourceFiles, humanReadableFileSize, handleTable, getFilteredOutput, 
+    printSuccess, printError, getSourceFiles, humanReadableFileSize, handleTable, getFilteredOutput, checkProject,
 } from './utils.js';
 
 const debug = debugSetup('cortex:cli');
+
+async function upload(contentClient, profile, options, contentKey, filePath, exit = true) {
+    if (fs.lstatSync(filePath).isDirectory()) {
+        printError('Uploads of directories require the option --recursive | -r', options);
+    }
+    const showProgress = !!options.progress;
+    const contentType = _.get(options, 'contentType', 'application/octet-stream');
+    const response = await contentClient.uploadContentStreaming(options.project || profile.project, profile.token, contentKey, filePath, showProgress, contentType);
+    if (response.success) {
+        printSuccess('Content successfully uploaded.', options);
+    } else {
+        const message = `Failed to upload content ${filePath}: ${response.status} ${response.message}`;
+        printError(message, options, exit);
+        throw Error(message); // Temp fix to make recursive upload stop uploading, until uploadContentStreaming() throws
+    }
+}
+
 export class ListContent {
     constructor(program) {
         this.program = program;
@@ -46,59 +66,41 @@ export class UploadContent {
         this.program = program;
     }
 
-    async execute(contentKey, filePath, options, cbTest) {
+    async execute(contentKey, filePath, options) {
         const profile = await loadProfile(options.profile);
+        const project = options.project || profile.project;
+        checkProject(project);
         debug('%s.uploadContent()', profile.name);
         const contentClient = new Content(profile.url);
         const chunkSize = parseInt(options.chunkSize, 10);
-        const upload = _.partial(UploadContent.upload, contentClient, profile, options);
         if (options.recursive) {
-            getSourceFiles(filePath, (err, filesDict) => {
-                if (err) {
-                    debug(err);
-                    printError(`Failed to upload content: ${err.status} ${err.message}`, options);
-                }
-                const totalBytes = filesDict.reduce((accum, current) => {
-                    console.log(`${humanReadableFileSize(current.size)}\t${current.relative} -> ${contentKey}/${current.relative}`);
-                    return accum + current.size;
-                }, 0);
-                console.log(`\nTotal:\n${humanReadableFileSize(totalBytes)}\t${filePath}`);
-                debug(`chunksize ${chunkSize}`);
-                if (!options.test) {
-                    _.chunk(filesDict, chunkSize)
-                        .reduce((promise, currentChunk) => promise
-                        .then(() => {
-                        debug(`working on chunk of files: ${JSON.stringify(currentChunk)}`);
-                        const promises = currentChunk.map((item) => upload(`${contentKey}/${item.relative}`, item.canonical));
-                        return Promise.all(promises);
-                    }), Promise.resolve());
-                } else {
-                    console.log('Test option set. Nothing uploaded.');
-                }
-                if (cbTest) {
-                    // for unit tests
-                    cbTest(filesDict);
-                }
-            });
-        } else {
-            upload(contentKey, filePath);
-        }
-    }
-
-    static upload(contentClient, profile, options, contentKey, filePath) {
-        const showProgress = !!options.progress;
-        const contentType = _.get(options, 'contentType', 'application/octet-stream');
-        return contentClient.uploadContentStreaming(options.project || profile.project, profile.token, contentKey, filePath, showProgress, contentType).then((response) => {
-            if (response.success) {
-                printSuccess('Content successfully uploaded.', options);
-            } else {
-                printError(`Failed to upload content: ${response.status} ${response.message}`, options);
+            const files = getSourceFiles(filePath);
+            // if (err) {
+            //     debug(err);
+            //     printError(`Failed to upload content: ${err.status} ${err.message}`, options);
+            // }
+            const totalBytes = files.reduce((accum, current) => {
+                console.log(`${humanReadableFileSize(current.size)}\t${current.relative} -> ${contentKey}/${current.relative}`);
+                return accum + current.size;
+            }, 0);
+            console.log(`\nTotal:\n${humanReadableFileSize(totalBytes)}\t${filePath}`);
+            debug(`chunksize ${chunkSize}`);
+            if (!options.test) {
+               return PromisePool
+                    .withConcurrency(chunkSize)
+                    .for(files)
+                    .handleError((err, item, pool) => {
+                        pool.stop();
+                        process.exit(1);
+                    })
+                    .process(async (item) => {
+                        // TODO progress
+                        await upload(contentClient, profile, options, `${contentKey}/${item.relative}`, item.canonical, false);
+                    });
             }
-        })
-            .catch((err) => {
-            debug(err);
-            printError(`Failed to upload content: ${err.status} ${err.message}`, options);
-        });
+            return console.log('Test option set. Nothing uploaded.');
+        }
+        return upload(contentClient, profile, options, contentKey, filePath);
     }
 }
 export class DeleteContent {

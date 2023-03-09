@@ -49,6 +49,7 @@ export default (class Content {
             new PassThrough());
             return { success: true, message };
         } catch (err) {
+            // TODO this should just throw
             return constructError(err);
         }
     }

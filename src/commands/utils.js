@@ -186,24 +186,20 @@ export function printTable(spec, objects, transform) {
     values.forEach((v) => table.push(v));
     console.log(table.toString());
 }
-export const getSourceFiles = (source, cb) => {
+
+export function getSourceFiles(source) {
     const options = { silent: true };
     const normalizedSource = (source.endsWith('/')) ? source : `${source}/`;
     const normalizedPath = path.posix.join(normalizedSource, '**', '*');
-    globSync(normalizedPath, options, (err, files) => {
-        // files is an array of filenames.
-        if (err) {
-            cb(err, null);
-        } else {
-            const results = files.filter((fpath) => fs.lstatSync(fpath).isFile()).map((fpath) => ({
-                canonical: fpath,
-                relative: path.relative(normalizedSource, fpath),
-                size: fs.lstatSync(fpath).size,
-            }));
-            cb(null, results);
-        }
-    });
-};
+    const files = globSync(normalizedPath, options);
+    // files is an array of filenames.
+    return files.filter((fpath) => fs.lstatSync(fpath).isFile()).map((fpath) => ({
+        canonical: fpath,
+        relative: path.relative(normalizedSource, fpath),
+        size: fs.lstatSync(fpath).size,
+    }));
+}
+
 export const humanReadableFileSize = (sizeInBytes) => {
     const ranges = {
         K: 10 ** 3,

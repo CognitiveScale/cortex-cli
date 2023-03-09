@@ -37,18 +37,18 @@ export function create() {
         .description('Upload content')
         .option('--progress', 'Show upload progress')
         .option('--test', 'Show what would be uploaded along with file size')
-        .option('--recursive', 'Recursively walk <filePath> and prefix each path stored with <contentKey>')
+        .option('-r, --recursive', 'Recursively walk <filePath> and prefix each path stored with <contentKey>')
         .option('--no-compat', 'Ignore API compatibility checks')
         .option('--color [boolean]', 'Turn on/off colors for JSON output.', 'true')
         .option('--profile <profile>', 'The profile to use')
         .option('--project <project>', 'The project to use')
         .option('--content-type <MIME type>', 'Sets the `Content-Type` or MIME type of the content ( default: application/octet-stream )')
         .option('--chunkSize <int>', 'Number of files to simultaneous upload', 10)
-        .action(withCompatibilityCheck((contentKey, filePath, options) => {
+        .action(withCompatibilityCheck(async (contentKey, filePath, options) => {
             try {
-                new UploadContent(program).execute(contentKey, filePath, options);
+                return await new UploadContent(program).execute(contentKey, filePath, options);
             } catch (err) {
-                console.error(chalk.red(err.message));
+                return console.error(chalk.red(err.message));
             }
         }));
 // Delete Content

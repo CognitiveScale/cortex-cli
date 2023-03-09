@@ -1,4 +1,5 @@
 import _ from 'lodash';
+// eslint-disable-next-line import/no-unresolved
 import { GraphQLClient, gql } from 'graphql-request';
 import { defaultHeaders } from './apiutils.js';
 

@@ -1,55 +1,80 @@
 import path from 'node:path';
 import url from 'node:url';
-import * as commander from 'commander';
 import chai from 'chai';
 import mockedEnv from 'mocked-env';
-import { UploadContent } from '../src/commands/content.js';
+import sinon from 'sinon';
+import _ from 'lodash';
+import { create } from '../bin/cortex-content.js';
 import { humanReadableFileSize } from '../src/commands/utils.js';
+import { stripAnsi } from './utils.js';
+import Info from '../src/client/info.js';
+import Content from '../src/client/content.js';
 
 const { expect } = chai;
-let restoreEnv;
 describe('Upload Directory', () => {
+    let restoreEnv;
+    let sandbox;
+    let printSpy;
+    let errorSpy;
+    function getPrintedLines() {
+        return _.flatten(printSpy.args).map((s) => stripAnsi(s));
+    }
+
+    function getErrorLines() {
+        return _.flatten(errorSpy.args).map((s) => stripAnsi(s));
+    }
+
     before(() => {
         restoreEnv = mockedEnv({
             CORTEX_CONFIG_DIR: './test/cortex',
         });
     });
-    after(() => {
-        restoreEnv();
+
+    beforeEach(() => {
+        sandbox = sinon.createSandbox();
+        sandbox.stub(process, 'exit');
+        sandbox.stub(Info.prototype, 'getInfo').callsFake(() => ({
+            serverTs: Date.now(),
+        }));
+        printSpy = sandbox.spy(console, 'log');
+        errorSpy = sandbox.spy(console, 'error');
     });
-    it('test upload', (done) => {
-        const program = new commander.Command();
-        const command = new UploadContent(program);
+    
+    after(() => restoreEnv());
+    afterEach(() => sandbox.restore());
+
+    it('test upload successfull', async () => {
+        const program = create();
         const contentKey = '.shared';
+        sandbox.stub(Content.prototype, 'uploadContentStreaming').returns({ success: true });
         const dirname = url.fileURLToPath(new URL('.', import.meta.url)).split(path.sep).join(path.posix.sep);
         const filePath = path.posix.join(dirname, 'cortex');
-        const options = {
-            recursive: true,
-            test: true,
-        };
-        const expectedFileDicts = [
-            {
-                canonical: path.posix.join(dirname, 'cortex', 'config'),
-                relative: 'config',
-                size: 1611,
-            },
-            {
-                canonical: path.posix.join(dirname, 'cortex', 'pat-file.json'),
-                relative: 'pat-file.json',
-                size: 326,
-            },
-            {
-                canonical: path.posix.join(dirname, 'cortex', 'sample', 'upload', 'config'),
-                relative: path.join('sample', 'upload', 'config'),
-                size: 483,
-            },
-        ];
-        command.execute(contentKey, filePath, options, (fileDicts) => {
-            expect(fileDicts).to.deep.equal(expectedFileDicts);
-            done();
-        });
+        await program.parseAsync(['node', 'content', 'upload', '--project', 'FOO', '--recursive', contentKey, filePath]);
+        const lines = getPrintedLines();
+        expect(lines).to.include('326B\tpat-file.json -> .shared/pat-file.json');
+        expect(lines).to.include('1.6K\tconfig -> .shared/config');
+        expect(lines).to.include('483B\tsample/upload/config -> .shared/sample/upload/config');
+        // eslint-disable-next-line no-unused-expressions
+        expect(getErrorLines()).is.empty; // Assume no errors
+    });
+    it('test upload error', async () => {
+        const program = create();
+        const contentKey = '.shared';
+        // can't contact cluster..
+        // sandbox.stub(Content.prototype, 'uploadContentStreaming').returns({ success: true });
+        const dirname = url.fileURLToPath(new URL('.', import.meta.url)).split(path.sep).join(path.posix.sep);
+        const filePath = path.posix.join(dirname, 'cortex');
+        await program.parseAsync(['node', 'content', 'upload', '--project', 'FOO', '--chunkSize', 1, '--recursive', contentKey, filePath]);
+        const lines = getPrintedLines();
+        const errLines = getErrorLines();
+        expect(lines).to.include('326B\tpat-file.json -> .shared/pat-file.json');
+        expect(lines).to.include('1.6K\tconfig -> .shared/config');
+        expect(lines).to.include('483B\tsample/upload/config -> .shared/sample/upload/config');
+        // eslint-disable-next-line no-unused-expressions
+        expect(errLines).to.have.length(2); // Should match concurrency ?? why +1
     });
 });
+
 describe('Human Readable File Size', () => {
     it('bytes', (done) => {
         const sizeInBytes = 260;

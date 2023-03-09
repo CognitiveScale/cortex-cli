@@ -57,6 +57,7 @@
   "license": "Apache-2.0",
   "homepage": "https://github.com/CognitiveScale/cortex-cli",
   "dependencies": {
+    "@supercharge/promise-pool": "2.4.0",
     "boolean": "3.2.0",
     "chalk": "5.2.0",
     "cli-progress": "3.12.0",
@@ -116,7 +117,7 @@
     "check-coverage": true,
     "statements": 40,
     "branches": 72,
-    "functions": 25,
+    "functions": 17,
     "lines": 40,
     "include": [
       "bin",

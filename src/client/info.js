@@ -24,15 +24,18 @@ export default (class Info {
         this.cortexUrl = cortexUrl;
     }
 
-    getInfo() {
+    async getInfo() {
         const endpoint = `${this.cortexUrl}/fabric/v4/info`;
         debug('getInfo() => %s', endpoint);
-        return got
-            .get(endpoint, {
-            headers: { 'user-agent': getUserAgent() },
-            followRedirect: false,
-        }).json()
-            .then((result) => result)
-            .catch((err) => constructError(err));
+        try {
+            return await got
+                .get(endpoint, {
+                    headers: { 'user-agent': getUserAgent() },
+                    followRedirect: false,
+                })
+                .json();
+        } catch (err) {
+            return constructError(err);
+        }
     }
 });
