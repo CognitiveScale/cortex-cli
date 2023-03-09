@@ -1,6 +1,7 @@
 /**
  * Opted to use pure JS versus adding handlebars as a dep, as handlebars always has vulns..
  */
+import process from 'node:process';
 import _ from 'lodash';
 
 function docObject(program) {
@@ -52,5 +53,5 @@ function markdownForCmd(program) {
 }
 
 // eslint-disable-next-line import/no-dynamic-require
-const cmd = require(process.argv[2]);
-console.log(markdownForCmd(cmd));
+const { default: program } = await import(process.argv[2]);
+console.log(markdownForCmd(program));
