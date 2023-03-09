@@ -25,7 +25,7 @@ import {
     QUERY_JSON_HELP_TEXT,
 } from '../src/constants.js';
 
-function create() {
+export function create() {
     const program = new Command();
     program.name('cortex assessments');
     program.description('Work with Cortex Assessments');

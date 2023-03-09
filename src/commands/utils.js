@@ -5,7 +5,7 @@ import chalk from 'chalk';
 import debugSetup from 'debug';
 import fs from 'node:fs';
 import process from 'node:process';
-import glob from 'glob';
+import { globSync } from 'glob';
 import * as jmsepath from 'jmespath';
 import path from 'node:path';
 import yaml from 'js-yaml';
@@ -190,7 +190,7 @@ export const getSourceFiles = (source, cb) => {
     const options = { silent: true };
     const normalizedSource = (source.endsWith('/')) ? source : `${source}/`;
     const normalizedPath = path.posix.join(normalizedSource, '**', '*');
-    glob(normalizedPath, options, (err, files) => {
+    globSync(normalizedPath, options, (err, files) => {
         // files is an array of filenames.
         if (err) {
             cb(err, null);

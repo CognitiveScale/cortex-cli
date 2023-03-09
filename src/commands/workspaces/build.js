@@ -1,7 +1,7 @@
 import _ from 'lodash';
 import fs from 'node:fs';
 import path from 'node:path';
-import glob from 'glob';
+import { globSync } from 'glob';
 import Docker from 'dockerode';
 import cliProgress from 'cli-progress';
 import { printError, printSuccess } from '../utils.js';
@@ -123,7 +123,7 @@ export default class WorkspaceBuildCommand {
             if (!fs.existsSync(expectedDockerfile)) {
                 throw Error(`Unable to build action '${action.name}': Missing Dockerfile '${expectedDockerfile}', \nCheck that the 'actions/<name>' folder and action's name match or add a 'Dockerfile' in the path provided`);
             }
-            const globList = glob.sync('./**/*', {
+            const globList = globSync('./**/*', {
                 cwd: actionPath,
                 absolute: true,
             });

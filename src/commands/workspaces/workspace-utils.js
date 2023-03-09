@@ -1,6 +1,6 @@
 import _ from 'lodash';
-import path from 'path';
-import glob from 'glob';
+import path from 'node:path';
+import { globSync } from 'glob';
 import yaml from 'js-yaml';
 import {
  existsSync, readFileSync, writeFileSync, statSync, 
@@ -90,7 +90,7 @@ export function getSkillInfo(target) {
     if (target.endsWith('skill.yaml')) {
         skillFiles = statSync(path.resolve(target)) ? [target] : [];
     } else {
-        skillFiles = glob.sync('./skills/**/skill.yaml', {
+        skillFiles = globSync('./skills/**/skill.yaml', {
             cwd: target,
             absolute: true,
         });

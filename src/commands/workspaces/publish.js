@@ -1,8 +1,8 @@
-import glob from 'glob';
+import { globSync } from 'glob';
 import fs from 'node:fs';
-import path from 'path';
+import path from 'node:path';
 import Docker from 'dockerode';
-import { readFile } from 'fs/promises';
+import { readFile } from 'node:fs/promises';
 import { v1 as uuid } from 'uuid';
 import inquirer from 'inquirer';
 import cliProgress from 'cli-progress';
@@ -220,7 +220,7 @@ export default class WorkspacePublishCommand {
                                 absolute: true,
                             };
                             const regAuth = await this.getRegistryAuth(profile, action.image, options);
-                            const typesFiles = glob.sync(`types/${skillName}/**/*.yaml`, globOpts);
+                            const typesFiles = globSync(`types/${skillName}/**/*.yaml`, globOpts);
                             await Promise.all(_.map(typesFiles, async (f) => {
                                 const typeData = await readFile(f).catch(() => { });
                                 if (typeData) {
@@ -232,7 +232,7 @@ export default class WorkspacePublishCommand {
                                     printSuccess(`Published type ${path.basename(f)}`, options);
                                 }
                             }));
-                            const modelsFiles = glob.sync(`models/${skillName}/**/*.yaml`, globOpts);
+                            const modelsFiles = globSync(`models/${skillName}/**/*.yaml`, globOpts);
                             await Promise.all(_.map(modelsFiles, async (f) => {
                                 const modelData = await readFile(f).catch(() => { });
                                 if (modelData) {
@@ -241,7 +241,7 @@ export default class WorkspacePublishCommand {
                                     printSuccess(`Published model ${model.name}`, options);
                                 }
                             }));
-                            const experimentsFiles = glob.sync(`experiments/${skillName}/*/*.yaml`, globOpts);
+                            const experimentsFiles = globSync(`experiments/${skillName}/*/*.yaml`, globOpts);
                             await Promise.all(_.map(experimentsFiles, async (expFile) => {
                                 const experimentData = await readFile(expFile).catch(() => { });
                                 if (experimentData) {
@@ -250,7 +250,7 @@ export default class WorkspacePublishCommand {
                                         .catch(() => false);
                                     if (result) {
                                         printSuccess(`Published experiment ${experiment.name}`, options);
-                                        const runsFiles = glob.sync(`experiments/${skillName}/${experiment.name}/runs/**/*.yaml`, globOpts);
+                                        const runsFiles = globSync(`experiments/${skillName}/${experiment.name}/runs/**/*.yaml`, globOpts);
                                         await Promise.all(_.map(runsFiles, async (runFile) => {
                                             const runData = await readFile(runFile).catch(() => { });
                                             if (runData) {
@@ -265,7 +265,7 @@ export default class WorkspacePublishCommand {
                                                 run.experimentName = experiment.name;
                                                 await this.experimentClient.createRun(project, profile.token, run);
                                                 printSuccess(`Published run ${run.runId}`, options);
-                                                const artifacts = glob.sync(`experiments/${skillName}/${experiment.name}/runs/${run.runId}/artifacts/*`, globOpts);
+                                                const artifacts = globSync(`experiments/${skillName}/${experiment.name}/runs/${run.runId}/artifacts/*`, globOpts);
                                                 await Promise.all(_.map(artifacts, async (artifactUri) => {
                                                     const artifactName = path.basename(artifactUri).split('.')[0];
                                                     await this.experimentClient.uploadArtifact(project, profile.token, experiment.name, run.runId, artifactUri, artifactName);
@@ -278,7 +278,7 @@ export default class WorkspacePublishCommand {
                                     }
                                 }
                             }));
-                            const contentFiles = glob.sync(`content/${skillName}/*`, globOpts);
+                            const contentFiles = globSync(`content/${skillName}/*`, globOpts);
                             await Promise.all(_.map(contentFiles, async (f) => {
                                 const key = `content/${skillName}/${path.posix.basename(f, path.posix.extname(f))}`;
                                 await this.contentClient.uploadContentStreaming(project, profile.token, key, f);
