@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Cognitive Scale, Inc. All Rights Reserved.
+ * Copyright 2023 Cognitive Scale, Inc. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the “License”);
  * you may not use this file except in compliance with the License.
@@ -13,13 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import debugSetup from 'debug';
+import urljoin from 'url-join';
+import { got, defaultHeaders } from './apiutils.js';
+import { constructError, checkProject } from '../commands/utils.js';
 
-const debug = require('debug')('cortex:cli');
-const urljoin = require('url-join');
-const { got, defaultHeaders } = require('./apiutils');
-const { constructError, checkProject } = require('../commands/utils');
-
-module.exports = class Secrets {
+const debug = debugSetup('cortex:cli');
+export default (class Secrets {
     constructor(cortexUrl) {
         this.cortexUrl = cortexUrl;
         this.endpoint = (projectId) => urljoin(cortexUrl, 'fabric/v4/projects', projectId, 'secrets');
@@ -31,8 +31,8 @@ module.exports = class Secrets {
         debug('listSecrets => %s', endpoint);
         return got
             .get(endpoint, {
-                headers: defaultHeaders(token),
-            }).json()
+            headers: defaultHeaders(token),
+        }).json()
             .then((result) => ({ success: true, result }))
             .catch((err) => constructError(err));
     }
@@ -43,8 +43,8 @@ module.exports = class Secrets {
         debug('readSecret(%s) => %s', keyName, endpoint);
         return got
             .get(endpoint, {
-                headers: defaultHeaders(token),
-            }).json()
+            headers: defaultHeaders(token),
+        }).json()
             .then((result) => ({ success: true, result }))
             .catch((err) => constructError(err));
     }
@@ -55,8 +55,8 @@ module.exports = class Secrets {
         debug('deleteSecret(%s) => %s', keyName, endpoint);
         return got
             .delete(endpoint, {
-                headers: defaultHeaders(token),
-            }).json()
+            headers: defaultHeaders(token),
+        }).json()
             .then((result) => ({ success: true, result }))
             .catch((err) => constructError(err));
     }
@@ -68,10 +68,10 @@ module.exports = class Secrets {
         const body = { value };
         return got
             .post(endpoint, {
-                headers: defaultHeaders(token),
-                json: body,
-            }).json()
+            headers: defaultHeaders(token),
+            json: body,
+        }).json()
             .then((result) => ({ ...result }))
             .catch((err) => constructError(err));
     }
-};
+});

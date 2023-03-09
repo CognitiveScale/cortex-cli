@@ -1,78 +1,53 @@
-/*
- * Copyright 2020 Cognitive Scale, Inc. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the “License”);
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an “AS IS” BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import _ from 'lodash';
+import * as Table from 'cli-table3';
+import chalk from 'chalk';
+import concat from 'lodash/fp/concat.js';
+import debugSetup from 'debug';
+import filter from 'lodash/fp/filter.js';
+import getOr from 'lodash/fp/getOr.js';
+import keys from 'lodash/fp/keys.js';
+import last from 'lodash/fp/last.js';
+import isInstalledGlobally from 'is-installed-globally';
+import npmFetch from 'npm-registry-fetch';
+import Semver from 'semver';
+import { got, getUserAgent } from './client/apiutils.js';
+import { loadProfile } from './config.js';
+import { printError, printWarning } from './commands/utils.js';
+import pkg from '../package.json' assert { type: 'json' };
 
-const _ = require('lodash');
-const Table = require('cli-table3');
-const chalk = require('chalk');
-const concat = require('lodash/fp/concat');
-const debug = require('debug')('cortex:cli');
-const filter = require('lodash/fp/filter');
-const findPackageJson = require('find-package-json');
-const getOr = require('lodash/fp/getOr');
-const isInstalledGlobally = require('is-installed-globally');
-const keys = require('lodash/fp/keys');
-const last = require('lodash/fp/last');
-const npmFetch = require('npm-registry-fetch');
-const Semver = require('semver');
-const uniq = require('lodash/fp/uniq');
-const { got, getUserAgent } = require('./client/apiutils');
-const { loadProfile } = require('./config');
-const { printError, printWarning } = require('./commands/utils');
-
-const pkg = findPackageJson(__dirname).next().value;
+const debug = debugSetup('cortex:cli');
 
 function getAvailableVersions(name) {
     debug('getAvailableVersions => %s', name);
     return npmFetch
         .json(pkg.name)
         .then((manifest) => keys(getOr({}, 'versions', manifest)))
-        .then((versions) => uniq(concat(versions, pkg.version)))
+        .then((versions) => _.uniq(concat(versions, pkg.version)))
         .then((versions) => versions.sort(Semver.compare))
         .catch(() => {
-            throw new Error('Unable to determine CLI available versions');
-        });
+        throw new Error('Unable to determine CLI available versions');
+    });
 }
-
 function getRequiredVersion(profile) {
     const endpoint = `${profile.url}/fabric/v4/compatibility/applications/cortex-cli`;
     debug('getRequiredVersion => %s', endpoint);
     return got
         .get(endpoint, {
-             headers: {
-                Authorization: `Bearer ${profile.token}`,
-                'user-agent': getUserAgent(),
-         },
-})
+        headers: {
+            Authorization: `Bearer ${profile.token}`,
+            'user-agent': getUserAgent(),
+        },
+    })
         .json()
         .then((res) => {
-            const { semver } = res;
-            return semver;
-        }).catch((err) => {
-            throw new Error(`Unable to fetch compatibility: ${err.message}`);
-        });
+        const { semver } = res;
+        return semver;
+    }).catch((err) => {
+        throw new Error(`Unable to fetch compatibility: ${err.message}`);
+    });
 }
-
-function notifyUpdate({ required = false, current, latest }) {
-    const message = `Update ${required ? chalk.bold('required') : 'available'} ${
-         chalk.dim(current)
-         }${chalk.reset(' → ')
-         }${chalk.green(latest)
-         }\nRun ${
-         chalk.cyan(`npm i ${isInstalledGlobally ? '-g ' : ''}${pkg.name}@${latest}`)
-         } to update`;
+export function notifyUpdate({ required = false, current, latest }) {
+    const message = `Update ${required ? chalk.bold('required') : 'available'} ${chalk.dim(current)}${chalk.reset(' → ')}${chalk.green(latest)}\nRun ${chalk.cyan(`npm i ${isInstalledGlobally ? '-g ' : ''}${pkg.name}@${latest}`)} to update`;
     const table = new Table({
         chars: {
             'top-left': '╭',
@@ -85,19 +60,16 @@ function notifyUpdate({ required = false, current, latest }) {
     table.push([message]);
     console.warn(table.toString());
 }
-
 function upgradeAvailable(args) {
     process.on('exit', () => {
         notifyUpdate(args);
     });
 }
-
 function upgradeRequired(args) {
     notifyUpdate({ required: true, ...args });
     process.exit(-1);
 }
-
-async function getCompatibility(profile) {
+export async function getCompatibility(profile) {
     debug('getCompatibility => %s profile', profile.name);
     try {
         // fail if unable to contact cortex service
@@ -121,8 +93,7 @@ async function getCompatibility(profile) {
         throw new Error(`Unable to contact cortex: ${e.message}`);
     }
 }
-
-function withCompatibilityCheck(fn) {
+export function withCompatibilityCheck(fn) {
     return (...args) => {
         const command = args.find((a) => a !== undefined && typeof a.opts === 'function');
         const options = command.opts();
@@ -131,23 +102,17 @@ function withCompatibilityCheck(fn) {
             const profile = loadProfile(profileName);
             return getCompatibility(profile)
                 .then(({ current, latest, satisfied }) => {
-                    if (!satisfied) {
-                        upgradeRequired({ current, latest });
-                    } else if (Semver.gt(latest, current)) {
-                        upgradeAvailable({ current, latest });
-                    }
-                })
+                if (!satisfied) {
+                    upgradeRequired({ current, latest });
+                } else if (Semver.gt(latest, current)) {
+                    upgradeAvailable({ current, latest });
+                }
+            })
                 .then(() => fn(...args))
                 .catch((error) => {
-                    printError(error);
-                });
+                printError(error);
+            });
         }
         return Promise.resolve().then(() => fn(...args));
     };
 }
-
-module.exports = {
-    notifyUpdate,
-    getCompatibility,
-    withCompatibilityCheck,
-};

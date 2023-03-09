@@ -1,5 +1,4 @@
-// ToDo: move to cortex-express-common when adding server side validations FAB-4008
-module.exports.ALLOWED_QUERY_FIELDS = {
+export const ALLOWED_QUERY_FIELDS = {
     SKILL: {
         filter: ['name', 'title', 'description', 'createdBy'],
         sort: ['name', 'title', 'description', 'createdAt', 'createdBy', 'updatedAt'],
@@ -69,20 +68,14 @@ module.exports.ALLOWED_QUERY_FIELDS = {
         sort: ['name', 'state', 'startTime', 'endTime', 'skillName', 'actionName', 'jobType'],
     },
 };
-
-module.exports.DEFAULT_LIST_LIMIT_COUNT = '20';
-
-module.exports.DEFAULT_LIST_SKIP_COUNT = '0';
-
-module.exports.DEFAULT_LIST_SORT_PARAMS = {
-    updatedAt: 'updatedAt', // skills, agents, actions, connections, models, experiments, types,
-    _updatedAt: '_updatedAt', // projects, missions, campaigns, run, assessment, snapshot
-    start: 'start', // activations
+export const DEFAULT_LIST_LIMIT_COUNT = '20';
+export const DEFAULT_LIST_SKIP_COUNT = '0';
+export const DEFAULT_LIST_SORT_PARAMS = {
+    updatedAt: 'updatedAt',
+    _updatedAt: '_updatedAt',
+    start: 'start',
     startTime: 'startTime', // tasks
 };
-
-module.exports.LIST_JSON_HELP_TEXT = 'Output results in JSON, supports JMESPath query to filter the response data';
-
-module.exports.QUERY_JSON_HELP_TEXT = 'A JMESPath query to use in filtering the response data';
-
-module.exports.GET_DEFAULT_SORT_CLI_OPTION = (param) => JSON.stringify({ [param]: -1 });
+export const LIST_JSON_HELP_TEXT = 'Output results in JSON, supports JMESPath query to filter the response data';
+export const QUERY_JSON_HELP_TEXT = 'A JMESPath query to use in filtering the response data';
+export const GET_DEFAULT_SORT_CLI_OPTION = (param) => JSON.stringify({ [param]: -1 });

@@ -1,39 +1,23 @@
-/*
- * Copyright 2020 Cognitive Scale, Inc. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the “License”);
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an “AS IS” BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-const fs = require('fs');
+import fs from 'node:fs';
+import get from 'lodash/get.js';
+import pick from 'lodash/pick.js';
+import debugSetup from 'debug';
+import dayjs from 'dayjs';
+import relativeTime from 'dayjs/plugin/relativeTime.js';
+import { loadProfile } from '../config.js';
+import Models from '../client/models.js';
+import Experiments from '../client/experiments.js';
+import {
+ LISTTABLEFORMAT, RUNTABLEFORMAT, printExtendedLogs, handleListFailure, handleDeleteFailure, printSuccess, printError, filterObject, parseObject, printTable, formatValidationPath, fileExists, handleTable, getFilteredOutput, 
+} from './utils.js';
 
 const _ = {
-    get: require('lodash/get'),
-    pick: require('lodash/pick'),
+    get,
+    pick,
 };
-const debug = require('debug')('cortex:cli');
-const dayjs = require('dayjs');
-const relativeTime = require('dayjs/plugin/relativeTime');
-const { loadProfile } = require('../config');
-const Models = require('../client/models');
-const Experiments = require('../client/experiments');
-const {
-    LISTTABLEFORMAT, RUNTABLEFORMAT, printExtendedLogs, handleListFailure, handleDeleteFailure,
-    printSuccess, printError, filterObject, parseObject, printTable, formatValidationPath, fileExists, handleTable,
-    getFilteredOutput,
-} = require('./utils');
-
+const debug = debugSetup('cortex:cli');
 dayjs.extend(relativeTime);
-
-module.exports.SaveModelCommand = class SaveModelCommand {
+export class SaveModelCommand {
     constructor(program) {
         this.program = program;
     }
@@ -41,13 +25,12 @@ module.exports.SaveModelCommand = class SaveModelCommand {
     async execute(modelDefinition, options) {
         const profile = await loadProfile(options.profile);
         debug('%s.executeSaveModel(%s)', profile.name, modelDefinition);
-         if (!fileExists(modelDefinition)) {
+        if (!fileExists(modelDefinition)) {
             printError(`File does not exist at: ${modelDefinition}`);
         }
         const modelDefStr = fs.readFileSync(modelDefinition);
         const model = parseObject(modelDefStr, options);
         debug('%o', model);
-
         const models = new Models(profile.url);
         models.saveModel(options.project || profile.project, profile.token, model).then((response) => {
             if (response.success) {
@@ -68,12 +51,11 @@ module.exports.SaveModelCommand = class SaveModelCommand {
             }
         })
             .catch((err) => {
-                printError(`Failed to save model: ${err.status} ${err.message}`, options);
-            });
+            printError(`Failed to save model: ${err.status} ${err.message}`, options);
+        });
     }
-};
-
-module.exports.ListModelsCommand = class ListModelsCommand {
+}
+export class ListModelsCommand {
     constructor(program) {
         this.program = program;
     }
@@ -92,25 +74,19 @@ module.exports.ListModelsCommand = class ListModelsCommand {
                     getFilteredOutput(result, options);
                 } else {
                     printExtendedLogs(result, options);
-                    handleTable(
-                        LISTTABLEFORMAT,
-                        result,
-                        (o) => ({ ...o, updatedAt: o.updatedAt ? dayjs(o.updatedAt).fromNow() : '-' }),
-                        'No models found',
-                    );
+                    handleTable(LISTTABLEFORMAT, result, (o) => ({ ...o, updatedAt: o.updatedAt ? dayjs(o.updatedAt).fromNow() : '-' }), 'No models found');
                 }
             } else {
                 return handleListFailure(response, options, 'Models');
             }
         })
             .catch((err) => {
-                debug(err);
-                printError(`Failed to list models: ${err.status} ${err.message}`, options);
-            });
+            debug(err);
+            printError(`Failed to list models: ${err.status} ${err.message}`, options);
+        });
     }
-};
-
-module.exports.ListModelRunsCommand = class ListModelsCommand {
+}
+export class ListModelRunsCommand {
     constructor(program) {
         this.program = program;
     }
@@ -129,25 +105,20 @@ module.exports.ListModelRunsCommand = class ListModelsCommand {
                     getFilteredOutput(result, options);
                 } else {
                     printExtendedLogs(result, options);
-                    handleTable(
-                        RUNTABLEFORMAT,
-                        result,
-                        (o) => ({ ...o, updatedAt: o.updatedAt ? dayjs(o.updatedAt).fromNow() : '-' }),
-                        'No runs found',
-                    );
+                    handleTable(RUNTABLEFORMAT, result, (o) => ({ ...o, updatedAt: o.updatedAt ? dayjs(o.updatedAt).fromNow() : '-' }), 'No runs found');
                 }
             } else {
                 return handleListFailure(response, options, 'Model-runs');
             }
         })
             .catch((err) => {
-                debug(err);
-                printError(`Failed to list model runs: ${err.status} ${err.message}`, options);
-            });
+            debug(err);
+            printError(`Failed to list model runs: ${err.status} ${err.message}`, options);
+        });
     }
-};
+}
 
-module.exports.DescribeModelCommand = class DescribeModelCommand {
+export class DescribeModelCommand {
     constructor(program) {
         this.program = program;
     }
@@ -163,13 +134,12 @@ module.exports.DescribeModelCommand = class DescribeModelCommand {
                 printError(`Failed to describe model ${modelName}: ${response.message}`, options);
             }
         })
-        .catch((err) => {
+            .catch((err) => {
             printError(`Failed to describe model ${modelName}: ${err.status} ${err.message}`, options);
         });
     }
-};
-
-module.exports.DeleteModelCommand = class {
+}
+export const DeleteModelCommand = class {
     constructor(program) {
         this.program = program;
     }
@@ -180,19 +150,18 @@ module.exports.DeleteModelCommand = class {
         const models = new Models(profile.url);
         models.deleteModel(options.project || profile.project, profile.token, modelName)
             .then((response) => {
-                if (response && response.success) {
-                    const result = filterObject(response, options);
-                    return printSuccess(JSON.stringify(result, null, 2), options);
-                }
-                return handleDeleteFailure(response, options, 'Model');
-            })
+            if (response && response.success) {
+                const result = filterObject(response, options);
+                return printSuccess(JSON.stringify(result, null, 2), options);
+            }
+            return handleDeleteFailure(response, options, 'Model');
+        })
             .catch((err) => {
-                printError(`Failed to delete model: ${err.status} ${err.message}`, options);
-            });
+            printError(`Failed to delete model: ${err.status} ${err.message}`, options);
+        });
     }
 };
-
-module.exports.UpdateModelStatusCommand = class UpdateModelStatusCommand {
+export class UpdateModelStatusCommand {
     constructor(program) {
         this.program = program;
     }
@@ -211,16 +180,14 @@ module.exports.UpdateModelStatusCommand = class UpdateModelStatusCommand {
             printError(`Failed to publish model ${modelName}: ${err.status} ${err.message}`, options);
         }
     }
-};
-
-module.exports.RegisterModelCommand = class RegisterModelCommand {
+}
+export class RegisterModelCommand {
     constructor(program) {
         this.program = program;
     }
 
     async execute(modelDefinition, options) {
         const profile = await loadProfile(options.profile);
-
         function printErrorDetails(response) {
             const tableSpec = [
                 { column: 'Path', field: 'path', width: 50 },
@@ -230,16 +197,12 @@ module.exports.RegisterModelCommand = class RegisterModelCommand {
             printTable(tableSpec, response.details);
             printError(''); // Just exit
         }
-
         const experiments = new Experiments(profile.url);
-
         try {
             debug('%s.executeRegisterModel(%s)', profile.name, modelDefinition);
-
             const modelDefStr = fs.readFileSync(modelDefinition);
             const model = parseObject(modelDefStr, options);
             debug('%o', model);
-
             const saveExperimentResponse = await experiments.saveExperiment(options.project || profile.project, profile.token, model);
             if (!saveExperimentResponse.success) {
                 if (saveExperimentResponse.details) {
@@ -261,10 +224,7 @@ module.exports.RegisterModelCommand = class RegisterModelCommand {
             }
             const runId = _.get(saveRunResponse, 'result.runId', '');
             const contentType = _.get(options, 'contentType', 'application/octet-stream');
-            const uploadArtifactResponse = await experiments.uploadArtifact(
-                options.project || profile.project, profile.token,
-                experimentName, runId, model.filePath, model.artifact, contentType,
-            );
+            const uploadArtifactResponse = await experiments.uploadArtifact(options.project || profile.project, profile.token, experimentName, runId, model.filePath, model.artifact, contentType);
             if (uploadArtifactResponse.success) {
                 printSuccess('Artifact successfully uploaded.', options);
                 printSuccess(JSON.stringify(saveRunResponse.result, null, 2), options);
@@ -275,4 +235,4 @@ module.exports.RegisterModelCommand = class RegisterModelCommand {
             printError(`Failed to upload model: ${err.status} ${err.message}`, options);
         }
     }
-};
+}

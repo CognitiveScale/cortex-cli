@@ -1,72 +1,77 @@
-/*
- * Copyright 2020 Cognitive Scale, Inc. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the “License”);
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an “AS IS” BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-const path = require('path');
-const commander = require('commander');
-const chai = require('chai');
-const mockedEnv = require('mocked-env');
-const { UploadContent } = require('../src/commands/content');
-const { humanReadableFileSize } = require('../src/commands/utils');
+import path from 'node:path';
+import url from 'node:url';
+import chai from 'chai';
+import mockedEnv from 'mocked-env';
+import sinon from 'sinon';
+import _ from 'lodash';
+import { create } from '../bin/cortex-content.js';
+import { humanReadableFileSize } from '../src/commands/utils.js';
+import { stripAnsi } from './utils.js';
+import Info from '../src/client/info.js';
+import Content from '../src/client/content.js';
 
 const { expect } = chai;
-let restoreEnv;
 describe('Upload Directory', () => {
+    let restoreEnv;
+    let sandbox;
+    let printSpy;
+    let errorSpy;
+    function getPrintedLines() {
+        return _.flatten(printSpy.args).map((s) => stripAnsi(s));
+    }
+
+    function getErrorLines() {
+        return _.flatten(errorSpy.args).map((s) => stripAnsi(s));
+    }
+
     before(() => {
         restoreEnv = mockedEnv({
             CORTEX_CONFIG_DIR: './test/cortex',
         });
     });
-    after(() => {
-        restoreEnv();
+
+    beforeEach(() => {
+        sandbox = sinon.createSandbox();
+        sandbox.stub(process, 'exit');
+        sandbox.stub(Info.prototype, 'getInfo').callsFake(() => ({
+            serverTs: Date.now(),
+        }));
+        printSpy = sandbox.spy(console, 'log');
+        errorSpy = sandbox.spy(console, 'error');
     });
-    it('test upload', (done) => {
-        const program = new commander.Command();
-        const command = new UploadContent(program);
+    
+    after(() => restoreEnv());
+    afterEach(() => sandbox.restore());
+
+    it('test upload successfull', async () => {
+        const program = create();
         const contentKey = '.shared';
-
-        const dirname = __dirname.split(path.sep).join(path.posix.sep);
-
+        sandbox.stub(Content.prototype, 'uploadContentStreaming').returns({ success: true });
+        const dirname = url.fileURLToPath(new URL('.', import.meta.url)).split(path.sep).join(path.posix.sep);
         const filePath = path.posix.join(dirname, 'cortex');
-        const options = {
-            recursive: true,
-            test: true,
-        };
-
-        const expectedFileDicts = [
-            {
-                canonical: path.posix.join(dirname, 'cortex', 'config'),
-                relative: 'config',
-                size: 1611,
-            },
-            {
-                canonical: path.posix.join(dirname, 'cortex', 'pat-file.json'),
-                relative: 'pat-file.json',
-                size: 326,
-            },
-            {
-                canonical: path.posix.join(dirname, 'cortex', 'sample', 'upload', 'config'),
-                relative: path.join('sample', 'upload', 'config'),
-                size: 483,
-            },
-        ];
-
-        command.execute(contentKey, filePath, options, (fileDicts) => {
-            expect(fileDicts).to.deep.equal(expectedFileDicts);
-            done();
-        });
+        await program.parseAsync(['node', 'content', 'upload', '--project', 'FOO', '--recursive', contentKey, filePath]);
+        const lines = getPrintedLines();
+        expect(lines).to.include('326B\tpat-file.json -> .shared/pat-file.json');
+        expect(lines).to.include('1.6K\tconfig -> .shared/config');
+        expect(lines).to.include('483B\tsample/upload/config -> .shared/sample/upload/config');
+        // eslint-disable-next-line no-unused-expressions
+        expect(getErrorLines()).is.empty; // Assume no errors
+    });
+    it('test upload error', async () => {
+        const program = create();
+        const contentKey = '.shared';
+        // can't contact cluster..
+        // sandbox.stub(Content.prototype, 'uploadContentStreaming').returns({ success: true });
+        const dirname = url.fileURLToPath(new URL('.', import.meta.url)).split(path.sep).join(path.posix.sep);
+        const filePath = path.posix.join(dirname, 'cortex');
+        await program.parseAsync(['node', 'content', 'upload', '--project', 'FOO', '--chunkSize', 1, '--recursive', contentKey, filePath]);
+        const lines = getPrintedLines();
+        const errLines = getErrorLines();
+        expect(lines).to.include('326B\tpat-file.json -> .shared/pat-file.json');
+        expect(lines).to.include('1.6K\tconfig -> .shared/config');
+        expect(lines).to.include('483B\tsample/upload/config -> .shared/sample/upload/config');
+        // eslint-disable-next-line no-unused-expressions
+        expect(errLines).to.have.length(2); // Should match concurrency ?? why +1
     });
 });
 
@@ -83,35 +88,30 @@ describe('Human Readable File Size', () => {
         expect(formattedFileSize).to.have.string('1.2K');
         done();
     });
-
     it('MB', (done) => {
         const sizeInBytes = 1000000;
         const formattedFileSize = humanReadableFileSize(sizeInBytes);
         expect(formattedFileSize).to.have.string('1M');
         done();
     });
-
     it('1MB less some', (done) => {
         const sizeInBytes = (10 ** 3) - 1;
         const formattedFileSize = humanReadableFileSize(sizeInBytes);
         expect(formattedFileSize).to.have.string('999B');
         done();
     });
-
     it('1k 200 bytes less', (done) => {
         const sizeInBytes = 1000000 - 200;
         const formattedFileSize = humanReadableFileSize(sizeInBytes);
         expect(formattedFileSize).to.have.string('999.8K');
         done();
     });
-
     it('1k less', (done) => {
         const sizeInBytes = (10 ** 6) - 1;
         const formattedFileSize = humanReadableFileSize(sizeInBytes);
         expect(formattedFileSize).to.have.string('999.9K');
         done();
     });
-
     it('several GB', (done) => {
         const sizeInBytes = 32 * (10 ** 9) + 345 * (10 ** 6);
         const formattedFileSize = humanReadableFileSize(sizeInBytes);

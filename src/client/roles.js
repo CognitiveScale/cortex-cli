@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Cognitive Scale, Inc. All Rights Reserved.
+ * Copyright 2023 Cognitive Scale, Inc. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the “License”);
  * you may not use this file except in compliance with the License.
@@ -13,16 +13,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-const debug = require('debug')('cortex:cli');
-const { got, defaultHeaders } = require('./apiutils');
-const { constructError } = require('../commands/utils');
+import debugSetup from 'debug';
+import { got, defaultHeaders } from './apiutils.js';
+import { constructError } from '../commands/utils.js';
 
-module.exports = class Roles {
+const debug = debugSetup('cortex:cli');
+export default class Roles {
     constructor(cortexUrl, role, flags = []) {
         this.cortexUrl = cortexUrl;
         this.endpoint = `${cortexUrl}/fabric/v4`;
         this.flags = '';
-
         if (role) {
             this.rolesEndpoint = `${this.endpoint}/roles/${role}`;
         } else {
@@ -31,9 +31,7 @@ module.exports = class Roles {
         this.rolesUsersEndpoint = `${this.rolesEndpoint}/users`;
         this.rolesGrantsEndpoint = `${this.rolesEndpoint}/grants`;
         this.rolesProjectsEndpoint = `${this.rolesEndpoint}/projects`;
-
         this.rolesMappingsEndpoint = `${this.rolesEndpoint}/mappings`;
-
         if (flags.length > 0) {
             this.flags = `${flags.reduce((flagString, flag) => {
                 if (flagString) {
@@ -51,8 +49,8 @@ module.exports = class Roles {
         debug('describeRole => %s', endpoint);
         return got
             .get(endpoint, {
-                headers: defaultHeaders(token),
-            }).json()
+            headers: defaultHeaders(token),
+        }).json()
             .then((res) => ({ success: true, result: res }))
             .catch((err) => constructError(err));
     }
@@ -62,8 +60,8 @@ module.exports = class Roles {
         debug('deleteRole => %s', endpoint);
         return got
             .delete(endpoint, {
-                headers: defaultHeaders(token),
-            }).json()
+            headers: defaultHeaders(token),
+        }).json()
             .then((res) => ({ success: true, result: res }))
             .catch((err) => constructError(err));
     }
@@ -73,9 +71,9 @@ module.exports = class Roles {
         debug('createRole => %s', endpoint);
         return got
             .post(endpoint, {
-                headers: defaultHeaders(token),
-                json: body,
-            }).json()
+            headers: defaultHeaders(token),
+            json: body,
+        }).json()
             .then((res) => ({ success: true, result: res }))
             .catch((err) => constructError(err));
     }
@@ -85,9 +83,9 @@ module.exports = class Roles {
         debug('addUsersToRole => %s', endpoint);
         return got
             .post(endpoint, {
-                headers: defaultHeaders(token),
-                json: { users },
-            }).json()
+            headers: defaultHeaders(token),
+            json: { users },
+        }).json()
             .then((res) => ({ success: true, result: res }))
             .catch((err) => constructError(err));
     }
@@ -97,9 +95,9 @@ module.exports = class Roles {
         debug('removeUsersFromRole => %s', endpoint);
         return got
             .delete(endpoint, {
-                headers: defaultHeaders(token),
-                json: { users },
-            }).json()
+            headers: defaultHeaders(token),
+            json: { users },
+        }).json()
             .then((res) => ({ success: true, result: res }))
             .catch((err) => constructError(err));
     }
@@ -109,9 +107,9 @@ module.exports = class Roles {
         debug('createGrantForRole => %s', endpoint);
         return got
             .post(endpoint, {
-                headers: defaultHeaders(token),
-                json: body,
-            }).json()
+            headers: defaultHeaders(token),
+            json: body,
+        }).json()
             .then((res) => ({ success: true, result: res }))
             .catch((err) => constructError(err));
     }
@@ -121,9 +119,9 @@ module.exports = class Roles {
         debug('removeGrantFromRole => %s', endpoint);
         return got
             .delete(endpoint, {
-                headers: defaultHeaders(token),
-                json: body,
-            }).json()
+            headers: defaultHeaders(token),
+            json: body,
+        }).json()
             .then((res) => ({ success: true, result: res }))
             .catch((err) => constructError(err));
     }
@@ -136,8 +134,8 @@ module.exports = class Roles {
         debug('listRoles => %s', endpoint);
         return got
             .get(endpoint, {
-                headers: defaultHeaders(token),
-            }).json()
+            headers: defaultHeaders(token),
+        }).json()
             .then((res) => ({ success: true, result: res }))
             .catch((err) => constructError(err));
     }
@@ -147,9 +145,9 @@ module.exports = class Roles {
         debug('addRolesToProject(%s) => %s', roles, endpoint);
         return got
             .post(endpoint, {
-                headers: defaultHeaders(token),
-                json: { project, roles },
-            }).json()
+            headers: defaultHeaders(token),
+            json: { project, roles },
+        }).json()
             .then((res) => ({ success: true, result: res }))
             .catch((err) => constructError(err));
     }
@@ -159,9 +157,9 @@ module.exports = class Roles {
         debug('removeRolesFromProject => %s', endpoint);
         return got
             .delete(endpoint, {
-                headers: defaultHeaders(token),
-                json: { project, roles },
-            }).json()
+            headers: defaultHeaders(token),
+            json: { project, roles },
+        }).json()
             .then((res) => ({ success: true, result: res }))
             .catch((err) => constructError(err));
     }
@@ -171,8 +169,8 @@ module.exports = class Roles {
         debug('listExternalGroups => %s', endpoint);
         return got
             .get(endpoint, {
-                headers: defaultHeaders(token),
-            }).json()
+            headers: defaultHeaders(token),
+        }).json()
             .then((res) => ({ success: true, result: res }))
             .catch((err) => constructError(err));
     }
@@ -182,8 +180,8 @@ module.exports = class Roles {
         debug('describeExternalGroup => %s', endpoint);
         return got
             .get(endpoint, {
-                headers: defaultHeaders(token),
-            }).json()
+            headers: defaultHeaders(token),
+        }).json()
             .then((res) => ({ success: true, result: res }))
             .catch((err) => constructError(err));
     }
@@ -193,8 +191,8 @@ module.exports = class Roles {
         debug('deleteExternalGroup => %s', endpoint);
         return got
             .delete(endpoint, {
-                headers: defaultHeaders(token),
-            }).json()
+            headers: defaultHeaders(token),
+        }).json()
             .then((res) => ({ success: true, result: res }))
             .catch((err) => constructError(err));
     }
@@ -204,9 +202,9 @@ module.exports = class Roles {
         debug('addExternalGroupToRole(%s) => %s', externalGroup, endpoint);
         return got
             .post(endpoint, {
-                headers: defaultHeaders(token),
-                json: { externalGroup },
-            }).json()
+            headers: defaultHeaders(token),
+            json: { externalGroup },
+        }).json()
             .then((res) => ({ success: true, result: res }))
             .catch((err) => constructError(err));
     }
@@ -216,9 +214,9 @@ module.exports = class Roles {
         debug('removeExternalGroupFromRole => %s', endpoint);
         return got
             .delete(endpoint, {
-                headers: defaultHeaders(token),
-            }).json()
+            headers: defaultHeaders(token),
+        }).json()
             .then((res) => ({ success: true, result: res }))
             .catch((err) => constructError(err));
     }
-};
+}

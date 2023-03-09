@@ -1,79 +1,30 @@
-/*
- * Copyright 2020 Cognitive Scale, Inc. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the “License”);
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an “AS IS” BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import fs from 'node:fs';
+import debugSetup from 'debug';
+import _ from 'lodash';
+import dayjs from 'dayjs';
+import relativeTime from 'dayjs/plugin/relativeTime.js';
+import { loadProfile } from '../config.js';
+import Catalog from '../client/catalog.js';
+import Agents from '../client/agents.js';
+import {
+    LISTTABLEFORMAT,
+    filterObject,
+    formatValidationPath,
+    getFilteredOutput,
+    getQueryOptions,
+    handleDeleteFailure,
+    handleListFailure,
+    handleTable,
+    parseObject,
+    printError,
+    printExtendedLogs,
+    printSuccess,
+    printTable,
+} from './utils.js';
 
-const fs = require('fs');
-const debug = require('debug')('cortex:cli');
-const _ = require('lodash');
-const dayjs = require('dayjs');
-const relativeTime = require('dayjs/plugin/relativeTime');
-const { loadProfile } = require('../config');
-const Catalog = require('../client/catalog');
-const Agents = require('../client/agents');
-
+const debug = debugSetup('cortex:cli');
 dayjs.extend(relativeTime);
-
-const {
-    printSuccess, printError, filterObject, parseObject, printTable, formatValidationPath,
-    LISTTABLEFORMAT, handleTable, printExtendedLogs, handleListFailure, handleDeleteFailure,
-    getFilteredOutput, getQueryOptions,
-} = require('./utils');
-
-module.exports.SaveAgentCommand = class SaveAgentCommand {
-    constructor(program) {
-        this.program = program;
-    }
-
-    async execute(agentDefinitions, options) {
-        const profile = await loadProfile(options.profile);
-        await Promise.all(agentDefinitions.map(async (agentDefinition) => {
-            debug('%s.executeSaveAgent(%s)', profile.name, agentDefinition);
-            if (!fs.existsSync(agentDefinition)) {
-                printError(`File does not exist at: ${agentDefinition}`);
-            }
-            const agentDefStr = fs.readFileSync(agentDefinition);
-            const agent = parseObject(agentDefStr, options);
-            debug('%o', agent);
-
-            const catalog = new Catalog(profile.url);
-            const project = options.project || profile.project;
-            try {
-                const response = await catalog.saveAgent(project, profile.token, agent);
-                if (response.success) {
-                    printSuccess(`Agent "${agent.name}" saved in project "${project}"`, options);
-                } else if (response.details) {
-                    console.log(`Failed to save agent: ${response.status} ${response.message}`);
-                    console.log('The following issues were found:');
-                    const tableSpec = [
-                        { column: 'Path', field: 'path', width: 50 },
-                        { column: 'Message', field: 'message', width: 100 },
-                    ];
-                    response.details.map((d) => d.path = formatValidationPath(d.path));
-                    printTable(tableSpec, response.details);
-                    printError(''); // Just exit
-                } else {
-                    printError(JSON.stringify(response));
-                }
-            } catch (err) {
-                    printError(`Failed to save agent: ${err.status} ${err.message}`, options);
-            }
-        }));
-    }
-};
-
-module.exports.ListAgentsCommand = class ListAgentsCommand {
+export class ListAgentsCommand {
     constructor(program) {
         this.program = program;
     }
@@ -82,7 +33,6 @@ module.exports.ListAgentsCommand = class ListAgentsCommand {
     async execute(options) {
         const profile = await loadProfile(options.profile);
         debug('%s.executeListAgents()', profile.name);
-
         const catalog = new Catalog(profile.url);
         // eslint-disable-next-line consistent-return
         catalog.listAgents(options.project || profile.project, profile.token, options.filter, options.limit, options.skip, options.sort).then((response) => {
@@ -93,25 +43,19 @@ module.exports.ListAgentsCommand = class ListAgentsCommand {
                     getFilteredOutput(result, options);
                 } else {
                     printExtendedLogs(result, options);
-                    handleTable(
-                        LISTTABLEFORMAT,
-                        result,
-                        (o) => ({ ...o, updatedAt: o.updatedAt ? dayjs(o.updatedAt).fromNow() : '-' }),
-                        'No agents found',
-                    );
+                    handleTable(LISTTABLEFORMAT, result, (o) => ({ ...o, updatedAt: o.updatedAt ? dayjs(o.updatedAt).fromNow() : '-' }), 'No agents found');
                 }
             } else {
                 return handleListFailure(response, options, 'Agents');
             }
         })
-        .catch((err) => {
+            .catch((err) => {
             debug(err);
             printError(`Failed to list agents: ${err.status} ${err.message}`, options);
         });
     }
-};
-
-module.exports.DescribeAgentCommand = class DescribeAgentCommand {
+}
+export class DescribeAgentCommand {
     constructor(program) {
         this.program = program;
     }
@@ -128,7 +72,7 @@ module.exports.DescribeAgentCommand = class DescribeAgentCommand {
                     printError(`Failed to describe agent versions ${agentName}: ${response.message}`, options);
                 }
             })
-            .catch((err) => {
+                .catch((err) => {
                 printError(`Failed to describe agent versions ${agentName}: ${err.status} ${err.message}`, options);
             });
         } else {
@@ -141,14 +85,13 @@ module.exports.DescribeAgentCommand = class DescribeAgentCommand {
                     printError(`Failed to describe agent ${agentName}: ${response.message}`, options);
                 }
             })
-            .catch((err) => {
+                .catch((err) => {
                 printError(`Failed to describe agent ${agentName}: ${err.status} ${err.message}`, options);
             });
         }
     }
-};
-
-module.exports.InvokeAgentServiceCommand = class {
+}
+export class InvokeAgentServiceCommand {
     constructor(program) {
         this.program = program;
     }
@@ -156,7 +99,6 @@ module.exports.InvokeAgentServiceCommand = class {
     async execute(agentName, serviceName, options) {
         const profile = await loadProfile(options.profile);
         debug('%s.invokeAgentService(%s, %s)', profile.name, agentName, serviceName);
-
         let params = {};
         if (options.params) {
             try {
@@ -171,9 +113,7 @@ module.exports.InvokeAgentServiceCommand = class {
             const paramsStr = fs.readFileSync(options.paramsFile);
             params = parseObject(paramsStr, options);
         }
-
         debug('params: %o', params);
-
         const agents = new Agents(profile.url);
         agents.invokeAgentService(options.project || profile.project, profile.token, agentName, serviceName, params, options).then((response) => {
             if (response.success) {
@@ -183,7 +123,7 @@ module.exports.InvokeAgentServiceCommand = class {
                 printError(`Invocation failed: ${response.status} ${response.message}`, options);
             }
         })
-        .catch((err) => {
+            .catch((err) => {
             if (err.response && err.response.body) {
                 debug('Raw error response: %o', err.response.body);
                 printError(`Failed to invoke agent service (${err.status} ${err.message}): ${err.response.body.error}`, options);
@@ -192,9 +132,8 @@ module.exports.InvokeAgentServiceCommand = class {
             }
         });
     }
-};
-
-module.exports.GetActivationCommand = class {
+}
+export class GetActivationCommand {
     constructor(program) {
         this.program = program;
     }
@@ -225,27 +164,25 @@ module.exports.GetActivationCommand = class {
                 printError(`Failed to get activation ${activationId}: ${response.message}`, options);
             }
         })
-        .catch((err) => {
+            .catch((err) => {
             printError(`Failed to get activation ${activationId}: ${err.status} ${err.message}`, options);
         });
     }
-};
-
-module.exports.ListActivationsCommand = class {
+}
+export class ListActivationsCommand {
     constructor(program) {
         this.program = program;
     }
 
     async execute(options) {
-        if (_.isEmpty(options.agentName) 
-            && _.isEmpty(options.skillName) 
-            && _.isEmpty(options.correlationId) 
+        if (_.isEmpty(options.agentName)
+            && _.isEmpty(options.skillName)
+            && _.isEmpty(options.correlationId)
             && _.isEmpty(options.status)) {
             printError('Either --agentName, --skillName, --correlationId, or --status must be provided', options);
         }
         const profile = await loadProfile(options.profile);
         debug('%s.listActivations(%s)', profile.name);
-
         const agents = new Agents(profile.url);
         // TODO validate param types?
         const queryParams = {};
@@ -261,7 +198,6 @@ module.exports.ListActivationsCommand = class {
         if (options.skip) queryParams.skip = options.skip;
         if (options.sort) queryParams.sort = _.toLower(options.sort);
         if (options.filter) queryParams.filter = options.filter;
-
         // eslint-disable-next-line consistent-return
         agents.listActivations(options.project || profile.project, profile.token, queryParams).then((response) => {
             if (response.success) {
@@ -277,7 +213,6 @@ module.exports.ListActivationsCommand = class {
                         { column: 'Status', field: 'status', width: 20 },
                         { column: 'Started', field: 'start', width: 65 },
                     ];
-
                     const genName = (o) => {
                         if (o.agentName) {
                             return `${o.agentName} (Agent)`;
@@ -287,7 +222,6 @@ module.exports.ListActivationsCommand = class {
                         }
                         return '-';
                     };
-
                     handleTable(tableSpec, _.map(result, (o) => ({
                         ...o,
                         name: genName(o),
@@ -299,12 +233,11 @@ module.exports.ListActivationsCommand = class {
             }
         })
             .catch((err) => {
-                printError(`Failed to list activations: ${err.status} ${err.message}`, options);
-            });
+            printError(`Failed to list activations: ${err.status} ${err.message}`, options);
+        });
     }
-};
-
-module.exports.ListServicesCommand = class ListServicesCommand {
+}
+export class ListServicesCommand {
     constructor(program) {
         this.program = program;
     }
@@ -312,7 +245,6 @@ module.exports.ListServicesCommand = class ListServicesCommand {
     async execute(agentName, options) {
         const profile = await loadProfile(options.profile);
         debug('%s.listServices(%s)', profile.name, agentName);
-
         const catalog = new Catalog(profile.url);
         catalog.listServices(options.project || profile.project, profile.token, agentName, profile).then((response) => {
             if (response.success) {
@@ -336,9 +268,8 @@ module.exports.ListServicesCommand = class ListServicesCommand {
             printError(`Failed to return agent service information: ${agentName}: ${err.status} ${err.message}`, options);
         });
     }
-};
-
-module.exports.ListAgentSnapshotsCommand = class {
+}
+export class ListAgentSnapshotsCommand {
     constructor(program) {
         this.program = program;
     }
@@ -347,7 +278,6 @@ module.exports.ListAgentSnapshotsCommand = class {
     async execute(agentName, options) {
         const profile = await loadProfile(options.profile);
         debug('%s.listAgentSnapshots(%s)', profile.name, agentName);
-
         const agents = new Agents(profile.url);
         agents.listAgentSnapshots(options.project || profile.project, profile.token, agentName, options.filter, options.limit, options.skip, options.sort)
             // eslint-disable-next-line consistent-return
@@ -362,29 +292,23 @@ module.exports.ListAgentSnapshotsCommand = class {
                     const tableSpec = [
                         { column: 'Snapshot ID', field: 'snapshotId', width: 40 },
                         { column: 'Title', field: 'title', width: 40 },
-// Removed as this is confusing for end users, agent version may not change
-//                        { column: 'Agent Version', field: 'agentVersion', width: 15 },
+                        // Removed as this is confusing for end users, agent version may not change
+                        //                        { column: 'Agent Version', field: 'agentVersion', width: 15 },
                         { column: 'Created', field: 'createdAt', width: 26 },
                         { column: 'Author', field: 'createdBy', width: 26 },
                     ];
-                    handleTable(
-                        tableSpec,
-                        result,
-                        (o) => ({ ...o, createdAt: o.createdAt ? dayjs(o.createdAt).fromNow() : '-' }),
-                        'No snapshots found',
-                    );
+                    handleTable(tableSpec, result, (o) => ({ ...o, createdAt: o.createdAt ? dayjs(o.createdAt).fromNow() : '-' }), 'No snapshots found');
                 }
             } else {
                 return handleListFailure(response, options, 'Agent-snapshots');
             }
         })
             .catch((err) => {
-                printError(`Failed to list agent snapshots ${agentName}: ${err.status} ${err.message}`, options);
-            });
+            printError(`Failed to list agent snapshots ${agentName}: ${err.status} ${err.message}`, options);
+        });
     }
-};
-
-module.exports.DescribeAgentSnapshotCommand = class {
+}
+export class DescribeAgentSnapshotCommand {
     constructor(program) {
         this.program = program;
     }
@@ -392,7 +316,6 @@ module.exports.DescribeAgentSnapshotCommand = class {
     async execute(snapshotId, options) {
         const profile = await loadProfile(options.profile);
         debug('%s.describeAgentSnapshot(%s)', profile.name, snapshotId);
-
         const agents = new Agents(profile.url);
         const output = _.get(options, 'output', 'json');
         try {
@@ -409,9 +332,8 @@ module.exports.DescribeAgentSnapshotCommand = class {
             return printError(`Failed to describe agent snapshot ${snapshotId}: ${err.status} ${err.message}`, options);
         }
     }
-};
-
-module.exports.CreateAgentSnapshotCommand = class {
+}
+export class CreateAgentSnapshotCommand {
     constructor(program) {
         this.program = program;
     }
@@ -440,12 +362,11 @@ module.exports.CreateAgentSnapshotCommand = class {
             }
         })
             .catch((err) => {
-                printError(`Failed to create agent snapshot ${agentName}: ${err.status} ${err.message}`, options);
-            });
+            printError(`Failed to create agent snapshot ${agentName}: ${err.status} ${err.message}`, options);
+        });
     }
-};
-
-module.exports.DeleteAgentCommand = class DeleteAgentCommand {
+}
+export class DeleteAgentCommand {
     constructor(program) {
         this.program = program;
     }
@@ -456,19 +377,18 @@ module.exports.DeleteAgentCommand = class DeleteAgentCommand {
         const catalog = new Catalog(profile.url);
         catalog.deleteAgent(options.project || profile.project, profile.token, agentName)
             .then((response) => {
-                if (response.success) {
-                    const result = filterObject(response, options);
-                    return printSuccess(JSON.stringify(result, null, 2), options);
-                }
-                return handleDeleteFailure(response, options, 'Agent');
-            })
+            if (response.success) {
+                const result = filterObject(response, options);
+                return printSuccess(JSON.stringify(result, null, 2), options);
+            }
+            return handleDeleteFailure(response, options, 'Agent');
+        })
             .catch((err) => {
-                printError(`Failed to delete agent: ${err.status} ${err.message}`, options);
-            });
+            printError(`Failed to delete agent: ${err.status} ${err.message}`, options);
+        });
     }
-};
-
-module.exports.DeployAgentCommand = class DeployAgentCommand {
+}
+export class DeployAgentCommand {
     constructor(program) {
         this.program = program;
     }
@@ -490,10 +410,8 @@ module.exports.DeployAgentCommand = class DeployAgentCommand {
             }
         }));
     }
-};
-
-
-module.exports.UndeployAgentCommand = class UndeployAgentCommand {
+}
+export class UndeployAgentCommand {
     constructor(program) {
         this.program = program;
     }
@@ -515,4 +433,44 @@ module.exports.UndeployAgentCommand = class UndeployAgentCommand {
             }
         }));
     }
-};
+}
+export class SaveAgentCommand {
+    constructor(program) {
+        this.program = program;
+    }
+
+    async execute(agentDefinitions, options) {
+        const profile = await loadProfile(options.profile);
+        await Promise.all(agentDefinitions.map(async (agentDefinition) => {
+            debug('%s.executeSaveAgent(%s)', profile.name, agentDefinition);
+            if (!fs.existsSync(agentDefinition)) {
+                printError(`File does not exist at: ${agentDefinition}`);
+            }
+            const agentDefStr = fs.readFileSync(agentDefinition);
+            const agent = parseObject(agentDefStr, options);
+            debug('%o', agent);
+            const catalog = new Catalog(profile.url);
+            const project = options.project || profile.project;
+            try {
+                const response = await catalog.saveAgent(project, profile.token, agent);
+                if (response.success) {
+                    printSuccess(`Agent "${agent.name}" saved in project "${project}"`, options);
+                } else if (response.details) {
+                    console.log(`Failed to save agent: ${response.status} ${response.message}`);
+                    console.log('The following issues were found:');
+                    const tableSpec = [
+                        { column: 'Path', field: 'path', width: 50 },
+                        { column: 'Message', field: 'message', width: 100 },
+                    ];
+                    response.details.map((d) => d.path = formatValidationPath(d.path));
+                    printTable(tableSpec, response.details);
+                    printError(''); // Just exit
+                } else {
+                    printError(JSON.stringify(response));
+                }
+            } catch (err) {
+                printError(`Failed to save agent: ${err.status} ${err.message}`, options);
+            }
+        }));
+    }
+}

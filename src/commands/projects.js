@@ -1,29 +1,14 @@
-/*
- * Copyright 2020 Cognitive Scale, Inc. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the “License”);
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an “AS IS” BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-const _ = require('lodash');
-const fs = require('fs');
-const debug = require('debug')('cortex:cli');
-const { loadProfile } = require('../config');
-const ApiServerClient = require('../client/apiServerClient');
-const {
- printSuccess, printError, parseObject, handleTable, printExtendedLogs, handleListFailure,
-    getFilteredOutput,
-} = require('./utils');
+import _ from 'lodash';
+import fs from 'node:fs';
+import debugSetup from 'debug';
+import { loadProfile } from '../config.js';
+import ApiServerClient from '../client/apiServerClient.js';
+import {
+ printSuccess, printError, parseObject, handleTable, printExtendedLogs, handleListFailure, getFilteredOutput, 
+} from './utils.js';
 
-module.exports.CreateProjectCommand = class CreateProjectCommand {
+const debug = debugSetup('cortex:cli');
+export class CreateProjectCommand {
     constructor(program) {
         this.program = program;
     }
@@ -52,9 +37,8 @@ module.exports.CreateProjectCommand = class CreateProjectCommand {
             printError(`Failed to save project: ${err.message}`, options);
         }
     }
-};
-
-module.exports.ListProjectsCommand = class ListProjectsCommand {
+}
+export class ListProjectsCommand {
     constructor(program) {
         this.program = program;
     }
@@ -85,9 +69,8 @@ module.exports.ListProjectsCommand = class ListProjectsCommand {
             handleListFailure(_.get(err, 'response.errors[0]', err), options, 'Projects');
         }
     }
-};
-
-module.exports.DescribeProjectCommand = class DescribeProjectCommand {
+}
+export class DescribeProjectCommand {
     constructor(program) {
         this.program = program;
     }
@@ -97,7 +80,6 @@ module.exports.DescribeProjectCommand = class DescribeProjectCommand {
         const profile = await loadProfile(options.profile);
         debug('%s.executeDescribeProject(%s)', profile.name, projectName);
         const cli = new ApiServerClient(profile.url);
-
         try {
             const response = await cli.getProject(profile.token, projectName);
             getFilteredOutput(response, options);
@@ -105,9 +87,8 @@ module.exports.DescribeProjectCommand = class DescribeProjectCommand {
             printError(`Failed to describe project: ${err.status} ${err.message}`, options);
         }
     }
-};
-
-module.exports.DeleteProjectCommand = class DeleteProjectCommand {
+}
+export class DeleteProjectCommand {
     constructor(program) {
         this.program = program;
     }
@@ -128,4 +109,4 @@ module.exports.DeleteProjectCommand = class DeleteProjectCommand {
             printError(`Failed to delete project: ${err.message}`, options);
         }
     }
-};
+}

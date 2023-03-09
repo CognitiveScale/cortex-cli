@@ -1,40 +1,103 @@
-/*
- * Copyright 2020 Cognitive Scale, Inc. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the “License”);
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an “AS IS” BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import Table from 'cli-table3';
+import _ from 'lodash';
+import { boolean } from 'boolean';
+import chalk from 'chalk';
+import debugSetup from 'debug';
+import fs from 'node:fs';
+import process from 'node:process';
+import { globSync } from 'glob';
+import * as jmsepath from 'jmespath';
+import path from 'node:path';
+import yaml from 'js-yaml';
+import { exec } from 'child_process';
 
-const Table = require('cli-table3');
-const _ = require('lodash');
-const { boolean } = require('boolean');
-const chalk = require('chalk');
-const debug = require('debug')('cortex:cli');
-const fs = require('fs');
-const glob = require('glob');
-const jmsepath = require('jmespath');
-const path = require('path');
-const yaml = require('js-yaml');
-const { exec } = require('child_process');
-
+const debug = debugSetup('cortex:cli');
 const MAX_NAME_LENGTH = 20;
-
 const space = /\s+/;
 const specialCharsExceptHyphen = /[^A-Za-z0-9- ]/;
 const beginAndEndWithHyphen = /^[-]+|[-]+$/;
 const validationErrorMessage = 'Must be 20 characters or less, contain only lowercase a-z, 0-9, or -, and cannot begin or end with -';
 const nameRequirementMessage = 'You must provide a name for the skill.';
+export function useColor(options) {
+    return boolean(options?.color);
+}
 
-module.exports.constructError = (error) => {
+export const printExtendedLogs = (data, options) => {
+    if (options.limit && Array.isArray(data) && data.length === Number(options.limit) && options.limit !== '0') {
+        // don't log if showing all the results
+        process.stderr.write(`Results limited to ${options.limit} rows\n`);
+    }
+};
+
+export function printError(message, options = { color: true }, exitProgram = true) {
+    if (useColor(options)) {
+        console.error(chalk.red(message));
+    } else {
+        console.error(message);
+    }
+    if (exitProgram) {
+        process.exit(1);
+    }
+}
+function _extractValues(fields, obj) {
+    const rv = [];
+    fields.forEach((f) => rv.push((obj !== undefined && obj !== null && obj[f] !== undefined && obj[f] !== null) ? obj[f].toString() : '-'));
+    return rv;
+}
+/**
+ * Execute a sub command, return stdout on success, return stderr on failure
+ * @param commandStr
+ * @returns {Promise<*>}
+ */
+// eslint-disable-next-line require-await
+export async function callMe(commandStr) {
+    return new Promise((resolve, reject) => {
+        const proc = exec(commandStr, (err, stdout) => {
+            if (err) {
+                reject(Error(err.message + stdout));
+            } else {
+                resolve(stdout);
+            }
+        });
+        // Pipe stdout to stderr in real time:
+        proc.stdout.pipe(process.stderr);
+    });
+}
+function round(value, precision) {
+    const multiplier = 10 ** (precision || 0);
+    return Math.floor(value * multiplier) / multiplier;
+}
+function formatServiceInputParameter(inputParameter) {
+    if (inputParameter.type === 'array') {
+        return (`-Name: ${inputParameter.name}, Type: ${inputParameter.type}<${inputParameter.format}>`);
+    }
+    return (`-Name: ${inputParameter.name}, Type: ${inputParameter.type}`);
+}
+// connections get returns createdAt (not prefixed by _) field that cause saving exported connection to fail. Hence removing them manually
+const systemFields = ['createdAt', 'updatedAt', 'createdBy', 'updatedBy'];
+// Alternatively, we can use fs.rmdirSync(<path>, {recursive: true}), but that requires node v12+
+const deleteFolderRecursive = (filepath) => {
+    try {
+        if (fs.existsSync(filepath)) {
+            if (fs.lstatSync(filepath).isDirectory()) {
+                fs.readdirSync(filepath).forEach((file) => {
+                    const curPath = path.join(filepath, file);
+                    if (fs.lstatSync(curPath).isDirectory()) { // recurse
+                        deleteFolderRecursive(curPath);
+                    } else { // delete file
+                        fs.unlinkSync(curPath);
+                    }
+                });
+                fs.rmdirSync(filepath);
+            } else {
+                fs.unlinkSync(filepath);
+            }
+        }
+    } catch (e) {
+        console.error(chalk.red(e.message));
+    }
+};
+export const constructError = (error) => {
     // fallback to text in message or standard error message
     const errResp = error.response;
     let errorText = _.get(errResp, 'body');
@@ -59,55 +122,33 @@ module.exports.constructError = (error) => {
         success: false, message: errorText, details, status,
     };
 };
-
-function useColor(options) {
-    return boolean(_.get(options, 'color'));
-}
-module.exports.useColor = useColor;
-
-module.exports.printSuccess = (message, options) => {
+export const printSuccess = (message, options) => {
     if (useColor(options)) {
         console.log(chalk.green(message));
     } else {
         console.log(message);
     }
 };
-
-module.exports.printWarning = (message, options) => {
+export const printWarning = (message, options) => {
     if (useColor(options)) {
         console.log(chalk.yellow(message));
     } else {
         console.log(message);
     }
 };
-
-function printError(message, options, exit = true) {
-    if (useColor(options)) {
-        console.error(chalk.red(message));
-    } else {
-        console.error(message);
-    }
-    if (exit) {
-        process.exit(1);
-    }
-}
-module.exports.printError = printError;
-
-// eslint-disable-next-line consistent-return
-module.exports.filterObject = (obj, options) => {
+export function filterObject(obj, options) {
     try {
         if (options.query) {
             debug(`filtering results with query: ${options.query}`);
             return jmsepath.search(obj, options.query);
         }
-        return obj;
     } catch (e) {
         // TODO remove --query on deprecation
         process.stderr.write(`error: invalid argument: ${options.query} \n`);
     }
-};
-
-module.exports.getQueryOptions = (options) => {
+    return obj;
+}
+export const getQueryOptions = (options) => {
     // TODO remove --query on deprecation
     if (options.query) process.stderr.write('[DEPRECATION WARNING] --query\n');
     if (options.query && options.json && typeof (options.json) === 'string') process.stderr.write('Warning! --query overrides --json args\n');
@@ -117,96 +158,49 @@ module.exports.getQueryOptions = (options) => {
     // set searchPath to null if there's no path
     return { query: queryOptions === true ? null : queryOptions };
 };
-
-module.exports.getFilteredOutput = (result, options) => {
-    const filteredResult = this.filterObject(result, this.getQueryOptions(options));
+export const getFilteredOutput = (result, options) => {
+    const filteredResult = filterObject(result, getQueryOptions(options));
     if (filteredResult) {
         // print extended logs iff --query arg is valid
-        this.printExtendedLogs(filteredResult, options);
-        this.printSuccess(JSON.stringify(filteredResult, null, 2), options);
+        printExtendedLogs(filteredResult, options);
+        printSuccess(JSON.stringify(filteredResult, null, 2), options);
     }
 };
-
-module.exports.filterListObject = (obj, options) => {
+export function filterListObject(obj, options) {
     const { map, pick, partialRight } = _;
     if (options.query) {
         debug(`filtering results with query: ${options.query}`);
         return map(obj, partialRight(pick, options.query.split(',')));
     }
     return obj;
-};
-
-// YAML 1.2 parses both yaml & json
-module.exports.parseObject = (str) => yaml.load(str);
-
-function _extractValues(fields, obj) {
-    const rv = [];
-    fields.forEach((f) => rv.push((obj !== undefined && obj !== null && obj[f] !== undefined && obj[f] !== null) ? obj[f].toString() : '-'));
-    return rv;
 }
-
-module.exports.printTable = (spec, objects, transform) => {
-    transform = transform || function (obj) { return obj; };
-
+export const parseObject = (str) => yaml.load(str);
+export function printTable(spec, objects, transform) {
+    const fn = transform ?? ((obj) => obj);
     const head = spec.map((s) => s.column);
     const colWidths = spec.map((s) => s.width);
     const fields = spec.map((s) => s.field);
-    const values = objects.map((obj) => _extractValues(fields, transform(obj)));
+    const values = objects.map((obj) => _extractValues(fields, fn(obj)));
     debug('printing fields: %o', fields);
-
     const table = new Table({ head, colWidths, style: { head: ['cyan'] } });
     values.forEach((v) => table.push(v));
-
     console.log(table.toString());
-};
-
-/**
- * Execute a sub command, return stdout on success, return stderr on failure
- * @param commandStr
- * @returns {Promise<*>}
- */
-// eslint-disable-next-line require-await
-async function callMe(commandStr) {
-    return new Promise((resolve, reject) => {
-        const proc = exec(commandStr, (err, stdout) => {
-            if (err) {
-                reject(err.message + stdout);
-            } else {
-                resolve(stdout);
-            }
-        });
-        // Pipe stdout to stderr in real time:
-        proc.stdout.pipe(process.stderr);
-    });
 }
 
-module.exports.callMe = callMe;
-
-module.exports.getSourceFiles = (source, cb) => {
+export function getSourceFiles(source) {
     const options = { silent: true };
     const normalizedSource = (source.endsWith('/')) ? source : `${source}/`;
     const normalizedPath = path.posix.join(normalizedSource, '**', '*');
-    glob(normalizedPath, options, (err, files) => {
-        // files is an array of filenames.
-        if (err) {
-            cb(err, null);
-        } else {
-            const results = files.filter((fpath) => fs.lstatSync(fpath).isFile()).map((fpath) => ({
-                canonical: fpath,
-                relative: path.relative(normalizedSource, fpath),
-                size: fs.lstatSync(fpath).size,
-            }));
-            cb(null, results);
-        }
-    });
-};
-
-function round(value, precision) {
-    const multiplier = 10 ** (precision || 0);
-    return Math.floor(value * multiplier) / multiplier;
+    const files = globSync(normalizedPath, options);
+    // files is an array of filenames.
+    return files.filter((fpath) => fs.lstatSync(fpath).isFile()).map((fpath) => ({
+        canonical: fpath,
+        relative: path.relative(normalizedSource, fpath),
+        size: fs.lstatSync(fpath).size,
+    }));
 }
 
-module.exports.humanReadableFileSize = (sizeInBytes) => {
+export const humanReadableFileSize = (sizeInBytes) => {
     const ranges = {
         K: 10 ** 3,
         M: 10 ** 6,
@@ -215,33 +209,25 @@ module.exports.humanReadableFileSize = (sizeInBytes) => {
     };
     if (sizeInBytes < ranges.K) {
         return `${sizeInBytes}B`;
-    } if (sizeInBytes < ranges.M) {
+    }
+    if (sizeInBytes < ranges.M) {
         return `${round(sizeInBytes / ranges.K, 1)}K`;
-    } if (sizeInBytes < ranges.G) {
+    }
+    if (sizeInBytes < ranges.G) {
         return `${round(sizeInBytes / ranges.M, 1)}M`;
-    } if (sizeInBytes < ranges.T) {
+    }
+    if (sizeInBytes < ranges.T) {
         return `${round(sizeInBytes / ranges.G, 1)}G`;
     }
     return sizeInBytes; // Umm fix logic
 };
-
-function formatServiceInputParameter(inputParameter) {
-    if (inputParameter.type === 'array') {
-        return (`-Name: ${inputParameter.name}, Type: ${inputParameter.type}<${inputParameter.format}>`);
-    }
-
-    return (`-Name: ${inputParameter.name}, Type: ${inputParameter.type}`);
-}
-
-module.exports.formatAllServiceInputParameters = (allParameters) => {
+export const formatAllServiceInputParameters = (allParameters) => {
     if (allParameters.$ref != null) {
         return `$ref:${allParameters.$ref}`;
     }
-
     return allParameters.map((inputParameters) => formatServiceInputParameter(inputParameters)).join('\n');
 };
-
-module.exports.countLinesInFile = (filePath) => new Promise((resolve, reject) => {
+export const countLinesInFile = (filePath) => new Promise((resolve, reject) => {
     // Bug ... this code ignores the final line that does not end with a new line ... thats why leftovers was added
     // eslint-disable-next-line implicit-arrow-linebreak
     let count = 0;
@@ -249,18 +235,18 @@ module.exports.countLinesInFile = (filePath) => new Promise((resolve, reject) =>
     fs.createReadStream(filePath)
         .on('error', (e) => reject(e))
         .on('data', (chunk) => {
-            for (let i = 0; i < chunk.length; i += 1) {
-                if (chunk[i] === 10) {
-                    count += 1;
-                    leftovers = false;
-                } else {
-                    leftovers = true;
-                }
+        for (let i = 0; i < chunk.length; i += 1) {
+            if (chunk[i] === 10) {
+                count += 1;
+                leftovers = false;
+            } else {
+                leftovers = true;
             }
-        })
+        }
+    })
         .on('end', () => (leftovers ? resolve(count + 1) : resolve(count)));
 });
-module.exports.formatValidationPath = (p) => {
+export const formatValidationPath = (p) => {
     let cnt = 0;
     let res = '';
     const len = p.length;
@@ -274,133 +260,89 @@ module.exports.formatValidationPath = (p) => {
     });
     return res;
 };
-
-// connections get returns createdAt (not prefixed by _) field that cause saving exported connection to fail. Hence removing them manually
-const systemFields = ['createdAt', 'updatedAt', 'createdBy', 'updatedBy'];
-module.exports.cleanInternalFields = (jsobj) => JSON.stringify(jsobj, (a, obj) => {
+export const cleanInternalFields = (jsobj) => JSON.stringify(jsobj, (a, obj) => {
     if (a.startsWith('_') || systemFields.includes(a)) {
         return undefined;
     }
     return obj;
 }, 2);
-
-module.exports.jsonToYaml = (json) => {
+export const jsonToYaml = (json) => {
     if (typeof json === 'string') {
         json = JSON.parse(json);
     }
     return yaml.dump(json);
 };
-
-module.exports.createFileStream = (filepath) => {
+export const createFileStream = (filepath) => {
     const dir = path.dirname(filepath);
     if (!fs.existsSync(dir)) {
         fs.mkdirSync(dir, { recursive: true });
     }
     return fs.createWriteStream(filepath);
 };
-
-module.exports.writeToFile = (content, filepath) => {
+export const writeToFile = (content, filepath) => {
     const dir = path.dirname(filepath);
     if (!fs.existsSync(dir)) {
         fs.mkdirSync(dir, { recursive: true });
     }
-
     fs.writeFileSync(filepath, content);
 };
-
-module.exports.fileExists = (filepath) => fs.existsSync(filepath);
-
-// Alternatively, we can use fs.rmdirSync(<path>, {recursive: true}), but that requires node v12+
-const deleteFolderRecursive = (filepath) => {
-    try {
-        if (fs.existsSync(filepath)) {
-            if (fs.lstatSync(filepath).isDirectory()) {
-                fs.readdirSync(filepath).forEach((file) => {
-                    const curPath = path.join(filepath, file);
-                    if (fs.lstatSync(curPath).isDirectory()) { // recurse
-                        deleteFolderRecursive(curPath);
-                    } else { // delete file
-                        fs.unlinkSync(curPath);
-                    }
-                });
-                fs.rmdirSync(filepath);
-            } else {
-                fs.unlinkSync(filepath);
-            }
-        }
-    } catch (e) {
-        console.error(chalk.red(e.message));
-    }
-};
-
-module.exports.deleteFile = deleteFolderRecursive;
-
-module.exports.checkProject = (projectId) => {
+export const fileExists = (filepath) => fs.existsSync(filepath);
+export const checkProject = (projectId) => {
     if (_.isEmpty(projectId)) {
         printError('\'project\' is required, please provide using \'cortex configure\' or --project');
     }
 };
-
-module.exports.LISTTABLEFORMAT = [
+export const LISTTABLEFORMAT = [
     { column: 'Name', field: 'name', width: 30 },
     { column: 'Title', field: 'title', width: 40 },
     { column: 'Description', field: 'description', width: 50 },
     { column: 'Modified', field: 'updatedAt', width: 26 },
     { column: 'Author', field: 'createdBy', width: 25 },
 ];
-
-module.exports.DEPENDENCYTABLEFORMAT = [
+export const DEPENDENCYTABLEFORMAT = [
     { column: 'Dependency Name', field: 'name', width: 60 },
     { column: 'Dependency Type', field: 'type', width: 40 },
 ];
-
-module.exports.OPTIONSTABLEFORMAT = [
+export const OPTIONSTABLEFORMAT = [
     { column: 'Option Type', field: 'type', width: 20 },
     { column: 'Message', field: 'message', width: 120 },
 ];
-
-module.exports.RUNTABLEFORMAT = [
+export const RUNTABLEFORMAT = [
     { column: 'Run ID', field: 'runId', width: 30 },
     { column: 'Experiment Name', field: 'experimentName', width: 40 },
     { column: 'Took', field: 'took', width: 50 },
     { column: 'Modified', field: '_updatedAt', width: 26 },
 ];
-module.exports.SESSIONTABLEFORMAT = [
+export const SESSIONTABLEFORMAT = [
     { column: 'Session ID', field: 'sessionId', width: 45 },
     { column: 'TTL', field: 'ttl', width: 15 },
     { column: 'Description', field: 'description', width: 70 },
 ];
-
-module.exports.isNumeric = (value) => /^-?\d+$/.test(value);
-
-module.exports.CONNECTIONTABLEFORMAT = [
+export const isNumeric = (value) => /^-?\d+$/.test(value);
+export const CONNECTIONTABLEFORMAT = [
     { column: 'Name', field: 'name', width: 40 },
     { column: 'Title', field: 'title', width: 50 },
     { column: 'Description', field: 'description', width: 50 },
     { column: 'Connection Type', field: 'connectionType', width: 25 },
     { column: 'Created On', field: 'createdAt', width: 26 },
 ];
-
-module.exports.EXTERNALROLESFORMAT = [
+export const EXTERNALROLESFORMAT = [
     { column: 'Group', field: 'group' },
     { column: 'Roles', field: 'roles' },
 ];
-
-module.exports.generateNameFromTitle = (title) => title.replace(specialCharsExceptHyphen, '')
+export const generateNameFromTitle = (title) => title.replace(specialCharsExceptHyphen, '')
     .replace(space, '-')
     .replace(beginAndEndWithHyphen, '')
     .substr(0, MAX_NAME_LENGTH)
     .replace(beginAndEndWithHyphen, '')
     .toLowerCase();
-
-module.exports.hasUppercase = (s) => /[A-Z]/.test(s);
-
-module.exports.validateName = (name) => (space.test(name)
+export const hasUppercase = (s) => /[A-Z]/.test(s);
+export const validateName = (name) => (space.test(name)
     || specialCharsExceptHyphen.test(name)
     || beginAndEndWithHyphen.test(name)
     || (!name)
     || (name && name.length > MAX_NAME_LENGTH)
-    || module.exports.hasUppercase(name)
+    || hasUppercase(name)
     ? {
         status: false,
         message: name ? validationErrorMessage : nameRequirementMessage,
@@ -409,43 +351,35 @@ module.exports.validateName = (name) => (space.test(name)
         status: true,
         message: '',
     });
-
-module.exports.handleTable = (spec, data, transformer, noDataMessage) => {
+export const handleTable = (spec, data, transformer, noDataMessage) => {
     if (!data || data.length === 0) {
-        this.printSuccess(noDataMessage);
+        printSuccess(noDataMessage);
     } else {
-        this.printTable(spec, data, transformer);
+        printTable(spec, data, transformer);
     }
 };
 
-module.exports.printExtendedLogs = (data, options) => {
-    if (options.limit && Array.isArray(data) && data.length === Number(options.limit) && options.limit !== '0') {
-        // don't log if showing all the results
-        process.stderr.write(`Results limited to ${options.limit} rows\n`);
-    }
-};
-
-module.exports.handleListFailure = (response, options, type) => {
+export const handleListFailure = (response, options, type) => {
     if (response.status === 400) {
-        const optionTableFormat = this.OPTIONSTABLEFORMAT;
+        const optionTableFormat = OPTIONSTABLEFORMAT;
         printError(`${type} list failed.`, options, false);
         if (response.details !== undefined && response.details !== null) {
-            this.printTable(optionTableFormat, response.details);
+            printTable(optionTableFormat, response.details);
         } else {
-            this.printError(response.message, options);
+            printError(response.message, options);
         }
         printError(''); // Just exit
     }
     return printError(`Failed to list ${type}: ${response.status} ${response.message}`, options);
 };
-
-module.exports.handleDeleteFailure = (response, options, type) => {
+export const handleDeleteFailure = (response, options, type) => {
     if (response.status === 403) { // has dependencies
-        const tableFormat = this.DEPENDENCYTABLEFORMAT;
+        const tableFormat = DEPENDENCYTABLEFORMAT;
         printError(`${type} deletion failed: ${response.message}.`, options, false);
-        this.printTable(tableFormat, response.details);
+        printTable(tableFormat, response.details);
         return printError(''); // Just exit
     }
     const defaultErrorMessage = `${type} deletion failed: ${response.status} ${response.message}.`;
     return printError(defaultErrorMessage, options);
 };
+export { deleteFolderRecursive as deleteFile };

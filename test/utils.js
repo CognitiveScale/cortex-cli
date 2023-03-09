@@ -6,8 +6,12 @@ function ansiRegex({ onlyFirst = false } = {}) {
     ].join('|');
     return new RegExp(pattern, onlyFirst ? undefined : 'g');
 }
-
 function stripAnsi(s) {
     return s.replace(ansiRegex(), '');
 }
-module.exports = { ansiRegex, stripAnsi };
+export { ansiRegex };
+export { stripAnsi };
+export default {
+    ansiRegex,
+    stripAnsi,
+};
