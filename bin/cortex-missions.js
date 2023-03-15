@@ -105,7 +105,7 @@ export function create() {
                     printError('payload cannot be empty');
                     throw new Error('Empty payload received in params');
                 }
-                new InvokeAgentServiceCommand(program).execute(`${missionName}-online-learner-agent`, 'online_learner_service', options);
+                new InvokeAgentServiceCommand(program).execute(`${campaignName}-${missionName}`, 'mission_manager_service', options);
             } catch (err) {
                 console.error(chalk.red(err.message));
             }
