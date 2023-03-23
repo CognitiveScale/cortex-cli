@@ -12,6 +12,7 @@ import {
  ListMissionsCommand, DeployMissionCommand, DescribeMissionCommand, UndeployMissionCommand, 
 } from '../src/commands/campaigns.js';
 import { InvokeAgentServiceCommand } from '../src/commands/agents.js';
+import { DownloadContent } from '../src/commands/content.js';
 
 export function create() {
     const program = new Command();
@@ -120,6 +121,20 @@ export function create() {
         .action(withCompatibilityCheck((campaignName, missionName, options) => {
             try {
                 new UndeployMissionCommand(program).execute(campaignName, missionName, options);
+            } catch (err) {
+                console.error(chalk.red(err.message));
+            }
+        }));
+    program
+        .command('status <activationId>')
+        .description('Status of Missions activation')
+        .option('--no-compat', 'Ignore API compatibility checks')
+        .option('--color [boolean]', 'Turn on/off colors for JSON output.', 'true')
+        .option('--profile <profile>', 'The profile to use')
+        .option('--project <project>', 'The project to use')
+        .action(withCompatibilityCheck((activationId, options) => {
+            try {
+                new DownloadContent(program).execute(`mission_runtime/${activationId}/status.chk`, options);
             } catch (err) {
                 console.error(chalk.red(err.message));
             }
