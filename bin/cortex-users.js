@@ -13,7 +13,7 @@ export function create() {
 
     program.name('cortex users');
     program.description('Work with Cortex User');
-    program.command('describe')
+    program.command('describe [user]')
         .alias('get')
         .description('Describe a users grants and roles')
         .option('--no-compat', 'Ignore API compatibility checks')
@@ -21,9 +21,9 @@ export function create() {
         .option('--profile <profile>', 'The profile to use')
         .option('--user <user>', 'The user to describe, self for default')
         .option('--roles', 'Include grant inheritance from roles')
-        .action(withCompatibilityCheck((options) => {
+        .action(withCompatibilityCheck(async (user, options) => {
             try {
-                new UserDescribeCommand(program).execute(options);
+                await new UserDescribeCommand(program).execute(user, options);
             } catch (err) {
                 console.error(chalk.red(err.message));
             }

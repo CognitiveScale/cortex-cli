@@ -2,7 +2,7 @@ import debugSetup from 'debug';
 import { loadProfile } from '../config.js';
 import Users from '../client/users.js';
 import {
- printSuccess, printError, filterObject, handleTable, getFilteredOutput, 
+ printSuccess, printError, printWarning, filterObject, handleTable, getFilteredOutput,
 } from './utils.js';
 /*
  * Copyright 2023 Cognitive Scale, Inc. All Rights Reserved.
@@ -135,7 +135,7 @@ export const UserDescribeCommand = class {
         this.program = program;
     }
 
-    async execute(options) {
+    async execute(cliUser, options) {
         const profile = await loadProfile(options.profile);
         debug('%s.describeForUser(%s)', profile.name, options.user || 'self');
         const flags = [];
@@ -145,18 +145,26 @@ export const UserDescribeCommand = class {
         if (options.roles) {
             flags.push('roles');
         }
-        const client = new Users(profile.url, options.user, flags);
-        client.describeUser(profile.token).then((response) => {
+        console.log(cliUser);
+        if (options?.user !== undefined && cliUser !== undefined) {
+            printError('Bad options: --user <user> and <user> are mutually exclusive,', options);
+        }
+        const user = options?.user ?? cliUser;
+        if (user === undefined) {
+            printWarning('Defaulting to user from cortex profile', options);
+        }
+        const client = new Users(profile.url, user, flags);
+        try {
+            const response = await client.describeUser(profile.token);
             if (response.success) {
                 const result = filterObject(response.result, options);
                 printSuccess(JSON.stringify(result, null, 2), options);
             } else {
                 printError(`Failed to describe user : ${response.message}`, options);
             }
-        })
-            .catch((err) => {
+        } catch (err) {
             printError(`Failed to describe user : ${err.status} ${err.message}`, options);
-        });
+        }
     }
 };
 export const UserProjectAssignCommand = class {

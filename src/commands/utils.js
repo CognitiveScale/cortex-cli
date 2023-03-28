@@ -131,9 +131,9 @@ export const printSuccess = (message, options) => {
 };
 export const printWarning = (message, options) => {
     if (useColor(options)) {
-        console.log(chalk.yellow(message));
+        console.warn(chalk.yellow(message));
     } else {
-        console.log(message);
+        console.warn(message);
     }
 };
 export function filterObject(obj, options) {
