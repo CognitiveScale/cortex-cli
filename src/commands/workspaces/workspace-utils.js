@@ -15,7 +15,7 @@ let keytar;
 try {
     // Don't load keytar for tests
     if (process.env.NODE_ENV !== 'test') {
-        keytar = await import('keytar');
+        keytar = (await import('keytar'))?.default;
     }
 } catch (err) {
     printWarning(`Unable to use keyring service, falling back to file-based keystore: ${err.message}`);
