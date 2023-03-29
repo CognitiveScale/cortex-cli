@@ -145,7 +145,6 @@ export const UserDescribeCommand = class {
         if (options.roles) {
             flags.push('roles');
         }
-        console.log(cliUser);
         if (options?.user !== undefined && cliUser !== undefined) {
             printError('Bad options: --user <user> and <user> are mutually exclusive,', options);
         }
