@@ -56,9 +56,7 @@ export default (class Secrets {
         return got
             .delete(endpoint, {
             headers: defaultHeaders(token),
-        }).json()
-            .then((result) => ({ success: true, result }))
-            .catch((err) => constructError(err));
+        }).json();
     }
 
     writeSecret(projectId, token, keyName, value) {

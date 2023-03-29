@@ -118,15 +118,14 @@ export const DeleteSecretCommand = class {
         const profile = await loadProfile(options.profile);
         debug('%s.deleteSecret(%s)', profile.name, keyName);
         const secretsClient = new Secrets(profile.url);
-        secretsClient.deleteSecret(options.project || profile.project, profile.token, keyName).then((response) => {
+        try {
+            const response = await secretsClient.deleteSecret(options.project || profile.project, profile.token, keyName);
             if (response.success) {
-                const result = filterObject(response.result, options);
-                return printSuccess(JSON.stringify(result, null, 2), options);
+                return printSuccess(response?.message ?? response, options);
             }
             return handleDeleteFailure(response, options, 'Secret');
-        })
-            .catch((err) => {
-            printError(`Failed to delete secure secret : ${err.status} ${err.message}`, options);
-        });
+        } catch (err) {
+            return printError(`Failed to delete secure secret : ${err.status} ${err.message}`, options);
+        }
     }
 };
