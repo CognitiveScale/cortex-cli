@@ -129,7 +129,7 @@ export const DeleteSecretCommand = class {
             if (err?.response?.body) {
                 message = JSON.parse(err?.response?.body)?.message ?? err.message;
             }
-            return printError(`Failed to delete secure secret : ${err?.response?.statusCode ?? ''} ${message}`, options);
+            return printError(`Secret deletion failed: ${err?.response?.statusCode ?? ''} ${message}`, options);
         }
     }
 };
