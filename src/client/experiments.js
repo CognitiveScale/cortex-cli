@@ -1,5 +1,5 @@
 import fs from 'node:fs';
-import pipeline from 'node:stream/promises';
+import { pipeline } from 'node:stream/promises';
 import debugSetup from 'debug';
 import { got, defaultHeaders } from './apiutils.js';
 import { constructError, checkProject } from '../commands/utils.js';
