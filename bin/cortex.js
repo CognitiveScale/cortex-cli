@@ -23,8 +23,6 @@ export function create() {
         .command('deploy <cmd>', 'Work with Cortex Artifacts export for deployment')
         .command('docker <cmd>', 'Work with Docker')
         .command('experiments <cmd>', 'Work with Cortex Experiments')
-        .command('generate <cmd>', 'Scaffold Cortex Components')
-        .command('workspaces <cmd>', 'Scaffold Cortex Components')
         .command('missions <cmd>', 'Work with Cortex Missions')
         .command('models <cmd>', 'Work with Cortex Models')
         .command('projects <cmd>', 'Work with Cortex Projects')
@@ -34,7 +32,9 @@ export function create() {
         .command('skills <cmd>', 'Work with Cortex Skills')
         .command('tasks <cmd>', 'Work with Cortex Tasks')
         .command('types <cmd>', 'Work with Cortex Types')
-        .command('users <cmd>', 'Work with a Cortex Users');
+        .command('users <cmd>', 'Work with a Cortex Users')
+        .command('workspaces <cmd>', 'Scaffold Cortex Components');
+
     return program;
 }
 if (esMain(import.meta)) {
