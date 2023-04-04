@@ -160,6 +160,7 @@ export function create() {
         .option('--no-compat', 'Ignore API compatibility checks')
         .option('--profile <profile>', 'The profile to use')
         .option('--project <project>', 'The project to use')
+        .option('--raw', 'Get raw logs as a stream')
         // TODO enable when we want to support tasks
         // .option('--type [type]', 'The type of action logs to fetch [skill|task]')
         .action(withCompatibilityCheck(async (skillName, actionName, options) => {

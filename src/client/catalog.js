@@ -112,16 +112,18 @@ export default (class Catalog {
             .catch((err) => constructError(err));
     }
 
-    skillLogs(projectId, token, skillName, actionName, verbose = false) {
+    skillLogs(projectId, token, skillName, actionName, raw = false) {
         checkProject(projectId);
         const endpoint = `${this.endpoints.skills(projectId)}/${encodeURIComponent(skillName)}/action/${encodeURIComponent(actionName)}/logs`;
         debug('skillLogs(%s, %s) => %s', skillName, actionName, endpoint);
-        return got
-            .get(endpoint, {
+        const gotOptions = {
             headers: defaultHeaders(token),
-            searchParams: { verbose },
-        }).json()
-            .then((res) => ({ ...res }))
+            searchParams: { raw },
+        };
+        const gotResponse = raw ? got.get(endpoint, gotOptions).text() : got.get(endpoint, gotOptions).json();
+
+        return gotResponse
+            .then((res) => (raw ? res : { ...res }))
             .catch((err) => constructError(err));
     }
 

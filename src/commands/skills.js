@@ -161,19 +161,30 @@ export class SkillLogsCommand {
     }
 
     async execute(skillName, actionName, options) {
-        const profile = await loadProfile(options.profile);
-        debug('%s.executeSkillLogs(%s,%s)', profile.name, skillName, actionName);
-        const catalog = new Catalog(profile.url);
-        catalog.skillLogs(options.project || profile.project, profile.token, skillName, actionName, options.verbose).then((response) => {
-            if (response.success) {
+        try {
+            const profile = await loadProfile(options.profile);
+            debug('%s.executeSkillLogs(%s,%s)', profile.name, skillName, actionName);
+    
+            const catalog = new Catalog(profile.url);
+            const response = await catalog.skillLogs(options.project || profile.project, profile.token, skillName, actionName, options.raw);
+    
+            if (options.raw) {
+                try {
+                    const respJSON = JSON.parse(response); // happens with errors
+                    if (respJSON?.body) {
+                        printError(`Failed to List Skill/Action Logs ${skillName}/${actionName}: ${respJSON.body.message}`, options);
+                    }
+                } catch (err) {
+                    printSuccess(response, options);
+                }
+            } else if (response.success) {
                 printSuccess(JSON.stringify(response.logs), options);
             } else {
-                printError(`Failed to List Skill/Action Logs ${skillName}/${actionName}: ${response.message}`, options);
+                printError(`Failed to List Skill/Action Logs ${skillName}/${actionName}: ${response.body.message}`, options);
             }
-        })
-            .catch((err) => {
+        } catch (err) {
             printError(`Failed to List Skill/Action Logs ${skillName}/${actionName}: ${err.status} ${err.message}`, options);
-        });
+        }
     }
 }
 export class DeploySkillCommand {
