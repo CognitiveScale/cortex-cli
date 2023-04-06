@@ -1,33 +1,16 @@
-/*
- * Copyright 2020 Cognitive Scale, Inc. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the “License”);
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an “AS IS” BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import fs from 'node:fs';
+import debugSetup from 'debug';
+import getOr from 'lodash/fp/getOr.js';
+import isUndefined from 'lodash/fp/isUndefined.js';
+import map from 'lodash/fp/map.js';
+import { loadProfile } from '../config.js';
+import Secrets from '../client/secrets.js';
+import {
+ printSuccess, printError, filterObject, parseObject, printTable, handleTable, handleDeleteFailure, getFilteredOutput, 
+} from './utils.js';
 
-const fs = require('fs');
-const debug = require('debug')('cortex:cli');
-const getOr = require('lodash/fp/getOr');
-const isUndefined = require('lodash/fp/isUndefined');
-const map = require('lodash/fp/map');
-
-const { loadProfile } = require('../config');
-const Secrets = require('../client/secrets');
-const {
- printSuccess, printError, filterObject, parseObject, printTable, handleTable, handleDeleteFailure,
-    getFilteredOutput,
-} = require('./utils');
-
-module.exports.ListSecretsCommand = class {
+const debug = debugSetup('cortex:cli');
+export const ListSecretsCommand = class {
     constructor(program) {
         this.program = program;
     }
@@ -35,32 +18,30 @@ module.exports.ListSecretsCommand = class {
     async execute(options) {
         const profile = await loadProfile(options.profile);
         debug('%s.listsecrets(%s)', profile.name);
-
         const secrets = new Secrets(profile.url);
         secrets.listSecrets(options.project || profile.project, profile.token)
             .then((response) => {
-                if (response.success) {
-                    const { result } = response;
-                    // TODO remove --query on deprecation
-                    if (options.json || options.query) {
-                        getFilteredOutput(result, options);
-                    } else {
-                        const tableSpec = [
-                            { column: 'Secret Key Name', field: 'keyName', width: 50 },
-                        ];
-                        handleTable(tableSpec, map((x) => ({ keyName: x }), result), null, 'No secrets found');
-                    }
+            if (response.success) {
+                const { result } = response;
+                // TODO remove --query on deprecation
+                if (options.json || options.query) {
+                    getFilteredOutput(result, options);
                 } else {
-                    printError(`Failed to list secrets: ${response.message}`, options);
+                    const tableSpec = [
+                        { column: 'Secret Key Name', field: 'keyName', width: 50 },
+                    ];
+                    handleTable(tableSpec, map((x) => ({ keyName: x }), result), null, 'No secrets found');
                 }
-            })
+            } else {
+                printError(`Failed to list secrets: ${response.message}`, options);
+            }
+        })
             .catch((err) => {
-                printError(`Failed to list secrets : ${err.status} ${err.message}`, options);
-            });
+            printError(`Failed to list secrets : ${err.status} ${err.message}`, options);
+        });
     }
 };
-
-module.exports.ReadSecretsCommand = class {
+export const ReadSecretsCommand = class {
     constructor(program) {
         this.program = program;
     }
@@ -68,7 +49,6 @@ module.exports.ReadSecretsCommand = class {
     async execute(keyName, options) {
         const profile = await loadProfile(options.profile);
         debug('%s.readsecret(%s)', profile.name, keyName);
-
         const secrets = new Secrets(profile.url);
         secrets.readSecret(options.project || profile.project, profile.token, keyName).then((response) => {
             if (response.success) {
@@ -86,12 +66,11 @@ module.exports.ReadSecretsCommand = class {
             }
         })
             .catch((err) => {
-                printError(`Failed to read secure secret : ${err.status} ${err.message}`, options);
-            });
+            printError(`Failed to read secure secret : ${err.status} ${err.message}`, options);
+        });
     }
 };
-
-module.exports.WriteSecretsCommand = class {
+export const WriteSecretsCommand = class {
     constructor(program) {
         this.program = program;
     }
@@ -99,7 +78,6 @@ module.exports.WriteSecretsCommand = class {
     async execute(keyName, value, options) {
         const profile = await loadProfile(options.profile);
         debug('%s.writeSecret(%s)', profile.name, keyName);
-
         let data = value;
         if (options.data) {
             try {
@@ -111,17 +89,14 @@ module.exports.WriteSecretsCommand = class {
             const dataStr = fs.readFileSync(options.dataFile);
             data = parseObject(dataStr, options);
         }
-
         if (isUndefined(data)) {
-          return printError('Failed to write secret : no value specified', options);
+            return printError('Failed to write secret : no value specified', options);
         }
-
         // FAB-1775: validate secret key name
         const invalidCharsRegex = /^\w+([./-]?\w+)*$/;
         if (!invalidCharsRegex.test(keyName)) {
             return printError(`Failed to write secret : keyName did not conform to regex ${JSON.stringify(invalidCharsRegex)}`, options);
         }
-
         const secrets = new Secrets(profile.url);
         return secrets.writeSecret(options.project || profile.project, profile.token, keyName, data).then((response) => {
             if (response.success) {
@@ -129,13 +104,12 @@ module.exports.WriteSecretsCommand = class {
             }
             return printError(`Failed to write secret: ${response.status} ${response.message}`, options);
         })
-        .catch((err) => {
+            .catch((err) => {
             printError(`Failed to write secret : ${err.status} ${err.message}`, options);
         });
     }
 };
-
-module.exports.DeleteSecretCommand = class {
+export const DeleteSecretCommand = class {
     constructor(program) {
         this.program = program;
     }
@@ -143,17 +117,19 @@ module.exports.DeleteSecretCommand = class {
     async execute(keyName, options) {
         const profile = await loadProfile(options.profile);
         debug('%s.deleteSecret(%s)', profile.name, keyName);
-
         const secretsClient = new Secrets(profile.url);
-        secretsClient.deleteSecret(options.project || profile.project, profile.token, keyName).then((response) => {
+        try {
+            const response = await secretsClient.deleteSecret(options.project || profile.project, profile.token, keyName);
             if (response.success) {
-                const result = filterObject(response.result, options);
-                return printSuccess(JSON.stringify(result, null, 2), options);
+                return printSuccess(response?.message ?? response, options);
             }
             return handleDeleteFailure(response, options, 'Secret');
-        })
-        .catch((err) => {
-            printError(`Failed to delete secure secret : ${err.status} ${err.message}`, options);
-        });
+        } catch (err) {
+            let message = err?.message;
+            if (err?.response?.body) {
+                message = JSON.parse(err?.response?.body)?.message ?? err.message;
+            }
+            return printError(`Secret deletion failed: ${err?.response?.statusCode ?? ''} ${message}.`, options);
+        }
     }
 };

@@ -1,36 +1,18 @@
-/*
- * Copyright 2020 Cognitive Scale, Inc. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the “License”);
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an “AS IS” BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-const _ = require('lodash');
-const fs = require('fs');
-const debug = require('debug')('cortex:cli');
-const dayjs = require('dayjs');
-const relativeTime = require('dayjs/plugin/relativeTime');
-const { loadProfile } = require('../config');
-const Catalog = require('../client/catalog');
-const Agent = require('../client/agents');
+import _ from 'lodash';
+import fs from 'node:fs';
+import debugSetup from 'debug';
+import dayjs from 'dayjs';
+import relativeTime from 'dayjs/plugin/relativeTime.js';
+import { loadProfile } from '../config.js';
+import Catalog from '../client/catalog.js';
+import Agent from '../client/agents.js';
+import {
+ printSuccess, printError, printWarning, filterObject, parseObject, printTable, formatValidationPath, LISTTABLEFORMAT, isNumeric, handleTable, printExtendedLogs, handleListFailure, handleDeleteFailure, getFilteredOutput, 
+} from './utils.js';
 
+const debug = debugSetup('cortex:cli');
 dayjs.extend(relativeTime);
-
-const {
-    printSuccess, printError, printWarning, filterObject, parseObject, printTable, formatValidationPath,
-    LISTTABLEFORMAT, isNumeric, handleTable, printExtendedLogs, handleListFailure, handleDeleteFailure,
-    getFilteredOutput,
-} = require('./utils');
-
-module.exports.SaveSkillCommand = class SaveSkillCommand {
+export class SaveSkillCommand {
     constructor(program) {
         this.program = program;
     }
@@ -63,7 +45,6 @@ module.exports.SaveSkillCommand = class SaveSkillCommand {
                     const scaleCount = parseInt(options.scaleCount, 10);
                     skill.actions.map((a) => a.scaleCount = scaleCount);
                 }
-
                 if (options.podspec) {
                     const paramsStr = fs.readFileSync(options.podspec);
                     const podSpec = parseObject(paramsStr, options);
@@ -93,9 +74,8 @@ module.exports.SaveSkillCommand = class SaveSkillCommand {
             printError(`Failed to save skill: ${_.get(err, 'status', '')} ${_.get(err, 'response.body.error', err.message)}`, options);
         }
     }
-};
-
-module.exports.ListSkillsCommand = class ListSkillsCommand {
+}
+export class ListSkillsCommand {
     constructor(program) {
         this.program = program;
     }
@@ -103,14 +83,11 @@ module.exports.ListSkillsCommand = class ListSkillsCommand {
     async execute(options) {
         const profile = await loadProfile(options.profile);
         debug('%s.executeListSkills()', profile.name);
-
         const catalog = new Catalog(profile.url);
         try {
             const status = !_.get(options, 'nostatus', false); // default show status, if nostatus==true status == false
             const shared = !_.get(options, 'noshared', false);
-            const response = await catalog.listSkills(
-                options.project || profile.project, profile.token, { status, shared }, options.filter, options.limit, options.skip, options.sort,
-            );
+            const response = await catalog.listSkills(options.project || profile.project, profile.token, { status, shared }, options.filter, options.limit, options.skip, options.sort);
             if (response.success) {
                 let result = response.skills;
                 const tableFormat = LISTTABLEFORMAT;
@@ -129,21 +106,15 @@ module.exports.ListSkillsCommand = class ListSkillsCommand {
                     return getFilteredOutput(result, options);
                 }
                 printExtendedLogs(result, options);
-                return handleTable(
-                    tableFormat,
-                    _.sortBy(result, options.sort ? [] : ['name']),
-                    (o) => ({ ...o, updatedAt: o.updatedAt ? dayjs(o.updatedAt).fromNow() : '-' }),
-                    'No skills found',
-                );
+                return handleTable(tableFormat, _.sortBy(result, options.sort ? [] : ['name']), (o) => ({ ...o, updatedAt: o.updatedAt ? dayjs(o.updatedAt).fromNow() : '-' }), 'No skills found');
             }
             return handleListFailure(response, options, 'Skills');
         } catch (err) {
             return printError(`Failed to list skills: ${err.status} ${err.message}`, options);
         }
     }
-};
-
-module.exports.DescribeSkillCommand = class DescribeSkillCommand {
+}
+export class DescribeSkillCommand {
     constructor(program) {
         this.program = program;
     }
@@ -151,7 +122,6 @@ module.exports.DescribeSkillCommand = class DescribeSkillCommand {
     async execute(skillName, options) {
         const profile = await loadProfile(options.profile);
         debug('%s.executeDescribeSkill(%s)', profile.name, skillName);
-
         const catalog = new Catalog(profile.url);
         try {
             const response = await catalog.describeSkill(options.project || profile.project, profile.token, skillName, options.verbose, options.output);
@@ -161,9 +131,8 @@ module.exports.DescribeSkillCommand = class DescribeSkillCommand {
             return printError(`Failed to describe skill ${skillName}: ${err.status} ${err.message}`, options);
         }
     }
-};
-
-module.exports.UndeploySkillCommand = class UndeploySkillCommand {
+}
+export class UndeploySkillCommand {
     constructor(program) {
         this.program = program;
     }
@@ -185,31 +154,40 @@ module.exports.UndeploySkillCommand = class UndeploySkillCommand {
             }
         }));
     }
-};
-
-module.exports.SkillLogsCommand = class SkillLogsCommand {
+}
+export class SkillLogsCommand {
     constructor(program) {
         this.program = program;
     }
 
     async execute(skillName, actionName, options) {
-        const profile = await loadProfile(options.profile);
-        debug('%s.executeSkillLogs(%s,%s)', profile.name, skillName, actionName);
-        const catalog = new Catalog(profile.url);
-        catalog.skillLogs(options.project || profile.project, profile.token, skillName, actionName, options.verbose).then((response) => {
-            if (response.success) {
+        try {
+            const profile = await loadProfile(options.profile);
+            debug('%s.executeSkillLogs(%s,%s)', profile.name, skillName, actionName);
+    
+            const catalog = new Catalog(profile.url);
+            const response = await catalog.skillLogs(options.project || profile.project, profile.token, skillName, actionName, options.raw);
+    
+            if (options.raw) {
+                try {
+                    const respJSON = JSON.parse(response); // happens with errors
+                    if (respJSON?.body) {
+                        printError(`Failed to List Skill/Action Logs ${skillName}/${actionName}: ${respJSON.body.message}`, options);
+                    }
+                } catch (err) {
+                    printSuccess(response, options);
+                }
+            } else if (response.success) {
                 printSuccess(JSON.stringify(response.logs), options);
             } else {
-                printError(`Failed to List Skill/Action Logs ${skillName}/${actionName}: ${response.message}`, options);
+                printError(`Failed to List Skill/Action Logs ${skillName}/${actionName}: ${response.body.message}`, options);
             }
-        })
-            .catch((err) => {
-                printError(`Failed to List Skill/Action Logs ${skillName}/${actionName}: ${err.status} ${err.message}`, options);
-            });
+        } catch (err) {
+            printError(`Failed to List Skill/Action Logs ${skillName}/${actionName}: ${err.status} ${err.message}`, options);
+        }
     }
-};
-
-module.exports.DeploySkillCommand = class DeploySkillCommand {
+}
+export class DeploySkillCommand {
     constructor(program) {
         this.program = program;
     }
@@ -231,9 +209,8 @@ module.exports.DeploySkillCommand = class DeploySkillCommand {
             }
         }));
     }
-};
-
-module.exports.InvokeSkillCommand = class InvokeSkillCommand {
+}
+export class InvokeSkillCommand {
     constructor(program) {
         this.program = program;
     }
@@ -241,7 +218,6 @@ module.exports.InvokeSkillCommand = class InvokeSkillCommand {
     async execute(skillName, inputName, options) {
         const profile = await loadProfile(options.profile);
         debug('%s.executeInvokeSkill(%s/%s)', profile.name, skillName, inputName);
-
         let params = {};
         if (options.params) {
             try {
@@ -256,7 +232,6 @@ module.exports.InvokeSkillCommand = class InvokeSkillCommand {
             const paramsStr = fs.readFileSync(options.paramsFile);
             params = parseObject(paramsStr, options);
         }
-
         const agent = new Agent(profile.url);
         agent.invokeSkill(options.project || profile.project, profile.token, skillName, inputName, params, options.sync).then((response) => {
             if (response.success) {
@@ -267,17 +242,16 @@ module.exports.InvokeSkillCommand = class InvokeSkillCommand {
             }
         })
             .catch((err) => {
-                if (err.response && err.response.body) {
-                    debug('Raw error response: %o', err.response.body);
-                    printError(`Failed to invoke skill(${err.status} ${err.message}): ${err.response.body.error}`, options);
-                } else {
-                    printError(`Failed to invoke skill: ${err.status} ${err.message}`, options);
-                }
-            });
+            if (err.response && err.response.body) {
+                debug('Raw error response: %o', err.response.body);
+                printError(`Failed to invoke skill(${err.status} ${err.message}): ${err.response.body.error}`, options);
+            } else {
+                printError(`Failed to invoke skill: ${err.status} ${err.message}`, options);
+            }
+        });
     }
-};
-
-module.exports.DeleteSkillCommand = class DeleteSkillCommand {
+}
+export class DeleteSkillCommand {
     constructor(program) {
         this.program = program;
     }
@@ -288,17 +262,17 @@ module.exports.DeleteSkillCommand = class DeleteSkillCommand {
         const catalog = new Catalog(profile.url);
         catalog.deleteSkill(options.project || profile.project, profile.token, skillName)
             .then((response) => {
-                if (response.success) {
-                    const result = filterObject(response, options);
-                    if (options.json) {
-                        return printSuccess(JSON.stringify(result, null, 2), options);
-                    }
-                    return printSuccess(result.message);
+            if (response.success) {
+                const result = filterObject(response, options);
+                if (options.json) {
+                    return printSuccess(JSON.stringify(result, null, 2), options);
                 }
-                return handleDeleteFailure(response, options, 'Skill');
-            })
+                return printSuccess(result.message);
+            }
+            return handleDeleteFailure(response, options, 'Skill');
+        })
             .catch((err) => {
-                printError(`Failed to delete skill: ${err.status} ${err.message}`, options);
-            });
+            printError(`Failed to delete skill: ${err.status} ${err.message}`, options);
+        });
     }
-};
+}

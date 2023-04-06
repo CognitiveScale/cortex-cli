@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Cognitive Scale, Inc. All Rights Reserved.
+ * Copyright 2023 Cognitive Scale, Inc. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the “License”);
  * you may not use this file except in compliance with the License.
@@ -13,17 +13,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import debugSetup from 'debug';
+import { got, defaultHeaders } from './apiutils.js';
+import { constructError } from '../commands/utils.js';
 
-const debug = require('debug')('cortex:cli');
-const { got, defaultHeaders } = require('./apiutils');
-const { constructError } = require('../commands/utils');
-
-module.exports = class Users {
+const debug = debugSetup('cortex:cli');
+export default class Users {
     constructor(cortexUrl, user, flags = []) {
         this.cortexUrl = cortexUrl;
         this.endpoint = `${cortexUrl}/fabric/v4`;
         this.flags = '';
-
         if (user) {
             this.usersEndpoint = `${this.endpoint}/usergrants/${user}`;
         } else {
@@ -47,8 +46,8 @@ module.exports = class Users {
         debug('createServiceUser => %s', endpoint);
         return got
             .post(endpoint, {
-                headers: defaultHeaders(token),
-            }).json()
+            headers: defaultHeaders(token),
+        }).json()
             .then((res) => ({ success: true, result: res }))
             .catch((err) => constructError(err));
     }
@@ -58,8 +57,8 @@ module.exports = class Users {
         debug('deleteServiceUser => %s', endpoint);
         return got
             .delete(endpoint, {
-                headers: defaultHeaders(token),
-            }).json()
+            headers: defaultHeaders(token),
+        }).json()
             .then((res) => ({ success: true, result: res }))
             .catch((err) => constructError(err));
     }
@@ -69,8 +68,8 @@ module.exports = class Users {
         debug('listServiceUser => %s', endpoint);
         return got
             .get(endpoint, {
-                headers: defaultHeaders(token),
-            }).json()
+            headers: defaultHeaders(token),
+        }).json()
             .then((res) => ({ success: true, result: res }))
             .catch((err) => constructError(err));
     }
@@ -80,8 +79,8 @@ module.exports = class Users {
         debug('describeUser => %s', endpoint);
         return got
             .get(endpoint, {
-                headers: defaultHeaders(token),
-            }).json()
+            headers: defaultHeaders(token),
+        }).json()
             .then((res) => ({ success: true, result: res }))
             .catch((err) => constructError(err));
     }
@@ -91,9 +90,9 @@ module.exports = class Users {
         debug('createGrantForUser => %s', endpoint);
         return got
             .post(endpoint, {
-                headers: defaultHeaders(token),
-                json: body,
-            }).json()
+            headers: defaultHeaders(token),
+            json: body,
+        }).json()
             .then((res) => ({ success: true, result: res }))
             .catch((err) => constructError(err));
     }
@@ -103,9 +102,9 @@ module.exports = class Users {
         debug('removeGrantFromUser => %s', endpoint);
         return got
             .delete(endpoint, {
-                headers: defaultHeaders(token),
-                json: body,
-            }).json()
+            headers: defaultHeaders(token),
+            json: body,
+        }).json()
             .then((res) => ({ success: true, result: res }))
             .catch((err) => constructError(err));
     }
@@ -115,9 +114,9 @@ module.exports = class Users {
         debug('addUsersToProject => %s', endpoint);
         return got
             .post(endpoint, {
-                headers: defaultHeaders(token),
-                json: { project, users },
-            }).json()
+            headers: defaultHeaders(token),
+            json: { project, users },
+        }).json()
             .then((res) => ({ success: true, result: res }))
             .catch((err) => constructError(err));
     }
@@ -127,10 +126,10 @@ module.exports = class Users {
         debug('removeUsersFromProject => %s', endpoint);
         return got
             .delete(endpoint, {
-                headers: defaultHeaders(token),
-                json: { project, users },
-            }).json()
+            headers: defaultHeaders(token),
+            json: { project, users },
+        }).json()
             .then((res) => ({ success: true, result: res }))
             .catch((err) => constructError(err));
     }
-};
+}

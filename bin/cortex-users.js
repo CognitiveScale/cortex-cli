@@ -1,130 +1,106 @@
-#!/usr/bin/env node
+#!/usr/bin/env -S node --no-warnings
+import chalk from 'chalk';
+import esMain from 'es-main';
+import { Command } from 'commander';
+import { withCompatibilityCheck } from '../src/compatibility.js';
+import {
+ UserProjectAssignCommand, UserDescribeCommand, UserGrantCommand, UserCreateCommand, UserListCommand, UserDeleteCommand, 
+} from '../src/commands/users.js';
+import { LIST_JSON_HELP_TEXT, QUERY_JSON_HELP_TEXT } from '../src/constants.js';
 
-/*
- * Copyright 2020 Cognitive Scale, Inc. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the “License”);
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an “AS IS” BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-const chalk = require('chalk');
-const { program } = require('commander');
+export function create() {
+    const program = new Command();
 
-const { withCompatibilityCheck } = require('../src/compatibility');
-
-const {
-    UserProjectAssignCommand,
-    UserDescribeCommand,
-    UserGrantCommand,
-    UserCreateCommand,
-    UserListCommand,
-    UserDeleteCommand,
-} = require('../src/commands/users');
-const { LIST_JSON_HELP_TEXT, QUERY_JSON_HELP_TEXT } = require('../src/constants');
-
-program.name('cortex users');
-program.description('Work with Cortex User');
-
-program.command('describe')
-    .alias('get')
-    .description('Describe a users grants and roles')
-    .option('--no-compat', 'Ignore API compatibility checks')
-    .option('--color [boolean]', 'Turn on/off colors for JSON output.', 'true')
-    .option('--profile <profile>', 'The profile to use')
-    .option('--user <user>', 'The user to describe, self for default')
-    .option('--roles', 'Include grant inheritance from roles')
-    .action(withCompatibilityCheck((options) => {
-        try {
-            new UserDescribeCommand(program).execute(options);
-        } catch (err) {
-            console.error(chalk.red(err.message));
-        }
-    }));
-
-program.command('grant <user>')
-    .description('Manage user grants')
-    .option('--no-compat', 'Ignore API compatibility checks')
-    .option('--color [boolean]', 'Turn on/off colors for JSON output.', 'true')
-    .requiredOption('--project <project>', 'Grant project')
-    .requiredOption('--resource <resource>', 'Grant resource')
-    .requiredOption('--actions <actions...>', 'Grant actions read | write | execute | *')
-    .option('--profile <profile>', 'The profile to use')
-    .option('--delete', 'Remove grant from user')
-    .option('--deny', 'Explicit deny of action(s)')
-    .action(withCompatibilityCheck((user, options) => {
-        try {
-            new UserGrantCommand(program).execute(user, options);
-        } catch (err) {
-            console.error(chalk.red(err.message));
-        }
-    }));
-
-program.command('project <project>')
-    .description('Manage a list of user assignments on a project')
-    .option('--no-compat', 'Ignore API compatibility checks')
-    .option('--color [boolean]', 'Turn on/off colors for JSON output.', 'true')
-    .option('--profile <profile>', 'The profile to use')
-    .requiredOption('--users <users...>', 'Users to add/remove on project')
-    .option('--delete', 'Unassign users from project')
-    .action(withCompatibilityCheck((project, options) => {
-        try {
-            new UserProjectAssignCommand(program).execute(project, options);
-        } catch (err) {
-            console.error(chalk.red(err.message));
-        }
-    }));
-
-program.command('delete <user>')
-    .description('Deletes a service user and disables any existing tokens created by the user')
-    .option('--no-compat', 'Ignore API compatibility checks')
-    .option('--color [boolean]', 'Turn on/off colors for JSON output.', 'true')
-    .option('--profile <profile>', 'The profile to use')
-    .action(withCompatibilityCheck((user, options) => {
-        try {
-            new UserDeleteCommand(program).execute(user, options);
-        } catch (err) {
-            console.error(chalk.red(err.message));
-        }
-    }));
-
-program.command('create <user>')
-    .description('Creates a service user (with no assigned roles/grants) that can authenticate with and call Fabric API\'s')
-    .option('--no-compat', 'Ignore API compatibility checks')
-    .option('--color [boolean]', 'Turn on/off colors for JSON output.', 'true')
-    .option('--profile <profile>', 'The profile to use')
-    .action(withCompatibilityCheck((user, options) => {
-        try {
-            new UserCreateCommand(program).execute(user, options);
-        } catch (err) {
-            console.error(chalk.red(err.message));
-        }
-    }));
-
-program.command('list')
-    .description('Lists all service users created within Cortex')
-    .alias('l')
-    .option('--no-compat', 'Ignore API compatibility checks')
-    .option('--json [searchQuery]', LIST_JSON_HELP_TEXT)
-    .option('--query <query>', `[DEPRECATION WARNING] ${QUERY_JSON_HELP_TEXT}`)
-    .option('--color [boolean]', 'Turn on/off colors for JSON output.', 'true')
-    .option('--profile <profile>', 'The profile to use')
-    .action(withCompatibilityCheck((options) => {
-        try {
-            new UserListCommand(program).execute(options);
-        } catch (err) {
-            console.error(chalk.red(err.message));
-        }
-    }));
-
-if (require.main === module) {
-    program.showHelpAfterError().parseAsync(process.argv);
+    program.name('cortex users');
+    program.description('Work with Cortex User');
+    program.command('describe [user]')
+        .alias('get')
+        .description('Describe a users grants and roles')
+        .option('--no-compat', 'Ignore API compatibility checks')
+        .option('--color [boolean]', 'Turn on/off colors for JSON output.', 'true')
+        .option('--profile <profile>', 'The profile to use')
+        .option('--user <user>', 'The user to describe, self for default')
+        .option('--roles', 'Include grant inheritance from roles')
+        .action(withCompatibilityCheck(async (user, options) => {
+            try {
+                await new UserDescribeCommand(program).execute(user, options);
+            } catch (err) {
+                console.error(chalk.red(err.message));
+            }
+        }));
+    program.command('grant <user>')
+        .description('Manage user grants')
+        .option('--no-compat', 'Ignore API compatibility checks')
+        .option('--color [boolean]', 'Turn on/off colors for JSON output.', 'true')
+        .requiredOption('--project <project>', 'Grant project')
+        .requiredOption('--resource <resource>', 'Grant resource')
+        .requiredOption('--actions <actions...>', 'Grant actions read | write | execute | *')
+        .option('--profile <profile>', 'The profile to use')
+        .option('--delete', 'Remove grant from user')
+        .option('--deny', 'Explicit deny of action(s)')
+        .action(withCompatibilityCheck((user, options) => {
+            try {
+                new UserGrantCommand(program).execute(user, options);
+            } catch (err) {
+                console.error(chalk.red(err.message));
+            }
+        }));
+    program.command('project <project>')
+        .description('Manage a list of user assignments on a project')
+        .option('--no-compat', 'Ignore API compatibility checks')
+        .option('--color [boolean]', 'Turn on/off colors for JSON output.', 'true')
+        .option('--profile <profile>', 'The profile to use')
+        .requiredOption('--users <users...>', 'Users to add/remove on project')
+        .option('--delete', 'Unassign users from project')
+        .action(withCompatibilityCheck((project, options) => {
+            try {
+                new UserProjectAssignCommand(program).execute(project, options);
+            } catch (err) {
+                console.error(chalk.red(err.message));
+            }
+        }));
+    program.command('delete <user>')
+        .description('Deletes a service user and disables any existing tokens created by the user')
+        .option('--no-compat', 'Ignore API compatibility checks')
+        .option('--color [boolean]', 'Turn on/off colors for JSON output.', 'true')
+        .option('--profile <profile>', 'The profile to use')
+        .action(withCompatibilityCheck((user, options) => {
+            try {
+                new UserDeleteCommand(program).execute(user, options);
+            } catch (err) {
+                console.error(chalk.red(err.message));
+            }
+        }));
+    program.command('create <user>')
+        .description('Creates a service user (with no assigned roles/grants) that can authenticate with and call Fabric API\'s')
+        .option('--no-compat', 'Ignore API compatibility checks')
+        .option('--color [boolean]', 'Turn on/off colors for JSON output.', 'true')
+        .option('--profile <profile>', 'The profile to use')
+        .action(withCompatibilityCheck((user, options) => {
+            try {
+                new UserCreateCommand(program).execute(user, options);
+            } catch (err) {
+                console.error(chalk.red(err.message));
+            }
+        }));
+    program.command('list')
+        .description('Lists all service users created within Cortex')
+        .alias('l')
+        .option('--no-compat', 'Ignore API compatibility checks')
+        .option('--json [searchQuery]', LIST_JSON_HELP_TEXT)
+        .option('--query <query>', `[DEPRECATION WARNING] ${QUERY_JSON_HELP_TEXT}`)
+        .option('--color [boolean]', 'Turn on/off colors for JSON output.', 'true')
+        .option('--profile <profile>', 'The profile to use')
+        .action(withCompatibilityCheck((options) => {
+            try {
+                new UserListCommand(program).execute(options);
+            } catch (err) {
+                console.error(chalk.red(err.message));
+            }
+        }));
+    return program;
 }
-module.exports = program;
+if (esMain(import.meta)) {
+    create().showHelpAfterError().parseAsync(process.argv);
+}
+export default create();

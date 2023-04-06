@@ -1,28 +1,13 @@
-/*
- * Copyright 2021 Cognitive Scale, Inc. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the “License”);
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an “AS IS” BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-const querystring = require('querystring');
-const { pipeline } = require('stream');
-const { createWriteStream } = require('fs');
-const debug = require('debug')('cortex:cli');
-const { got, defaultHeaders } = require('./apiutils');
-const { printSuccess } = require('../commands/utils');
-const { printError } = require('../commands/utils');
-const { constructError } = require('../commands/utils');
+import querystring from 'querystring';
+import stream from 'node:stream';
+import { createWriteStream } from 'node:fs';
+import debugSetup from 'debug';
+import { got, defaultHeaders } from './apiutils.js';
+import { printSuccess, printError, constructError } from '../commands/utils.js';
 
-module.exports = class Assessments {
+const { pipeline } = stream;
+const debug = debugSetup('cortex:cli');
+export default (class Assessments {
     constructor(cortexUrl) {
         this.endpointV4 = `${cortexUrl}/fabric/v4/impactassessment`;
         this.endpointApiV4 = `${cortexUrl}/fabric/v4/dependencies`;
@@ -44,10 +29,10 @@ module.exports = class Assessments {
 
     queryResources(token, name, projectId, type, skip, limit, filter, sort) {
         const url = `${this.endpointV4}/resources?${querystring.stringify({
-            projectId, 
-            name, 
-            type, 
-            skip, 
+            projectId,
+            name,
+            type,
+            skip,
             limit,
             filter,
             sort,
@@ -75,17 +60,17 @@ module.exports = class Assessments {
         debug('createAssessment => %s', url);
         return got
             .post(url, {
-                headers: defaultHeaders(token, { 'Content-Type': 'application/json' }),
-                body: JSON.stringify({
-                    name,
-                    title,
-                    description,
-                    scope,
-                    componentName,
-                    componentTypes,
-                    overwrite,
-                }),
-            }).json()
+            headers: defaultHeaders(token, { 'Content-Type': 'application/json' }),
+            body: JSON.stringify({
+                name,
+                title,
+                description,
+                scope,
+                componentName,
+                componentTypes,
+                overwrite,
+            }),
+        }).json()
             .then((res) => res)
             .catch((err) => constructError(err));
     }
@@ -106,8 +91,8 @@ module.exports = class Assessments {
         debug('getAssessment => %s', url);
         return got
             .get(url, {
-                headers: defaultHeaders(token),
-            }).json()
+            headers: defaultHeaders(token),
+        }).json()
             .then((res) => res)
             .catch((err) => constructError(err));
     }
@@ -117,8 +102,8 @@ module.exports = class Assessments {
         debug('deleteAssessment => %s', url);
         return got
             .delete(url, {
-                headers: defaultHeaders(token),
-            }).json()
+            headers: defaultHeaders(token),
+        }).json()
             .then((res) => res)
             .catch((err) => constructError(err));
     }
@@ -128,8 +113,8 @@ module.exports = class Assessments {
         debug('runAssessment => %s', url);
         return got
             .post(url, {
-                headers: defaultHeaders(token),
-            }).json()
+            headers: defaultHeaders(token),
+        }).json()
             .then((res) => res)
             .catch((err) => constructError(err));
     }
@@ -139,8 +124,8 @@ module.exports = class Assessments {
         debug('listAssessmentReports => %s', url);
         return got
             .get(url, {
-                headers: defaultHeaders(token),
-            }).json()
+            headers: defaultHeaders(token),
+        }).json()
             .then((res) => res)
             .catch((err) => constructError(err));
     }
@@ -150,8 +135,8 @@ module.exports = class Assessments {
         debug('getAssessmentReport => %s', url);
         return got
             .get(url, {
-                headers: defaultHeaders(token),
-            }).json()
+            headers: defaultHeaders(token),
+        }).json()
             .then((res) => res)
             .catch((err) => constructError(err));
     }
@@ -162,7 +147,6 @@ module.exports = class Assessments {
         const filter = types && types.trim() ? `?components=${types.trim()}` : '';
         const url = `${this.endpointV4}/assessments/${encodeURIComponent(name)}/reports/${encodeURIComponent(reportId)}/export${filter}`;
         debug('exportAssessmentReport => %s', url);
-
         const rs = got.stream(url, { headers: defaultHeaders(token) });
         pipeline(rs, createWriteStream(file), (e) => {
             if (e) {
@@ -173,4 +157,4 @@ module.exports = class Assessments {
             }
         });
     }
-};
+});

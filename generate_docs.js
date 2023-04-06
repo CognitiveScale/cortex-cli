@@ -1,7 +1,9 @@
 /**
  * Opted to use pure JS versus adding handlebars as a dep, as handlebars always has vulns..
  */
-const _ = require('lodash');
+import process from 'node:process';
+import _ from 'lodash';
+import esMain from 'es-main';
 
 function docObject(program) {
     return program.commands.map((c) => ({
@@ -46,11 +48,14 @@ ${cmd.name()} ${cmd.usage()}
 ${cmd.description()}  
 `;
 
-function markdownForCmd(program) {
+export default function markdownForCmd(program) {
     const docObj = docObject(program);
     return `${cmdHeading(program)}\n${subcmdTable(docObj)}`;
 }
 
+if (esMain(import.meta)) {
+    const { default: program } = await import(process.argv[2]);
+    console.log(markdownForCmd(program));
+}
+
 // eslint-disable-next-line import/no-dynamic-require
-const cmd = require(process.argv[2]);
-console.log(markdownForCmd(cmd));
