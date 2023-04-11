@@ -6,6 +6,7 @@ import debugSetup from 'debug';
 import fs from 'node:fs';
 import process from 'node:process';
 import { globSync } from 'glob';
+import { fileURLToPath } from 'node:url';
 import * as jmsepath from 'jmespath';
 import path from 'node:path';
 import yaml from 'js-yaml';
@@ -384,7 +385,7 @@ export const handleDeleteFailure = (response, options, type) => {
 };
 
 export function readPackageJSON(relPath) {
-    const absPath = new URL(`${path.dirname(import.meta.url)}/${relPath}`).pathname;
+    const absPath = fileURLToPath(new URL(relPath, import.meta.url));
     return JSON.parse(fs.readFileSync(absPath));
 }
 
