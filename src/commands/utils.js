@@ -382,4 +382,10 @@ export const handleDeleteFailure = (response, options, type) => {
     const defaultErrorMessage = `${type} deletion failed: ${response.status} ${response.message}.`;
     return printError(defaultErrorMessage, options);
 };
+
+export function readPackageJSON(relPath) {
+    const absPath = new URL(`${path.dirname(import.meta.url)}/${relPath}`).pathname;
+    return JSON.parse(fs.readFileSync(absPath));
+}
+
 export { deleteFolderRecursive as deleteFile };

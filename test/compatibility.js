@@ -4,12 +4,13 @@ import semver from 'semver';
 import nock from 'nock';
 import npmFetch from 'npm-registry-fetch';
 import sinon from 'sinon';
-import pkg from '../package.json' assert { type: 'json' };
 import * as compatibility from '../src/compatibility.js';
+import { readPackageJSON } from '../src/commands/utils.js';
 
 chai.use(chaiAsPromised);
 const { expect } = chai;
 
+const pkg = readPackageJSON('../../package.json');
 let sandbox;
 
 describe('compatibility checks', () => {
