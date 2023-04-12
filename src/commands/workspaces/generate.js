@@ -2,7 +2,7 @@ import fs from 'node:fs';
 import path from 'path';
 import URL from 'url-parse';
 import { mkdir, writeFile } from 'fs/promises';
-import minimatch from 'minimatch';
+import { minimatch } from 'minimatch';
 import inquirer from 'inquirer';
 import ghGot from 'gh-got';
 import { isText } from 'istextorbinary';

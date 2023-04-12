@@ -3,12 +3,15 @@ import _ from 'lodash';
 import got from 'got';
 import debugSetup from 'debug';
 import os from 'os';
-import pkg from '../../package.json' assert { type: 'json' };
+import { readPackageJSON } from '../commands/utils.js';
+
+const pkg = readPackageJSON('../../package.json');
 
 const debug = debugSetup('cortex:cli');
 function getUserAgent() {
     return `${pkg.name}/${pkg.version} (${os.platform()}; ${os.arch()}; ${os.release()}; ${os.platform()})`;
 }
+
 const gotExt = got.extend({
     followRedirect: false,
     hooks: {

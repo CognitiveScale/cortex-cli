@@ -3,8 +3,10 @@ import chaiAsPromised from 'chai-as-promised';
 import nock from 'nock';
 import sinon from 'sinon';
 import npmFetch from 'npm-registry-fetch';
-import pkg from '../package.json' assert { type: 'json' };
 import * as compatibility from '../src/compatibility.js';
+import { readPackageJSON } from '../src/commands/utils.js';
+
+const pkg = readPackageJSON('../../package.json');
 
 chai.use(chaiAsPromised);
 

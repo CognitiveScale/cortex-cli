@@ -6,6 +6,7 @@ import debugSetup from 'debug';
 import fs from 'node:fs';
 import process from 'node:process';
 import { globSync } from 'glob';
+import { fileURLToPath } from 'node:url';
 import * as jmsepath from 'jmespath';
 import path from 'node:path';
 import yaml from 'js-yaml';
@@ -382,4 +383,10 @@ export const handleDeleteFailure = (response, options, type) => {
     const defaultErrorMessage = `${type} deletion failed: ${response.status} ${response.message}.`;
     return printError(defaultErrorMessage, options);
 };
+
+export function readPackageJSON(relPath) {
+    const absPath = fileURLToPath(new URL(relPath, import.meta.url));
+    return JSON.parse(fs.readFileSync(absPath));
+}
+
 export { deleteFolderRecursive as deleteFile };
