@@ -12,10 +12,11 @@ import npmFetch from 'npm-registry-fetch';
 import Semver from 'semver';
 import { got, getUserAgent } from './client/apiutils.js';
 import { loadProfile } from './config.js';
-import { printError, printWarning } from './commands/utils.js';
-import pkg from '../package.json' assert { type: 'json' };
+import { printError, printWarning, readPackageJSON } from './commands/utils.js';
 
 const debug = debugSetup('cortex:cli');
+
+const pkg = readPackageJSON('../../package.json');
 
 function getAvailableVersions(name) {
     debug('getAvailableVersions => %s', name);

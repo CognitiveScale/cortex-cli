@@ -1,13 +1,13 @@
-#!/usr/bin/env -S node --no-warnings
+#!/usr/bin/env node
 import { Command } from 'commander';
 import esMain from 'es-main';
-import info from '../package.json' assert { type: 'json' };
+import { readPackageJSON } from '../src/commands/utils.js';
 
 export function create() {
     const program = new Command();
+    program.version(readPackageJSON('../../package.json').version, '-v, --version', 'Outputs the installed version of the Cortex CLI');
     program.name('cortex');
     program
-        .version(info?.version, '-v, --version')
         .description('Cortex CLI')
         .option('--debug', 'Enables enhanced log output for debugging', false)
         .on('option:debug', () => {
