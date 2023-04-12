@@ -11,7 +11,6 @@ const debug = debugSetup('cortex:cli');
 function getUserAgent() {
     return `${pkg.name}/${pkg.version} (${os.platform()}; ${os.arch()}; ${os.release()}; ${os.platform()})`;
 }
-
 const gotExt = got.extend({
     followRedirect: false,
     hooks: {
