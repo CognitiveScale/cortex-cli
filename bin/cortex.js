@@ -5,7 +5,7 @@ import { readPackageJSON } from '../src/commands/utils.js';
 
 export function create() {
     const program = new Command();
-    program.version(readPackageJSON('../../package.json').version);
+    program.version(readPackageJSON('../../package.json').version, '-v, --version', 'Outputs the installed version of the Cortex CLI');
     program.name('cortex');
     program
         .description('Cortex CLI')
