@@ -192,7 +192,7 @@ export function create() {
         .option('--limit <limit>', 'Limit number of records', DEFAULT_LIST_LIMIT_COUNT)
         .option('--skip <skip>', 'Skip number of records', DEFAULT_LIST_SKIP_COUNT)
         // eslint-disable-next-line max-len
-        .option('--sort <asc|desc>', 'Sort the activations by start timestamp ascending (asc) or descending (desc) or as mongo query', GET_DEFAULT_SORT_CLI_OPTION(DEFAULT_LIST_SORT_PARAMS.start))
+        .option('--sort <sort>', 'A Mongo style sort statement to use in the query.', GET_DEFAULT_SORT_CLI_OPTION(DEFAULT_LIST_SORT_PARAMS.start))
         .option('--filter <filter>', 'A Mongo style filter to use.')
         .action(withCompatibilityCheck((options) => {
             try {
