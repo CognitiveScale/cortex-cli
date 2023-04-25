@@ -1,17 +1,17 @@
-const _ = require('lodash');
-const got = require('got');
-const debug = require('debug')('cortex:cli');
-const findPackageJson = require('find-package-json');
-const os = require('os');
+import _ from 'lodash';
+// eslint-disable-next-line import/no-unresolved
+import got from 'got';
+import debugSetup from 'debug';
+import os from 'os';
+import { readPackageJSON } from '../commands/utils.js';
 
-const pkg = findPackageJson(__dirname).next().value;
+const pkg = readPackageJSON('../../package.json');
+
+const debug = debugSetup('cortex:cli');
 function getUserAgent() {
     return `${pkg.name}/${pkg.version} (${os.platform()}; ${os.arch()}; ${os.release()}; ${os.platform()})`;
 }
-
-module.exports.getUserAgent = getUserAgent;
-// TODO add debug for request response
-module.exports.got = got.extend({
+const gotExt = got.extend({
     followRedirect: false,
     hooks: {
         beforeRequest: [
@@ -39,83 +39,8 @@ module.exports.got = got.extend({
                 return res;
             },
         ],
-
-    }, 
+    },
 });
-
-
-module.exports.defaultHeaders = (token, otherHeaders = {}) => ({ Authorization: `Bearer ${token}`, 'user-agent': getUserAgent(), ...otherHeaders });
-
-/**
- * makes a request via superagent. proxy methods will be utilized
- * if the user (i.e. person running cli commands) has set environment
- * variables for their proxy (this is assuming ofc they have a proxy). if
- * no env variables set, the request just keeps piping through.
- */
-// TODO for proxies https://github.com/gajus/global-agent
-/**
-function requestWrapper() {
-    // @tutorial: https://stackoverflow.com/questions/22156326/private-properties-in-javascript-es6-classes
-    // below are private variables
-    const proxyEnv = process.env.https_proxy || process.env.http_proxy;
-    const bothProxiesSet = process.env.https_proxy && process.env.http_proxy;
-    const bothProxiesWarning = 'Both process.env.https_proxy AND process.env.http_proxy are set as env variables. Will default to process.env.https_proxy';
-
-    const bypassProxy = process.env.bypass_proxy;
-
-    this.get = function(endpoint) {
-        if (bypassProxy)
-            return superagentRequest
-                .get(endpoint)
-                .on('redirect', handleAuthError);
-
-        bothProxiesSet && printWarning(bothProxiesWarning);
-        return superagentRequest
-            .get(endpoint)
-            .proxy(proxyEnv)
-            .on('redirect', handleAuthError)
-            .set('User-Agent', getUserAgent());
-    };
-    this.delete = function(endpoint) {
-        if (bypassProxy)
-            return superagentRequest
-                .delete(endpoint)
-                .on('redirect', handleAuthError);
-
-        bothProxiesSet && printWarning(bothProxiesWarning);
-        return superagentRequest
-            .delete(endpoint)
-            .on('redirect', handleAuthError)
-            .proxy(proxyEnv)
-            .set('User-Agent', getUserAgent());
-    };
-    this.post = function(endpoint) {
-        if (bypassProxy)
-            return superagentRequest
-                .post(endpoint)
-                .on('redirect', handleAuthError);
-
-        bothProxiesSet && printWarning(bothProxiesWarning);
-        return superagentRequest
-            .post(endpoint)
-            .on('redirect', handleAuthError)
-            .proxy(proxyEnv)
-            .set('User-Agent', getUserAgent());
-    }
-    this.put = function(endpoint) {
-        if (bypassProxy)
-            return superagentRequest
-                .put(endpoint)
-                .on('redirect', handleAuthError);
-
-        bothProxiesSet && printWarning(bothProxiesWarning);
-        return superagentRequest
-            .put(endpoint)
-            .on('redirect', handleAuthError)
-            .proxy(proxyEnv)
-            .set('User-Agent', getUserAgent());
-    }
-}
-
-module.exports.request = new requestWrapper();
-* */
+export const defaultHeaders = (token, otherHeaders = {}) => ({ Authorization: `Bearer ${token}`, 'user-agent': getUserAgent(), ...otherHeaders });
+export { getUserAgent };
+export { gotExt as got };

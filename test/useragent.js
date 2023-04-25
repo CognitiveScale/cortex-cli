@@ -1,31 +1,16 @@
-/*
- * Copyright 2020 Cognitive Scale, Inc. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the “License”);
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an “AS IS” BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import chai from 'chai';
+import chaiAsPromised from 'chai-as-promised';
+import nock from 'nock';
+import sinon from 'sinon';
+import npmFetch from 'npm-registry-fetch';
+import * as compatibility from '../src/compatibility.js';
+import { readPackageJSON } from '../src/commands/utils.js';
 
-const chai = require('chai');
-const chaiAsPromised = require('chai-as-promised');
-const findPackageJson = require('find-package-json');
-const rewire = require('rewire');
-const nock = require('nock');
-
-const compatibilityModule = rewire('../src/compatibility');
+const pkg = readPackageJSON('../../package.json');
 
 chai.use(chaiAsPromised);
 
-const pkg = findPackageJson(__dirname).next().value;
-
+let sandbox;
 describe('useragent', () => {
     const profile = {
         url: 'http://example.com',
@@ -34,33 +19,28 @@ describe('useragent', () => {
         username: 'testUser',
         token: 'testToken',
     };
-
-    let revertCompatibilityModule;
-
     before(() => {
+        if (!nock.isActive()) {
+            nock.activate();
+        }
         // Compatibility API call is as good as any to verify the request has user-agent,
         // so mock it the same way we do for that test, adding capture of headers.
-        revertCompatibilityModule = compatibilityModule.__set__({
-            npmFetch: {
-                json: () => Promise.resolve({ versions: { [pkg.version]: {} } }),
-            },
-        });
+        sandbox = sinon.createSandbox();
+        sandbox.stub(npmFetch, 'json')
+            .returns(Promise.resolve({ versions: { [pkg.version]: {} } }));
     });
-
     after(() => {
-        revertCompatibilityModule();
+        sandbox.restore();
+        nock.cleanAll();
     });
-
     it('should exist in request headers', async () => {
-        nock.activate();
-        const n = nock(profile.url)
+        nock(profile.url)
             .get('/fabric/v4/compatibility/applications/cortex-cli')
             .reply(200, () => ({ semver: pkg.version }))
             .matchHeader('user-agent', (val) => {
-                console.log(val);
-                return val.includes(`${pkg.name}/${pkg.version}`);
-            });
-        await compatibilityModule.getCompatibility(profile);
-        n.done();
+            console.log(val);
+            return val.includes(`${pkg.name}/${pkg.version}`);
+        });
+        await compatibility.getCompatibility(profile);
     });
 });

@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Cognitive Scale, Inc. All Rights Reserved.
+ * Copyright 2023 Cognitive Scale, Inc. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the “License”);
  * you may not use this file except in compliance with the License.
@@ -13,19 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import debugSetup from 'debug';
+import URL from 'url-parse';
+import { printSuccess, printError, callMe } from './utils.js';
+import { generateJwt, loadProfile } from '../config.js';
+const debug = debugSetup('cortex:cli');
 
-const debug = require('debug')('cortex:cli');
-const URL = require('url-parse');
-const {
-    printSuccess, printError, printWarning,
-} = require('./utils');
-const { callMe } = require('./utils');
-const {
-    generateJwt,
-    loadProfile,
-} = require('../config');
-
-module.exports.DockerLoginCommand = class {
+export default class DockerLoginCommand {
     constructor(program) {
         this.program = program;
     }
@@ -50,4 +44,4 @@ module.exports.DockerLoginCommand = class {
             printError(`Failed to docker login: ${err.message || err}`, options);
         }
     }
-};
+}

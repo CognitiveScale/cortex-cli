@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Cognitive Scale, Inc. All Rights Reserved.
+ * Copyright 2023 Cognitive Scale, Inc. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the “License”);
  * you may not use this file except in compliance with the License.
@@ -13,31 +13,27 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-const debug = require('debug')('cortex:cli');
-const path = require('path');
-const fs = require('fs');
-const getStream = require('get-stream');
-const yauzl = require('yauzl');
-const yaml = require('js-yaml');
-const { loadProfile } = require('../config');
-const Agents = require('../client/agents');
-const Catalog = require('../client/catalog');
-const Assessments = require('../client/assessments');
-const Connections = require('../client/connections');
-const Experiments = require('../client/experiments');
-const Models = require('../client/models');
-const Actions = require('../client/actions');
-const Content = require('../client/content');
+import _ from 'lodash';
+import debugSetup from 'debug';
+import path from 'path';
+import fs from 'fs';
+import getStream from 'get-stream';
+import * as yauzl from 'yauzl';
+import yaml from 'js-yaml';
+import { loadProfile } from '../config.js';
+import Agents from '../client/agents.js';
+import Catalog from '../client/catalog.js';
+import Assessments from '../client/assessments.js';
+import Connections from '../client/connections.js';
+import Experiments from '../client/experiments.js';
+import Models from '../client/models.js';
+import Actions from '../client/actions.js';
+import Content from '../client/content.js';
+import {
+    printSuccess, printError, cleanInternalFields, jsonToYaml, writeToFile, fileExists, deleteFile, filterObject,
+} from './utils.js';
 
-const _ = {
-    get: require('lodash/get'),
-    set: require('lodash/set'),
-    uniq: require('lodash/uniq'),
-    size: require('lodash/size'),
-};
-const {
- printSuccess, printError, cleanInternalFields, jsonToYaml, writeToFile, fileExists, deleteFile, filterObject,
-} = require('./utils');
+const debug = debugSetup('cortex:cli');
 
 const artifactsDir = '.fabric';
 const manifestFile = 'fabric.yaml';
@@ -46,7 +42,6 @@ const manifestMeta = {
     kind: 'deployment-manifest',
     cortex: {},
 };
-
 function updateManifest(filepaths) {
     const manifest = fileExists(manifestFile) ? yaml.load(fs.readFileSync(manifestFile).toString()) : manifestMeta;
     Object.keys(filepaths).forEach((type) => {
@@ -56,7 +51,6 @@ function updateManifest(filepaths) {
     });
     writeToFile(jsonToYaml(manifest), manifestFile);
 }
-
 async function addDependencies(url, token, project, resourceType, resourceName) {
     const assessments = new Assessments(url);
     const dependencies = await assessments.getDependenciesOfResource(token, project, resourceType, resourceName);
@@ -71,7 +65,6 @@ async function addDependencies(url, token, project, resourceType, resourceName) 
     }
     return dependencies;
 }
-
 const DeployExperimentCommand = class {
     constructor(program) {
         this.program = program;
@@ -81,13 +74,11 @@ const DeployExperimentCommand = class {
         const profile = await loadProfile(options.profile);
         const project = options.project || profile.project;
         debug('%s.exportDeployExperimentCommand%s)', profile.name, experimentName);
-
         const manifest = {};
         const exports = {};
         const experiments = new Experiments(profile.url);
         const model = new Models(profile.url);
         const content = new Content(profile.url);
-
         let modelName;
         let response;
         response = await experiments.describeExperiment(project, profile.token, experimentName);
@@ -97,7 +88,7 @@ const DeployExperimentCommand = class {
             const filepath = path.join(artifactsDir, 'experiments', `${experimentName}.json`);
             writeToFile(expDesc, filepath);
             manifest.experiment = [filepath];
-            exports.experiment = experimentName;
+            // TODO ???  module.exports ??? experimentName;
             modelName = result.modelId;
         } else {
             printError(`Failed to export experiment ${experimentName}: ${response.message}`, options);
@@ -112,7 +103,7 @@ const DeployExperimentCommand = class {
                     const filepath = path.join(artifactsDir, 'models', `${modelName}.json`);
                     writeToFile(modelDesc, filepath);
                     manifest.model = [filepath];
-                    exports.model = modelName;
+                    // TODO ???  module.exports ??? modelName;
                 } else {
                     printError(`Only Published models can be exported. Model ${modelName} is in ${result.status}`);
                 }
@@ -142,7 +133,7 @@ const DeployExperimentCommand = class {
                         .map((value) => content.downloadContent(project, profile.token, value, false, path.join(artifactsDir, value))));
                 }
                 manifest.run = [filepath];
-                exports.run = exportRun;
+                // TODO ???  module.exports ??? exportRun;
             } else {
                 printError(`Failed to export experiment ${experimentName}: ${response.message}`, options);
             }
@@ -153,9 +144,6 @@ const DeployExperimentCommand = class {
         printSuccess(`Successfully exported ${JSON.stringify(exports)} in ${artifactsDir} and updated manifest file ${manifestFile}`);
     }
 };
-
-module.exports.DeployExperimentCommand = DeployExperimentCommand;
-
 const DeployConnectionCommand = class {
     constructor(program) {
         this.program = program;
@@ -165,7 +153,6 @@ const DeployConnectionCommand = class {
         const profile = await loadProfile(options.profile);
         const project = options.project || profile.project;
         debug('%s.exportDeploymentConnection%s)', profile.name, connectionName);
-
         const connection = new Connections(profile.url);
         connection.describeConnection(project, profile.token, connectionName).then(async (response) => {
             if (response.success) {
@@ -184,31 +171,7 @@ const DeployConnectionCommand = class {
         });
     }
 };
-
-module.exports.DeployConnectionCommand = DeployConnectionCommand;
-
-/**
- * Cortex deploy command is to export Cortex artifacts (agent, snapshot, skill, action etc) for CI/CD deployment. This command:
- * 1. Exports cortex artifacts
- * 2. generates manifest files to drive artifacts deployment
- * Files are exported/generated in pre-determined layout to support CI/CD deployment
- * .fabric
- *      snapshots
- *          snapshot1.yaml
- *          snapshot2.yaml
- *      agents
- *          ...
- *      skills
- *          ...
- *      actions
- *          ...
- * fabric.yaml (manifest file)
- *
- * Currently only exporting agent snapshots.
- *
- * @type {DeploySnapshotCommand}
- */
-module.exports.DeploySnapshotCommand = class {
+export const DeploySnapshotCommand = class {
     constructor(program) {
         this.program = program;
     }
@@ -252,15 +215,13 @@ module.exports.DeploySnapshotCommand = class {
                 printError(`Failed to export agent snapshot ${snapshotId}: ${err.status} ${err.message}`, options);
             }));
         });
-
         Promise.all(promises).then((result) => {
             updateManifest({ snapshots: result });
             printSuccess(`Successfully updated manifest file ${manifestFile}`);
         });
     }
 };
-
-module.exports.DeployCampaignCommand = class {
+export const DeployCampaignCommand = class {
     constructor(program) {
         this.program = program;
     }
@@ -292,12 +253,10 @@ module.exports.DeployCampaignCommand = class {
         const profile = await loadProfile(options.profile);
         const project = options.project || profile.project;
         debug('%s.exportDeploymentCampaigns(%s)', profile.name, campaignName);
-
         const catalog = new Catalog(profile.url);
         await catalog.exportCampaign(project, profile.token, campaignName, options.deployable, `${campaignName}.zip`);
         const filepaths = {};
         const promises = [];
-
         yauzl.open(`${campaignName}.zip`, { lazyEntries: true }, (err, zipfile) => {
             if (err) {
                 throw err;
@@ -324,8 +283,7 @@ module.exports.DeployCampaignCommand = class {
         });
     }
 };
-
-module.exports.DeploySkillCommand = class {
+export const DeploySkillCommand = class {
     constructor(program) {
         this.program = program;
     }
@@ -334,7 +292,6 @@ module.exports.DeploySkillCommand = class {
         const profile = await loadProfile(options.profile);
         const project = options.project || profile.project;
         debug('%s.exportDeploySkillCommand%s)', profile.name, skillName);
-
         const manifest = {};
         const exports = {};
         const catalog = new Catalog(profile.url);
@@ -348,7 +305,6 @@ module.exports.DeploySkillCommand = class {
                 const filepath = path.join(artifactsDir, 'skills', `${skillName}.json`);
                 writeToFile(skillDesc, filepath);
                 manifest.skill = [filepath];
-                exports.skill = skillName;
                 const dependencies = await addDependencies(profile.url, profile.token, project, 'Skill', skillName);
                 // export linked connections of skill
                 const connections = dependencies.data.filter((d) => d.type === 'Connection').map((d) => d.name);
@@ -375,7 +331,6 @@ module.exports.DeploySkillCommand = class {
                         }
                     }));
                     manifest.action = actions.map((a) => path.join(artifactsDir, 'actions', `${a}.json`));
-                    exports.action = actions;
                 }
                 // export types of skill
                 const types = dependencies.data.filter((d) => d.type === 'Type').map((d) => d.name);
@@ -390,7 +345,6 @@ module.exports.DeploySkillCommand = class {
                         }
                     }));
                     manifest.type = types.map((a) => path.join(artifactsDir, 'types', `${a}.json`));
-                    exports.type = types;
                 }
                 updateManifest(manifest);
                 printSuccess(`Successfully exported  ${JSON.stringify(Object.assign(exports, mlOps))} in ${artifactsDir} and updated manifest file ${manifestFile}`);
@@ -400,3 +354,8 @@ module.exports.DeploySkillCommand = class {
         });
     }
 };
+export { DeployExperimentCommand as experiment };
+export { DeployExperimentCommand as model };
+export { DeployExperimentCommand as run };
+export { DeployExperimentCommand };
+export { DeployConnectionCommand };

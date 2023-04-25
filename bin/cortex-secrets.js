@@ -1,109 +1,89 @@
 #!/usr/bin/env node
+import chalk from 'chalk';
+import esMain from 'es-main';
+import process from 'node:process';
+import { Command } from 'commander';
+import { withCompatibilityCheck } from '../src/compatibility.js';
+import {
+ ListSecretsCommand, ReadSecretsCommand, WriteSecretsCommand, DeleteSecretCommand, 
+} from '../src/commands/secrets.js';
+import { LIST_JSON_HELP_TEXT, QUERY_JSON_HELP_TEXT } from '../src/constants.js';
 
-/*
- * Copyright 2020 Cognitive Scale, Inc. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the “License”);
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an “AS IS” BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+export function create() {
+    const program = new Command();
 
-const chalk = require('chalk');
-const { program } = require('commander');
-
-const { withCompatibilityCheck } = require('../src/compatibility');
-
-const {
-    ListSecretsCommand,
-    ReadSecretsCommand,
-    WriteSecretsCommand,
-    DeleteSecretCommand,
-} = require('../src/commands/secrets');
-const { LIST_JSON_HELP_TEXT, QUERY_JSON_HELP_TEXT } = require('../src/constants');
-
-program.name('cortex secrets');
-program.description('Work with Cortex Secrets');
-
+    program.name('cortex secrets');
+    program.description('Work with Cortex Secrets');
 // List Secure Keys
-program
-    .command('list')
-    .description('List secure keys')
-    .alias('l')
-    .option('--no-compat', 'Ignore API compatibility checks')
-    .option('--color [boolean]', 'Turn on/off colors for JSON output.', 'true')
-    .option('--json [searchQuery]', LIST_JSON_HELP_TEXT)
-    .option('--query <query>', `[DEPRECATION WARNING] ${QUERY_JSON_HELP_TEXT}`)
-    .option('--profile <profile>', 'The profile to use')
-    .option('--project <project>', 'The project to use')
-    .action(withCompatibilityCheck((options) => {
-        try {
-            new ListSecretsCommand(program).execute(options);
-        } catch (err) {
-            console.error(chalk.red(err.message));
-        }
-    }));
-
+    program
+        .command('list')
+        .description('List secure keys')
+        .alias('l')
+        .option('--no-compat', 'Ignore API compatibility checks')
+        .option('--color [boolean]', 'Turn on/off colors for JSON output.', 'true')
+        .option('--json [searchQuery]', LIST_JSON_HELP_TEXT)
+        .option('--query <query>', `[DEPRECATION WARNING] ${QUERY_JSON_HELP_TEXT}`)
+        .option('--profile <profile>', 'The profile to use')
+        .option('--project <project>', 'The project to use')
+        .action(withCompatibilityCheck((options) => {
+            try {
+                return new ListSecretsCommand(program).execute(options);
+            } catch (err) {
+                return console.error(chalk.red(err.message));
+            }
+        }));
 // Read Secure Value
-program
-    .command('describe <keyName>')
-    .alias('get')
-    .description('Retrieve the value stored for the given key.')
-    .option('--no-compat', 'Ignore API compatibility checks')
-    .option('--color [boolean]', 'Turn on/off colors for JSON output.', 'true')
-    .option('--json', 'Output results using JSON')
-    .option('--profile <profile>', 'The profile to use')
-    .option('--project <project>', 'The project to use')
-    .action(withCompatibilityCheck((keyName, options) => {
-        try {
-            new ReadSecretsCommand(program).execute(keyName, options);
-        } catch (err) {
-            console.error(chalk.red(err.message));
-        }
-    }));
-
+    program
+        .command('describe <keyName>')
+        .alias('get')
+        .description('Retrieve the value stored for the given key.')
+        .option('--no-compat', 'Ignore API compatibility checks')
+        .option('--color [boolean]', 'Turn on/off colors for JSON output.', 'true')
+        .option('--json', 'Output results using JSON')
+        .option('--profile <profile>', 'The profile to use')
+        .option('--project <project>', 'The project to use')
+        .action(withCompatibilityCheck((keyName, options) => {
+            try {
+                return new ReadSecretsCommand(program).execute(keyName, options);
+            } catch (err) {
+                return console.error(chalk.red(err.message));
+            }
+        }));
 // Write Secure Value
-program
-    .command('save <keyName> [value]')
-    .description('Save or overwrite a secure value. By default values are stored as strings but can also be saved as JSON or YAML.')
-    .option('--no-compat', 'Ignore API compatibility checks')
-    .option('--color [boolean]', 'Turn on/off colors for JSON output.', 'true')
-    .option('--data <data>', 'JSON value to save')
-    .option('--data-file <dataFile>', 'A file containing either JSON or YAML formatted value to save')
-    .option('--profile <profile>', 'The profile to use')
-    .option('--project <project>', 'The project to use')
-    .action(withCompatibilityCheck((keyName, value, options) => {
-        try {
-            new WriteSecretsCommand(program).execute(keyName, value, options);
-        } catch (err) {
-            console.error(chalk.red(err.message));
-        }
-    }));
-
+    program
+        .command('save <keyName> [value]')
+        .description('Save or overwrite a secure value. By default values are stored as strings but can also be saved as JSON or YAML.')
+        .option('--no-compat', 'Ignore API compatibility checks')
+        .option('--color [boolean]', 'Turn on/off colors for JSON output.', 'true')
+        .option('--data <data>', 'JSON value to save')
+        .option('--data-file <dataFile>', 'A file containing either JSON or YAML formatted value to save')
+        .option('--profile <profile>', 'The profile to use')
+        .option('--project <project>', 'The project to use')
+        .action(withCompatibilityCheck((keyName, value, options) => {
+            try {
+                return new WriteSecretsCommand(program).execute(keyName, value, options);
+            } catch (err) {
+                return console.error(chalk.red(err.message));
+            }
+        }));
 // Delete Secret
-program
-    .command('delete <keyName>')
-    .description('Delete a secret')
-    .option('--no-compat', 'Ignore API compatibility checks')
-    .option('--color [boolean]', 'Turn on/off colors for JSON output.', 'true')
-    .option('--profile <profile>', 'The profile to use')
-    .option('--project <project>', 'The project to use')
-    .action(withCompatibilityCheck((keyName, options) => {
-        try {
-            new DeleteSecretCommand(program).execute(keyName, options);
-        } catch (err) {
-            console.error(chalk.red(err.message));
-        }
-    }));
-
-if (require.main === module) {
-    program.showHelpAfterError().parseAsync(process.argv);
+    program
+        .command('delete <keyName>')
+        .description('Delete a secret')
+        .option('--no-compat', 'Ignore API compatibility checks')
+        .option('--color [boolean]', 'Turn on/off colors for JSON output.', 'true')
+        .option('--profile <profile>', 'The profile to use')
+        .option('--project <project>', 'The project to use')
+        .action(withCompatibilityCheck((keyName, options) => {
+            try {
+                return new DeleteSecretCommand(program).execute(keyName, options);
+            } catch (err) {
+                return console.error(chalk.red(err.message));
+            }
+        }));
+    return program;
 }
-module.exports = program;
+if (esMain(import.meta)) {
+    create().showHelpAfterError().parseAsync(process.argv);
+}
+export default create();

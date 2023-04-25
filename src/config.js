@@ -1,34 +1,18 @@
-/*
- * Copyright 2020 Cognitive Scale, Inc. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the “License”);
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an “AS IS” BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import _ from 'lodash';
+import os from 'os';
+import fs from 'node:fs';
+import path from 'path';
+import Joi from 'joi';
+import dayjs from 'dayjs';
+import debugSetup from 'debug';
+import * as jose from 'jose';
+import { printError } from './commands/utils.js';
+import Info from './client/info.js';
 
-const _ = require('lodash');
-const os = require('os');
-const fs = require('fs');
-const path = require('path');
-const Joi = require('joi');
-const dayjs = require('dayjs');
-const debug = require('debug')('cortex:config');
-const jose = require('jose-node-cjs-runtime');
-const { printError } = require('./commands/utils');
-const Info = require('./client/info');
-
+const debug = debugSetup('cortex:config');
 function configDir() {
     return process.env.CORTEX_CONFIG_DIR || path.join(os.homedir(), '.cortex');
 }
-
 // TODO deprecate CORTEX_URI
 function getCortexUrlFromEnv() {
     if (process.env.CORTEX_URI) {
@@ -36,12 +20,11 @@ function getCortexUrlFromEnv() {
     }
     return process.env.CORTEX_URL;
 }
-
 const durationRegex = /^([.\d]+)(ms|[smhdwMy])$/;
 async function generateJwt(profile, expiresIn = '2m') {
     const {
-        username, issuer, audience, jwk,
-    } = profile;
+ username, issuer, audience, jwk, 
+} = profile;
     const jwtSigner = await jose.importJWK(jwk, 'Ed25519');
     const infoClient = new Info(profile.url);
     const infoResp = await infoClient.getInfo();
@@ -57,7 +40,6 @@ async function generateJwt(profile, expiresIn = '2m') {
         .setExpirationTime(expiry)
         .sign(jwtSigner, { kid: jwk.kid });
 }
-
 const ProfileSchema = Joi.object({
     name: Joi.string().optional(),
     url: Joi.string().uri().required(),
@@ -70,7 +52,6 @@ const ProfileSchema = Joi.object({
     token: Joi.string().optional(),
     project: Joi.string().optional(),
 });
-
 const ProfileSchemaV4 = Joi.object().keys({
     name: Joi.string().optional(),
     url: Joi.string().uri().required(),
@@ -85,7 +66,6 @@ const ProfileSchemaV4 = Joi.object().keys({
     registries: Joi.any().required(),
     currentRegistry: Joi.string().required(),
 });
-
 const ProfileSchemaV5 = Joi.object().keys({
     name: Joi.string().optional(),
     url: Joi.string().uri().required(),
@@ -101,10 +81,9 @@ const ProfileSchemaV5 = Joi.object().keys({
     currentRegistry: Joi.string().required(),
     templateConfig: Joi.any().required(),
 });
-
 class Profile {
     constructor(name, {
- url, username, issuer, audience, jwk, project,
+ url, username, issuer, audience, jwk, project, 
 }) {
         this.name = name;
         this.url = url;
@@ -135,13 +114,8 @@ class Profile {
         };
     }
 }
-
 class Config {
-    constructor({ 
-        version, 
-        profiles, 
-        currentProfile,
-    }) {
+    constructor({ version, profiles, currentProfile }) {
         this.version = version || '3';
         this.profiles = profiles || {};
         this.currentProfile = currentProfile;
@@ -170,10 +144,10 @@ class Config {
     }
 
     setProfile(name, {
-            url, username, issuer, audience, jwk,
-    }, project) {
+ url, username, issuer, audience, jwk, 
+}, project) {
         const profile = new Profile(name, {
-             url, username, issuer, audience, jwk, project,
+            url, username, issuer, audience, jwk, project,
         });
         profile.validate(); // do not set/save invalid profiles ..
         this.profiles[name] = profile;
@@ -184,10 +158,10 @@ class Config {
         Object.keys(this.profiles).forEach((name) => {
             profiles[name] = this.profiles[name].toJSON();
         });
-        return { 
-            version: this.version, 
-            profiles, 
-            currentProfile: this.currentProfile, 
+        return {
+            version: this.version,
+            profiles,
+            currentProfile: this.currentProfile,
         };
     }
 
@@ -196,19 +170,16 @@ class Config {
         if (!fs.existsSync(dir)) {
             fs.mkdirSync(dir);
         }
-
         _.forEach(this.profiles, (profile) => {
             delete profile.token;
         });
-
         const configFile = path.join(dir, 'config');
         fs.writeFileSync(configFile, JSON.stringify(this.toJSON(), null, 2));
     }
 }
-
 class ProfileV4 {
     constructor(name, {
- url, username, issuer, audience, jwk, project, registries, currentRegistry,
+ url, username, issuer, audience, jwk, project, registries, currentRegistry, 
 }) {
         this.name = name;
         this.url = url;
@@ -249,13 +220,8 @@ class ProfileV4 {
         };
     }
 }
-
 class ConfigV4 {
-    constructor({ 
-        profiles,
-        currentProfile, 
-        templateConfig,
-    }) {
+    constructor({ profiles, currentProfile, templateConfig }) {
         this.version = '4';
         this.profiles = profiles || {};
         this.currentProfile = currentProfile;
@@ -269,8 +235,8 @@ class ConfigV4 {
     }
 
     setProfile(name, {
-        url, username, issuer, audience, jwk, registries, currentRegistry,
-    }, project) {
+ url, username, issuer, audience, jwk, registries, currentRegistry, 
+}, project) {
         const profile = new ProfileV4(name, {
             url, username, issuer, audience, jwk, project, registries, currentRegistry,
         });
@@ -283,11 +249,11 @@ class ConfigV4 {
         Object.keys(this.profiles).forEach((name) => {
             profiles[name] = this.profiles[name].toJSON();
         });
-        return { 
-            version: this.version, 
-            profiles, 
-            currentProfile: this.currentProfile, 
-            templateConfig: this.templateConfig, 
+        return {
+            version: this.version,
+            profiles,
+            currentProfile: this.currentProfile,
+            templateConfig: this.templateConfig,
         };
     }
 
@@ -315,19 +281,16 @@ class ConfigV4 {
         if (!fs.existsSync(dir)) {
             fs.mkdirSync(dir);
         }
-
         _.forEach(this.profiles, (profile) => {
             delete profile.token;
         });
-
         const configFile = path.join(dir, 'config');
         fs.writeFileSync(configFile, JSON.stringify(this.toJSON(), null, 2));
     }
 }
-
 class ProfileV5 {
     constructor(name, {
- url, username, issuer, audience, jwk, project, registries, currentRegistry, templateConfig,
+ url, username, issuer, audience, jwk, project, registries, currentRegistry, templateConfig, 
 }, templateConfigV4) {
         this.name = name;
         this.url = url;
@@ -373,13 +336,8 @@ class ProfileV5 {
         };
     }
 }
-
 class ConfigV5 {
-    constructor({ 
-        profiles,
-        currentProfile,
-        templateConfig,
-    }) {
+    constructor({ profiles, currentProfile, templateConfig }) {
         this.version = '5';
         this.profiles = profiles || {};
         this.currentProfile = currentProfile;
@@ -389,8 +347,8 @@ class ConfigV5 {
     }
 
     setProfile(name, {
-        url, username, issuer, audience, jwk, registries, currentRegistry, templateConfig,
-    }, project) {
+ url, username, issuer, audience, jwk, registries, currentRegistry, templateConfig, 
+}, project) {
         const profile = new ProfileV5(name, {
             url, username, issuer, audience, jwk, project, registries, currentRegistry, templateConfig,
         });
@@ -403,10 +361,10 @@ class ConfigV5 {
         Object.keys(this.profiles).forEach((name) => {
             profiles[name] = this.profiles[name].toJSON();
         });
-        return { 
-            version: this.version, 
-            profiles, 
-            currentProfile: this.currentProfile, 
+        return {
+            version: this.version,
+            profiles,
+            currentProfile: this.currentProfile,
         };
     }
 
@@ -434,39 +392,31 @@ class ConfigV5 {
         if (!fs.existsSync(dir)) {
             fs.mkdirSync(dir);
         }
-
         _.forEach(this.profiles, (profile) => {
             delete profile.token;
         });
-
         const configFile = path.join(dir, 'config');
         fs.writeFileSync(configFile, JSON.stringify(this.toJSON(), null, 2));
     }
 }
-
 function defaultConfig() {
     return new ConfigV5({});
 }
-
 function readConfig() {
     try {
         const dir = configDir();
         if (!fs.existsSync(dir)) {
             fs.mkdirSync(dir);
         }
-
         debug(`Reading config from ${dir}`);
-
         const configFile = path.join(dir, 'config');
         if (fs.existsSync(configFile)) {
             // deal with config versions
             const configObj = JSON.parse(fs.readFileSync(configFile));
-
             if (configObj.version) {
                 switch (configObj.version) {
                     case '5':
                         return new ConfigV5(configObj);
-
                     case '4':
                         {
                             // version 5 (per-profile template support)
@@ -475,7 +425,6 @@ function readConfig() {
                             cfg.save();
                             return cfg;
                         }
-    
                     case '3':
                         {
                             // version 4 (template config support, with github token)
@@ -484,14 +433,12 @@ function readConfig() {
                             cfg.save();
                             return cfg;
                         }
-
                     case '2':
                         fs.copyFileSync(configFile, path.join(dir, 'config_v2'));
                         defaultConfig().save();
                         printError('Old profile found and moved to ~/.cortex/config_v2. Please run "cortex configure"');
                         // version 2
                         return new Config(configObj);
-            
                     default:
                         // version 1
                         return new Config({ profiles: configObj });
@@ -503,13 +450,11 @@ function readConfig() {
     }
     return undefined;
 }
-
 async function loadProfile(profileName, useenv = true) {
     const config = readConfig();
     if (config === undefined) {
         printError('Please configure the Cortex CLI by running "cortex configure"');
     }
-
     const name = profileName || config.currentProfile || 'default';
     const profile = await config.getProfile(name, useenv);
     if (!profile) {
@@ -517,8 +462,13 @@ async function loadProfile(profileName, useenv = true) {
     }
     return profile;
 }
-
-module.exports = {
+export { durationRegex };
+export { loadProfile };
+export { generateJwt };
+export { defaultConfig };
+export { configDir };
+export { readConfig };
+export default {
     durationRegex,
     loadProfile,
     generateJwt,

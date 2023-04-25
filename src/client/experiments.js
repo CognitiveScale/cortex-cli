@@ -1,29 +1,12 @@
-/*
- * Copyright 2020 Cognitive Scale, Inc. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the “License”);
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an “AS IS” BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-const fs = require('fs');
-const stream = require('stream');
-const { promisify } = require('util');
+import fs from 'node:fs';
+import { pipeline } from 'node:stream/promises';
+import debugSetup from 'debug';
+import { got, defaultHeaders } from './apiutils.js';
+import { constructError, checkProject } from '../commands/utils.js';
+import Content from './content.js';
 
-const pipeline = promisify(stream.pipeline);
-const debug = require('debug')('cortex:cli');
-const { got, defaultHeaders } = require('./apiutils');
-const { constructError, checkProject } = require('../commands/utils');
-const Content = require('./content');
-
-module.exports = class Experiments {
+const debug = debugSetup('cortex:cli');
+export default (class Experiments {
     constructor(cortexUrl) {
         this.cortexUrl = cortexUrl;
         this.endpoint = (projectId) => `${cortexUrl}/fabric/v4/projects/${projectId}/experiments`;
@@ -40,9 +23,9 @@ module.exports = class Experiments {
         if (skip) query.skip = skip;
         return got
             .get(endpoint, {
-                headers: defaultHeaders(token),
-                searchParams: query,
-            }).json()
+            headers: defaultHeaders(token),
+            searchParams: query,
+        }).json()
             .then((result) => ({ success: true, result }))
             .catch((err) => constructError(err));
     }
@@ -53,8 +36,8 @@ module.exports = class Experiments {
         debug('describeExperiment(%s) => %s', name, endpoint);
         return got
             .get(endpoint, {
-                headers: defaultHeaders(token),
-            }).json()
+            headers: defaultHeaders(token),
+        }).json()
             .then((result) => ({ success: true, result }))
             .catch((err) => constructError(err));
     }
@@ -65,8 +48,8 @@ module.exports = class Experiments {
         debug('deleteExperiment(%s) => %s', name, endpoint);
         return got
             .delete(endpoint, {
-                headers: defaultHeaders(token),
-            }).json()
+            headers: defaultHeaders(token),
+        }).json()
             .then((result) => ({ success: true, result }))
             .catch((err) => constructError(err));
     }
@@ -82,9 +65,9 @@ module.exports = class Experiments {
         if (skip) query.skip = skip;
         return got
             .get(endpoint, {
-                headers: defaultHeaders(token),
-                searchParams: query,
-            }).json()
+            headers: defaultHeaders(token),
+            searchParams: query,
+        }).json()
             .then((result) => ({ success: true, result }))
             .catch((err) => constructError(err));
     }
@@ -95,8 +78,8 @@ module.exports = class Experiments {
         debug('describeRun(%s) => %s', runId, endpoint);
         return got
             .get(endpoint, {
-                headers: defaultHeaders(token),
-            }).json()
+            headers: defaultHeaders(token),
+        }).json()
             .then((result) => ({ success: true, result }))
             .catch((err) => constructError(err));
     }
@@ -107,8 +90,8 @@ module.exports = class Experiments {
         debug('deleteRun(%s, %s) => %s', experimentName, runId, endpoint);
         return got
             .delete(endpoint, {
-                headers: defaultHeaders(token),
-            }).json()
+            headers: defaultHeaders(token),
+        }).json()
             .then((result) => ({ success: true, result }))
             .catch((err) => constructError(err));
     }
@@ -138,9 +121,9 @@ module.exports = class Experiments {
         debug('saveExperiment(%s) => %s', experimentObj.name, endpoint);
         return got
             .post(endpoint, {
-                headers: defaultHeaders(token),
-                json: experimentObj,
-            }).json()
+            headers: defaultHeaders(token),
+            json: experimentObj,
+        }).json()
             .then((result) => ({ success: true, result }))
             .catch((err) => constructError(err));
     }
@@ -151,9 +134,9 @@ module.exports = class Experiments {
         debug('createRun(%s) => %s', runObj.experimentName, endpoint);
         return got
             .post(endpoint, {
-                headers: defaultHeaders(token),
-                json: runObj,
-            }).json()
+            headers: defaultHeaders(token),
+            json: runObj,
+        }).json()
             .then((result) => ({ success: true, result }))
             .catch((err) => constructError(err));
     }
@@ -164,29 +147,24 @@ module.exports = class Experiments {
         debug('updateRun(%s) => %s', runObj.experimentName, endpoint);
         return got
             .post(endpoint, {
-                headers: defaultHeaders(token),
-                json: runObj,
-            }).json()
+            headers: defaultHeaders(token),
+            json: runObj,
+        }).json()
             .then((result) => ({ success: true, result }))
             .catch((err) => constructError(err));
     }
 
     async uploadArtifact(projectId, token, experimentName, runId, content, artifact, contentType = 'application/octet-stream') {
         checkProject(projectId);
-
         const endpoint = `${this.endpoint(projectId)}/${encodeURIComponent(experimentName)}/runs/${encodeURIComponent(runId)}/artifacts/${artifact}`;
-
         debug('uploadArtifact(%s, %s) => %s', artifact, content, endpoint);
         try {
-            const message = await pipeline(
-                fs.createReadStream(content),
-                got.stream.put(endpoint, {
-                    headers: defaultHeaders(token, { 'Content-Type': contentType }),
-                }),
-            );
+            const message = await pipeline(fs.createReadStream(content), got.stream.put(endpoint, {
+                headers: defaultHeaders(token, { 'Content-Type': contentType }),
+            }));
             return { success: true, message };
         } catch (err) {
             return constructError(err);
         }
     }
-};
+});

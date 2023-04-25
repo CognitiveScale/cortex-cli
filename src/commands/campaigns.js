@@ -1,5 +1,13 @@
+import debugSetup from 'debug';
+import get from 'lodash/get.js';
+import { loadProfile } from '../config.js';
+import ApiServerClient from '../client/apiServerClient.js';
+import Catalog from '../client/catalog.js';
+import {
+ printSuccess, printError, printTable, handleTable, printExtendedLogs, handleListFailure, getFilteredOutput, 
+} from './utils.js';
 /*
- * Copyright 2020 Cognitive Scale, Inc. All Rights Reserved.
+ * Copyright 2023 Cognitive Scale, Inc. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the “License”);
  * you may not use this file except in compliance with the License.
@@ -13,19 +21,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-const debug = require('debug')('cortex:cli');
-const { loadProfile } = require('../config');
-const ApiServerClient = require('../client/apiServerClient');
-const Catalog = require('../client/catalog');
-
-const _ = { get: require('lodash/get') };
-const {
- printSuccess, printError, printTable, handleTable,
-    printExtendedLogs, handleListFailure,
-    getFilteredOutput,
-} = require('./utils');
-
-module.exports.ListCampaignsCommand = class ListCampaignsCommand {
+const debug = debugSetup('cortex:cli');
+const _ = { get };
+export class ListCampaignsCommand {
     constructor(program) {
         this.program = program;
     }
@@ -56,9 +54,8 @@ module.exports.ListCampaignsCommand = class ListCampaignsCommand {
             handleListFailure(_.get(err, 'response.errors[0]', err), options, 'Campaigns');
         }
     }
-};
-
-module.exports.DescribeCampaignCommand = class DescribeCampaignCommand {
+}
+export class DescribeCampaignCommand {
     constructor(program) {
         this.program = program;
     }
@@ -68,7 +65,6 @@ module.exports.DescribeCampaignCommand = class DescribeCampaignCommand {
         const profile = await loadProfile(options.profile);
         debug('%s.executeDescribeCampaign(%s)', profile.name, campaignName);
         const cli = new ApiServerClient(profile.url);
-
         try {
             const response = await cli.getCampaign(options.project || profile.project, profile.token, campaignName);
             getFilteredOutput(response, options);
@@ -76,9 +72,8 @@ module.exports.DescribeCampaignCommand = class DescribeCampaignCommand {
             printError(`Failed to describe campaign: ${err.status} ${err.message}`, options);
         }
     }
-};
-
-module.exports.ExportCampaignCommand = class ExportCampaignCommand {
+}
+export class ExportCampaignCommand {
     constructor(program) {
         this.program = program;
     }
@@ -97,9 +92,8 @@ module.exports.ExportCampaignCommand = class ExportCampaignCommand {
             printError(`Failed to export Campaign ${campaignName} from project ${project}. Error: ${e}`);
         }
     }
-};
-
-module.exports.ImportCampaignCommand = class ImportCampaignCommand {
+}
+export class ImportCampaignCommand {
     constructor(program) {
         this.program = program;
     }
@@ -109,16 +103,14 @@ module.exports.ImportCampaignCommand = class ImportCampaignCommand {
         const profile = await loadProfile(options.profile);
         debug('%s.executeImportCampaignCommand(%s)', profile.name, campaignFilepath);
         const cli = new Catalog(profile.url);
-
         try {
             cli.importCampaign(options.project || profile.project, profile.token, campaignFilepath, options.deploy, options.overwrite);
         } catch (err) {
             printError(`Failed to import campaign: ${err.status} ${err.message}`, options);
         }
     }
-};
-
-module.exports.DeployCampaignCommand = class DeployCampaignCommand {
+}
+export class DeployCampaignCommand {
     constructor(program) {
         this.program = program;
     }
@@ -128,7 +120,6 @@ module.exports.DeployCampaignCommand = class DeployCampaignCommand {
         const profile = await loadProfile(options.profile);
         debug('%s.executeDeployCampaignCommand(%s)', profile.name, campaignName);
         const cli = new Catalog(profile.url);
-
         try {
             cli.deployCampaign(options.project || profile.project, profile.token, campaignName).then((response) => {
                 if (response.success === false) throw response;
@@ -146,9 +137,8 @@ module.exports.DeployCampaignCommand = class DeployCampaignCommand {
             printError(`Failed to deploy campaign: ${err.status} ${err.message}`, options);
         }
     }
-};
-
-module.exports.UndeployCampaignCommand = class UndeployCampaignCommand {
+}
+export class UndeployCampaignCommand {
     constructor(program) {
         this.program = program;
     }
@@ -158,7 +148,6 @@ module.exports.UndeployCampaignCommand = class UndeployCampaignCommand {
         const profile = await loadProfile(options.profile);
         debug('%s.executeUndeployCampaignCommand(%s)', profile.name, campaignName);
         const cli = new Catalog(profile.url);
-
         try {
             cli.undeployCampaign(options.project || profile.project, profile.token, campaignName).then((response) => {
                 if (response.success === false) throw response;
@@ -176,9 +165,8 @@ module.exports.UndeployCampaignCommand = class UndeployCampaignCommand {
             printError(`Failed to undeploy campaign: ${err.status} ${err.message}`, options);
         }
     }
-};
-
-module.exports.UndeployMissionCommand = class UndeployMissionCommand {
+}
+export class UndeployMissionCommand {
     constructor(program) {
         this.program = program;
     }
@@ -188,7 +176,6 @@ module.exports.UndeployMissionCommand = class UndeployMissionCommand {
         const profile = await loadProfile(options.profile);
         debug('%s.executeUndeployMissionCommand(%s)', profile.name, missionName);
         const cli = new Catalog(profile.url);
-
         try {
             cli.undeployMission(options.project || profile.project, profile.token, campaignName, missionName).then((response) => {
                 if (response.success === false) throw response;
@@ -201,9 +188,8 @@ module.exports.UndeployMissionCommand = class UndeployMissionCommand {
             printError(`Failed to undeploy mission: ${err.status} ${err.message}`, options);
         }
     }
-};
-
-module.exports.ListMissionsCommand = class ListMissionsCommand {
+}
+export class ListMissionsCommand {
     constructor(program) {
         this.program = program;
     }
@@ -212,7 +198,6 @@ module.exports.ListMissionsCommand = class ListMissionsCommand {
     async execute(campaign, cmd) {
         const options = cmd;
         const profile = await loadProfile(options.profile);
-
         debug('%s.executeListMissionsCommand(%s)', profile.name, campaign);
         const cli = new Catalog(profile.url);
         try {
@@ -241,9 +226,8 @@ module.exports.ListMissionsCommand = class ListMissionsCommand {
             handleListFailure(_.get(err, 'response.errors[0]', err), options, 'Missions');
         }
     }
-};
-
-module.exports.DeployMissionCommand = class DeployMissionCommand {
+}
+export class DeployMissionCommand {
     constructor(program) {
         this.program = program;
     }
@@ -253,16 +237,14 @@ module.exports.DeployMissionCommand = class DeployMissionCommand {
         const profile = await loadProfile(options.profile);
         debug('%s.executeDeployMissionCommand(%s)', profile.name, campaign);
         const cli = new Catalog(profile.url);
-
         cli.deployMission(options.project || profile.project, profile.token, campaign, mission).then((response) => {
             if (response.success === false) throw response;
             const output = _.get(response, 'data.message') || JSON.stringify(response.data || response, null, 2);
             printSuccess(output, options);
         }).catch((err) => printError(`Failed to deploy mission ${mission} of campaign ${campaign}: ${err.status} ${err.message}`, options));
     }
-};
-
-module.exports.DescribeMissionCommand = class DescribeMissionCommand {
+}
+export class DescribeMissionCommand {
     constructor(program) {
         this.program = program;
     }
@@ -272,10 +254,9 @@ module.exports.DescribeMissionCommand = class DescribeMissionCommand {
         const profile = await loadProfile(options.profile);
         debug('%s.executeDescribeMissionCommand(%s)', profile.name, campaign);
         const cli = new Catalog(profile.url);
-
         cli.getMission(options.project || profile.project, profile.token, campaign, mission).then((response) => {
             if (response.success === false) throw response;
             printSuccess(JSON.stringify(response.data, null, 2), options);
         }).catch((err) => printError(`Failed to describe mission ${mission} of campaign ${campaign}: ${err.status} ${err.message}`, options));
     }
-};
+}

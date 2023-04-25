@@ -1,37 +1,18 @@
-/*
- * Copyright 2020 Cognitive Scale, Inc. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the “License”);
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an “AS IS” BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import fs from 'node:fs';
+import debugSetup from 'debug';
+import dayjs from 'dayjs';
+import relativeTime from 'dayjs/plugin/relativeTime.js';
+import { loadProfile } from '../config.js';
+import Catalog from '../client/catalog.js';
+import {
+ LISTTABLEFORMAT, filterObject, printExtendedLogs, handleListFailure, getFilteredOutput, 
 
-const fs = require('fs');
-const debug = require('debug')('cortex:cli');
-const dayjs = require('dayjs');
-const relativeTime = require('dayjs/plugin/relativeTime');
-const { loadProfile } = require('../config');
-const Catalog = require('../client/catalog');
-const {
-    LISTTABLEFORMAT, filterObject, printExtendedLogs, handleListFailure,
-    getFilteredOutput,
-} = require('./utils');
+ printSuccess, printError, parseObject, handleTable, 
+} from './utils.js';
 
-const {
- printSuccess, printError, parseObject, handleTable,
-} = require('./utils');
-
+const debug = debugSetup('cortex:cli');
 dayjs.extend(relativeTime);
-
-module.exports.SaveTypeCommand = class SaveTypeCommand {
+export class SaveTypeCommand {
     constructor(program) {
         this.program = program;
     }
@@ -43,11 +24,9 @@ module.exports.SaveTypeCommand = class SaveTypeCommand {
             const typeDefStr = fs.readFileSync(typeDefinition);
             const type = parseObject(typeDefStr, options);
             debug('%o', type);
-
             let normalizedType = {};
             if (!('types' in type)) normalizedType.types = [type];
             else normalizedType = type;
-
             const catalog = new Catalog(profile.url);
             const response = await catalog.saveType(options.project || profile.project, profile.token, normalizedType);
             if (response.success) {
@@ -58,9 +37,8 @@ module.exports.SaveTypeCommand = class SaveTypeCommand {
             return printError(`Failed to save type: ${err.status} ${err.message}`, options);
         }
     }
-};
-
-module.exports.ListTypesCommand = class ListTypesCommand {
+}
+export class ListTypesCommand {
     constructor(program) {
         this.program = program;
     }
@@ -69,7 +47,6 @@ module.exports.ListTypesCommand = class ListTypesCommand {
     async execute(options) {
         const profile = await loadProfile(options.profile);
         debug('%s.executeListTypes()', profile.name);
-
         const catalog = new Catalog(profile.url);
         // eslint-disable-next-line consistent-return
         catalog.listTypes(options.project || profile.project, profile.token, options.limit, options.skip, options.sort).then((response) => {
@@ -80,24 +57,18 @@ module.exports.ListTypesCommand = class ListTypesCommand {
                     getFilteredOutput(result, options);
                 } else {
                     printExtendedLogs(result, options);
-                    handleTable(
-                        LISTTABLEFORMAT,
-                        result,
-                        (o) => ({ ...o, updatedAt: o.updatedAt ? dayjs(o.updatedAt).fromNow() : '-' }),
-                        'No types found',
-                    );
+                    handleTable(LISTTABLEFORMAT, result, (o) => ({ ...o, updatedAt: o.updatedAt ? dayjs(o.updatedAt).fromNow() : '-' }), 'No types found');
                 }
             } else {
                 return handleListFailure(response, options, 'Types');
             }
         })
-        .catch((err) => {
+            .catch((err) => {
             printError(`Failed to list types: ${err.status} ${err.message}`, options);
         });
     }
-};
-
-module.exports.DescribeTypeCommand = class DescribeTypeCommand {
+}
+export class DescribeTypeCommand {
     constructor(program) {
         this.program = program;
     }
@@ -105,7 +76,6 @@ module.exports.DescribeTypeCommand = class DescribeTypeCommand {
     async execute(typeName, options) {
         const profile = await loadProfile(options.profile);
         debug('%s.executeDescribeType(%s)', profile.name, typeName);
-
         const catalog = new Catalog(profile.url);
         catalog.describeType(options.project || profile.project, profile.token, typeName).then((response) => {
             if (response.success) {
@@ -114,13 +84,12 @@ module.exports.DescribeTypeCommand = class DescribeTypeCommand {
                 printError(`Failed to describe type ${typeName}: ${response.message}`, options);
             }
         })
-        .catch((err) => {
+            .catch((err) => {
             printError(`Failed to describe type ${typeName}: ${err.status} ${err.message}`, options);
         });
     }
-};
-
-module.exports.DeleteTypeCommand = class DeleteTypeCommand {
+}
+export class DeleteTypeCommand {
     constructor(program) {
         this.program = program;
     }
@@ -128,7 +97,6 @@ module.exports.DeleteTypeCommand = class DeleteTypeCommand {
     async execute(typeName, options) {
         const profile = await loadProfile(options.profile);
         debug('%s.executeDeleteType(%s)', profile.name, typeName);
-
         const catalog = new Catalog(profile.url);
         catalog.deleteType(options.project || profile.project, profile.token, typeName).then((response) => {
             if (response.success) {
@@ -138,8 +106,8 @@ module.exports.DeleteTypeCommand = class DeleteTypeCommand {
                 printError(`Failed to delete type ${typeName}: ${response.message}`, options);
             }
         })
-        .catch((err) => {
+            .catch((err) => {
             printError(`Failed to delete type ${typeName}: ${err.status} ${err.message}`, options);
         });
     }
-};
+}

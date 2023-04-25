@@ -1,5 +1,14 @@
+import debugSetup from 'debug';
+import _ from 'lodash';
+import prompts from 'prompts';
+import chalk from 'chalk';
+import fs from 'node:fs';
+import {
+ readConfig, defaultConfig, generateJwt, loadProfile, durationRegex, 
+} from '../config.js';
+import { printSuccess, printError, useColor } from './utils.js';
 /*
- * Copyright 2020 Cognitive Scale, Inc. All Rights Reserved.
+ * Copyright 2023 Cognitive Scale, Inc. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the “License”);
  * you may not use this file except in compliance with the License.
@@ -13,30 +22,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-const debug = require('debug')('cortex:cli');
-const _ = require('lodash');
-const prompts = require('prompts');
-const chalk = require('chalk');
-const fs = require('fs');
-
-const {
-    readConfig,
-    defaultConfig,
-    generateJwt,
-    loadProfile,
-    durationRegex,
-} = require('../config');
-const { printSuccess, printError, useColor } = require('./utils');
-
+const debug = debugSetup('cortex:cli');
 function _validatePatFile(patFile) {
     if (!fs.existsSync(patFile)) {
         printError(`Personal Access Token file does not exist at: ${patFile}`);
     }
     return JSON.parse(fs.readFileSync(patFile));
 }
-
-module.exports.ConfigureCommand = class {
+export const ConfigureCommand = class {
     constructor(program) {
         this.program = program;
     }
@@ -45,28 +38,26 @@ module.exports.ConfigureCommand = class {
         const { profile, file, project } = options;
         const config = readConfig();
         const profileName = profile || _.get(config, 'currentProfile', 'default');
-
         debug('configuring profile: %s', profileName);
         console.log(`Configuring profile ${chalk.green.bold(profileName)}:`);
-
         const cmd = this;
-            try {
-                let patData = null;
-                if (file) {
-                    patData = _validatePatFile(file);
-                } else {
-                    const { patjson } = await prompts({
-                        type: 'text',
-                        name: 'patjson',
-                        message: 'Cortex Personal Access Config:',
-                    });
-                    patData = JSON.parse(patjson);
-                }
-                cmd.saveConfig(config, profileName, patData, project);
-                console.log(`Configuration for profile ${chalk.green.bold(profileName)} saved.`);
-            } catch (err) {
-                printError(err);
+        try {
+            let patData = null;
+            if (file) {
+                patData = _validatePatFile(file);
+            } else {
+                const { patjson } = await prompts({
+                    type: 'text',
+                    name: 'patjson',
+                    message: 'Cortex Personal Access Config:',
+                });
+                patData = JSON.parse(patjson);
             }
+            cmd.saveConfig(config, profileName, patData, project);
+            console.log(`Configuration for profile ${chalk.green.bold(profileName)} saved.`);
+        } catch (err) {
+            printError(err);
+        }
     }
 
     saveConfig(config, profileName, cfg, project) {
@@ -76,8 +67,7 @@ module.exports.ConfigureCommand = class {
         config.save();
     }
 };
-
-module.exports.SetProfileCommand = class {
+export const SetProfileCommand = class {
     constructor(program) {
         this.program = program;
     }
@@ -89,15 +79,12 @@ module.exports.SetProfileCommand = class {
             printError(`No profile named ${profileName}.  Run cortex configure --profile ${profileName} to create it.`, options);
             return;
         }
-
         config.currentProfile = profileName;
         config.save();
-
         console.log(`Current profile set to ${chalk.green.bold(profileName)}`);
     }
 };
-
-module.exports.DescribeProfileCommand = class {
+export const DescribeProfileCommand = class {
     constructor(program) {
         this.program = program;
     }
@@ -108,16 +95,13 @@ module.exports.DescribeProfileCommand = class {
             printError('Configuration not found.  Please run "cortex configure".');
             return;
         }
-
         const profileName = options.profile || config.currentProfile;
         debug('describing profile: %s', profileName);
-
         const profile = await config.getProfile(profileName);
         if (profile === undefined) {
             printError(`No profile named ${profileName}.  Run cortex configure --profile ${profileName} to create it.`, options);
             return;
         }
-
         printSuccess(`Profile: ${profile.name}`, options);
         printSuccess(`Cortex URL: ${profile.url}`, options);
         printSuccess(`Username: ${profile.username}`, options);
@@ -125,8 +109,7 @@ module.exports.DescribeProfileCommand = class {
         printSuccess(`Project: ${profile.project || 'undefined'}`, options);
     }
 };
-
-module.exports.ListProfilesCommand = class {
+export const ListProfilesCommand = class {
     constructor(program) {
         this.program = program;
     }
@@ -137,7 +120,6 @@ module.exports.ListProfilesCommand = class {
             printError('Configuration not found.  Please run "cortex configure".', options);
             return;
         }
-
         const profiles = Object.keys(config.profiles);
         profiles.forEach((name) => {
             if (name === config.currentProfile) {
@@ -152,8 +134,7 @@ module.exports.ListProfilesCommand = class {
         });
     }
 };
-
-module.exports.GetAccessToken = class {
+export const GetAccessToken = class {
     constructor(program) {
         this.program = program;
     }
@@ -169,8 +150,7 @@ module.exports.GetAccessToken = class {
         return printSuccess(jwt, options);
     }
 };
-
-module.exports.PrintEnvVars = class {
+export const PrintEnvVars = class {
     constructor(program) {
         this.program = program;
     }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Cognitive Scale, Inc. All Rights Reserved.
+ * Copyright 2023 Cognitive Scale, Inc. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the “License”);
  * you may not use this file except in compliance with the License.
@@ -13,11 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-const debug = require('debug')('cortex:cli');
-const { got, defaultHeaders } = require('./apiutils');
-const { constructError, checkProject } = require('../commands/utils');
+import debugSetup from 'debug';
+import { got, defaultHeaders } from './apiutils.js';
+import { constructError, checkProject } from '../commands/utils.js';
 
-module.exports = class Sessions {
+const debug = debugSetup('cortex:cli');
+export default (class Sessions {
     constructor(cortexUrl) {
         this.cortexUrl = cortexUrl;
         this.endpointV4 = (projectId) => `${cortexUrl}/fabric/v4/projects/${projectId}/sessions`;
@@ -29,9 +30,9 @@ module.exports = class Sessions {
         debug('saveSession(%s) => %s', sessionObj.name, endpoint);
         return got
             .post(endpoint, {
-                headers: defaultHeaders(token),
-                json: sessionObj,
-            }).json()
+            headers: defaultHeaders(token),
+            json: sessionObj,
+        }).json()
             .then((res) => ({ success: true, message: res }))
             .catch((err) => constructError(err));
     }
@@ -42,8 +43,8 @@ module.exports = class Sessions {
         debug('deleteSession(%s) => %s', sessionName, endpoint);
         return got
             .delete(endpoint, {
-                headers: defaultHeaders(token),
-            })
+            headers: defaultHeaders(token),
+        })
             .json()
             .then((session) => ({ success: true, session }))
             .catch((err) => constructError(err));
@@ -55,9 +56,9 @@ module.exports = class Sessions {
         debug('describeSession(%s) => %s', sessionName, endpoint);
         return got
             .get(endpoint, {
-                headers: defaultHeaders(token),
-                searchParams: { verbose },
-            }).json()
+            headers: defaultHeaders(token),
+            searchParams: { verbose },
+        }).json()
             .then((session) => ({ success: true, session }))
             .catch((err) => constructError(err));
     }
@@ -68,10 +69,10 @@ module.exports = class Sessions {
         debug('listSessions() => %s', endpoint);
         return got
             .get(endpoint, {
-                headers: defaultHeaders(token),
-            })
+            headers: defaultHeaders(token),
+        })
             .json()
             .then((sessionsResp) => ({ success: true, ...sessionsResp }))
             .catch((err) => constructError(err));
     }
-};
+});

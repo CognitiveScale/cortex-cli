@@ -1,36 +1,16 @@
-/*
- * Copyright 2020 Cognitive Scale, Inc. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the “License”);
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an “AS IS” BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-const fs = require('fs');
-const _ = require('lodash');
+import fs from 'node:fs';
+import _ from 'lodash';
+import debugSetup from 'debug';
+import { loadProfile } from '../config.js';
+import Sessions from '../client/sessions.js';
+import {
+ SESSIONTABLEFORMAT, formatValidationPath, handleListFailure, getFilteredOutput, 
 
-const debug = require('debug')('cortex:cli');
-const { loadProfile } = require('../config');
-const Sessions = require('../client/sessions');
-const {
-    SESSIONTABLEFORMAT,
-    formatValidationPath,
-    handleListFailure,
-    getFilteredOutput,
-} = require('./utils');
+ printSuccess, printError, filterObject, parseObject, printTable, handleTable, 
+} from './utils.js';
 
-const {
-    printSuccess, printError, filterObject, parseObject, printTable, handleTable,
-} = require('./utils');
-
-module.exports.SaveSessionCommand = class SaveSessionCommand {
+const debug = debugSetup('cortex:cli');
+export class SaveSessionCommand {
     constructor(program) {
         this.program = program;
     }
@@ -44,7 +24,6 @@ module.exports.SaveSessionCommand = class SaveSessionCommand {
         const sessionDefStr = fs.readFileSync(sessionDefinition);
         const session = parseObject(sessionDefStr, options);
         debug('%o', session);
-
         const sessions = new Sessions(profile.url);
         sessions.saveSession(options.project || profile.project, profile.token, session).then((response) => {
             if (response.success) {
@@ -64,12 +43,11 @@ module.exports.SaveSessionCommand = class SaveSessionCommand {
             }
         })
             .catch((err) => {
-                printError(`Failed to save session: ${err.status} ${err.message}`, options);
-            });
+            printError(`Failed to save session: ${err.status} ${err.message}`, options);
+        });
     }
-};
-
-module.exports.ListSessionsCommand = class ListSessionsCommand {
+}
+export class ListSessionsCommand {
     constructor(program) {
         this.program = program;
     }
@@ -90,13 +68,12 @@ module.exports.ListSessionsCommand = class ListSessionsCommand {
             return handleListFailure(response, options, 'Sessions');
         })
             .catch((err) => {
-                debug(err);
-                printError(`Failed to list sessions: ${err.status} ${err.message}`, options);
-            });
+            debug(err);
+            printError(`Failed to list sessions: ${err.status} ${err.message}`, options);
+        });
     }
-};
-
-module.exports.DescribeSessionCommand = class DescribeSessionCommand {
+}
+export class DescribeSessionCommand {
     constructor(program) {
         this.program = program;
     }
@@ -112,13 +89,12 @@ module.exports.DescribeSessionCommand = class DescribeSessionCommand {
                 printError(`Failed to describe session ${sessionName}: ${response.message}`, options);
             }
         })
-        .catch((err) => {
+            .catch((err) => {
             printError(`Failed to describe session ${sessionName}: ${err.status} ${err.message}`, options);
         });
     }
-};
-
-module.exports.DeleteSessionCommand = class DeleteSessionCommand {
+}
+export class DeleteSessionCommand {
     constructor(program) {
         this.program = program;
     }
@@ -129,15 +105,15 @@ module.exports.DeleteSessionCommand = class DeleteSessionCommand {
         const sessions = new Sessions(profile.url);
         sessions.deleteSession(options.project || profile.project, profile.token, sessionName)
             .then((response) => {
-                if (response && response.success) {
-                    const result = filterObject(response, options);
-                    printSuccess(JSON.stringify(result, null, 2), options);
-                } else {
-                    printError(`Session deletion failed: ${response.status} ${response.message}.`, options);
-                }
-            })
+            if (response && response.success) {
+                const result = filterObject(response, options);
+                printSuccess(JSON.stringify(result, null, 2), options);
+            } else {
+                printError(`Session deletion failed: ${response.status} ${response.message}.`, options);
+            }
+        })
             .catch((err) => {
-                printError(`Failed to delete session: ${err.status} ${err.message}`, options);
-            });
+            printError(`Failed to delete session: ${err.status} ${err.message}`, options);
+        });
     }
-};
+}

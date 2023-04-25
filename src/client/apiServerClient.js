@@ -1,8 +1,9 @@
-const _ = require('lodash');
-const { GraphQLClient, gql } = require('graphql-request');
-const { defaultHeaders } = require('./apiutils');
+import _ from 'lodash';
+// eslint-disable-next-line import/no-unresolved
+import { GraphQLClient, gql } from 'graphql-request';
+import { defaultHeaders } from './apiutils.js';
 
-module.exports = class ApiServerClient {
+export default (class ApiServerClient {
     constructor(cortexUrl) {
         this.cortexUrl = cortexUrl;
         this.endpoint = `${cortexUrl}/fabric/v4/graphql`;
@@ -34,7 +35,7 @@ module.exports = class ApiServerClient {
      */
     async listProjects(token, filter, limit, skip, sort) {
         const fetched = await this._client(token)
-                .request(gql`{
+            .request(gql`{
                 projects ( filter: "${filter}", limit: "${limit}",  skip: "${skip}",  sort: "${sort}" ) { name, title, description} }
         `);
         return _.get(fetched, 'projects', []);
@@ -51,7 +52,6 @@ module.exports = class ApiServerClient {
             .request(gql`mutation NewProject($input: CreateProjectInput!) { createProject(input: $input){name}}`, { input: projDef });
         return _.get(fetched, 'createProject', {});
     }
-
 
     /**
      * Delete project using graphql
@@ -116,4 +116,4 @@ module.exports = class ApiServerClient {
             .request(gql`{ modelByName ( project: "${projectId}", name: "${name}" ) { name, description, model_mode, source, status, title, type } }`);
         return _.get(fetched, 'modelByName', []);
     }
-};
+});

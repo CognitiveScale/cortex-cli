@@ -1,5 +1,11 @@
+import debugSetup from 'debug';
+import { loadProfile } from '../config.js';
+import Users from '../client/users.js';
+import {
+ printSuccess, printError, printWarning, filterObject, handleTable, getFilteredOutput,
+} from './utils.js';
 /*
- * Copyright 2020 Cognitive Scale, Inc. All Rights Reserved.
+ * Copyright 2023 Cognitive Scale, Inc. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the “License”);
  * you may not use this file except in compliance with the License.
@@ -13,14 +19,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-const debug = require('debug')('cortex:cli');
-const { loadProfile } = require('../config');
-const Users = require('../client/users');
-const {
- printSuccess, printError, filterObject, handleTable,
-    getFilteredOutput,
-} = require('./utils');
-
+const debug = debugSetup('cortex:cli');
 function createGrant(options) {
     return {
         project: options.project,
@@ -29,8 +28,7 @@ function createGrant(options) {
         effect: options.deny ? 'deny' : 'allow',
     };
 }
-
-module.exports.UserGrantCommand = class {
+export const UserGrantCommand = class {
     constructor(program) {
         this.program = program;
     }
@@ -44,9 +42,8 @@ module.exports.UserGrantCommand = class {
             if (deleteFlag) {
                 return client.removeGrantFromUser(token, body);
             }
-                return client.createGrantForUser(token, body);
+            return client.createGrantForUser(token, body);
         };
-
         call(options.delete, profile.token, form).then((response) => {
             if (response.success) {
                 const result = filterObject(response.result, options);
@@ -57,13 +54,12 @@ module.exports.UserGrantCommand = class {
             }
         })
             .catch((err) => {
-                const func = (options.delete) ? 'delete' : 'create';
-                printError(`Failed to ${func} grant for user : ${err.status} ${err.message}`, options);
-            });
+            const func = (options.delete) ? 'delete' : 'create';
+            printError(`Failed to ${func} grant for user : ${err.status} ${err.message}`, options);
+        });
     }
 };
-
-module.exports.UserDeleteCommand = class {
+export const UserDeleteCommand = class {
     constructor(program) {
         this.program = program;
     }
@@ -71,7 +67,6 @@ module.exports.UserDeleteCommand = class {
     async execute(user, options) {
         const profile = await loadProfile(options.profile);
         debug('%s.deleteServiceUser(%s)', profile.name, user);
-
         const client = new Users(profile.url, user);
         client.deleteServiceUser(profile.token, user).then((response) => {
             if (response.success) {
@@ -82,12 +77,11 @@ module.exports.UserDeleteCommand = class {
             }
         })
             .catch((err) => {
-                printError(`Failed to delete user : ${err.status} ${err.message}`, options);
-            });
+            printError(`Failed to delete user : ${err.status} ${err.message}`, options);
+        });
     }
 };
-
-module.exports.UserCreateCommand = class {
+export const UserCreateCommand = class {
     constructor(program) {
         this.program = program;
     }
@@ -95,7 +89,6 @@ module.exports.UserCreateCommand = class {
     async execute(user, options) {
         const profile = await loadProfile(options.profile);
         debug('%s.createServiceUser(%s)', profile.name, user);
-
         const client = new Users(profile.url, user);
         client.createServiceUser(profile.token, user).then((response) => {
             if (response.success) {
@@ -106,12 +99,11 @@ module.exports.UserCreateCommand = class {
             }
         })
             .catch((err) => {
-                printError(`Failed to create user : ${err.status} ${err.message}`, options);
-            });
+            printError(`Failed to create user : ${err.status} ${err.message}`, options);
+        });
     }
 };
-
-module.exports.UserListCommand = class {
+export const UserListCommand = class {
     constructor(program) {
         this.program = program;
     }
@@ -119,7 +111,6 @@ module.exports.UserListCommand = class {
     async execute(options) {
         const profile = await loadProfile(options.profile);
         debug('%s.listServiceUsers', profile.name);
-
         const client = new Users(profile.url, 'self');
         client.listServiceUsers(profile.token).then((response) => {
             if (response.success) {
@@ -135,44 +126,47 @@ module.exports.UserListCommand = class {
             }
         })
             .catch((err) => {
-                printError(`Failed to list service users : ${err.status} ${err.message}`, options);
-            });
+            printError(`Failed to list service users : ${err.status} ${err.message}`, options);
+        });
     }
 };
-
-module.exports.UserDescribeCommand = class {
+export const UserDescribeCommand = class {
     constructor(program) {
         this.program = program;
     }
 
-    async execute(options) {
+    async execute(cliUser, options) {
         const profile = await loadProfile(options.profile);
         debug('%s.describeForUser(%s)', profile.name, options.user || 'self');
-
         const flags = [];
-
         if (options.grants) {
             flags.push('grants');
         }
         if (options.roles) {
             flags.push('roles');
         }
-        const client = new Users(profile.url, options.user, flags);
-        client.describeUser(profile.token).then((response) => {
+        if (options?.user !== undefined && cliUser !== undefined) {
+            printError('Bad options: --user <user> and <user> are mutually exclusive,', options);
+        }
+        const user = options?.user ?? cliUser;
+        if (user === undefined) {
+            printWarning('Defaulting to user from cortex profile', options);
+        }
+        const client = new Users(profile.url, user, flags);
+        try {
+            const response = await client.describeUser(profile.token);
             if (response.success) {
                 const result = filterObject(response.result, options);
                 printSuccess(JSON.stringify(result, null, 2), options);
             } else {
                 printError(`Failed to describe user : ${response.message}`, options);
             }
-        })
-            .catch((err) => {
-                printError(`Failed to describe user : ${err.status} ${err.message}`, options);
-            });
+        } catch (err) {
+            printError(`Failed to describe user : ${err.status} ${err.message}`, options);
+        }
     }
 };
-
-module.exports.UserProjectAssignCommand = class {
+export const UserProjectAssignCommand = class {
     constructor(program) {
         this.program = program;
     }
@@ -180,7 +174,6 @@ module.exports.UserProjectAssignCommand = class {
     async execute(project, options) {
         const profile = await loadProfile(options.profile);
         debug('%s.assignUserProject(%s)', profile.name, project);
-
         const client = new Users(profile.url, null);
         const call = (deleteFlag, token, assignProject, users) => {
             if (deleteFlag) {
@@ -188,7 +181,6 @@ module.exports.UserProjectAssignCommand = class {
             }
             return client.addUsersToProject(token, assignProject, users);
         };
-
         call(options.delete, profile.token, project, options.users).then((response) => {
             if (response.success) {
                 const result = filterObject(response.result, options);
@@ -199,8 +191,8 @@ module.exports.UserProjectAssignCommand = class {
             }
         })
             .catch((err) => {
-                const func = (options.delete) ? 'unassign' : 'assign';
-                printError(`Failed to ${func} users from project : ${err.status} ${err.message}`, options);
-            });
+            const func = (options.delete) ? 'unassign' : 'assign';
+            printError(`Failed to ${func} users from project : ${err.status} ${err.message}`, options);
+        });
     }
 };
