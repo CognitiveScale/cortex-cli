@@ -27,7 +27,7 @@ const CORTEX_CLI_AUTH_USER = 'cortex-cli';
 async function getPasswordHeaded() {
     return keytar.getPassword(CORTEX_CLI_AUTH_ID, CORTEX_CLI_AUTH_USER);
 }
-function readLocaFile() {
+function readLocalFile() {
     const dataFile = path.join(configDir(), 'cache.dat');
     // nothing stored
     if (!existsSync(dataFile)) return {};
@@ -36,14 +36,14 @@ function readLocaFile() {
     return JSON.parse(decoded);
 }
 function getPasswordHeadless() {
-    return _.get(readLocaFile(), [CORTEX_CLI_AUTH_ID, CORTEX_CLI_AUTH_USER]);
+    return _.get(readLocalFile(), [CORTEX_CLI_AUTH_ID, CORTEX_CLI_AUTH_USER]);
 }
 async function storePasswordHeaded(val) {
     await keytar.setPassword(CORTEX_CLI_AUTH_ID, CORTEX_CLI_AUTH_USER, val);
 }
 function storePasswordHeadless(val) {
     const dataFile = path.join(configDir(), 'cache.dat');
-    const originaldata = readLocaFile();
+    const originaldata = readLocalFile();
     const updated = _.set(originaldata, [CORTEX_CLI_AUTH_ID, CORTEX_CLI_AUTH_USER], val);
     writeFileSync(dataFile, Buffer.from(JSON.stringify(updated)).toString('base64'));
 }
