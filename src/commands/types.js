@@ -5,7 +5,7 @@ import relativeTime from 'dayjs/plugin/relativeTime.js';
 import { loadProfile } from '../config.js';
 import Catalog from '../client/catalog.js';
 import {
- LISTTABLEFORMAT, filterObject, printExtendedLogs, handleListFailure, getFilteredOutput, 
+ LISTTABLEFORMAT, filterObject, printExtendedLogs, handleListFailure, getFilteredOutput, handleDeleteFailure,
 
  printSuccess, printError, parseObject, handleTable, 
 } from './utils.js';
@@ -102,9 +102,8 @@ export class DeleteTypeCommand {
             if (response.success) {
                 const result = filterObject(response.type, options);
                 printSuccess(JSON.stringify(result, null, 2), options);
-            } else {
-                printError(`Failed to delete type ${typeName}: ${response.message}`, options);
-            }
+            }  
+            return handleDeleteFailure(response, options, 'Types');
         })
             .catch((err) => {
             printError(`Failed to delete type ${typeName}: ${err.status} ${err.message}`, options);
