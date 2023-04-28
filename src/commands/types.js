@@ -101,8 +101,8 @@ export class DeleteTypeCommand {
         catalog.deleteType(options.project || profile.project, profile.token, typeName).then((response) => {
             if (response.success) {
                 const result = filterObject(response.type, options);
-                printSuccess(JSON.stringify(result, null, 2), options);
-            }  
+                return printSuccess(JSON.stringify(result, null, 2), options);
+           }
             return handleDeleteFailure(response, options, 'Types');
         })
             .catch((err) => {
