@@ -349,13 +349,13 @@ class ProfileV5 {
         this.audience = audience;
         this.project = project;
         this.registries = registries || {
-            'Cortex Private Registry': {
+            'Cortex Private Registry (generated from URL)': {
                 url: new URL(url).hostname.replace('api', 'private-registry'),
                 name: 'Cortex Private Registry',
                 isCortex: true,
             },
         };
-        this.currentRegistry = currentRegistry || 'Cortex Private Registry';
+        this.currentRegistry = currentRegistry || 'Cortex Private Registry (generated from URL)';
         this.templateConfig = templateConfig || templateConfigV4 || {
             repo: 'CognitiveScale/cortex-code-templates',
             branch: 'main',

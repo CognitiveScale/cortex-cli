@@ -1,7 +1,8 @@
 import _ from 'lodash';
 import debugSetup from 'debug';
 import { got, defaultHeaders } from './apiutils.js';
-import { constructError, callMe, checkProject } from '../commands/utils.js';
+import { constructError, callMe, checkProject, printWarning } from '../commands/utils.js';
+import dockerCli from './dockerClient.js';
 
 const debug = debugSetup('cortex:cli');
 export default class Actions {
@@ -129,18 +130,23 @@ export default class Actions {
     }
 
     async _maybePushDockerImage(image, token, pushDocker) {
+        // This is a helper to push a local or remote image to a private registry
         if (!image || !pushDocker) {
             return image;
         }
         const registryUrl = await this._cortexRegistryUrl(token);
         const imageName = image.replace(/.+\..+\//, '');
-        // const { payload } = jwtVerify(token);
-        // TODO fix path
         const cortexImageUrl = this._cortexRegistryImagePath(registryUrl, imageName, '');
-        await callMe(`docker login -u cli --password ${token} ${registryUrl}`);
-        await callMe(`docker pull ${image} || echo "Docker pull failed using local image"`);
-        await callMe(`docker tag ${image} ${cortexImageUrl}`);
-        await callMe(`docker push ${cortexImageUrl}`);
+        // TODO support non cortex registry !!
+        await dockerCli().login(registryUrl,'cli', token);
+        try {
+            await dockerCli()
+                .pull(image);
+        } catch (err) {
+            printWarning(`Docker pull failed using local image: ${err.message}`);
+        }
+        await dockerCli().tag(image, cortexImageUrl);
+        await dockerCli().push(cortexImageUrl);
         return cortexImageUrl;
     }
 }

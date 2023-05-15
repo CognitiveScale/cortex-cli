@@ -107,8 +107,10 @@ export function getSkillInfo(target) {
 }
 export async function getCurrentRegistry(profile = undefined) {
     const regProfile = profile || await loadProfile(); // old behavior was always getting "current" profile
-    // use internal name instead of key/label
-    return Object.values(regProfile.registries).find((r) => r.name = regProfile.currentRegistry);
+    if (!regProfile?.currentRegistry){
+        return undefined;
+    }
+    return regProfile?.registries[regProfile?.currentRegistry];
 }
 export async function buildImageTag(profile, actionName) {
     if (actionName.includes('/')) {

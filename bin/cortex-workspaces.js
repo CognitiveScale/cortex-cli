@@ -44,6 +44,7 @@ export function create() {
         .command('build [folder]')
         .option('--profile <profile>', 'The profile to use')
         .option('--color [boolean]', 'Turn on/off colors', 'true')
+        .option('--dockerCli <string>', 'Specify the docker client, the following are supported [docker, nerdctl, podman]. If not specified the cli will scan the PATH for available clients')
         .option('--skill <skill name>', 'Build only the specified skill')
         .description('Builds all skills in the workspace, or optionally only the specified skill')
         .action((folder, options) => {
@@ -58,6 +59,7 @@ export function create() {
         .option('--profile <profile>', 'The profile to use')
         .option('--project <project name>', 'Publish to the specified project')
         .option('--color [boolean]', 'Turn on/off colors', 'true')
+        .option('--dockerCli <string>', 'Specify the docker client, the following are supported [docker, nerdctl, podman]. If not specified the cli will scan the PATH for available clients')
         .option('--skip-push', 'Don\'t push images to docker registry')
         .option('--skill <skill name>', 'Publish only the specified skill')
         .description('Publishes all skills and resources in the workspace')

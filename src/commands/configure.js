@@ -108,6 +108,7 @@ export const DescribeProfileCommand = class {
         printSuccess(`Username: ${profile.username}`, options);
         printSuccess(`JWK: ${JSON.stringify(profile.jwk)}`, options);
         printSuccess(`Project: ${profile.project || 'undefined'}`, options);
+        printSuccess(`Container Registry:\n\tName: ${Object.keys(profile.registries)[0]}\n\tURL: ${Object.values(profile.registries)[0]?.url || 'undefined'}`, options);
     }
 };
 export const ListProfilesCommand = class {
