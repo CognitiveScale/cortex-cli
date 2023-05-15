@@ -14,9 +14,10 @@
  * limitations under the License.
  */
 import debugSetup from 'debug';
-import URL from 'url-parse';
-import { printSuccess, printError, callMe } from './utils.js';
+import { printSuccess, printError } from './utils.js';
 import { generateJwt, loadProfile } from '../config.js';
+import { getCurrentRegistry } from './workspaces/workspace-utils.js';
+import dockerClient from '../client/dockerClient.js';
 
 const debug = debugSetup('cortex:cli');
 export default class DockerLoginCommand {
@@ -28,17 +29,17 @@ export default class DockerLoginCommand {
         const profile = await loadProfile(options.profile);
         const ttl = options.ttl || '14d';
         try {
-            // First try to see if we have of registries from /v4/info,  grab the first one with isCortex == true
-            let registryUrl = Object.values(profile?.registries ?? {}).find((v) => v?.isCortex === true)?.url;
-            // If not found try to guess the url, assuming our recommended install api.<my dns>  and private-registry.<my dns>
+            // First try to see if we have of registries in out profile
+            const registry = await getCurrentRegistry(profile);
+            const registryUrl = registry?.url;
             if (registryUrl === undefined) {
-                registryUrl = (new URL(profile.url)).hostname.replace('api', 'private-registry');
-                printWarning(`Using default docker registry url: ${registryUrl}`);
+                printError(`No docker registry configured in current profile ${profile.name}`, options, true);
             }
             const jwt = await generateJwt(profile, ttl);
-            const command = `docker login -u cli --password ${jwt} ${registryUrl}`;
-            debug('%s.executeDockerLogin(%s)', profile.name, command);
-            await callMe(command);
+//            const command = `docker login -u cli --password ${jwt} ${registryUrl}`;
+//            debug('%s.executeDockerLogin(%s)', profile.name, command);
+//            await callMe(command);
+            await dockerClient(options).login(registryUrl, 'cli', jwt);
             printSuccess(JSON.stringify('Login Succeeded', null, 2), options);
         } catch (err) {
             printError(`Failed to docker login: ${err.message || err}`, options);

@@ -78,7 +78,7 @@ function _extractValues(fields, obj) {
  * @returns {Promise<*>}
  */
 // eslint-disable-next-line require-await
-export async function callMe(commandStr) {
+export async function callMe(commandStr, stdoutHandler) {
     return new Promise((resolve, reject) => {
         const proc = exec(commandStr, (err, stdout) => {
             if (err) {
@@ -87,8 +87,18 @@ export async function callMe(commandStr) {
                 resolve(stdout);
             }
         });
-        // Pipe stdout to stderr in real time:
-        proc.stdout.pipe(process.stderr);
+        if (stdoutHandler) {
+            proc.stdout.on('data', (data) => {
+                stdoutHandler(data);
+            });
+            proc.stderr.on('data', (data) => {
+                stdoutHandler(data);
+            });
+
+        } else {
+            // Pipe stdout to stderr in real time:
+            proc.stderr.pipe(process.stderr);
+        }
     });
 }
 function round(value, precision) {
