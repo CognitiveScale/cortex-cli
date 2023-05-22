@@ -90,6 +90,7 @@ export function create() {
         .alias('get')
         .option('--no-compat', 'Ignore API compatibility checks')
         .option('--color [boolean]', 'Turn on/off colors for JSON output.', 'true')
+        .option('-o, --output <json|yaml|openapi>', 'Format output as yaml or k8s resource')
         .option('--profile <profile>', 'The profile to use')
         .option('--project <project>', 'The project to use')
         .option('--json [searchPath]', QUERY_JSON_HELP_TEXT)

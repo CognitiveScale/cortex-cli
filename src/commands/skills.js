@@ -125,7 +125,7 @@ export class DescribeSkillCommand {
         const catalog = new Catalog(profile.url);
         try {
             const response = await catalog.describeSkill(options.project || profile.project, profile.token, skillName, options.verbose, options.output);
-            if (_.get(options, 'output', 'json').toLowerCase() === 'json') return getFilteredOutput(response, options);
+            if ((options?.output ?? 'json').toLowerCase() === 'json') return getFilteredOutput(response, options);
             return printSuccess(response, options);
         } catch (err) {
             return printError(`Failed to describe skill ${skillName}: ${err.status} ${err.message}`, options);

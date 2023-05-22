@@ -10,7 +10,7 @@ import { fileURLToPath } from 'node:url';
 import * as jmsepath from 'jmespath';
 import path from 'node:path';
 import yaml from 'js-yaml';
-import { exec } from 'child_process';
+import { exec } from 'node:child_process';
 
 const debug = debugSetup('cortex:cli');
 const MAX_NAME_LENGTH = 20;

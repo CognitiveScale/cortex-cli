@@ -4,6 +4,7 @@ import _ from 'lodash';
 import dayjs from 'dayjs';
 import relativeTime from 'dayjs/plugin/relativeTime.js';
 import { loadProfile } from '../config.js';
+// eslint-disable-next-line import/no-named-as-default
 import Catalog from '../client/catalog.js';
 import Agents from '../client/agents.js';
 import {
@@ -64,30 +65,25 @@ export class DescribeAgentCommand {
         const profile = await loadProfile(options.profile);
         const catalog = new Catalog(profile.url);
         if (options.versions) {
-            debug('%s.executeDescribeAgentVersions(%s)', profile.name, agentName);
-            catalog.describeAgentVersions(options.project || profile.project, profile.token, agentName).then((response) => {
+            try {
+                debug('%s.executeDescribeAgentVersions(%s)', profile.name, agentName);
+                const response = await catalog.describeAgentVersions(options.project || profile.project, profile.token, agentName);
                 if (response.success) {
-                    getFilteredOutput(response.agent, options);
-                } else {
-                    printError(`Failed to describe agent versions ${agentName}: ${response.message}`, options);
+                    return getFilteredOutput(response.agent, options);
                 }
-            })
-                .catch((err) => {
-                printError(`Failed to describe agent versions ${agentName}: ${err.status} ${err.message}`, options);
-            });
+                return printError(`Failed to describe agent versions ${agentName}: ${response.message}`, options);
+            } catch (err) {
+                return printError(`Failed to describe agent versions ${agentName}: ${err.status} ${err.message}`, options);
+            }
         } else {
             debug('%s.executeDescribeAgent(%s)', profile.name, agentName);
-            catalog.describeAgent(options.project || profile.project, profile.token, agentName, options.verbose).then((response) => {
-                if (response.success) {
-                    const result = filterObject(response.agent, options);
-                    printSuccess(JSON.stringify(result, null, 2), options);
-                } else {
-                    printError(`Failed to describe agent ${agentName}: ${response.message}`, options);
-                }
-            })
-                .catch((err) => {
-                printError(`Failed to describe agent ${agentName}: ${err.status} ${err.message}`, options);
-            });
+            try {
+                const response = await catalog.describeAgent(options.project || profile.project, profile.token, agentName, options);
+                if ((options?.output ?? 'json').toLowerCase() === 'json') return getFilteredOutput(response, options);
+                return printSuccess(response, options);
+            } catch (err) {
+                return printError(`Failed to describe agent ${agentName}: ${err.status} ${err.message}`, options);
+            }
         }
     }
 }
@@ -317,13 +313,13 @@ export class DescribeAgentSnapshotCommand {
         const profile = await loadProfile(options.profile);
         debug('%s.describeAgentSnapshot(%s)', profile.name, snapshotId);
         const agents = new Agents(profile.url);
-        const output = _.get(options, 'output', 'json');
+        const output = options?.output?.toLowerCase() ?? 'json';
         try {
             const response = await agents.describeAgentSnapshot(options.project || profile.project, profile.token, snapshotId, output);
             if (response.success === false) {
                 return printError(`Failed to describe agent snapshot ${snapshotId}: ${response.message}`);
             }
-            if (output.toLowerCase() === 'json') {
+            if (output === 'json') {
                 const result = filterObject(JSON.parse(response), options);
                 return printSuccess(JSON.stringify(result, null, 2), options);
             }
