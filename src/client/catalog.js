@@ -18,7 +18,6 @@ import debugSetup from 'debug';
 import FormData from 'form-data';
 import http from 'https';
 import fs from 'node:fs';
-import urljoin from 'url-join';
 import { got, defaultHeaders } from './apiutils.js';
 import {
  constructError, formatAllServiceInputParameters, checkProject, printSuccess, printError, printTable, 
@@ -180,24 +179,17 @@ export default class Catalog {
             .catch((err) => constructError(err));
     }
 
-    async describeAgent(projectId, token, agentName, options) {
+    describeAgent(projectId, token, agentName, verbose = false, output = 'json') {
         checkProject(projectId);
-        let endpoint = `${this.endpoints.agents(projectId)}/${encodeURIComponent(agentName)}`;
-        if (options?.output?.toLocaleLowerCase() === 'openapi') {
-            endpoint = urljoin(endpoint, 'openapi.json');
-        }
+        const endpoint = `${this.endpoints.agents(projectId)}/${encodeURIComponent(agentName)}`;
         debug('describeAgent(%s) => %s', agentName, endpoint);
-        try {
-            const res = await got
-                .get(endpoint, {
-                    headers: defaultHeaders(token),
-                    searchParams: { verbose: options?.verbose, output: options?.output },
-                });
-            if (options?.output?.toLocaleLowerCase() === 'yaml') return res.body;
-            return res.json;
-        } catch (err) {
-            return constructError(err);
-        }
+        const res = got
+            .get(endpoint, {
+                headers: defaultHeaders(token),
+                searchParams: { verbose, output },
+            });
+        if (output?.toLocaleLowerCase() === 'json') return res.json();
+        return res.text();
     }
 
     async describeAgentVersions(projectId, token, agentName) {

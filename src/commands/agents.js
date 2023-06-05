@@ -64,7 +64,10 @@ export class DescribeAgentCommand {
     async execute(agentName, options) {
         const profile = await loadProfile(options.profile);
         const catalog = new Catalog(profile.url);
-        if (options.versions) {
+        const {
+             versions, verbose, output, project,
+        } = options;
+        if (versions) {
             try {
                 debug('%s.executeDescribeAgentVersions(%s)', profile.name, agentName);
                 const response = await catalog.describeAgentVersions(options.project || profile.project, profile.token, agentName);
@@ -78,8 +81,8 @@ export class DescribeAgentCommand {
         } else {
             debug('%s.executeDescribeAgent(%s)', profile.name, agentName);
             try {
-                const response = await catalog.describeAgent(options.project || profile.project, profile.token, agentName, options);
-                if ((options?.output ?? 'json').toLowerCase() === 'json') return getFilteredOutput(response, options);
+                const response = await catalog.describeAgent(project || profile.project, profile.token, agentName, verbose, output);
+                if ((output ?? 'json').toLowerCase() === 'json') return getFilteredOutput(response, options);
                 return printSuccess(response, options);
             } catch (err) {
                 return printError(`Failed to describe agent ${agentName}: ${err.status} ${err.message}`, options);
