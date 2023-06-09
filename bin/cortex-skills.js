@@ -50,6 +50,7 @@ export function create() {
         .option('--color [boolean]', 'Turn on/off colors for JSON output.', 'true')
         .option('--profile <profile>', 'The profile to use')
         .option('--project <project>', 'The project to use')
+        .option('-f --output-file <file>', 'Write output to file instead of stdout')
         .option('-o, --output <json|yaml|k8s|openapi>', 'Format output as yaml or k8s resource')
         .option('--json [searchPath]', QUERY_JSON_HELP_TEXT)
         .option('--query <query>', `[DEPRECATION WARNING] ${QUERY_JSON_HELP_TEXT}`)
