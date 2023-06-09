@@ -20,7 +20,7 @@ import {
     printError,
     printExtendedLogs,
     printSuccess,
-    printTable,
+    printTable, writeOutput,
 } from './utils.js';
 
 const debug = debugSetup('cortex:cli');
@@ -72,7 +72,7 @@ export class DescribeAgentCommand {
                 debug('%s.executeDescribeAgentVersions(%s)', profile.name, agentName);
                 const response = await catalog.describeAgentVersions(options.project || profile.project, profile.token, agentName);
                 if (response.success) {
-                    return getFilteredOutput(response.agent, options);
+                    return writeOutput(getFilteredOutput(response.agent, options), options);
                 }
                 return printError(`Failed to describe agent versions ${agentName}: ${response.message}`, options);
             } catch (err) {
@@ -83,7 +83,7 @@ export class DescribeAgentCommand {
             try {
                 const response = await catalog.describeAgent(project || profile.project, profile.token, agentName, verbose, output);
                 if ((output ?? 'json').toLowerCase() === 'json') return getFilteredOutput(response, options);
-                return printSuccess(response, options);
+                return writeOutput(response, options);
             } catch (err) {
                 return printError(`Failed to describe agent ${agentName}: ${err.status} ${err.message}`, options);
             }
