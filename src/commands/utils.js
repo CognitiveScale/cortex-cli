@@ -15,6 +15,7 @@ import { exec } from 'node:child_process';
 const debug = debugSetup('cortex:cli');
 const MAX_NAME_LENGTH = 20;
 const space = /\s+/;
+const validNameRegex = /^[a-zA-Z][a-zA-Z0-9_-]*[a-zA-Z0-9]$/;
 const specialCharsExceptHyphen = /[^A-Za-z0-9- ]/;
 const beginAndEndWithHyphen = /^[-]+|[-]+$/;
 const validationErrorMessage = 'Must be 20 characters or less, contain only lowercase a-z, 0-9, or -, and cannot begin or end with -';
@@ -331,19 +332,14 @@ export const generateNameFromTitle = (title) => title.replace(specialCharsExcept
     .replace(beginAndEndWithHyphen, '')
     .toLowerCase();
 export const hasUppercase = (s) => /[A-Z]/.test(s);
-export const validateName = (name) => (space.test(name)
-    || specialCharsExceptHyphen.test(name)
-    || beginAndEndWithHyphen.test(name)
-    || (!name)
-    || (name && name.length > MAX_NAME_LENGTH)
-    || hasUppercase(name)
+export const validateName = (name) => (validNameRegex.test(name) && (name.length <= MAX_NAME_LENGTH)
     ? {
-        status: false,
-        message: name ? validationErrorMessage : nameRequirementMessage,
-    }
-    : {
         status: true,
         message: '',
+    }
+    : {
+        status: false,
+        message: name ? validationErrorMessage : nameRequirementMessage,
     });
 export const handleTable = (spec, data, transformer, noDataMessage) => {
     if (!data || data.length === 0) {
