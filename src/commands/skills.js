@@ -7,7 +7,21 @@ import { loadProfile } from '../config.js';
 import Catalog from '../client/catalog.js';
 import Agent from '../client/agents.js';
 import {
- printSuccess, printError, printWarning, filterObject, parseObject, printTable, formatValidationPath, LISTTABLEFORMAT, isNumeric, handleTable, printExtendedLogs, handleListFailure, handleDeleteFailure, getFilteredOutput, 
+    printSuccess,
+    printError,
+    printWarning,
+    filterObject,
+    parseObject,
+    printTable,
+    formatValidationPath,
+    LISTTABLEFORMAT,
+    isNumeric,
+    handleTable,
+    printExtendedLogs,
+    handleListFailure,
+    handleDeleteFailure,
+    getFilteredOutput,
+    writeOutput,
 } from './utils.js';
 
 const debug = debugSetup('cortex:cli');
@@ -121,12 +135,15 @@ export class DescribeSkillCommand {
 
     async execute(skillName, options) {
         const profile = await loadProfile(options.profile);
+        const {
+            verbose, output, project,
+        } = options;
         debug('%s.executeDescribeSkill(%s)', profile.name, skillName);
         const catalog = new Catalog(profile.url);
         try {
-            const response = await catalog.describeSkill(options.project || profile.project, profile.token, skillName, options.verbose, options.output);
-            if (_.get(options, 'output', 'json').toLowerCase() === 'json') return getFilteredOutput(response, options);
-            return printSuccess(response, options);
+            const response = await catalog.describeSkill(project || profile.project, profile.token, skillName, verbose, output);
+            if ((options?.output ?? 'json').toLowerCase() === 'json') return getFilteredOutput(response, options);
+            return writeOutput(response, options);
         } catch (err) {
             return printError(`Failed to describe skill ${skillName}: ${err.status} ${err.message}`, options);
         }

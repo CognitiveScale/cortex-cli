@@ -31,7 +31,7 @@ const createEndpoints = (baseUri) => ({
     types: (projectId) => `${baseUri}/fabric/v4/projects/${projectId}/types`,
     campaigns: (projectId) => `${baseUri}/fabric/v4/projects/${projectId}/campaigns/`,
 });
-export default (class Catalog {
+export default class Catalog {
     constructor(cortexUrl) {
         this.cortexUrl = cortexUrl;
         this.endpoints = createEndpoints(cortexUrl);
@@ -79,7 +79,7 @@ export default (class Catalog {
                 headers: defaultHeaders(token),
                 searchParams,
             });
-            if (output === 'json') return res.json();
+            if (output.toLocaleLowerCase() === 'json') return res.json();
             return res.text();
         } catch (err) {
             return constructError(err);
@@ -179,30 +179,36 @@ export default (class Catalog {
             .catch((err) => constructError(err));
     }
 
-    describeAgent(projectId, token, agentName, verbose) {
+    describeAgent(projectId, token, agentName, verbose = false, output = 'json') {
         checkProject(projectId);
         const endpoint = `${this.endpoints.agents(projectId)}/${encodeURIComponent(agentName)}`;
         debug('describeAgent(%s) => %s', agentName, endpoint);
-        return got
+        const res = got
             .get(endpoint, {
-            headers: defaultHeaders(token),
-            searchParams: { verbose },
-        }).json()
-            .then((agent) => ({ success: true, agent }))
-            .catch((err) => constructError(err));
+                headers: defaultHeaders(token),
+                searchParams: { verbose, output },
+            });
+        if (output?.toLocaleLowerCase() === 'json') return res.json();
+        return res.text();
     }
 
-    describeAgentVersions(projectId, token, agentName) {
+    async describeAgentVersions(projectId, token, agentName) {
         checkProject(projectId);
         const endpoint = `${this.endpoints.agents(projectId)}/${encodeURIComponent(agentName)}/versions`;
         debug('describeAgentVersions(%s) => %s', agentName, endpoint);
-        return got
-            .get(endpoint, {
-            headers: defaultHeaders(token),
-        })
-            .json()
-            .then((agent) => ({ success: true, agent }))
-            .catch((err) => constructError(err));
+        try {
+            const agent = await got
+                .get(endpoint, {
+                    headers: defaultHeaders(token),
+                })
+                .json();
+            return ({
+                success: true,
+                agent,
+            });
+        } catch (err) {
+            return constructError(err);
+        }
     }
 
     deployAgent(projectId, token, agentName, verbose = false) {
@@ -541,4 +547,4 @@ export default (class Catalog {
             .then((agent) => ({ success: true, agent }))
             .catch((err) => constructError(err));
     }
-});
+}

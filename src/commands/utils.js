@@ -10,15 +10,18 @@ import { fileURLToPath } from 'node:url';
 import * as jmsepath from 'jmespath';
 import path from 'node:path';
 import yaml from 'js-yaml';
-import { exec } from 'child_process';
+import { exec } from 'node:child_process';
 
 const debug = debugSetup('cortex:cli');
 const MAX_NAME_LENGTH = 20;
 const space = /\s+/;
+const validNameRegex = /^[a-zA-Z][a-zA-Z0-9_-]*[a-zA-Z0-9]$/;
 const specialCharsExceptHyphen = /[^A-Za-z0-9- ]/;
 const beginAndEndWithHyphen = /^[-]+|[-]+$/;
 const validationErrorMessage = 'Must be 20 characters or less, contain only lowercase a-z, 0-9, or -, and cannot begin or end with -';
 const nameRequirementMessage = 'You must provide a name for the skill.';
+
+
 export function useColor(options) {
     return boolean(options?.color);
 }
@@ -27,6 +30,21 @@ export const printExtendedLogs = (data, options) => {
     if (options.limit && Array.isArray(data) && data.length === Number(options.limit) && options.limit !== '0') {
         // don't log if showing all the results
         process.stderr.write(`Results limited to ${options.limit} rows\n`);
+    }
+};
+
+export const printSuccess = (message, options) => {
+    if (useColor(options)) {
+        console.log(chalk.green(message));
+    } else {
+        console.log(message);
+    }
+};
+export const printWarning = (message, options) => {
+    if (useColor(options)) {
+        console.warn(chalk.yellow(message));
+    } else {
+        console.warn(message);
     }
 };
 
@@ -123,20 +141,26 @@ export const constructError = (error) => {
         success: false, message: errorText, details, status,
     };
 };
-export const printSuccess = (message, options) => {
-    if (useColor(options)) {
-        console.log(chalk.green(message));
-    } else {
-        console.log(message);
+export function writeToFile(content, filepath, createDir = true) {
+    const dir = path.dirname(filepath);
+    if (createDir && !fs.existsSync(dir)) {
+        fs.mkdirSync(dir, { recursive: true });
     }
-};
-export const printWarning = (message, options) => {
-    if (useColor(options)) {
-        console.warn(chalk.yellow(message));
-    } else {
-        console.warn(message);
+    fs.writeFileSync(filepath, content);
+}
+
+/**
+ * If provided write to file otherwise dump to stdout
+ * @param content
+ * @param opts - expects `outputFile` property or dumps to stdout
+ */
+export function writeOutput(content, opts) {
+    if (opts?.outputFile) {
+        return writeToFile(content, opts.outputFile);
     }
-};
+    return printSuccess(content, opts);
+}
+
 export function filterObject(obj, options) {
     try {
         if (options.query) {
@@ -164,17 +188,10 @@ export const getFilteredOutput = (result, options) => {
     if (filteredResult) {
         // print extended logs iff --query arg is valid
         printExtendedLogs(filteredResult, options);
-        printSuccess(JSON.stringify(filteredResult, null, 2), options);
+        writeOutput(JSON.stringify(filteredResult, null, 2), options);
     }
 };
-export function filterListObject(obj, options) {
-    const { map, pick, partialRight } = _;
-    if (options.query) {
-        debug(`filtering results with query: ${options.query}`);
-        return map(obj, partialRight(pick, options.query.split(',')));
-    }
-    return obj;
-}
+
 export const parseObject = (str) => yaml.load(str);
 export function printTable(spec, objects, transform) {
     const fn = transform ?? ((obj) => obj);
@@ -228,25 +245,7 @@ export const formatAllServiceInputParameters = (allParameters) => {
     }
     return allParameters.map((inputParameters) => formatServiceInputParameter(inputParameters)).join('\n');
 };
-export const countLinesInFile = (filePath) => new Promise((resolve, reject) => {
-    // Bug ... this code ignores the final line that does not end with a new line ... thats why leftovers was added
-    // eslint-disable-next-line implicit-arrow-linebreak
-    let count = 0;
-    let leftovers = true;
-    fs.createReadStream(filePath)
-        .on('error', (e) => reject(e))
-        .on('data', (chunk) => {
-        for (let i = 0; i < chunk.length; i += 1) {
-            if (chunk[i] === 10) {
-                count += 1;
-                leftovers = false;
-            } else {
-                leftovers = true;
-            }
-        }
-    })
-        .on('end', () => (leftovers ? resolve(count + 1) : resolve(count)));
-});
+
 export const formatValidationPath = (p) => {
     let cnt = 0;
     let res = '';
@@ -268,10 +267,11 @@ export const cleanInternalFields = (jsobj) => JSON.stringify(jsobj, (a, obj) => 
     return obj;
 }, 2);
 export const jsonToYaml = (json) => {
+    let res = json;
     if (typeof json === 'string') {
-        json = JSON.parse(json);
+        res = JSON.parse(json);
     }
-    return yaml.dump(json);
+    return yaml.dump(res);
 };
 export const createFileStream = (filepath) => {
     const dir = path.dirname(filepath);
@@ -280,13 +280,7 @@ export const createFileStream = (filepath) => {
     }
     return fs.createWriteStream(filepath);
 };
-export const writeToFile = (content, filepath) => {
-    const dir = path.dirname(filepath);
-    if (!fs.existsSync(dir)) {
-        fs.mkdirSync(dir, { recursive: true });
-    }
-    fs.writeFileSync(filepath, content);
-};
+
 export const fileExists = (filepath) => fs.existsSync(filepath);
 export const checkProject = (projectId) => {
     if (_.isEmpty(projectId)) {
@@ -338,19 +332,14 @@ export const generateNameFromTitle = (title) => title.replace(specialCharsExcept
     .replace(beginAndEndWithHyphen, '')
     .toLowerCase();
 export const hasUppercase = (s) => /[A-Z]/.test(s);
-export const validateName = (name) => (space.test(name)
-    || specialCharsExceptHyphen.test(name)
-    || beginAndEndWithHyphen.test(name)
-    || (!name)
-    || (name && name.length > MAX_NAME_LENGTH)
-    || hasUppercase(name)
+export const validateName = (name) => (validNameRegex.test(name) && (name.length <= MAX_NAME_LENGTH)
     ? {
-        status: false,
-        message: name ? validationErrorMessage : nameRequirementMessage,
-    }
-    : {
         status: true,
         message: '',
+    }
+    : {
+        status: false,
+        message: name ? validationErrorMessage : nameRequirementMessage,
     });
 export const handleTable = (spec, data, transformer, noDataMessage) => {
     if (!data || data.length === 0) {
