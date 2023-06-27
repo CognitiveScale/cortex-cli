@@ -18,7 +18,7 @@ const space = /\s+/;
 const validNameRegex = /^[a-zA-Z][a-zA-Z0-9_-]*[a-zA-Z0-9]$/;
 const specialCharsExceptHyphen = /[^A-Za-z0-9- ]/;
 const beginAndEndWithHyphen = /^[-]+|[-]+$/;
-const validationErrorMessage = 'Must be 20 characters or less, contain only lowercase a-z, 0-9, or -, and cannot begin or end with -';
+const validationErrorMessage = 'Must be 20 characters or less, contain only alphanumeric characters, or -, and cannot begin with a number and cannot begin or end with -';
 const nameRequirementMessage = 'You must provide a name for the skill.';
 
 
