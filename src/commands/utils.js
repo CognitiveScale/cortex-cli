@@ -94,7 +94,6 @@ export async function callMe(commandStr, stdoutHandler) {
             proc.stderr.on('data', (data) => {
                 stdoutHandler(data);
             });
-
         } else {
             // Pipe stdout to stderr in real time:
             proc.stderr.pipe(process.stderr);

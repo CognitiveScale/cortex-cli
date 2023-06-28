@@ -1,8 +1,4 @@
-import _ from 'lodash';
-import path from 'node:path';
-import { globSync } from 'glob';
 import debugSetup from 'debug';
-import Docker from 'dockerode';
 import which from 'which';
 import { callMe, printError } from '../commands/utils.js';
 
@@ -20,11 +16,14 @@ class DockerCli {
     async login(registryUrl, user, password) {
         const command = `docker login -u ${user} --password ${password} ${registryUrl}`;
         debug('%s', command);
-        return callMe(command);
+        await callMe(command, () => {}); // suppress warnings
+        return 'Login Succeeded';
     }
 
     async build(opts) {
-        const { imageTag, dockerFile, contextPath, stdoutHandler } = opts;
+        const {
+ imageTag, dockerFile, contextPath, stdoutHandler, 
+} = opts;
         // TODO --platform=amd64,arm64,darwin/arm64
         const command = `docker build --progress plain --tag ${imageTag} -f ${dockerFile} ${contextPath}`;
         debug('%s', command);
@@ -48,13 +47,26 @@ class DockerCli {
         debug('%s', command);
         return callMe(command);
     }
+
+    async listImages(image = undefined) {
+        const command = `docker images ${image ?? ''} --format json`;
+        const lines = [];
+        await callMe(command, (s) => {
+            if (s.startsWith('{')) lines.push(s);
+        });
+        const str = lines.join();
+        const images = [];
+        str.split('\n').forEach((l) => { if (l.startsWith('{')) images.push(JSON.parse(l)); });
+        return images;
+    }
 }
 
 class NerdCtl {
     async login(registryUrl, user, password) {
         const command = `nerdctl login -u ${user} --password ${password} ${registryUrl}`;
         debug('%s', command);
-        return callMe(command);
+        await callMe(command, () => {}); // suppress warnings
+        return 'Login Succeeded';
     }
 
     async build(opts) {
@@ -66,9 +78,35 @@ class NerdCtl {
         return callMe(command);
     }
 
-    async pull() {}
+    tag(source, target) {
+        const command = `nerdctl tag ${source} ${target}`;
+        debug('%s', command);
+        return callMe(command);
+    }
 
-    async push() {}
+    pull(image) {
+        const command = `nerdctl pull ${image}`;
+        debug('%s', command);
+        return callMe(command);
+    }
+
+    push(image) {
+        const command = `nerdctl push ${image}`;
+        debug('%s', command);
+        return callMe(command);
+    }
+
+    async listImages(image = undefined) {
+        const command = `nerdctl images ${image ?? ''} --format json`;
+        const lines = [];
+        await callMe(command, (s) => {
+            if (s.startsWith('{')) lines.push(s);
+        });
+        const str = lines.join();
+        const images = [];
+        str.split('\n').forEach((l) => { if (l.startsWith('{')) images.push(JSON.parse(l)); });
+        return images;
+    }
 }
 
 class PodMan {
@@ -76,14 +114,41 @@ class PodMan {
         // TODO validate this
         const command = `podman login -u ${user} --password ${password} ${registryUrl}`;
         debug('%s', command);
-        return callMe(command);
+        await callMe(command, () => {}); // suppress warnings
+        return 'Login Succeeded';
     }
 
     async build() {}
 
-    async pull() {}
+    tag(source, target) {
+        const command = `podman tag ${source} ${target}`;
+        debug('%s', command);
+        return callMe(command);
+    }
 
-    async push() {}
+    pull(image) {
+        const command = `podman pull ${image}`;
+        debug('%s', command);
+        return callMe(command);
+    }
+
+    push(image) {
+        const command = `podman push ${image}`;
+        debug('%s', command);
+        return callMe(command);
+    }
+
+    async listImages(image = undefined) {
+        const command = `podman images ${image ?? ''} --format json`;
+        const lines = [];
+        await callMe(command, (s) => {
+            if (s.startsWith('{')) lines.push(s);
+        });
+        const str = lines.join();
+        const images = [];
+        str.split('\n').forEach((l) => { if (l.startsWith('{')) images.push(JSON.parse(l)); });
+        return images;
+    }
 }
 
 const SUPPORTED_CLIS = { docker: DockerCli, nerdctl: NerdCtl, podman: PodMan };
@@ -117,8 +182,7 @@ export default function getClient(opts = {}) {
         return true;
     });
     if (currentClient === undefined) {
-        debug('No docker client found in PATH using node client');
-        currentClient = new DockerModem();
+        return printError(`No docker client found in PATH, checked ${Object.keys(SUPPORTED_CLIS).join(',')}`);
     }
     return currentClient;
 }
