@@ -33,9 +33,7 @@ export default (class Agents {
             headers: defaultHeaders(token),
             json: params,
             searchParams: { sync: options.sync, scheduleName: options.scheduleName, scheduleCron: options.scheduleCron },
-        }).json()
-            .then((result) => ({ success: true, result }))
-            .catch((err) => constructError(err));
+        }).json();
     }
 
     invokeSkill(projectId, token, skillName, inputName, params, sync) {
@@ -47,9 +45,7 @@ export default (class Agents {
             headers: defaultHeaders(token),
             json: params,
             searchParams: { sync },
-        }).json()
-            .then((result) => ({ success: true, result }))
-            .catch((err) => constructError(err));
+        }).json();
     }
 
     getActivation(projectId, token, activationId, verbose, report) {

@@ -51,10 +51,10 @@ export function create() {
         .option('--profile <profile>', 'The profile to use')
         .option('--project <project>', 'The project to use')
         .option('-f --output-file <file>', 'Write output to file instead of stdout')
-        .option('-o, --output <json|yaml|k8s|openapi>', 'Format output as yaml or k8s resource')
+        .option('-o, --output <json|yaml|k8s|openapi>', 'Format output as yaml or k8s resource', 'json')
         .option('--json [searchPath]', QUERY_JSON_HELP_TEXT)
         .option('--query <query>', `[DEPRECATION WARNING] ${QUERY_JSON_HELP_TEXT}`)
-        .option('--verbose', 'Verbose output')
+        .option('--verbose', 'Verbose output', false)
         .action(withCompatibilityCheck(async (skillName, options) => {
             try {
                 await new DescribeSkillCommand(program).execute(skillName, options);
@@ -67,12 +67,12 @@ export function create() {
         .command('invoke <skillName> <inputName>')
         .description('Invoke a skill')
         .option('--no-compat', 'Ignore API compatibility checks')
-        .option('--color [boolean]', 'Turn on/off colors for JSON output.', 'true')
+        .option('--color [boolean]', 'Turn on/off colors for JSON output.', true)
         .option('--profile <profile>', 'The profile to use')
         .option('--project <project>', 'The project to use')
         .option('--params <params>', 'JSON params to send to the action')
         .option('--params-file <paramsFile>', 'A file containing either JSON or YAML formatted params')
-        .option('--sync', 'Invoke the skill synchronously')
+        .option('--sync', 'Invoke the skill synchronously', false)
         .action(withCompatibilityCheck(async (skillName, inputName, options) => {
             try {
                 await new InvokeSkillCommand(program).execute(skillName, inputName, options);

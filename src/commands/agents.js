@@ -10,7 +10,6 @@ import Agents from '../client/agents.js';
 import {
     LISTTABLEFORMAT,
     filterObject,
-    formatValidationPath,
     getFilteredOutput,
     getQueryOptions,
     handleDeleteFailure,
@@ -20,7 +19,7 @@ import {
     printError,
     printExtendedLogs,
     printSuccess,
-    printTable, writeOutput,
+    printTable, writeOutput, printErrorDetails,
 } from './utils.js';
 
 const debug = debugSetup('cortex:cli');
@@ -114,22 +113,18 @@ export class InvokeAgentServiceCommand {
         }
         debug('params: %o', params);
         const agents = new Agents(profile.url);
-        agents.invokeAgentService(options.project || profile.project, profile.token, agentName, serviceName, params, options).then((response) => {
-            if (response.success) {
-                const result = filterObject(response.result, options);
-                printSuccess(JSON.stringify(result, null, 2), options);
-            } else {
-                printError(`Invocation failed: ${response.status} ${response.message}`, options);
+        try {
+            const response = await agents.invokeAgentService(options.project || profile.project, profile.token, agentName, serviceName, params, options);
+            const result = filterObject(response, options);
+            printSuccess(JSON.stringify(result, null, 2), options);
+        } catch (err) {
+            let message = `Failed to invoke agent service (${err.message})`;
+            if (err?.response?.body) {
+                message = `${message}: ${err.response.body}`;
             }
-        })
-            .catch((err) => {
-            if (err.response && err.response.body) {
-                debug('Raw error response: %o', err.response.body);
-                printError(`Failed to invoke agent service (${err.status} ${err.message}): ${err.response.body.error}`, options);
-            } else {
-                printError(`Failed to invoke agent service: ${err.status} ${err.message}`, options);
-            }
-        });
+            printError(message, options, false);
+            printErrorDetails(err, options);
+        }
     }
 }
 export class GetActivationCommand {
@@ -245,27 +240,22 @@ export class ListServicesCommand {
         const profile = await loadProfile(options.profile);
         debug('%s.listServices(%s)', profile.name, agentName);
         const catalog = new Catalog(profile.url);
-        catalog.listServices(options.project || profile.project, profile.token, agentName, profile).then((response) => {
-            if (response.success) {
-                const result = response.services;
-                // TODO remove --query on deprecation
-                if (options.json || options.query) {
-                    getFilteredOutput(result, options);
-                } else {
-                    printExtendedLogs(result, options);
-                    const tableSpec = [
-                        { column: 'Service Name', field: 'name', width: 25 },
-                        { column: 'Service Endpoint URL', field: 'url', width: 115 },
-                        { column: 'Parameters', field: 'formatted_types', width: 65 },
-                    ];
-                    handleTable(tableSpec, result, null, 'No services found');
-                }
+        try {
+            const result = await catalog.listServices(options.project || profile.project, profile.token, agentName, profile);
+            if (options.json || options.query) {
+                getFilteredOutput(result, options);
             } else {
-                printError(`Failed to return agent service information: ${agentName}: ${response.message}`, options);
+                printExtendedLogs(result, options);
+                const tableSpec = [
+                    { column: 'Service Name', field: 'name', width: 25 },
+                    { column: 'Service Endpoint URL', field: 'url', width: 115 },
+                    { column: 'Parameters', field: 'formatted_types', width: 65 },
+                ];
+                handleTable(tableSpec, result, null, 'No services found');
             }
-        }).catch((err) => {
+        } catch (err) {
             printError(`Failed to return agent service information: ${agentName}: ${err.status} ${err.message}`, options);
-        });
+        }
     }
 }
 export class ListAgentSnapshotsCommand {
@@ -456,14 +446,7 @@ export class SaveAgentCommand {
                     printSuccess(`Agent "${agent.name}" saved in project "${project}"`, options);
                 } else if (response.details) {
                     console.log(`Failed to save agent: ${response.status} ${response.message}`);
-                    console.log('The following issues were found:');
-                    const tableSpec = [
-                        { column: 'Path', field: 'path', width: 50 },
-                        { column: 'Message', field: 'message', width: 100 },
-                    ];
-                    response.details.map((d) => d.path = formatValidationPath(d.path));
-                    printTable(tableSpec, response.details);
-                    printError(''); // Just exit
+                    printErrorDetails(response, options);
                 } else {
                     printError(JSON.stringify(response));
                 }

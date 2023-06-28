@@ -8,7 +8,19 @@ import { loadProfile } from '../config.js';
 import Models from '../client/models.js';
 import Experiments from '../client/experiments.js';
 import {
- LISTTABLEFORMAT, RUNTABLEFORMAT, printExtendedLogs, handleListFailure, handleDeleteFailure, printSuccess, printError, filterObject, parseObject, printTable, formatValidationPath, fileExists, handleTable, getFilteredOutput, 
+    LISTTABLEFORMAT,
+    RUNTABLEFORMAT,
+    printExtendedLogs,
+    handleListFailure,
+    handleDeleteFailure,
+    printSuccess,
+    printError,
+    filterObject,
+    parseObject,
+    fileExists,
+    handleTable,
+    getFilteredOutput,
+    printErrorDetails,
 } from './utils.js';
 
 const _ = {
@@ -38,13 +50,7 @@ export class SaveModelCommand {
                 printSuccess(JSON.stringify(_.pick(response.message, ['version', 'created', 'modelId']), null, 2));
             } else if (response.details) {
                 console.log(`Failed to save model: ${response.status} ${response.message}`);
-                console.log('The following issues were found:');
-                const tableSpec = [
-                    { column: 'Path', field: 'path', width: 50 },
-                    { column: 'Message', field: 'message', width: 100 },
-                ];
-                response.details.map((d) => d.path = formatValidationPath(d.path));
-                printTable(tableSpec, response.details);
+                printErrorDetails(response, options);
                 printError(''); // Just exit
             } else {
                 printError(JSON.stringify(response));
@@ -188,15 +194,6 @@ export class RegisterModelCommand {
 
     async execute(modelDefinition, options) {
         const profile = await loadProfile(options.profile);
-        function printErrorDetails(response) {
-            const tableSpec = [
-                { column: 'Path', field: 'path', width: 50 },
-                { column: 'Message', field: 'message', width: 100 },
-            ];
-            response.details.map((d) => d.path = formatValidationPath(d.path));
-            printTable(tableSpec, response.details);
-            printError(''); // Just exit
-        }
         const experiments = new Experiments(profile.url);
         try {
             debug('%s.executeRegisterModel(%s)', profile.name, modelDefinition);
@@ -205,10 +202,7 @@ export class RegisterModelCommand {
             debug('%o', model);
             const saveExperimentResponse = await experiments.saveExperiment(options.project || profile.project, profile.token, model);
             if (!saveExperimentResponse.success) {
-                if (saveExperimentResponse.details) {
-                    printErrorDetails(saveExperimentResponse);
-                    return;
-                }
+                printErrorDetails(saveExperimentResponse, options);
                 printError(JSON.stringify(saveExperimentResponse));
                 return;
             }

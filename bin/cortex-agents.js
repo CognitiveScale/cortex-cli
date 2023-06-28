@@ -91,13 +91,13 @@ export function create() {
         .option('--no-compat', 'Ignore API compatibility checks')
         .option('--color [boolean]', 'Turn on/off colors for JSON output.', 'true')
         .option('-f --output-file <file>', 'Write output to file instead of stdout')
-        .option('-o, --output <json|yaml|openapi>', 'Format output as yaml or k8s resource')
+        .option('-o, --output <json|yaml|openapi>', 'Format output as yaml or k8s resource', 'json')
         .option('--profile <profile>', 'The profile to use')
         .option('--project <project>', 'The project to use')
         .option('--json [searchPath]', QUERY_JSON_HELP_TEXT)
         .option('--query <query>', `[DEPRECATION WARNING] ${QUERY_JSON_HELP_TEXT}`)
         .option('--versions', 'To get list of versions of an agent')
-        .option('--verbose', 'Verbose output')
+        .option('--verbose', 'Verbose output', false)
         .action(withCompatibilityCheck((agentName, options) => {
             try {
                 new DescribeAgentCommand(program).execute(agentName, options);
@@ -110,14 +110,14 @@ export function create() {
         .command('invoke <agentName> <serviceName>')
         .description('Invoke an agent service')
         .option('--no-compat', 'Ignore API compatibility checks')
-        .option('--color [boolean]', 'Turn on/off colors for JSON output.', 'true')
+        .option('--color [boolean]', 'Turn on/off colors for JSON output.', true)
         .option('--profile <profile>', 'The profile to use')
         .option('--project <project>', 'The project to use')
         .option('--params <params>', 'JSON params to send to the action')
         .option('--params-file <paramsFile>', 'A file containing either JSON or YAML formatted params')
         .option('--scheduleName <name>', 'Identifier to uniquely identify an agents schedule, defaults to the agent\'s name')
         .option('--scheduleCron <cron>', 'Schedule agent invoke periodically using a cron schedule string for example: "0 0 * * *", @hourly, or @daily')
-        .option('--sync', 'Invoke the agent synchronously')
+        .option('--sync', 'Invoke the agent synchronously', false)
         .action(withCompatibilityCheck((agentName, serviceName, options) => {
             try {
                 new InvokeAgentServiceCommand(program).execute(agentName, serviceName, options);
