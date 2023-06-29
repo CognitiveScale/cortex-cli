@@ -93,8 +93,6 @@ export default (class Connections {
             .get(endpoint, {
             headers: defaultHeaders(token),
             searchParams: query,
-        }).json()
-            .then((result) => ({ success: true, result }))
-            .catch((err) => constructError(err));
+        }).json();
     }
 });

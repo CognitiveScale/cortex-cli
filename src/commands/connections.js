@@ -7,7 +7,18 @@ import { loadProfile } from '../config.js';
 import Connections from '../client/connections.js';
 import Content from '../client/content.js';
 import {
- printSuccess, printError, filterObject, parseObject, CONNECTIONTABLEFORMAT, fileExists, handleTable, printExtendedLogs, handleListFailure, handleDeleteFailure, getFilteredOutput, 
+    printSuccess,
+    printError,
+    filterObject,
+    parseObject,
+    CONNECTIONTABLEFORMAT,
+    fileExists,
+    handleTable,
+    printExtendedLogs,
+    handleListFailure,
+    handleDeleteFailure,
+    getFilteredOutput,
+    printErrorDetails,
 } from './utils.js';
 
 const debug = debugSetup('cortex:cli');
@@ -160,30 +171,47 @@ export class ListConnectionsTypes {
         debug('%s.listConnectionsTypes()', profile.name);
         const conns = new Connections(profile.url);
         // eslint-disable-next-line consistent-return
-        conns.listConnectionsTypes(profile.token, options.limit, options.skip, options.sort).then((response) => {
-            if (response.success) {
-                const result = response.result.connectionTypes;
-                // TODO remove --query on deprecation
-                if (options.json || options.query) {
-                    getFilteredOutput(result, options);
-                } else {
-                    printExtendedLogs(result, options);
-                    const tableSpec = [
-                        { column: 'Name', field: 'name', width: 50 },
-                        { column: 'Title', field: 'title', width: 25 },
-                        { column: 'Description', field: 'description', width: 50 },
-                        { column: 'Created On', field: 'createdAt', width: 26 },
-                        { column: 'Updated On', field: 'updatedAt', width: 26 },
-                    ];
-                    handleTable(tableSpec, result, null, 'No connection types found');
-                }
+        try {
+            const response = await conns.listConnectionsTypes(profile.token, options.limit, options.skip, options.sort);
+            const result = response?.connectionTypes;
+            // TODO remove --query on deprecation
+            if (options.json || options.query) {
+                getFilteredOutput(result, options);
             } else {
-                return handleListFailure(response, options, 'Connection-types');
-            }
-        })
-            .catch((err) => {
-            debug(err);
-            printError(`Failed to list connection types: ${err.status} ${err.message}`, options);
-        });
+                printExtendedLogs(result, options);
+                const tableSpec = [
+                    {
+                        column: 'Name',
+                        field: 'name',
+                        width: 50,
+                    },
+                    {
+                        column: 'Title',
+                        field: 'title',
+                        width: 25,
+                    },
+                    {
+                        column: 'Description',
+                        field: 'description',
+                        width: 50,
+                    },
+                    {
+                        column: 'Created On',
+                        field: 'createdAt',
+                        width: 26,
+                    },
+                    {
+                        column: 'Updated On',
+                        field: 'updatedAt',
+                        width: 26,
+                    },
+                ];
+                handleTable(tableSpec, result, null, 'No connection types found');
+                }
+            } catch (err) {
+                debug(err);
+                 printError(`Failed to list connection types: ${err.status} ${err.message}`, options, false);
+                 printErrorDetails(err?.response, options);
+        }
     }
 }
