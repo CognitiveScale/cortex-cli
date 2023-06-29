@@ -60,9 +60,7 @@ export default class Catalog {
             .get(this.endpoints.skills(projectId), {
             headers: defaultHeaders(token),
             searchParams: query,
-        }).json()
-            .then((skills) => ({ success: true, ...skills }))
-            .catch((err) => constructError(err));
+        }).json();
     }
 
     describeSkill(projectId, token, skillName, verbose = false, output = 'json') {
@@ -153,17 +151,14 @@ export default class Catalog {
         // TODO removed profile should I use that as the URL ??
         checkProject(projectId);
         debug('listServices() using describeAgent');
-        const response = await this.describeAgent(projectId, token, agentName);
-        if (response.success) {
-            const urlBase = `${this.endpoints.agentinvoke(projectId)}/${encodeURIComponent(agentName)}/services`;
-            debug('listServices(%s) => %s', agentName, urlBase);
-            const servicesList = response.agent.inputs
-                .filter((i) => i.signalType === 'Service')
-                .map((i) => ({ ...i, url: `${urlBase}/${i.name}` }))
-                .map((i) => ({ ...i, formatted_types: formatAllServiceInputParameters(i.parameters) }));
-            return { success: true, services: servicesList };
-        }
-        return response;
+        const agent = await this.describeAgent(projectId, token, agentName);
+        const urlBase = `${this.endpoints.agentinvoke(projectId)}/${encodeURIComponent(agentName)}/services`;
+        debug('listServices(%s) => %s', agentName, urlBase);
+        const servicesList = agent.inputs
+            .filter((i) => i.signalType === 'Service')
+            .map((i) => ({ ...i, url: `${urlBase}/${i.name}` }))
+            .map((i) => ({ ...i, formatted_types: formatAllServiceInputParameters(i.parameters) }));
+        return servicesList;
     }
 
     saveAgent(projectId, token, agentObj) {

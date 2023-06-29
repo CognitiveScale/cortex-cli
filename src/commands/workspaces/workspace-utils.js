@@ -5,6 +5,7 @@ import yaml from 'js-yaml';
 import {
  existsSync, readFileSync, writeFileSync, statSync, 
 } from 'node:fs';
+import urljoin from 'url-join';
 import { readFile } from 'node:fs/promises';
 import ghGot from 'gh-got';
 import { configDir, loadProfile } from '../../config.js';
@@ -106,15 +107,14 @@ export function getSkillInfo(target) {
 }
 export async function getCurrentRegistry(profile = undefined) {
     const regProfile = profile || await loadProfile(); // old behavior was always getting "current" profile
-    return regProfile.registries[regProfile.currentRegistry];
+    // use internal name instead of key/label
+    return Object.values(regProfile.registries).find((r) => r.name = regProfile.currentRegistry);
 }
 export async function buildImageTag(profile, actionName) {
     if (actionName.includes('/')) {
         return actionName;
     }
     const registry = await getCurrentRegistry(profile);
-    if (registry.url.includes('docker.io')) {
-        return path.posix.join(registry.namespace || '', actionName);
-    }
-    return path.posix.join(registry.url, registry.namespace || '', actionName);
+    const namespace = registry.namespace || '';
+    return urljoin(registry.url, namespace, actionName);
 }

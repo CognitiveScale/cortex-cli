@@ -1,13 +1,7 @@
 {
-    "parser": "@babel/eslint-parser",
     "parserOptions": {
-        "requireConfigFile": false,
-        "babelOptions": {
-            "plugins": [
-                "@babel/plugin-syntax-import-assertions"
-            ]
-        },
-        "ecmaVersion": 2022
+        "ecmaVersion": "latest",
+        "sourceType": "module"
     },
     "extends": "airbnb-base",
     "rules": {

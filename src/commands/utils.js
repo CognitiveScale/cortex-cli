@@ -378,4 +378,26 @@ export function readPackageJSON(relPath) {
     return JSON.parse(fs.readFileSync(absPath));
 }
 
+/**
+ * pretty print the 400 response from TSOA router
+ */
+export function printErrorDetails(response, options, exit = true) {
+    let details = response?.details;
+    if (!details && response?.body) {
+        details = parseObject(response?.body)?.details;
+    }
+    if (!details) return; // nothing to process...
+    printWarning('The following issues were found:', options);
+    const tableSpec = [
+        { column: 'Path', field: 'path', width: 50 },
+        { column: 'Message', field: 'message', width: 100 },
+    ];
+    if (_.isArray(details)) {
+        details.map((d) => d.path = formatValidationPath(d.path));
+    } else {
+        details = Object.entries(details).map(([path2, body]) => ({ path: path2, message: body?.message }));
+    }
+    printTable(tableSpec, details);
+    if (exit) printError(''); // Just use this over exit() as tests already stub this call ..
+}
 export { deleteFolderRecursive as deleteFile };
