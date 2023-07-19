@@ -7,7 +7,17 @@ import duration from 'dayjs/plugin/duration.js';
 import { loadProfile } from '../config.js';
 import Experiments from '../client/experiments.js';
 import {
- printSuccess, printError, filterObject, printTable, parseObject, fileExists, formatValidationPath, handleTable, printExtendedLogs, handleListFailure, handleDeleteFailure, getFilteredOutput, 
+    printSuccess,
+    printError,
+    filterObject,
+    parseObject,
+    fileExists,
+    handleTable,
+    printExtendedLogs,
+    handleListFailure,
+    handleDeleteFailure,
+    getFilteredOutput,
+    printErrorDetails,
 } from './utils.js';
 
 const debug = debugSetup('cortex:cli');
@@ -218,14 +228,7 @@ class SaveExperimentCommand {
                 printSuccess('Experiment saved', options);
             } else if (response.details) {
                 console.log(`Failed to save experiment: ${response.status} ${response.message}`);
-                console.log('The following issues were found:');
-                const tableSpec = [
-                    { column: 'Path', field: 'path', width: 50 },
-                    { column: 'Message', field: 'message', width: 100 },
-                ];
-                response.details.map((d) => d.path = formatValidationPath(d.path));
-                printTable(tableSpec, response.details);
-                printError(''); // Just exit
+                printErrorDetails(response, options);
             } else {
                 printError(JSON.stringify(response));
             }
@@ -255,14 +258,7 @@ class CreateRunCommand {
                 printSuccess(JSON.stringify(response.result, null, 2), options);
             } else if (response.details) {
                 console.log(`Failed to create run: ${response.status} ${response.message}`);
-                console.log('The following issues were found:');
-                const tableSpec = [
-                    { column: 'Path', field: 'path', width: 50 },
-                    { column: 'Message', field: 'message', width: 100 },
-                ];
-                response.details.map((d) => d.path = formatValidationPath(d.path));
-                printTable(tableSpec, response.details);
-                printError(''); // Just exit
+                printErrorDetails(response, options);
             } else {
                 printError(JSON.stringify(response));
             }

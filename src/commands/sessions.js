@@ -4,9 +4,9 @@ import debugSetup from 'debug';
 import { loadProfile } from '../config.js';
 import Sessions from '../client/sessions.js';
 import {
- SESSIONTABLEFORMAT, formatValidationPath, handleListFailure, getFilteredOutput, 
+    SESSIONTABLEFORMAT, handleListFailure, getFilteredOutput,
 
- printSuccess, printError, filterObject, parseObject, printTable, handleTable, 
+    printSuccess, printError, filterObject, parseObject, handleTable, printErrorDetails,
 } from './utils.js';
 
 const debug = debugSetup('cortex:cli');
@@ -30,13 +30,7 @@ export class SaveSessionCommand {
                 printSuccess(_.get(response, 'message.message', 'Session saved'), options);
             } else if (response.details) {
                 console.log(`Failed to save session: ${response.status} ${response.message}`);
-                console.log('The following issues were found:');
-                const tableSpec = [
-                    { column: 'Path', field: 'path', width: 50 },
-                    { column: 'Message', field: 'message', width: 100 },
-                ];
-                response.details.map((d) => d.path = formatValidationPath(d.path));
-                printTable(tableSpec, response.details);
+                printErrorDetails(response, options);
                 printError(''); // Just exit
             } else {
                 printError(JSON.stringify(response));

@@ -18,7 +18,7 @@ const space = /\s+/;
 const validNameRegex = /^[a-zA-Z][a-zA-Z0-9_-]*[a-zA-Z0-9]$/;
 const specialCharsExceptHyphen = /[^A-Za-z0-9- ]/;
 const beginAndEndWithHyphen = /^[-]+|[-]+$/;
-const validationErrorMessage = 'Must be 20 characters or less, contain only lowercase a-z, 0-9, or -, and cannot begin or end with -';
+const validationErrorMessage = 'Must be 20 characters or less, contain only alphanumeric characters, or -, and cannot begin with a number and cannot begin or end with -';
 const nameRequirementMessage = 'You must provide a name for the skill.';
 
 
@@ -378,4 +378,26 @@ export function readPackageJSON(relPath) {
     return JSON.parse(fs.readFileSync(absPath));
 }
 
+/**
+ * pretty print the 400 response from TSOA router
+ */
+export function printErrorDetails(response, options, exit = true) {
+    let details = response?.details;
+    if (!details && response?.body) {
+        details = parseObject(response?.body)?.details;
+    }
+    if (!details) return; // nothing to process...
+    printWarning('The following issues were found:', options);
+    const tableSpec = [
+        { column: 'Path', field: 'path', width: 50 },
+        { column: 'Message', field: 'message', width: 100 },
+    ];
+    if (_.isArray(details)) {
+        details.map((d) => d.path = formatValidationPath(d.path));
+    } else {
+        details = Object.entries(details).map(([path2, body]) => ({ path: path2, message: body?.message }));
+    }
+    printTable(tableSpec, details);
+    if (exit) printError(''); // Just use this over exit() as tests already stub this call ..
+}
 export { deleteFolderRecursive as deleteFile };

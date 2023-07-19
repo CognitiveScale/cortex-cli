@@ -12,16 +12,13 @@ import {
     printWarning,
     filterObject,
     parseObject,
-    printTable,
-    formatValidationPath,
     LISTTABLEFORMAT,
     isNumeric,
     handleTable,
     printExtendedLogs,
-    handleListFailure,
     handleDeleteFailure,
     getFilteredOutput,
-    writeOutput,
+    writeOutput, printErrorDetails,
 } from './utils.js';
 
 const debug = debugSetup('cortex:cli');
@@ -72,15 +69,7 @@ export class SaveSkillCommand {
                     printSuccess(`Skill saved: ${JSON.stringify(response.message)}`, options);
                 } else {
                     console.log(`Failed to save skill: ${response.message}`);
-                    if (response.details) {
-                        console.log('The following issues were found:');
-                        const tableSpec = [
-                            { column: 'Path', field: 'path', width: 50 },
-                            { column: 'Message', field: 'message', width: 100 },
-                        ];
-                        response.details.map((d) => d.path = formatValidationPath(d.path));
-                        printTable(tableSpec, response.details);
-                    }
+                    printErrorDetails(response, options);
                     printError(''); // Just exit
                 }
             }));
@@ -102,29 +91,27 @@ export class ListSkillsCommand {
             const status = !_.get(options, 'nostatus', false); // default show status, if nostatus==true status == false
             const shared = !_.get(options, 'noshared', false);
             const response = await catalog.listSkills(options.project || profile.project, profile.token, { status, shared }, options.filter, options.limit, options.skip, options.sort);
-            if (response.success) {
-                let result = response.skills;
-                const tableFormat = LISTTABLEFORMAT;
-                if (options.nostatus === undefined) {
-                    result = result.map((skillStat) => {
-                        const statuses = _.isEmpty(skillStat.actionStatuses) ? skillStat.deployStatus : skillStat.actionStatuses.map((s) => `${s.name}: ${s.state}`).join(' ');
-                        return {
-                            ...skillStat,
-                            status: statuses,
-                        };
-                    });
-                    tableFormat.push({ column: 'Status', field: 'status', width: 30 });
-                }
-                // TODO remove --query on deprecation
-                if (options.json || options.query) {
-                    return getFilteredOutput(result, options);
-                }
-                printExtendedLogs(result, options);
-                return handleTable(tableFormat, _.sortBy(result, options.sort ? [] : ['name']), (o) => ({ ...o, updatedAt: o.updatedAt ? dayjs(o.updatedAt).fromNow() : '-' }), 'No skills found');
+            let result = response.skills;
+            const tableFormat = LISTTABLEFORMAT;
+            if (options.nostatus === undefined) {
+                result = result.map((skillStat) => {
+                    const statuses = _.isEmpty(skillStat.actionStatuses) ? skillStat.deployStatus : skillStat.actionStatuses.map((s) => `${s.name}: ${s.state}`).join(' ');
+                    return {
+                        ...skillStat,
+                        status: statuses,
+                    };
+                });
+                tableFormat.push({ column: 'Status', field: 'status', width: 30 });
             }
-            return handleListFailure(response, options, 'Skills');
+            // TODO remove --query on deprecation
+            if (options.json || options.query) {
+                return getFilteredOutput(result, options);
+            }
+            printExtendedLogs(result, options);
+            return handleTable(tableFormat, _.sortBy(result, options.sort ? [] : ['name']), (o) => ({ ...o, updatedAt: o.updatedAt ? dayjs(o.updatedAt).fromNow() : '-' }), 'No skills found');
         } catch (err) {
-            return printError(`Failed to list skills: ${err.status} ${err.message}`, options);
+            printError(`Failed to list skills: (${err.message}): ${err.response?.body ?? ''}`, options, false);
+            return printErrorDetails(err.response, options, true);
         }
     }
 }
@@ -250,22 +237,18 @@ export class InvokeSkillCommand {
             params = parseObject(paramsStr, options);
         }
         const agent = new Agent(profile.url);
-        agent.invokeSkill(options.project || profile.project, profile.token, skillName, inputName, params, options.sync).then((response) => {
-            if (response.success) {
-                const result = filterObject(response.result, options);
-                printSuccess(JSON.stringify(result, null, 2), options);
-            } else {
-                printError(`Skill invoke failed: ${response.message}`, options);
+        try {
+            const response = await agent.invokeSkill(options.project || profile.project, profile.token, skillName, inputName, params, options.sync);
+            const result = filterObject(response, options);
+            printSuccess(JSON.stringify(result, null, 2), options);
+        } catch (err) {
+            let message = `Failed to invoke skill (${err.message})`;
+            if (err?.response?.body) {
+                message = `${message}: ${err.response.body}`;
             }
-        })
-            .catch((err) => {
-            if (err.response && err.response.body) {
-                debug('Raw error response: %o', err.response.body);
-                printError(`Failed to invoke skill(${err.status} ${err.message}): ${err.response.body.error}`, options);
-            } else {
-                printError(`Failed to invoke skill: ${err.status} ${err.message}`, options);
-            }
-        });
+            printError(message, options, false);
+            printErrorDetails(err, options);
+        }
     }
 }
 export class DeleteSkillCommand {
