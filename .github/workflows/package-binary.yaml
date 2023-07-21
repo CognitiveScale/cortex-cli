@@ -8,12 +8,13 @@ jobs:
   package-linux:
     runs-on: ubuntu-latest
     steps:
-      - name: Check out
+      - name: Check out source
         uses: actions/checkout@v3
-      - name: Build, test, package
+      - name: Install node
         uses: actions/setup-node@v3
         with:
           node-version: '18'
+      - name: Build, test, package
         run: |
          npm ci
          npm test
@@ -28,10 +29,11 @@ jobs:
     steps:
       - name: Check out
         uses: actions/checkout@v3
-      - name: Build, test, package
+      - name: Install node
         uses: actions/setup-node@v3
         with:
           node-version: '18'
+      - name: Build, test, package
         run: |
          npm ci
          npm test
@@ -46,16 +48,17 @@ jobs:
     steps:
       - name: Check out
         uses: actions/checkout@v3
-      - name: Build, test, package
+      - name: Install node
         uses: actions/setup-node@v3
         with:
           node-version: '18'
+      - name: Build, test, package
         run: |
          npm ci
          npm test
-         npm run package-binary
+         npm run package-binary-windows
       - name: Upload binary
         uses: actions/upload-artifact@v3
         with:
           name: binary-win64
-          path: ./dist/cortex
+          path: ./dist/cortex.exe
