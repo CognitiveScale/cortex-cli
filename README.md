@@ -119,7 +119,8 @@ cortex agents list --json "[].{name: name, title: title}"
 
 ## Standalone binary
 
-We use [pkg](https://www.npmjs.com/package/pkg) to bundle the Cortex cli's source, dependencies, and node runtime into a standalone executable
+We use caxa https://github.com/leafac/caxa to build standalone binaries.
+Previously, we used `pkg` but it doesn't support ESM without transpilation as of 07/2023
 
 Executables are created for the following platforms:
   - Linux 64bit intel
@@ -127,11 +128,6 @@ Executables are created for the following platforms:
   - macOS 64 bit intel. 
   - macOS 64 bit M1/M2.
 
-__NOTE:__ Apple M1/M2 (arm64 binary) is experimental
-
 ### Signed binaries status
 * windows: binaries are currently **unsigned**
 * macOS: adhoc signature using [ldid](https://github.com/xerub/ldid)
-
-**Known Issues**
-cortex workspaces - is non functional on Window and macOs until we can provide pre-compiled binaries for the following dependencies: ssh2, keytar, cpufeatures

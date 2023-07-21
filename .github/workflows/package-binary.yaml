@@ -1,0 +1,61 @@
+name: package-standalone-binary
+run-name:
+on: 
+  push:
+    branches:
+      - main
+jobs:
+  package-linux:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out
+        uses: actions/checkout@v3
+      - name: Build, test, package
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+        run: |
+         npm ci
+         npm test
+         npm run package-binary
+      - name: Upload binary
+        uses: actions/upload-artifact@v3
+        with:
+          name: binary-linux
+          path: ./dist/cortex
+  package-mac:
+    runs-on: macos-latest
+    steps:
+      - name: Check out
+        uses: actions/checkout@v3
+      - name: Build, test, package
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+        run: |
+         npm ci
+         npm test
+         npm run package-binary
+      - name: Upload binary
+        uses: actions/upload-artifact@v3
+        with:
+          name: binary-macos
+          path: ./dist/cortex
+  package-windows:
+    runs-on: windows-latest
+    steps:
+      - name: Check out
+        uses: actions/checkout@v3
+      - name: Build, test, package
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+        run: |
+         npm ci
+         npm test
+         npm run package-binary
+      - name: Upload binary
+        uses: actions/upload-artifact@v3
+        with:
+          name: binary-win64
+          path: ./dist/cortex

@@ -6,7 +6,8 @@
   "type": "module",
   "types": "./client/index.d.ts",
   "scripts": {
-    "build-binaries": "pkg .",
+    "package-binary": "caxa --input . --output 'dist/cortex' '{{caxa}}/node_modules/.bin/node' '{{caxa}}/bin/cortex.js' --exclude '*' '.*' '!bin' '!src' '!client' '!package.json'",
+    "package-binary-windows": "caxa --input . --output 'dist/cortex.exe' '{{caxa}}/node_modules/.bin/node' '{{caxa}}/bin/cortex.js' --exclude '*' '.*' '!bin' '!src' '!client' '!package.json'",
     "prepare": "is-ci || husky install",
     "prepack": "cp package-lock.json npm-shrinkwrap.json",
     "postpack": "rm npm-shrinkwrap.json",
@@ -14,18 +15,6 @@
     "test": "cross-env NODE_ENV=test c8 mocha",
     "test:workspaces": "cross-env NODE_ENV=test mocha --grep='Workspaces'",
     "clean": "rm -rf dist/ coverage/ .nyc_output/ node_modules/ cortex-cli.tgz cortex-cli-docs.md version.txt"
-  },
-  "pkg": {
-    "outputPath": "dist",
-    "targets": [
-      "node16-win-x64",
-      "node16-linux-x64",
-      "node16-macos-x64",
-      "node16-macos-arm64"
-    ],
-    "assets": [
-      "node_modules/open/xdg-open"
-    ]
   },
   "files": [
     "bin/*",
@@ -97,9 +86,11 @@
   "devDependencies": {
     "audit-ci": "6.6.1",
     "c8": "8.0.0",
+    "caxa": "3.0.1",
     "chai": "4.3.7",
     "chai-as-promised": "7.1.1",
     "cross-env": "7.0.3",
+    "esbuild": "0.18.15",
     "eslint": "8.43.0",
     "eslint-config-airbnb-base": "15.0.0",
     "eslint-plugin-import": "2.27.5",
