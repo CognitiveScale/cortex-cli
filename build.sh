@@ -53,10 +53,6 @@ function docker_build(){
 #        npm publish --tag "${BRANCH}" --registry=https://cognitivescale.jfrog.io/artifactory/api/npm/npm-local/
     fi
     npm pack .
-    # TODO Should we cache these distros ?
-    export PKG_CACHE_PATH=/tmp/pkg-cache
-    npm run build-binaries
-    mv cortex-cli-*.tgz cortex-cli.tgz
 }
 
 ## MAIN
