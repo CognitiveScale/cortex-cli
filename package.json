@@ -7,7 +7,7 @@
   "types": "./client/index.d.ts",
   "scripts": {
     "package-binary": "caxa --input . --output 'dist/cortex' '{{caxa}}/node_modules/.bin/node' '{{caxa}}/bin/cortex.js' --exclude '*' '.*' '!bin' '!src' '!client' '!package.json'",
-    "package-binary-windows": "caxa --input . --output 'dist/cortex.exe' '{{caxa}}/node_modules/.bin/node' '{{caxa}}/bin/cortex.js' --exclude '*' '.*' '!bin' '!src' '!client' '!package.json'",
+    "package-binary-windows": "caxa --input . --output \"dist/cortex.exe\" \"{{caxa}}/node_modules/.bin/node\" \"{{caxa}}/bin/cortex.js\" --exclude \"*\" \".*\" \"!bin\" \"!src\" \"!client\" \"!package.json\"",
     "prepare": "is-ci || husky install",
     "prepack": "cp package-lock.json npm-shrinkwrap.json",
     "postpack": "rm npm-shrinkwrap.json",
