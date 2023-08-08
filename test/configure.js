@@ -76,7 +76,7 @@ describe('configure', () => {
     it('get profile other', async () => {
         await create().parseAsync(['node', 'configure', 'describe', 'other']);
         const output = getPrintedLines();
-        expect(output).to.length(5);
+        expect(output).to.length(6);
         expect(output[4]).to.eql('Project: otherProj');
     });
     it('ttl token default ttl', async () => {

@@ -63,11 +63,11 @@ export function create() {
         .option('--skip-push', 'Don\'t push images to docker registry')
         .option('--skill <skill name>', 'Publish only the specified skill')
         .description('Publishes all skills and resources in the workspace')
-        .action((folder, options) => {
+        .action(async (folder, options) => {
             try {
-                return new WorkspacePublishCommand(program).execute(folder, options);
+                await (new WorkspacePublishCommand(program)).execute(folder, options);
             } catch (err) {
-                return printError(err.message);
+                printError(err.message);
             }
         });
     const registry = program

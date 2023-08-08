@@ -13,36 +13,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import debugSetup from 'debug';
-import { printSuccess, printError } from './utils.js';
-import { generateJwt, loadProfile } from '../config.js';
-import { getCurrentRegistry } from './workspaces/workspace-utils.js';
-import dockerClient from '../client/dockerClient.js';
+import { printError, printSuccess } from './utils.js';
+import { privateRegLogin } from '../client/dockerClient.js';
 
-const debug = debugSetup('cortex:cli');
 export default class DockerLoginCommand {
     constructor(program) {
         this.program = program;
     }
 
     async execute(options) {
-        const profile = await loadProfile(options.profile);
-        const ttl = options.ttl || '14d';
         try {
-            // First try to see if we have of registries in out profile
-            const registry = await getCurrentRegistry(profile);
-            const registryUrl = registry?.url;
-            if (registryUrl === undefined) {
-                printError(`No docker registry configured in current profile ${profile.name}`, options, true);
-            }
-            const jwt = await generateJwt(profile, ttl);
-//            const command = `docker login -u cli --password ${jwt} ${registryUrl}`;
-//            debug('%s.executeDockerLogin(%s)', profile.name, command);
-//            await callMe(command);
-            await dockerClient(options).login(registryUrl, 'cli', jwt);
+            await privateRegLogin(options);
             printSuccess(JSON.stringify('Login Succeeded', null, 2), options);
         } catch (err) {
-            printError(`Failed to docker login: ${err.message || err}`, options);
+            printError(`Failed to docker login: ${err?.message ?? err}`, options);
         }
     }
 }
