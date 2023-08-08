@@ -1,7 +1,9 @@
 import _ from 'lodash';
 import debugSetup from 'debug';
 import { got, defaultHeaders } from './apiutils.js';
-import { constructError, callMe, checkProject, printWarning } from '../commands/utils.js';
+import {
+    constructError, checkProject, printWarning,
+} from '../commands/utils.js';
 import dockerCli from './dockerClient.js';
 
 const debug = debugSetup('cortex:cli');
@@ -19,7 +21,7 @@ export default class Actions {
         }
         debug('deployAction(%s, docker=%s, ttl=%s) => %s', actionInst.name, actionInst.image, actionInst.ttl, endpoint);
         const body = { ...actionInst };
-        // image & docker floating around fixup just in case..
+        // image & docker floating around fixup just in case.
         if (body.docker) {
             body.image = body.docker;
             delete body.docker;
@@ -138,7 +140,7 @@ export default class Actions {
         const imageName = image.replace(/.+\..+\//, '');
         const cortexImageUrl = this._cortexRegistryImagePath(registryUrl, imageName, '');
         // TODO support non cortex registry !!
-        await dockerCli().login(registryUrl,'cli', token);
+        await dockerCli().login(registryUrl, 'cli', token);
         try {
             await dockerCli()
                 .pull(image);

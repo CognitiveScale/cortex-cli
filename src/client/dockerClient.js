@@ -1,6 +1,8 @@
 import debugSetup from 'debug';
 import which from 'which';
 import { callMe, printError } from '../commands/utils.js';
+import { generateJwt, loadProfile } from '../config.js';
+import { getCurrentRegistry } from '../commands/workspaces/workspace-utils.js';
 
 const debug = debugSetup('cortex:cli');
 
@@ -20,10 +22,10 @@ class DockerCli {
         return 'Login Succeeded';
     }
 
-    async build(opts) {
+    build(opts) {
         const {
- imageTag, dockerFile, contextPath, stdoutHandler, 
-} = opts;
+             imageTag, dockerFile, contextPath, stdoutHandler,
+        } = opts;
         // TODO --platform=amd64,arm64,darwin/arm64
         const command = `docker build --progress plain --tag ${imageTag} -f ${dockerFile} ${contextPath}`;
         debug('%s', command);
@@ -42,10 +44,10 @@ class DockerCli {
         return callMe(command);
     }
 
-    push(image) {
+    push(image, stdOutHandler = () => {}) {
         const command = `docker push ${image}`;
         debug('%s', command);
-        return callMe(command);
+        return callMe(command, stdOutHandler);
     }
 
     async listImages(image = undefined) {
@@ -69,7 +71,7 @@ class NerdCtl {
         return 'Login Succeeded';
     }
 
-    async build(opts) {
+    build(opts) {
         const { imageTag, dockerFile, contextPath } = opts;
         // TODO namespace
         // TODO --platform=amd64,arm64,darwin/arm64
@@ -90,10 +92,10 @@ class NerdCtl {
         return callMe(command);
     }
 
-    push(image) {
+    push(image, stdOutHandler = () => {}) {
         const command = `nerdctl push ${image}`;
         debug('%s', command);
-        return callMe(command);
+        return callMe(command, stdOutHandler);
     }
 
     async listImages(image = undefined) {
@@ -118,7 +120,7 @@ class PodMan {
         return 'Login Succeeded';
     }
 
-    async build() {}
+    build() {}
 
     tag(source, target) {
         const command = `podman tag ${source} ${target}`;
@@ -132,10 +134,10 @@ class PodMan {
         return callMe(command);
     }
 
-    push(image) {
+    push(image, stdOutHandler = () => {}) {
         const command = `podman push ${image}`;
         debug('%s', command);
-        return callMe(command);
+        return callMe(command, stdOutHandler);
     }
 
     async listImages(image = undefined) {
@@ -185,4 +187,22 @@ export default function getClient(opts = {}) {
         return printError(`No docker client found in PATH, checked ${Object.keys(SUPPORTED_CLIS).join(',')}`);
     }
     return currentClient;
+}
+
+export async function privateRegLogin(options) {
+    const profile = await loadProfile(options.profile);
+    const ttl = options?.ttl ?? '14d';
+    // First try to see if we have of registries in out profile
+    const registry = await getCurrentRegistry(profile);
+    const registryUrl = registry?.url;
+    if (registryUrl === undefined) {
+        throw Error(`No docker registry configured in current profile ${profile.name}`);
+    }
+    if (!registry.isCortex) {
+        return getClient(options).login(registryUrl); // Login with registry URI and use existing credentials..
+    }
+    // Sensa private registries are configured with JWT authentication ...
+    const jwt = await generateJwt(profile, ttl);
+    return getClient(options)
+        .login(registryUrl, 'cli', jwt);
 }
