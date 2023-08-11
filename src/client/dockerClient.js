@@ -51,9 +51,9 @@ class DockerCli {
     }
 
     async listImages(image = undefined) {
-        const command = `docker images ${image ?? ''} --format json`;
+        const command = `docker images ${image ?? ''} --format "{{json .}}"`;
         const lines = [];
-        await callMe(command, (s) => {
+            await callMe(command, (s) => {
             if (s.startsWith('{')) lines.push(s);
         });
         const str = lines.join();
@@ -99,7 +99,7 @@ class NerdCtl {
     }
 
     async listImages(image = undefined) {
-        const command = `nerdctl images ${image ?? ''} --format json`;
+        const command = `nerdctl images ${image ?? ''} --format "{{json .}}"`;
         const lines = [];
         await callMe(command, (s) => {
             if (s.startsWith('{')) lines.push(s);
@@ -141,7 +141,7 @@ class PodMan {
     }
 
     async listImages(image = undefined) {
-        const command = `podman images ${image ?? ''} --format json`;
+        const command = `podman images ${image ?? ''} --format "{{json .}}"`;
         const lines = [];
         await callMe(command, (s) => {
             if (s.startsWith('{')) lines.push(s);

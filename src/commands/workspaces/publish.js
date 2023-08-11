@@ -77,7 +77,7 @@ export default class WorkspacePublishCommand {
             this.experimentClient = new Experiments(profile.url);
             this.contentClient = new Content(profile.url);
             try {
-                await privateRegLogin(options);
+                if (options?.skipPush !== true) await privateRegLogin(options);
             } catch (err) {
                 printError(err.message, options);
             }
