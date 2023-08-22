@@ -4,7 +4,7 @@ import esMain from 'es-main';
 import { Command } from 'commander';
 import { withCompatibilityCheck } from '../src/compatibility.js';
 import {
- UserProjectAssignCommand, UserDescribeCommand, UserGrantCommand, UserCreateCommand, UserListCommand, UserDeleteCommand, UserResetPATCommand, UserGetPATCommand
+ UserProjectAssignCommand, UserDescribeCommand, UserGrantCommand, UserCreateCommand, UserListCommand, UserDeleteCommand, UserResetPATCommand, UserGetPATCommand,
 } from '../src/commands/users.js';
 import { LIST_JSON_HELP_TEXT, QUERY_JSON_HELP_TEXT } from '../src/constants.js';
 
@@ -125,7 +125,6 @@ export function create() {
             }
         }));
     return program;
-
 }
 if (esMain(import.meta)) {
     create().showHelpAfterError().parseAsync(process.argv);

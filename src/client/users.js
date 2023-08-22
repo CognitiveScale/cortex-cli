@@ -139,13 +139,13 @@ export default class Users {
         return got
             .post(endpoint, {
                 headers: defaultHeaders(token),
-                json:{ user },
+                json: { user },
             }).json()
                 .then((res) => ({ success: true, result: res }))
                 .catch((err) => constructError(err));
     }
 
-    getUserPAT(token, user) {
+    getUserPAT(token) {
         const endpoint = `${this.endpoint}/accounts/pat`;
         debug('resetUserPAT => %s', endpoint);
         return got

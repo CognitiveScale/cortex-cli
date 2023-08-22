@@ -203,7 +203,7 @@ export const UserResetPATCommand = class {
 
     async execute(options) {
         const profile = await loadProfile(options.profile);
-        const user = options.user;
+        const { user } = options;
         debug('%s.UserResetPATCommand(%s)', profile.name, user);
         const client = new Users(profile.url, 'self');
         client.resetUserPAT(profile.token, user).then((response) => {
@@ -215,17 +215,17 @@ export const UserResetPATCommand = class {
             }
         });
     }
-}
+};
 export const UserGetPATCommand = class {
     constructor(program) {
         this.program = program;
     }
+
     async execute(options) {
         const profile = await loadProfile(options.profile);
-        const user = options.user;
-        debug('%s.UserGetPATCommand(%s)', profile.name, user);
+        debug('%s.UserGetPATCommand(%s)', profile.name);
         const client = new Users(profile.url, 'self');
-        client.getUserPAT(profile.token, user).then((response) => {
+        client.getUserPAT(profile.token).then((response) => {
             if (response.success) {
                 const { result } = response;
                 printSuccess(JSON.stringify(result.config, null, 2), options);
@@ -234,4 +234,4 @@ export const UserGetPATCommand = class {
             }
         });
     }
-}
+};
