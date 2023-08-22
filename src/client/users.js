@@ -132,4 +132,16 @@ export default class Users {
             .then((res) => ({ success: true, result: res }))
             .catch((err) => constructError(err));
     }
+
+    resetUserPAT(token, user) {
+        const endpoint = `${this.endpoint}/accounts/pat/invalidate`;
+        debug('resetUserPAT => %s', endpoint);
+        return got
+            .post(endpoint, {
+                headers: defaultHeaders(token),
+                json:{ user },
+            }).json()
+                .then((res) => ({ success: true, result: res }))
+                .catch((err) => constructError(err));
+    }
 }
