@@ -116,7 +116,6 @@ export function create() {
         .option('--no-compat', 'Ignore API compatibility checks')
         .option('--color [boolean]', 'Turn on/off colors for JSON output.', 'true')
         .option('--profile <profile>', 'The profile to use')
-        .option('--user <user>', 'The user to reset personal access token')
         .action(withCompatibilityCheck((options) => {
             try {
                 new UserGetPATCommand(program).execute(options);
