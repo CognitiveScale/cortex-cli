@@ -223,9 +223,10 @@ export const UserGetPATCommand = class {
 
     async execute(options) {
         const profile = await loadProfile(options.profile);
+        const { user } = options;
         debug('%s.UserGetPATCommand(%s)', profile.name);
         const client = new Users(profile.url, 'self');
-        client.getUserPAT(profile.token).then((response) => {
+        client.getUserPAT(profile.token, user).then((response) => {
             if (response.success) {
                 const { result } = response;
                 printSuccess(JSON.stringify(result.config, null, 2), options);

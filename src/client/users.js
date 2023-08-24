@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 import debugSetup from 'debug';
+import _ from 'lodash';
 import { got, defaultHeaders } from './apiutils.js';
 import { constructError } from '../commands/utils.js';
 
@@ -145,13 +146,17 @@ export default class Users {
                 .catch((err) => constructError(err));
     }
 
-    getUserPAT(token) {
+    getUserPAT(token, user) {
         const endpoint = `${this.endpoint}/accounts/pat`;
         debug('resetUserPAT => %s', endpoint);
+        const requestOptions = {
+            headers: defaultHeaders(token)
+        };
+        if (!_.isEmpty(user)) {
+            requestOptions.searchParams = { user: user };
+        }
         return got
-            .get(endpoint, {
-                headers: defaultHeaders(token),
-            }).json()
+            .get(endpoint, requestOptions).json()
                 .then((res) => ({ success: true, result: res }))
                 .catch((err) => constructError(err));
     }
