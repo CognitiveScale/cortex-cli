@@ -150,10 +150,10 @@ export default class Users {
         const endpoint = `${this.endpoint}/accounts/pat`;
         debug('resetUserPAT => %s', endpoint);
         const requestOptions = {
-            headers: defaultHeaders(token)
+            headers: defaultHeaders(token),
         };
         if (!_.isEmpty(user)) {
-            requestOptions.searchParams = { user: user };
+            requestOptions.searchParams = { user };
         }
         return got
             .get(endpoint, requestOptions).json()
