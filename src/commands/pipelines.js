@@ -1,4 +1,3 @@
-import _ from 'lodash';
 import fs from 'node:fs';
 import debugSetup from 'debug';
 import dayjs from 'dayjs';
@@ -6,7 +5,7 @@ import relativeTime from 'dayjs/plugin/relativeTime.js';
 import { loadProfile } from '../config.js';
 import Pipelines from '../client/pipelines.js';
 import {
- printSuccess, printError, filterObject, parseObject, isNumeric, handleTable, printExtendedLogs, handleListFailure, handleDeleteFailure, getFilteredOutput,
+ fileExists, printSuccess, printError, filterObject, parseObject, handleTable, printExtendedLogs, handleListFailure, handleDeleteFailure, getFilteredOutput,
 } from './utils.js';
 
 const debug = debugSetup('cortex:cli');
@@ -35,7 +34,7 @@ export const SavePipelineRepoCommand = class {
       }
       return printError(`Failed to save pipeline repository: ${response.status} ${response.message}`, options);
     } catch (err) {
-      return printError(`Failed to save pipeline repository: ${err.response.body.message} ${response.message}`, options);
+      return printError(`Failed to save pipeline repository: ${err.response.body.message}`, options);
     }
   }
 };
@@ -50,25 +49,23 @@ export const ListPipelineRepoCommand = class {
     debug('%s.executeListPipelineRepos()', profile.name);
     const repos = new Pipelines(profile.url).repos();
     try {
-      const response = await repos.listPipelineRepo(options.project || profile.project, profile.token, options.filter, options.limit, options.skip, options.sort)
+      const response = await repos.listPipelineRepo(options.project || profile.project, profile.token, options.filter, options.limit, options.skip, options.sort);
       if (response.success) {
         const result = response.pipelineRepos;
         if (options.json) {
           return getFilteredOutput(result, options);
-        } else {
-          printExtendedLogs(result, options);
-          const tableSpec = [
-            { column: 'Name', field: 'name', width: 30 },
-            { column: 'Repo', field: 'repo', width: 30 },  // TODO: check desired length?
-            { column: 'Branch', field: 'branch', width: 30 },
-            { column: 'Modified', field: 'updatedAt', width: 26 },
-            { column: 'Author', field: 'createdBy', width: 26 },
-          ];
-          return handleTable(tableSpec, result, (o) => ({ ...o, updatedAt: o.updatedAt ? dayjs(o.updatedAt).fromNow() : '-' }), 'No pipeline repositories found');
         }
-      } else {
-        return handleListFailure(response, options, 'Pipeline Repositories')
+        printExtendedLogs(result, options);
+        const tableSpec = [
+          { column: 'Name', field: 'name', width: 30 },
+          { column: 'Repo', field: 'repo', width: 30 }, // TODO: check desired length?
+          { column: 'Branch', field: 'branch', width: 30 },
+          { column: 'Modified', field: 'updatedAt', width: 26 },
+          { column: 'Author', field: 'createdBy', width: 26 },
+        ];
+        return handleTable(tableSpec, result, (o) => ({ ...o, updatedAt: o.updatedAt ? dayjs(o.updatedAt).fromNow() : '-' }), 'No pipeline repositories found');
       }
+      return handleListFailure(response, options, 'Pipeline Repositories');
     } catch (err) {
       return printError(`Failed to list pipeline repositories: ${err.status} ${err.message}`, options);
     }
@@ -106,7 +103,7 @@ export const DeletePipelineRepoCommand = class {
     debug('%s.executeDeleteProfileRepo(%s)', profile.name, pipelineRepoName);
     const repos = new Pipelines(profile.url).repos();
     try {
-      const response = response.deletePipelineRepo(options.project || profile.project, profile.token, pipelineRepoName);
+      const response = repos.deletePipelineRepo(options.project || profile.project, profile.token, pipelineRepoName);
       if (response.success) {
         const result = filterObject(response, options);
         return printSuccess(JSON.stringify(result, null, 2), options);

@@ -6,7 +6,7 @@ export function create() {
   const program = new Command();
   program.name('cortex pipelines');
   program.description('Work with Cortex Pipelines');
-  program.command('repos <cmd>', 'Work with Cortex Pipeline Repositories')
+  program.command('repos <cmd>', 'Work with Cortex Pipeline Repositories');
   return program;
 }
 

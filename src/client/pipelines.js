@@ -1,4 +1,3 @@
-import _ from 'lodash';
 import debugSetup from 'debug';
 import { got, defaultHeaders } from './apiutils.js';
 import { constructError, checkProject } from '../commands/utils.js';
@@ -21,7 +20,7 @@ class PipelineRepos {
     if (filter) query.filer = filter;
     if (limit) query.limit = limit;
     if (sort) query.sort = sort;
-    if (skip) query.skip == skip;
+    if (skip) query.skip = skip;
     try {
       const result = await got.get(endpoint, {
         headers: defaultHeaders(token),
@@ -51,9 +50,9 @@ class PipelineRepos {
   async describePipelineRepo(projectId, token, pipelineRepoName) {
     checkProject(projectId);
     const endpoint = `${this.endpoint(projectId)}/${encodeURIComponent(pipelineRepoName)}`;
-    debug('describePipelineRepo(%s) => %s', repoObj.name, endpoint);
+    debug('describePipelineRepo(%s) => %s', pipelineRepoName, endpoint);
     try {
-      const result = got.get(endpoint, {
+      const result = await got.get(endpoint, {
         headers: defaultHeaders(token),
       }).json();
       return { success: true, result };
@@ -67,7 +66,7 @@ class PipelineRepos {
     const endpoint = `${this.endpoint(projectId)}/${encodeURIComponent(pipelineRepoName)}`;
     debug('deletePipelineRepo(%s) => %s', pipelineRepoName, endpoint);
     try {
-      const result =  got.delete(endpoint, {
+      const result = await got.delete(endpoint, {
         headers: defaultHeaders(token),
       }).json();
       return { success: true, result };

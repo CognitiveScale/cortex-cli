@@ -30,46 +30,46 @@ export function create() {
     .option('--skip <skip>', 'Skip number of records', DEFAULT_LIST_SKIP_COUNT)
     .option('--sort <sort>', 'A Mongo style sort statement to use in the query.', GET_DEFAULT_SORT_CLI_OPTION(DEFAULT_LIST_SORT_PARAMS.updatedAt))
     .action(withCompatibilityCheck((options) => {
-        try {
-            new ListPipelineRepoCommand(program).execute(options);
-        } catch (err) {
-            console.error(chalk.red(err.message));
-        }
+      try {
+        new ListPipelineRepoCommand(program).execute(options);
+      } catch (err) {
+        console.error(chalk.red(err.message));
+      }
     }));
 
 // Describe
   program
-  .command('describe <pipelineRepoName>')
-  .alias('get')
-  .description('Describe a Pipeline Repository')
-  .option('--no-compat', 'Ignore API compatibility checks')
-  .option('--color [boolean]', 'Turn on/off colors for JSON output.', 'true')
-  .option('--profile <profile>', 'The profile to use')
-  .option('--project <project>', 'The project to use')
-  .option('--json [searchPath]', QUERY_JSON_HELP_TEXT)
-  .action(withCompatibilityCheck((pipelineRepoName, options) => {
+    .command('describe <pipelineRepoName>')
+    .alias('get')
+    .description('Describe a Pipeline Repository')
+    .option('--no-compat', 'Ignore API compatibility checks')
+    .option('--color [boolean]', 'Turn on/off colors for JSON output.', 'true')
+    .option('--profile <profile>', 'The profile to use')
+    .option('--project <project>', 'The project to use')
+    .option('--json [searchPath]', QUERY_JSON_HELP_TEXT)
+    .action(withCompatibilityCheck((pipelineRepoName, options) => {
       try {
-          new DescribePipelineRepoCommand(program).execute(pipelineRepoName, options);
+        new DescribePipelineRepoCommand(program).execute(pipelineRepoName, options);
       } catch (err) {
-          console.error(chalk.red(err.message));
+        console.error(chalk.red(err.message));
       }
-  }));
+    }));
 
 // Delete
   program
-  .command('delete <pipelineRepoName>')
-  .description('Delete a Pipeline Repository')
-  .option('--no-compat', 'Ignore API compatibility checks')
-  .option('--color [boolean]', 'Turn on/off colors for JSON output.', 'true')
-  .option('--profile <profile>', 'The profile to use')
-  .option('--project <project>', 'The project to use')
-  .action(withCompatibilityCheck((actionName, options) => {
+    .command('delete <pipelineRepoName>')
+    .description('Delete a Pipeline Repository')
+    .option('--no-compat', 'Ignore API compatibility checks')
+    .option('--color [boolean]', 'Turn on/off colors for JSON output.', 'true')
+    .option('--profile <profile>', 'The profile to use')
+    .option('--project <project>', 'The project to use')
+    .action(withCompatibilityCheck((actionName, options) => {
       try {
-          new DeletePipelineRepoCommand(program).execute(actionName, options);
+        new DeletePipelineRepoCommand(program).execute(actionName, options);
       } catch (err) {
-          console.error(chalk.red(err.message));
+        console.error(chalk.red(err.message));
       }
-  }));
+    }));
 
 // Save
   program
@@ -81,12 +81,12 @@ export function create() {
     .option('--project <project>', 'The project to use')
     .option('-y, --yaml', 'Use YAML for Pipeline Repository definition format')
     // TODO: should this have CLI args for <repo> & <branch> ??
-    .action(withCompatibilityCheck((connDefinition, options) => {
-        try {
-            new SavePipelineRepoCommand(program).execute(pipelineRepoDefinition, options);
-        } catch (err) {
-            console.error(chalk.red(err.message));
-        }
+    .action(withCompatibilityCheck((pipelineRepoDefinition, options) => {
+      try {
+        new SavePipelineRepoCommand(program).execute(pipelineRepoDefinition, options);
+      } catch (err) {
+        console.error(chalk.red(err.message));
+      }
     }));
   return program;
 }
