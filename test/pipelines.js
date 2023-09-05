@@ -65,6 +65,7 @@ describe('Pipelines', () => {
       const output = getPrintedLines();
       const errs = getErrorLines();
       const roundTripped = JSON.parse(output.join(''));
+      // eslint-disable-next-line no-unused-expressions
       chai.expect(roundTripped).to.be.an('array').that.is.empty;
       // eslint-disable-next-line no-unused-expressions
       chai.expect(errs.join('')).to.be.empty;
