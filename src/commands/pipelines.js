@@ -57,8 +57,8 @@ export const ListPipelineRepoCommand = class {
         }
         printExtendedLogs(result, options);
         const tableSpec = [
-          { column: 'Name', field: 'name', width: 30 },
-          { column: 'Repo', field: 'repo', width: 30 }, // TODO: check desired length?
+          { column: 'Name', field: 'name', width: 20 },
+          { column: 'Repo', field: 'repo', width: 35 }, // TODO: check desired length?
           { column: 'Branch', field: 'branch', width: 30 },
           { column: 'Modified', field: 'updatedAt', width: 26 },
           { column: 'Author', field: 'createdBy', width: 26 },
