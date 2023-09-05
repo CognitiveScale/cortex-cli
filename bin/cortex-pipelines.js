@@ -1,5 +1,4 @@
 #!/usr/bin/env node
-import chalk from 'chalk';
 import esMain from 'es-main';
 import { Command } from 'commander';
 import { withCompatibilityCheck } from '../src/compatibility.js';
@@ -9,6 +8,7 @@ import {
 import {
  DEFAULT_LIST_SKIP_COUNT, DEFAULT_LIST_LIMIT_COUNT, DEFAULT_LIST_SORT_PARAMS, GET_DEFAULT_SORT_CLI_OPTION, LIST_JSON_HELP_TEXT, QUERY_JSON_HELP_TEXT,
 } from '../src/constants.js';
+import { printError } from '../src/commands/utils.js';
 
 export function create() {
   const program = new Command();
@@ -33,9 +33,9 @@ export function create() {
     .option('--sort <sort>', 'A Mongo style sort statement to use in the query.', GET_DEFAULT_SORT_CLI_OPTION(DEFAULT_LIST_SORT_PARAMS.updatedAt))
     .action(withCompatibilityCheck((options) => {
       try {
-        new ListPipelineRepoCommand(program).execute(options);
+        return new ListPipelineRepoCommand(program).execute(options);
       } catch (err) {
-        console.error(chalk.red(err.message));
+        return printError(err.message);
       }
     }));
 
@@ -51,9 +51,9 @@ export function create() {
     .option('--json [searchPath]', QUERY_JSON_HELP_TEXT)
     .action(withCompatibilityCheck((pipelineRepoName, options) => {
       try {
-        new DescribePipelineRepoCommand(program).execute(pipelineRepoName, options);
+        return new DescribePipelineRepoCommand(program).execute(pipelineRepoName, options);
       } catch (err) {
-        console.error(chalk.red(err.message));
+        return printError(err.message);
       }
     }));
 
@@ -67,9 +67,9 @@ export function create() {
     .option('--project <project>', 'The project to use')
     .action(withCompatibilityCheck((actionName, options) => {
       try {
-        new DeletePipelineRepoCommand(program).execute(actionName, options);
+        return new DeletePipelineRepoCommand(program).execute(actionName, options);
       } catch (err) {
-        console.error(chalk.red(err.message));
+        return printError(err.message);
       }
     }));
 
@@ -85,9 +85,9 @@ export function create() {
     // TODO: should this have CLI args for <repo> & <branch>??
     .action(withCompatibilityCheck((pipelineRepoDefinition, options) => {
       try {
-        new SavePipelineRepoCommand(program).execute(pipelineRepoDefinition, options);
+        return new SavePipelineRepoCommand(program).execute(pipelineRepoDefinition, options);
       } catch (err) {
-        console.error(chalk.red(err.message));
+        return printError(err.message);
       }
     }));
 

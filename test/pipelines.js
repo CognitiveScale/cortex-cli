@@ -15,7 +15,7 @@ describe('Pipelines', () => {
   let sandbox;
   let printSpy;
   let errorSpy;
-  before(() => {
+  beforeEach(() => {
     if (!nock.isActive()) {
       nock.activate();
     }
@@ -28,15 +28,11 @@ describe('Pipelines', () => {
     errorSpy = sandbox.spy(console, 'error');
   });
 
-  after(() => {
-    restoreEnv();
-    sandbox.restore();
-    nock.restore();
-  });
-
   afterEach(() => {
     // clean up mocks that may not have been called
+    restoreEnv();
     nock.cleanAll();
+    sandbox.restore();
   });
 
   function getPrintedLines() {
@@ -53,14 +49,25 @@ describe('Pipelines', () => {
     it('lists pipeline repositories - empty', async () => {
       const response = { success: true, pipelineRepositories: [] };
       nock(serverUrl).get(/\/fabric\/v4\/projects\/.*\/pipeline-repositories/).reply(200, response);
-      await create().parseAsync(['node', 'pipelines', 'repos', 'list', '--project', PROJECT, '--json']);
-      // console.log(res);
+      await create().parseAsync(['node', 'pipelines', 'repos', 'list', '--project', PROJECT]);
       const output = getPrintedLines();
       const errs = getErrorLines();
       // eslint-disable-next-line no-unused-expressions
       chai.expect(errs.join('')).to.be.empty;
-      chai.expect(output.join('')).to.include('No pipeline repositories found');
       chai.expect(output.join('')).to.contain('No pipeline repositories found');
+      nock.isDone();
+    });
+
+    it('lists pipeline repositories as JSON - empty', async () => {
+      const response = { success: true, pipelineRepositories: [] };
+      nock(serverUrl).get(/\/fabric\/v4\/projects\/.*\/pipeline-repositories/).reply(200, response);
+      await create().parseAsync(['node', 'pipelines', 'repos', 'list', '--project', PROJECT, '--json']);
+      const output = getPrintedLines();
+      const errs = getErrorLines();
+      const roundTripped = JSON.parse(output.join(''));
+      chai.expect(roundTripped).to.be.an('array').that.is.empty;
+      // eslint-disable-next-line no-unused-expressions
+      chai.expect(errs.join('')).to.be.empty;
       nock.isDone();
     });
 
@@ -73,10 +80,9 @@ describe('Pipelines', () => {
         ],
       };
       nock(serverUrl).get(/\/fabric\/v4\/projects\/.*\/pipeline-repositories.*/).reply(200, response);
-      const res = await create().parseAsync(['node', 'pipelines', 'repos', 'list', '--project', PROJECT]);
+      await create().parseAsync(['node', 'pipelines', 'repos', 'list', '--project', PROJECT]);
       const output = getPrintedLines().join('');
       const errs = getErrorLines().join('');
-      console.log(res);
       chai.expect(output).to.contain('repo1');
       chai.expect(output).to.contain('main');
       chai.expect(output).to.contain('repo2');
@@ -103,7 +109,7 @@ describe('Pipelines', () => {
       const output = getPrintedLines().join('');
       const errs = getErrorLines().join('');
       const description = JSON.parse(output);
-      chai.expect(output).to.equal(description);
+      chai.expect(description).to.deep.equal(response.pipelineRepository);
       // eslint-disable-next-line no-unused-expressions
       chai.expect(errs).to.be.empty;
       nock.isDone();

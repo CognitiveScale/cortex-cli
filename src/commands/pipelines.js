@@ -51,17 +51,17 @@ export const ListPipelineRepoCommand = class {
     try {
       const response = await repos.listPipelineRepo(options.project || profile.project, profile.token, options.filter, options.limit, options.skip, options.sort);
       if (response.success) {
-        const result = response.pipelineRepos;
+        const result = response.pipelineRepositories;
         if (options.json) {
           return getFilteredOutput(result, options);
         }
         printExtendedLogs(result, options);
         const tableSpec = [
           { column: 'Name', field: 'name', width: 20 },
-          { column: 'Repo', field: 'repo', width: 35 }, // TODO: check desired length?
-          { column: 'Branch', field: 'branch', width: 30 },
-          { column: 'Modified', field: 'updatedAt', width: 26 },
-          { column: 'Author', field: 'createdBy', width: 26 },
+          { column: 'Repo', field: 'repo', width: 40 },
+          { column: 'Branch', field: 'branch', width: 15 },
+          { column: 'Modified', field: 'updatedAt', width: 22 },
+          { column: 'Author', field: 'createdBy', width: 22 },
         ];
         return handleTable(tableSpec, result, (o) => ({ ...o, updatedAt: o.updatedAt ? dayjs(o.updatedAt).fromNow() : '-' }), 'No pipeline repositories found');
       }
@@ -82,9 +82,9 @@ export const DescribePipelineRepoCommand = class {
     debug('%s.executeDescribePipelineRepo(%s)', profile.name, pipelineRepoName);
     const repos = new Pipelines(profile.url).repos();
     try {
-      const response = repos.describePipelineRepo(options.project || profile.project, profile.token, pipelineRepoName);
+      const response = await repos.describePipelineRepo(options.project || profile.project, profile.token, pipelineRepoName);
       if (response.success) {
-        return getFilteredOutput(response.pipelineRepo, options);
+        return getFilteredOutput(response.pipelineRepository, options);
       }
       return printError(`Failed to describe pipeline repository: ${response.status} ${response.message}`, options);
     } catch (err) {

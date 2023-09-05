@@ -9,7 +9,7 @@ const debug = debugSetup('cortex:cli');
 class PipelineRepos {
   constructor(cortexUrl) {
     this.cortexUrl = cortexUrl;
-    this.endpointV4 = (projectId) => `${cortexUrl}/fabric/v4/projects/${projectId}/${PIPELINE_REPO_API}`;
+    this.endpoint = (projectId) => `${cortexUrl}/fabric/v4/projects/${projectId}/${PIPELINE_REPO_API}`;
   }
 
   async listPipelineRepo(projectId, token, filter, limit, skip, sort) {
@@ -22,11 +22,10 @@ class PipelineRepos {
     if (sort) query.sort = sort;
     if (skip) query.skip = skip;
     try {
-      const result = await got.get(endpoint, {
+       return await got.get(endpoint, {
         headers: defaultHeaders(token),
         searchParams: query,
       }).json();
-      return ({ success: true, result });
     } catch (err) {
       return constructError(err);
     }
@@ -37,11 +36,10 @@ class PipelineRepos {
     const endpoint = `${this.endpoint(projectId)}`;
     debug('savePipelineRepo(%s) => %s', repoObj.name, endpoint);
     try {
-      const message = await got.post(endpoint, {
+      return await got.post(endpoint, {
         headers: defaultHeaders(token),
         json: repoObj,
       }).json();
-      return { success: true, message };
     } catch (err) {
       return constructError(err);
     }
@@ -52,10 +50,9 @@ class PipelineRepos {
     const endpoint = `${this.endpoint(projectId)}/${encodeURIComponent(pipelineRepoName)}`;
     debug('describePipelineRepo(%s) => %s', pipelineRepoName, endpoint);
     try {
-      const result = await got.get(endpoint, {
+      return await got.get(endpoint, {
         headers: defaultHeaders(token),
       }).json();
-      return { success: true, result };
     } catch (err) {
       return constructError(err);
     }
@@ -66,10 +63,9 @@ class PipelineRepos {
     const endpoint = `${this.endpoint(projectId)}/${encodeURIComponent(pipelineRepoName)}`;
     debug('deletePipelineRepo(%s) => %s', pipelineRepoName, endpoint);
     try {
-      const result = await got.delete(endpoint, {
+      return await got.delete(endpoint, {
         headers: defaultHeaders(token),
       }).json();
-      return { success: true, result };
     } catch (err) {
       return constructError(err);
     }
@@ -83,6 +79,6 @@ export default class Pipelines {
   }
 
   repos() {
-    return PipelineRepos(this.cortexUrl);
+    return new PipelineRepos(this.cortexUrl);
   }
 }
