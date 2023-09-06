@@ -196,3 +196,43 @@ export const UserProjectAssignCommand = class {
         });
     }
 };
+export const UserResetPATCommand = class {
+    constructor(program) {
+        this.program = program;
+    }
+
+    async execute(options) {
+        const profile = await loadProfile(options.profile);
+        const { user } = options;
+        debug('%s.UserResetPATCommand(%s)', profile.name, user);
+        const client = new Users(profile.url, 'self');
+        client.resetUserPAT(profile.token, user).then((response) => {
+            if (response.success) {
+                const { result } = response;
+                printSuccess(JSON.stringify(result, null, 2), options);
+            } else {
+                printError(`Failed to invalidate user PAT: ${response.message}`, options);
+            }
+        });
+    }
+};
+export const UserGetPATCommand = class {
+    constructor(program) {
+        this.program = program;
+    }
+
+    async execute(options) {
+        const profile = await loadProfile(options.profile);
+        const { user } = options;
+        debug('%s.UserGetPATCommand(%s)', profile.name);
+        const client = new Users(profile.url, 'self');
+        client.getUserPAT(profile.token, user).then((response) => {
+            if (response.success) {
+                const { result } = response;
+                printSuccess(JSON.stringify(result.config, null, 2), options);
+            } else {
+                printError(`Failed to fetch user PAT: ${response.message}`, options);
+            }
+        });
+    }
+};

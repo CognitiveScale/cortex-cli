@@ -4,7 +4,7 @@ import esMain from 'es-main';
 import { Command } from 'commander';
 import { withCompatibilityCheck } from '../src/compatibility.js';
 import {
- UserProjectAssignCommand, UserDescribeCommand, UserGrantCommand, UserCreateCommand, UserListCommand, UserDeleteCommand, 
+ UserProjectAssignCommand, UserDescribeCommand, UserGrantCommand, UserCreateCommand, UserListCommand, UserDeleteCommand, UserResetPATCommand, UserGetPATCommand,
 } from '../src/commands/users.js';
 import { LIST_JSON_HELP_TEXT, QUERY_JSON_HELP_TEXT } from '../src/constants.js';
 
@@ -94,6 +94,32 @@ export function create() {
         .action(withCompatibilityCheck((options) => {
             try {
                 new UserListCommand(program).execute(options);
+            } catch (err) {
+                console.error(chalk.red(err.message));
+            }
+        }));
+    program.command('reset-pat')
+        .description('Invalidates personal access token (PAT) for a specified user within Cortex')
+        .option('--no-compat', 'Ignore API compatibility checks')
+        .option('--color [boolean]', 'Turn on/off colors for JSON output.', 'true')
+        .option('--profile <profile>', 'The profile to use')
+        .option('--user <user>', 'The user to reset personal access token')
+        .action(withCompatibilityCheck((options) => {
+            try {
+                new UserResetPATCommand(program).execute(options);
+            } catch (err) {
+                console.error(chalk.red(err.message));
+            }
+        }));
+    program.command('get-pat')
+        .description('Fetch personal access token (PAT) for a specified user within Cortex')
+        .option('--no-compat', 'Ignore API compatibility checks')
+        .option('--color [boolean]', 'Turn on/off colors for JSON output.', 'true')
+        .option('--profile <profile>', 'The profile to use')
+        .option('--user <user>', 'The user to reset personal access token (admins only)')
+        .action(withCompatibilityCheck((options) => {
+            try {
+                new UserGetPATCommand(program).execute(options);
             } catch (err) {
                 console.error(chalk.red(err.message));
             }
