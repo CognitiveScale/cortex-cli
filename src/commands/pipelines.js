@@ -5,7 +5,7 @@ import relativeTime from 'dayjs/plugin/relativeTime.js';
 import { loadProfile } from '../config.js';
 import Pipelines from '../client/pipelines.js';
 import {
- fileExists, printSuccess, printError, filterObject, parseObject, handleTable, printExtendedLogs, handleListFailure, handleDeleteFailure, getFilteredOutput,
+ fileExists, printSuccess, printError, parseObject, handleTable, printExtendedLogs, handleListFailure, handleDeleteFailure, getFilteredOutput,
 } from './utils.js';
 
 const debug = debugSetup('cortex:cli');
@@ -28,9 +28,9 @@ export const SavePipelineRepoCommand = class {
     debug('%s', repoObj);
     const repo = new Pipelines(profile.url).repos();
     try {
-      const response = repo.savePipelineRepo(options.project || profile.project, profile.token, repoObj);
+      const response = await repo.savePipelineRepo(options.project || profile.project, profile.token, repoObj);
       if (response.success) {
-        return printSuccess('Profile Repository saved', options);
+        return printSuccess('Pipeline Repository saved', options);
       }
       return printError(`Failed to save pipeline repository: ${response.status} ${response.message}`, options);
     } catch (err) {
@@ -103,10 +103,9 @@ export const DeletePipelineRepoCommand = class {
     debug('%s.executeDeleteProfileRepo(%s)', profile.name, pipelineRepoName);
     const repos = new Pipelines(profile.url).repos();
     try {
-      const response = repos.deletePipelineRepo(options.project || profile.project, profile.token, pipelineRepoName);
+      const response = await repos.deletePipelineRepo(options.project || profile.project, profile.token, pipelineRepoName);
       if (response.success) {
-        const result = filterObject(response, options);
-        return printSuccess(JSON.stringify(result, null, 2), options);
+        return printSuccess(response?.message ?? response, options);
       }
       return handleDeleteFailure(response, options, 'Pipeline Repository');
     } catch (err) {

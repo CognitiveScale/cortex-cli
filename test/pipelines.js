@@ -3,8 +3,11 @@ import mockedEnv from 'mocked-env';
 import nock from 'nock';
 import _ from 'lodash';
 import sinon from 'sinon';
-import { stripAnsi } from './utils.js';
+import { mkdtemp, writeFile } from 'node:fs/promises';
+import { join } from 'node:path';
+import { tmpdir } from 'node:os';
 import { create } from '../bin/cortex-pipelines.js';
+import { stripAnsi } from './utils.js';
 
 // import Pipelines from '../src/client/pipelines.js';
 // const { expect } = chai;
@@ -116,10 +119,65 @@ describe('Pipelines', () => {
       nock.isDone();
     });
 
-    // it('saves a pipeline repository  ', async () => {
-    // });
+    it('saves a pipeline repository  ', async () => {
+      const repo = {
+        name: 'repo1',
+        repo: exampleRepo,
+        branch: 'develop',
+      };
+      const response = {
+        success: true,
+        version: 1,
+        message: 'pipelineRepository repo1 saved.',
+      };
+      // save definition of 'repo' to temporary file
+      const dir = await mkdtemp(join(tmpdir(), 'tmp-'));
+      const filename = join(dir, 'repo1.json');
+      await writeFile(filename, JSON.stringify(repo));
+      // invoke the CLI
+      nock(serverUrl).post(/\/fabric\/v4\/projects\/.*\/pipeline-repositories/).reply(200, response);
+      await create().parseAsync(['node', 'pipelines', 'repos', 'save', filename, '--project', PROJECT]);
+      const output = getPrintedLines().join('');
+      const errs = getErrorLines().join('');
+      // verify response
+      chai.expect(output).to.contain('Pipeline Repository saved');
+      // eslint-disable-next-line no-unused-expressions
+      chai.expect(errs).to.be.empty;
+      nock.isDone();
+    });
 
-    // it('deletes a pipeline repository  ', async () => {
-    // });
+    it('deletes a pipeline repository  ', async () => {
+      const response = {
+        success: true,
+        message: 'Successfully deleted pipelineRepository repo1',
+      };
+      nock(serverUrl).delete(/\/fabric\/v4\/projects\/.*\/pipeline-repositories\/.*/).reply(200, response);
+      await create().parseAsync(['node', 'pipelines', 'repos', 'delete', 'repo1', '--project', PROJECT]);
+      const output = getPrintedLines().join('');
+      const errs = getErrorLines().join('');
+      chai.expect(output).to.contain(response.message);
+      // eslint-disable-next-line no-unused-expressions
+      chai.expect(errs).to.be.empty;
+      nock.isDone();
+    });
+
+    it('fails to delete a pipeline repository  ', async () => {
+      const response = {
+        success: false,
+        message: 'Failed to delete pipelineRepository repo1',
+        status: 503,
+      };
+      nock(serverUrl).delete(/\/fabric\/v4\/projects\/.*\/pipeline-repositories\/.*/).reply(200, response);
+      try {
+        await create().parseAsync(['node', 'pipelines', 'repos', 'delete', 'repo1', '--project', PROJECT]);
+      } catch (err) {
+        const output = getPrintedLines().join('');
+        const errs = getErrorLines().join('');
+        // eslint-disable-next-line no-unused-expressions
+        chai.expect(output).to.be.empty;
+        chai.expect(errs).to.contain('Pipeline Repository deletion failed: 503 Failed to delete pipelineRepository repo1.');
+        nock.isDone();
+      }
+    });
   });
 });
