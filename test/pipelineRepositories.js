@@ -6,11 +6,9 @@ import sinon from 'sinon';
 import { mkdtemp, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { tmpdir } from 'node:os';
-import { create } from '../bin/cortex-pipelines.js';
+import { create } from '../bin/cortex-pipelines-repos.js';
 import { stripAnsi } from './utils.js';
 
-// import Pipelines from '../src/client/pipelines.js';
-// const { expect } = chai;
 const PROJECT = 'project';
 
 describe('Pipelines', () => {
@@ -52,7 +50,7 @@ describe('Pipelines', () => {
     it('lists pipeline repositories - empty', async () => {
       const response = { success: true, pipelineRepositories: [] };
       nock(serverUrl).get(/\/fabric\/v4\/projects\/.*\/pipeline-repositories/).reply(200, response);
-      await create().parseAsync(['node', 'pipelines', 'repos', 'list', '--project', PROJECT]);
+      await create().parseAsync(['node', 'repos', 'list', '--project', PROJECT]);
       const output = getPrintedLines();
       const errs = getErrorLines();
       // eslint-disable-next-line no-unused-expressions
@@ -64,7 +62,7 @@ describe('Pipelines', () => {
     it('lists pipeline repositories as JSON - empty', async () => {
       const response = { success: true, pipelineRepositories: [] };
       nock(serverUrl).get(/\/fabric\/v4\/projects\/.*\/pipeline-repositories/).reply(200, response);
-      await create().parseAsync(['node', 'pipelines', 'repos', 'list', '--project', PROJECT, '--json']);
+      await create().parseAsync(['node', 'repos', 'list', '--project', PROJECT, '--json']);
       const output = getPrintedLines();
       const errs = getErrorLines();
       const roundTripped = JSON.parse(output.join(''));
@@ -84,7 +82,7 @@ describe('Pipelines', () => {
         ],
       };
       nock(serverUrl).get(/\/fabric\/v4\/projects\/.*\/pipeline-repositories.*/).reply(200, response);
-      await create().parseAsync(['node', 'pipelines', 'repos', 'list', '--project', PROJECT]);
+      await create().parseAsync(['node', 'repos', 'list', '--project', PROJECT]);
       const output = getPrintedLines().join('');
       const errs = getErrorLines().join('');
       chai.expect(output).to.contain('repo1');
@@ -109,7 +107,7 @@ describe('Pipelines', () => {
         },
       };
       nock(serverUrl).get(/\/fabric\/v4\/projects\/.*\/pipeline-repositories\/.*/).reply(200, response);
-      await create().parseAsync(['node', 'pipelines', 'repos', 'describe', 'repo1', '--project', PROJECT]);
+      await create().parseAsync(['node', 'repos', 'describe', 'repo1', '--project', PROJECT]);
       const output = getPrintedLines().join('');
       const errs = getErrorLines().join('');
       const description = JSON.parse(output);
@@ -136,7 +134,7 @@ describe('Pipelines', () => {
       await writeFile(filename, JSON.stringify(repo));
       // invoke the CLI
       nock(serverUrl).post(/\/fabric\/v4\/projects\/.*\/pipeline-repositories/).reply(200, response);
-      await create().parseAsync(['node', 'pipelines', 'repos', 'save', filename, '--project', PROJECT]);
+      await create().parseAsync(['node', 'repos', 'save', filename, '--project', PROJECT]);
       const output = getPrintedLines().join('');
       const errs = getErrorLines().join('');
       // verify response
@@ -152,7 +150,7 @@ describe('Pipelines', () => {
         message: 'Successfully deleted pipelineRepository repo1',
       };
       nock(serverUrl).delete(/\/fabric\/v4\/projects\/.*\/pipeline-repositories\/.*/).reply(200, response);
-      await create().parseAsync(['node', 'pipelines', 'repos', 'delete', 'repo1', '--project', PROJECT]);
+      await create().parseAsync(['node', 'repos', 'delete', 'repo1', '--project', PROJECT]);
       const output = getPrintedLines().join('');
       const errs = getErrorLines().join('');
       chai.expect(output).to.contain(response.message);
@@ -169,7 +167,7 @@ describe('Pipelines', () => {
       };
       nock(serverUrl).delete(/\/fabric\/v4\/projects\/.*\/pipeline-repositories\/.*/).reply(200, response);
       try {
-        await create().parseAsync(['node', 'pipelines', 'repos', 'delete', 'repo1', '--project', PROJECT]);
+        await create().parseAsync(['node', 'repos', 'delete', 'repo1', '--project', PROJECT]);
       } catch (err) {
         const output = getPrintedLines().join('');
         const errs = getErrorLines().join('');

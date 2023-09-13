@@ -3,7 +3,7 @@ import debugSetup from 'debug';
 import dayjs from 'dayjs';
 import relativeTime from 'dayjs/plugin/relativeTime.js';
 import { loadProfile } from '../config.js';
-import Pipelines from '../client/pipelines.js';
+import Pipelines from '../client/pipelineRepositories.js';
 import {
  fileExists, printSuccess, printError, parseObject, handleTable, printExtendedLogs, handleListFailure, handleDeleteFailure, getFilteredOutput,
 } from './utils.js';
