@@ -17,6 +17,7 @@ export function create() {
   const pipelines = new Command();
   pipelines.name('cortex pipelines');
   pipelines.description('Work with Cortex Pipelines');
+  pipelines.command('repos <cmd>', 'Work with Cortex Pipeline Repositories');
 
   // List
   pipelines
