@@ -26,7 +26,7 @@ export const SavePipelineRepoCommand = class {
     const repoDefStr = fs.readFileSync(pipelineRepoDefinition);
     const repoObj = parseObject(repoDefStr, options);
     debug('%s', repoObj);
-    const repo = new Pipelines(profile.url).repos();
+    const repo = new Pipelines(profile.url);
     try {
       const response = await repo.savePipelineRepo(options.project || profile.project, profile.token, repoObj);
       if (response.success) {
@@ -47,7 +47,7 @@ export const ListPipelineRepoCommand = class {
   async execute(options) {
     const profile = await loadProfile(options.profile);
     debug('%s.executeListPipelineRepos()', profile.name);
-    const repos = new Pipelines(profile.url).repos();
+    const repos = new Pipelines(profile.url);
     try {
       const response = await repos.listPipelineRepo(options.project || profile.project, profile.token, options.filter, options.limit, options.skip, options.sort);
       if (response.success) {
@@ -80,7 +80,7 @@ export const DescribePipelineRepoCommand = class {
   async execute(pipelineRepoName, options) {
     const profile = await loadProfile(options.profile);
     debug('%s.executeDescribePipelineRepo(%s)', profile.name, pipelineRepoName);
-    const repos = new Pipelines(profile.url).repos();
+    const repos = new Pipelines(profile.url);
     try {
       const response = await repos.describePipelineRepo(options.project || profile.project, profile.token, pipelineRepoName);
       if (response.success) {
@@ -101,7 +101,7 @@ export const DeletePipelineRepoCommand = class {
   async execute(pipelineRepoName, options) {
     const profile = await loadProfile(options.profile);
     debug('%s.executeDeleteProfileRepo(%s)', profile.name, pipelineRepoName);
-    const repos = new Pipelines(profile.url).repos();
+    const repos = new Pipelines(profile.url);
     try {
       const response = await repos.deletePipelineRepo(options.project || profile.project, profile.token, pipelineRepoName);
       if (response.success) {

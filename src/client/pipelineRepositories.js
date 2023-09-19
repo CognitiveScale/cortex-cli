@@ -2,11 +2,10 @@ import debugSetup from 'debug';
 import { got, defaultHeaders } from './apiutils.js';
 import { constructError, checkProject } from '../commands/utils.js';
 
-const PIPELINE_API = 'pipelines';
 const PIPELINE_REPO_API = 'pipeline-repositories';
 const debug = debugSetup('cortex:cli');
 
-class PipelineRepos {
+export default class PipelineRepos {
   constructor(cortexUrl) {
     this.cortexUrl = cortexUrl;
     this.endpoint = (projectId) => `${cortexUrl}/fabric/v4/projects/${projectId}/${PIPELINE_REPO_API}`;
@@ -69,16 +68,5 @@ class PipelineRepos {
     } catch (err) {
       return constructError(err);
     }
-  }
-}
-
-export default class Pipelines {
-  constructor(cortexUrl) {
-    this.cortexUrl = cortexUrl;
-    this.endpointV4 = (projectId) => `${cortexUrl}/fabric/v4/projects/${projectId}/${PIPELINE_API}`;
-  }
-
-  repos() {
-    return new PipelineRepos(this.cortexUrl);
   }
 }
