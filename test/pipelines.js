@@ -91,7 +91,7 @@ describe('Pipelines', () => {
         },
       };
       nock(serverUrl).get(/\/fabric\/v4\/projects\/.*\/pipelines\/.*/).reply(200, response);
-      await create().parseAsync(['node', 'pipelines', 'describe', 'pipeline1', '--project', PROJECT]);
+      await create().parseAsync(['node', 'pipelines', 'describe', 'pipeline1', 'repo1', '--project', PROJECT]);
       const output = getPrintedLines().join('');
       const errs = getErrorLines().join('');
       const description = JSON.parse(output);
@@ -109,7 +109,7 @@ describe('Pipelines', () => {
       };
       nock(serverUrl).get(/\/fabric\/v4\/projects\/.*\/pipelines\/.*/).reply(404, response);
       try {
-        await create().parseAsync(['node', 'pipelines', 'describe', 'nonExistentPipeline', '--project', PROJECT]);
+        await create().parseAsync(['node', 'pipelines', 'describe', 'nonExistentPipeline', 'repo1', '--project', PROJECT]);
       } catch (err) {
         const output = getPrintedLines().join('');
         const errs = getErrorLines().join('');
