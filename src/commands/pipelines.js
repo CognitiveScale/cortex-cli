@@ -54,12 +54,12 @@ export const DescribePipelineCommand = class {
     this.program = program;
   }
 
-  async execute(pipelineName, options) {
+  async execute(pipelineName, gitRepoName, options) {
     const profile = await loadProfile(options.profile);
-    debug('%s.executeDescribePipeline(%s)', profile.name, pipelineName);
+    debug('%s.executeDescribePipeline(%s, %s)', profile.name, pipelineName, gitRepoName);
     const pipelines = new Pipelines(profile.url);
     try {
-      const response = await pipelines.describePipeline(options.project || profile.project, profile.token, pipelineName);
+      const response = await pipelines.describePipeline(options.project || profile.project, profile.token, pipelineName, gitRepoName);
       if (response.success) {
         return getFilteredOutput(response.pipeline, options);
       }

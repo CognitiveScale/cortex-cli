@@ -42,7 +42,7 @@ export function create() {
 
   // Describe
   pipelines
-  .command('describe <pipelineName>')
+  .command('describe <pipelineName> <gitRepoName>')
   .alias('get')
   .description('Describe a Pipeline')
   .option('--no-compat', 'Ignore API compatibility checks')
@@ -50,9 +50,9 @@ export function create() {
   .option('--profile <profile>', 'The profile to use')
   .option('--project <project>', 'The project to use')
   .option('--json [searchPath]', QUERY_JSON_HELP_TEXT)
-  .action(withCompatibilityCheck((pipelineName, options) => {
+  .action(withCompatibilityCheck((pipelineName, gitRepoName, options) => {
     try {
-      return new DescribePipelineCommand(pipelines).execute(pipelineName, options);
+      return new DescribePipelineCommand(pipelines).execute(pipelineName, gitRepoName, options);
     } catch (err) {
       return printError(err.message);
     }
