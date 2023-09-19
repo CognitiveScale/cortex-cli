@@ -33,7 +33,6 @@ export default class Pipelines {
 
     async describePipeline(projectId, token, name, gitRepoName) {
       checkProject(projectId);
-      token = 'eyJhbGciOiJFZERTQSIsImtpZCI6Imo3WDFURV91cWNNVkItWnFhOVJsQ1h2M2VCbW1pdXRmRlpaZWM2eTZzNjAifQ.eyJiZWFyZXIiOiJ1c2VyIiwicm9sZXMiOlsiY29ydGV4LWFkbWlucyJdLCJleHAiOjE2OTUyMjk5NzgsImlzcyI6InRlY25vdHJlZS5jb20iLCJhdWQiOiJzZW5zYSIsInN1YiI6ImNvcnRleEBleGFtcGxlLmNvbSJ9.7ziigr4odNZ06yyJbMOWh1VijHXz5gOYSB8FHlhrkwivin0O8Pm-rJI4sWlsXK3k26azNpx7Z7m7h1nY1kWxCw';
       const endpoint = `${this.endpointV4(projectId)}/${encodeURIComponent(name)}`;
       debug('describePipeline(%s, %s) => %s', name, gitRepoName, endpoint);
       try {
