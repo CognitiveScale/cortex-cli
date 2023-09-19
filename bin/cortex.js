@@ -25,6 +25,7 @@ export function create() {
         .command('experiments <cmd>', 'Work with Cortex Experiments')        
         .command('missions <cmd>', 'Work with Cortex Missions')
         .command('models <cmd>', 'Work with Cortex Models')
+        .command('pipelines <cmd>', 'Work with Cortex Pipelines')
         .command('projects <cmd>', 'Work with Cortex Projects')
         .command('roles <cmd>', 'Work with a Cortex Roles')
         .command('secrets <cmd>', 'Work with Cortex Secrets')
