@@ -40,7 +40,7 @@ describe('Pipelines', () => {
       return _.flatten(errorSpy.args).map((s) => stripAnsi(s));
   }
 
-  const serverUrl = 'http://localhost:4445';
+  const serverUrl = 'http://localhost:8000';
 
   describe('Pipeline', () => {
     it('lists pipelines - empty', async () => {
