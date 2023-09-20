@@ -9,7 +9,7 @@ const debug = debugSetup('cortex:cli');
 export default class Pipelines {
     constructor(cortexUrl) {
       this.cortexUrl = cortexUrl;
-      this.endpointV4 = (projectId) => `http://localhost:4445/fabric/v4/projects/${projectId}/${PIPELINE_API}`;
+      this.endpointV4 = (projectId) => `${cortexUrl}/fabric/v4/projects/${projectId}/${PIPELINE_API}`;
     }
   
     async listPipelines(projectId, token, filter, limit, skip, sort) {
