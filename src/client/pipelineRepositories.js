@@ -69,4 +69,17 @@ export default class PipelineRepos {
       return constructError(err);
     }
   }
+
+  async updateRepoPipelines(projectId, token, pipelineRepoName) {
+    checkProject(projectId);
+    const endpoint = `${this.endpoint(projectId)}/${encodeURIComponent(pipelineRepoName)}/update`;
+    debug('updateRepoPipelines(%s) => %s', pipelineRepoName, endpoint);
+    try {
+      return await got.post(endpoint, {
+        headers: defaultHeaders(token),
+      }).json();
+    } catch (err) {
+      return constructError(err);
+    }
+  }
 }

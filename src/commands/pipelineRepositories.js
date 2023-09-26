@@ -113,3 +113,24 @@ export const DeletePipelineRepoCommand = class {
     }
   }
 };
+
+export const UpdateRepoPipelinesCommand = class {
+  constructor(program) {
+    this.program = program;
+  }
+
+  async execute(pipelineRepoName, options) {
+    const profile = await loadProfile(options.profile);
+    debug('%s.executeUpdateRepoPipelines(%s)', profile.name, pipelineRepoName);
+    const repos = new Pipelines(profile.url);
+    try {
+      const response = await repos.updateRepoPipelines(options.project || profile.project, profile.token, pipelineRepoName);
+      if (response.success) {
+        return getFilteredOutput(response.updateReport, options);
+      }
+      return printError(`Failed to update repo pipelines: ${response.status} ${response.message}`, options);
+    } catch (err) {
+      return printError(`Failed to update repo pipelines: ${err.status} ${err.message}`, options);
+    }
+  }
+};
