@@ -177,5 +177,33 @@ describe('Pipelines', () => {
         nock.isDone();
       }
     });
+
+    it('should update-pipelines', async () => {
+      const response = {
+        success: true,
+        updateReport: {
+          added: ['pipeline1'],
+          updated: ['pipeline2'],
+          deleted: ['pipeline3'],
+          failed: {
+            add: [],
+            delete: [],
+            update: [],
+          },
+        },
+      };
+      nock(serverUrl).post(/\/fabric\/v4\/projects\/.*\/pipeline-repositories\/.*\/update/).reply(200, response);
+      try {
+        await create().parseAsync(['node', 'repos', 'update-pipelines', 'repo1', '--project', PROJECT]);
+      } catch (err) {
+        const output = getPrintedLines().join('');
+        const errs = getErrorLines().join('');
+        const jsonOutput = JSON.parse(output);
+        // eslint-disable-next-line no-unused-expressions
+        chai.expect(errs).to.be.empty;
+        chai.expect(jsonOutput.success).to.equal(true);
+        nock.isDone();
+      }
+    });
   });
 });
