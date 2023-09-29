@@ -3,7 +3,11 @@ import esMain from 'es-main';
 import { Command } from 'commander';
 import { withCompatibilityCheck } from '../src/compatibility.js';
 import {
- ListPipelineRepoCommand, DescribePipelineRepoCommand, DeletePipelineRepoCommand, SavePipelineRepoCommand,
+  ListPipelineRepoCommand,
+  DescribePipelineRepoCommand,
+  DeletePipelineRepoCommand,
+  SavePipelineRepoCommand,
+  UpdateRepoPipelinesCommand,
 } from '../src/commands/pipelineRepositories.js';
 import {
  DEFAULT_LIST_SKIP_COUNT, DEFAULT_LIST_LIMIT_COUNT, DEFAULT_LIST_SORT_PARAMS, GET_DEFAULT_SORT_CLI_OPTION, LIST_JSON_HELP_TEXT, QUERY_JSON_HELP_TEXT,
@@ -83,6 +87,23 @@ export function create() {
     .action(withCompatibilityCheck((pipelineRepoDefinition, options) => {
       try {
         return new SavePipelineRepoCommand(repos).execute(pipelineRepoDefinition, options);
+      } catch (err) {
+        return printError(err.message);
+      }
+    }));
+
+    // Update pipelines
+    repos
+    .command('update-pipelines <pipelineRepoName>')
+    .description('Updates pipelines within Sensa catalog.')
+    .option('--no-compat', 'Ignore API compatibility checks')
+    .option('--color [boolean]', 'Turn on/off colors for JSON output.', 'true')
+    .option('--profile <profile>', 'The profile to use')
+    .option('--project <project>', 'The project to use')
+    .option('--json [searchPath]', QUERY_JSON_HELP_TEXT)
+    .action(withCompatibilityCheck((pipelineRepoName, options) => {
+      try {
+        return new UpdateRepoPipelinesCommand(repos).execute(pipelineRepoName, options);
       } catch (err) {
         return printError(err.message);
       }

@@ -113,3 +113,76 @@ export const DeletePipelineRepoCommand = class {
     }
   }
 };
+
+export const UpdateRepoPipelinesCommand = class {
+  constructor(program) {
+    this.program = program;
+  }
+
+  async execute(pipelineRepoName, options) {
+    const profile = await loadProfile(options.profile);
+    debug('%s.executeUpdateRepoPipelines(%s)', profile.name, pipelineRepoName);
+    const repos = new Pipelines(profile.url);
+    try {
+      const response = await repos.updateRepoPipelines(options.project || profile.project, profile.token, pipelineRepoName);
+      if (response.success) {
+        const result = response.updateReport;
+        if (options.json) {
+          return getFilteredOutput(result, options);
+        }
+        const tableSpec = [
+          { column: 'Added', field: 'added', width: 15 },
+          { column: 'Updated', field: 'updated', width: 15 },
+          { column: 'Deleted', field: 'deleted', width: 15 },
+          { column: 'Failed to Add', field: 'failedToAdd', width: 20 },
+          { column: 'Failed to Update', field: 'failedToUpdate', width: 20 },
+          { column: 'Failed to Delete', field: 'failedToDelete', width: 20 },
+        ];
+        const maxLength = Math.max(
+          result.added.length,
+          result.updated.length,
+          result.deleted.length,
+          result.failed.add.length,
+          result.failed.delete.length,
+          result.failed.update.length,
+        );
+        const transformedResult = [];
+        // eslint-disable-next-line no-plusplus
+        for (let i = 0; i < maxLength; i++) {
+          const obj = {};
+
+          if (result.added[i]) {
+            obj.added = result.added[i];
+          }
+          if (result.updated[i]) {
+            obj.updated = result.updated[i];
+          }
+          if (result.deleted[i]) {
+            obj.deleted = result.deleted[i];
+          }
+          if (result.failed.add[i]) {
+            obj.failedAdd = result.failed.add[i].pipelineName || '';
+          }
+          if (result.failed.update[i]) {
+            obj.failedUpdate = result.failed.update[i].pipelineName || '';
+          }
+          if (result.failed.delete[i]) {
+            obj.failedDelete = result.failed.delete[i].pipelineName || '';
+          }
+          transformedResult.push(obj);
+        }
+        return handleTable(tableSpec, transformedResult, (o) => ({
+          added: o.added,
+          updated: o.updated,
+          deleted: o.deleted,
+          failedToAdd: o.failedAdd,
+          failedToUpdate: o.failedUpdate,
+          failedToDelete: o.failedDelete,
+        }), 'Failed to update repo pipelines');
+      }
+      return printError(`Failed to update repo pipelines: ${response.status} ${response.message}`, options);
+    } catch (err) {
+      return printError(`Failed to update repo pipelines: ${err.status} ${err.message}`, options);
+    }
+  }
+};
