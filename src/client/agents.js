@@ -67,7 +67,7 @@ export default (class Agents {
             .catch((err) => constructError(err));
     }
 
-    async cancelActivation(projectId, token, activationId, inFlight) {
+    cancelActivation(projectId, token, activationId, inFlight) {
         checkProject(projectId);
         const endpoint = `${this.endpointV4(projectId)}/activations/${activationId}/cancel`;
         debug('cancelActivation(%s, %b) => %s', activationId, inFlight, endpoint);

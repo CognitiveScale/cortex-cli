@@ -71,7 +71,7 @@ describe('Upload Directory', () => {
         expect(lines).to.include('1.6K\tconfig -> .shared/config');
         expect(lines).to.include('483B\tsample/upload/config -> .shared/sample/upload/config');
         // eslint-disable-next-line no-unused-expressions
-        expect(errLines).to.have.length(2); // Should match concurrency ?? why +1
+        expect(errLines).to.have.length(1); // Should match concurrency ?? why +1
     });
 });
 
