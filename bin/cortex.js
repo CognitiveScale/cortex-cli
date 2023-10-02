@@ -56,6 +56,7 @@ export async function create(profileName) {
     const allCommands = [
         _toObject('actions <cmd>', 'Work with Cortex Actions'),
         _toObject('agents <cmd>', 'Work with Cortex Agents'),
+        _toObject('applications <cmd>', 'Work with Cortex Applications'),
         _toObject('assessments <cmd>', 'Work with Cortex Impact Assesments'),
         _toObject('campaigns <cmd>', 'Work with Cortex Campaigns'),
         _toObject('configure', 'Configure the Cortex CLI'),
@@ -72,6 +73,7 @@ export async function create(profileName) {
         _toObject('secrets <cmd>', 'Work with Cortex Secrets'),
         _toObject('sessions <cmd>', 'Work with Cortex Sessions'),
         _toObject('skills <cmd>', 'Work with Cortex Skills'),
+        _toObject('stereotypes <cmd>', 'Work with Skill Stereotypes'),
         _toObject('tasks <cmd>', 'Work with Cortex Tasks'),
         _toObject('types <cmd>', 'Work with Cortex Types'),
         _toObject('users <cmd>', 'Work with a Cortex Users'),
