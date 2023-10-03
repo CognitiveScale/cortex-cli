@@ -117,7 +117,7 @@ describe('Pipelines', () => {
       nock.isDone();
     });
 
-    it('saves a pipeline repository  ', async () => {
+    it('saves a pipeline repository', async () => {
       const repo = {
         name: 'repo1',
         repo: exampleRepo,
@@ -135,6 +135,33 @@ describe('Pipelines', () => {
       // invoke the CLI
       nock(serverUrl).post(/\/fabric\/v4\/projects\/.*\/pipeline-repositories/).reply(200, response);
       await create().parseAsync(['node', 'repos', 'save', filename, '--project', PROJECT]);
+      const output = getPrintedLines().join('');
+      const errs = getErrorLines().join('');
+      // verify response
+      chai.expect(output).to.contain('Pipeline Repository saved');
+      // eslint-disable-next-line no-unused-expressions
+      chai.expect(errs).to.be.empty;
+      nock.isDone();
+    });
+
+    it('saves a pipeline repository and skips connection check', async () => {
+      const repo = {
+        name: 'repo1',
+        repo: exampleRepo,
+        branch: 'develop',
+      };
+      const response = {
+        success: true,
+        version: 1,
+        message: 'pipelineRepository repo1 saved.',
+      };
+      // save definition of 'repo' to temporary file
+      const dir = await mkdtemp(join(tmpdir(), 'tmp-'));
+      const filename = join(dir, 'repo1.json');
+      await writeFile(filename, JSON.stringify(repo));
+      // invoke the CLI
+      nock(serverUrl).post(/\/fabric\/v4\/projects\/.*\/pipeline-repositories/).reply(200, response);
+      await create().parseAsync(['node', 'repos', 'save', filename, '--project', PROJECT, '--skip-connection-check']);
       const output = getPrintedLines().join('');
       const errs = getErrorLines().join('');
       // verify response
