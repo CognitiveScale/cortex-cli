@@ -30,9 +30,12 @@ export default class PipelineRepos {
     }
   }
 
-  async savePipelineRepo(projectId, token, repoObj) {
+  async savePipelineRepo(projectId, token, repoObj, skipConnectionCheck) {
     checkProject(projectId);
-    const endpoint = `${this.endpoint(projectId)}`;
+    let endpoint = `${this.endpoint(projectId)}`;
+    if (skipConnectionCheck) {
+      endpoint = `${endpoint}?skipConnectionCheck=true`;
+    }
     debug('savePipelineRepo(%s) => %s', repoObj.name, endpoint);
     try {
       return await got.post(endpoint, {

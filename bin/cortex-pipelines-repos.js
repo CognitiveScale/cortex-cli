@@ -82,8 +82,8 @@ export function create() {
     .option('--color [boolean]', 'Turn on/off colors for JSON output.', 'true')
     .option('--profile <profile>', 'The profile to use')
     .option('--project <project>', 'The project to use')
+    .option('--skip-connection-check', 'Skip connection check to Pipeline Repository prior to saving Pipeline Repository.')
     .option('-y, --yaml', 'Use YAML for Pipeline Repository definition format')
-    // TODO: should this have CLI args for <repo> & <branch>??
     .action(withCompatibilityCheck((pipelineRepoDefinition, options) => {
       try {
         return new SavePipelineRepoCommand(repos).execute(pipelineRepoDefinition, options);

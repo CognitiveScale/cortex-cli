@@ -28,7 +28,7 @@ export const SavePipelineRepoCommand = class {
     debug('%s', repoObj);
     const repo = new Pipelines(profile.url);
     try {
-      const response = await repo.savePipelineRepo(options.project || profile.project, profile.token, repoObj);
+      const response = await repo.savePipelineRepo(options.project || profile.project, profile.token, repoObj, options.skipConnectionCheck);
       if (response.success) {
         return printSuccess('Pipeline Repository saved', options);
       }
