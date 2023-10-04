@@ -45,6 +45,28 @@ export default class Pipelines {
       }
     }
 
+    async runPipeline(projectId, token, name, gitRepoName, params) {
+      checkProject(projectId);
+      const endpoint = `${this.endpointV4(projectId)}/${encodeURIComponent(name)}/run`;
+      debug('runPipeline(%s) => %s', name, endpoint);
+      try {
+        return await got.post(endpoint, {
+          headers: defaultHeaders(token),
+          json: { gitRepoName, ...params },
+        }).json();
+      } catch (err) {
+        return constructError(err);
+      }
+    }
+
+    async describePipelineRun(projectId, token, name, runId) {
+
+    }
+
+    async listPipelineRuns(projectId, token, name) {
+
+    }
+
     repos() {
       return new PipelineRepos(this.cortexUrl);
     }
