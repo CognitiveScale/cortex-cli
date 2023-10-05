@@ -101,7 +101,7 @@ export function create() {
     .option('--profile <profile>', 'The profile to use')
     .option('--project <project>', 'The project to use')
     .option('--json [searchPath]', QUERY_JSON_HELP_TEXT)
-    .option('--skill <skillName>', 'Name of the underlying Skill to use for running the Pipeline'')
+    .option('--skill <skillName>', 'Name of the underlying Skill in the same Project to use for running the Pipeline')
     .action(withCompatibilityCheck((pipelineRepoName, options) => {
       try {
         return new UpdateRepoPipelinesCommand(repos).execute(pipelineRepoName, options);

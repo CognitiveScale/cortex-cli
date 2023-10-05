@@ -208,26 +208,32 @@ describe('Pipelines', () => {
   });
 
   it('should update-pipelines with custom Skill', async () => {
-      const response = {
-        success: true,
-        pipelineRepositories: [
-          { name: 'repo1', repo: exampleRepo, branch: 'main' },
-          { name: 'repo2', repo: exampleRepo, branch: 'develop' },
-        ],
-      };
-      nock(serverUrl)
-          .post(/\/fabric\/v4\/projects\/.*\/pipeline-repositories\/.*\/update/)
-          .query({ skill: 'my-skill' })
-          .reply(200, response);
-      await create().parseAsync(['node', 'repos', 'list', '--project', PROJECT, '--skill', 'my-skill']);
-      const output = getPrintedLines().join('');
-      const errs = getErrorLines().join('');
-      chai.expect(output).to.contain('repo1');
-      chai.expect(output).to.contain('main');
-      chai.expect(output).to.contain('repo2');
-      chai.expect(output).to.contain('develop');
-      // eslint-disable-next-line no-unused-expressions
-      chai.expect(errs).to.be.empty;
-      nock.isDone();
+    const response = {
+      success: true,
+      updateReport: {
+        added: ['pipeline1'],
+        updated: ['pipeline2'],
+        deleted: ['pipeline3'],
+        failed: {
+          add: [],
+          delete: [],
+          update: [],
+        },
+      },
+    };
+
+    nock(serverUrl)
+      .post(/\/fabric\/v4\/projects\/.*\/pipeline-repositories\/.*\/update/)
+      .query({ skill: 'my-skill' })
+      .reply(200, response);
+    await create().parseAsync(['node', 'repos', 'update-pipelines', 'repo1', '--project', PROJECT, '--skill', 'my-skill']);
+    const output = getPrintedLines().join('');
+    const errs = getErrorLines().join('');
+    chai.expect(output).to.contain('pipeline1');
+    chai.expect(output).to.contain('pipeline2');
+    chai.expect(output).to.contain('pipeline3');
+    // eslint-disable-next-line no-unused-expressions
+    chai.expect(errs).to.be.empty;
+    nock.isDone();
   });
 });
