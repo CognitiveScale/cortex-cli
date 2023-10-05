@@ -124,7 +124,7 @@ export const UpdateRepoPipelinesCommand = class {
     debug('%s.executeUpdateRepoPipelines(%s)', profile.name, pipelineRepoName);
     const repos = new Pipelines(profile.url);
     try {
-      const response = await repos.updateRepoPipelines(options.project || profile.project, profile.token, pipelineRepoName);
+      const response = await repos.updateRepoPipelines(options.project || profile.project, profile.token, pipelineRepoName, options.skill);
       if (response.success) {
         const result = response.updateReport;
         if (options.json) {
