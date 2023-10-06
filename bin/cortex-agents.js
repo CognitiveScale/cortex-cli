@@ -25,6 +25,7 @@ import {
     ListServicesCommand,
     SaveAgentCommand,
     UndeployAgentCommand,
+    CancelActivationCommand,
 } from '../src/commands/agents.js';
 
 export function create() {
@@ -173,6 +174,23 @@ export function create() {
                 console.error(chalk.red(err.message));
             }
         }));
+// Cancel activation
+    program
+        .command('cancel-activation <activationId>')
+        .description('Cancel pending/running activation')
+        .option('--no-compat', 'Ignore API compatibility checks')
+        .option('--color [boolean]', 'Turn on/off colors for JSON output.', 'true')
+        .option('--profile <profile>', 'The profile to use')
+        .option('--project <project>', 'The project to use')
+        .option('--inFlight [boolean]', 'Leave inflight jobs running', false)
+        .action(withCompatibilityCheck((activationId, options) => {
+            try {
+                new CancelActivationCommand(program).execute(activationId, options);
+            } catch (err) {
+                console.error(chalk.red(err.message));
+            }
+        }));
+
 // List activations
     program
         .command('list-activations')

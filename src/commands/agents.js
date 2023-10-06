@@ -19,7 +19,7 @@ import {
     printError,
     printExtendedLogs,
     printSuccess,
-    printTable, writeOutput, printErrorDetails,
+    printTable, writeOutput, printErrorDetails, constructError,
 } from './utils.js';
 
 const debug = debugSetup('cortex:cli');
@@ -163,6 +163,26 @@ export class GetActivationCommand {
         });
     }
 }
+export class CancelActivationCommand {
+    constructor(program) {
+        this.program = program;
+    }
+
+    async execute(activationId, options) {
+        const profile = await loadProfile(options.profile);
+        debug('%s.cancelActivation(%s, %s)', profile.name, activationId, JSON.stringify(options));
+        const { inFlight, project } = options;
+        const agents = new Agents(profile.url);
+        try {
+            const response = await agents.cancelActivation(project || profile.project, profile.token, activationId, inFlight);
+            printSuccess(response.message);
+        } catch (err) {
+            const { message } = constructError(err);
+            printError(`Failed to cancel activation ${activationId}: ${message}`, options);
+        }
+    }
+}
+
 export class ListActivationsCommand {
     constructor(program) {
         this.program = program;

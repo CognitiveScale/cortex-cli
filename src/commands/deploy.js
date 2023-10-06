@@ -17,6 +17,7 @@ import _ from 'lodash';
 import debugSetup from 'debug';
 import path from 'path';
 import fs from 'fs';
+// eslint-disable-next-line import/no-unresolved
 import getStream from 'get-stream';
 import * as yauzl from 'yauzl';
 import yaml from 'js-yaml';
