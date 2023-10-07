@@ -224,7 +224,7 @@ describe('Pipelines', () => {
 
     nock(serverUrl)
       .post(/\/fabric\/v4\/projects\/.*\/pipeline-repositories\/.*\/update/)
-      .query({ skill: 'my-skill' })
+      .query({ skillName: 'my-skill' })
       .reply(200, response);
     await create().parseAsync(['node', 'repos', 'update-pipelines', 'repo1', '--project', PROJECT, '--skill', 'my-skill']);
     const output = getPrintedLines().join('');

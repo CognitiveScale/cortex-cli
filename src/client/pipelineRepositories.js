@@ -75,7 +75,7 @@ export default class PipelineRepos {
     const params = {};
     const endpoint = `${this.endpoint(projectId)}/${encodeURIComponent(pipelineRepoName)}/update`;
     if (skill) {
-      params.skill = skill;
+      params.skillName = skill;
     }
     debug('updateRepoPipelines(%s) => %s', pipelineRepoName, endpoint);
     try {
