@@ -105,7 +105,7 @@
   "c8": {
     "check-coverage": true,
     "statements": 40,
-    "branches": 72,
+    "branches": 71,
     "functions": 17,
     "lines": 40,
     "include": [

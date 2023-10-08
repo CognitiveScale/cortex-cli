@@ -19,13 +19,20 @@ export const SavePipelineRepoCommand = class {
   async execute(pipelineRepoDefinition, options) {
     const profile = await loadProfile(options.profile);
     debug('%s.executeSavePipelineRepoDefinition(%s)', profile.name, pipelineRepoDefinition);
-    if (!fileExists(pipelineRepoDefinition)) {
+    let repoObj = {};
+    if (pipelineRepoDefinition && !fileExists(pipelineRepoDefinition)) {
       printError(`File does not exist at: ${pipelineRepoDefinition}`);
+    } else {
+      const repoDefStr = fs.readFileSync(pipelineRepoDefinition);
+      repoObj = parseObject(repoDefStr, options);
     }
-
-    const repoDefStr = fs.readFileSync(pipelineRepoDefinition);
-    const repoObj = parseObject(repoDefStr, options);
     debug('%s', repoObj);
+
+    // Take options as overrides if both are provided..
+    if (options?.name) { repoObj.name = options.name; }
+    if (options?.repo) { repoObj.repo = options.repo; }
+    if (options?.branch) { repoObj.branch = options.branch; }
+
     const repo = new Pipelines(profile.url);
     try {
       const response = await repo.savePipelineRepo(options.project || profile.project, profile.token, repoObj);

@@ -76,12 +76,15 @@ export function create() {
 
    // Save
   repos
-    .command('save <pipelineRepoDefinition>')
+    .command('save [pipelineRepoDefinition]')
     .description('Save a Pipeline Repository definition. Takes JSON file by default.')
     .option('--no-compat', 'Ignore API compatibility checks')
     .option('--color [boolean]', 'Turn on/off colors for JSON output.', 'true')
     .option('--profile <profile>', 'The profile to use')
     .option('--project <project>', 'The project to use')
+    .option('--name <name>', 'Pipeline repository name')
+    .option('--repo <repo>', 'Repository URL or use "mc://<content key>" for a bundle.')
+    .option('--branch <branch>', 'Git branch to checkout')
     .option('-y, --yaml', 'Use YAML for Pipeline Repository definition format')
     // TODO: should this have CLI args for <repo> & <branch>??
     .action(withCompatibilityCheck((pipelineRepoDefinition, options) => {
