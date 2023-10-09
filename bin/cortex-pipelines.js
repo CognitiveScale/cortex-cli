@@ -6,6 +6,7 @@ import {
   DescribePipelineCommand,
   RunPipelineCommand,
   DescribePipelineRunCommand,
+  ListPipelineRunsCommand,
 } from '../src/commands/pipelines.js';
 import { withCompatibilityCheck } from '../src/compatibility.js';
 import {
@@ -73,6 +74,8 @@ export function create() {
   .option('--project <project>', 'The project to use')
   .option('--params <params>', 'JSON params to send to the action')
   .option('--params-file <paramsFile>', 'A file containing either JSON or YAML formatted params')
+  .option('--commit <commit>', 'Git SHA for pipeline repository')
+  .option('--block <block>', 'Block name to run a specific block')
   .action(withCompatibilityCheck((pipelineName, gitRepoName, options) => {
     try {
       return new RunPipelineCommand(pipelines).execute(pipelineName, gitRepoName, options);
@@ -83,7 +86,7 @@ export function create() {
 
   // Describe Pipeline Run
   pipelines
-  .command('describe-run <pipelineName> <runId>')
+  .command('describe-run <pipelineName> <gitRepoName> <runId>')
   .alias('get')
   .description('Describe a Pipeline Run')
   .option('--no-compat', 'Ignore API compatibility checks')
@@ -91,9 +94,9 @@ export function create() {
   .option('--profile <profile>', 'The profile to use')
   .option('--project <project>', 'The project to use')
   .option('--json [searchPath]', QUERY_JSON_HELP_TEXT)
-  .action(withCompatibilityCheck((pipelineName, options) => {
+  .action(withCompatibilityCheck((pipelineName, gitRepoName, runId, options) => {
     try {
-      return new DescribePipelineRunCommand(pipelines).execute(pipelineName, runId, options);
+      return new DescribePipelineRunCommand(pipelines).execute(pipelineName, gitRepoName, runId, options);
     } catch (err) {
       return printError(err.message);
     }
@@ -101,7 +104,7 @@ export function create() {
 
   // List Pipeline Run
   pipelines
-  .command('list-runs <pipelineName>')
+  .command('list-runs <pipelineName> <gitRepoName>')
   .alias('get')
   .description('Describe a Pipeline Run')
   .option('--no-compat', 'Ignore API compatibility checks')
@@ -109,9 +112,9 @@ export function create() {
   .option('--profile <profile>', 'The profile to use')
   .option('--project <project>', 'The project to use')
   .option('--json [searchPath]', QUERY_JSON_HELP_TEXT)
-  .action(withCompatibilityCheck((pipelineName, options) => {
+  .action(withCompatibilityCheck((pipelineName, gitRepoName, options) => {
     try {
-      return new DescribePipelineRunCommand(pipelines).execute(pipelineName, options);
+      return new ListPipelineRunsCommand(pipelines).execute(pipelineName, gitRepoName, options);
     } catch (err) {
       return printError(err.message);
     }

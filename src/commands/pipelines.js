@@ -1,6 +1,7 @@
 import debugSetup from 'debug';
 import fs from 'fs';
 import dayjs from 'dayjs';
+import _ from 'lodash';
 import relativeTime from 'dayjs/plugin/relativeTime.js';
 import { loadProfile } from '../config.js';
 import Pipelines from '../client/pipelines.js';
@@ -96,7 +97,7 @@ export const RunPipelineCommand = class {
     }
     const pipelines = new Pipelines(profile.url);
     try {
-      const response = await pipelines.runPipeline(options.project || profile.project, profile.token, pipelineName, gitRepoName, params);
+      const response = await pipelines.runPipeline(options.project || profile.project, profile.token, pipelineName, gitRepoName, params, options);
       if (response.success) {
         return getFilteredOutput(response, options);
       }
@@ -112,14 +113,14 @@ export const DescribePipelineRunCommand = class {
     this.program = program;
   }
 
-  async execute(pipelineName, runId, options) {
+  async execute(pipelineName, gitRepoName, runId, options) {
     const profile = await loadProfile(options.profile);
     debug('%s.executeRunPipeline(%s, %s)', profile.name, pipelineName, runId);
     const pipelines = new Pipelines(profile.url);
     try {
-      const response = await pipelines.describePipelineRun(options.project || profile.project, profile.token, pipelineName, runId);
+      const response = await pipelines.describePipelineRun(options.project || profile.project, profile.token, pipelineName, gitRepoName, runId);
       if (response.success) {
-        return getFilteredOutput(response.pipeline, options);
+        return getFilteredOutput(response, options);
       }
       return printError(`Failed to describe pipeline run: ${response.status} ${response.message}`, options);
     } catch (err) {
@@ -133,18 +134,43 @@ export const ListPipelineRunsCommand = class {
     this.program = program;
   }
 
-  async execute(pipelineName, runId, options) {
+  async execute(pipelineName, gitRepoName, options) {
     const profile = await loadProfile(options.profile);
-    debug('%s.executeListPipelineRuns(%s, %s)', profile.name, pipelineName, runId);
+    debug('%s.executeListPipelineRuns(%s, %s)', profile.name, pipelineName);
     const pipelines = new Pipelines(profile.url);
     try {
-      const response = await pipelines.listPipelineRuns(options.project || profile.project, profile.token, pipelineName);
+      const response = await pipelines.listPipelineRuns(options.project || profile.project, profile.token, pipelineName, gitRepoName);
       if (response.success) {
-        return getFilteredOutput(response.pipeline, options);
-      }
-      return printError(`Failed to list pipeline runs: ${response.status} ${response.message}`, options);
+        const result = response.activations;
+        // TODO remove --query on deprecation
+        if (options.json || options.query) {
+            return getFilteredOutput(result, options);
+        } 
+        printExtendedLogs(result, options);
+        const tableSpec = [
+            { column: 'Name', field: 'name', width: 30 },
+            { column: 'Run Id', field: 'activationId', width: 40 },
+            { column: 'Status', field: 'status', width: 20 },
+            { column: 'Started', field: 'start', width: 65 },
+        ];
+        const genName = (o) => {
+            if (o.agentName) {
+                return `${o.agentName} (Agent)`;
+            }
+            if (o.skillName) {
+                return `${o.skillName} (Skill)`;
+            }
+            return '-';
+        };
+        return handleTable(tableSpec, _.map(result, (o) => ({
+            ...o,
+            name: genName(o),
+            start: o.start ? dayjs(o.start).fromNow() : '-',
+        })), null, 'No activations found');
+    }
+    return handleListFailure(response, options, 'Activations');
     } catch (err) {
-      return printError(`Failed to list pipeline runs: ${err.status} ${err.message}`, options);
+      return printError(`Failed to list activations: ${err.status} ${err.message}`, options);
     }
   }
 };
