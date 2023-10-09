@@ -12,6 +12,10 @@ import {
     handleListFailure,
     getFilteredOutput,
     parseObject,
+    filterObject,
+    getQueryOptions,
+    printSuccess,
+    printTable,
 } from './utils.js';
 
 const debug = debugSetup('cortex:cli');
@@ -120,11 +124,26 @@ export const DescribePipelineRunCommand = class {
     try {
       const response = await pipelines.describePipelineRun(options.project || profile.project, profile.token, pipelineName, gitRepoName, runId);
       if (response.success) {
-        return getFilteredOutput(response, options);
+        if (options.report && !options.json) {
+            const result = filterObject(response.result, getQueryOptions(options));
+            const tableSpec = [
+                { column: 'Name', field: 'name', width: 40 },
+                { column: 'Title', field: 'title', width: 40 },
+                { column: 'Type', field: 'type', width: 20 },
+                { column: 'Status', field: 'status', width: 20 },
+                { column: 'Elapsed (ms)', field: 'elapsed', width: 30 },
+            ];
+            printSuccess(`Status: ${_.get(result, 'status')}`);
+            printSuccess(`Elapsed Time (ms): ${_.get(result, 'elapsed')}`);
+            printTable(tableSpec, _.sortBy(_.get(result, 'transits'), ['start', 'end']));
+        } else {
+            getFilteredOutput(response.result, options);
+        }
+      } else {
+        printError(`Failed to desribe pipeline run ${runId}: ${response.message}`, options);
       }
-      return printError(`Failed to describe pipeline run: ${response.status} ${response.message}`, options);
     } catch (err) {
-      return printError(`Failed to describe pipeline run: ${err.status} ${err.message}`, options);
+      printError(`Failed to describe pipeline run ${runId}: ${err.status} ${err.message}`, options);
     }
   }
 };
@@ -144,8 +163,8 @@ export const ListPipelineRunsCommand = class {
         const result = response.activations;
         // TODO remove --query on deprecation
         if (options.json || options.query) {
-            return getFilteredOutput(result, options);
-        } 
+          return getFilteredOutput(result, options);
+        }
         printExtendedLogs(result, options);
         const tableSpec = [
             { column: 'Name', field: 'name', width: 30 },
@@ -166,11 +185,11 @@ export const ListPipelineRunsCommand = class {
             ...o,
             name: genName(o),
             start: o.start ? dayjs(o.start).fromNow() : '-',
-        })), null, 'No activations found');
+        })), null, 'No pipeline runs found');
     }
-    return handleListFailure(response, options, 'Activations');
+    return handleListFailure(response, options, 'PipelineRuns');
     } catch (err) {
-      return printError(`Failed to list activations: ${err.status} ${err.message}`, options);
+      return printError(`Failed to list pipelne runs: ${err.status} ${err.message}`, options);
     }
   }
 };
