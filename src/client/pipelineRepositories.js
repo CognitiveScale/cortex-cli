@@ -70,13 +70,18 @@ export default class PipelineRepos {
     }
   }
 
-  async updateRepoPipelines(projectId, token, pipelineRepoName) {
+  async updateRepoPipelines(projectId, token, pipelineRepoName, skill) {
     checkProject(projectId);
+    const params = {};
     const endpoint = `${this.endpoint(projectId)}/${encodeURIComponent(pipelineRepoName)}/update`;
+    if (skill) {
+      params.skillName = skill;
+    }
     debug('updateRepoPipelines(%s) => %s', pipelineRepoName, endpoint);
     try {
       return await got.post(endpoint, {
         headers: defaultHeaders(token),
+        searchParams: params,
       }).json();
     } catch (err) {
       return constructError(err);

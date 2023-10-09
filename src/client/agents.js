@@ -67,6 +67,19 @@ export default (class Agents {
             .catch((err) => constructError(err));
     }
 
+    cancelActivation(projectId, token, activationId, inFlight) {
+        checkProject(projectId);
+        const endpoint = `${this.endpointV4(projectId)}/activations/${activationId}/cancel`;
+        debug('cancelActivation(%s, %b) => %s', activationId, inFlight, endpoint);
+        const opts = {
+            headers: defaultHeaders(token),
+        };
+        if (inFlight) {
+            opts.searchParams = { inFlight };
+        }
+        return got.post(endpoint, opts).json();
+    }
+
     listActivations(projectId, token, params) {
         checkProject(projectId);
         const endpoint = `${this.endpointV4(projectId)}/activations`;
