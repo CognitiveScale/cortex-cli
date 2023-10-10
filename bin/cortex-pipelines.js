@@ -1,7 +1,13 @@
 #!/usr/bin/env node
 import esMain from 'es-main';
 import { Command } from 'commander';
-import { ListPipelineCommand, DescribePipelineCommand } from '../src/commands/pipelines.js';
+import {
+  ListPipelineCommand,
+  DescribePipelineCommand,
+  RunPipelineCommand,
+  DescribePipelineRunCommand,
+  ListPipelineRunsCommand,
+} from '../src/commands/pipelines.js';
 import { withCompatibilityCheck } from '../src/compatibility.js';
 import {
   LIST_JSON_HELP_TEXT,
@@ -53,6 +59,62 @@ export function create() {
   .action(withCompatibilityCheck((pipelineName, gitRepoName, options) => {
     try {
       return new DescribePipelineCommand(pipelines).execute(pipelineName, gitRepoName, options);
+    } catch (err) {
+      return printError(err.message);
+    }
+  }));
+  
+  // Run Pipeline
+  pipelines
+  .command('run <pipelineName> <gitRepoName>')
+  .description('Run a Pipeline')
+  .option('--no-compat', 'Ignore API compatibility checks')
+  .option('--color [boolean]', 'Turn on/off colors for JSON output.', 'true')
+  .option('--profile <profile>', 'The profile to use')
+  .option('--project <project>', 'The project to use')
+  .option('--params <params>', 'JSON params to send to the action')
+  .option('--params-file <paramsFile>', 'A file containing either JSON or YAML formatted params')
+  .option('--commit <commit>', 'Git SHA for pipeline repository')
+  .option('--block <block>', 'Block name to run a specific block')
+  .action(withCompatibilityCheck((pipelineName, gitRepoName, options) => {
+    try {
+      return new RunPipelineCommand(pipelines).execute(pipelineName, gitRepoName, options);
+    } catch (err) {
+      return printError(err.message);
+    }
+  }));
+
+  // Describe Pipeline Run
+  pipelines
+  .command('describe-run <pipelineName> <gitRepoName> <runId>')
+  .alias('get')
+  .description('Describe a Pipeline Run')
+  .option('--no-compat', 'Ignore API compatibility checks')
+  .option('--color [boolean]', 'Turn on/off colors for JSON output.', 'true')
+  .option('--profile <profile>', 'The profile to use')
+  .option('--project <project>', 'The project to use')
+  .option('--json [searchPath]', QUERY_JSON_HELP_TEXT)
+  .action(withCompatibilityCheck((pipelineName, gitRepoName, runId, options) => {
+    try {
+      return new DescribePipelineRunCommand(pipelines).execute(pipelineName, gitRepoName, runId, options);
+    } catch (err) {
+      return printError(err.message);
+    }
+  }));
+
+  // List Pipeline Run
+  pipelines
+  .command('list-runs <pipelineName> <gitRepoName>')
+  .alias('get')
+  .description('Describe a Pipeline Run')
+  .option('--no-compat', 'Ignore API compatibility checks')
+  .option('--color [boolean]', 'Turn on/off colors for JSON output.', 'true')
+  .option('--profile <profile>', 'The profile to use')
+  .option('--project <project>', 'The project to use')
+  .option('--json [searchPath]', QUERY_JSON_HELP_TEXT)
+  .action(withCompatibilityCheck((pipelineName, gitRepoName, options) => {
+    try {
+      return new ListPipelineRunsCommand(pipelines).execute(pipelineName, gitRepoName, options);
     } catch (err) {
       return printError(err.message);
     }

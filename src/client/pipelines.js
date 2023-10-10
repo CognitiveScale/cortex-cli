@@ -45,6 +45,54 @@ export default class Pipelines {
       }
     }
 
+    async runPipeline(projectId, token, name, gitRepoName, params, options) {
+      checkProject(projectId);
+      const endpoint = `${this.endpointV4(projectId)}/${encodeURIComponent(name)}/run`;
+      debug('runPipeline(%s, %s) => %s', name, gitRepoName, endpoint);
+      const { commit, block } = options;
+      const body = { gitRepoName, ...params };
+      if (commit) {
+        body.commit = commit;
+      }
+      if (block) {
+        body.block = block;
+      }
+      try {
+        return await got.post(endpoint, {
+          headers: defaultHeaders(token),
+          json: body,
+        }).json();
+      } catch (err) {
+        return constructError(err);
+      }
+    }
+
+    async describePipelineRun(projectId, token, name, gitRepoName, runId) {
+      checkProject(projectId);
+      const endpoint = `${this.endpointV4(projectId)}/${encodeURIComponent(name)}/run/${runId}?gitRepoName=${gitRepoName}`;
+      debug('describePipeline(%s, %s) => %s', name, gitRepoName, endpoint);
+      try {
+        return await got.get(endpoint, {
+          headers: defaultHeaders(token),
+        }).json();
+      } catch (err) {
+        return constructError(err);
+      }
+    }
+
+    async listPipelineRuns(projectId, token, name, gitRepoName) {
+      checkProject(projectId);
+      const endpoint = `${this.endpointV4(projectId)}/${encodeURIComponent(name)}/run?gitRepoName=${gitRepoName}`;
+      debug('listPipelineRuns(%s, %s) => %s', name, gitRepoName, endpoint);
+      try {
+        return await got.get(endpoint, {
+          headers: defaultHeaders(token),
+        }).json();
+      } catch (err) {
+        return constructError(err);
+      }
+    }
+
     repos() {
       return new PipelineRepos(this.cortexUrl);
     }

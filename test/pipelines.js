@@ -119,5 +119,84 @@ describe('Pipelines', () => {
         nock.isDone();
       }
     });
+
+    xit('trigger pipeline run', async () => {
+      const response = {
+        success: true,
+        activationId: '3d77f2d3-90ef-4061-a17d-fa2aecb3c6a4',
+      };
+      nock(serverUrl).post(/\/fabric\/v4\/projects\/.*\/pipelines\/.*\/run/).reply(200, response);
+      await create().parseAsync(['node', 'pipelines', 'run', 'pipeline1', 'repo1', '--project', PROJECT]);
+      const output = getPrintedLines().join('');
+      const errs = getErrorLines().join('');
+      const description = JSON.parse(output);
+      chai.expect(description).to.deep.equal(response);
+      // eslint-disable-next-line no-unused-expressions
+      chai.expect(errs).to.be.empty;
+      nock.isDone();
+    });
+
+    xit('list pipeline runs', async () => {
+      const response = {
+        success: true,
+        activations: [
+            {
+                activationId: '4ea4199-1590-46ca-b49d-2f2574ef5873',
+                status: 'COMPLETE',
+                start: 1696875227868,
+                end: 1696875239664,
+                agentName: 'toy-pipeline',
+            },
+          ],
+      };
+      nock(serverUrl).get(/\/fabric\/v4\/projects\/.*\/pipelines\/.*\/run/).query({ gitRepoName: 'repo1' }).reply(200, response);
+      await create().parseAsync(['node', 'pipelines', 'list-runs', 'pipeline1', 'repo1', '--project', PROJECT]);
+      const errs = getErrorLines().join('');
+      // eslint-disable-next-line no-unused-expressions
+      chai.expect(errs).to.be.empty;
+      nock.isDone();
+    });
+
+    xit('describe pipeline run', async () => {
+      const response = {
+        success: true,
+        agentName: 'toy-pipeline',
+        channelId: 'd9e97efc-c663-43e7-a435-2b85d6977d1c',
+        payload: {
+            config: '/app/conf/spark-conf-sensa-data-pipeline.json',
+            app_command: [
+                '--var',
+                'key=value',
+                '--pipeline',
+                'claro_pipeline',
+                '--config',
+                'config_catalog.yml',
+                '.',
+                '--repo',
+                'git@github.com:CognitiveScale/sensa-data-pipelines.git',
+                '--block',
+                'someblock',
+            ],
+        },
+        projectId: 'mc-test',
+        requestId: '54ea4199-1590-46ca-b49d-2f2574ef5873',
+        serviceName: 'input',
+        sessionId: '54ea4199-1590-46ca-b49d-2f2574ef5873',
+        sync: false,
+        timestamp: 1696875227736,
+        token: 'eyJhbGciOiJxm_K3fAA',
+        username: 'cortex@example.com',
+        start: 1696875227868,
+        status: 'COMPLETE',
+        end: 1696875239664,
+        response: {},
+      };
+      nock(serverUrl).get(/\/fabric\/v4\/projects\/.*\/pipelines\/.*\/run\/.*/).query({ gitRepoName: 'repo1' }).reply(200, response);
+      await create().parseAsync(['node', 'pipelines', 'describe-run', 'pipeline1', 'repo1', 'd9e97efc-c663-43e7-a435-2b85d6977d1c', '--project', PROJECT]);
+      const errs = getErrorLines().join('');
+      // eslint-disable-next-line no-unused-expressions
+      chai.expect(errs).to.be.empty;
+      nock.isDone();
+    });
   });
 });
