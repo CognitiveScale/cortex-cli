@@ -125,7 +125,7 @@ export const DescribePipelineRunCommand = class {
       const response = await pipelines.describePipelineRun(options.project || profile.project, profile.token, pipelineName, gitRepoName, runId);
       if (response.success) {
         if (options.report && !options.json) {
-            const result = filterObject(response.result, getQueryOptions(options));
+            const result = filterObject(response, getQueryOptions(options));
             const tableSpec = [
                 { column: 'Name', field: 'name', width: 40 },
                 { column: 'Title', field: 'title', width: 40 },
@@ -137,7 +137,7 @@ export const DescribePipelineRunCommand = class {
             printSuccess(`Elapsed Time (ms): ${_.get(result, 'elapsed')}`);
             printTable(tableSpec, _.sortBy(_.get(result, 'transits'), ['start', 'end']));
         } else {
-            getFilteredOutput(response.result, options);
+            getFilteredOutput(response, options);
         }
       } else {
         printError(`Failed to desribe pipeline run ${runId}: ${response.message}`, options);
