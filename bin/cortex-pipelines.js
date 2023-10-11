@@ -51,6 +51,7 @@ export function create() {
   .command('describe <pipelineName> <gitRepoName>')
   .alias('get')
   .description('Describe a Pipeline')
+  .option('--sha [sha]', 'Filter by SHA - to find specific version of the pipeline')
   .option('--no-compat', 'Ignore API compatibility checks')
   .option('--color [boolean]', 'Turn on/off colors for JSON output.', 'true')
   .option('--profile <profile>', 'The profile to use')

@@ -66,7 +66,7 @@ export const DescribePipelineCommand = class {
     debug('%s.executeDescribePipeline(%s, %s)', profile.name, pipelineName, gitRepoName);
     const pipelines = new Pipelines(profile.url);
     try {
-      const response = await pipelines.describePipeline(options.project || profile.project, profile.token, pipelineName, gitRepoName);
+      const response = await pipelines.describePipeline(options.project || profile.project, profile.token, pipelineName, gitRepoName, options.sha);
       if (response.success) {
         return getFilteredOutput(response.pipeline, options);
       }
