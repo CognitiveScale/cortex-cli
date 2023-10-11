@@ -31,14 +31,18 @@ export default class Pipelines {
       }
     }
 
-    async describePipeline(projectId, token, name, gitRepoName) {
+    async describePipeline(projectId, token, name, gitRepoName, sha) {
       checkProject(projectId);
       const endpoint = `${this.endpointV4(projectId)}/${encodeURIComponent(name)}`;
       debug('describePipeline(%s, %s) => %s', name, gitRepoName, endpoint);
+      const searchParams = { gitRepoName };
+      if (sha) {
+        searchParams.sha = sha;
+      }
       try {
         return await got.get(endpoint, {
           headers: defaultHeaders(token),
-          searchParams: { gitRepoName },
+          searchParams: { ...searchParams },
         }).json();
       } catch (err) {
         return constructError(err);
