@@ -22,6 +22,7 @@ export function create() {
   // List
   repos
     .command('list')
+    .alias('l')
     .description('List Pipeline Repositories')
     .option('--no-compat', 'Ignore API compatibility checks')
     .option('--color [boolean]', 'Turn on/off colors for JSON output.', 'true')
