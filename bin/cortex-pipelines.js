@@ -87,7 +87,7 @@ export function create() {
 
   // Describe Pipeline Run
   pipelines
-  .command('describe-run <pipelineName> <gitRepoName> <runId>')
+  .command('describe-run <runId>')
   .alias('get')
   .description('Describe a Pipeline Run')
   .option('--no-compat', 'Ignore API compatibility checks')
@@ -95,9 +95,9 @@ export function create() {
   .option('--profile <profile>', 'The profile to use')
   .option('--project <project>', 'The project to use')
   .option('--json [searchPath]', QUERY_JSON_HELP_TEXT)
-  .action(withCompatibilityCheck((pipelineName, gitRepoName, runId, options) => {
+  .action(withCompatibilityCheck((runId, options) => {
     try {
-      return new DescribePipelineRunCommand(pipelines).execute(pipelineName, gitRepoName, runId, options);
+      return new DescribePipelineRunCommand(pipelines).execute(runId, options);
     } catch (err) {
       return printError(err.message);
     }
