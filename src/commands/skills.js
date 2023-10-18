@@ -7,6 +7,7 @@ import { loadProfile } from '../config.js';
 import Catalog from '../client/catalog.js';
 import Agent from '../client/agents.js';
 import {
+    constructError,
     printSuccess,
     printError,
     printWarning,
@@ -148,13 +149,10 @@ export class UndeploySkillCommand {
             debug('%s.executeUndeploySkill(%s)', profile.name, skillName);
             try {
                 const response = await catalog.unDeploySkill(options.project || profile.project, profile.token, skillName, options.verbose);
-                if (response.success) {
-                    printSuccess(`Undeploy Skill ${skillName}: ${response.message}`, options);
-                } else {
-                    printError(`Failed to Undeploy Skill ${skillName}: ${response.message}`, options);
-                }
+                printSuccess(`Undeploy Skill ${skillName}: ${response.message}`, options);
             } catch (err) {
-                printError(`Failed to Undeploy Skill ${skillName}: ${err.status} ${err.message}`, options);
+                const { status, message } = constructError(err);
+                printError(`Failed to Undeploy Skill ${skillName}: ${status} ${message}`, options);
             }
         }));
     }
@@ -171,12 +169,11 @@ export class SkillLogsCommand {
     
             const catalog = new Catalog(profile.url);
             const response = await catalog.skillLogs(options.project || profile.project, profile.token, skillName, actionName, options.raw);
-    
             if (options.raw) {
                 try {
                     const respJSON = JSON.parse(response); // happens with errors
                     if (respJSON?.body) {
-                        printError(`Failed to List Skill/Action Logs ${skillName}/${actionName}: ${respJSON.body.message}`, options);
+                        printError(`Failed to fetch Skill/Action Logs ${skillName}/${actionName}: ${respJSON.body.message}`, options);
                     }
                 } catch (err) {
                     printSuccess(response, options);
@@ -184,10 +181,11 @@ export class SkillLogsCommand {
             } else if (response.success) {
                 printSuccess(JSON.stringify(response.logs), options);
             } else {
-                printError(`Failed to List Skill/Action Logs ${skillName}/${actionName}: ${response.body.message}`, options);
+                printError(`Failed to fetch Skill/Action Logs ${skillName}/${actionName}: ${response.body.message}`, options);
             }
         } catch (err) {
-            printError(`Failed to List Skill/Action Logs ${skillName}/${actionName}: ${err.status} ${err.message}`, options);
+            const { status, message } = constructError(err);
+            printError(`Failed to fetch Skill/Action Logs ${skillName}/${actionName}: ${status} ${message}`, options);
         }
     }
 }
@@ -203,13 +201,10 @@ export class DeploySkillCommand {
             debug('%s.executeDeploySkill(%s)', profile.name, skillName);
             try {
                 const response = await catalog.deploySkill(options.project || profile.project, profile.token, skillName, options.verbose);
-                if (response.success) {
-                    printSuccess(`Deployed Skill ${skillName}: ${response.message}`, options);
-                } else {
-                    printError(`Failed to deploy Skill ${skillName}: ${response.message}`, options);
-                }
+                printSuccess(`Deployed Skill ${skillName}: ${response.message}`, options);
             } catch (err) {
-                printError(`Failed to deploy Skill ${skillName}: ${err.status} ${err.message}`, options);
+                const { status, message } = constructError(err);
+                printError(`Failed to deploy Skill ${skillName}: ${status} ${message}`, options);
             }
         }));
     }

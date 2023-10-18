@@ -92,9 +92,7 @@ export default class Catalog {
             .get(endpoint, {
             headers: defaultHeaders(token),
             searchParams: { verbose },
-        }).json()
-            .then((res) => ({ ...res }))
-            .catch((err) => constructError(err));
+        }).json();
     }
 
     unDeploySkill(projectId, token, skillName, verbose = false) {
@@ -105,12 +103,10 @@ export default class Catalog {
             .get(endpoint, {
             headers: defaultHeaders(token),
             searchParams: { verbose },
-        }).json()
-            .then((res) => ({ ...res }))
-            .catch((err) => constructError(err));
+        }).json();
     }
 
-    async skillLogs(projectId, token, skillName, actionName, raw = false) {
+    skillLogs(projectId, token, skillName, actionName, raw = false) {
         checkProject(projectId);
         const endpoint = `${this.endpoints.skills(projectId)}/${encodeURIComponent(skillName)}/action/${encodeURIComponent(actionName)}/logs`;
         debug('skillLogs(%s, %s) => %s', skillName, actionName, endpoint);
@@ -118,14 +114,7 @@ export default class Catalog {
             headers: defaultHeaders(token),
             searchParams: { raw },
         };
-        const gotResponse = raw ? got.get(endpoint, gotOptions).text() : got.get(endpoint, gotOptions).json();
-
-        try {
-            const res = await gotResponse;
-            return res;
-        } catch (err) {
-            return constructError(err);
-        }
+        return raw ? got.get(endpoint, gotOptions).text() : got.get(endpoint, gotOptions).json();
     }
 
     listAgents(projectId, token, filter, limit, skip, sort) {
