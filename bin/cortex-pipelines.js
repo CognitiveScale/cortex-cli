@@ -28,6 +28,7 @@ export function create() {
   // List
   pipelines
     .command('list')
+    .alias('l')
     .description('List Pipelines')
     .option('--no-compat', 'Ignore API compatibility checks')
     .option('--color [boolean]', 'Turn on/off colors for JSON output.', 'true')
@@ -88,7 +89,7 @@ export function create() {
   // Describe Pipeline Run
   pipelines
   .command('describe-run <runId>')
-  .alias('get')
+  .alias('get-run')
   .description('Describe a Pipeline Run')
   .option('--no-compat', 'Ignore API compatibility checks')
   .option('--color [boolean]', 'Turn on/off colors for JSON output.', 'true')
@@ -106,7 +107,7 @@ export function create() {
   // List Pipeline Run
   pipelines
   .command('list-runs <pipelineName> <gitRepoName>')
-  .alias('get')
+  .alias('lr')
   .description('Describe a Pipeline Run')
   .option('--no-compat', 'Ignore API compatibility checks')
   .option('--color [boolean]', 'Turn on/off colors for JSON output.', 'true')
