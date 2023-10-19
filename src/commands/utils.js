@@ -118,9 +118,9 @@ const deleteFolderRecursive = (filepath) => {
 };
 export const constructError = (error) => {
     // fallback to text in message or standard error message
-    const errResp = error.response;
-    let errorText = _.get(errResp, 'body');
-    if (_.isEmpty(errorText) || error.name === 'RequestError') {
+    const errResp = error?.response;
+    let errorText = errResp?.body;
+    if (errorText?.trim().length === 0 || error.name === 'RequestError') {
         errorText = error.message;
     }
     let details;
@@ -129,14 +129,14 @@ export const constructError = (error) => {
     try {
         const resp = errResp ? JSON.parse(errorText) : {};
         respCode = resp.code;
-        if (resp.message || resp.error) errorText = resp.message || resp.error;
+        if (resp?.message || resp?.error) errorText = resp?.message || resp?.error;
         // eslint-disable-next-line prefer-destructuring
         details = resp.details;
     } catch (e) {
         // Guess it wasn't JSON!
     }
     // todo make figuring out the status code more consistent? this might be a holdover from request vs got?
-    const status = _.get(errResp, 'statusCode') || respCode || error.code || error.status || '';
+    const status = errResp?.statusCode || respCode || error?.code || error?.status || '';
     return {
         success: false, message: errorText, details, status,
     };
