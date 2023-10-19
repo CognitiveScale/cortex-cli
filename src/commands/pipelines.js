@@ -117,12 +117,12 @@ export const DescribePipelineRunCommand = class {
     this.program = program;
   }
 
-  async execute(pipelineName, gitRepoName, runId, options) {
+  async execute(runId, options) {
     const profile = await loadProfile(options.profile);
-    debug('%s.executeRunPipeline(%s, %s)', profile.name, pipelineName, runId);
+    debug('%s.executeDescribePipelineRun(%s)', profile.name, runId);
     const pipelines = new Pipelines(profile.url);
     try {
-      const response = await pipelines.describePipelineRun(options.project || profile.project, profile.token, pipelineName, gitRepoName, runId);
+      const response = await pipelines.describePipelineRun(options.project || profile.project, profile.token, runId);
       if (response.success) {
         if (options.report && !options.json) {
             const result = filterObject(response, getQueryOptions(options));

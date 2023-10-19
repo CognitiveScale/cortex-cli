@@ -22,6 +22,7 @@ export function create() {
   // List
   repos
     .command('list')
+    .alias('l')
     .description('List Pipeline Repositories')
     .option('--no-compat', 'Ignore API compatibility checks')
     .option('--color [boolean]', 'Turn on/off colors for JSON output.', 'true')
@@ -76,7 +77,7 @@ export function create() {
 
    // Save
   repos
-    .command('save [pipelineRepoDefinition]')
+    .command('save <pipelineRepoDefinition>')
     .description('Save a Pipeline Repository definition. Takes JSON file by default.')
     .option('--no-compat', 'Ignore API compatibility checks')
     .option('--color [boolean]', 'Turn on/off colors for JSON output.', 'true')

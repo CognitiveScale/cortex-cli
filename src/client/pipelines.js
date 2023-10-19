@@ -71,10 +71,10 @@ export default class Pipelines {
       }
     }
 
-    async describePipelineRun(projectId, token, name, gitRepoName, runId) {
+    async describePipelineRun(projectId, token, runId) {
       checkProject(projectId);
-      const endpoint = `${this.endpointV4(projectId)}/${encodeURIComponent(name)}/run/${runId}?gitRepoName=${gitRepoName}`;
-      debug('describePipeline(%s, %s) => %s', name, gitRepoName, endpoint);
+      const endpoint = `${this.endpointV4(projectId)}/run/${runId}`;
+      debug('describePipeline(%s) => %s', runId, endpoint);
       try {
         return await got.get(endpoint, {
           headers: defaultHeaders(token),
