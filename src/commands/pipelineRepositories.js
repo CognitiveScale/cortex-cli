@@ -22,7 +22,7 @@ export const SavePipelineRepoCommand = class {
     let repoObj = {};
     if (pipelineRepoDefinition && !fileExists(pipelineRepoDefinition)) {
       printError(`File does not exist at: ${pipelineRepoDefinition}`);
-    } else {
+    } else if (pipelineRepoDefinition) {
       const repoDefStr = fs.readFileSync(pipelineRepoDefinition);
       repoObj = parseObject(repoDefStr, options);
     }
