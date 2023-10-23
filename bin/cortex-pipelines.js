@@ -108,7 +108,7 @@ export function create() {
   pipelines
   .command('list-runs <pipelineName> <gitRepoName>')
   .alias('lr')
-  .description('Describe a Pipeline Run')
+  .description('List all Runs for a Pipeline')
   .option('--no-compat', 'Ignore API compatibility checks')
   .option('--color [boolean]', 'Turn on/off colors for JSON output.', 'true')
   .option('--profile <profile>', 'The profile to use')
