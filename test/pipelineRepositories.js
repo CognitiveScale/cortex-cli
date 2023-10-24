@@ -3,6 +3,7 @@ import mockedEnv from 'mocked-env';
 import nock from 'nock';
 import _ from 'lodash';
 import sinon from 'sinon';
+import yaml from 'js-yaml';
 import { mkdtemp, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { tmpdir } from 'node:os';
@@ -117,7 +118,7 @@ describe('Pipelines', () => {
       nock.isDone();
     });
 
-    it('saves a pipeline repository  ', async () => {
+    it('saves a pipeline repository (json)', async () => {
       const repo = {
         name: 'repo1',
         repo: exampleRepo,
@@ -135,6 +136,51 @@ describe('Pipelines', () => {
       // invoke the CLI
       nock(serverUrl).post(/\/fabric\/v4\/projects\/.*\/pipeline-repositories/).reply(200, response);
       await create().parseAsync(['node', 'repos', 'save', filename, '--project', PROJECT]);
+      const output = getPrintedLines().join('');
+      const errs = getErrorLines().join('');
+      // verify response
+      chai.expect(output).to.contain('Pipeline Repository saved');
+      // eslint-disable-next-line no-unused-expressions
+      chai.expect(errs).to.be.empty;
+      nock.isDone();
+    });
+
+    it('saves a pipeline repository (yaml)', async () => {
+      const repo = {
+        name: 'repo1',
+        repo: exampleRepo,
+        branch: 'develop',
+      };
+      const response = {
+        success: true,
+        version: 1,
+        message: 'pipelineRepository repo1 saved.',
+      };
+      // save definition of 'repo' to temporary file
+      const dir = await mkdtemp(join(tmpdir(), 'tmp-'));
+      const filename = join(dir, 'repo1.yaml');
+      await writeFile(filename, yaml.dump(repo));
+      // invoke the CLI
+      nock(serverUrl).post(/\/fabric\/v4\/projects\/.*\/pipeline-repositories/).reply(200, response);
+      await create().parseAsync(['node', 'repos', 'save', '-y', filename, '--project', PROJECT]);
+      const output = getPrintedLines().join('');
+      const errs = getErrorLines().join('');
+      // verify response
+      chai.expect(output).to.contain('Pipeline Repository saved');
+      // eslint-disable-next-line no-unused-expressions
+      chai.expect(errs).to.be.empty;
+      nock.isDone();
+    });
+
+    it('saves a pipeline repository using CLI flags', async () => {
+      const response = {
+        success: true,
+        version: 1,
+        message: 'pipelineRepository testpipeline saved.',
+      };
+      // invoke the CLI
+      nock(serverUrl).post(/\/fabric\/v4\/projects\/.*\/pipeline-repositories/).reply(200, response);
+      await create().parseAsync(['node', 'repos', 'save', '--name', 'testpipeline', '--branch', 'develop', '--repo', 'mc://test.key', '--project', PROJECT]);
       const output = getPrintedLines().join('');
       const errs = getErrorLines().join('');
       // verify response
