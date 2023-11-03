@@ -26,27 +26,29 @@ function getAvailableVersions(name) {
         .then((versions) => _.uniq(concat(versions, pkg.version)))
         .then((versions) => versions.sort(Semver.compare))
         .catch(() => {
-        throw new Error('Unable to determine CLI available versions');
-    });
+            throw new Error('Unable to determine CLI available versions');
+        });
 }
+
 function getRequiredVersion(profile) {
     const endpoint = `${profile.url}/fabric/v4/compatibility/applications/cortex-cli`;
     debug('getRequiredVersion => %s', endpoint);
     return got
         .get(endpoint, {
-        headers: {
-            Authorization: `Bearer ${profile.token}`,
-            'user-agent': getUserAgent(),
-        },
-    })
+            headers: {
+                Authorization: `Bearer ${profile.token}`,
+                'user-agent': getUserAgent(),
+            },
+        })
         .json()
         .then((res) => {
-        const { semver } = res;
-        return semver;
-    }).catch((err) => {
-        throw new Error(`Unable to fetch compatibility: ${err.message}`);
-    });
+            const { semver } = res;
+            return semver;
+        }).catch((err) => {
+            throw new Error(`Unable to fetch compatibility: ${err.message}`);
+        });
 }
+
 export function notifyUpdate({ required = false, current, latest }) {
     const message = `Update ${required ? chalk.bold('required') : 'available'} ${chalk.dim(current)}${chalk.reset(' → ')}${chalk.green(latest)}\nRun ${chalk.cyan(`npm i ${isInstalledGlobally ? '-g ' : ''}${pkg.name}@${latest}`)} to update`;
     const table = new Table({
@@ -61,15 +63,18 @@ export function notifyUpdate({ required = false, current, latest }) {
     table.push([message]);
     console.warn(table.toString());
 }
+
 function upgradeAvailable(args) {
     process.on('exit', () => {
         notifyUpdate(args);
     });
 }
+
 function upgradeRequired(args) {
     notifyUpdate({ required: true, ...args });
     process.exit(-1);
 }
+
 export async function getCompatibility(profile) {
     debug('getCompatibility => %s profile', profile.name);
     try {
@@ -94,6 +99,7 @@ export async function getCompatibility(profile) {
         throw new Error(`Unable to contact cortex: ${e.message}`);
     }
 }
+
 export function withCompatibilityCheck(fn) {
     return (...args) => {
         const command = args.find((a) => a !== undefined && typeof a.opts === 'function');
@@ -103,17 +109,34 @@ export function withCompatibilityCheck(fn) {
             const profile = loadProfile(profileName);
             return getCompatibility(profile)
                 .then(({ current, latest, satisfied }) => {
+                    if (!satisfied) {
+                        upgradeRequired({ current, latest });
+                    } else if (Semver.gt(latest, current)) {
+                        upgradeAvailable({ current, latest });
+                    }
+                })
+                .then(() => fn(...args))
+                .catch((error) => {
+                    printError(error);
+                });
+        }
+        return Promise.resolve().then(() => fn(...args));
+    };
+}
+
+export function doCompatibilityCheck(profile, doCheck = true) {
+    if (doCheck && !_.toLower(process.env.CORTEX_NO_COMPAT) === 'true') {
+        return getCompatibility(profile)
+            .then(({ current, latest, satisfied }) => {
                 if (!satisfied) {
                     upgradeRequired({ current, latest });
                 } else if (Semver.gt(latest, current)) {
                     upgradeAvailable({ current, latest });
                 }
             })
-                .then(() => fn(...args))
-                .catch((error) => {
-                printError(error);
+            .catch((error) => {
+                 printError(error);
             });
-        }
-        return Promise.resolve().then(() => fn(...args));
-    };
+    }
+    return Promise.resolve();
 }

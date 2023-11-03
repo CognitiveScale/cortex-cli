@@ -10,6 +10,7 @@ import { printError } from './commands/utils.js';
 import Info from './client/info.js';
 
 const debug = debugSetup('cortex:config');
+
 function configDir() {
     return process.env.CORTEX_CONFIG_DIR || path.join(os.homedir(), '.cortex');
 }
@@ -20,16 +21,15 @@ function getCortexUrlFromEnv() {
     }
     return process.env.CORTEX_URL;
 }
+
 const durationRegex = /^([.\d]+)(ms|[smhdwMy])$/;
-async function generateJwt(profile, expiresIn = '2m') {
+
+async function computeJwt(profile, serverTs, expiresIn = '2m') {
     const {
- username, issuer, audience, jwk, 
-} = profile;
+        username, issuer, audience, jwk,
+    } = profile;
     const alg = jwk?.alg || 'EdDSA';
     const jwtSigner = await jose.importJWK(jwk, alg);
-    const infoClient = new Info(profile.url);
-    const infoResp = await infoClient.getInfo();
-    const serverTs = _.get(infoResp, 'serverTs', Date.now());
     const [, amount, unit] = durationRegex.exec(expiresIn);
     const expiry = dayjs(serverTs).add(_.toNumber(amount), unit).unix();
     return new jose.SignJWT({})
@@ -41,6 +41,21 @@ async function generateJwt(profile, expiresIn = '2m') {
         .setExpirationTime(expiry)
         .sign(jwtSigner, { kid: jwk.kid });
 }
+
+async function fetchInfoForProfile(profile, expiresIn = '2m') {
+    const infoClient = new Info(profile.url);
+    const infoResp = await infoClient.getInfo();
+    const serverTs = infoResp?.serverTs ?? Date.now();
+    const featureFlags = infoResp?.featureFlags ?? {};
+    const jwt = await computeJwt(profile, serverTs, expiresIn);
+    return { jwt, featureFlags };
+}
+
+async function generateJwt(profile, expiresIn = '2m') {
+    const { jwt } = await fetchInfoForProfile(profile, expiresIn);
+    return jwt;
+}
+
 const ProfileSchema = Joi.object({
     name: Joi.string().optional(),
     url: Joi.string().uri().required(),
@@ -52,6 +67,7 @@ const ProfileSchema = Joi.object({
     audience: Joi.string().required(),
     token: Joi.string().optional(),
     project: Joi.string().optional(),
+    // featureFlags: Joi.object().optional(),
 });
 const ProfileSchemaV4 = Joi.object().keys({
     name: Joi.string().optional(),
@@ -66,6 +82,7 @@ const ProfileSchemaV4 = Joi.object().keys({
     project: Joi.string().optional(),
     registries: Joi.any().required(),
     currentRegistry: Joi.string().required(),
+    // featureFlags: Joi.object().optional(),
 });
 const ProfileSchemaV5 = Joi.object().keys({
     name: Joi.string().optional(),
@@ -81,10 +98,11 @@ const ProfileSchemaV5 = Joi.object().keys({
     registries: Joi.any().required(),
     currentRegistry: Joi.string().required(),
     templateConfig: Joi.any().required(),
+    // featureFlags: Joi.object().optional(),
 });
 class Profile {
     constructor(name, {
- url, username, issuer, audience, jwk, project, 
+ url, username, issuer, audience, jwk, project, featureFlags,
 }) {
         this.name = name;
         this.url = url;
@@ -93,6 +111,7 @@ class Profile {
         this.issuer = issuer;
         this.audience = audience;
         this.project = project;
+        this.featureFlags = featureFlags;
     }
 
     validate() {
@@ -112,6 +131,7 @@ class Profile {
             audience: this.audience,
             jwk: this.jwk,
             project: this.project,
+            featureFlags: this.featureFlags, // TODO: is this needed?
         };
     }
 }
@@ -131,15 +151,18 @@ class Config {
             return undefined;
         }
         const profileType = new Profile(name, profile).validate();
+        const { jwt, featureFlags } = await fetchInfoForProfile(profile);
         if (useenv) {
             if (process.env.CORTEX_TOKEN) {
                 printError('Using token from "CORTEX_TOKEN" environment variable', {}, false);
             }
             profileType.url = getCortexUrlFromEnv() || profileType.url;
-            profileType.token = process.env.CORTEX_TOKEN || await generateJwt(profile);
+            profileType.token = process.env.CORTEX_TOKEN || jwt;
             profileType.project = process.env.CORTEX_PROJECT || profileType.project;
+            profile.featureFlags = featureFlags;
         } else {
-            profileType.token = await generateJwt(profile);
+            profileType.token = jwt;
+            profile.featureFlags = featureFlags;
         }
         return profileType;
     }
@@ -180,7 +203,7 @@ class Config {
 }
 class ProfileV4 {
     constructor(name, {
- url, username, issuer, audience, jwk, project, registries, currentRegistry, 
+ url, username, issuer, audience, jwk, project, registries, currentRegistry, featureFlags,
 }) {
         this.name = name;
         this.url = url;
@@ -197,6 +220,7 @@ class ProfileV4 {
             },
         };
         this.currentRegistry = currentRegistry || 'Cortex Private Registry';
+        this.featureFlags = featureFlags;
     }
 
     validate() {
@@ -264,15 +288,18 @@ class ConfigV4 {
             return undefined;
         }
         const profileType = new ProfileV4(name, profile).validate();
+        const { jwt, featureFlags } = await fetchInfoForProfile(profileType);
         if (useenv) {
             if (process.env.CORTEX_TOKEN) {
                 printError('Using token from "CORTEX_TOKEN" environment variable', {}, false);
             }
             profileType.url = getCortexUrlFromEnv() || profileType.url;
-            profileType.token = process.env.CORTEX_TOKEN || await generateJwt(profileType);
+            profileType.token = process.env.CORTEX_TOKEN || jwt;
             profileType.project = process.env.CORTEX_PROJECT || profileType.project;
+            profileType.featureFlags = featureFlags;
         } else {
-            profileType.token = await generateJwt(profileType);
+            profileType.token = jwt;
+            profileType.featureFlags = featureFlags;
         }
         return profileType;
     }
@@ -291,7 +318,7 @@ class ConfigV4 {
 }
 class ProfileV5 {
     constructor(name, {
- url, username, issuer, audience, jwk, project, registries, currentRegistry, templateConfig, 
+ url, username, issuer, audience, jwk, project, registries, currentRegistry, templateConfig, featureFlags,
 }, templateConfigV4) {
         this.name = name;
         this.url = url;
@@ -312,6 +339,7 @@ class ProfileV5 {
             repo: 'CognitiveScale/cortex-code-templates',
             branch: 'main',
         };
+        this.featureFlags = featureFlags;
     }
 
     validate() {
@@ -334,6 +362,7 @@ class ProfileV5 {
             registries: this.registries,
             currentRegistry: this.currentRegistry,
             templateConfig: this.templateConfig,
+            featureFlags: this.featureFlags, // TODO: is featureFlags needed as a field?
         };
     }
 }
@@ -375,15 +404,18 @@ class ConfigV5 {
             return undefined;
         }
         const profileType = new ProfileV5(name, profile).validate();
+        const { jwt, featureFlags } = await fetchInfoForProfile(profileType);
         if (useenv) {
             if (process.env.CORTEX_TOKEN) {
                 printError('Using token from "CORTEX_TOKEN" environment variable', {}, false);
             }
             profileType.url = getCortexUrlFromEnv() || profileType.url;
-            profileType.token = process.env.CORTEX_TOKEN || await generateJwt(profileType);
+            profileType.token = process.env.CORTEX_TOKEN || jwt;
             profileType.project = process.env.CORTEX_PROJECT || profileType.project;
+            profileType.featureFlags = featureFlags;
         } else {
-            profileType.token = await generateJwt(profileType);
+            profileType.token = jwt;
+            profileType.featureFlags = featureFlags;
         }
         return profileType;
     }
@@ -466,14 +498,15 @@ async function loadProfile(profileName, useenv = true) {
 export { durationRegex };
 export { loadProfile };
 export { generateJwt };
+export { fetchInfoForProfile };
 export { defaultConfig };
 export { configDir };
 export { readConfig };
 export default {
     durationRegex,
     loadProfile,
-    generateJwt,
     defaultConfig,
     configDir,
     readConfig,
+    fetchInfoForProfile,
 };
