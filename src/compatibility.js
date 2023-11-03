@@ -101,7 +101,7 @@ export async function getCompatibility(profile) {
 }
 
 export async function doCompatibilityCheck(profile, doCheck = true) {
-    if (doCheck && !_.toLower(process.env.CORTEX_NO_COMPAT) === 'true') { // TODO: duplicate check?
+    if (doCheck && _.toLower(process.env.CORTEX_NO_COMPAT) !== 'true') { // TODO: duplicate check?
         try {
             const { current, latest, satisfied } = await getCompatibility(profile);
             if (!satisfied) {
@@ -120,7 +120,7 @@ export function withCompatibilityCheck(fn) {
     return (...args) => {
         const command = args.find((a) => a !== undefined && typeof a.opts === 'function');
         const options = command.opts();
-        if (options.compat && !_.toLower(process.env.CORTEX_NO_COMPAT) === 'true') {
+        if (options.compat && _.toLower(process.env.CORTEX_NO_COMPAT) !== 'true') {
             const { profile: profileName } = options;
             const profile = loadProfile(profileName);
             return doCompatibilityCheck(profile)
