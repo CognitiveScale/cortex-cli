@@ -67,7 +67,7 @@ const ProfileSchema = Joi.object({
     audience: Joi.string().required(),
     token: Joi.string().optional(),
     project: Joi.string().optional(),
-    // featureFlags: Joi.object().optional(),
+    featureFlags: Joi.object().optional(),
 });
 const ProfileSchemaV4 = Joi.object().keys({
     name: Joi.string().optional(),
@@ -82,7 +82,7 @@ const ProfileSchemaV4 = Joi.object().keys({
     project: Joi.string().optional(),
     registries: Joi.any().required(),
     currentRegistry: Joi.string().required(),
-    // featureFlags: Joi.object().optional(),
+    featureFlags: Joi.object().optional(),
 });
 const ProfileSchemaV5 = Joi.object().keys({
     name: Joi.string().optional(),
@@ -98,7 +98,7 @@ const ProfileSchemaV5 = Joi.object().keys({
     registries: Joi.any().required(),
     currentRegistry: Joi.string().required(),
     templateConfig: Joi.any().required(),
-    // featureFlags: Joi.object().optional(),
+    featureFlags: Joi.object().optional(),
 });
 class Profile {
     constructor(name, {

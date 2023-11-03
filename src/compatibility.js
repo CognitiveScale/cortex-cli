@@ -100,6 +100,22 @@ export async function getCompatibility(profile) {
     }
 }
 
+export async function doCompatibilityCheck(profile, doCheck = true) {
+    if (doCheck && !_.toLower(process.env.CORTEX_NO_COMPAT) === 'true') { // TODO: duplicate check?
+        try {
+            const { current, latest, satisfied } = await getCompatibility(profile);
+            if (!satisfied) {
+                upgradeRequired({ current, latest });
+            } else if (Semver.gt(latest, current)) {
+                upgradeAvailable({ current, latest });
+            }
+        } catch (error) {
+            printError(error);
+        }
+    }
+    return Promise.resolve();
+}
+
 export function withCompatibilityCheck(fn) {
     return (...args) => {
         const command = args.find((a) => a !== undefined && typeof a.opts === 'function');
@@ -107,36 +123,10 @@ export function withCompatibilityCheck(fn) {
         if (options.compat && !_.toLower(process.env.CORTEX_NO_COMPAT) === 'true') {
             const { profile: profileName } = options;
             const profile = loadProfile(profileName);
-            return getCompatibility(profile)
-                .then(({ current, latest, satisfied }) => {
-                    if (!satisfied) {
-                        upgradeRequired({ current, latest });
-                    } else if (Semver.gt(latest, current)) {
-                        upgradeAvailable({ current, latest });
-                    }
-                })
+            return doCompatibilityCheck(profile)
                 .then(() => fn(...args))
-                .catch((error) => {
-                    printError(error);
-                });
+                .catch((error) => printError(error));
         }
         return Promise.resolve().then(() => fn(...args));
     };
-}
-
-export function doCompatibilityCheck(profile, doCheck = true) {
-    if (doCheck && !_.toLower(process.env.CORTEX_NO_COMPAT) === 'true') {
-        return getCompatibility(profile)
-            .then(({ current, latest, satisfied }) => {
-                if (!satisfied) {
-                    upgradeRequired({ current, latest });
-                } else if (Semver.gt(latest, current)) {
-                    upgradeAvailable({ current, latest });
-                }
-            })
-            .catch((error) => {
-                 printError(error);
-            });
-    }
-    return Promise.resolve();
 }

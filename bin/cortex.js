@@ -4,7 +4,7 @@ import esMain from 'es-main';
 import { readPackageJSON } from '../src/commands/utils.js';
 import { loadProfile } from '../src/config.js';
 import { FeatureController } from '../src/features.js';
-import { doCompatibilityCheck } from '../src/compatibility.js';
+// import { doCompatibilityCheck } from '../src/compatibility.js';
 
 
 /**
@@ -28,9 +28,10 @@ export async function create(profileName) {
     program.version(readPackageJSON('../../package.json').version, '-v, --version', 'Outputs the installed version of the Cortex CLI');
     program.name('cortex');
 
-    // Load the users Profile to resolve the available commands
+    // Only Load the users Profile Once - resolves the available set of CLI commands
     if (profile === undefined || profile === null) {
         profile = await loadProfile(profileName);
+        // doCompatibilityCheck(profile);
     }
     const features = new FeatureController(profile);
     const supportedCommands = features.getSupportedSubCommands();
@@ -104,4 +105,4 @@ if (esMain(import.meta)) {
     }
     (await create(_profile)).showHelpAfterError().parseAsync(process.argv);
 }
-export default create();
+export default await create();
