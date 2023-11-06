@@ -1,5 +1,5 @@
 export function allGAFeaturesEnabled() {
-    return process.env.ALL_GA_FEATURES_ENABLED;
+    return process.env.ALL_GA_FEATURES_ENABLED || true; // hardcoding to support all features until feature flagging is finalized
 }
 
 export function previewFeaturesEnabled() {
@@ -71,10 +71,10 @@ export class FeatureController {
     if (allGAFeaturesEnabled()) {
       supportedCommands.push(...GA_FEATURES.map((f) => f.subcommands).flat());
     } else {
-      this.collectSubcommands(enabledFeatures, GA_FEATURES);
+      supportedCommands.push(...this.collectSubcommands(enabledFeatures, GA_FEATURES));
     }
     if (previewFeaturesEnabled()) {
-      this.collectSubcommands(enabledFeatures, PREVIEW_FEATURES);
+      supportedCommands.push(...PREVIEW_FEATURES.map((f) => f.subcommands).flat());
     }
     return supportedCommands;
   }

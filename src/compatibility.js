@@ -122,8 +122,8 @@ export function withCompatibilityCheck(fn) {
         const options = command.opts();
         if (options.compat && _.toLower(process.env.CORTEX_NO_COMPAT) !== 'true') {
             const { profile: profileName } = options;
-            const profile = loadProfile(profileName);
-            return doCompatibilityCheck(profile)
+            return loadProfile(profileName)
+                .then((profile) => doCompatibilityCheck(profile))
                 .then(() => fn(...args))
                 .catch((error) => printError(error));
         }
