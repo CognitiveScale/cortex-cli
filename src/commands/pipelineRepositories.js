@@ -195,11 +195,11 @@ export const UpdateRepoPipelinesCommand = class {
           failedToAdd: o.failedAdd,
           failedToUpdate: o.failedUpdate,
           failedToDelete: o.failedDelete,
-        }), 'Failed to update repo pipelines');
+        }), `Failed to update pipelines in repo ${pipelineRepoName}`);
       }
-      return printError(`Failed to update repo pipelines: ${response.status} ${response.message}`, options);
+      return printError(`Failed to update pipelines in repo ${pipelineRepoName}: ${response.status} ${response.message}`, options);
     } catch (err) {
-      return printError(`Failed to update repo pipelines: ${err.status} ${err.message}`, options);
+      return printError(`Failed to update pipelines in repo ${pipelineRepoName}: ${err.status} ${err.message}`, options);
     }
   }
 };
