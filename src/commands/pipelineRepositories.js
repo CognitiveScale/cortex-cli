@@ -137,6 +137,16 @@ export const UpdateRepoPipelinesCommand = class {
         if (options.json) {
           return getFilteredOutput(result, options);
         }
+        const noChangesMade = (result.added.length === 0
+          && result.deleted.length === 0
+          && result.updated.length === 0
+          && result.failed.add.length === 0
+          && result.failed.delete.length === 0
+          && result.failed.update.length === 0);
+        if (noChangesMade) {
+          return printSuccess('Pipelines up to date! No changes made.');
+        }
+
         const tableSpec = [
           { column: 'Added', field: 'added', width: 15 },
           { column: 'Updated', field: 'updated', width: 15 },
