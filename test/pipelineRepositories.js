@@ -190,7 +190,7 @@ describe('Pipelines', () => {
       nock.isDone();
     });
 
-    it('deletes a pipeline repository  ', async () => {
+    it('deletes a pipeline repository', async () => {
       const response = {
         success: true,
         message: 'Successfully deleted pipelineRepository repo1',
@@ -251,35 +251,64 @@ describe('Pipelines', () => {
         nock.isDone();
       }
     });
-  });
 
-  it('should update-pipelines with custom Skill', async () => {
-    const response = {
-      success: true,
-      updateReport: {
-        added: ['pipeline1'],
-        updated: ['pipeline2'],
-        deleted: ['pipeline3'],
-        failed: {
-          add: [],
-          delete: [],
-          update: [],
+    it('should update-pipelines with custom Skill', async () => {
+      const response = {
+        success: true,
+        updateReport: {
+          added: ['pipeline1'],
+          updated: ['pipeline2'],
+          deleted: ['pipeline3'],
+          failed: {
+            add: [],
+            delete: [],
+            update: [],
+          },
         },
-      },
-    };
+      };
 
-    nock(serverUrl)
-      .post(/\/fabric\/v4\/projects\/.*\/pipeline-repositories\/.*\/update/)
-      .query({ skillName: 'my-skill' })
-      .reply(200, response);
-    await create().parseAsync(['node', 'repos', 'update-pipelines', 'repo1', '--project', PROJECT, '--skill', 'my-skill']);
-    const output = getPrintedLines().join('');
-    const errs = getErrorLines().join('');
-    chai.expect(output).to.contain('pipeline1');
-    chai.expect(output).to.contain('pipeline2');
-    chai.expect(output).to.contain('pipeline3');
-    // eslint-disable-next-line no-unused-expressions
-    chai.expect(errs).to.be.empty;
-    nock.isDone();
+      nock(serverUrl)
+        .post(/\/fabric\/v4\/projects\/.*\/pipeline-repositories\/.*\/update/)
+        .query({ skillName: 'my-skill' })
+        .reply(200, response);
+      await create().parseAsync(['node', 'repos', 'update-pipelines', 'repo1', '--project', PROJECT, '--skill', 'my-skill']);
+      const output = getPrintedLines().join('');
+      const errs = getErrorLines().join('');
+      chai.expect(output).to.contain('pipeline1');
+      chai.expect(output).to.contain('pipeline2');
+      chai.expect(output).to.contain('pipeline3');
+      // eslint-disable-next-line no-unused-expressions
+      chai.expect(errs).to.be.empty;
+      nock.isDone();
+    });
+
+    it('should report no changes when updating-pipelines with an empty report', async () => {
+      // set up mock - should report no changes, but it was successful
+      const response = {
+        success: true,
+        updateReport: {
+          added: [],
+          updated: [],
+          deleted: [],
+          failed: {
+            add: [],
+            delete: [],
+            update: [],
+          },
+        },
+      };
+      nock(serverUrl)
+        .post(/\/fabric\/v4\/projects\/.*\/pipeline-repositories\/.*\/update/)
+        .reply(200, response);
+
+      // Execute update
+      await create().parseAsync(['node', 'repos', 'update-pipelines', 'repo1', '--project', PROJECT]);
+      const output = getPrintedLines().join('');
+      const errs = getErrorLines().join('');
+      chai.expect(output).to.contain('Pipelines up to date! No changes made.');
+      // eslint-disable-next-line no-unused-expressions
+      chai.expect(errs).to.be.empty;
+      nock.isDone();
+    });
   });
 });
