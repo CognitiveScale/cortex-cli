@@ -127,6 +127,25 @@ describe('Test handleListFailure function', () => {
         // eslint-disable-next-line no-unused-expressions
         expect(process.exit.calledWith(1)).to.be.true;
     });
+    const errResponseTsoa = {
+        status: 400,
+        details: {
+            'query.type1': {
+                message: 'message1',
+                value: '-1',
+            },
+        },
+    };
+    it('should print tabular output if status is 400 with TSOA response', () => {
+        handleListFailure(errResponseTsoa, null, 'test-resource');
+        expect((getPrintedLines()[0])).to.equal('┌────────────────────┬────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┐\n'
+            + '│ Option Type        │ Message                                                                                                                │\n'
+            + '├────────────────────┼────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┤\n'
+            + '│ type1              │ message1                                                                                                               │\n'
+            + '└────────────────────┴────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘');
+        // eslint-disable-next-line no-unused-expressions
+        expect(process.exit.calledWith(1)).to.be.true;
+    });
 });
 describe('Test handleDeleteFailure', () => {
     let printSpy;
