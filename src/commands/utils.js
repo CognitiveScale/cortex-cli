@@ -1,5 +1,7 @@
 import Table from 'cli-table3';
 import _ from 'lodash';
+// eslint-disable-next-line import/no-unresolved
+import { HTTPError } from 'got';
 import { boolean } from 'boolean';
 import chalk from 'chalk';
 import debugSetup from 'debug';
@@ -349,18 +351,33 @@ export const handleTable = (spec, data, transformer, noDataMessage) => {
     }
 };
 
-export const handleListFailure = (response, options, type) => {
-    if (response.status === 400) {
+    export const handleListFailure = (err, options, type) => {
+    let status;
+    let message;
+    let details;
+    // Newer code throws got HTTPError
+    if (err instanceof HTTPError) {
+        status = err.response.statusCode;
+        const jsonResp = JSON.parse(err.response.body ?? '{}');
+        details = jsonResp.details;
+        message = jsonResp.message;
+    } else {
+        status = err.status ?? '';
+        message = err.message;
+        details = err.details;
+    }
+
+    if (status === 400) {
         const optionTableFormat = OPTIONSTABLEFORMAT;
         printError(`${type} list failed.`, options, false);
-        if (response.details !== undefined && response.details !== null) {
-            printTable(optionTableFormat, response.details);
+        if (details !== undefined && details !== null) {
+            printTable(optionTableFormat, details);
         } else {
-            printError(response.message, options);
+            printError(message, options);
         }
         printError(''); // Just exit
     }
-    return printError(`Failed to list ${type}: ${response.status} ${response.message}`, options);
+    return printError(`Failed to list ${type}: ${status} ${message}`, options);
 };
 export const handleDeleteFailure = (response, options, type) => {
     if (response.status === 403) { // has dependencies

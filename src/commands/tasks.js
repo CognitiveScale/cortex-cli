@@ -5,7 +5,7 @@ import relativeTime from 'dayjs/plugin/relativeTime.js';
 import { loadProfile } from '../config.js';
 import Tasks from '../client/tasks.js';
 import {
- printSuccess, printError, handleTable, printExtendedLogs, getFilteredOutput, 
+    printSuccess, printError, handleTable, printExtendedLogs, getFilteredOutput, handleListFailure,
 } from './utils.js';
 /*
  * Copyright 2023 Cognitive Scale, Inc. All Rights Reserved.
@@ -34,10 +34,11 @@ const TASK_LIST_TABLE = [
 ];
 const SCHED_LIST_TABLE = [
     { column: 'Name', field: 'name', width: 60 },
-    { column: 'Skill Name', field: 'skillName', width: 40 },
+    { column: 'Agent Name', field: 'agentName', width: 40 },
     { column: 'Status', field: 'state', width: 20 },
     { column: 'Started', field: 'start', width: 25 },
     { column: 'Schedule', field: 'schedule', width: 12 },
+    { column: 'Username', field: 'username', width: 40 },
 ];
 export const ListTasksCommand = class {
     constructor(program) {
@@ -58,7 +59,6 @@ export const ListTasksCommand = class {
         try {
             const response = await tasks.listTasks(projectId, profile.token, options);
             let format = 'k8sFormat'; // Assume old format
-            if (response.success) {
                 let taskList = _.get(response, 'tasks', []);
                 if (_.isEmpty(taskList)) {
                     return printSuccess('No tasks found');
@@ -97,10 +97,8 @@ export const ListTasksCommand = class {
                 printExtendedLogs(taskList, options);
                 const tableCols = options.scheduled ? SCHED_LIST_TABLE : TASK_LIST_TABLE;
                 return handleTable(tableCols, taskList);
-            }
-            return printError(`Failed to list tasks: ${response.message}`, options);
         } catch (err) {
-            return printError(`Failed to query tasks: ${err.status} ${err.message} ${JSON.stringify(err)}`, options);
+            return handleListFailure(err, {}, 'Tasks');
         }
     }
 };
