@@ -34,9 +34,7 @@ export default (class Tasks {
         if (params) {
             opts.searchParams = params;
         }
-        return got
-            .get(endpoint, opts).json()
-            .catch((err) => constructError(err));
+        return got.get(endpoint, opts).json();
     }
 
     getTask(projectId, taskName, token, params) {
