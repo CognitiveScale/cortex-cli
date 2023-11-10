@@ -4,7 +4,7 @@ import esMain from 'es-main';
 import { readPackageJSON } from '../src/commands/utils.js';
 import { loadProfile } from '../src/config.js';
 import { FeatureController } from '../src/features.js';
-// import { doCompatibilityCheck } from '../src/compatibility.js';
+import { doCompatibilityCheck } from '../src/compatibility.js';
 
 
 /**
@@ -23,15 +23,19 @@ function _toObject(nameAndArgs, description) {
 // Global varible storing spe
 let profile;
 
-export async function create(profileName) {
+export async function create(profileName, doCheck = true) {
     const program = new Command();
     program.version(readPackageJSON('../../package.json').version, '-v, --version', 'Outputs the installed version of the Cortex CLI');
     program.name('cortex');
 
-    // Only Load the users Profile Once - resolves the available set of CLI commands
+    // Only Load the users Profile & do a compatibility check once on startup
     if (profile === undefined || profile === null) {
         profile = await loadProfile(profileName);
-        // doCompatibilityCheck(profile);
+        // console.log(`jwk: ${profile.jwk}`);
+        console.log(`token: ${profile.token}`);
+        console.log(`featureFlags: ${JSON.stringify(profile.featureFlags)}`);
+        console.log(`doChecK: ${doCheck}`);
+        // await doCompatibilityCheck(profile, doCheck);
     }
     const features = new FeatureController(profile);
     const supportedCommands = features.getSupportedSubCommands();
@@ -47,6 +51,8 @@ export async function create(profileName) {
         console.log(`preAction, ${thisCommand._name}, ${subCommand._name}`);
     });
     program.hook('preSubcommand', (thisCommand, subCommand) => {
+        thisCommand.profile = profile;
+        subCommand.profile = profile;
         console.log(`preSubcommand, ${thisCommand._name}, ${subCommand._name}`);
     });
 
@@ -103,6 +109,7 @@ if (esMain(import.meta)) {
         const idx = process.argv.indexOf('--profile') + 1;
         _profile = process.argv[idx] ?? _profile; // possibly undefined
     }
-    (await create(_profile)).showHelpAfterError().parseAsync(process.argv);
+    const _compat = !process.argv.includes('--no-compat');
+    (await create(_profile, _compat)).showHelpAfterError().parseAsync(process.argv);
 }
 export default await create();

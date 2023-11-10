@@ -2,6 +2,7 @@
 import esMain from 'es-main';
 import { Command } from 'commander';
 import { withCompatibilityCheck } from '../src/compatibility.js';
+import { loadProfile } from '../src/config.js';
 import {
   ListPipelineRepoCommand,
   DescribePipelineRepoCommand,

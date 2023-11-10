@@ -131,3 +131,112 @@ Executables are created for the following platforms:
 ### Signed binaries status
 * windows: binaries are currently **unsigned**
 * macOS: adhoc signature using [ldid](https://github.com/xerub/ldid)
+
+## Compatibility Checks
+
+[Before](https://mermaid.live/view#pako:eNrlVMtu2zAQ_JWF0EODytGlJ6FwYch2k8JRDMvpSReKWjvbUCRLUkaMIP9eKpQfsZ3-QHkiubPDGS6XLxFXNUZpZPFPi5LjmNjasKaU4AdrnZJtU6EJ6xF3ysAYN6UMG5V6hmx2C5lqGiZrG3a7oZlxxEkz6SADZoEr4_D5MqBoqwMENGkUJLFnQ1nvjjvOmZJAu7UOm_NY0bEVKC2D0fz2PJ538Xx-t-P1jgbD4ZcsPZMAgqwLoMxDvNAUahS4Zg7BKbBtxYP3HVeufERt0HSu4jyFRSu7-9HMUUWC3BayR-RPAc0NeVVMwEyxGuZGrbytEPLpnaiDT081GY3h08393SS5DkoTruSK1iHjAO0S37RmovVrAw-LWdzR_0buYkDHr3d6-2OKFG6Wyzn8mCwhWbHKEE82XxOSK9Xj9pw_i_scPhdoOpNLahAKxxodwxSZaw3CVLC1vTqr3t7rh7cRtHwghR9nJUxr4ckcKWmTcBcDLuiy1oV_3GSwhl9orM-4OjGfH534vS_jCcVow0iwSuDbe-95Lph8X_4ilN_3jUf_xxWf-S6C-fu-_mexdRBuk2_9bJjsenJgUCtL_ieiPdWJ0v1JB0lRHDVoGka1_-xeuu0yco_YYBmlfloz81RGpXz1uO7XK7aSR6kzLcZRq2vf7f3HGDZf_wIhb7Bb):
+
+```mermaid
+sequenceDiagram
+    autonumber
+    Actor Dev
+
+    box CLI Commands
+        participant C as cortex
+        participant Sub as cortex pipelines
+    end
+
+    participant Filesystem
+    participant S as Sensa API
+    participant N as NPM
+
+    Dev->>+C: cortex pipelines list
+    C->>Sub: delegate to subcommand
+
+    Note over Sub,N: Run Compatibility Check
+    critical Load Profile
+    Sub->>+Filesystem: READ $HOME/.cortex/config
+    Filesystem->>+Sub: Cluster URL, Project, etc.
+
+    Sub->>+S: HTTP GET /fabric/v4/info
+    S->>+Sub: JSON (Server Time Stamp, Feature Flags)
+    end
+
+    critical Compatibility Check
+    Sub->>S: HTTP GET /fabric/v4/compatibility/applications/cortex-cli
+    S->>+Sub: JSON (Required Version)
+
+    Sub->>+N: HTTP GET ?
+    N->>+Sub: JSON (Available CLI Versions)
+    end
+
+    Note over Sub,S: Run Action
+    critical Load Profile
+    Sub->>+Filesystem: READ $HOME/.cortex/config
+    Filesystem->>+Sub: Cluster URL, Project, etc.
+
+    Sub->>+S: HTTP GET /fabric/v4/info
+    S->>+Sub: JSON (Server Time Stamp, Feature Flags)
+    end
+
+    critical List Pipelines
+    Sub->>S: HTTP GET /fabric/v4/projects/<project>/pipeline-repositories
+    S->>+Sub: JSON (Pipelines)
+    end
+```
+
+Notes:
+* The Users Profile is loaded twice (2 Info HTTP Reqeusts), once when doing the compatiblity check, and once when
+    executing the command.
+
+[Desired](https://mermaid.live/view#pako:eNp9VE1z2jAQ_Ss7nh6aAeJLT54OHcZAQ4c4TEx64iLLa6IiS6ok0zCZ_PdKlg0k0Ookad--_XgrvUZUlhglkcHfDQqKU0a2mtQbAW6RxkrR1AXqcJ5QKzVMcR-OhXyBdLmAVNY1EaUJt34poi2jTBFhIQVigEpt8eU6IG-KEwQUU8iZwI4NRRk25x5zxtEcjMX60pZ7rhyFITBZLS7tmbdnq_tgcbWMxuNBmlyEB86M3YgAo5o5AsJhKUkJKy0rl0Ewpd7_lFACj7PJFD7dPdzP4ttAGlMpKrYN-BO0C5zyxp00PD0uh576F1I7BLT0to_ehsgTuFuvV_B9toa4IoVmNN5_iZmoZEDlHd-P_CGDzznqvSNdsxoht6RWQ5gjsY1GmHOyNTc99ah1WrKatUrQTksoiMESpICqc6u825ko3YhwCwtz5um2Svmyy28nuX0FDpJAiRy3xCJYCebo07Fyg-9dBk6eBGZaS53Ak9gJ-Uf003aRSSYdrfRFu0jDzAnRtGBFLCsYZ_YA6TPS3YWmVzFtR5vC53298fTcKyZKcUdmmRQmDqqPKGdnyrTlB20e3Vtj2nX3J2rjPG76lELAQXYWsWti9oFisieMk4Jj-wA7nl7UfzYlD01xz9ihL2fbDTys3j-__7ZAhWE18dduN4775zPSqKRh7rtgR6oPJRwjnbKOhlGNuiasdD_Sq7_eRPYZa9xEiduWRO820Ua8OZz_mvKDoFFidYPDqFGlG6vu9wqXb38B-i2SbA):
+
+```mermaid
+sequenceDiagram
+    autonumber
+    Actor Dev
+    box CLI Commands
+        participant C as cortex
+        participant Sub as cortex pipelines
+    end
+    participant Filesystem
+    participant S as Sensa API
+    participant N as NPM
+    Dev->>+C: cortex pipelines list
+
+    critical Load Profile
+    C->>+Filesystem: READ $HOME/.cortex/config
+    Filesystem->>+C: Cluster URL, Project, etc.
+
+    C->>+S: HTTP GET /fabric/v4/info
+    S->>+C: JSON (Server Time Stamp, Feature Flags)
+    C-->+C: Limit Subcommands based on feature flags
+    end
+
+    alt Is Subcommand Supported?
+        C->>Sub: delegate to subcommand
+    else
+        C->>+Dev: Error: Unknown Command
+    end
+
+    Note over Sub,N: Run Compatibility Check
+
+    critical Compatibility Check
+    Sub->>S: HTTP GET /fabric/v4/compatibility/applications/cortex-cli
+    S->>+Sub: JSON (Required Version)
+
+    Sub->>+N: HTTP GET ?
+    N->>+Sub: JSON (Available CLI Versions)
+    end
+
+    Note over Sub,S: Run Action
+
+    critical List Pipelines
+    Sub->>S: HTTP GET /fabric/v4/projects/<project>/pipeline-repositories
+    S->>+Sub: JSON (Pipelines)
+    end
+```
+
+Notes:
+* We only want to load the Profile & perform a Compatibility Check once!
+* The downside is that startup for help commands are slower!

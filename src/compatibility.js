@@ -118,14 +118,16 @@ export async function doCompatibilityCheck(profile, doCheck = true) {
 
 export function withCompatibilityCheck(fn) {
     return (...args) => {
-        const command = args.find((a) => a !== undefined && typeof a.opts === 'function');
-        const options = command.opts();
+         const command = args.find((a) => a !== undefined && typeof a.opts === 'function');
+         const options = command.opts();
+        // assume already done
         if (options.compat && _.toLower(process.env.CORTEX_NO_COMPAT) !== 'true') {
-            const { profile: profileName } = options;
-            return loadProfile(profileName)
-                .then((profile) => doCompatibilityCheck(profile))
-                .then(() => fn(...args))
-                .catch((error) => printError(error));
+             const { profile: profileName } = options;
+             debug('in withCompatiblityCheck (no-op): %s', profileName);
+        //     return loadProfile(profileName)
+        //         .then((profile) => doCompatibilityCheck(profile))
+        //         .then(() => fn(...args))
+        //         .catch((error) => printError(error));
         }
         return Promise.resolve().then(() => fn(...args));
     };

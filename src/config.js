@@ -151,15 +151,34 @@ class Config {
             return undefined;
         }
         const profileType = new Profile(name, profile).validate();
+        // TODO(LA): Instead of always computing JWT & Feature Flags, maybe these properties can be passed through environment variables?
+        // However, we would also want to silently use these values
+        //
+        // - add environment variable 'CORTEX_TOKEN_SILENT' - similar to CORTEX_TOKEN, but it does not emit the same warning
+        // - add environment variable 'CORTEX_FEATURE_FLAGS' - set it to the JSON string of featureFlags returned from the INFO API
+        // - Avoid calling `fetchInfoForProfile` if environment variables are set (no reason to call for Info)
         const { jwt, featureFlags } = await fetchInfoForProfile(profile);
         if (useenv) {
-            if (process.env.CORTEX_TOKEN) {
+            let jwtFromEnv;
+            if (process.env.CORTEX_TOKEN_SILENT) {
+                jwtFromEnv = process.env.CORTEX_TOKEN_SILENT;
+            } else if (process.env.CORTEX_TOKEN) {
+                jwtFromEnv = process.env.CORTEX_TOKEN;
                 printError('Using token from "CORTEX_TOKEN" environment variable', {}, false);
             }
+
+            let featureFlagsFromEnv;
+            if (process.env.CORTEX_FEATURE_FLAGS) {
+                try {
+                   featureFlagsFromEnv = JSON.parse(process.env.CORTEX_FEATURE_FLAGS);
+                } catch (err) {
+                    // fail silently
+                }
+            }
             profileType.url = getCortexUrlFromEnv() || profileType.url;
-            profileType.token = process.env.CORTEX_TOKEN || jwt;
+            profileType.token = jwtFromEnv || jwt;
             profileType.project = process.env.CORTEX_PROJECT || profileType.project;
-            profile.featureFlags = featureFlags;
+            profile.featureFlags = featureFlagsFromEnv || featureFlags;
         } else {
             profileType.token = jwt;
             profile.featureFlags = featureFlags;
@@ -483,7 +502,9 @@ function readConfig() {
     }
     return undefined;
 }
+
 async function loadProfile(profileName, useenv = true) {
+    debug(`loadProfile() => ${profileName} (using env: ${useenv})`);
     const config = readConfig();
     if (config === undefined) {
         printError('Please configure the Cortex CLI by running "cortex configure"');
