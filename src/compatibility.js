@@ -123,11 +123,10 @@ export function withCompatibilityCheck(fn) {
         // assume already done
         if (options.compat && _.toLower(process.env.CORTEX_NO_COMPAT) !== 'true') {
              const { profile: profileName } = options;
-             debug('in withCompatiblityCheck (no-op): %s', profileName);
-        //     return loadProfile(profileName)
-        //         .then((profile) => doCompatibilityCheck(profile))
-        //         .then(() => fn(...args))
-        //         .catch((error) => printError(error));
+             return loadProfile(profileName)
+                 .then((profile) => doCompatibilityCheck(profile))
+                 .then(() => fn(...args))
+                 .catch((error) => printError(error));
         }
         return Promise.resolve().then(() => fn(...args));
     };

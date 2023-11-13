@@ -47,7 +47,7 @@ async function fetchInfoForProfile(profile, expiresIn = '2m') {
     const infoClient = new Info(profile.url);
     const infoResp = await infoClient.getInfo();
     const serverTs = infoResp?.serverTs ?? Date.now();
-    const featureFlags = infoResp?.featureFlags ?? {};
+    const featureFlags = infoResp?.featureFlags ?? getDefaultFeatures();
     const jwt = await computeJwt(profile, serverTs, expiresIn);
     return { jwt, featureFlags };
 }
@@ -176,12 +176,12 @@ class Config {
                 printError('Using token from "CORTEX_TOKEN" environment variable', {}, false);
             }
             profileType.url = getCortexUrlFromEnv() || profileType.url;
-            profileType.token = jwtFromEnv;
+            profileType.token = jwtFromEnv || profileType.token;
             profileType.project = process.env.CORTEX_PROJECT || profileType.project;
         }
         // In the case that either value is missing, call the Info API
         if (!profileType.token || !profileType.featureFlags) {
-            debug('JWT or Feature Flags is not defined - making info request');
+            debug(`JWT or Feature Flags is not defined - making info request - ${profileType.token}, ${profileType.featureFlags}`);
             const { jwt, featureFlags } = await fetchInfoForProfile(profile);
             profileType.token = jwt;
             profileType.featureFlags = featureFlags || getDefaultFeatures();
@@ -334,12 +334,12 @@ class ConfigV4 {
                 printError('Using token from "CORTEX_TOKEN" environment variable', {}, false);
             }
             profileType.url = getCortexUrlFromEnv() || profileType.url;
-            profileType.token = jwtFromEnv;
+            profileType.token = jwtFromEnv || profileType.token;
             profileType.project = process.env.CORTEX_PROJECT || profileType.project;
         }
         // In the case that either value is missing, call the Info API
         if (!profileType.token || !profileType.featureFlags) {
-            debug('JWT or Feature Flags is not defined - making info request');
+            debug(`JWT or Feature Flags is not defined - making info request - ${profileType.token}, ${profileType.featureFlags}`);
             const { jwt, featureFlags } = await fetchInfoForProfile(profile);
             profileType.token = jwt;
             profileType.featureFlags = featureFlags || getDefaultFeatures();
@@ -471,12 +471,12 @@ class ConfigV5 {
                 printError('Using token from "CORTEX_TOKEN" environment variable', {}, false);
             }
             profileType.url = getCortexUrlFromEnv() || profileType.url;
-            profileType.token = jwtFromEnv;
+            profileType.token = jwtFromEnv || profileType.token;
             profileType.project = process.env.CORTEX_PROJECT || profileType.project;
         }
         // In the case that either value is missing, call the Info API
         if (!profileType.token || !profileType.featureFlags) {
-            debug('JWT or Feature Flags is not defined - making info request');
+            debug(`JWT or Feature Flags is not defined - making info request - ${profileType.token}, ${profileType.featureFlags}`);
             const { jwt, featureFlags } = await fetchInfoForProfile(profile);
             profileType.token = jwt;
             profileType.featureFlags = featureFlags || getDefaultFeatures();
