@@ -8,6 +8,7 @@ import debugSetup from 'debug';
 import * as jose from 'jose';
 import { printError } from './commands/utils.js';
 import Info from './client/info.js';
+import { getDefaultFeatures } from './features.js';
 
 const debug = debugSetup('cortex:config');
 
@@ -151,37 +152,39 @@ class Config {
             return undefined;
         }
         const profileType = new Profile(name, profile).validate();
-        // TODO(LA): Instead of always computing JWT & Feature Flags, maybe these properties can be passed through environment variables?
-        // However, we would also want to silently use these values
-        //
-        // - add environment variable 'CORTEX_TOKEN_SILENT' - similar to CORTEX_TOKEN, but it does not emit the same warning
-        // - add environment variable 'CORTEX_FEATURE_FLAGS' - set it to the JSON string of featureFlags returned from the INFO API
-        // - Avoid calling `fetchInfoForProfile` if environment variables are set (no reason to call for Info)
-        const { jwt, featureFlags } = await fetchInfoForProfile(profile);
+        // Side load JWT & Feature Flags - this is used to avoid redundant calls
+        // to the Info API (`fetchInfoForProfile()`).
+        if (process.env.CORTEX_TOKEN_SILENT) {
+            profileType.token = process.env.CORTEX_TOKEN_SILENT;
+            debug('Side loaded token from previous info request');
+        }
+        if (process.env.CORTEX_FEATURE_FLAGS) {
+            try {
+                profileType.featureFlags = JSON.parse(process.env.CORTEX_FEATURE_FLAGS);
+                debug('Side loaded feature flags token from previous info request');
+            } catch (err) {
+                // fail silently - let feature flags to be retrieved later
+                debug(`Failed to side loaded feature flags token from previous info request - ${err}`);
+            }
+        }
+        // Load user facing environment variables - these have higher priority than
+        // the above (silent) options.
         if (useenv) {
             let jwtFromEnv;
-            if (process.env.CORTEX_TOKEN_SILENT) {
-                jwtFromEnv = process.env.CORTEX_TOKEN_SILENT;
-            } else if (process.env.CORTEX_TOKEN) {
+            if (process.env.CORTEX_TOKEN) {
                 jwtFromEnv = process.env.CORTEX_TOKEN;
                 printError('Using token from "CORTEX_TOKEN" environment variable', {}, false);
             }
-
-            let featureFlagsFromEnv;
-            if (process.env.CORTEX_FEATURE_FLAGS) {
-                try {
-                   featureFlagsFromEnv = JSON.parse(process.env.CORTEX_FEATURE_FLAGS);
-                } catch (err) {
-                    // fail silently
-                }
-            }
             profileType.url = getCortexUrlFromEnv() || profileType.url;
-            profileType.token = jwtFromEnv || jwt;
+            profileType.token = jwtFromEnv;
             profileType.project = process.env.CORTEX_PROJECT || profileType.project;
-            profile.featureFlags = featureFlagsFromEnv || featureFlags;
-        } else {
+        }
+        // In the case that either value is missing, call the Info API
+        if (!profileType.token || !profileType.featureFlags) {
+            debug('JWT or Feature Flags is not defined - making info request');
+            const { jwt, featureFlags } = await fetchInfoForProfile(profile);
             profileType.token = jwt;
-            profile.featureFlags = featureFlags;
+            profileType.featureFlags = featureFlags || getDefaultFeatures();
         }
         return profileType;
     }
@@ -306,19 +309,40 @@ class ConfigV4 {
         if (!profile) {
             return undefined;
         }
-        const profileType = new ProfileV4(name, profile).validate();
-        const { jwt, featureFlags } = await fetchInfoForProfile(profileType);
+        const profileType = new Profile(name, profile).validate();
+        // Side load JWT & Feature Flags - this is used to avoid redundant calls
+        // to the Info API (`fetchInfoForProfile()`).
+        if (process.env.CORTEX_TOKEN_SILENT) {
+            profileType.token = process.env.CORTEX_TOKEN_SILENT;
+            debug('Side loaded token from previous info request');
+        }
+        if (process.env.CORTEX_FEATURE_FLAGS) {
+            try {
+                profileType.featureFlags = JSON.parse(process.env.CORTEX_FEATURE_FLAGS);
+                debug('Side loaded feature flags token from previous info request');
+            } catch (err) {
+                // fail silently - let feature flags to be retrieved again
+                debug(`Failed to side loaded feature flags token from previous info request - ${err}`);
+            }
+        }
+        // Load user facing environment variables - these have higher priority than
+        // the above (silent) options.
         if (useenv) {
+            let jwtFromEnv;
             if (process.env.CORTEX_TOKEN) {
+                jwtFromEnv = process.env.CORTEX_TOKEN;
                 printError('Using token from "CORTEX_TOKEN" environment variable', {}, false);
             }
             profileType.url = getCortexUrlFromEnv() || profileType.url;
-            profileType.token = process.env.CORTEX_TOKEN || jwt;
+            profileType.token = jwtFromEnv;
             profileType.project = process.env.CORTEX_PROJECT || profileType.project;
-            profileType.featureFlags = featureFlags;
-        } else {
+        }
+        // In the case that either value is missing, call the Info API
+        if (!profileType.token || !profileType.featureFlags) {
+            debug('JWT or Feature Flags is not defined - making info request');
+            const { jwt, featureFlags } = await fetchInfoForProfile(profile);
             profileType.token = jwt;
-            profileType.featureFlags = featureFlags;
+            profileType.featureFlags = featureFlags || getDefaultFeatures();
         }
         return profileType;
     }
@@ -422,19 +446,40 @@ class ConfigV5 {
         if (!profile) {
             return undefined;
         }
-        const profileType = new ProfileV5(name, profile).validate();
-        const { jwt, featureFlags } = await fetchInfoForProfile(profileType);
+        const profileType = new Profile(name, profile).validate();
+        // Side load JWT & Feature Flags - this is used to avoid redundant calls
+        // to the Info API (`fetchInfoForProfile()`).
+        if (process.env.CORTEX_TOKEN_SILENT) {
+            profileType.token = process.env.CORTEX_TOKEN_SILENT;
+            debug('Side loaded token from previous info request');
+        }
+        if (process.env.CORTEX_FEATURE_FLAGS) {
+            try {
+                profileType.featureFlags = JSON.parse(process.env.CORTEX_FEATURE_FLAGS);
+                debug('Side loaded feature flags token from previous info request');
+            } catch (err) {
+                // fail silently - let feature flags to be retrieved again
+                debug(`Failed to side loaded feature flags token from previous info request - ${err}`);
+            }
+        }
+        // Load user facing environment variables - these have higher priority than
+        // the above (silent) options.
         if (useenv) {
+            let jwtFromEnv;
             if (process.env.CORTEX_TOKEN) {
+                jwtFromEnv = process.env.CORTEX_TOKEN;
                 printError('Using token from "CORTEX_TOKEN" environment variable', {}, false);
             }
             profileType.url = getCortexUrlFromEnv() || profileType.url;
-            profileType.token = process.env.CORTEX_TOKEN || jwt;
+            profileType.token = jwtFromEnv;
             profileType.project = process.env.CORTEX_PROJECT || profileType.project;
-            profileType.featureFlags = featureFlags;
-        } else {
+        }
+        // In the case that either value is missing, call the Info API
+        if (!profileType.token || !profileType.featureFlags) {
+            debug('JWT or Feature Flags is not defined - making info request');
+            const { jwt, featureFlags } = await fetchInfoForProfile(profile);
             profileType.token = jwt;
-            profileType.featureFlags = featureFlags;
+            profileType.featureFlags = featureFlags || getDefaultFeatures();
         }
         return profileType;
     }

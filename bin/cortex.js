@@ -4,7 +4,6 @@ import esMain from 'es-main';
 import { readPackageJSON } from '../src/commands/utils.js';
 import { loadProfile } from '../src/config.js';
 import { FeatureController } from '../src/features.js';
-import { doCompatibilityCheck } from '../src/compatibility.js';
 
 
 /**
@@ -23,7 +22,7 @@ function _toObject(nameAndArgs, description) {
 // Global varible storing spe
 let profile;
 
-export async function create(profileName, doCheck = true) {
+export async function create(profileName) {
     const program = new Command();
     program.version(readPackageJSON('../../package.json').version, '-v, --version', 'Outputs the installed version of the Cortex CLI');
     program.name('cortex');
@@ -31,40 +30,20 @@ export async function create(profileName, doCheck = true) {
     // Only Load the users Profile & do a compatibility check once on startup
     if (profile === undefined || profile === null) {
         profile = await loadProfile(profileName);
-        // console.log(`jwk: ${profile.jwk}`);
-        console.log(`token: ${profile.token}`);
-        console.log(`featureFlags: ${JSON.stringify(profile.featureFlags)}`);
-        console.log(`doChecK: ${doCheck}`);
-        // await doCompatibilityCheck(profile, doCheck);
+        process.env.CORTEX_TOKEN_SILENT = profile.token;
+        process.env.CORTEX_FEATURE_FLAGS = JSON.stringify(profile.featureFlags);
     }
     const features = new FeatureController(profile);
     const supportedCommands = features.getSupportedSubCommands();
 
-    // options
-    // - move compat check to happen at startup (downside is earlier parsing of --no-compat)
-    // - move compat check to happen before each subcommand (use subcommand hook here)
-    // - somehow pass the profile from this module to the submodule? (Would sharing of a global variable)
-
-    // - preSubcommand hook -> called before delegating to each subcommand, includes -h
-    // - preAction hook -> before executing an action, does not work when applied to 'cortex' (needs to be on something with an Action), does not include '-h'
-    program.hook('preAction', (thisCommand, subCommand) => {
-        console.log(`preAction, ${thisCommand._name}, ${subCommand._name}`);
-    });
-    program.hook('preSubcommand', (thisCommand, subCommand) => {
-        thisCommand.profile = profile;
-        subCommand.profile = profile;
-        console.log(`preSubcommand, ${thisCommand._name}, ${subCommand._name}`);
-    });
-
     program
         .description('Cortex CLI')
         .option('--debug', 'Enables enhanced log output for debugging', false)
-        // .option('--no-compat', 'Ignore API compatibility checks') // TODO: move this here
         .on('option:debug', () => {
             process.env.DEBUG = '*';
         });
 
-    // Dynamically add subcommands - only those that are supported by the server
+    // Dynamically add subcommands - only include those that are supported by the server
     const allCommands = [
         _toObject('actions <cmd>', 'Work with Cortex Actions'),
         _toObject('agents <cmd>', 'Work with Cortex Agents'),
@@ -89,7 +68,6 @@ export async function create(profileName, doCheck = true) {
         _toObject('users <cmd>', 'Work with a Cortex Users'),
         _toObject('workspaces <cmd>', 'Scaffold Cortex Components'),
     ];
-
     allCommands
         .filter(({ nameAndArgs }) => {
             const name = nameAndArgs.split(' ')[0].trim();
@@ -109,7 +87,6 @@ if (esMain(import.meta)) {
         const idx = process.argv.indexOf('--profile') + 1;
         _profile = process.argv[idx] ?? _profile; // possibly undefined
     }
-    const _compat = !process.argv.includes('--no-compat');
-    (await create(_profile, _compat)).showHelpAfterError().parseAsync(process.argv);
+    (await create(_profile)).showHelpAfterError().parseAsync(process.argv);
 }
 export default await create();

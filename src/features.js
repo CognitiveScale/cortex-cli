@@ -1,9 +1,9 @@
-export function allGAFeaturesEnabled() {
-    return process.env.ALL_GA_FEATURES_ENABLED || true; // hardcoding to support all features until feature flagging is finalized
+export function allGAFeaturesEnabled(featureFlags) {
+    return (featureFlags?.ga?.enabled ?? false) || process.env.ALL_GA_FEATURES_ENABLED;
 }
 
-export function previewFeaturesEnabled() {
-  return process.env.PREVIEW_FEATURES_ENABLED;
+export function previewFeaturesEnabled(featureFlags) {
+  return (featureFlags?.preview?.enabled ?? false) || process.env.PREVIEW_FEATURES_ENABLED;
 }
 
 export class FeatureFlag {
@@ -21,25 +21,37 @@ export class FeatureFlag {
   }
 }
 
-const ALL_FEATURES = {
-  ga: {
-    accounts: ['projects', 'roles', 'users'],
-    campaigns: ['campaigns', 'missions'],
-    dataFabric: ['connections', 'content', 'secrets'],
-    models: ['experiments', 'models'],
-    runtime: ['actions', 'agents', 'docker', 'sessions', 'skills', 'tasks', 'types', 'workspaces', 'deploy'],
-  },
+// Group -> Feature Flag -> CLI Subcommands
+const FLAG_SUBCOMMANDS = {
+  ga: { }, // TODO: to be finalized
   preview: {
-    pipelines: ['pipelines'],
+    'data-fabric-pipelines': ['pipelines'],
   },
-  default: ['configure', 'assessments'],
+  default: {
+   // default commands - always enabled. These should be grouped into 'ga' features, but those are TBD,
+   // so existing commands count as default.
+    all: [
+      'actions', 'agents', 'assessments', 'campaigns', 'configure', 'connections', 'content', 'deploy',
+      'docker', 'experiments', 'missions', 'models', 'projects', 'roles', 'secrets', 'sessions',
+      'skills', 'tasks', 'types', 'users', 'workspaces',
+    ],
+  },
 };
 
-const GA_FEATURES = Object.keys(ALL_FEATURES.ga)
-  .map((f) => new FeatureFlag(f, 'GA', ALL_FEATURES.ga[f]));
+export function getDefaultFeatures() {
+  return {
+    ga: {},
+    preview: {
+      enabled: false,
+      features: {
+        'data-fabric-pipelines': {
+          enabled: false,
+        },
+      },
+    },
+  };
+}
 
-const PREVIEW_FEATURES = Object.keys(ALL_FEATURES.preview)
-  .map((f) => new FeatureFlag(f, 'PREVIEW', ALL_FEATURES.preview[f]));
 
 export class FeatureController {
   constructor(profile) {
@@ -48,15 +60,23 @@ export class FeatureController {
 
   /**
    * Computes the set of subcommands that are supported.
-   * @param {string[]} enabledFeatures
-   * @param {FeatureFlag[]} featureFlags
-   * @return {string[]}
+   *
+   * @param {object} featureFlagSet feature flag group (e.g. ga or preview)
+   * @param {Object.<string,string[]>} flagSubcommands map of feature flags to corresponding subcommands
+   * @param {boolean} allEnabled whether all feature flags in the group should be treated as enabled
+   * @return {string[]} list of strings
    */
-  collectSubcommands(enabledFeatures, featureFlags) {
-    console.log(enabledFeatures);
-    return featureFlags
-      .filter((flag) => enabledFeatures.includes(flag.name))
-      .map((flag) => flag.subcommands) // string[][]
+  collectSubcommands(featureFlagSet, flagSubcommands, allEnabled = false) {
+    if (allEnabled) {
+      // collect all subcommands
+      return Object.keys(flagSubcommands)
+        .map((k) => flagSubcommands[k])
+        .flat();
+    }
+    // only include subcommands for features that individuall enabled
+    return Object.keys(flagSubcommands)
+      .filter((k) => featureFlagSet?.[k]?.enabled ?? false)
+      .map((k) => flagSubcommands[k])
       .flat();
   }
 
@@ -65,17 +85,14 @@ export class FeatureController {
    * @returns {string[]}
    */
   getSupportedSubCommands() {
-    // Collect GA Features & Preview Features, but always include default options
-    const enabledFeatures = (this.profile?.featureFlags?.ga ?? []) + (this.profile.featureFlags?.preview ?? []);
-    const supportedCommands = [...ALL_FEATURES.default];
-    if (allGAFeaturesEnabled()) {
-      supportedCommands.push(...GA_FEATURES.map((f) => f.subcommands).flat());
-    } else {
-      supportedCommands.push(...this.collectSubcommands(enabledFeatures, GA_FEATURES));
-    }
-    if (previewFeaturesEnabled()) {
-      supportedCommands.push(...PREVIEW_FEATURES.map((f) => f.subcommands).flat());
-    }
+    // Collect GA Features & Preview Features, but always include defaults
+    const previewSubcommands = this.collectSubcommands(this.profile.featureFlags?.preview ?? {}, FLAG_SUBCOMMANDS.preview, previewFeaturesEnabled(this.profile.featureFlags));
+    const gaSubcommands = this.collectSubcommands(this.profile.featureFlags?.ga ?? {}, FLAG_SUBCOMMANDS.ga, allGAFeaturesEnabled(this.profile.featureFlags));
+    const supportedCommands = [
+      ...FLAG_SUBCOMMANDS.default.all,
+      ...gaSubcommands,
+      ...previewSubcommands,
+    ];
     return supportedCommands;
   }
 }
