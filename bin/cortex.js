@@ -29,7 +29,7 @@ export async function create(profileName) {
     const features = new FeatureController(profile);
     const supportedCommands = features.getSupportedSubCommands();
     const _toObject = (nameAndArgs, description) => ({ nameAndArgs, description });
-    const isCommandSupported = (nameAndArgs) => (supportedCommands.includes(nameAndArgs.split(' ')[0].trim()));
+    const isCommandSupported = ({ nameAndArgs }) => (supportedCommands.includes(nameAndArgs.split(' ')[0].trim()));
     const allCommands = [
         _toObject('actions <cmd>', 'Work with Cortex Actions'),
         _toObject('agents <cmd>', 'Work with Cortex Agents'),
