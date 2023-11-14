@@ -21,8 +21,9 @@ export class FeatureFlag {
   }
 }
 
+// exported for testing purposes
 // Group -> Feature Flag -> CLI Subcommands
-const FLAG_SUBCOMMANDS = {
+export const FLAG_SUBCOMMANDS = {
   ga: { }, // TODO: to be finalized
   preview: {
     'data-fabric-pipelines': ['pipelines'],
@@ -75,7 +76,7 @@ export class FeatureController {
     }
     // only include subcommands for features that individuall enabled
     return Object.keys(flagSubcommands)
-      .filter((k) => featureFlagSet?.[k]?.enabled ?? false)
+      .filter((k) => featureFlagSet?.features?.[k]?.enabled ?? false)
       .map((k) => flagSubcommands[k])
       .flat();
   }
