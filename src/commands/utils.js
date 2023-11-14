@@ -388,10 +388,10 @@ export const handleListFailure = (err, options, type) => {
     if (status === 400) {
         const optionTableFormat = OPTIONSTABLEFORMAT;
         printError(`${type} list failed.`, options, false);
-        if (response.details !== undefined && response.details !== null) {
+        if (details !== undefined && details !== null) {
             // TSOA API validation error case
-            if (!Array.isArray(response.details)) {
-                const transformedResponse = transformTSOAValidation(response.details);
+            if (!Array.isArray(details)) {
+                const transformedResponse = transformTSOAValidation(details);
                 if (transformedResponse !== null) {
                     response.details = transformedResponse;
                 }
