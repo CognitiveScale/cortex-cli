@@ -356,7 +356,7 @@ const transformTSOAValidation = (responseDetails) => {
         const keys = Object.keys(responseDetails);
         if (keys.length > 0) {
             const transformedResp = [];
-            for (let i = 0; i < keys.length; i++) {
+            for (let i = 0; i < keys.length; i += 1) {
                 const key = keys[i];
                 if (key.includes('.') && key.split('.').length === 2) {
                     const { message } = _.get(responseDetails, key, {});
@@ -368,9 +368,8 @@ const transformTSOAValidation = (responseDetails) => {
             }
             if (transformedResp.length > 0) {
                 return transformedResp;
-            } else {
-                return null;
             }
+            return null;
         }
     }
     // Handle invalid or unexpected input
