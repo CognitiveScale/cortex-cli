@@ -9,9 +9,19 @@ function ansiRegex({ onlyFirst = false } = {}) {
 function stripAnsi(s) {
     return s.replace(ansiRegex(), '');
 }
+function compatiblityResponse() {
+    return { semver: '>=0.12.11' };
+}
+function compatibilityApi() {
+    return '/fabric/v4/compatibility/applications/cortex-cli';
+}
 export { ansiRegex };
 export { stripAnsi };
+export { compatibilityApi };
+export { compatiblityResponse };
 export default {
     ansiRegex,
     stripAnsi,
+    compatibilityApi,
+    compatiblityResponse,
 };

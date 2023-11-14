@@ -3,10 +3,11 @@ import url from 'node:url';
 import chai from 'chai';
 import mockedEnv from 'mocked-env';
 import sinon from 'sinon';
+import nock from 'nock';
 import _ from 'lodash';
 import { create } from '../bin/cortex-content.js';
 import { humanReadableFileSize } from '../src/commands/utils.js';
-import { stripAnsi } from './utils.js';
+import { compatibilityApi, compatiblityResponse, stripAnsi } from './utils.js';
 import Info from '../src/client/info.js';
 import Content from '../src/client/content.js';
 
@@ -16,6 +17,7 @@ describe('Upload Directory', () => {
     let sandbox;
     let printSpy;
     let errorSpy;
+    const serverUrl = 'http://localhost:8000';
     function getPrintedLines() {
         return _.flatten(printSpy.args).map((s) => stripAnsi(s));
     }
@@ -31,6 +33,9 @@ describe('Upload Directory', () => {
     });
 
     beforeEach(() => {
+        if (!nock.isActive()) {
+            nock.activate();
+        }
         sandbox = sinon.createSandbox();
         sandbox.stub(process, 'exit');
         sandbox.stub(Info.prototype, 'getInfo').callsFake(() => ({
@@ -38,10 +43,14 @@ describe('Upload Directory', () => {
         }));
         printSpy = sandbox.spy(console, 'log');
         errorSpy = sandbox.spy(console, 'error');
+        nock(serverUrl).get(compatibilityApi()).reply(200, compatiblityResponse());
     });
     
     after(() => restoreEnv());
-    afterEach(() => sandbox.restore());
+    afterEach(() => {
+        sandbox.restore();
+        nock.cleanAll();
+    });
 
     it('test upload successfull', async () => {
         const program = create();
