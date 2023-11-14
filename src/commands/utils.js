@@ -351,7 +351,32 @@ export const handleTable = (spec, data, transformer, noDataMessage) => {
     }
 };
 
-    export const handleListFailure = (err, options, type) => {
+const transformTSOAValidation = (responseDetails) => {
+    if (responseDetails && typeof responseDetails === 'object') {
+        const keys = Object.keys(responseDetails);
+        if (keys.length > 0) {
+            const transformedResp = [];
+            for (let i = 0; i < keys.length; i += 1) {
+                const key = keys[i];
+                if (key.includes('.') && key.split('.').length === 2) {
+                    const { message } = _.get(responseDetails, key, {});
+                    if (message) {
+                        // Transform error object
+                        transformedResp.push({ type: key.split('.')[1], message });
+                    }
+                }
+            }
+            if (transformedResp.length > 0) {
+                return transformedResp;
+            }
+            return null;
+        }
+    }
+    // Handle invalid or unexpected input
+    return null;
+};
+
+export const handleListFailure = (err, options, type) => {
     let status;
     let message;
     let details;
@@ -371,6 +396,13 @@ export const handleTable = (spec, data, transformer, noDataMessage) => {
         const optionTableFormat = OPTIONSTABLEFORMAT;
         printError(`${type} list failed.`, options, false);
         if (details !== undefined && details !== null) {
+            // TSOA API validation error case
+            if (!Array.isArray(details)) {
+                const transformedResponse = transformTSOAValidation(details);
+                if (transformedResponse !== null) {
+                    details = transformedResponse;
+                }
+            }
             printTable(optionTableFormat, details);
         } else {
             printError(message, options);
