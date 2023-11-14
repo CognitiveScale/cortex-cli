@@ -355,13 +355,21 @@ const transformTSOAValidation = (responseDetails) => {
     if (responseDetails && typeof responseDetails === 'object') {
         const keys = Object.keys(responseDetails);
         if (keys.length > 0) {
-            const key = keys[0];
-            if (key.includes('.') && key.split('.').length === 2) {
-                const { message } = _.get(responseDetails, key, {});
-                if (message) {
-                    // Transform error object
-                    return [{ type: key.split('.')[1], message }];
+            const transformedResp = [];
+            for (let i = 0; i < keys.length; i++) {
+                const key = keys[i];
+                if (key.includes('.') && key.split('.').length === 2) {
+                    const { message } = _.get(responseDetails, key, {});
+                    if (message) {
+                        // Transform error object
+                        transformedResp.push({ type: key.split('.')[1], message });
+                    }
                 }
+            }
+            if (transformedResp.length > 0) {
+                return transformedResp;
+            } else {
+                return null;
             }
         }
     }
