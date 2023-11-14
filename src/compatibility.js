@@ -100,8 +100,13 @@ export async function getCompatibility(profile) {
     }
 }
 
+function shouldDoCompatibilityCheck(doCheck) {
+    const skipCompatEnv = _.toLower(process.env.CORTEX_NO_COMPAT) !== 'true';
+    return doCheck && skipCompatEnv;
+}
+
 export async function doCompatibilityCheck(profile, doCheck = true) {
-    if (doCheck && _.toLower(process.env.CORTEX_NO_COMPAT) !== 'true') { // TODO: duplicate check?
+    if (shouldDoCompatibilityCheck(doCheck)) {
         try {
             const { current, latest, satisfied } = await getCompatibility(profile);
             if (!satisfied) {
@@ -118,15 +123,15 @@ export async function doCompatibilityCheck(profile, doCheck = true) {
 
 export function withCompatibilityCheck(fn) {
     return (...args) => {
-         const command = args.find((a) => a !== undefined && typeof a.opts === 'function');
-         const options = command.opts();
-        // assume already done
-        if (options.compat && _.toLower(process.env.CORTEX_NO_COMPAT) !== 'true') {
-             const { profile: profileName } = options;
-             return loadProfile(profileName)
-                 .then((profile) => doCompatibilityCheck(profile))
-                 .then(() => fn(...args))
-                 .catch((error) => printError(error));
+        const command = args.find((a) => a !== undefined && typeof a.opts === 'function');
+        const options = command.opts();
+        // Explicit duplicate compatibility check to avoid unnecessarily loading the Profile
+        if (shouldDoCompatibilityCheck(options.compat)) {
+            const { profile: profileName } = options;
+            return loadProfile(profileName)
+                .then((profile) => doCompatibilityCheck(profile))
+                .then(() => fn(...args))
+                .catch((error) => printError(error));
         }
         return Promise.resolve().then(() => fn(...args));
     };

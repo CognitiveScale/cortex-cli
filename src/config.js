@@ -132,7 +132,7 @@ class Profile {
             audience: this.audience,
             jwk: this.jwk,
             project: this.project,
-            featureFlags: this.featureFlags, // TODO: is this needed?
+            featureFlags: this.featureFlags,
         };
     }
 }
@@ -309,7 +309,7 @@ class ConfigV4 {
         if (!profile) {
             return undefined;
         }
-        const profileType = new Profile(name, profile).validate();
+        const profileType = new ProfileV4(name, profile).validate();
         // Side load JWT & Feature Flags - this is used to avoid redundant calls
         // to the Info API (`fetchInfoForProfile()`).
         if (process.env.CORTEX_TOKEN_SILENT) {
@@ -446,7 +446,7 @@ class ConfigV5 {
         if (!profile) {
             return undefined;
         }
-        const profileType = new Profile(name, profile).validate();
+        const profileType = new ProfileV5(name, profile).validate();
         // Side load JWT & Feature Flags - this is used to avoid redundant calls
         // to the Info API (`fetchInfoForProfile()`).
         if (process.env.CORTEX_TOKEN_SILENT) {

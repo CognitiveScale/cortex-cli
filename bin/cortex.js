@@ -4,38 +4,13 @@ import esMain from 'es-main';
 import { readPackageJSON } from '../src/commands/utils.js';
 import { loadProfile } from '../src/config.js';
 import { FeatureController } from '../src/features.js';
-
-
-/**
- *  NOTES:
- *  - Compatibility check (i.e. Cluster INFO check) neeeds to be done before every CLI command, even HELP commands, and only the specified
- *    options are displayed to the user.
- *  - Define Mapping of Feature Flags to CLI commands
- *  - Add `PREVIEW_FEATURES_ENABLED` environment variable, always defaults to false, but can override compatibility
- *  - Implementation wise, I can move the existing compatibility check to happen prior to creating the Commander command
- */
-
-function _toObject(nameAndArgs, description) {
-    return { nameAndArgs, description };
-}
-
-// Global varible storing spe
+// Global varible storing loaded profile - only used to avoid duplicate calls
 let profile;
 
 export async function create(profileName) {
     const program = new Command();
     program.version(readPackageJSON('../../package.json').version, '-v, --version', 'Outputs the installed version of the Cortex CLI');
     program.name('cortex');
-
-    // Only Load the users Profile & do a compatibility check once on startup
-    if (profile === undefined || profile === null) {
-        profile = await loadProfile(profileName);
-        process.env.CORTEX_TOKEN_SILENT = profile.token;
-        process.env.CORTEX_FEATURE_FLAGS = JSON.stringify(profile.featureFlags);
-    }
-    const features = new FeatureController(profile);
-    const supportedCommands = features.getSupportedSubCommands();
-
     program
         .description('Cortex CLI')
         .option('--debug', 'Enables enhanced log output for debugging', false)
@@ -43,7 +18,18 @@ export async function create(profileName) {
             process.env.DEBUG = '*';
         });
 
+    // Only Load the users Profile & do a compatibility check once on startup
+    if (profile === undefined || profile === null) {
+        profile = await loadProfile(profileName);
+        process.env.CORTEX_TOKEN_SILENT = profile.token;
+        process.env.CORTEX_FEATURE_FLAGS = JSON.stringify(profile.featureFlags);
+    }
+
     // Dynamically add subcommands - only include those that are supported by the server
+    const features = new FeatureController(profile);
+    const supportedCommands = features.getSupportedSubCommands();
+    const _toObject = (nameAndArgs, description) => ({ nameAndArgs, description });
+    const isCommandSupported = (nameAndArgs) => (supportedCommands.includes(nameAndArgs.split(' ')[0].trim()));
     const allCommands = [
         _toObject('actions <cmd>', 'Work with Cortex Actions'),
         _toObject('agents <cmd>', 'Work with Cortex Agents'),
@@ -69,10 +55,7 @@ export async function create(profileName) {
         _toObject('workspaces <cmd>', 'Scaffold Cortex Components'),
     ];
     allCommands
-        .filter(({ nameAndArgs }) => {
-            const name = nameAndArgs.split(' ')[0].trim();
-            return supportedCommands.includes(name);
-        })
+        .filter(isCommandSupported)
         .forEach(({ nameAndArgs, description }) => {
             program.command(nameAndArgs, description);
         });
@@ -83,7 +66,10 @@ if (esMain(import.meta)) {
     // module was not imported but called directly
     let _profile;
     if (process.argv.includes('--profile')) {
-        // pre-process arguments to extract user specified '--profile'
+        // Pre-process arguments to extract user specified '--profile'. This
+        // allows the CLI to load the profile config, without requiring arg
+        // processing (chicken & egg problem). Additionally, the '--profile' flag
+        // means different things depending on the subcommand being run.
         const idx = process.argv.indexOf('--profile') + 1;
         _profile = process.argv[idx] ?? _profile; // possibly undefined
     }

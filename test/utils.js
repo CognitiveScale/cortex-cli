@@ -10,7 +10,7 @@ function stripAnsi(s) {
     return s.replace(ansiRegex(), '');
 }
 function compatiblityResponse() {
-    return { semver: '>=0.12.11' };
+    return { semver: '>=0.12.11' }; // arbitrary
 }
 function compatibilityApi() {
     return '/fabric/v4/compatibility/applications/cortex-cli';
