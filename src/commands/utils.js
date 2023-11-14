@@ -393,10 +393,10 @@ export const handleListFailure = (err, options, type) => {
             if (!Array.isArray(details)) {
                 const transformedResponse = transformTSOAValidation(details);
                 if (transformedResponse !== null) {
-                    response.details = transformedResponse;
+                    details = transformedResponse;
                 }
             }
-            printTable(optionTableFormat, response.details);
+            printTable(optionTableFormat, details);
         } else {
             printError(message, options);
         }
