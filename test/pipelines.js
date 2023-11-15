@@ -4,7 +4,9 @@ import nock from 'nock';
 import _ from 'lodash';
 import sinon from 'sinon';
 import { create } from '../bin/cortex-pipelines.js';
-import { compatibilityApi, compatiblityResponse, stripAnsi } from './utils.js';
+import {
+  compatibilityApi, compatiblityResponse, infoApi, infoResponse, stripAnsi,
+} from './utils.js';
 
 const PROJECT = 'project';
 
@@ -26,6 +28,7 @@ describe('Pipelines', () => {
     printSpy = sandbox.spy(console, 'log');
     errorSpy = sandbox.spy(console, 'error');
     nock(serverUrl).get(compatibilityApi()).reply(200, compatiblityResponse());
+    nock(serverUrl).persist().get(infoApi()).reply(200, infoResponse());
     process.env.PREVIEW_FEATURES_ENABLED = '1';
   });
 

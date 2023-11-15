@@ -1,3 +1,4 @@
+import { getDefaultFeatures } from '../src/features.js';
 // COPIED from https://github.com/chalk/ansi-regex  ( esm not cjs :( )
 function ansiRegex({ onlyFirst = false } = {}) {
     const pattern = [
@@ -15,13 +16,25 @@ function compatiblityResponse() {
 function compatibilityApi() {
     return '/fabric/v4/compatibility/applications/cortex-cli';
 }
+function infoApi() {
+    return '/fabric/v4/info';
+}
+function infoResponse() {
+    const flags = getDefaultFeatures();
+    flags.preview.enabled = true;
+    return flags;
+}
 export { ansiRegex };
 export { stripAnsi };
 export { compatibilityApi };
 export { compatiblityResponse };
+export { infoApi };
+export { infoResponse };
 export default {
     ansiRegex,
     stripAnsi,
     compatibilityApi,
     compatiblityResponse,
+    infoApi,
+    infoResponse,
 };

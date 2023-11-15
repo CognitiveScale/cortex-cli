@@ -3,7 +3,7 @@ import { Command } from 'commander';
 import esMain from 'es-main';
 import { readPackageJSON } from '../src/commands/utils.js';
 import { loadProfile } from '../src/config.js';
-import { FeatureController } from '../src/features.js';
+import { getAllSubcommands, FeatureController } from '../src/features.js';
 // Global varible storing loaded profile - only used to avoid duplicate calls
 let profile;
 
@@ -18,16 +18,21 @@ export async function create(profileName) {
             process.env.DEBUG = '*';
         });
 
-    // Only Load the users Profile & do a compatibility check once on startup
-    if (profile === undefined || profile === null) {
-        profile = await loadProfile(profileName);
-        process.env.CORTEX_TOKEN_SILENT = profile.token;
-        process.env.CORTEX_FEATURE_FLAGS = JSON.stringify(profile.featureFlags);
+    let supportedCommands;
+    if (process.env.CORTEX_SKIP_INIT_PROFILE) {
+        // Provide all subcommands - mostly intended as workaround for Docgen testing
+        supportedCommands = getAllSubcommands();
+    } else {
+        // Only Load the users Profile & do a compatibility check once on startup
+        if (profile === undefined || profile === null) {
+            profile = await loadProfile(profileName);
+            process.env.CORTEX_TOKEN_SILENT = profile.token;
+            process.env.CORTEX_FEATURE_FLAGS = JSON.stringify(profile.featureFlags);
+        }
+        // Filter subcommands - only include those that are supported by the server
+        const features = new FeatureController(profile);
+        supportedCommands = features.getSupportedSubCommands();
     }
-
-    // Dynamically add subcommands - only include those that are supported by the server
-    const features = new FeatureController(profile);
-    const supportedCommands = features.getSupportedSubCommands();
     const _toObject = (nameAndArgs, description) => ({ nameAndArgs, description });
     const isCommandSupported = ({ nameAndArgs }) => (supportedCommands.includes(nameAndArgs.split(' ')[0].trim()));
     const allCommands = [

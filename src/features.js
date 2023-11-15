@@ -53,6 +53,9 @@ export function getDefaultFeatures() {
   };
 }
 
+export function getAllSubcommands() {
+  return [...FLAG_SUBCOMMANDS.default.all, ...FLAG_SUBCOMMANDS.preview['data-fabric-pipelines']];
+}
 
 export class FeatureController {
   constructor(profile) {

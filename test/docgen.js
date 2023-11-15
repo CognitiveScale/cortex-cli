@@ -7,6 +7,12 @@ chai.use(chaiAsPromised);
 const { expect } = chai;
 
 describe('Test docgen', () => {
+        beforeEach(() => {
+            process.env.CORTEX_SKIP_INIT_PROFILE = '1';
+        });
+        afterEach(() => {
+            delete process.env.CORTEX_SKIP_INIT_PROFILE;
+        });
         const cmdJses = globSync('./bin/*.js', { absolute: true });
         cmdJses.forEach((commandJS) => {
         it(`Generate docs for ${commandJS}`, async () => {

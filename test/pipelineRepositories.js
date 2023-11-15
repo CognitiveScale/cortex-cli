@@ -8,7 +8,9 @@ import { mkdtemp, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { tmpdir } from 'node:os';
 import { create } from '../bin/cortex-pipelines-repos.js';
-import { compatibilityApi, compatiblityResponse, stripAnsi } from './utils.js';
+import {
+  infoApi, infoResponse, compatibilityApi, compatiblityResponse, stripAnsi,
+} from './utils.js';
 
 const PROJECT = 'project';
 
@@ -31,6 +33,7 @@ describe('Pipelines', () => {
     printSpy = sandbox.spy(console, 'log');
     errorSpy = sandbox.spy(console, 'error');
     nock(serverUrl).get(compatibilityApi()).reply(200, compatiblityResponse());
+    nock(serverUrl).persist().get(infoApi()).reply(200, infoResponse());
     process.env.PREVIEW_FEATURES_ENABLED = '1';
   });
 

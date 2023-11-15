@@ -4,7 +4,9 @@ import nock from 'nock';
 import _ from 'lodash';
 import sinon from 'sinon';
 import Tasks from '../src/client/tasks.js';
-import { compatibilityApi, compatiblityResponse, stripAnsi } from './utils.js';
+import {
+    compatibilityApi, compatiblityResponse, infoApi, infoResponse, stripAnsi,
+} from './utils.js';
 import { create } from '../bin/cortex-tasks.js';
 
 const { expect } = chai;
@@ -34,6 +36,7 @@ describe('Tasks', () => {
     });
     beforeEach(() => {
         nock(serverUrl).get(compatibilityApi()).reply(200, compatiblityResponse());
+        nock(serverUrl).persist().get(infoApi()).reply(200, infoResponse());
     });
     afterEach(() => {
         // clean up mocks that may not have been called
