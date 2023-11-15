@@ -32,7 +32,12 @@ export default (class Info {
                 .get(endpoint, {
                     headers: { 'user-agent': getUserAgent() },
                     followRedirect: false,
-                    // TODO: add options to limit timeout & number of retries
+                    retry: {
+                        limit: 0, // no retries
+                    },
+                    timeout: {
+                        connect: 100, // milliseconds
+                    },
                 })
                 .json();
         } catch (err) {

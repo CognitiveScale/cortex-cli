@@ -182,7 +182,7 @@ class Config {
         // In the case that either value is missing, call the Info API
         if (!profileType.token || !profileType.featureFlags) {
             debug(`JWT or Feature Flags is not defined - making info request - ${profileType.token}, ${profileType.featureFlags}`);
-            const { jwt, featureFlags } = await fetchInfoForProfile(profile);
+            const { jwt, featureFlags } = await fetchInfoForProfile(profileType);
             profileType.token = jwt;
             profileType.featureFlags = featureFlags || getDefaultFeatures();
         }
@@ -340,7 +340,7 @@ class ConfigV4 {
         // In the case that either value is missing, call the Info API
         if (!profileType.token || !profileType.featureFlags) {
             debug(`JWT or Feature Flags is not defined - making info request - ${profileType.token}, ${profileType.featureFlags}`);
-            const { jwt, featureFlags } = await fetchInfoForProfile(profile);
+            const { jwt, featureFlags } = await fetchInfoForProfile(profileType);
             profileType.token = jwt;
             profileType.featureFlags = featureFlags || getDefaultFeatures();
         }
@@ -477,7 +477,7 @@ class ConfigV5 {
         // In the case that either value is missing, call the Info API
         if (!profileType.token || !profileType.featureFlags) {
             debug(`JWT or Feature Flags is not defined - making info request - ${profileType.token}, ${profileType.featureFlags}`);
-            const { jwt, featureFlags } = await fetchInfoForProfile(profile);
+            const { jwt, featureFlags } = await fetchInfoForProfile(profileType);
             profileType.token = jwt;
             profileType.featureFlags = featureFlags || getDefaultFeatures();
         }
