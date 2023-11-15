@@ -53,7 +53,6 @@ describe('Feature Flags', () => {
   // TODO: Use structuredClone() instead of JSON stringify & parse, once node 18 is minimum
   const individualPreviewEnabledFlags = JSON.parse(JSON.stringify(previewDisabledFlags));
   individualPreviewEnabledFlags.preview.features['data-fabric-pipelines'].enabled = true;
-  console.log(JSON.stringify(individualPreviewEnabledFlags));
 
   describe('getSupportedSubcommands', () => {
     it('displays default subcommands if the server does not respond with feature flags', () => {
