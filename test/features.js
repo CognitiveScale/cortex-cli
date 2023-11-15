@@ -51,7 +51,7 @@ describe('Feature Flags', () => {
   allPreviewEnabledFlags.preview.enabled = true;
 
   // TODO: Use structuredClone() instead of JSON stringify & parse, once node 18 is minimum
-  const allPreviewEnabledFlags = JSON.parse(JSON.stringify(previewDisabledFlags));
+  const individualPreviewEnabledFlags = JSON.parse(JSON.stringify(previewDisabledFlags));
   individualPreviewEnabledFlags.preview.features['data-fabric-pipelines'].enabled = true;
   console.log(JSON.stringify(individualPreviewEnabledFlags));
 
