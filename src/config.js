@@ -25,14 +25,15 @@ async function generateJwt(profile, expiresIn = '2m') {
     const {
  username, issuer, audience, jwk, 
 } = profile;
-    const jwtSigner = await jose.importJWK(jwk, 'Ed25519');
+    const alg = jwk?.alg || 'EdDSA';
+    const jwtSigner = await jose.importJWK(jwk, alg);
     const infoClient = new Info(profile.url);
     const infoResp = await infoClient.getInfo();
     const serverTs = _.get(infoResp, 'serverTs', Date.now());
     const [, amount, unit] = durationRegex.exec(expiresIn);
     const expiry = dayjs(serverTs).add(_.toNumber(amount), unit).unix();
     return new jose.SignJWT({})
-        .setProtectedHeader({ alg: 'EdDSA', kid: jwk.kid })
+        .setProtectedHeader({ alg, kid: jwk.kid })
         .setSubject(username)
         .setAudience(audience)
         .setIssuer(issuer)
