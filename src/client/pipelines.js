@@ -1,5 +1,5 @@
 import debugSetup from 'debug';
-import { constructError, checkProject } from '../commands/utils.js';
+import { constructError, checkProject, printWarning, printError } from '../commands/utils.js';
 import { got, defaultHeaders } from './apiutils.js';
 import PipelineRepos from './pipelineRepositories.js';
 
@@ -91,6 +91,21 @@ export default class Pipelines {
       try {
         return await got.get(endpoint, {
           headers: defaultHeaders(token),
+        }).json();
+      } catch (err) {
+        return constructError(err);
+      }
+    }
+
+    async deletePipeline(projectId, token, pipelineName, gitRepoName) {
+      checkProject(projectId);
+      const endpoint = `${this.endpointV4(projectId)}/${encodeURIComponent(pipelineName)}`;
+      debug('deletePipelineRepo(%s) => %s', pipelineName, gitRepoName, endpoint);
+      const body = { gitRepoName };
+      try {
+        return await got.delete(endpoint, {
+          headers: defaultHeaders(token),
+          json: body,
         }).json();
       } catch (err) {
         return constructError(err);

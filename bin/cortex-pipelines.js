@@ -7,6 +7,7 @@ import {
   RunPipelineCommand,
   DescribePipelineRunCommand,
   ListPipelineRunsCommand,
+  DeletePipelineCommand,
 } from '../src/commands/pipelines.js';
 import { withCompatibilityCheck } from '../src/compatibility.js';
 import {
@@ -122,8 +123,26 @@ export function create() {
     }
   }));
 
+  // Delete Pipeline
+  pipelines
+  .command('delete <pipelineName> <gitRepoName>')
+  .description('Delete a Pipeline')
+  .option('--no-compat', 'Ignore API compatibility checks')
+  .option('--color [boolean]', 'Turn on/off colors for JSON output.', 'true')
+  .option('--profile <profile>', 'The profile to use')
+  .option('--project <project>', 'The project to use')
+  .option('--json [searchPath]', QUERY_JSON_HELP_TEXT)
+  .action(withCompatibilityCheck((pipelineName, gitRepoName, options) => {
+    try {
+      return new DeletePipelineCommand(pipelines).execute(pipelineName, gitRepoName, options);
+    } catch (err) {
+      return printError(err.message);
+    }
+  }));
+
   return pipelines;
 }
+
 
 if (esMain(import.meta)) {
   create().showHelpAfterError().parseAsync(process.argv);
