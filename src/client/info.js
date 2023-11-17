@@ -32,10 +32,16 @@ export default (class Info {
                 .get(endpoint, {
                     headers: { 'user-agent': getUserAgent() },
                     followRedirect: false,
+                    retry: {
+                        limit: 0, // no retries - fail fast
+                    },
                 })
                 .json();
         } catch (err) {
-            return constructError(err);
+            // return error object and let caller deal with failure
+            const e = constructError(err);
+            debug(`Failed to retrieve cluster information from ${this.cortexUrl}: ${e.message}`);
+            return e;
         }
     }
 });

@@ -4,7 +4,9 @@ import nock from 'nock';
 import _ from 'lodash';
 import sinon from 'sinon';
 import { create } from '../bin/cortex-pipelines.js';
-import { stripAnsi } from './utils.js';
+import {
+  compatibilityApi, compatiblityResponse, infoApi, infoResponse, stripAnsi,
+} from './utils.js';
 
 const PROJECT = 'project';
 
@@ -13,6 +15,7 @@ describe('Pipelines', () => {
   let sandbox;
   let printSpy;
   let errorSpy;
+  const serverUrl = 'http://localhost:8000';
   beforeEach(() => {
     if (!nock.isActive()) {
       nock.activate();
@@ -24,6 +27,9 @@ describe('Pipelines', () => {
     sandbox.stub(process, 'exit').throws(Error('EXIT'));
     printSpy = sandbox.spy(console, 'log');
     errorSpy = sandbox.spy(console, 'error');
+    nock(serverUrl).get(compatibilityApi()).reply(200, compatiblityResponse());
+    nock(serverUrl).persist().get(infoApi()).reply(200, infoResponse());
+    process.env.PREVIEW_FEATURES_ENABLED = '1';
   });
 
   afterEach(() => {
@@ -31,6 +37,7 @@ describe('Pipelines', () => {
     restoreEnv();
     nock.cleanAll();
     sandbox.restore();
+    delete process.env.PREVIEW_FEATURES_ENABLED;
   });
 
   function getPrintedLines() {
@@ -39,8 +46,6 @@ describe('Pipelines', () => {
   function getErrorLines() {
       return _.flatten(errorSpy.args).map((s) => stripAnsi(s));
   }
-
-  const serverUrl = 'http://localhost:8000';
 
   describe('Pipeline', () => {
     it('lists pipelines - empty', async () => {

@@ -131,3 +131,70 @@ Executables are created for the following platforms:
 ### Signed binaries status
 * windows: binaries are currently **unsigned**
 * macOS: adhoc signature using [ldid](https://github.com/xerub/ldid)
+
+## Subcommands & Compatibility Checks
+
+The following sequene diagram shows an example running a command with  Cortex CLI - namely which HTTP requests. ([This diagram can be viewered here](https://mermaid.live/view#pako:eNp9VE1z2jAQ_Ss7nh6aAeJLT54OHcZAQ4c4TEx64iLLa6IiS6ok0zCZ_PdKlg0k0Ookad--_XgrvUZUlhglkcHfDQqKU0a2mtQbAW6RxkrR1AXqcJ5QKzVMcR-OhXyBdLmAVNY1EaUJt34poi2jTBFhIQVigEpt8eU6IG-KEwQUU8iZwI4NRRk25x5zxtEcjMX60pZ7rhyFITBZLS7tmbdnq_tgcbWMxuNBmlyEB86M3YgAo5o5AsJhKUkJKy0rl0Ewpd7_lFACj7PJFD7dPdzP4ttAGlMpKrYN-BO0C5zyxp00PD0uh576F1I7BLT0to_ehsgTuFuvV_B9toa4IoVmNN5_iZmoZEDlHd-P_CGDzznqvSNdsxoht6RWQ5gjsY1GmHOyNTc99ah1WrKatUrQTksoiMESpICqc6u825ko3YhwCwtz5um2Svmyy28nuX0FDpJAiRy3xCJYCebo07Fyg-9dBk6eBGZaS53Ak9gJ-Uf003aRSSYdrfRFu0jDzAnRtGBFLCsYZ_YA6TPS3YWmVzFtR5vC53298fTcKyZKcUdmmRQmDqqPKGdnyrTlB20e3Vtj2nX3J2rjPG76lELAQXYWsWti9oFisieMk4Jj-wA7nl7UfzYlD01xz9ihL2fbDTys3j-__7ZAhWE18dduN4775zPSqKRh7rtgR6oPJRwjnbKOhlGNuiasdD_Sq7_eRPYZa9xEiduWRO820Ua8OZz_mvKDoFFidYPDqFGlG6vu9wqXb38B-i2SbA)).
+
+The Cortex CLI will limit the set of available subcommands, to those which are supported by the Cortex cluster that it is
+communicating with.
+
+```mermaid
+sequenceDiagram
+    autonumber
+    Actor Dev
+    box CLI Commands
+        participant C as cortex
+        participant Sub as cortex pipelines
+    end
+    participant Filesystem
+    participant S as Sensa API
+    participant N as NPM
+    Dev->>+C: cortex pipelines list
+
+    critical Load Profile
+    C->>+Filesystem: READ $HOME/.cortex/config
+    Filesystem->>+C: Cluster URL, Project, etc.
+
+    C->>+S: HTTP GET /fabric/v4/info
+    S->>+C: JSON (Server Time Stamp, Feature Flags)
+    C-->+C: Limit Subcommands based on feature flags
+    end
+
+    alt Is Subcommand Supported?
+        C->>Sub: delegate to subcommand
+    else
+        C->>+Dev: Error: Unknown Command
+    end
+
+    Note over Sub,N: Run Compatibility Check
+
+    critical Compatibility Check
+    Sub->>S: HTTP GET /fabric/v4/compatibility/applications/cortex-cli
+    S->>+Sub: JSON (Required Version)
+
+    Sub->>+N: HTTP GET <npm-registry-url>
+    N->>+Sub: JSON (Available CLI Versions)
+    end
+
+    Note over Sub,S: Run Action
+
+    critical List Pipelines
+    Sub->>S: HTTP GET /fabric/v4/projects/<project>/pipeline-repositories
+    S->>+Sub: JSON (Pipelines)
+    end
+```
+
+Practical Notes:
+* Only want to load the Profile & perform a Compatibility Check once during command execution
+* Clear downside is that startup for initial help commands are slightly slower due to the dynamic nature of loading
+    subcommands
+
+### Preview Features
+
+ALl preview features cam be emabled in the CLI by setting the `PREVIEW_FEATURES_ENABLED` environment variable.
+
+    Example
+    ```
+    PREVIEW_FEATURES_ENABLED=* cortex -h
+    ```

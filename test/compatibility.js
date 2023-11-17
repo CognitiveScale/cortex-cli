@@ -105,4 +105,38 @@ describe('compatibility checks', () => {
             return expect(compatibility.getCompatibility(profile)).to.become(expected);
         });
     });
+    describe('when compatibility check should be skipped', () => {
+        beforeEach(() => {
+            sandbox = sinon.createSandbox();
+            sandbox.stub(npmFetch, 'json')
+                .returns(Promise.resolve({ versions: { [pkg.version]: {} } }));
+            nock(profile.url)
+                .get('/fabric/v4/compatibility/applications/cortex-cli')
+                .reply(200, () => ({ semver: pkg.version }));
+            delete process.env.CORTEX_NO_COMPAT;
+        });
+        afterEach(() => {
+            sandbox.restore();
+            nock.cleanAll();
+            nock.enableNetConnect();
+            delete process.env.CORTEX_NO_COMPAT;
+        });
+        it('runs compatiblity check by default', async () => {
+            await compatibility.doCompatibilityCheck(profile);
+            sandbox.assert.calledOnce(npmFetch.json);
+        });
+
+        it('should skip the compatibility check - env', async () => {
+            process.env.CORTEX_NO_COMPAT = 'true';
+            await compatibility.doCompatibilityCheck(profile);
+            // verify that check skipped by checking npmFetch wasn't called
+            sandbox.assert.notCalled(npmFetch.json);
+        });
+
+        it('should skip the compatibility check - args', async () => {
+            await compatibility.doCompatibilityCheck(profile, false);
+            // verify that check skipped by checking npmFetch wasn't called
+            sandbox.assert.notCalled(npmFetch.json);
+        });
+    });
 });

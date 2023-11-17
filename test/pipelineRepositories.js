@@ -8,7 +8,9 @@ import { mkdtemp, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { tmpdir } from 'node:os';
 import { create } from '../bin/cortex-pipelines-repos.js';
-import { stripAnsi } from './utils.js';
+import {
+  infoApi, infoResponse, compatibilityApi, compatiblityResponse, stripAnsi,
+} from './utils.js';
 
 const PROJECT = 'project';
 
@@ -17,6 +19,8 @@ describe('Pipelines', () => {
   let sandbox;
   let printSpy;
   let errorSpy;
+  const serverUrl = 'http://localhost:8000';
+  const exampleRepo = 'git@github.com:organization/repository-name.git';
   beforeEach(() => {
     if (!nock.isActive()) {
       nock.activate();
@@ -28,6 +32,9 @@ describe('Pipelines', () => {
     sandbox.stub(process, 'exit').throws(Error('EXIT'));
     printSpy = sandbox.spy(console, 'log');
     errorSpy = sandbox.spy(console, 'error');
+    nock(serverUrl).get(compatibilityApi()).reply(200, compatiblityResponse());
+    nock(serverUrl).persist().get(infoApi()).reply(200, infoResponse());
+    process.env.PREVIEW_FEATURES_ENABLED = '1';
   });
 
   afterEach(() => {
@@ -35,6 +42,7 @@ describe('Pipelines', () => {
     restoreEnv();
     nock.cleanAll();
     sandbox.restore();
+    delete process.env.PREVIEW_FEATURES_ENABLED;
   });
 
   function getPrintedLines() {
@@ -43,9 +51,6 @@ describe('Pipelines', () => {
   function getErrorLines() {
       return _.flatten(errorSpy.args).map((s) => stripAnsi(s));
   }
-
-  const serverUrl = 'http://localhost:8000';
-  const exampleRepo = 'git@github.com:organization/repository-name.git';
 
   describe('Pipeline Repos', () => {
     it('lists pipeline repositories - empty', async () => {

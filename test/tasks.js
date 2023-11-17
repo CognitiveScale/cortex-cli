@@ -4,7 +4,9 @@ import nock from 'nock';
 import _ from 'lodash';
 import sinon from 'sinon';
 import Tasks from '../src/client/tasks.js';
-import { stripAnsi } from './utils.js';
+import {
+    compatibilityApi, compatiblityResponse, infoApi, infoResponse, stripAnsi,
+} from './utils.js';
 import { create } from '../bin/cortex-tasks.js';
 
 const { expect } = chai;
@@ -14,6 +16,7 @@ describe('Tasks', () => {
     let sandbox;
     let printSpy;
     let errorSpy;
+    const serverUrl = 'http://localhost:8000';
     before(() => {
         if (!nock.isActive()) {
             nock.activate();
@@ -31,6 +34,10 @@ describe('Tasks', () => {
         sandbox.restore();
         nock.restore();
     });
+    beforeEach(() => {
+        nock(serverUrl).get(compatibilityApi()).reply(200, compatiblityResponse());
+        nock(serverUrl).persist().get(infoApi()).reply(200, infoResponse());
+    });
     afterEach(() => {
         // clean up mocks that may not have been called
         nock.cleanAll();
@@ -41,7 +48,6 @@ describe('Tasks', () => {
     function getErrorLines() {
         return _.flatten(errorSpy.args).map((s) => stripAnsi(s));
     }
-    const serverUrl = 'http://localhost:8000';
     it('list tasks command (old response)', async () => {
         const response = { success: true, tasks: ['task0', 'task1'] };
         nock(serverUrl).get(/\/fabric\/v4\/projects\/.*\/tasks.*/).reply(200, response);

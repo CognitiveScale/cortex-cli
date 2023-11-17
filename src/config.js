@@ -8,8 +8,10 @@ import debugSetup from 'debug';
 import * as jose from 'jose';
 import { printError } from './commands/utils.js';
 import Info from './client/info.js';
+import { getDefaultFeatures } from './features.js';
 
 const debug = debugSetup('cortex:config');
+
 function configDir() {
     return process.env.CORTEX_CONFIG_DIR || path.join(os.homedir(), '.cortex');
 }
@@ -20,16 +22,15 @@ function getCortexUrlFromEnv() {
     }
     return process.env.CORTEX_URL;
 }
+
 const durationRegex = /^([.\d]+)(ms|[smhdwMy])$/;
-async function generateJwt(profile, expiresIn = '2m') {
+
+async function computeJwt(profile, serverTs, expiresIn = '2m') {
     const {
- username, issuer, audience, jwk, 
-} = profile;
+        username, issuer, audience, jwk,
+    } = profile;
     const alg = jwk?.alg || 'EdDSA';
     const jwtSigner = await jose.importJWK(jwk, alg);
-    const infoClient = new Info(profile.url);
-    const infoResp = await infoClient.getInfo();
-    const serverTs = _.get(infoResp, 'serverTs', Date.now());
     const [, amount, unit] = durationRegex.exec(expiresIn);
     const expiry = dayjs(serverTs).add(_.toNumber(amount), unit).unix();
     return new jose.SignJWT({})
@@ -41,6 +42,21 @@ async function generateJwt(profile, expiresIn = '2m') {
         .setExpirationTime(expiry)
         .sign(jwtSigner, { kid: jwk.kid });
 }
+
+async function fetchInfoForProfile(profile, expiresIn = '2m') {
+    const infoClient = new Info(profile.url);
+    const infoResp = await infoClient.getInfo();
+    const serverTs = infoResp?.serverTs ?? Date.now();
+    const featureFlags = infoResp?.enabledFeatures ?? getDefaultFeatures();
+    const jwt = await computeJwt(profile, serverTs, expiresIn);
+    return { jwt, featureFlags };
+}
+
+async function generateJwt(profile, expiresIn = '2m') {
+    const { jwt } = await fetchInfoForProfile(profile, expiresIn);
+    return jwt;
+}
+
 const ProfileSchema = Joi.object({
     name: Joi.string().optional(),
     url: Joi.string().uri().required(),
@@ -52,6 +68,7 @@ const ProfileSchema = Joi.object({
     audience: Joi.string().required(),
     token: Joi.string().optional(),
     project: Joi.string().optional(),
+    featureFlags: Joi.object().optional(),
 });
 const ProfileSchemaV4 = Joi.object().keys({
     name: Joi.string().optional(),
@@ -66,6 +83,7 @@ const ProfileSchemaV4 = Joi.object().keys({
     project: Joi.string().optional(),
     registries: Joi.any().required(),
     currentRegistry: Joi.string().required(),
+    featureFlags: Joi.object().optional(),
 });
 const ProfileSchemaV5 = Joi.object().keys({
     name: Joi.string().optional(),
@@ -81,10 +99,55 @@ const ProfileSchemaV5 = Joi.object().keys({
     registries: Joi.any().required(),
     currentRegistry: Joi.string().required(),
     templateConfig: Joi.any().required(),
+    featureFlags: Joi.object().optional(),
 });
+
+/* eslint-disable no-param-reassign */
+// profileType is a validated (Profile, ProfileV4, or ProfileV5)
+async function loadDynamicProfileProps(profileType, useenv) {
+    // Side load JWT & Feature Flags - this is used to avoid redundant calls
+    // to the Info API (`fetchInfoForProfile()`).
+    if (process.env.CORTEX_TOKEN_SILENT) {
+        profileType.token = process.env.CORTEX_TOKEN_SILENT;
+        debug('Side loaded token from previous info request');
+    }
+    if (process.env.CORTEX_FEATURE_FLAGS) {
+        try {
+            profileType.featureFlags = JSON.parse(process.env.CORTEX_FEATURE_FLAGS);
+            debug('Side loaded feature flags token from previous info request');
+        } catch (err) {
+            // fail silently - let feature flags to be retrieved again
+            debug(`Failed to side loaded feature flags token from previous info request - ${err}`);
+        }
+    }
+    // Load user facing environment variables - these have higher priority than
+    // the above (silent) options.
+    if (useenv) {
+        let jwtFromEnv;
+        if (process.env.CORTEX_TOKEN) {
+            jwtFromEnv = process.env.CORTEX_TOKEN;
+            printError('Using token from "CORTEX_TOKEN" environment variable', {}, false);
+        }
+        profileType.url = getCortexUrlFromEnv() || profileType.url;
+        profileType.token = jwtFromEnv || profileType.token;
+        profileType.project = process.env.CORTEX_PROJECT || profileType.project;
+    }
+    // In the case that either value is missing, call the Info API
+    if (!profileType.token || !profileType.featureFlags) {
+        debug(`JWT or Feature Flags is not defined - making info request - ${profileType.token}, ${profileType.featureFlags}`);
+        const { jwt, featureFlags } = await fetchInfoForProfile(profileType);
+        profileType.token = jwt;
+        profileType.featureFlags = featureFlags || getDefaultFeatures();
+    } else {
+        debug('JWT & Feature Flags are defined - skipping info request');
+    }
+    return profileType;
+}
+/* eslint-enable no-param-reassign */
+
 class Profile {
     constructor(name, {
- url, username, issuer, audience, jwk, project, 
+ url, username, issuer, audience, jwk, project, featureFlags,
 }) {
         this.name = name;
         this.url = url;
@@ -93,6 +156,7 @@ class Profile {
         this.issuer = issuer;
         this.audience = audience;
         this.project = project;
+        this.featureFlags = featureFlags;
     }
 
     validate() {
@@ -112,6 +176,7 @@ class Profile {
             audience: this.audience,
             jwk: this.jwk,
             project: this.project,
+            featureFlags: this.featureFlags,
         };
     }
 }
@@ -128,19 +193,11 @@ class Config {
     async getProfile(name, useenv = true) {
         const profile = this.profiles[name];
         if (!profile) {
+            debug('profile not found');
             return undefined;
         }
         const profileType = new Profile(name, profile).validate();
-        if (useenv) {
-            if (process.env.CORTEX_TOKEN) {
-                printError('Using token from "CORTEX_TOKEN" environment variable', {}, false);
-            }
-            profileType.url = getCortexUrlFromEnv() || profileType.url;
-            profileType.token = process.env.CORTEX_TOKEN || await generateJwt(profile);
-            profileType.project = process.env.CORTEX_PROJECT || profileType.project;
-        } else {
-            profileType.token = await generateJwt(profile);
-        }
+        await loadDynamicProfileProps(profileType, useenv);
         return profileType;
     }
 
@@ -180,7 +237,7 @@ class Config {
 }
 class ProfileV4 {
     constructor(name, {
- url, username, issuer, audience, jwk, project, registries, currentRegistry, 
+ url, username, issuer, audience, jwk, project, registries, currentRegistry, featureFlags,
 }) {
         this.name = name;
         this.url = url;
@@ -197,6 +254,7 @@ class ProfileV4 {
             },
         };
         this.currentRegistry = currentRegistry || 'Cortex Private Registry';
+        this.featureFlags = featureFlags;
     }
 
     validate() {
@@ -264,16 +322,7 @@ class ConfigV4 {
             return undefined;
         }
         const profileType = new ProfileV4(name, profile).validate();
-        if (useenv) {
-            if (process.env.CORTEX_TOKEN) {
-                printError('Using token from "CORTEX_TOKEN" environment variable', {}, false);
-            }
-            profileType.url = getCortexUrlFromEnv() || profileType.url;
-            profileType.token = process.env.CORTEX_TOKEN || await generateJwt(profileType);
-            profileType.project = process.env.CORTEX_PROJECT || profileType.project;
-        } else {
-            profileType.token = await generateJwt(profileType);
-        }
+        await loadDynamicProfileProps(profileType, useenv);
         return profileType;
     }
 
@@ -291,7 +340,7 @@ class ConfigV4 {
 }
 class ProfileV5 {
     constructor(name, {
- url, username, issuer, audience, jwk, project, registries, currentRegistry, templateConfig, 
+ url, username, issuer, audience, jwk, project, registries, currentRegistry, templateConfig, featureFlags,
 }, templateConfigV4) {
         this.name = name;
         this.url = url;
@@ -312,6 +361,7 @@ class ProfileV5 {
             repo: 'CognitiveScale/cortex-code-templates',
             branch: 'main',
         };
+        this.featureFlags = featureFlags;
     }
 
     validate() {
@@ -334,6 +384,7 @@ class ProfileV5 {
             registries: this.registries,
             currentRegistry: this.currentRegistry,
             templateConfig: this.templateConfig,
+            featureFlags: this.featureFlags, // TODO: is featureFlags needed as a field?
         };
     }
 }
@@ -375,16 +426,7 @@ class ConfigV5 {
             return undefined;
         }
         const profileType = new ProfileV5(name, profile).validate();
-        if (useenv) {
-            if (process.env.CORTEX_TOKEN) {
-                printError('Using token from "CORTEX_TOKEN" environment variable', {}, false);
-            }
-            profileType.url = getCortexUrlFromEnv() || profileType.url;
-            profileType.token = process.env.CORTEX_TOKEN || await generateJwt(profileType);
-            profileType.project = process.env.CORTEX_PROJECT || profileType.project;
-        } else {
-            profileType.token = await generateJwt(profileType);
-        }
+        await loadDynamicProfileProps(profileType, useenv);
         return profileType;
     }
 
@@ -445,13 +487,18 @@ function readConfig() {
                         return new Config({ profiles: configObj });
                 }
             }
+        } else {
+            debug('Configuration file does not exist');
         }
     } catch (err) {
+        debug(`Failed to read config: ${err}`);
         throw new Error(`Unable to load config: ${err.message}`);
     }
     return undefined;
 }
+
 async function loadProfile(profileName, useenv = true) {
+    debug(`loadProfile() => ${profileName} (using env: ${useenv})`);
     const config = readConfig();
     if (config === undefined) {
         printError('Please configure the Cortex CLI by running "cortex configure"');
@@ -463,17 +510,37 @@ async function loadProfile(profileName, useenv = true) {
     }
     return profile;
 }
+
+async function loadProfileWithoutFailure(profileName, useenv = true) {
+    debug(`loadProfileWithoutFailure() => ${profileName} (using env: ${useenv})`);
+    const config = readConfig();
+    if (config === undefined) {
+        debug('Cortex CLI not configured');
+        return undefined; // return even if config doesn't exist
+    }
+    const name = profileName || config.currentProfile || 'default';
+    const profile = await config.getProfile(name, useenv);
+    debug(`Loaded profile with name "${name}"`);
+    if (!profile) {
+        debug(`Profile with name "${name}" not found in configuration`);
+    }
+    return profile; // return even if its undefined
+}
+
 export { durationRegex };
 export { loadProfile };
+export { loadProfileWithoutFailure };
 export { generateJwt };
+export { fetchInfoForProfile };
 export { defaultConfig };
 export { configDir };
 export { readConfig };
 export default {
     durationRegex,
     loadProfile,
-    generateJwt,
+    loadProfileWithoutFailure,
     defaultConfig,
     configDir,
     readConfig,
+    fetchInfoForProfile,
 };
