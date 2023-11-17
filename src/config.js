@@ -47,7 +47,7 @@ async function fetchInfoForProfile(profile, expiresIn = '2m') {
     const infoClient = new Info(profile.url);
     const infoResp = await infoClient.getInfo();
     const serverTs = infoResp?.serverTs ?? Date.now();
-    const featureFlags = infoResp?.featureFlags ?? getDefaultFeatures();
+    const featureFlags = infoResp?.enabledFeatures ?? getDefaultFeatures();
     const jwt = await computeJwt(profile, serverTs, expiresIn);
     return { jwt, featureFlags };
 }
@@ -138,6 +138,8 @@ async function loadDynamicProfileProps(profileType, useenv) {
         const { jwt, featureFlags } = await fetchInfoForProfile(profileType);
         profileType.token = jwt;
         profileType.featureFlags = featureFlags || getDefaultFeatures();
+    } else {
+        debug('JWT & Feature Flags are defined - skipping info request');
     }
     return profileType;
 }
@@ -191,6 +193,7 @@ class Config {
     async getProfile(name, useenv = true) {
         const profile = this.profiles[name];
         if (!profile) {
+            debug('profile not found');
             return undefined;
         }
         const profileType = new Profile(name, profile).validate();
@@ -512,10 +515,15 @@ async function loadProfileWithoutFailure(profileName, useenv = true) {
     debug(`loadProfileWithoutFailure() => ${profileName} (using env: ${useenv})`);
     const config = readConfig();
     if (config === undefined) {
+        debug('Cortex CLI not configured');
         return undefined; // return even if config doesn't exist
     }
     const name = profileName || config.currentProfile || 'default';
     const profile = await config.getProfile(name, useenv);
+    debug(`Loaded profile with name "${name}"`);
+    if (!profile) {
+        debug(`Profile with name "${name}" not found in configuration`);
+    }
     return profile; // return even if its undefined
 }
 

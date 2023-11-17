@@ -1,5 +1,9 @@
+import debugSetup from 'debug';
+
+const debug = debugSetup('cortex:config');
+
 export function allGAFeaturesEnabled(featureFlags) {
-    return (featureFlags?.ga?.enabled ?? false) || process.env.ALL_GA_FEATURES_ENABLED;
+  return (featureFlags?.ga?.enabled ?? false) || process.env.ALL_GA_FEATURES_ENABLED;
 }
 
 export function previewFeaturesEnabled(featureFlags) {
@@ -91,7 +95,9 @@ export class FeatureController {
   getSupportedSubCommands() {
     // Collect GA Features & Preview Features, but always include defaults
     const previewSubcommands = this.collectSubcommands(this.profile.featureFlags?.preview ?? {}, FLAG_SUBCOMMANDS.preview, previewFeaturesEnabled(this.profile.featureFlags));
+    debug(`collected preview subcommands: ${JSON.stringify(previewSubcommands)}`);
     const gaSubcommands = this.collectSubcommands(this.profile.featureFlags?.ga ?? {}, FLAG_SUBCOMMANDS.ga, allGAFeaturesEnabled(this.profile.featureFlags));
+    debug(`collected ga subcommands: ${JSON.stringify(gaSubcommands)}`);
     const supportedCommands = [
       ...FLAG_SUBCOMMANDS.default.all,
       ...gaSubcommands,
