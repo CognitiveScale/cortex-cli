@@ -155,10 +155,10 @@ export const DeletePipelineCommand = class {
 
   async execute(pipelineName, gitRepoName, options) {
     const profile = await loadProfile(options.profile);
-    debug('%s.executeDeletePipeline(%s)', profile.name, pipelineName,gitRepoName);
+    debug('%s.executeDeletePipeline(%s)', profile.name, pipelineName, gitRepoName);
     const repos = new Pipelines(profile.url);
     try {
-      const response = await repos.deletePipeline(options.project || profile.project, profile.token, pipelineName,gitRepoName );
+      const response = await repos.deletePipeline(options.project || profile.project, profile.token, pipelineName, gitRepoName);
       if (response.success) {
         return printSuccess(response?.message ?? response, options);
       }
