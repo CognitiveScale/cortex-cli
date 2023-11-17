@@ -1,5 +1,5 @@
 import debugSetup from 'debug';
-import { constructError, checkProject, printWarning, printError } from '../commands/utils.js';
+import { constructError, checkProject } from '../commands/utils.js';
 import { got, defaultHeaders } from './apiutils.js';
 import PipelineRepos from './pipelineRepositories.js';
 
