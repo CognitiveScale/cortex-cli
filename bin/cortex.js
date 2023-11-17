@@ -2,10 +2,38 @@
 import { Command } from 'commander';
 import esMain from 'es-main';
 import { readPackageJSON } from '../src/commands/utils.js';
-import { loadProfile } from '../src/config.js';
+import { loadProfileWithoutFailure } from '../src/config.js';
 import { getAllSubcommands, FeatureController } from '../src/features.js';
-// Global varible storing loaded profile - only used to avoid duplicate calls
+
+// Global varible storing the users profile, used to avoid redundantly loading the Profile
 let profile;
+
+async function resolveAvailableSubcommands(profileName) {
+    let supportedCommands;
+    if (process.env.CORTEX_SKIP_INIT_PROFILE) {
+        // Provide all subcommands - mostly intended as workaround for Docgen testing
+        supportedCommands = getAllSubcommands();
+    } else {
+        if (profile === undefined || profile === null) {
+            // Check to only Load the users Profile & do a compatibility check once on startup
+            profile = await loadProfileWithoutFailure(profileName);
+        }
+        if (profile) {
+            // if the profile was found, then side-load the token & feature flags to avoid future calls to the server
+            process.env.CORTEX_TOKEN_SILENT = profile.token;
+            process.env.CORTEX_FEATURE_FLAGS = JSON.stringify(profile.featureFlags);
+            // Filter subcommands - only include those that are supported by the server
+            const features = new FeatureController(profile);
+            supportedCommands = features.getSupportedSubCommands();
+        } else {
+            // Failed to load Profile -> likely means CLI is not configured, allow any subcommand to proceed.
+            // If a subcommand (API call) is going to be run, then we expect the CLI to try again & fail when the Profile is needed.
+            // If the subcommand doesn't need the users Profile, its likely just printing help messages.
+            supportedCommands = getAllSubcommands();
+        }
+    }
+    return supportedCommands;
+}
 
 export async function create(profileName) {
     const program = new Command();
@@ -17,22 +45,7 @@ export async function create(profileName) {
         .on('option:debug', () => {
             process.env.DEBUG = '*';
         });
-
-    let supportedCommands;
-    if (process.env.CORTEX_SKIP_INIT_PROFILE) {
-        // Provide all subcommands - mostly intended as workaround for Docgen testing
-        supportedCommands = getAllSubcommands();
-    } else {
-        // Only Load the users Profile & do a compatibility check once on startup
-        if (profile === undefined || profile === null) {
-            profile = await loadProfile(profileName);
-            process.env.CORTEX_TOKEN_SILENT = profile.token;
-            process.env.CORTEX_FEATURE_FLAGS = JSON.stringify(profile.featureFlags);
-        }
-        // Filter subcommands - only include those that are supported by the server
-        const features = new FeatureController(profile);
-        supportedCommands = features.getSupportedSubCommands();
-    }
+    const supportedCommands = await resolveAvailableSubcommands(profileName);
     const _toObject = (nameAndArgs, description) => ({ nameAndArgs, description });
     const isCommandSupported = ({ nameAndArgs }) => (supportedCommands.includes(nameAndArgs.split(' ')[0].trim()));
     const allCommands = [

@@ -15,7 +15,7 @@
  */
 import debugSetup from 'debug';
 import { got, getUserAgent } from './apiutils.js';
-import { constructError, printError } from '../commands/utils.js';
+import { constructError } from '../commands/utils.js';
 
 const debug = debugSetup('cortex:cli');
 export default (class Info {
@@ -33,19 +33,15 @@ export default (class Info {
                     headers: { 'user-agent': getUserAgent() },
                     followRedirect: false,
                     retry: {
-                        limit: 0, // no retries
-                    },
-                    timeout: {
-                        connect: 100, // milliseconds
+                        limit: 0, // no retries - fail fast
                     },
                 })
                 .json();
         } catch (err) {
-            // TODO: was this explicitly returning the error for some reason?
-            // Callers do NOT handle error, so my only assumption is that this
-            // should be exit here
-            const { message } = constructError(err);
-            return printError(`Failed to retrieve cluster information from ${this.cortexUrl}: ${message}`, {}, true);
+            // return error object and let caller deal with failure
+            const e = constructError(err);
+            debug(`Failed to retrieve cluster information from ${this.cortexUrl}: ${e.message}`);
+            return e;
         }
     }
 });

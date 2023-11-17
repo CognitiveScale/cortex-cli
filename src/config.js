@@ -484,8 +484,11 @@ function readConfig() {
                         return new Config({ profiles: configObj });
                 }
             }
+        } else {
+            debug('Configuration file does not exist');
         }
     } catch (err) {
+        debug(`Failed to read config: ${err}`);
         throw new Error(`Unable to load config: ${err.message}`);
     }
     return undefined;
@@ -504,8 +507,21 @@ async function loadProfile(profileName, useenv = true) {
     }
     return profile;
 }
+
+async function loadProfileWithoutFailure(profileName, useenv = true) {
+    debug(`loadProfileWithoutFailure() => ${profileName} (using env: ${useenv})`);
+    const config = readConfig();
+    if (config === undefined) {
+        return undefined; // return even if config doesn't exist
+    }
+    const name = profileName || config.currentProfile || 'default';
+    const profile = await config.getProfile(name, useenv);
+    return profile; // return even if its undefined
+}
+
 export { durationRegex };
 export { loadProfile };
+export { loadProfileWithoutFailure };
 export { generateJwt };
 export { fetchInfoForProfile };
 export { defaultConfig };
@@ -514,6 +530,7 @@ export { readConfig };
 export default {
     durationRegex,
     loadProfile,
+    loadProfileWithoutFailure,
     defaultConfig,
     configDir,
     readConfig,
