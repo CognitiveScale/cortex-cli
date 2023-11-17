@@ -11,24 +11,29 @@ let profile;
 async function resolveAvailableSubcommands(profileName) {
     let supportedCommands;
     if (process.env.CORTEX_SKIP_INIT_PROFILE) {
-        // Provide all subcommands - mostly intended as workaround for Docgen testing
+        // Provide all subcommands - mostly intended as workaround for Docgen
+        // testing
         supportedCommands = getAllSubcommands();
     } else {
         if (profile === undefined || profile === null) {
-            // Check to only Load the users Profile & do a compatibility check once on startup
+            // Check to only Load the users Profile & do a compatibility check
+            // once on startup
             profile = await loadProfileWithoutFailure(profileName);
         }
         if (profile) {
-            // if the profile was found, then side-load the token & feature flags to avoid future calls to the server
+            // if the profile was found, then side-load the token & feature
+            // flags to avoid future calls to the server
             process.env.CORTEX_TOKEN_SILENT = profile.token;
             process.env.CORTEX_FEATURE_FLAGS = JSON.stringify(profile.featureFlags);
             // Filter subcommands - only include those that are supported by the server
             const features = new FeatureController(profile);
             supportedCommands = features.getSupportedSubCommands();
         } else {
-            // Failed to load Profile -> likely means CLI is not configured, allow any subcommand to proceed.
-            // If a subcommand (API call) is going to be run, then we expect the CLI to try again & fail when the Profile is needed.
-            // If the subcommand doesn't need the users Profile, its likely just printing help messages.
+            // Failed to load Profile -> likely means CLI is not configured, so
+            // allow all subcommands. If a subcommand (API call) is going to be
+            // made, then we expect the CLI to try again & fail when the Profile
+            // is needed.  If the subcommand doesn't need the users Profile, its
+            // likely just printing help messages.
             supportedCommands = getAllSubcommands();
         }
     }
