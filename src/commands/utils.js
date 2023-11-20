@@ -358,12 +358,17 @@ const transformTSOAValidation = (responseDetails) => {
             const transformedResp = [];
             for (let i = 0; i < keys.length; i += 1) {
                 const key = keys[i];
+                const { message } = _.get(responseDetails, key, {});
+
+                // If the key includes a single dot (.)
                 if (key.includes('.') && key.split('.').length === 2) {
-                    const { message } = _.get(responseDetails, key, {});
                     if (message) {
                         // Transform error object
                         transformedResp.push({ type: key.split('.')[1], message });
                     }
+                    // If key doesn't include a period dot (.)
+                } else if (!key.includes('.')) {
+                    transformedResp.push({ type: key, message });
                 }
             }
             if (transformedResp.length > 0) {
