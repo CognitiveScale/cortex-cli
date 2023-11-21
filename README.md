@@ -192,7 +192,7 @@ Practical Notes:
 
 ### Preview Features
 
-ALl preview features cam be emabled in the CLI by setting the `PREVIEW_FEATURES_ENABLED` environment variable.
+All preview features cam be enabled in the CLI by setting the `PREVIEW_FEATURES_ENABLED` environment variable.
 
     Example
     ```
