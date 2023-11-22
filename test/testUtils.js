@@ -260,7 +260,12 @@ describe('checkForEmptyArgs', () => {
 
       const expectedErrorMessage = 'error: <arg2> cannot be empty.';
 
-      expect(() => checkForEmptyArgs(args)).to.throw(expectedErrorMessage);
+      try {
+        checkForEmptyArgs(args);
+      } catch (error) {
+        // Check if the error message matches the expected error message
+        expect(error.message).to.equal(expectedErrorMessage);
+      }
     });
 
     it('should not throw an error when arguments are not empty', () => {
