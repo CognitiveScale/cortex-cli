@@ -58,7 +58,7 @@ export function create() {
         .option('--verbose', 'Verbose output', false)
         .action(withCompatibilityCheck(async (skillName, options) => {
             try {
-                checkForEmptyArgs([skillName]);
+                checkForEmptyArgs({ skillName });
                 await new DescribeSkillCommand(program).execute(skillName, options);
             } catch (err) {
                 console.error(chalk.red(err.message));
@@ -117,7 +117,7 @@ export function create() {
         .option('--project <project>', 'The project to use')
         .action(withCompatibilityCheck(async (skillName, options) => {
             try {
-                checkForEmptyArgs([skillName]);
+                checkForEmptyArgs({ skillName });
                 await new DeleteSkillCommand(program).execute(skillName, options);
             } catch (err) {
                 console.error(chalk.red(err.message));

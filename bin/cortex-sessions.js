@@ -47,7 +47,7 @@ export function create() {
         .option('--verbose', 'Verbose output')
         .action(withCompatibilityCheck((sessionName, options) => {
             try {
-                checkForEmptyArgs([sessionName]);
+                checkForEmptyArgs({ sessionName });
                 new DescribeSessionCommand(program).execute(sessionName, options);
             } catch (err) {
                 console.error(chalk.red(err.message));
@@ -63,7 +63,7 @@ export function create() {
         .option('--project <project>', 'The project to use')
         .action(withCompatibilityCheck((sessionName, options) => {
             try {
-                checkForEmptyArgs([sessionName]);
+                checkForEmptyArgs({ sessionName });
                 new DeleteSessionCommand(program).execute(sessionName, options);
             } catch (err) {
                 console.error(chalk.red(err.message));

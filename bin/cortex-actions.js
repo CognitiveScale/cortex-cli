@@ -51,7 +51,7 @@ export function create() {
         .option('-d, --download', 'Download code binary in response')
         .action(withCompatibilityCheck((actionName, options) => {
             try {
-                checkForEmptyArgs([actionName]);
+                checkForEmptyArgs({ actionName });
                 new DescribeActionCommand(program).execute(actionName, options);
             } catch (err) {
                 console.error(chalk.red(err.message));
@@ -67,7 +67,7 @@ export function create() {
         .option('--project <project>', 'The project to use')
         .action(withCompatibilityCheck((actionName, options) => {
             try {
-                checkForEmptyArgs([actionName]);
+                checkForEmptyArgs({ actionName });
                 new DeleteActionCommand(program).execute(actionName, options);
             } catch (err) {
                 console.error(chalk.red(err.message));

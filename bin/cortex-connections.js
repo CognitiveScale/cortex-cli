@@ -65,7 +65,7 @@ export function create() {
         .option('--query <query>', `[DEPRECATION WARNING] ${QUERY_JSON_HELP_TEXT}`)
         .action(withCompatibilityCheck((connectionName, options) => {
             try {
-                checkForEmptyArgs([connectionName]);
+                checkForEmptyArgs({ connectionName });
                 new DescribeConnectionCommand(program).execute(connectionName, options);
             } catch (err) {
                 console.error(chalk.red(err.message));
@@ -101,7 +101,7 @@ export function create() {
         .option('--project <project>', 'The project to use')
         .action(withCompatibilityCheck((connectionName, options) => {
             try {
-                checkForEmptyArgs([connectionName]);
+                checkForEmptyArgs({ connectionName });
                 new DeleteConnectionCommand(program).execute(connectionName, options);
             } catch (err) {
                 console.error(chalk.red(err.message));

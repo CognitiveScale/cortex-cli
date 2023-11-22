@@ -50,7 +50,7 @@ export function create() {
         .option('--project <project>', 'The project to use')
         .action(withCompatibilityCheck((campaignName, missionName, options) => {
             try {
-                checkForEmptyArgs([campaignName, missionName]);
+                checkForEmptyArgs({ campaignName, missionName });
                 new DescribeMissionCommand(program).execute(campaignName, missionName, options);
             } catch (err) {
                 console.error(chalk.red(err.message));
@@ -65,7 +65,7 @@ export function create() {
         .option('--project <project>', 'The project to use')
         .action(withCompatibilityCheck((campaignName, missionName, options) => {
             try {
-                checkForEmptyArgs([campaignName, missionName]);
+                checkForEmptyArgs({ campaignName, missionName });
                 new DeployMissionCommand(program).execute(campaignName, missionName, options);
             } catch (err) {
                 console.error(chalk.red(err.message));
@@ -81,7 +81,7 @@ export function create() {
         .option('--params <params>', 'JSON params to send to the action')
         .option('--params-file <paramsFile>', 'A file containing either JSON or YAML formatted params')
         .action(withCompatibilityCheck((campaignName, missionName, options) => {
-            checkForEmptyArgs([campaignName, missionName]);
+            checkForEmptyArgs({ campaignName, missionName });
             try {
                 let params = {};
                 if (options.params) {
@@ -123,7 +123,7 @@ export function create() {
         .option('--project <project>', 'The project to use')
         .action(withCompatibilityCheck((campaignName, missionName, options) => {
             try {
-                checkForEmptyArgs([campaignName, missionName]);
+                checkForEmptyArgs({ campaignName, missionName });
                 new UndeployMissionCommand(program).execute(campaignName, missionName, options);
             } catch (err) {
                 console.error(chalk.red(err.message));
@@ -138,7 +138,7 @@ export function create() {
         .option('--project <project>', 'The project to use')
         .action(withCompatibilityCheck((activationId, options) => {
             try {
-                checkForEmptyArgs([activationId]);
+                checkForEmptyArgs({ activationId });
                 new DownloadContent(program).execute(`mission_runtime/${activationId}/status.chk`, options);
             } catch (err) {
                 console.error(chalk.red(err.message));

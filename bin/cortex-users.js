@@ -7,6 +7,7 @@ import {
  UserProjectAssignCommand, UserDescribeCommand, UserGrantCommand, UserCreateCommand, UserListCommand, UserDeleteCommand, UserResetPATCommand, UserGetPATCommand,
 } from '../src/commands/users.js';
 import { LIST_JSON_HELP_TEXT, QUERY_JSON_HELP_TEXT } from '../src/constants.js';
+import { checkForEmptyArgs } from '../src/commands/utils.js';
 
 export function create() {
     const program = new Command();
@@ -40,6 +41,7 @@ export function create() {
         .option('--deny', 'Explicit deny of action(s)')
         .action(withCompatibilityCheck((user, options) => {
             try {
+                checkForEmptyArgs({ user });
                 new UserGrantCommand(program).execute(user, options);
             } catch (err) {
                 console.error(chalk.red(err.message));
@@ -54,6 +56,7 @@ export function create() {
         .option('--delete', 'Unassign users from project')
         .action(withCompatibilityCheck((project, options) => {
             try {
+                checkForEmptyArgs({ project });
                 new UserProjectAssignCommand(program).execute(project, options);
             } catch (err) {
                 console.error(chalk.red(err.message));
@@ -66,6 +69,7 @@ export function create() {
         .option('--profile <profile>', 'The profile to use')
         .action(withCompatibilityCheck((user, options) => {
             try {
+                checkForEmptyArgs({ user });
                 new UserDeleteCommand(program).execute(user, options);
             } catch (err) {
                 console.error(chalk.red(err.message));
@@ -78,6 +82,7 @@ export function create() {
         .option('--profile <profile>', 'The profile to use')
         .action(withCompatibilityCheck((user, options) => {
             try {
+                checkForEmptyArgs({ user });
                 new UserCreateCommand(program).execute(user, options);
             } catch (err) {
                 console.error(chalk.red(err.message));

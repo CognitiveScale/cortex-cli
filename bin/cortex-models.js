@@ -53,7 +53,7 @@ export function create() {
         .option('--verbose', 'Verbose output')
         .action(withCompatibilityCheck((modelName, options) => {
             try {
-                checkForEmptyArgs([modelName]);
+                checkForEmptyArgs({ modelName });
                 new DescribeModelCommand(program).execute(modelName, options);
             } catch (err) {
                 console.error(chalk.red(err.message));
@@ -69,7 +69,7 @@ export function create() {
         .option('--project <project>', 'The project to use')
         .action(withCompatibilityCheck((modelName, options) => {
             try {
-                checkForEmptyArgs([modelName]);
+                checkForEmptyArgs({ modelName });
                 new DeleteModelCommand(program).execute(modelName, options);
             } catch (err) {
                 console.error(chalk.red(err.message));
@@ -103,7 +103,7 @@ export function create() {
         .option('--content-type <MIME type>', 'Sets the `Content-Type` or MIME type of the content ( default: application/octet-stream )')
         .action(withCompatibilityCheck((modelName, options) => {
             try {
-                checkForEmptyArgs([modelName]);
+                checkForEmptyArgs({ modelName });
                 new UpdateModelStatusCommand(program).execute(modelName, options, 'publish');
             } catch (err) {
                 console.error(chalk.red(err.message));
@@ -121,7 +121,7 @@ export function create() {
         .option('--content-type <MIME type>', 'Sets the `Content-Type` or MIME type of the content ( default: application/octet-stream )')
         .action(withCompatibilityCheck((modelName, options) => {
             try {
-                checkForEmptyArgs([modelName]);
+                checkForEmptyArgs({ modelName });
                 new UpdateModelStatusCommand(program).execute(modelName, options, 'unpublish');
             } catch (err) {
                 console.error(chalk.red(err.message));
@@ -143,7 +143,7 @@ export function create() {
         .option('--sort <sort>', 'A Mongo style sort statement to use in the query.', GET_DEFAULT_SORT_CLI_OPTION(DEFAULT_LIST_SORT_PARAMS._updatedAt))
         .action(withCompatibilityCheck((modelName, options) => {
             try {
-                checkForEmptyArgs([modelName]);
+                checkForEmptyArgs({ modelName });
                 new ListModelRunsCommand(program).execute(modelName, options);
             } catch (err) {
                 console.error(chalk.red(err.message));

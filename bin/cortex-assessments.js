@@ -141,7 +141,7 @@ export function create() {
         .option('--profile <profile>', 'The profile to use')
         .action(withCompatibilityCheck((assessmentName, options) => {
             try {
-                checkForEmptyArgs([assessmentName]);
+                checkForEmptyArgs({ assessmentName });
                 new DescribeAssessmentCommand(program).execute(assessmentName, options);
             } catch (err) {
                 console.error(chalk.red(err.message));
@@ -155,7 +155,7 @@ export function create() {
         .option('--profile <profile>', 'The profile to use')
         .action(withCompatibilityCheck((assessmentName, options) => {
             try {
-                checkForEmptyArgs([assessmentName]);
+                checkForEmptyArgs({ assessmentName });
                 new DeleteAssessmentCommand(program).execute(assessmentName, options);
             } catch (err) {
                 console.error(chalk.red(err.message));
@@ -169,7 +169,7 @@ export function create() {
         .option('--profile <profile>', 'The profile to use')
         .action(withCompatibilityCheck((assessmentName, options) => {
             try {
-                checkForEmptyArgs([assessmentName]);
+                checkForEmptyArgs({ assessmentName });
                 new RunAssessmentCommand(program).execute(assessmentName, options);
             } catch (err) {
                 console.error(chalk.red(err.message));
@@ -188,6 +188,7 @@ export function create() {
         .option('--query <query>', `[DEPRECATION WARNING] ${QUERY_JSON_HELP_TEXT}`)
         .action(withCompatibilityCheck((assessmentName, options) => {
             try {
+                checkForEmptyArgs({ assessmentName });
                 new ListAssessmentReportCommand(program).execute(assessmentName, options);
             } catch (err) {
                 console.error(chalk.red(err.message));
@@ -204,6 +205,7 @@ export function create() {
         .option('--query <query>', `[DEPRECATION WARNING] ${QUERY_JSON_HELP_TEXT}`)
         .action(withCompatibilityCheck((assessmentName, reportId, options) => {
             try {
+                checkForEmptyArgs({ assessmentName, reportId });
                 new GetAssessmentReportCommand(program).execute(assessmentName, reportId, options);
             } catch (err) {
                 console.error(chalk.red(err.message));
@@ -220,6 +222,7 @@ export function create() {
         .option('--profile <profile>', 'The profile to use')
         .action(withCompatibilityCheck((assessmentName, reportId, options) => {
             try {
+                checkForEmptyArgs({ assessmentName, reportId });
                 new ExportAssessmentReportCommand(program).execute(assessmentName, reportId, options);
             } catch (err) {
                 console.error(chalk.red(err.message));

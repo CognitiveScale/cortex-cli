@@ -53,7 +53,7 @@ export function create() {
     .option('--json [searchPath]', QUERY_JSON_HELP_TEXT)
     .action(withCompatibilityCheck((pipelineRepoName, options) => {
       try {
-        checkForEmptyArgs([pipelineRepoName]);
+        checkForEmptyArgs({ pipelineRepoName });
         return new DescribePipelineRepoCommand(repos).execute(pipelineRepoName, options);
       } catch (err) {
         return printError(err.message);
@@ -70,7 +70,7 @@ export function create() {
     .option('--project <project>', 'The project to use')
     .action(withCompatibilityCheck((pipelineRepoName, options) => {
       try {
-        checkForEmptyArgs([pipelineRepoName]);
+        checkForEmptyArgs({ pipelineRepoName });
         return new DeletePipelineRepoCommand(repos).execute(pipelineRepoName, options);
       } catch (err) {
         return printError(err.message);
@@ -110,7 +110,7 @@ export function create() {
     .option('--skill <skillName>', 'Name of the underlying Skill in the same Project to use for running the Pipeline')
     .action(withCompatibilityCheck((pipelineRepoName, options) => {
       try {
-        checkForEmptyArgs([pipelineRepoName]);
+        checkForEmptyArgs({ pipelineRepoName });
         return new UpdateRepoPipelinesCommand(repos).execute(pipelineRepoName, options);
       } catch (err) {
         return printError(err.message);

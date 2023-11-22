@@ -50,7 +50,7 @@ export function create() {
         .option('--query <query>', `[DEPRECATION WARNING] ${QUERY_JSON_HELP_TEXT}`)
         .action(withCompatibilityCheck((campaignName, options) => {
             try {
-                checkForEmptyArgs([campaignName]);
+                checkForEmptyArgs({ campaignName });
                 new DescribeCampaignCommand(program).execute(campaignName, options);
             } catch (err) {
                 console.error(chalk.red(err.message));
@@ -67,7 +67,7 @@ export function create() {
         .option('--o <output>', 'Export file name')
         .action(withCompatibilityCheck(async (campaignName, options) => {
             try {
-                checkForEmptyArgs([campaignName]);
+                checkForEmptyArgs({ campaignName });
                 await new ExportCampaignCommand(program).execute(campaignName, options);
             } catch (err) {
                 console.error(chalk.red(err.message));
@@ -98,7 +98,7 @@ export function create() {
         .option('--project <project>', 'The project to use')
         .action(withCompatibilityCheck((campaignName, options) => {
             try {
-                checkForEmptyArgs([campaignName]);
+                checkForEmptyArgs({ campaignName });
                 new DeployCampaignCommand(program).execute(campaignName, options);
             } catch (err) {
                 console.error(chalk.red(err.message));
@@ -113,7 +113,7 @@ export function create() {
         .option('--project <project>', 'The project to use')
         .action(withCompatibilityCheck((campaignName, options) => {
             try {
-                checkForEmptyArgs([campaignName]);
+                checkForEmptyArgs({ campaignName });
                 new UndeployCampaignCommand(program).execute(campaignName, options);
             } catch (err) {
                 console.error(chalk.red(err.message));

@@ -45,7 +45,7 @@ export function create() {
         .option('--project <project>', 'The project to use')
         .action(withCompatibilityCheck((keyName, options) => {
             try {
-                checkForEmptyArgs([keyName]);
+                checkForEmptyArgs({ keyName });
                 return new ReadSecretsCommand(program).execute(keyName, options);
             } catch (err) {
                 return console.error(chalk.red(err.message));
@@ -78,7 +78,7 @@ export function create() {
         .option('--project <project>', 'The project to use')
         .action(withCompatibilityCheck((keyName, options) => {
             try {
-                checkForEmptyArgs([keyName]);
+                checkForEmptyArgs({ keyName });
                 return new DeleteSecretCommand(program).execute(keyName, options);
             } catch (err) {
                 return console.error(chalk.red(err.message));

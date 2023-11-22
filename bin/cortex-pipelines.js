@@ -60,7 +60,7 @@ export function create() {
   .option('--json [searchPath]', QUERY_JSON_HELP_TEXT)
   .action(withCompatibilityCheck((pipelineName, gitRepoName, options) => {
     try {
-      checkForEmptyArgs([pipelineName, gitRepoName]);
+      checkForEmptyArgs({ pipelineName, gitRepoName });
       return new DescribePipelineCommand(pipelines).execute(pipelineName, gitRepoName, options);
     } catch (err) {
       return printError(err.message);
@@ -81,7 +81,7 @@ export function create() {
   .option('--block <block>', 'Block name to run a specific block')
   .action(withCompatibilityCheck((pipelineName, gitRepoName, options) => {
     try {
-      checkForEmptyArgs([pipelineName, gitRepoName]);
+      checkForEmptyArgs({ pipelineName, gitRepoName });
       return new RunPipelineCommand(pipelines).execute(pipelineName, gitRepoName, options);
     } catch (err) {
       return printError(err.message);
@@ -100,7 +100,7 @@ export function create() {
   .option('--json [searchPath]', QUERY_JSON_HELP_TEXT)
   .action(withCompatibilityCheck((runId, options) => {
     try {
-      checkForEmptyArgs([runId]);
+      checkForEmptyArgs({ runId });
       return new DescribePipelineRunCommand(pipelines).execute(runId, options);
     } catch (err) {
       return printError(err.message);
@@ -119,6 +119,7 @@ export function create() {
   .option('--json [searchPath]', QUERY_JSON_HELP_TEXT)
   .action(withCompatibilityCheck((pipelineName, gitRepoName, options) => {
     try {
+      checkForEmptyArgs({ pipelineName, gitRepoName });
       return new ListPipelineRunsCommand(pipelines).execute(pipelineName, gitRepoName, options);
     } catch (err) {
       return printError(err.message);

@@ -69,7 +69,7 @@ export function create() {
         .option('--query <query>', `[DEPRECATION WARNING] ${QUERY_JSON_HELP_TEXT}`)
         .action(withCompatibilityCheck((projectName, options) => {
             try {
-                checkForEmptyArgs([projectName]);
+                checkForEmptyArgs({ projectName });
                 return new DescribeProjectCommand(program).execute(projectName, options);
             } catch (err) {
                 return console.error(chalk.red(err.message));
@@ -85,7 +85,7 @@ export function create() {
         .option('--profile <profile>', 'The profile to use')
         .action(withCompatibilityCheck((projectName, options) => {
             try {
-                checkForEmptyArgs([projectName]);
+                checkForEmptyArgs({ projectName });
                 return new DeleteProjectCommand(program).execute(projectName, options);
             } catch (err) {
                 return console.error(chalk.red(err.message));

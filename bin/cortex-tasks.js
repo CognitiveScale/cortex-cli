@@ -57,7 +57,7 @@ export function create() {
         // .option('-o, --output <json|yaml|k8s>', 'Format output as yaml or k8s resources')
         .action(withCompatibilityCheck((taskName, options) => {
             try {
-                checkForEmptyArgs([taskName]);
+                checkForEmptyArgs({ taskName });
                 new DescribeTaskCommand(program).execute(taskName, options);
             } catch (err) {
                 console.error(chalk.red(err.message));
@@ -88,7 +88,7 @@ export function create() {
         .option('--project <project>', 'The project to use')
         .action(withCompatibilityCheck(async (taskName, options) => {
             try {
-                checkForEmptyArgs([taskName]);
+                checkForEmptyArgs({ taskName });
                 await new TaskDeleteCommand(program).execute(taskName, options);
             } catch (err) {
                 console.error(chalk.red(err.message));
