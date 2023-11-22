@@ -454,4 +454,15 @@ export function printErrorDetails(response, options, exit = true) {
     printTable(tableSpec, details);
     if (exit) printError(''); // Just use this over exit() as tests already stub this call ..
 }
+
+export function checkForEmptyArgs(argsList) {
+    for (let i = 0; i < argsList.length; i += 1) {
+        const arg = argsList[i];
+        if (!arg.trim()) {
+            console.error('Error: Command arguments cannot be empty.');
+            process.exit(1); // Exit with an error code
+          }
+    }
+}
+
 export { deleteFolderRecursive as deleteFile };
