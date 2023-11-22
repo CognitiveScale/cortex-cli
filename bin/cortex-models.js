@@ -9,6 +9,7 @@ import {
 import {
  DEFAULT_LIST_SKIP_COUNT, DEFAULT_LIST_LIMIT_COUNT, GET_DEFAULT_SORT_CLI_OPTION, DEFAULT_LIST_SORT_PARAMS, LIST_JSON_HELP_TEXT, QUERY_JSON_HELP_TEXT, 
 } from '../src/constants.js';
+import { checkForEmptyArgs } from '../src/commands/utils.js';
 
 export function create() {
     const program = new Command();
@@ -52,6 +53,7 @@ export function create() {
         .option('--verbose', 'Verbose output')
         .action(withCompatibilityCheck((modelName, options) => {
             try {
+                checkForEmptyArgs([modelName]);
                 new DescribeModelCommand(program).execute(modelName, options);
             } catch (err) {
                 console.error(chalk.red(err.message));
@@ -67,6 +69,7 @@ export function create() {
         .option('--project <project>', 'The project to use')
         .action(withCompatibilityCheck((modelName, options) => {
             try {
+                checkForEmptyArgs([modelName]);
                 new DeleteModelCommand(program).execute(modelName, options);
             } catch (err) {
                 console.error(chalk.red(err.message));
@@ -100,6 +103,7 @@ export function create() {
         .option('--content-type <MIME type>', 'Sets the `Content-Type` or MIME type of the content ( default: application/octet-stream )')
         .action(withCompatibilityCheck((modelName, options) => {
             try {
+                checkForEmptyArgs([modelName]);
                 new UpdateModelStatusCommand(program).execute(modelName, options, 'publish');
             } catch (err) {
                 console.error(chalk.red(err.message));
@@ -117,6 +121,7 @@ export function create() {
         .option('--content-type <MIME type>', 'Sets the `Content-Type` or MIME type of the content ( default: application/octet-stream )')
         .action(withCompatibilityCheck((modelName, options) => {
             try {
+                checkForEmptyArgs([modelName]);
                 new UpdateModelStatusCommand(program).execute(modelName, options, 'unpublish');
             } catch (err) {
                 console.error(chalk.red(err.message));
@@ -138,6 +143,7 @@ export function create() {
         .option('--sort <sort>', 'A Mongo style sort statement to use in the query.', GET_DEFAULT_SORT_CLI_OPTION(DEFAULT_LIST_SORT_PARAMS._updatedAt))
         .action(withCompatibilityCheck((modelName, options) => {
             try {
+                checkForEmptyArgs([modelName]);
                 new ListModelRunsCommand(program).execute(modelName, options);
             } catch (err) {
                 console.error(chalk.red(err.message));

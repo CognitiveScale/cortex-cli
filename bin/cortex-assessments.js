@@ -24,6 +24,7 @@ import {
     LIST_JSON_HELP_TEXT,
     QUERY_JSON_HELP_TEXT,
 } from '../src/constants.js';
+import { checkForEmptyArgs } from '../src/commands/utils.js';
 
 export function create() {
     const program = new Command();
@@ -140,6 +141,7 @@ export function create() {
         .option('--profile <profile>', 'The profile to use')
         .action(withCompatibilityCheck((assessmentName, options) => {
             try {
+                checkForEmptyArgs([assessmentName]);
                 new DescribeAssessmentCommand(program).execute(assessmentName, options);
             } catch (err) {
                 console.error(chalk.red(err.message));
@@ -153,6 +155,7 @@ export function create() {
         .option('--profile <profile>', 'The profile to use')
         .action(withCompatibilityCheck((assessmentName, options) => {
             try {
+                checkForEmptyArgs([assessmentName]);
                 new DeleteAssessmentCommand(program).execute(assessmentName, options);
             } catch (err) {
                 console.error(chalk.red(err.message));
@@ -166,6 +169,7 @@ export function create() {
         .option('--profile <profile>', 'The profile to use')
         .action(withCompatibilityCheck((assessmentName, options) => {
             try {
+                checkForEmptyArgs([assessmentName]);
                 new RunAssessmentCommand(program).execute(assessmentName, options);
             } catch (err) {
                 console.error(chalk.red(err.message));

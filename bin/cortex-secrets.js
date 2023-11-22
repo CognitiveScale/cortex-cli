@@ -8,6 +8,7 @@ import {
  ListSecretsCommand, ReadSecretsCommand, WriteSecretsCommand, DeleteSecretCommand, 
 } from '../src/commands/secrets.js';
 import { LIST_JSON_HELP_TEXT, QUERY_JSON_HELP_TEXT } from '../src/constants.js';
+import { checkForEmptyArgs } from '../src/commands/utils.js';
 
 export function create() {
     const program = new Command();
@@ -44,6 +45,7 @@ export function create() {
         .option('--project <project>', 'The project to use')
         .action(withCompatibilityCheck((keyName, options) => {
             try {
+                checkForEmptyArgs([keyName]);
                 return new ReadSecretsCommand(program).execute(keyName, options);
             } catch (err) {
                 return console.error(chalk.red(err.message));
@@ -76,6 +78,7 @@ export function create() {
         .option('--project <project>', 'The project to use')
         .action(withCompatibilityCheck((keyName, options) => {
             try {
+                checkForEmptyArgs([keyName]);
                 return new DeleteSecretCommand(program).execute(keyName, options);
             } catch (err) {
                 return console.error(chalk.red(err.message));

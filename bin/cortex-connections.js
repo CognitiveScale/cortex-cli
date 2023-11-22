@@ -9,6 +9,7 @@ import {
 import {
  ListConnections, SaveConnectionCommand, DescribeConnectionCommand, ListConnectionsTypes, DeleteConnectionCommand, 
 } from '../src/commands/connections.js';
+import { checkForEmptyArgs } from '../src/commands/utils.js';
 
 export function create() {
     const program = new Command();
@@ -64,6 +65,7 @@ export function create() {
         .option('--query <query>', `[DEPRECATION WARNING] ${QUERY_JSON_HELP_TEXT}`)
         .action(withCompatibilityCheck((connectionName, options) => {
             try {
+                checkForEmptyArgs([connectionName]);
                 new DescribeConnectionCommand(program).execute(connectionName, options);
             } catch (err) {
                 console.error(chalk.red(err.message));
@@ -99,6 +101,7 @@ export function create() {
         .option('--project <project>', 'The project to use')
         .action(withCompatibilityCheck((connectionName, options) => {
             try {
+                checkForEmptyArgs([connectionName]);
                 new DeleteConnectionCommand(program).execute(connectionName, options);
             } catch (err) {
                 console.error(chalk.red(err.message));

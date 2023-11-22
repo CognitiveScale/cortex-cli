@@ -27,6 +27,7 @@ import {
     UndeployAgentCommand,
     CancelActivationCommand,
 } from '../src/commands/agents.js';
+import { checkForEmptyArgs } from '../src/commands/utils.js';
 
 export function create() {
     const program = new Command();
@@ -101,6 +102,7 @@ export function create() {
         .option('--verbose', 'Verbose output', false)
         .action(withCompatibilityCheck((agentName, options) => {
             try {
+                checkForEmptyArgs([agentName]);
                 new DescribeAgentCommand(program).execute(agentName, options);
             } catch (err) {
                 console.error(chalk.red(err.message));
@@ -136,6 +138,7 @@ export function create() {
         .option('--project <project>', 'The project to use')
         .action(withCompatibilityCheck((agentName, options) => {
             try {
+                checkForEmptyArgs([agentName]);
                 new DeleteAgentCommand(program).execute(agentName, options);
             } catch (err) {
                 console.error(chalk.red(err.message));
@@ -285,6 +288,7 @@ export function create() {
         .option('-o, --output <json|yaml|k8s>', 'Format output as yaml or k8s resources')
         .action(withCompatibilityCheck((snapshotId, options) => {
             try {
+                checkForEmptyArgs([snapshotId]);
                 new DescribeAgentSnapshotCommand(program).execute(snapshotId, options);
             } catch (err) {
                 console.error(chalk.red(err.message));

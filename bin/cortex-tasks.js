@@ -8,6 +8,7 @@ import {
 import {
  DEFAULT_LIST_LIMIT_COUNT, DEFAULT_LIST_SKIP_COUNT, LIST_JSON_HELP_TEXT, QUERY_JSON_HELP_TEXT, DEFAULT_LIST_SORT_PARAMS, GET_DEFAULT_SORT_CLI_OPTION, 
 } from '../src/constants.js';
+import { checkForEmptyArgs } from '../src/commands/utils.js';
 
 export function create() {
     const program = new Command();
@@ -56,6 +57,7 @@ export function create() {
         // .option('-o, --output <json|yaml|k8s>', 'Format output as yaml or k8s resources')
         .action(withCompatibilityCheck((taskName, options) => {
             try {
+                checkForEmptyArgs([taskName]);
                 new DescribeTaskCommand(program).execute(taskName, options);
             } catch (err) {
                 console.error(chalk.red(err.message));
@@ -86,6 +88,7 @@ export function create() {
         .option('--project <project>', 'The project to use')
         .action(withCompatibilityCheck(async (taskName, options) => {
             try {
+                checkForEmptyArgs([taskName]);
                 await new TaskDeleteCommand(program).execute(taskName, options);
             } catch (err) {
                 console.error(chalk.red(err.message));
