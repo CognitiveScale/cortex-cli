@@ -233,6 +233,24 @@ describe('Test handleDeleteFailure', () => {
 });
 
 describe('checkForEmptyArgs', () => {
+    let printSpy;
+    let errorSpy;
+    before(() => {
+        restore = mockedEnv({});
+    });
+    beforeEach(() => {
+        printSpy = sinon.spy(console, 'log');
+        errorSpy = sinon.spy(console, 'error');
+        sinon.stub(process, 'exit');
+    });
+    afterEach(() => {
+        printSpy.restore();
+        errorSpy.restore();
+        process.exit.restore();
+    });
+    after(() => {
+        restore();
+    });
     it('should throw an error for empty argument', () => {
       const args = {
         arg1: 'value1',
