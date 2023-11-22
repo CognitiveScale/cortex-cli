@@ -204,7 +204,12 @@ export function create() {
         .option('--chunkSize <int>', 'Number of files to simultaneous upload', 10)
         .action(withCompatibilityCheck((experimentName, runId, filePath, artifactKey, options) => {
             try {
-                checkForEmptyArgs({ experimentName, runId, filePath, artifactKey });
+                checkForEmptyArgs({
+                    experimentName,
+                    runId,
+                    filePath,
+                    artifactKey,
+                });
                 new UploadArtifactCommand(program).execute(experimentName, runId, filePath, artifactKey, options);
             } catch (err) {
                 console.error(chalk.red(err.message));
