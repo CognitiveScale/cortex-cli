@@ -145,7 +145,7 @@ Image: ${app?.action?.image}
 Created By: ${app._createdBy}
 Updated At: ${app._updatedAt}`, options);
                 const hTable = new Table({ head: ['Hosts'] });
-                hTable.push(...(app?.hosts?.length > 0 ? app?.hosts?.map((h) => [`https://${h}`]) : [[profile.url]]));
+                hTable.push(...(app?.hosts?.length > 0 ? app.hosts.map((h) => [`https://${h}`]) : [[profile.url]]));
                 console.log(hTable.toString());
                 printSuccess('Route(s):');
                 const rTable = new Table({ head: ['Matcher', 'Path'] });

@@ -57,7 +57,7 @@ export class SaveStereotypeCommand {
                 printSuccess(`Stereotype saved: ${JSON.stringify(response.message)}`, options);
             }));
         } catch (err) {
-            handleError(err, options,'Failed to save skill stereotype');
+            handleError(err, options, 'Failed to save skill stereotype');
         }
     }
 }
@@ -81,7 +81,7 @@ export class ListStereotypesCommand {
             printExtendedLogs(stereotypes, options);
             return handleTable(tableFormat, _.sortBy(stereotypes, options.sort ? [] : ['name']), (o) => ({ ...o, updatedAt: o.updatedAt ? dayjs(o.updatedAt).fromNow() : '-' }), 'No stereotypes found');
         } catch (err) {
-            handleListFailure(err, {}, 'Skill stereotype');
+            return handleListFailure(err, {}, 'Skill stereotype');
         }
     }
 }
