@@ -80,6 +80,7 @@ export function create() {
         .option('--project <project>', 'The project to use')
         .action(withCompatibilityCheck((agentNames, options) => {
             try {
+                checkForEmptyArgs({ agentNames });
                 new DeployAgentCommand(program).execute(agentNames, options);
             } catch (err) {
                 console.error(chalk.red(err.message));
@@ -154,6 +155,7 @@ export function create() {
         .option('--project <project>', 'The project to use')
         .action(withCompatibilityCheck((agentNames, options) => {
             try {
+                checkForEmptyArgs({ agentNames });
                 new UndeployAgentCommand(program).execute(agentNames, options);
             } catch (err) {
                 console.error(chalk.red(err.message));

@@ -35,6 +35,7 @@ export function create() {
         .option('--sort <sort>', 'A Mongo style sort statement to use in the query.', GET_DEFAULT_SORT_CLI_OPTION(DEFAULT_LIST_SORT_PARAMS._updatedAt))
         .action(withCompatibilityCheck((campaignName, options) => {
             try {
+                checkForEmptyArgs({ campaignName });
                 new ListMissionsCommand(program).execute(campaignName, options);
             } catch (err) {
                 console.error(chalk.red(err.message));

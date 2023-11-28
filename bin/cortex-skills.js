@@ -37,6 +37,7 @@ export function create() {
         .option('--project <project>', 'The project to use')
         .action(withCompatibilityCheck(async (skillNames, options) => {
             try {
+                checkForEmptyArgs({ skillNames });
                 await new DeploySkillCommand(program).execute(skillNames, options);
             } catch (err) {
                 console.error(chalk.red(err.message));
@@ -77,6 +78,7 @@ export function create() {
         .option('--sync', 'Invoke the skill synchronously', false)
         .action(withCompatibilityCheck(async (skillName, inputName, options) => {
             try {
+                checkForEmptyArgs({ skillName, inputName });
                 await new InvokeSkillCommand(program).execute(skillName, inputName, options);
             } catch (err) {
                 console.error(chalk.red(err.message));
@@ -152,6 +154,7 @@ export function create() {
         .option('--project <project>', 'The project to use')
         .action(withCompatibilityCheck(async (skillNames, options) => {
             try {
+                checkForEmptyArgs({ skillNames });
                 return await new UndeploySkillCommand(program).execute(skillNames, options);
             } catch (err) {
                 return console.error(chalk.red(err.message));
@@ -169,6 +172,7 @@ export function create() {
         // .option('--type [type]', 'The type of action logs to fetch [skill|task]')
         .action(withCompatibilityCheck(async (skillName, actionName, options) => {
             try {
+                checkForEmptyArgs({ skillName, actionName });
                 return await new SkillLogsCommand(program).execute(skillName, actionName, options);
             } catch (err) {
                 return console.error(chalk.red(err.message));

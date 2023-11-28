@@ -74,6 +74,7 @@ export function create() {
         // .option('--type [type]', 'The type of action logs to fetch [skill|task]')
         .action(withCompatibilityCheck((taskName, options) => {
             try {
+                checkForEmptyArgs({ taskName });
                 new TaskLogsCommand(program).execute(taskName, options);
             } catch (err) {
                 console.error(chalk.red(err.message));
@@ -103,6 +104,7 @@ export function create() {
         .option('--project <project>', 'The project to use')
         .action(withCompatibilityCheck(async (taskName, options) => {
             try {
+                checkForEmptyArgs({ taskName });
                 await new TaskPauseCommand(program).execute(taskName, options);
             } catch (err) {
                 console.error(chalk.red(err.message));
@@ -117,6 +119,7 @@ export function create() {
         .option('--project <project>', 'The project to use')
         .action(withCompatibilityCheck(async (taskName, options) => {
             try {
+                checkForEmptyArgs({ taskName });
                 await new TaskResumeCommand(program).execute(taskName, options);
             } catch (err) {
                 console.error(chalk.red(err.message));

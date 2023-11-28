@@ -84,6 +84,7 @@ export function create() {
         .option('--overwrite [boolean]', 'Overwrite existing deployed missions with the imported one', false)
         .action(withCompatibilityCheck((campaignName, options) => {
             try {
+                checkForEmptyArgs({ campaignName });
                 new ImportCampaignCommand(program).execute(campaignName, options);
             } catch (err) {
                 console.error(chalk.red(err.message));
