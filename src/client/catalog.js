@@ -26,6 +26,8 @@ import {
 const debug = debugSetup('cortex:cli');
 const createEndpoints = (baseUri) => ({
     skills: (projectId) => `${baseUri}/fabric/v4/projects/${projectId}/skills`,
+    applications: (projectId) => `${baseUri}/fabric/v4/projects/${projectId}/applications`,
+    skillStereotype: (projectId) => `${baseUri}/fabric/v4/projects/${projectId}/skillStereotypes`,
     agents: (projectId) => `${baseUri}/fabric/v4/projects/${projectId}/agents`,
     agentinvoke: (projectId) => `${baseUri}/fabric/v4/projects/${projectId}/agentinvoke`,
     types: (projectId) => `${baseUri}/fabric/v4/projects/${projectId}/types`,
@@ -35,6 +37,20 @@ export default class Catalog {
     constructor(cortexUrl) {
         this.cortexUrl = cortexUrl;
         this.endpoints = createEndpoints(cortexUrl);
+    }
+
+    // Skill
+    deleteSkill(projectId, token, skillName) {
+        checkProject(projectId);
+        const endpoint = `${this.endpoints.skills(projectId)}/${encodeURIComponent(skillName)}`;
+        debug('deleteSkill(%s) => %s', skillName, endpoint);
+        return got
+            .delete(endpoint, {
+                headers: defaultHeaders(token),
+            })
+            .json()
+            .then((skill) => skill)
+            .catch((err) => constructError(err));
     }
 
     saveSkill(projectId, token, skillObj) {
@@ -115,6 +131,20 @@ export default class Catalog {
             searchParams: { raw },
         };
         return raw ? got.get(endpoint, gotOptions).text() : got.get(endpoint, gotOptions).json();
+    }
+
+    // Agent
+    deleteAgent(projectId, token, agentName) {
+        checkProject(projectId);
+        const endpoint = `${this.endpoints.agents(projectId)}/${encodeURIComponent(agentName)}`;
+        debug('deleteAgent(%s) => %s', agentName, endpoint);
+        return got
+            .delete(endpoint, {
+                headers: defaultHeaders(token),
+            })
+            .json()
+            .then((agent) => ({ success: true, agent }))
+            .catch((err) => constructError(err));
     }
 
     listAgents(projectId, token, filter, limit, skip, sort) {
@@ -221,6 +251,7 @@ export default class Catalog {
             .catch((err) => constructError(err));
     }
 
+    // Type
     saveType(projectId, token, types) {
         checkProject(projectId);
         const endpoint = `${this.endpoints.types(projectId)}`;
@@ -280,6 +311,7 @@ export default class Catalog {
             .catch((err) => constructError(err));
     }
 
+    // Campaign
     exportCampaign(projectId, token, campaignName, deployable, path) {
         checkProject(projectId);
         const url = `${this.endpoints.campaigns(projectId)}${campaignName}/export?deployable=${deployable}`;
@@ -360,6 +392,7 @@ export default class Catalog {
             .catch((err) => constructError(err));
     }
 
+    // Mission
     undeployMission(projectId, token, campaign, mission) {
         checkProject(projectId);
         const endpoint = `${this.endpoints.campaigns(projectId)}${campaign}/missions/${mission}/undeploy`;
@@ -418,117 +451,140 @@ export default class Catalog {
             .catch((err) => constructError(err));
     }
 
-    // saveProfileSchema(projectId, token, schemaObj) {
-    //     debug('saveProfileSchema(%s) => %s', schemaObj.name, this.endpoints.profileSchemas);
-    //     return request
-    //         .post(this.endpoints.profileSchemas)
-    //         .set('Authorization', `Bearer ${token}`)
-    //         .set('x-cortex-proxy-notify', true)
-    //         .send(schemaObj)
-    //         .then((res) => {
-    //             if (Boolean(_.get(res, 'headers.x-cortex-proxied', false)))
-    //                 console.error(chalk.blue('Request proxied to cloud.'));
-    //             if (res.ok) {
-    //                 return {success: true, message: res.body};
-    //             }
-    //             return {success: false, message: res.body, status: res.status};
-    //         })
-    //         .catch((err) => {
-    //             return constructError(err);
-    //         });
-    // }
-    //
-    // listProfileSchemas(projectId, token, filter, sort, limit, skip) {
-    //     debug('listProfileSchemas() => %s', this.endpoints.profileSchemas);
-    //     const req = request
-    //         .get(this.endpoints.profileSchemas)
-    //         .set('Authorization', `Bearer ${token}`)
-    //         .set('x-cortex-proxy-notify', true);
-    //
-    //     if (filter) req.query({ filter });
-    //     if (sort) req.query({ sort });
-    //     if (limit) req.query({ limit });
-    //     if (skip) req.query({ skip });
-    //
-    //     return req.then((res) => {
-    //         if (Boolean(_.get(res, 'headers.x-cortex-proxied', false)))
-    //             console.error(chalk.blue('Request proxied to cloud.'));
-    //         if (res.ok) {
-    //             return {success: true, schemas: res.body.schemas};
-    //         }
-    //         return {success: false, status: res.status, message: res.body};
-    //     })
-    //     .catch((err) => {
-    //         return constructError(err);
-    //     });
-    // }
-    //
-    // describeProfileSchema(projectId, token, schemaName) {
-    //     const endpoint = `${this.endpoints.profileSchemas}/${schemaName}`;
-    //     debug('describeProfileSchema(%s) => %s', schemaName, endpoint);
-    //     return request
-    //         .get(endpoint)
-    //         .set('Authorization', `Bearer ${token}`)
-    //         .set('x-cortex-proxy-notify', true)
-    //         .then((res) => {
-    //             if (Boolean(_.get(res, 'headers.x-cortex-proxied', false)))
-    //                 console.error(chalk.blue('Request proxied to cloud.'));
-    //             if (res.ok) {
-    //                 return {success: true, schema: res.body};
-    //             }
-    //             else {
-    //                 return {success: false, message: res.body, status: res.status};
-    //             }
-    //         })
-    //         .catch((err) => {
-    //             return constructError(err);
-    //         });
-    // }
-    //
-    // deleteProfileSchema(projectId, token, schemaName) {
-    //     const endpoint = `${this.endpoints.profileSchemas}/${schemaName}`;
-    //     debug('deleteProfileSchema(%s) => %s', schemaName, endpoint);
-    //     return request
-    //         .delete(endpoint)
-    //         .set('Authorization', `Bearer ${token}`)
-    //         .set('x-cortex-proxy-notify', true)
-    //         .then((res) => {
-    //             if (Boolean(_.get(res, 'headers.x-cortex-proxied', false)))
-    //                 console.error(chalk.blue('Request proxied to cloud.'));
-    //             if (res.ok) {
-    //                 return {success: true};
-    //             }
-    //             else {
-    //                 return {success: false, message: res.body, status: res.status};
-    //             }
-    //         })
-    //         .catch((err) => {
-    //             return constructError(err);
-    //         });
-    // }
-    deleteSkill(projectId, token, skillName) {
+    // Application
+    deleteApplication(projectId, token, name) {
         checkProject(projectId);
-        const endpoint = `${this.endpoints.skills(projectId)}/${encodeURIComponent(skillName)}`;
-        debug('deleteSkill(%s) => %s', skillName, endpoint);
+        const endpoint = `${this.endpoints.applications(projectId)}/${encodeURIComponent(name)}`;
+        debug('deleteApplication(%s) => %s', name, endpoint);
         return got
             .delete(endpoint, {
-            headers: defaultHeaders(token),
-        })
-            .json()
-            .then((skill) => skill)
+                headers: defaultHeaders(token),
+            })
+            .json();
+    }
+
+    saveApplication(projectId, token, appObj) {
+        checkProject(projectId);
+        debug('saveApplication(%s) => %s', appObj.name, this.endpoints.applications(projectId));
+        return got
+            .post(this.endpoints.applications(projectId), {
+                headers: defaultHeaders(token),
+                json: appObj,
+            }).json()
+            .then((res) => ({ success: true, message: res }))
             .catch((err) => constructError(err));
     }
 
-    deleteAgent(projectId, token, agentName) {
+    listApplications(projectId, token, query, filter, limit, skip, sort) {
         checkProject(projectId);
-        const endpoint = `${this.endpoints.agents(projectId)}/${encodeURIComponent(agentName)}`;
-        debug('deleteAgent(%s) => %s', agentName, endpoint);
+        debug('listApplications() => %s', this.endpoints.applications(projectId));
+        if (filter) query.filter = filter;
+        if (limit) query.limit = limit;
+        if (sort) query.sort = sort;
+        if (skip) query.skip = skip;
+        return got
+            .get(this.endpoints.applications(projectId), {
+                headers: defaultHeaders(token),
+                searchParams: query,
+            }).json();
+    }
+
+    describeApplication(projectId, token, name, verbose = false, output = 'json') {
+        checkProject(projectId);
+        const endpoint = `${this.endpoints.applications(projectId)}/${encodeURIComponent(name)}`;
+        debug('describeApplication(%s) => %s', name, endpoint);
+        const searchParams = { output };
+        if (verbose) {
+            searchParams.verbose = verbose;
+            searchParams.status = verbose;
+        }
+        try {
+            const res = got.get(endpoint, {
+                headers: defaultHeaders(token),
+                searchParams,
+            });
+            if (['json', 'pretty'].includes(output.toLocaleLowerCase())) return res.json();
+            return res.text();
+        } catch (err) {
+            return constructError(err);
+        }
+    }
+
+    deployApplication(projectId, token, name) {
+        checkProject(projectId);
+        const endpoint = `${this.endpoints.applications(projectId)}/${encodeURIComponent(name)}/deploy`;
+        debug('deployApplication(%s) => %s', name, endpoint);
+        try {
+            return got
+                .get(endpoint, {
+                    headers: defaultHeaders(token),
+                })
+                .json();
+        } catch (err) {
+            return constructError(err);
+        }
+    }
+
+    unDeployApplication(projectId, token, name) {
+        checkProject(projectId);
+        const endpoint = `${this.endpoints.applications(projectId)}/${encodeURIComponent(name)}/undeploy`;
+        debug('undeployApplication(%s) => %s', name, endpoint);
+        return got
+            .get(endpoint, {
+                headers: defaultHeaders(token),
+            }).json();
+    }
+
+    // Stereotype
+    deleteStereotype(projectId, token, name) {
+        checkProject(projectId);
+        const endpoint = `${this.endpoints.skillStereotype(projectId)}/${encodeURIComponent(name)}`;
+        debug('deleteStereotype(%s) => %s', name, endpoint);
         return got
             .delete(endpoint, {
+                headers: defaultHeaders(token),
+            })
+            .json();
+    }
+
+    saveStereotype(projectId, token, appObj) {
+        checkProject(projectId);
+        debug('saveStereotype(%s) => %s', appObj.name, this.endpoints.skillStereotype(projectId));
+        return got
+            .post(this.endpoints.skillStereotype(projectId), {
+                headers: defaultHeaders(token),
+                json: appObj,
+            }).json();
+    }
+
+    listStereotypes(projectId, token, query, filter, limit, skip, sort) {
+        checkProject(projectId);
+        debug('listStereotypes() => %s', this.endpoints.skillStereotype(projectId));
+        if (filter) query.filter = filter;
+        if (limit) query.limit = limit;
+        if (sort) query.sort = sort;
+        if (skip) query.skip = skip;
+        return got
+            .get(this.endpoints.skillStereotype(projectId), {
+                headers: defaultHeaders(token),
+                searchParams: query,
+            }).json();
+    }
+
+    describeStereotype(projectId, token, name, verbose = false, output = 'json') {
+        checkProject(projectId);
+        const endpoint = `${this.endpoints.skillStereotype(projectId)}/${encodeURIComponent(name)}`;
+        debug('describeStereotype(%s) => %s', name, endpoint);
+        const searchParams = { output };
+        if (verbose) {
+            searchParams.verbose = verbose;
+            searchParams.status = verbose;
+        }
+        const res = got.get(endpoint, {
             headers: defaultHeaders(token),
-        })
-            .json()
-            .then((agent) => ({ success: true, agent }))
-            .catch((err) => constructError(err));
+            searchParams,
+        });
+        if (output.toLocaleLowerCase() === 'json') return res.json();
+        return res.text();
     }
 }
