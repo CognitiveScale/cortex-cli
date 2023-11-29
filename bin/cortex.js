@@ -57,7 +57,7 @@ export async function create(profileName) {
         _toObject('actions <cmd>', 'Work with Cortex Actions'),
         _toObject('agents <cmd>', 'Work with Cortex Agents'),
         _toObject('applications <cmd>', 'Work with Cortex Applications'),
-        _toObject('assessments <cmd>', 'Work with Cortex Impact Assesments'),
+        _toObject('assessments <cmd>', 'Work with Cortex Impact Assessments'),
         _toObject('campaigns <cmd>', 'Work with Cortex Campaigns'),
         _toObject('configure', 'Configure the Cortex CLI'),
         _toObject('connections <cmd>', 'Work with Cortex Connections'),
