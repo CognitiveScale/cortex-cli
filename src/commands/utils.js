@@ -200,14 +200,16 @@ export const getFilteredOutput = (result, options) => {
 };
 
 export const parseObject = (str) => yaml.load(str);
-export function printTable(spec, objects, transform) {
+export function printTable(spec, objects, transform, tableOptions = {}) {
     const fn = transform ?? ((obj) => obj);
     const head = spec.map((s) => s.column);
     const colWidths = spec.map((s) => s.width);
     const fields = spec.map((s) => s.field);
     const values = objects.map((obj) => _extractValues(fields, fn(obj)));
     debug('printing fields: %o', fields);
-    const table = new Table({ head, colWidths, style: { head: ['cyan'] } });
+    const table = new Table({
+        head, colWidths, style: { head: ['cyan'] }, ...tableOptions,
+    });
     values.forEach((v) => table.push(v));
     console.log(table.toString());
 }
@@ -348,11 +350,11 @@ export const validateName = (name) => (validNameRegex.test(name) && (name.length
         status: false,
         message: name ? validationErrorMessage : nameRequirementMessage,
     });
-export const handleTable = (spec, data, transformer, noDataMessage) => {
+export const handleTable = (spec, data, transformer, noDataMessage, tableOptions) => {
     if (!data || data.length === 0) {
         printSuccess(noDataMessage);
     } else {
-        printTable(spec, data, transformer);
+        printTable(spec, data, transformer, tableOptions);
     }
 };
 

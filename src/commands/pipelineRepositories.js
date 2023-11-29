@@ -5,7 +5,7 @@ import relativeTime from 'dayjs/plugin/relativeTime.js';
 import { loadProfile } from '../config.js';
 import Pipelines from '../client/pipelineRepositories.js';
 import {
- fileExists, printSuccess, printError, parseObject, handleTable, printExtendedLogs, handleListFailure, handleDeleteFailure, getFilteredOutput,
+ fileExists, printSuccess, printError, parseObject, handleTable, printExtendedLogs, handleListFailure, handleDeleteFailure, getFilteredOutput, printTable,
 } from './utils.js';
 
 const debug = debugSetup('cortex:cli');
@@ -132,74 +132,149 @@ export const UpdateRepoPipelinesCommand = class {
     const repos = new Pipelines(profile.url);
     try {
       const response = await repos.updateRepoPipelines(options.project || profile.project, profile.token, pipelineRepoName, options.skill);
-      if (response.success) {
-        const result = response.updateReport;
+      // Check for 'updateReport' property
+      if (response.updateReport) {
+        const { message, updateReport: result, success } = response;
         if (options.json) {
           return getFilteredOutput(result, options);
         }
-        const noChangesMade = (result.added.length === 0
-          && result.deleted.length === 0
-          && result.updated.length === 0
-          && result.failed.add.length === 0
-          && result.failed.delete.length === 0
-          && result.failed.update.length === 0);
-        if (noChangesMade) {
-          return printSuccess('Pipelines up to date! No changes made.');
+        if (options.inline) {
+          return this.printInline(success, message, result, options);
         }
-
-        const tableSpec = [
-          { column: 'Added', field: 'added', width: 15 },
-          { column: 'Updated', field: 'updated', width: 15 },
-          { column: 'Deleted', field: 'deleted', width: 15 },
-          { column: 'Failed to Add', field: 'failedToAdd', width: 20 },
-          { column: 'Failed to Update', field: 'failedToUpdate', width: 20 },
-          { column: 'Failed to Delete', field: 'failedToDelete', width: 20 },
-        ];
-        const maxLength = Math.max(
-          result.added.length,
-          result.updated.length,
-          result.deleted.length,
-          result.failed.add.length,
-          result.failed.delete.length,
-          result.failed.update.length,
-        );
-        const transformedResult = [];
-        // eslint-disable-next-line no-plusplus
-        for (let i = 0; i < maxLength; i++) {
-          const obj = {};
-
-          if (result.added[i]) {
-            obj.added = result.added[i];
-          }
-          if (result.updated[i]) {
-            obj.updated = result.updated[i];
-          }
-          if (result.deleted[i]) {
-            obj.deleted = result.deleted[i];
-          }
-          if (result.failed.add[i]) {
-            obj.failedAdd = result.failed.add[i].pipelineName || '';
-          }
-          if (result.failed.update[i]) {
-            obj.failedUpdate = result.failed.update[i].pipelineName || '';
-          }
-          if (result.failed.delete[i]) {
-            obj.failedDelete = result.failed.delete[i].pipelineName || '';
-          }
-          transformedResult.push(obj);
-        }
-        return handleTable(tableSpec, transformedResult, (o) => ({
-          added: o.added,
-          updated: o.updated,
-          deleted: o.deleted,
-          failedToAdd: o.failedAdd,
-          failedToUpdate: o.failedUpdate,
-          failedToDelete: o.failedDelete,
-        }), `Failed to update pipelines in repo ${pipelineRepoName}`);
+        return this.printAsTable(success, message, result, options);
       }
-      return printError(`Failed to update pipelines in repo ${pipelineRepoName}: ${response.status} ${response.message}`, options);
+      return printError(response.message, options);
     } catch (err) {
-      return printError(`Failed to update pipelines in repo ${pipelineRepoName}: ${err.status} ${err.message}`, options);
+      return printError(`${err.status}: ${err.message}`, options);
     }
+  }
+
+  // TODO: rename result -> updateReport
+  noChangesMade(result) {
+    const noChangesMade = (result.added.length === 0
+      && result.deleted.length === 0
+      && result.updated.length === 0
+      && result.failed.add.length === 0
+      && result.failed.delete.length === 0
+      && result.failed.update.length === 0);
+    return noChangesMade;
+  }
+
+  printAsTable(success, message, result, options) {
+    if (success) {
+      printSuccess(`${message}\n`, options);
+    } else {
+      printError(`${message}\n`, options, false); // do not exit
+    }
+    if (this.noChangesMade(result)) {
+      return printSuccess('Pipelines up to date! No changes made.');
+    }
+    // Total = 105 = 15 * 3 + 20 * 3
+    const tableSpec = [
+      { column: 'Added', field: 'added', width: 15 },
+      { column: 'Updated', field: 'updated', width: 15 },
+      { column: 'Deleted', field: 'deleted', width: 15 },
+      { column: 'Failed to Add', field: 'failedToAdd', width: 20 },
+      { column: 'Failed to Update', field: 'failedToUpdate', width: 20 },
+      { column: 'Failed to Delete', field: 'failedToDelete', width: 20 },
+    ];
+    const maxLength = Math.max(
+      result.added.length,
+      result.updated.length,
+      result.deleted.length,
+      result.failed.add.length,
+      result.failed.delete.length,
+      result.failed.update.length,
+    );
+    const captureFailure = (failed) => {
+      // util function to format Pipeline failures
+      if (failed.details) {
+        return `${failed.pipelineName || ''}: ${failed.details}`;
+      }
+      return failed.pipelineName || '';
+    };
+
+    const transformedResult = [];
+    // eslint-disable-next-line no-plusplus
+    for (let i = 0; i < maxLength; i++) {
+      const obj = {};
+      if (result.added[i]) {
+        obj.added = result.added[i];
+      }
+      if (result.updated[i]) {
+        obj.updated = result.updated[i];
+      }
+      if (result.deleted[i]) {
+        obj.deleted = result.deleted[i];
+      }
+      if (result.failed.add[i]) {
+        obj.failedToAdd = captureFailure(result.failed.add[i]);
+      }
+      if (result.failed.update[i]) {
+        obj.failedToUpdate = captureFailure(result.failed.update[i]);
+      }
+      if (result.failed.delete[i]) {
+        obj.failedToDelete = captureFailure(result.failed.delete[i]);
+      }
+      transformedResult.push(obj);
+    }
+    // The Table must include the Pipeline name and error details for Pipelines
+    // that failed to be Added, Updated, Deleted. By default the Table only
+    // prints the # of characters allocated for each column. To ensure all
+    // details are presented set:
+    //
+    //  wordWrap - allows wrapping words across multiple lines in a Cell
+    //  wrapOnWordBoundary - allow wrapping on any character, otherwise long
+    //                strings (JSON) would be abbreviated/hidden from the user.
+    //                Downside is reading messages trickier.
+    const tableOptions = {
+      wordWrap: true,
+      // wrapOnWordBoundary: false,
+    };
+    return handleTable(tableSpec, transformedResult, undefined, 'Pipelines up to date! No changes made.', tableOptions);
+  }
+
+  // Alt method of printing report
+  printInline(success, message, result, options) {
+    function printSuccessful(title, pipelines) {
+      const spec = [
+        { column: 'Pipeline Name', field: 'pipelineName', width: 40 },
+      ];
+      if ((pipelines?.length ?? 0) > 0) {
+        printSuccess(title);
+        handleTable(spec, pipelines, (pipelineName) => ({ pipelineName }), { wordWrap: true });
+        printSuccess(''); // add newline
+      }
+    }
+    function printFailed(title, failedPipelines) {
+      if ((failedPipelines?.length ?? 0) > 0) {
+        const spec = [ // Total width: 80
+          { column: 'Pipeline Name', field: 'pipelineName', width: 32 },
+          { column: 'Details', field: 'details', width: 48 },
+        ];
+        printSuccess(title); // TODO: use printError() (without exit)??
+        printTable(spec, failedPipelines, undefined, { wordWrap: true });
+        printSuccess('');
+      }
+    }
+    if (success) {
+      printSuccess(`${message}\n`, options);
+    } else {
+      printError(`${message}\n`, options, false); // do not exit
+    }
+    if (this.noChangesMade(result)) {
+      return printSuccess('Pipelines up to date! No changes made.');
+    }
+    printSuccessful('Successfully Added', result.added);
+    printSuccessful('Successfully Updated', result.updated);
+    printSuccessful('Successfully Deleted', result.deleted);
+    printFailed('Failed to Add', result.failed.add);
+    printFailed('Failed to Update', result.failed.update);
+    printFailed('Failed to Delete', result.failed.delete);
+    return printSuccess('');
+  }
+
+  printJson(updateReport, options) {
+    return getFilteredOutput(updateReport, options);
   }
 };

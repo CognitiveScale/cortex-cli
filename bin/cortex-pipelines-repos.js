@@ -107,6 +107,7 @@ export function create() {
     .option('--profile <profile>', 'The profile to use')
     .option('--project <project>', 'The project to use')
     .option('--json [searchPath]', QUERY_JSON_HELP_TEXT)
+    .option('--inline', 'Print output report as inline text instead of as table or JSON. Incompatible with "--json" flag') // Alt method of printing report
     .option('--skill <skillName>', 'Name of the underlying Skill in the same Project to use for running the Pipeline')
     .action(withCompatibilityCheck((pipelineRepoName, options) => {
       try {
