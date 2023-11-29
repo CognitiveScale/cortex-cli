@@ -60,6 +60,13 @@ export function printError(message, options = { color: true }, exitProgram = tru
         process.exit(1);
     }
 }
+/**
+ * Returns an array with string representations of the specified fields from the given object.
+ *
+ * @param {Array<string>} fields - fields to extract
+ * @param {Object<string, any>} obj - object to extract fields from
+ * @returns {Array<string>} array of strings
+ */
 function _extractValues(fields, obj) {
     const rv = [];
     fields.forEach((f) => rv.push((obj !== undefined && obj !== null && obj[f] !== undefined && obj[f] !== null) ? obj[f].toString() : '-'));
@@ -200,6 +207,14 @@ export const getFilteredOutput = (result, options) => {
 };
 
 export const parseObject = (str) => yaml.load(str);
+/**
+ * Prints a table based on the given data and table specification.
+ *
+ * @param {Array<Object>} spec - objects with 'column', 'width', and 'field'
+ * @param {Array} objects - data to reprsent in the table
+ * @param {CallableFunction<Object, Object> | undefined} transform
+ * @param {Object} tableOptions - object to provide to 'Table()' constructor
+ */
 export function printTable(spec, objects, transform, tableOptions = {}) {
     const fn = transform ?? ((obj) => obj);
     const head = spec.map((s) => s.column);
@@ -211,6 +226,33 @@ export function printTable(spec, objects, transform, tableOptions = {}) {
         head, colWidths, style: { head: ['cyan'] }, ...tableOptions,
     });
     values.forEach((v) => table.push(v));
+    console.log(table.toString());
+}
+
+/**
+ * Prints a Cross-Table based on the given data & table spec. The spec defines
+ * the column structure and the values should be the Row objects to include in
+ * the table. Unlike 'printTable()', this fn does NOT transform row values to
+ * allow for lower-level cell configuration.
+ *
+ * @param {Array<Object>} spec - objects with 'column' & 'width'
+ * @param {Array<Object<string, Array<string>>>} values - map of cross-section title to column values
+ * @param {Object<string, any>} tableOptions object to provide to 'Table()' constructor
+ */
+export function printCrossTable(spec, values, tableOptions = {}) {
+    const head = spec.map((s) => s.column);
+    const colWidths = spec.map((s) => s.width);
+    if (head[0] !== '') {
+        // cross-tables should always include an empty string for the first
+        // header, add it, if missing
+        head.unshift('');
+        colWidths.unshift(10);
+    }
+    debug('Printing Columns: %o', head);
+    const table = new Table({
+        head, colWidths, style: { head: ['cyan'] }, ...tableOptions,
+    });
+    table.push(...values);
     console.log(table.toString());
 }
 

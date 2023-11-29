@@ -1,11 +1,12 @@
 import fs from 'node:fs';
+import chalk from 'chalk';
 import debugSetup from 'debug';
 import dayjs from 'dayjs';
 import relativeTime from 'dayjs/plugin/relativeTime.js';
 import { loadProfile } from '../config.js';
 import Pipelines from '../client/pipelineRepositories.js';
 import {
- fileExists, printSuccess, printError, parseObject, handleTable, printExtendedLogs, handleListFailure, handleDeleteFailure, getFilteredOutput, printTable,
+ fileExists, printSuccess, printError, parseObject, handleTable, printExtendedLogs, handleListFailure, handleDeleteFailure, getFilteredOutput, printTable, printCrossTable, useColor
 } from './utils.js';
 
 const debug = debugSetup('cortex:cli');
@@ -134,14 +135,14 @@ export const UpdateRepoPipelinesCommand = class {
       const response = await repos.updateRepoPipelines(options.project || profile.project, profile.token, pipelineRepoName, options.skill);
       // Check for 'updateReport' property
       if (response.updateReport) {
-        const { message, updateReport: result, success } = response;
+        const { message, updateReport, success } = response;
         if (options.json) {
-          return getFilteredOutput(result, options);
+          return getFilteredOutput(updateReport, options);
         }
         if (options.inline) {
-          return this.printInline(success, message, result, options);
+          return this.printInline(success, message, updateReport, options);
         }
-        return this.printAsTable(success, message, result, options);
+        return this.printAsTable(success, message, updateReport, options);
       }
       return printError(response.message, options);
     } catch (err) {
@@ -149,93 +150,81 @@ export const UpdateRepoPipelinesCommand = class {
     }
   }
 
-  // TODO: rename result -> updateReport
-  noChangesMade(result) {
-    const noChangesMade = (result.added.length === 0
-      && result.deleted.length === 0
-      && result.updated.length === 0
-      && result.failed.add.length === 0
-      && result.failed.delete.length === 0
-      && result.failed.update.length === 0);
+  noChangesMade(updateReport) {
+    const noChangesMade = (updateReport.added.length === 0
+      && updateReport.deleted.length === 0
+      && updateReport.updated.length === 0
+      && updateReport.failed.add.length === 0
+      && updateReport.failed.delete.length === 0
+      && updateReport.failed.update.length === 0);
     return noChangesMade;
   }
 
-  printAsTable(success, message, result, options) {
+  printAsTable(success, message, updateReport, options) {
+    if (success && this.noChangesMade(updateReport)) {
+      // no changes made -> no need to show update report
+      return printSuccess('Pipelines up to date! No changes made.', options);
+    }
+    // Top level message
     if (success) {
       printSuccess(`${message}\n`, options);
     } else {
       printError(`${message}\n`, options, false); // do not exit
     }
-    if (this.noChangesMade(result)) {
-      return printSuccess('Pipelines up to date! No changes made.');
-    }
-    // Total = 105 = 15 * 3 + 20 * 3
-    const tableSpec = [
-      { column: 'Added', field: 'added', width: 15 },
-      { column: 'Updated', field: 'updated', width: 15 },
-      { column: 'Deleted', field: 'deleted', width: 15 },
-      { column: 'Failed to Add', field: 'failedToAdd', width: 20 },
-      { column: 'Failed to Update', field: 'failedToUpdate', width: 20 },
-      { column: 'Failed to Delete', field: 'failedToDelete', width: 20 },
-    ];
-    const maxLength = Math.max(
-      result.added.length,
-      result.updated.length,
-      result.deleted.length,
-      result.failed.add.length,
-      result.failed.delete.length,
-      result.failed.update.length,
-    );
-    const captureFailure = (failed) => {
-      // util function to format Pipeline failures
-      if (failed.details) {
-        return `${failed.pipelineName || ''}: ${failed.details}`;
-      }
-      return failed.pipelineName || '';
-    };
 
-    const transformedResult = [];
-    // eslint-disable-next-line no-plusplus
-    for (let i = 0; i < maxLength; i++) {
-      const obj = {};
-      if (result.added[i]) {
-        obj.added = result.added[i];
+    // Constructs a crossed-table (i.e. nested table) with the left most column
+    // identifying the Type of Change (e.g. Added, Deleted) followed by columns
+    // 'Pipeline Name' & 'Details'.
+    function toTableValue(title, pipelines) {
+      // Add a cell to the table with a Title describing the type of change.
+      // The Title spans the # of corresponding Pipelines - always at least 1.
+      const titleRowSpan = (pipelines?.length || 1);
+      const coloredTitle = useColor(options) ? chalk.cyan(title) : title; // optionally add color
+      const values = [
+        [
+          {
+            rowSpan: titleRowSpan, content: coloredTitle, vAlign: 'center', hAlign: 'center',
+          },
+        ],
+      ];
+      // Add rows corresponding to Pipelines
+      const rows = pipelines.map((p) => [p.pipelineName || '-', p.details || '-']); // default values to '-'
+      if (rows.length === 0) {
+        // No records to show, thus default 1 row w/ aligned with Title Cell
+        rows.push('-', '-');
+        values[0].push(...rows);
+      } else {
+        // Include an initial row lining up with the Title Cell, then add all
+        // other rows below that to fill out the section
+        values[0].push(...rows.shift());
+        values.push(...rows);
       }
-      if (result.updated[i]) {
-        obj.updated = result.updated[i];
-      }
-      if (result.deleted[i]) {
-        obj.deleted = result.deleted[i];
-      }
-      if (result.failed.add[i]) {
-        obj.failedToAdd = captureFailure(result.failed.add[i]);
-      }
-      if (result.failed.update[i]) {
-        obj.failedToUpdate = captureFailure(result.failed.update[i]);
-      }
-      if (result.failed.delete[i]) {
-        obj.failedToDelete = captureFailure(result.failed.delete[i]);
-      }
-      transformedResult.push(obj);
+      return values;
     }
+    const tableSpec = [
+      { column: '', width: 25 },
+      { column: 'Pipeline Name', width: 25 },
+      { column: 'Details', width: 30 },
+    ];
+    const tableValues = [];
+    tableValues.push(
+      ...toTableValue('Added', updateReport.added.map((pipelineName) => ({ pipelineName, details: '' }))),
+      ...toTableValue('Updated', updateReport.updated.map((pipelineName) => ({ pipelineName, details: '' }))),
+      ...toTableValue('Deleted', updateReport.deleted.map((pipelineName) => ({ pipelineName, details: '' }))),
+      ...toTableValue('Failed to Add', updateReport.failed.add),
+      ...toTableValue('Failed to Update', updateReport.failed.update),
+      ...toTableValue('Failed to Delete', updateReport.failed.delete),
+    );
+    debug(`Constructed Table with values: ${JSON.stringify(tableValues)}`);
     // The Table must include the Pipeline name and error details for Pipelines
     // that failed to be Added, Updated, Deleted. By default the Table only
     // prints the # of characters allocated for each column. To ensure all
-    // details are presented set:
-    //
-    //  wordWrap - allows wrapping words across multiple lines in a Cell
-    //  wrapOnWordBoundary - allow wrapping on any character, otherwise long
-    //                strings (JSON) would be abbreviated/hidden from the user.
-    //                Downside is reading messages trickier.
-    const tableOptions = {
-      wordWrap: true,
-      // wrapOnWordBoundary: false,
-    };
-    return handleTable(tableSpec, transformedResult, undefined, 'Pipelines up to date! No changes made.', tableOptions);
+    // details are presented set 'wordWrap' to True.
+    return printCrossTable(tableSpec, tableValues, { wordWrap: true });
   }
 
   // Alt method of printing report
-  printInline(success, message, result, options) {
+  printInline(success, message, updateReport, options) {
     function printSuccessful(title, pipelines) {
       const spec = [
         { column: 'Pipeline Name', field: 'pipelineName', width: 40 },
@@ -257,20 +246,22 @@ export const UpdateRepoPipelinesCommand = class {
         printSuccess('');
       }
     }
+    if (success && this.noChangesMade(updateReport)) {
+      // no changes made -> no need to show update report
+      return printSuccess('Pipelines up to date! No changes made.', options);
+    }
+    // Top level message
     if (success) {
       printSuccess(`${message}\n`, options);
     } else {
       printError(`${message}\n`, options, false); // do not exit
     }
-    if (this.noChangesMade(result)) {
-      return printSuccess('Pipelines up to date! No changes made.');
-    }
-    printSuccessful('Successfully Added', result.added);
-    printSuccessful('Successfully Updated', result.updated);
-    printSuccessful('Successfully Deleted', result.deleted);
-    printFailed('Failed to Add', result.failed.add);
-    printFailed('Failed to Update', result.failed.update);
-    printFailed('Failed to Delete', result.failed.delete);
+    printSuccessful('Successfully Added', updateReport.added);
+    printSuccessful('Successfully Updated', updateReport.updated);
+    printSuccessful('Successfully Deleted', updateReport.deleted);
+    printFailed('Failed to Add', updateReport.failed.add);
+    printFailed('Failed to Update', updateReport.failed.update);
+    printFailed('Failed to Delete', updateReport.failed.delete);
     return printSuccess('');
   }
 
