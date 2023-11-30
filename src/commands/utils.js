@@ -263,7 +263,7 @@ export function printCrossTable(spec, sections, tableOptions = {}) {
         // in that section (minimum 1).
         const records = sections[title];
         const titleRowSpan = (records?.length || 1);
-        const coloredTitle = chalk.cyan(title); // useColor(options) ? chalk.cyan(title) : title; // optionally add color;
+        const coloredTitle = chalk.cyan(title);
         const values = [
             [
                 {
