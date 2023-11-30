@@ -147,12 +147,12 @@ export const UpdateRepoPipelinesCommand = class {
   }
 
   noChangesMade(updateReport) {
-    const noChangesMade = (updateReport.added.length === 0
-      && updateReport.deleted.length === 0
-      && updateReport.updated.length === 0
-      && updateReport.failed.add.length === 0
-      && updateReport.failed.delete.length === 0
-      && updateReport.failed.update.length === 0);
+    const noChangesMade = (updateReport?.added?.length === 0
+      && updateReport?.deleted?.length === 0
+      && updateReport?.updated?.length === 0
+      && updateReport?.failed?.add?.length === 0
+      && updateReport?.failed?.delete?.length === 0
+      && updateReport?.failed?.update?.length === 0);
     return noChangesMade;
   }
 
@@ -171,6 +171,7 @@ export const UpdateRepoPipelinesCommand = class {
     // identifying the Type of Change (e.g. Added, Deleted) followed by columns
     // 'Pipeline Name' & 'Details'.
     const tableSpec = [
+      { column: '', width: 20 }, // explicit width to keep table reasonable length
       { column: 'Pipeline Name', width: 25, field: 'pipelineName' },
       { column: 'Details', width: 30, field: 'details' },
     ];

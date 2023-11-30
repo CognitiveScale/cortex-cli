@@ -247,8 +247,7 @@ export function printCrossTable(spec, sections, tableOptions = {}) {
         // Cross-tables should always include an empty string for the first
         // header. Add it, if missing.
         head.unshift('');
-        const m = (Math.max(...Object.keys(sections).map((s) => s.length)) * 2) || undefined; // avoid NaN
-        colWidths.unshift(m);
+        colWidths.unshift(undefined);
     } else {
         // User provided first empty header, meaning that we should remove the
         // non-applicable value (likely undefined) from fields.

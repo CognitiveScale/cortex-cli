@@ -234,11 +234,13 @@ describe('Pipelines', () => {
     });
 
     describe('#Update Pipelines', () => {
-      it('should update-pipelines', async () => {
+      it('should update-pipelines - all success', async () => {
         const response = {
+          message: 'All Pipelines updated successfully!',
+          code: 200,
           success: true,
           updateReport: {
-            added: ['pipeline1'],
+            added: ['pipeline1', 'pipeline4'],
             updated: ['pipeline2'],
             deleted: ['pipeline3'],
             failed: {
@@ -249,22 +251,40 @@ describe('Pipelines', () => {
           },
         };
         nock(serverUrl).post(/\/fabric\/v4\/projects\/.*\/pipeline-repositories\/.*\/update/).reply(200, response);
-        try {
-          await create().parseAsync(['node', 'repos', 'update-pipelines', 'repo1', '--project', PROJECT]);
-        } catch (err) {
-          const output = getPrintedLines().join('');
-          const errs = getErrorLines().join('');
-          const jsonOutput = JSON.parse(output);
-          // eslint-disable-next-line no-unused-expressions
-          chai.expect(errs).to.be.empty;
-          chai.expect(jsonOutput.success).to.equal(true);
-          nock.isDone();
-        }
+        await create().parseAsync(['node', 'repos', 'update-pipelines', 'repo1', '--project', PROJECT]);
+        const output = getPrintedLines().join('');
+        const errs = getErrorLines().join('');
+        // eslint-disable-next-line no-unused-expressions
+        chai.expect(output).to.equal(
+          `${response.message}\n`
+          + '┌────────────────────┬─────────────────────────┬──────────────────────────────┐\n'
+          + '│                    │ Pipeline Name           │ Details                      │\n'
+          + '├────────────────────┼─────────────────────────┼──────────────────────────────┤\n'
+          + '│                    │ pipeline1               │                              │\n'
+          + '│       Added        ├─────────────────────────┼──────────────────────────────┤\n'
+          + '│                    │ pipeline4               │                              │\n'
+          + '├────────────────────┼─────────────────────────┼──────────────────────────────┤\n'
+          + '│      Updated       │ pipeline2               │                              │\n'
+          + '├────────────────────┼─────────────────────────┼──────────────────────────────┤\n'
+          + '│      Deleted       │ pipeline3               │                              │\n'
+          + '├────────────────────┼─────────────────────────┼──────────────────────────────┤\n'
+          + '│   Failed to Add    │ -                       │ -                            │\n'
+          + '├────────────────────┼─────────────────────────┼──────────────────────────────┤\n'
+          + '│  Failed to Update  │ -                       │ -                            │\n'
+          + '├────────────────────┼─────────────────────────┼──────────────────────────────┤\n'
+          + '│  Failed to Delete  │ -                       │ -                            │\n'
+          + '└────────────────────┴─────────────────────────┴──────────────────────────────┘',
+        );
+        // eslint-disable-next-line no-unused-expressions
+        chai.expect(errs).to.be.empty;
+        nock.isDone();
       });
 
       it('should update-pipelines with custom Skill', async () => {
         const response = {
           success: true,
+          code: 200,
+          message: 'All Pipelines updated successfully!',
           updateReport: {
             added: ['pipeline1'],
             updated: ['pipeline2'],
@@ -284,9 +304,24 @@ describe('Pipelines', () => {
         await create().parseAsync(['node', 'repos', 'update-pipelines', 'repo1', '--project', PROJECT, '--skill', 'my-skill']);
         const output = getPrintedLines().join('');
         const errs = getErrorLines().join('');
-        chai.expect(output).to.contain('pipeline1');
-        chai.expect(output).to.contain('pipeline2');
-        chai.expect(output).to.contain('pipeline3');
+        chai.expect(output).to.equal(
+          `${response.message}\n`
+          + '┌────────────────────┬─────────────────────────┬──────────────────────────────┐\n'
+          + '│                    │ Pipeline Name           │ Details                      │\n'
+          + '├────────────────────┼─────────────────────────┼──────────────────────────────┤\n'
+          + '│       Added        │ pipeline1               │                              │\n'
+          + '├────────────────────┼─────────────────────────┼──────────────────────────────┤\n'
+          + '│      Updated       │ pipeline2               │                              │\n'
+          + '├────────────────────┼─────────────────────────┼──────────────────────────────┤\n'
+          + '│      Deleted       │ pipeline3               │                              │\n'
+          + '├────────────────────┼─────────────────────────┼──────────────────────────────┤\n'
+          + '│   Failed to Add    │ -                       │ -                            │\n'
+          + '├────────────────────┼─────────────────────────┼──────────────────────────────┤\n'
+          + '│  Failed to Update  │ -                       │ -                            │\n'
+          + '├────────────────────┼─────────────────────────┼──────────────────────────────┤\n'
+          + '│  Failed to Delete  │ -                       │ -                            │\n'
+          + '└────────────────────┴─────────────────────────┴──────────────────────────────┘',
+        );
         // eslint-disable-next-line no-unused-expressions
         chai.expect(errs).to.be.empty;
         nock.isDone();
@@ -315,11 +350,135 @@ describe('Pipelines', () => {
         await create().parseAsync(['node', 'repos', 'update-pipelines', 'repo1', '--project', PROJECT]);
         const output = getPrintedLines().join('');
         const errs = getErrorLines().join('');
-        chai.expect(output).to.contain('Pipelines up to date! No changes made.');
+        chai.expect(output).to.equal('Pipelines up to date! No changes made.');
         // eslint-disable-next-line no-unused-expressions
         chai.expect(errs).to.be.empty;
         nock.isDone();
       });
-    })
+
+      it('should report pipeline failures and error details in the error message', async () => {
+        // set up mock - should report no changes, but it was successful
+        const response = {
+          success: false,
+          code: 200,
+          message: 'Individual Pipeline(s) failed to be updated! Check the Pipeline Update Report.',
+          updateReport: {
+            added: [
+              'hello_world',
+              'ingest_lookup',
+              'medallion-s3',
+              'simple',
+              'skill_test',
+            ],
+            updated: [],
+            deleted: [],
+            failed: {
+              add: [
+                {
+                  pipelineName: 'error-invalid-config1',
+                  details: 'Failed to parse Pipeline Configuration. Error: Invalid value for spec.blocks. At least 1 block is required',
+                },
+                {
+                  pipelineName: 'error-invalid-config2',
+                  details: 'Failed to parse Pipeline Configuration. Error: Invalid value for key "type" on BlockConfig. Expected one of [dbt, streaming] but got "invalid-custom"',
+                },
+                {
+                  pipelineName: 'error-invalid-config3',
+                  details: 'Failed to parse Pipeline Configuration. Error: Invalid value for key "apiVersion" on PipelineConfig. Expected string but got undefined',
+                },
+                {
+                  pipelineName: 'error-invalid-config4',
+                  details: 'Failed to parse Pipeline Configuration. Error: Invalid value for key "executor" on BlockConfig. Expected one of [pyspark] but got undefined',
+                },
+                {
+                  pipelineName: 'error-invalid-config5',
+                  details: 'Failed to parse Pipeline Configuration. SyntaxError: Unexpected token H in JSON at position 0',
+                },
+                {
+                  pipelineName: 'error-multiple-config',
+                  details: 'Multiple config files found',
+                },
+                {
+                  pipelineName: 'error-no-config',
+                  details: 'Config file not found',
+                },
+              ],
+              update: [],
+              delete: [],
+            },
+          },
+        };
+        nock(serverUrl)
+          .post(/\/fabric\/v4\/projects\/.*\/pipeline-repositories\/.*\/update/)
+          .reply(200, response);
+
+        // Execute update
+        await create().parseAsync(['node', 'repos', 'update-pipelines', 'repo1', '--project', PROJECT]);
+        const output = getPrintedLines().join('');
+        const errs = getErrorLines().join('');
+        chai.expect(output).to.equal(
+          '┌────────────────────┬─────────────────────────┬──────────────────────────────┐\n'
+          + '│                    │ Pipeline Name           │ Details                      │\n'
+          + '├────────────────────┼─────────────────────────┼──────────────────────────────┤\n'
+          + '│                    │ hello_world             │                              │\n'
+          + '│                    ├─────────────────────────┼──────────────────────────────┤\n'
+          + '│                    │ ingest_lookup           │                              │\n'
+          + '│                    ├─────────────────────────┼──────────────────────────────┤\n'
+          + '│       Added        │ medallion-s3            │                              │\n'
+          + '│                    ├─────────────────────────┼──────────────────────────────┤\n'
+          + '│                    │ simple                  │                              │\n'
+          + '│                    ├─────────────────────────┼──────────────────────────────┤\n'
+          + '│                    │ skill_test              │                              │\n'
+          + '├────────────────────┼─────────────────────────┼──────────────────────────────┤\n'
+          + '│      Updated       │ -                       │ -                            │\n'
+          + '├────────────────────┼─────────────────────────┼──────────────────────────────┤\n'
+          + '│      Deleted       │ -                       │ -                            │\n'
+          + '├────────────────────┼─────────────────────────┼──────────────────────────────┤\n'
+          + '│                    │ error-invalid-config1   │ Failed to parse Pipeline     │\n'
+          + '│                    │                         │ Configuration. Error:        │\n'
+          + '│                    │                         │ Invalid value for            │\n'
+          + '│                    │                         │ spec.blocks. At least 1      │\n'
+          + '│                    │                         │ block is required            │\n'
+          + '│                    ├─────────────────────────┼──────────────────────────────┤\n'
+          + '│                    │ error-invalid-config2   │ Failed to parse Pipeline     │\n'
+          + '│                    │                         │ Configuration. Error:        │\n'
+          + '│                    │                         │ Invalid value for key "type" │\n'
+          + '│                    │                         │ on BlockConfig. Expected one │\n'
+          + '│                    │                         │ of [dbt, streaming] but got  │\n'
+          + '│                    │                         │ "invalid-custom"             │\n'
+          + '│                    ├─────────────────────────┼──────────────────────────────┤\n'
+          + '│                    │ error-invalid-config3   │ Failed to parse Pipeline     │\n'
+          + '│                    │                         │ Configuration. Error:        │\n'
+          + '│                    │                         │ Invalid value for key        │\n'
+          + '│                    │                         │ "apiVersion" on              │\n'
+          + '│   Failed to Add    │                         │ PipelineConfig. Expected     │\n'
+          + '│                    │                         │ string but got undefined     │\n'
+          + '│                    ├─────────────────────────┼──────────────────────────────┤\n'
+          + '│                    │ error-invalid-config4   │ Failed to parse Pipeline     │\n'
+          + '│                    │                         │ Configuration. Error:        │\n'
+          + '│                    │                         │ Invalid value for key        │\n'
+          + '│                    │                         │ "executor" on BlockConfig.   │\n'
+          + '│                    │                         │ Expected one of [pyspark]    │\n'
+          + '│                    │                         │ but got undefined            │\n'
+          + '│                    ├─────────────────────────┼──────────────────────────────┤\n'
+          + '│                    │ error-invalid-config5   │ Failed to parse Pipeline     │\n'
+          + '│                    │                         │ Configuration. SyntaxError:  │\n'
+          + '│                    │                         │ Unexpected token H in JSON   │\n'
+          + '│                    │                         │ at position 0                │\n'
+          + '│                    ├─────────────────────────┼──────────────────────────────┤\n'
+          + '│                    │ error-multiple-config   │ Multiple config files found  │\n'
+          + '│                    ├─────────────────────────┼──────────────────────────────┤\n'
+          + '│                    │ error-no-config         │ Config file not found        │\n'
+          + '├────────────────────┼─────────────────────────┼──────────────────────────────┤\n'
+          + '│  Failed to Update  │ -                       │ -                            │\n'
+          + '├────────────────────┼─────────────────────────┼──────────────────────────────┤\n'
+          + '│  Failed to Delete  │ -                       │ -                            │\n'
+          + '└────────────────────┴─────────────────────────┴──────────────────────────────┘',
+        );
+        // eslint-disable-next-line no-unused-expressions
+        chai.expect(errs).to.equal(`${response.message}\n`);
+        nock.isDone();
+      });
+    });
   });
 });
