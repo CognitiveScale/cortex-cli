@@ -6,7 +6,7 @@ import relativeTime from 'dayjs/plugin/relativeTime.js';
 import { loadProfile } from '../config.js';
 import Pipelines from '../client/pipelineRepositories.js';
 import {
- fileExists, printSuccess, printError, parseObject, handleTable, printExtendedLogs, handleListFailure, handleDeleteFailure, getFilteredOutput, printTable, printCrossTable, useColor
+ fileExists, printSuccess, printError, parseObject, handleTable, printExtendedLogs, handleListFailure, handleDeleteFailure, getFilteredOutput, printCrossTable, useColor,
 } from './utils.js';
 
 const debug = debugSetup('cortex:cli');
@@ -139,9 +139,6 @@ export const UpdateRepoPipelinesCommand = class {
         if (options.json) {
           return getFilteredOutput(updateReport, options);
         }
-        if (options.inline) {
-          return this.printInline(success, message, updateReport, options);
-        }
         return this.printAsTable(success, message, updateReport, options);
       }
       return printError(response.message, options);
@@ -221,48 +218,6 @@ export const UpdateRepoPipelinesCommand = class {
     // prints the # of characters allocated for each column. To ensure all
     // details are presented set 'wordWrap' to True.
     return printCrossTable(tableSpec, tableValues, { wordWrap: true });
-  }
-
-  // Alt method of printing report
-  printInline(success, message, updateReport, options) {
-    function printSuccessful(title, pipelines) {
-      const spec = [
-        { column: 'Pipeline Name', field: 'pipelineName', width: 40 },
-      ];
-      if ((pipelines?.length ?? 0) > 0) {
-        printSuccess(title);
-        handleTable(spec, pipelines, (pipelineName) => ({ pipelineName }), { wordWrap: true });
-        printSuccess(''); // add newline
-      }
-    }
-    function printFailed(title, failedPipelines) {
-      if ((failedPipelines?.length ?? 0) > 0) {
-        const spec = [ // Total width: 80
-          { column: 'Pipeline Name', field: 'pipelineName', width: 32 },
-          { column: 'Details', field: 'details', width: 48 },
-        ];
-        printSuccess(title); // TODO: use printError() (without exit)??
-        printTable(spec, failedPipelines, undefined, { wordWrap: true });
-        printSuccess('');
-      }
-    }
-    if (success && this.noChangesMade(updateReport)) {
-      // no changes made -> no need to show update report
-      return printSuccess('Pipelines up to date! No changes made.', options);
-    }
-    // Top level message
-    if (success) {
-      printSuccess(`${message}\n`, options);
-    } else {
-      printError(`${message}\n`, options, false); // do not exit
-    }
-    printSuccessful('Successfully Added', updateReport.added);
-    printSuccessful('Successfully Updated', updateReport.updated);
-    printSuccessful('Successfully Deleted', updateReport.deleted);
-    printFailed('Failed to Add', updateReport.failed.add);
-    printFailed('Failed to Update', updateReport.failed.update);
-    printFailed('Failed to Delete', updateReport.failed.delete);
-    return printSuccess('');
   }
 
   printJson(updateReport, options) {
