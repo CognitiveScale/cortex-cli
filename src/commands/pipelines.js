@@ -33,7 +33,7 @@ export const ListPipelineCommand = class {
     debug('%s.executeListPipelines()', profile.name);
     const pipelines = new Pipelines(profile.url);
     try {
-        const response = await pipelines.listPipelines(options.project || profile.project, profile.token, options.filter, options.limit, options.skip, options.sort);
+      const response = await pipelines.listPipelines(options.project || profile.project, profile.token, options.filter, options.limit, options.skip, options.sort);
       if (response.success) {
         const result = response.pipelines;
         if (options.json) {
