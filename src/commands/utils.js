@@ -121,21 +121,24 @@ const deleteFolderRecursive = (filepath) => {
 
 // TODO replace with handleError, to reduce duplicate code.
 export const constructError = (error) => {
+    let details;
+    let respCode;
     // fallback to text in message or standard error message
     const errResp = error?.response;
     let errorText = errResp?.body;
     if (errorText?.trim().length === 0 || error.name === 'RequestError') {
         errorText = error.message;
+    } else if (error.name === 'ParseError' || error.code === 'ERR_BODY_PARSE_FAILURE') {
+        errorText = 'Unable to parse response from server. Try running again with "--debug" enabled for more details.';
+        details = error.message;
     }
-    let details;
-    let respCode;
     // if JSON was returned, look for either a message or error in it
     try {
         const resp = errResp ? JSON.parse(errorText) : {};
         respCode = resp.code;
         if (resp?.message || resp?.error) errorText = resp?.message || resp?.error;
         // eslint-disable-next-line prefer-destructuring
-        details = resp.details;
+        details = details || resp.details;
     } catch (e) {
         // Guess it wasn't JSON!
     }
@@ -479,14 +482,17 @@ export function checkForEmptyArgs(args) {
 
 // Yet another error handling function, need to rationalize these
 export function handleError(error, options, prefix = 'Error') {
+    let details;
+    let respCode;
     // fallback to text in message or standard error message
     const errResp = error?.response;
     let errorText = errResp?.body;
     if (errorText?.trim().length === 0 || error.name === 'RequestError') {
         errorText = error.message;
+    } else if (error.name === 'ParseError' || error.code === 'ERR_BODY_PARSE_FAILURE') {
+        errorText = 'Unable to parse response from server. Try running again with "--debug" enabled for more details.';
+        details = error.message;
     }
-    let details;
-    let respCode;
     // if JSON was returned, look for either a message or error in it
     try {
         const resp = errResp ? JSON.parse(errorText) : {};
