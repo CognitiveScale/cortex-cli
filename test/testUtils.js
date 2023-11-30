@@ -3,7 +3,11 @@ import { expect } from 'chai';
 import mockedEnv from 'mocked-env';
 import sinon from 'sinon';
 import {
- handleTable, printExtendedLogs, handleListFailure, handleDeleteFailure, 
+ handleTable,
+ printExtendedLogs,
+ handleListFailure,
+ handleDeleteFailure,
+ checkForEmptyArgs,
 } from '../src/commands/utils.js';
 import { stripAnsi } from './utils.js';
 
@@ -227,3 +231,50 @@ describe('Test handleDeleteFailure', () => {
         expect(process.exit.calledWith(1)).to.be.true;
     });
 });
+
+describe('checkForEmptyArgs', () => {
+    let printSpy;
+    let errorSpy;
+    before(() => {
+        restore = mockedEnv({});
+    });
+    beforeEach(() => {
+        printSpy = sinon.spy(console, 'log');
+        errorSpy = sinon.spy(console, 'error');
+        sinon.stub(process, 'exit');
+    });
+    afterEach(() => {
+        printSpy.restore();
+        errorSpy.restore();
+        process.exit.restore();
+    });
+    after(() => {
+        restore();
+    });
+    it('should throw an error for empty argument', () => {
+      const args = {
+        arg1: 'value1',
+        arg2: '',
+        arg3: 'value3',
+      };
+
+      const expectedErrorMessage = 'error: <arg2> cannot be empty.';
+
+      try {
+        checkForEmptyArgs(args);
+      } catch (error) {
+        // Check if the error message matches the expected error message
+        expect(error.message).to.equal(expectedErrorMessage);
+      }
+    });
+
+    it('should not throw an error when arguments are not empty', () => {
+      const args = {
+        arg1: 'value1',
+        arg2: 'value2',
+        arg3: 'value3',
+      };
+
+      expect(() => checkForEmptyArgs(args)).to.not.throw();
+    });
+  });

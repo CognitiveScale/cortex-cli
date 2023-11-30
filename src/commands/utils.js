@@ -458,6 +458,25 @@ export function printErrorDetails(response, options, exit = true) {
     if (exit) printError(''); // Just use this over exit() as tests already stub this call ..
 }
 
+function checkForEmptyString(key, value) {
+    if (!value.trim()) {
+      printError(`error: <${key}> cannot be empty.`);
+      process.exit(1); // Exit with an error code
+    }
+  }
+
+export function checkForEmptyArgs(args) {
+    Object.keys(args).forEach((key) => {
+      if (typeof args[key] === 'object') {
+        args[key].forEach((val) => {
+            checkForEmptyString(key, val);
+        });
+      } else {
+            checkForEmptyString(key, args[key]);
+      }
+    });
+  }
+
 // Yet another error handling function, need to rationalize these
 export function handleError(error, options, prefix = 'Error') {
     // fallback to text in message or standard error message

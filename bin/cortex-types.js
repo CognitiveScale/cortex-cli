@@ -10,6 +10,7 @@ import {
 import {
  SaveTypeCommand, ListTypesCommand, DescribeTypeCommand, DeleteTypeCommand, 
 } from '../src/commands/types.js';
+import { checkForEmptyArgs } from '../src/commands/utils.js';
 
 export function create() {
     const program = new Command();
@@ -65,6 +66,7 @@ export function create() {
         .option('--query <query>', `[DEPRECATION WARNING] ${QUERY_JSON_HELP_TEXT}`)
         .action(withCompatibilityCheck(async (typeName, options) => {
             try {
+                checkForEmptyArgs({ typeName });
                 await new DescribeTypeCommand(program).execute(typeName, options);
             } catch (err) {
                 console.error(chalk.red(err.message));
@@ -80,6 +82,7 @@ export function create() {
         .option('--project <project>', 'The project to use')
         .action(withCompatibilityCheck(async (typeName, options) => {
             try {
+                checkForEmptyArgs({ typeName });
                 await new DeleteTypeCommand(program).execute(typeName, options);
             } catch (err) {
                 console.error(chalk.red(err.message));
