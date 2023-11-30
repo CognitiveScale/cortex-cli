@@ -232,27 +232,60 @@ export function printTable(spec, objects, transform, tableOptions = {}) {
 /**
  * Prints a Cross-Table based on the given data & table spec. The spec defines
  * the column structure and the values should be the Row objects to include in
- * the table. Unlike 'printTable()', this fn does NOT transform row values to
- * allow for lower-level cell configuration.
+ * the table. Unlike 'printTable()', this function does NOT transform row
+ * values, as to allow for lower-level Table cell configuration.
  *
- * @param {Array<Object>} spec - objects with 'column' & 'width'
- * @param {Array<Object<string, Array<string>>>} values - map of cross-section title to column values
+ * @param {Array<Object>} spec - objects with 'column', 'width', and 'fields'
+ * @param {Array<Object<string, Array<Object<string, string>>>>} sections - map from Row Title to a list of values in the column
  * @param {Object<string, any>} tableOptions object to provide to 'Table()' constructor
  */
-export function printCrossTable(spec, values, tableOptions = {}) {
+export function printCrossTable(spec, sections, tableOptions = {}) {
     const head = spec.map((s) => s.column);
     const colWidths = spec.map((s) => s.width);
+    const fields = spec.map((s) => s.field);
     if (head[0] !== '') {
-        // cross-tables should always include an empty string for the first
-        // header, add it, if missing
+        // Cross-tables should always include an empty string for the first
+        // header. Add it, if missing.
         head.unshift('');
-        colWidths.unshift(10);
+        const m = (Math.max(...Object.keys(sections).map((s) => s.length)) * 2) || undefined; // avoid NaN
+        colWidths.unshift(m);
+    } else {
+        // User provided first empty header, meaning that we should remove the
+        // non-applicable value (likely undefined) from fields.
+        fields.shift();
     }
-    debug('Printing Columns: %o', head);
+    debug('Printing Columns: %o, Rows: %o', head, Object.keys(sections));
     const table = new Table({
         head, colWidths, style: { head: ['cyan'] }, ...tableOptions,
     });
-    table.push(...values);
+    // Parse the sections to add rows to the table
+    Object.keys(sections).forEach((title) => {
+        // Add a cell with the specified Title that spans the total # of records
+        // in that section (minimum 1).
+        const records = sections[title];
+        const titleRowSpan = (records?.length || 1);
+        const coloredTitle = chalk.cyan(title); // useColor(options) ? chalk.cyan(title) : title; // optionally add color;
+        const values = [
+            [
+                {
+                    rowSpan: titleRowSpan, content: coloredTitle, vAlign: 'center', hAlign: 'center',
+                },
+            ],
+        ];
+        if (records.length === 0) {
+            // No records to show for section, thus set default values in the
+            // cells next to the Title, so there is at least 1 row.
+            values[0].push('-', '-');
+        } else {
+            // Populate the initial row lining up with the Title Cell, then add
+            // all other rows below that to fill out the section.
+            const rows = records.map((obj) => _extractValues(fields, obj));
+            values[0].push(...rows.shift());
+            values.push(...rows);
+        }
+        debug('Adding Table Section: %o', values);
+        table.push(...values);
+    });
     console.log(table.toString());
 }
 

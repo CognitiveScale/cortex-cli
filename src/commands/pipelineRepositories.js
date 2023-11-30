@@ -1,12 +1,11 @@
 import fs from 'node:fs';
-import chalk from 'chalk';
 import debugSetup from 'debug';
 import dayjs from 'dayjs';
 import relativeTime from 'dayjs/plugin/relativeTime.js';
 import { loadProfile } from '../config.js';
 import Pipelines from '../client/pipelineRepositories.js';
 import {
- fileExists, printSuccess, printError, parseObject, handleTable, printExtendedLogs, handleListFailure, handleDeleteFailure, getFilteredOutput, printCrossTable, useColor,
+ fileExists, printSuccess, printError, parseObject, handleTable, printExtendedLogs, handleListFailure, handleDeleteFailure, getFilteredOutput, printCrossTable,
 } from './utils.js';
 
 const debug = debugSetup('cortex:cli');
@@ -168,56 +167,27 @@ export const UpdateRepoPipelinesCommand = class {
     } else {
       printError(`${message}\n`, options, false); // do not exit
     }
-
     // Constructs a crossed-table (i.e. nested table) with the left most column
     // identifying the Type of Change (e.g. Added, Deleted) followed by columns
     // 'Pipeline Name' & 'Details'.
-    function toTableValue(title, pipelines) {
-      // Add a cell to the table with a Title describing the type of change.
-      // The Title spans the # of corresponding Pipelines - always at least 1.
-      const titleRowSpan = (pipelines?.length || 1);
-      const coloredTitle = useColor(options) ? chalk.cyan(title) : title; // optionally add color
-      const values = [
-        [
-          {
-            rowSpan: titleRowSpan, content: coloredTitle, vAlign: 'center', hAlign: 'center',
-          },
-        ],
-      ];
-      // Add rows corresponding to Pipelines
-      const rows = pipelines.map((p) => [p.pipelineName || '-', p.details || '-']); // default values to '-'
-      if (rows.length === 0) {
-        // No records to show, thus default 1 row w/ aligned with Title Cell
-        rows.push('-', '-');
-        values[0].push(...rows);
-      } else {
-        // Include an initial row lining up with the Title Cell, then add all
-        // other rows below that to fill out the section
-        values[0].push(...rows.shift());
-        values.push(...rows);
-      }
-      return values;
-    }
     const tableSpec = [
-      { column: '', width: 25 },
-      { column: 'Pipeline Name', width: 25 },
-      { column: 'Details', width: 30 },
+      { column: 'Pipeline Name', width: 25, field: 'pipelineName' },
+      { column: 'Details', width: 30, field: 'details' },
     ];
-    const tableValues = [];
-    tableValues.push(
-      ...toTableValue('Added', updateReport.added.map((pipelineName) => ({ pipelineName, details: '' }))),
-      ...toTableValue('Updated', updateReport.updated.map((pipelineName) => ({ pipelineName, details: '' }))),
-      ...toTableValue('Deleted', updateReport.deleted.map((pipelineName) => ({ pipelineName, details: '' }))),
-      ...toTableValue('Failed to Add', updateReport.failed.add),
-      ...toTableValue('Failed to Update', updateReport.failed.update),
-      ...toTableValue('Failed to Delete', updateReport.failed.delete),
-    );
-    debug(`Constructed Table with values: ${JSON.stringify(tableValues)}`);
+    const tableSections = {
+      Added: updateReport.added.map((pipelineName) => ({ pipelineName, details: '' })),
+      Updated: updateReport.updated.map((pipelineName) => ({ pipelineName, details: '' })),
+      Deleted: updateReport.deleted.map((pipelineName) => ({ pipelineName, details: '' })),
+      'Failed to Add': updateReport.failed.add,
+      'Failed to Update': updateReport.failed.update,
+      'Failed to Delete': updateReport.failed.delete,
+    };
+    debug('Constructed Table with values: %s, columns: %s', JSON.stringify(tableSections), JSON.stringify(tableSpec));
     // The Table must include the Pipeline name and error details for Pipelines
     // that failed to be Added, Updated, Deleted. By default the Table only
     // prints the # of characters allocated for each column. To ensure all
     // details are presented set 'wordWrap' to True.
-    return printCrossTable(tableSpec, tableValues, { wordWrap: true });
+    return printCrossTable(tableSpec, tableSections, { wordWrap: true });
   }
 
   printJson(updateReport, options) {
