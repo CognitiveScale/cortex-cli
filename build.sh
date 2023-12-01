@@ -30,7 +30,10 @@ function docker_build(){
     # libsecrets is needed for keytar node-gyp build
     apt-get update
     apt-get install -y apt-utils libsecret-1-dev
-    npm install -g npm@latest
+    # Upgrade to NPM 9 to avoid permissions error when running npm as root. Must either be `V<7` or `>8`, but
+    # the latest version of npm is NOT supported with Node 16 (node runtime for CLI).
+    # see: https://stackoverflow.com/questions/70952903/npm-error-eacces-permission-denied-scandir
+    npm install -g npm@9.9.2
     npm ci --unsafe-perm --userconfig=/root/.npmrc --ignore-scripts
     npm rebuild
     npm test
