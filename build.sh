@@ -44,7 +44,7 @@ function docker_build(){
 #        TODO this should maybe be done as part of the gocd pipeline?.. or maybe get in the habit of pushing alpha versions to npm just like we do for cortex-python?..
         npm publish --registry=https://registry.npmjs.org/
     elif [[ ${BRANCH} = "develop" ]]; then
-#        npm config set always-auth true
+      echo "skipping plublish to dev npm registry"
 #        npm publish --tag "${BRANCH}" --registry=https://cognitivescale.jfrog.io/artifactory/api/npm/npm-local/
     fi
     npm pack .
