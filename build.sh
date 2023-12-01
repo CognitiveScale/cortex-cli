@@ -30,6 +30,7 @@ function docker_build(){
     # libsecrets is needed for keytar node-gyp build
     apt-get update
     apt-get install -y apt-utils libsecret-1-dev
+    npm install -g npm@latest
     npm ci --unsafe-perm --userconfig=/root/.npmrc --ignore-scripts
     npm rebuild
     npm test
