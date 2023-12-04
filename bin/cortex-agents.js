@@ -27,6 +27,7 @@ import {
     UndeployAgentCommand,
     CancelActivationCommand,
 } from '../src/commands/agents.js';
+import { checkForEmptyArgs } from '../src/commands/utils.js';
 
 export function create() {
     const program = new Command();
@@ -79,6 +80,7 @@ export function create() {
         .option('--project <project>', 'The project to use')
         .action(withCompatibilityCheck((agentNames, options) => {
             try {
+                checkForEmptyArgs({ agentNames });
                 new DeployAgentCommand(program).execute(agentNames, options);
             } catch (err) {
                 console.error(chalk.red(err.message));
@@ -101,6 +103,7 @@ export function create() {
         .option('--verbose', 'Verbose output', false)
         .action(withCompatibilityCheck((agentName, options) => {
             try {
+                checkForEmptyArgs({ agentName });
                 new DescribeAgentCommand(program).execute(agentName, options);
             } catch (err) {
                 console.error(chalk.red(err.message));
@@ -121,6 +124,7 @@ export function create() {
         .option('--sync', 'Invoke the agent synchronously', false)
         .action(withCompatibilityCheck((agentName, serviceName, options) => {
             try {
+                checkForEmptyArgs({ agentName, serviceName });
                 new InvokeAgentServiceCommand(program).execute(agentName, serviceName, options);
             } catch (err) {
                 console.error(chalk.red(err.message));
@@ -136,6 +140,7 @@ export function create() {
         .option('--project <project>', 'The project to use')
         .action(withCompatibilityCheck((agentName, options) => {
             try {
+                checkForEmptyArgs({ agentName });
                 new DeleteAgentCommand(program).execute(agentName, options);
             } catch (err) {
                 console.error(chalk.red(err.message));
@@ -150,6 +155,7 @@ export function create() {
         .option('--project <project>', 'The project to use')
         .action(withCompatibilityCheck((agentNames, options) => {
             try {
+                checkForEmptyArgs({ agentNames });
                 new UndeployAgentCommand(program).execute(agentNames, options);
             } catch (err) {
                 console.error(chalk.red(err.message));
@@ -169,6 +175,7 @@ export function create() {
         .option('--query <query>', `[DEPRECATION WARNING] ${QUERY_JSON_HELP_TEXT}`)
         .action(withCompatibilityCheck((activationId, options) => {
             try {
+                checkForEmptyArgs({ activationId });
                 new GetActivationCommand(program).execute(activationId, options);
             } catch (err) {
                 console.error(chalk.red(err.message));
@@ -185,6 +192,7 @@ export function create() {
         .option('--inFlight [boolean]', 'Leave inflight jobs running', false)
         .action(withCompatibilityCheck((activationId, options) => {
             try {
+                checkForEmptyArgs({ activationId });
                 new CancelActivationCommand(program).execute(activationId, options);
             } catch (err) {
                 console.error(chalk.red(err.message));
@@ -232,6 +240,7 @@ export function create() {
         .option('--query <query>', `[DEPRECATION WARNING] ${QUERY_JSON_HELP_TEXT}`)
         .action(withCompatibilityCheck((agentName, options) => {
             try {
+                checkForEmptyArgs({ agentName });
                 new ListServicesCommand(program).execute(agentName, options);
             } catch (err) {
                 console.error(chalk.red(err.message));
@@ -269,6 +278,7 @@ export function create() {
         .option('--sort <sort>', 'A Mongo style sort statement to use in the query.', GET_DEFAULT_SORT_CLI_OPTION(DEFAULT_LIST_SORT_PARAMS._updatedAt))
         .action(withCompatibilityCheck((agentName, options) => {
             try {
+                checkForEmptyArgs({ agentName });
                 new ListAgentSnapshotsCommand(program).execute(agentName, options);
             } catch (err) {
                 console.error(chalk.red(err.message));
@@ -285,6 +295,7 @@ export function create() {
         .option('-o, --output <json|yaml|k8s>', 'Format output as yaml or k8s resources')
         .action(withCompatibilityCheck((snapshotId, options) => {
             try {
+                checkForEmptyArgs({ snapshotId });
                 new DescribeAgentSnapshotCommand(program).execute(snapshotId, options);
             } catch (err) {
                 console.error(chalk.red(err.message));

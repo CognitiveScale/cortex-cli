@@ -9,6 +9,7 @@ import {
 import {
  DEFAULT_LIST_SKIP_COUNT, DEFAULT_LIST_LIMIT_COUNT, DEFAULT_LIST_SORT_PARAMS, GET_DEFAULT_SORT_CLI_OPTION, LIST_JSON_HELP_TEXT, QUERY_JSON_HELP_TEXT, 
 } from '../src/constants.js';
+import { checkForEmptyArgs } from '../src/commands/utils.js';
 
 export function create() {
     const program = new Command();
@@ -50,6 +51,7 @@ export function create() {
         .option('-d, --download', 'Download code binary in response')
         .action(withCompatibilityCheck((actionName, options) => {
             try {
+                checkForEmptyArgs({ actionName });
                 new DescribeActionCommand(program).execute(actionName, options);
             } catch (err) {
                 console.error(chalk.red(err.message));
@@ -65,6 +67,7 @@ export function create() {
         .option('--project <project>', 'The project to use')
         .action(withCompatibilityCheck((actionName, options) => {
             try {
+                checkForEmptyArgs({ actionName });
                 new DeleteActionCommand(program).execute(actionName, options);
             } catch (err) {
                 console.error(chalk.red(err.message));

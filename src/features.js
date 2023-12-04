@@ -36,9 +36,9 @@ export const FLAG_SUBCOMMANDS = {
    // default commands - always enabled. These should be grouped into 'ga'
    // features, but those are TBD, so existing commands count as default.
     all: [
-      'actions', 'agents', 'assessments', 'campaigns', 'configure', 'connections', 'content', 'deploy',
+      'actions', 'agents', 'applications', 'assessments', 'campaigns', 'configure', 'connections', 'content', 'deploy',
       'docker', 'experiments', 'missions', 'models', 'projects', 'roles', 'secrets', 'sessions',
-      'skills', 'tasks', 'types', 'users', 'workspaces',
+      'skills', 'stereotypes', 'tasks', 'types', 'users', 'workspaces',
     ],
   },
 };

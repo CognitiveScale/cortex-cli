@@ -118,6 +118,8 @@ const deleteFolderRecursive = (filepath) => {
         console.error(chalk.red(e.message));
     }
 };
+
+// TODO replace with handleError, to reduce duplicate code.
 export const constructError = (error) => {
     // fallback to text in message or standard error message
     const errResp = error?.response;
@@ -398,7 +400,6 @@ export const handleListFailure = (err, options, type) => {
     }
 
     if (status === 400) {
-        const optionTableFormat = OPTIONSTABLEFORMAT;
         printError(`${type} list failed.`, options, false);
         if (details !== undefined && details !== null) {
             // TSOA API validation error case
@@ -408,7 +409,7 @@ export const handleListFailure = (err, options, type) => {
                     details = transformedResponse;
                 }
             }
-            printTable(optionTableFormat, details);
+            printTable(OPTIONSTABLEFORMAT, details);
         } else {
             printError(message, options);
         }
@@ -416,6 +417,7 @@ export const handleListFailure = (err, options, type) => {
     }
     return printError(`Failed to list ${type}: ${status} ${message}`, options);
 };
+
 export const handleDeleteFailure = (response, options, type) => {
     if (response.status === 403) { // has dependencies
         const tableFormat = DEPENDENCYTABLEFORMAT;
@@ -426,6 +428,7 @@ export const handleDeleteFailure = (response, options, type) => {
     const defaultErrorMessage = `${type} deletion failed: ${response.status} ${response.message}.`;
     return printError(defaultErrorMessage, options);
 };
+
 
 export function readPackageJSON(relPath) {
     const absPath = fileURLToPath(new URL(relPath, import.meta.url));
@@ -454,4 +457,60 @@ export function printErrorDetails(response, options, exit = true) {
     printTable(tableSpec, details);
     if (exit) printError(''); // Just use this over exit() as tests already stub this call ..
 }
+
+function checkForEmptyString(key, value) {
+    if (!value.trim()) {
+      printError(`error: <${key}> cannot be empty.`);
+      process.exit(1); // Exit with an error code
+    }
+  }
+
+export function checkForEmptyArgs(args) {
+    Object.keys(args).forEach((key) => {
+      if (typeof args[key] === 'object') {
+        args[key].forEach((val) => {
+            checkForEmptyString(key, val);
+        });
+      } else {
+            checkForEmptyString(key, args[key]);
+      }
+    });
+  }
+
+// Yet another error handling function, need to rationalize these
+export function handleError(error, options, prefix = 'Error') {
+    // fallback to text in message or standard error message
+    const errResp = error?.response;
+    let errorText = errResp?.body;
+    if (errorText?.trim().length === 0 || error.name === 'RequestError') {
+        errorText = error.message;
+    }
+    let details;
+    let respCode;
+    // if JSON was returned, look for either a message or error in it
+    try {
+        const resp = errResp ? JSON.parse(errorText) : {};
+        respCode = resp.code;
+        if (resp?.message || resp?.error) errorText = resp?.message || resp?.error;
+        // eslint-disable-next-line prefer-destructuring
+        details = resp.details;
+    } catch (e) {
+        // Guess it wasn't JSON!
+    }
+    // todo make figuring out the status code more consistent? this might be a holdover from request vs got?
+    const status = errResp?.statusCode || respCode || error?.code || error?.status || '';
+    printError(`${prefix}: ${status}, ${errorText}`, undefined, false);
+    if (details !== undefined && details !== null) {
+        // TSOA API validation error case
+        if (!Array.isArray(details)) {
+            const transformedResponse = transformTSOAValidation(details);
+            if (transformedResponse !== null) {
+                details = transformedResponse;
+            }
+        }
+        printTable(OPTIONSTABLEFORMAT, details);
+    }
+    printError(''); // Just exit
+}
+
 export { deleteFolderRecursive as deleteFile };

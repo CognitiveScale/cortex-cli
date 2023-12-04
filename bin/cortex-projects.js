@@ -10,6 +10,7 @@ import {
 import {
  DEFAULT_LIST_SKIP_COUNT, DEFAULT_LIST_LIMIT_COUNT, GET_DEFAULT_SORT_CLI_OPTION, DEFAULT_LIST_SORT_PARAMS, LIST_JSON_HELP_TEXT, QUERY_JSON_HELP_TEXT, 
 } from '../src/constants.js';
+import { checkForEmptyArgs } from '../src/commands/utils.js';
 
 export function create() {
     const program = new Command();
@@ -68,6 +69,7 @@ export function create() {
         .option('--query <query>', `[DEPRECATION WARNING] ${QUERY_JSON_HELP_TEXT}`)
         .action(withCompatibilityCheck((projectName, options) => {
             try {
+                checkForEmptyArgs({ projectName });
                 return new DescribeProjectCommand(program).execute(projectName, options);
             } catch (err) {
                 return console.error(chalk.red(err.message));
@@ -83,6 +85,7 @@ export function create() {
         .option('--profile <profile>', 'The profile to use')
         .action(withCompatibilityCheck((projectName, options) => {
             try {
+                checkForEmptyArgs({ projectName });
                 return new DeleteProjectCommand(program).execute(projectName, options);
             } catch (err) {
                 return console.error(chalk.red(err.message));

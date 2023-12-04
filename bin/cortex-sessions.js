@@ -7,6 +7,7 @@ import {
  DeleteSessionCommand, SaveSessionCommand, DescribeSessionCommand, ListSessionsCommand, 
 } from '../src/commands/sessions.js';
 import { DEFAULT_LIST_LIMIT_COUNT, LIST_JSON_HELP_TEXT, QUERY_JSON_HELP_TEXT } from '../src/constants.js';
+import { checkForEmptyArgs } from '../src/commands/utils.js';
 
 export function create() {
     const program = new Command();
@@ -46,6 +47,7 @@ export function create() {
         .option('--verbose', 'Verbose output')
         .action(withCompatibilityCheck((sessionName, options) => {
             try {
+                checkForEmptyArgs({ sessionName });
                 new DescribeSessionCommand(program).execute(sessionName, options);
             } catch (err) {
                 console.error(chalk.red(err.message));
@@ -61,6 +63,7 @@ export function create() {
         .option('--project <project>', 'The project to use')
         .action(withCompatibilityCheck((sessionName, options) => {
             try {
+                checkForEmptyArgs({ sessionName });
                 new DeleteSessionCommand(program).execute(sessionName, options);
             } catch (err) {
                 console.error(chalk.red(err.message));

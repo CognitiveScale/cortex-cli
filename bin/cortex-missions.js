@@ -3,7 +3,7 @@ import chalk from 'chalk';
 import esMain from 'es-main';
 import fs from 'node:fs';
 import { Command } from 'commander';
-import { parseObject, printError } from '../src/commands/utils.js';
+import { checkForEmptyArgs, parseObject, printError } from '../src/commands/utils.js';
 import { withCompatibilityCheck } from '../src/compatibility.js';
 import {
  DEFAULT_LIST_SKIP_COUNT, DEFAULT_LIST_LIMIT_COUNT, GET_DEFAULT_SORT_CLI_OPTION, DEFAULT_LIST_SORT_PARAMS, LIST_JSON_HELP_TEXT, QUERY_JSON_HELP_TEXT, 
@@ -35,6 +35,7 @@ export function create() {
         .option('--sort <sort>', 'A Mongo style sort statement to use in the query.', GET_DEFAULT_SORT_CLI_OPTION(DEFAULT_LIST_SORT_PARAMS._updatedAt))
         .action(withCompatibilityCheck((campaignName, options) => {
             try {
+                checkForEmptyArgs({ campaignName });
                 new ListMissionsCommand(program).execute(campaignName, options);
             } catch (err) {
                 console.error(chalk.red(err.message));
@@ -50,6 +51,7 @@ export function create() {
         .option('--project <project>', 'The project to use')
         .action(withCompatibilityCheck((campaignName, missionName, options) => {
             try {
+                checkForEmptyArgs({ campaignName, missionName });
                 new DescribeMissionCommand(program).execute(campaignName, missionName, options);
             } catch (err) {
                 console.error(chalk.red(err.message));
@@ -64,6 +66,7 @@ export function create() {
         .option('--project <project>', 'The project to use')
         .action(withCompatibilityCheck((campaignName, missionName, options) => {
             try {
+                checkForEmptyArgs({ campaignName, missionName });
                 new DeployMissionCommand(program).execute(campaignName, missionName, options);
             } catch (err) {
                 console.error(chalk.red(err.message));
@@ -79,6 +82,7 @@ export function create() {
         .option('--params <params>', 'JSON params to send to the action')
         .option('--params-file <paramsFile>', 'A file containing either JSON or YAML formatted params')
         .action(withCompatibilityCheck((campaignName, missionName, options) => {
+            checkForEmptyArgs({ campaignName, missionName });
             try {
                 let params = {};
                 if (options.params) {
@@ -120,6 +124,7 @@ export function create() {
         .option('--project <project>', 'The project to use')
         .action(withCompatibilityCheck((campaignName, missionName, options) => {
             try {
+                checkForEmptyArgs({ campaignName, missionName });
                 new UndeployMissionCommand(program).execute(campaignName, missionName, options);
             } catch (err) {
                 console.error(chalk.red(err.message));
@@ -134,6 +139,7 @@ export function create() {
         .option('--project <project>', 'The project to use')
         .action(withCompatibilityCheck((activationId, options) => {
             try {
+                checkForEmptyArgs({ activationId });
                 new DownloadContent(program).execute(`mission_runtime/${activationId}/status.chk`, options);
             } catch (err) {
                 console.error(chalk.red(err.message));

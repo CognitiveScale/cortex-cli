@@ -12,7 +12,7 @@ import {
 import {
  DEFAULT_LIST_SKIP_COUNT, DEFAULT_LIST_LIMIT_COUNT, DEFAULT_LIST_SORT_PARAMS, GET_DEFAULT_SORT_CLI_OPTION, LIST_JSON_HELP_TEXT, QUERY_JSON_HELP_TEXT,
 } from '../src/constants.js';
-import { printError } from '../src/commands/utils.js';
+import { printError, checkForEmptyArgs } from '../src/commands/utils.js';
 
 export function create() {
   const repos = new Command();
@@ -53,6 +53,7 @@ export function create() {
     .option('--json [searchPath]', QUERY_JSON_HELP_TEXT)
     .action(withCompatibilityCheck((pipelineRepoName, options) => {
       try {
+        checkForEmptyArgs({ pipelineRepoName });
         return new DescribePipelineRepoCommand(repos).execute(pipelineRepoName, options);
       } catch (err) {
         return printError(err.message);
@@ -67,9 +68,10 @@ export function create() {
     .option('--color [boolean]', 'Turn on/off colors for JSON output.', 'true')
     .option('--profile <profile>', 'The profile to use')
     .option('--project <project>', 'The project to use')
-    .action(withCompatibilityCheck((actionName, options) => {
+    .action(withCompatibilityCheck((pipelineRepoName, options) => {
       try {
-        return new DeletePipelineRepoCommand(repos).execute(actionName, options);
+        checkForEmptyArgs({ pipelineRepoName });
+        return new DeletePipelineRepoCommand(repos).execute(pipelineRepoName, options);
       } catch (err) {
         return printError(err.message);
       }
@@ -108,6 +110,7 @@ export function create() {
     .option('--skill <skillName>', 'Name of the underlying Skill in the same Project to use for running the Pipeline')
     .action(withCompatibilityCheck((pipelineRepoName, options) => {
       try {
+        checkForEmptyArgs({ pipelineRepoName });
         return new UpdateRepoPipelinesCommand(repos).execute(pipelineRepoName, options);
       } catch (err) {
         return printError(err.message);

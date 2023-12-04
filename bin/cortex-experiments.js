@@ -23,6 +23,7 @@ import {
     SaveExperimentCommand,
     UploadArtifactCommand,
 } from '../src/commands/experiments.js';
+import { checkForEmptyArgs } from '../src/commands/utils.js';
 
 export function create() {
     const program = new Command();
@@ -64,6 +65,7 @@ export function create() {
         .option('--query <query>', `[DEPRECATION WARNING] ${QUERY_JSON_HELP_TEXT}`)
         .action(withCompatibilityCheck((experimentName, options) => {
             try {
+                checkForEmptyArgs({ experimentName });
                 new DescribeExperimentCommand(program).execute(experimentName, options);
             } catch (err) {
                 console.error(chalk.red(err.message));
@@ -79,6 +81,7 @@ export function create() {
         .option('--project <project>', 'The project to use')
         .action(withCompatibilityCheck((experimentName, options) => {
             try {
+                checkForEmptyArgs({ experimentName });
                 new DeleteExperimentCommand(program).execute(experimentName, options);
             } catch (err) {
                 console.error(chalk.red(err.message));
@@ -100,6 +103,7 @@ export function create() {
         .option('--sort <sort>', 'A Mongo style sort statement to use in the query.', GET_DEFAULT_SORT_CLI_OPTION(DEFAULT_LIST_SORT_PARAMS._updatedAt))
         .action(withCompatibilityCheck((experimentName, options) => {
             try {
+                checkForEmptyArgs({ experimentName });
                 new ListRuns(program).execute(experimentName, options);
             } catch (err) {
                 console.error(chalk.red(err.message));
@@ -118,6 +122,7 @@ export function create() {
         .option('--query <query>', `[DEPRECATION WARNING] ${QUERY_JSON_HELP_TEXT}`)
         .action(withCompatibilityCheck((experimentName, runId, options) => {
             try {
+                checkForEmptyArgs({ experimentName, runId });
                 new DescribeRunCommand(program).execute(experimentName, runId, options);
             } catch (err) {
                 console.error(chalk.red(err.message));
@@ -133,6 +138,7 @@ export function create() {
         .option('--project <project>', 'The project to use')
         .action(withCompatibilityCheck((experimentName, runId, options) => {
             try {
+                checkForEmptyArgs({ experimentName, runId });
                 new DeleteRunCommand(program).execute(experimentName, runId, options);
             } catch (err) {
                 console.error(chalk.red(err.message));
@@ -148,6 +154,7 @@ export function create() {
         .option('--project <project>', 'The project to use')
         .action(withCompatibilityCheck((experimentName, runId, artifactName, options) => {
             try {
+                checkForEmptyArgs({ experimentName, runId, artifactName });
                 new DownloadArtifactCommand(program).execute(experimentName, runId, artifactName, options);
             } catch (err) {
                 console.error(chalk.red(err.message));
@@ -197,6 +204,12 @@ export function create() {
         .option('--chunkSize <int>', 'Number of files to simultaneous upload', 10)
         .action(withCompatibilityCheck((experimentName, runId, filePath, artifactKey, options) => {
             try {
+                checkForEmptyArgs({
+                    experimentName,
+                    runId,
+                    filePath,
+                    artifactKey,
+                });
                 new UploadArtifactCommand(program).execute(experimentName, runId, filePath, artifactKey, options);
             } catch (err) {
                 console.error(chalk.red(err.message));

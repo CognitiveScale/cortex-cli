@@ -13,81 +13,58 @@ import {
     QUERY_JSON_HELP_TEXT,
 } from '../src/constants.js';
 import {
-    DeleteSkillCommand,
-    DeploySkillCommand,
-    DescribeSkillCommand,
-    InvokeSkillCommand,
-    ListSkillsCommand,
-    SaveSkillCommand,
-    SkillLogsCommand,
-    UndeploySkillCommand,
-} from '../src/commands/skills.js';
-import { checkForEmptyArgs } from '../src/commands/utils.js';
+    DeleteAppCommand,
+    DeployAppCommand,
+    DescribeAppCommand,
+    ListAppsCommand,
+    SaveAppCommand,
+    AppLogsCommand,
+    UndeployAppCommand,
+} from '../src/commands/applications.js';
 
 export function create() {
     const program = new Command();
-    program.name('cortex skills');
-    program.description('Work with Cortex Skills');
-// Deploy Skill
+    program.name('cortex applications');
+    program.description('Applications are a mechanism for exposing additional Web UIs and APIS behind Sensa\'s api gateway.  \nNOTE: Applications cannot be added to Agents like normal Skills');
+// Deploy Application
     program
-        .command('deploy <skillNames...>')
-        .description('Deploy the skill resource to the cluster')
+        .command('deploy <names...>')
+        .description('Deploy the application resource to the cluster')
         .option('--no-compat', 'Ignore API compatibility checks')
         .option('--profile <profile>', 'The profile to use')
         .option('--project <project>', 'The project to use')
-        .action(withCompatibilityCheck(async (skillNames, options) => {
+        .action(withCompatibilityCheck(async (names, options) => {
             try {
-                checkForEmptyArgs({ skillNames });
-                await new DeploySkillCommand(program).execute(skillNames, options);
+                await new DeployAppCommand(program).execute(names, options);
             } catch (err) {
                 console.error(chalk.red(err.message));
             }
         }));
-// Describe Skill
+// Describe Application
     program
-        .command('describe <skillName>')
+        .command('describe <name>')
         .alias('get')
-        .description('Describe skill')
+        .description('Describe application')
         .option('--no-compat', 'Ignore API compatibility checks')
         .option('--color [boolean]', 'Turn on/off colors for JSON output.', 'true')
         .option('--profile <profile>', 'The profile to use')
         .option('--project <project>', 'The project to use')
         .option('-f --output-file <file>', 'Write output to file instead of stdout')
-        .option('-o, --output <json|yaml|k8s|openapi>', 'Format output as yaml or k8s resource', 'json')
+        .option('-o, --output <pretty|json|yaml>', 'Format output as yaml or k8s resource', 'pretty')
         .option('--json [searchPath]', QUERY_JSON_HELP_TEXT)
         .option('--query <query>', `[DEPRECATION WARNING] ${QUERY_JSON_HELP_TEXT}`)
         .option('--verbose', 'Verbose output', false)
-        .action(withCompatibilityCheck(async (skillName, options) => {
+        .action(withCompatibilityCheck(async (name, options) => {
             try {
-                checkForEmptyArgs({ skillName });
-                await new DescribeSkillCommand(program).execute(skillName, options);
+                await new DescribeAppCommand(program).execute(name, options);
             } catch (err) {
                 console.error(chalk.red(err.message));
             }
         }));
-// Invoke Skill
-    program
-        .command('invoke <skillName> <inputName>')
-        .description('Invoke a skill')
-        .option('--no-compat', 'Ignore API compatibility checks')
-        .option('--color [boolean]', 'Turn on/off colors for JSON output.', true)
-        .option('--profile <profile>', 'The profile to use')
-        .option('--project <project>', 'The project to use')
-        .option('--params <params>', 'JSON params to send to the action')
-        .option('--params-file <paramsFile>', 'A file containing either JSON or YAML formatted params')
-        .option('--sync', 'Invoke the skill synchronously', false)
-        .action(withCompatibilityCheck(async (skillName, inputName, options) => {
-            try {
-                checkForEmptyArgs({ skillName, inputName });
-                await new InvokeSkillCommand(program).execute(skillName, inputName, options);
-            } catch (err) {
-                console.error(chalk.red(err.message));
-            }
-        }));
-// List Skills
+// List Applications
     program
         .command('list')
-        .description('List skill definitions')
+        .description('List applications')
         .alias('l')
         .option('--no-compat', 'Ignore API compatibility checks')
         .option('--color [boolean]', 'Turn on/off colors for JSON output.', 'true')
@@ -95,85 +72,79 @@ export function create() {
         .option('--project <project>', 'The project to use')
         .option('--json [searchQuery]', LIST_JSON_HELP_TEXT)
         .option('--query <query>', `[DEPRECATION WARNING] ${QUERY_JSON_HELP_TEXT}`)
-        .option('--nostatus', 'skip extra call for skill status')
-        .option('--noshared', 'do not list shared skills')
+        .option('--nostatus', 'skip extra call for application status')
         .option('--filter <filter>', 'A Mongo style filter to use.')
         .option('--limit <limit>', 'Limit number of records', DEFAULT_LIST_LIMIT_COUNT)
         .option('--skip <skip>', 'Skip number of records', DEFAULT_LIST_SKIP_COUNT)
         .option('--sort <sort>', 'A Mongo style sort statement to use in the query.', GET_DEFAULT_SORT_CLI_OPTION(DEFAULT_LIST_SORT_PARAMS.updatedAt))
         .action(withCompatibilityCheck(async (options) => {
             try {
-                await new ListSkillsCommand(program).execute(options);
+                await new ListAppsCommand(program).execute(options);
             } catch (err) {
                 console.error(chalk.red(err.message));
             }
         }));
-// Delete Skill
+// Delete Application
     program
-        .command('delete <skillName>')
-        .description('Delete a skill')
+        .command('delete <name>')
+        .description('Delete an application')
         .option('--no-compat', 'Ignore API compatibility checks')
         .option('--color [boolean]', 'Turn on/off colors for JSON output.', 'true')
         .option('--json', 'Output results using JSON')
         .option('--profile <profile>', 'The profile to use')
         .option('--project <project>', 'The project to use')
-        .action(withCompatibilityCheck(async (skillName, options) => {
+        .action(withCompatibilityCheck(async (name, options) => {
             try {
-                checkForEmptyArgs({ skillName });
-                await new DeleteSkillCommand(program).execute(skillName, options);
+                await new DeleteAppCommand(program).execute(name, options);
             } catch (err) {
                 console.error(chalk.red(err.message));
             }
         }));
-// Save Skill
+// Save Application
     program
-        .command('save <skillDefinitions...>')
-        .description('Save a skill definition')
+        .command('save <definitions...>')
+        .description('Save application(s)')
         .option('--no-compat', 'Ignore API compatibility checks')
         .option('--color [boolean]', 'Turn on/off colors for JSON output.', 'true')
         .option('--profile <profile>', 'The profile to use')
         .option('--project <project>', 'The project to use')
-        .option('-k, --k8sResource <file...>', 'Additional kubernetes resources deployed and owned by the skill')
+        .option('-k, --k8sResource <file...>', 'Additional kubernetes resources deployed and owned by the application')
         // eslint-disable-next-line max-len
-        .option('--podspec <podspec>', 'A file containing either a JSON or YAML formatted pod spec to merge with the skill definition, used for specifying resources (like memory, ephemeral storage, CPUs, and GPUs) and tolerations (like allowing pods to be scheduled on tainted nodes).')
-        .option('-y, --yaml', 'Use YAML for skill definition format')
+        .option('--podspec <podspec>', 'A file containing either a JSON or YAML formatted pod spec to merge with the application definition, used for specifying resources (like memory, ephemeral storage, CPUs, and GPUs) and tolerations (like allowing pods to be scheduled on tainted nodes).')
+        .option('-y, --yaml', 'Use YAML for application definition format')
         .option('--scaleCount <count>', 'Scale count, only used for daemon action types')
-        .action(withCompatibilityCheck(async (skillDefinitions, options) => {
+        .action(withCompatibilityCheck(async (definitions, options) => {
             try {
-                await new SaveSkillCommand(program).execute(skillDefinitions, options);
+                await new SaveAppCommand(program).execute(definitions, options);
             } catch (err) {
                 console.error(chalk.red(err.message));
             }
         }));
-// Undeploy Skill
+// Undeploy Application
     program
-        .command('undeploy <skillNames...>')
-        .description('Undeploy the skill resource from the cluster')
+        .command('undeploy <names...>')
+        .description('Undeploy the application resource from the cluster')
         .option('--no-compat', 'Ignore API compatibility checks')
         .option('--profile <profile>', 'The profile to use')
         .option('--project <project>', 'The project to use')
-        .action(withCompatibilityCheck(async (skillNames, options) => {
+        .action(withCompatibilityCheck(async (names, options) => {
             try {
-                checkForEmptyArgs({ skillNames });
-                return await new UndeploySkillCommand(program).execute(skillNames, options);
+                return await new UndeployAppCommand(program).execute(names, options);
             } catch (err) {
                 return console.error(chalk.red(err.message));
             }
         }));
-// Get Skill/action logs
+// Get Application logs
     program
-        .command('logs <skillName> <actionName>')
-        .description('Get logs of a skill and action')
+        .command('logs <name>')
+        .description('Get logs from an application\'s pod')
         .option('--no-compat', 'Ignore API compatibility checks')
         .option('--profile <profile>', 'The profile to use')
         .option('--project <project>', 'The project to use')
         .option('--raw', 'Get raw logs as a stream')
-        // TODO enable when we want to support tasks
-        // .option('--type [type]', 'The type of action logs to fetch [skill|task]')
-        .action(withCompatibilityCheck(async (skillName, actionName, options) => {
+        .action(withCompatibilityCheck(async (name, options) => {
             try {
-                checkForEmptyArgs({ skillName, actionName });
-                return await new SkillLogsCommand(program).execute(skillName, actionName, options);
+                return await new AppLogsCommand(program).execute(name, options);
             } catch (err) {
                 return console.error(chalk.red(err.message));
             }
