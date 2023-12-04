@@ -49,8 +49,9 @@ function docker_build(){
     fi
     npm pack .
     mv cortex-cli-*.tgz cortex-cli.tgz
-    ls -la .
+    ls -la
     ls -la coverage
+    ls -la coverage/tmp
 }
 
 ## MAIN
