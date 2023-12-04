@@ -59,7 +59,7 @@ describe('Pipelines', () => {
         const errs = getErrorLines();
         // eslint-disable-next-line no-unused-expressions
         chai.expect(output.join('')).to.be.empty;
-        chai.expect(errs.join('')).to.contain('Unable to parse response from server. Try running again with "--debug" enabled for more details.');
+        chai.expect(errs.join('')).to.contain('Unable to parse response from server. Try running again with "--debug" for more details.');
         nock.isDone();
       }
     });

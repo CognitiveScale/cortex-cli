@@ -129,7 +129,7 @@ export const constructError = (error) => {
     if (errorText?.trim().length === 0 || error.name === 'RequestError') {
         errorText = error.message;
     } else if (error.name === 'ParseError' || error.code === 'ERR_BODY_PARSE_FAILURE') {
-        errorText = 'Unable to parse response from server. Try running again with "--debug" enabled for more details.';
+        errorText = 'Unable to parse response from server. Try running again with "--debug" for more details.';
         details = error.message;
     }
     // if JSON was returned, look for either a message or error in it
@@ -490,7 +490,7 @@ export function handleError(error, options, prefix = 'Error') {
     if (errorText?.trim().length === 0 || error.name === 'RequestError') {
         errorText = error.message;
     } else if (error.name === 'ParseError' || error.code === 'ERR_BODY_PARSE_FAILURE') {
-        errorText = 'Unable to parse response from server. Try running again with "--debug" enabled for more details.';
+        errorText = 'Unable to parse response from server. Try running again with "--debug" for more details.';
         details = error.message;
     }
     // if JSON was returned, look for either a message or error in it
