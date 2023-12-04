@@ -16,7 +16,7 @@ export default class PipelineRepos {
     const endpoint = `${this.endpoint(projectId)}`;
     debug('listPipelineRepo() => %s', endpoint);
     const query = {};
-    if (filter) query.filer = filter;
+    if (filter) query.filter = filter;
     if (limit) query.limit = limit;
     if (sort) query.sort = sort;
     if (skip) query.skip = skip;
