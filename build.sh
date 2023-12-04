@@ -30,6 +30,10 @@ function docker_build(){
     # libsecrets is needed for keytar node-gyp build
     apt-get update
     apt-get install -y apt-utils libsecret-1-dev
+    # Upgrade to NPM 9 to avoid permissions error when running npm as root.
+    # Must either be `<7,>8`, but the latest version of npm is NOT
+    # supported with Node 16 (node runtime for CLI). See: https://stackoverflow.com/questions/70952903/npm-error-eacces-permission-denied-scandir
+    npm install -g npm@9.9.2
     npm ci --unsafe-perm --userconfig=/root/.npmrc --ignore-scripts
     npm rebuild
     npm test
@@ -40,12 +44,19 @@ function docker_build(){
 #        TODO this should maybe be done as part of the gocd pipeline?.. or maybe get in the habit of pushing alpha versions to npm just like we do for cortex-python?..
         npm publish --registry=https://registry.npmjs.org/
     elif [[ ${BRANCH} = "develop" ]]; then
-        npm config set always-auth true
+      echo "skipping plublish to dev npm registry"
 #        npm publish --tag "${BRANCH}" --registry=https://cognitivescale.jfrog.io/artifactory/api/npm/npm-local/
     fi
     npm pack .
     mv cortex-cli-*.tgz cortex-cli.tgz
-
+    # NOTE: This script running in a container on the gocd-agent. The coverage
+    # report belongs to the (root) user in the container. The pipeline uploads
+    # artifacts after the container exists, at which point the script is
+    # running as a different user. For some reason, one of the files in the
+    # coverage report (coverage/tmp/coverage-<SHA>.json), has 700 permissions,
+    # so the pipeline would fail to upload the artifact. Give 755 permissions to
+    # allow nested folders to be executable and to allow for artifact upload.
+    chmod -R 755 coverage/
 }
 
 ## MAIN

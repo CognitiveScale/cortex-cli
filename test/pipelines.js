@@ -47,6 +47,24 @@ describe('Pipelines', () => {
       return _.flatten(errorSpy.args).map((s) => stripAnsi(s));
   }
 
+  describe('List Pipelines as an unsupported preview feature', () => {
+    it('should print that the response was unintelligable', async () => {
+      const response = '<html></html>';
+      nock(serverUrl).get(/\/fabric\/v4\/projects\/.*\/pipelines/).reply(200, response, { 'content-type': 'text/html' });
+      try {
+        await create().parseAsync(['node', 'pipelines', 'list', '--project', PROJECT]);
+        chai.expect(0).to.equal(1, 'Failure expected!'); // because 'EXIT' signal is mocked with Error
+      } catch {
+        const output = getPrintedLines();
+        const errs = getErrorLines();
+        // eslint-disable-next-line no-unused-expressions
+        chai.expect(output.join('')).to.be.empty;
+        chai.expect(errs.join('')).to.contain('Unable to parse response from server. Try running again with "--debug" for more details.');
+        nock.isDone();
+      }
+    });
+  });
+
   describe('Pipeline', () => {
     it('lists pipelines - empty', async () => {
       const response = { success: true, pipelines: [] };
