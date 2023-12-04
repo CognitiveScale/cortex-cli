@@ -60,6 +60,13 @@ export function printError(message, options = { color: true }, exitProgram = tru
         process.exit(1);
     }
 }
+/**
+ * Returns an array with string representations of the specified fields from the given object.
+ *
+ * @param {Array<string>} fields - fields to extract
+ * @param {Object<string, any>} obj - object to extract fields from
+ * @returns {Array<string>} array of strings
+ */
 function _extractValues(fields, obj) {
     const rv = [];
     fields.forEach((f) => rv.push((obj !== undefined && obj !== null && obj[f] !== undefined && obj[f] !== null) ? obj[f].toString() : '-'));
@@ -200,15 +207,84 @@ export const getFilteredOutput = (result, options) => {
 };
 
 export const parseObject = (str) => yaml.load(str);
-export function printTable(spec, objects, transform) {
+/**
+ * Prints a table based on the given data and table specification.
+ *
+ * @param {Array<Object>} spec - objects with 'column', 'width', and 'field'
+ * @param {Array} objects - data to reprsent in the table
+ * @param {CallableFunction<Object, Object> | undefined} transform
+ * @param {Object} tableOptions - object to provide to 'Table()' constructor
+ */
+export function printTable(spec, objects, transform, tableOptions = {}) {
     const fn = transform ?? ((obj) => obj);
     const head = spec.map((s) => s.column);
     const colWidths = spec.map((s) => s.width);
     const fields = spec.map((s) => s.field);
     const values = objects.map((obj) => _extractValues(fields, fn(obj)));
     debug('printing fields: %o', fields);
-    const table = new Table({ head, colWidths, style: { head: ['cyan'] } });
+    const table = new Table({
+        head, colWidths, style: { head: ['cyan'] }, ...tableOptions,
+    });
     values.forEach((v) => table.push(v));
+    console.log(table.toString());
+}
+
+/**
+ * Prints a Cross-Table based on the given data & table spec. The spec defines
+ * the column structure and the values should be the Row objects to include in
+ * the table. Unlike 'printTable()', this function does NOT transform row
+ * values, as to allow for lower-level Table cell configuration.
+ *
+ * @param {Array<Object>} spec - objects with 'column', 'width', and 'fields'
+ * @param {Array<Object<string, Array<Object<string, string>>>>} sections - map from Row Title to a list of values in the column
+ * @param {Object<string, any>} tableOptions object to provide to 'Table()' constructor
+ */
+export function printCrossTable(spec, sections, tableOptions = {}) {
+    const head = spec.map((s) => s.column);
+    const colWidths = spec.map((s) => s.width);
+    const fields = spec.map((s) => s.field);
+    if (head[0] !== '') {
+        // Cross-tables should always include an empty string for the first
+        // header. Add it, if missing.
+        head.unshift('');
+        colWidths.unshift(undefined);
+    } else {
+        // User provided first empty header, meaning that we should remove the
+        // non-applicable value (likely undefined) from fields.
+        fields.shift();
+    }
+    debug('Printing Columns: %o, Rows: %o', head, Object.keys(sections));
+    const table = new Table({
+        head, colWidths, style: { head: ['cyan'] }, ...tableOptions,
+    });
+    // Parse the sections to add rows to the table
+    Object.keys(sections).forEach((title) => {
+        // Add a cell with the specified Title that spans the total # of records
+        // in that section (minimum 1).
+        const records = sections[title];
+        const titleRowSpan = (records?.length || 1);
+        const coloredTitle = chalk.cyan(title);
+        const values = [
+            [
+                {
+                    rowSpan: titleRowSpan, content: coloredTitle, vAlign: 'center', hAlign: 'center',
+                },
+            ],
+        ];
+        if (records.length === 0) {
+            // No records to show for section, thus set default values in the
+            // cells next to the Title, so there is at least 1 row.
+            values[0].push('-', '-');
+        } else {
+            // Populate the initial row lining up with the Title Cell, then add
+            // all other rows below that to fill out the section.
+            const rows = records.map((obj) => _extractValues(fields, obj));
+            values[0].push(...rows.shift());
+            values.push(...rows);
+        }
+        debug('Adding Table Section: %o', values);
+        table.push(...values);
+    });
     console.log(table.toString());
 }
 
@@ -348,11 +424,11 @@ export const validateName = (name) => (validNameRegex.test(name) && (name.length
         status: false,
         message: name ? validationErrorMessage : nameRequirementMessage,
     });
-export const handleTable = (spec, data, transformer, noDataMessage) => {
+export const handleTable = (spec, data, transformer, noDataMessage, tableOptions) => {
     if (!data || data.length === 0) {
         printSuccess(noDataMessage);
     } else {
-        printTable(spec, data, transformer);
+        printTable(spec, data, transformer, tableOptions);
     }
 };
 
