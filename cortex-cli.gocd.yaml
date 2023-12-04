@@ -140,6 +140,3 @@ pipelines:
                     set -eux
                     git clone git@github.com:CognitiveScale/gocd-pipeline-scripts.git
                     ./gocd-pipeline-scripts/common/c12e-common.sh dev
-                    ls -la /go/pipelines/cortex-cli-pr
-                    ls -la /go/pipelines/cortex-cli-pr/coverage
-                    ls -la /go/pipelines/cortex-cli-pr/coverage/tmp
