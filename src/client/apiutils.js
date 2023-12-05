@@ -13,6 +13,19 @@ function getUserAgent() {
 }
 const gotExt = got.extend({
     followRedirect: false,
+    // Put a reasonable timeout
+    timeout: {
+        lookup: 100,
+        connect: 50,
+        secureConnect: 100,
+        socket: 1000,
+// Validate these unsafe with content uploads
+       send: 10000,
+       response: 2000,
+    },
+    retry: {
+        limit: 0, // no retries - fail fast ( TODO always ? )
+    },
     hooks: {
         beforeRequest: [
             (options) => {
