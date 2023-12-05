@@ -11,7 +11,8 @@ const debug = debugSetup('cortex:cli');
 function getUserAgent() {
     return `${pkg.name}/${pkg.version} (${os.platform()}; ${os.arch()}; ${os.release()}; ${os.platform()})`;
 }
-const gotExt = got.extend({
+
+const gotOpts = {
     followRedirect: false,
     // Put a reasonable timeout
     timeout: {
@@ -19,12 +20,14 @@ const gotExt = got.extend({
         connect: 50,
         secureConnect: 100,
         socket: 1000,
-// Validate these unsafe with content uploads
-       send: 10000,
-       response: 2000,
+        // send: 10000, // Not "SAFE" with large uploads
+        response: 2000,
     },
     retry: {
-        limit: 0, // no retries - fail fast ( TODO always ? )
+        limit: 0, // no retries - fail fast
+    },
+    headers: {
+        'user-agent': getUserAgent(),
     },
     hooks: {
         beforeRequest: [
@@ -53,7 +56,7 @@ const gotExt = got.extend({
             },
         ],
     },
-});
-export const defaultHeaders = (token, otherHeaders = {}) => ({ Authorization: `Bearer ${token}`, 'user-agent': getUserAgent(), ...otherHeaders });
-export { getUserAgent };
+};
+const gotExt = got.extend(gotOpts);
+export const defaultHeaders = (token, otherHeaders = {}) => ({ Authorization: `Bearer ${token}`, ...otherHeaders });
 export { gotExt as got };

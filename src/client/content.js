@@ -3,7 +3,7 @@ import process from 'node:process';
 import { PassThrough } from 'node:stream';
 import { pipeline } from 'node:stream/promises';
 import debugSetup from 'debug';
-import { got, defaultHeaders } from './apiutils.js';
+import { defaultHeaders, got } from './apiutils.js';
 import { createFileStream, constructError, checkProject } from '../commands/utils.js';
 
 const debug = debugSetup('cortex:cli');
