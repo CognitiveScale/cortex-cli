@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 import debugSetup from 'debug';
-import { got, getUserAgent } from './apiutils.js';
+import { got } from './apiutils.js';
 import { constructError } from '../commands/utils.js';
 
 const debug = debugSetup('cortex:cli');
@@ -29,13 +29,7 @@ export default (class Info {
         debug('getInfo() => %s', endpoint);
         try {
             return await got
-                .get(endpoint, {
-                    headers: { 'user-agent': getUserAgent() },
-                    followRedirect: false,
-                    retry: {
-                        limit: 0, // no retries - fail fast
-                    },
-                })
+                .get({ url: endpoint })
                 .json();
         } catch (err) {
             // return error object and let caller deal with failure
