@@ -2,10 +2,10 @@ import _ from 'lodash';
 import inquirer from 'inquirer';
 import chalk from 'chalk';
 // eslint-disable-next-line import/no-unresolved
-import got from 'got';
 import open from 'open';
 import dayjs from 'dayjs';
 import relativeTime from 'dayjs/plugin/relativeTime.js';
+import { got } from '../../client/apiutils.js'; // Use got with DEBUG and preet options
 import { validateToken, persistToken } from './workspace-utils.js';
 import { readConfig } from '../../config.js';
 import { printSuccess, printError, useColor } from '../utils.js';

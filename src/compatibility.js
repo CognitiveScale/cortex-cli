@@ -10,7 +10,7 @@ import last from 'lodash/fp/last.js';
 import isInstalledGlobally from 'is-installed-globally';
 import npmFetch from 'npm-registry-fetch';
 import Semver from 'semver';
-import { got, getUserAgent } from './client/apiutils.js';
+import { got } from './client/apiutils.js';
 import { loadProfile } from './config.js';
 import { printError, printWarning, readPackageJSON } from './commands/utils.js';
 
@@ -37,7 +37,6 @@ function getRequiredVersion(profile) {
         .get(endpoint, {
             headers: {
                 Authorization: `Bearer ${profile.token}`,
-                'user-agent': getUserAgent(),
             },
         })
         .json()
