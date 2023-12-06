@@ -30,6 +30,7 @@ pipelines:
                     set -eux
                     git clone git@github.com:CognitiveScale/gocd-pipeline-scripts.git
                     ./gocd-pipeline-scripts/common/c12e-common.sh dev
+                    ./gocd-pipeline-scripts/common/sonar-scan.sh scan
                     echo ./gocd-pipeline-scripts/cortex5/docs/update-docs.sh cli
       - publish:
           clean_workspace: true
