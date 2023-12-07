@@ -7,6 +7,7 @@ import {
  readConfig, defaultConfig, generateJwt, loadProfile, durationRegex, 
 } from '../config.js';
 import { printSuccess, printError, useColor } from './utils.js';
+import { getTimeoutUnit, getTimeoutValues } from '../client/apiutils.js';
 /*
  * Copyright 2023 Cognitive Scale, Inc. All Rights Reserved.
  *
@@ -157,6 +158,10 @@ export const PrintEnvVars = class {
 
     async execute(options) {
         try {
+            // Token & URI are not picked from env variables, likely because
+            // this command is meant to help the user configure their env based
+            // on their profile.  Picking up env variables would be
+            // inconsistent.
             const vars = [];
             const profile = await loadProfile(options.profile, false);
             const ttl = options.ttl || '1d';
@@ -169,6 +174,27 @@ export const PrintEnvVars = class {
             // not sure why we used URI previously ??
             vars.push(`export CORTEX_URL=${profile.url}`);
             vars.push(`export CORTEX_PROJECT=${options.project || profile.project}`);
+
+            // Print timeout options
+            const timeout = getTimeoutValues();
+            const unit = getTimeoutUnit();
+            timeout.forEach((t) => {
+                // use fixed length to apply consistent spacing (should be more than enough)
+                const len = 60;
+                if (t.envValue == null) {
+                    // using default
+                    const defaultPart = `(default: ${t.defaultValue}, unit: ${unit})`;
+                    const exportPart = `export ${t.envVar}=`;
+                    const spacing = ' '.repeat(len - exportPart.length);
+                    vars.push(`${exportPart}${spacing}${defaultPart}`);
+                } else {
+                    // user set value
+                    const unitPart = `(unit: ${unit})`;
+                    const exportPart = `export ${t.envVar}=${t.envValue}`;
+                    const spacing = ' '.repeat(len - exportPart.length);
+                    vars.push(`${exportPart}${spacing}${unitPart}`);
+                }
+            });
             return printSuccess(vars.join('\n'), { color: 'off' });
         } catch (err) {
             return printError(err.message, {}, true);
