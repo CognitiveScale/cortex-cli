@@ -19,7 +19,7 @@ import {
     printExtendedLogs,
     handleDeleteFailure,
     getFilteredOutput,
-    writeOutput, printErrorDetails,
+    writeOutput, printErrorDetails, handleError,
 } from './utils.js';
 
 const debug = debugSetup('cortex:cli');
@@ -200,11 +200,10 @@ export class DeploySkillCommand {
         await Promise.all(skillNames.map(async (skillName) => {
             debug('%s.executeDeploySkill(%s)', profile.name, skillName);
             try {
-                const response = await catalog.deploySkill(options.project || profile.project, profile.token, skillName, options.verbose);
+                const response = await catalog.deploySkill(options.project || profile.project, profile.token, skillName, options.stereotypes, options.verbose);
                 printSuccess(`Deployed Skill ${skillName}: ${response.message}`, options);
             } catch (err) {
-                const { status, message } = constructError(err);
-                printError(`Failed to deploy Skill ${skillName}: ${status} ${message}`, options);
+                handleError(err, options, `Failed to deploy Skill ${skillName}`);
             }
         }));
     }

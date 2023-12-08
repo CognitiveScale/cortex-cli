@@ -17,6 +17,7 @@
 import debugSetup from 'debug';
 import FormData from 'form-data';
 import http from 'https';
+import qs from 'qs';
 import fs from 'node:fs';
 import { got, defaultHeaders } from './apiutils.js';
 import {
@@ -100,14 +101,14 @@ export default class Catalog {
         }
     }
 
-    deploySkill(projectId, token, skillName, verbose = false) {
+    deploySkill(projectId, token, skillName, stereotypes, verbose = false) {
         checkProject(projectId);
         const endpoint = `${this.endpoints.skills(projectId)}/${encodeURIComponent(skillName)}/deploy`;
         debug('deploySkill(%s) => %s', skillName, endpoint);
         return got
             .get(endpoint, {
             headers: defaultHeaders(token),
-            searchParams: { verbose },
+            searchParams: qs.stringify({ verbose, stereotypes }),
         }).json();
     }
 

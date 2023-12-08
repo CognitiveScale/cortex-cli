@@ -35,6 +35,7 @@ export function create() {
         .option('--no-compat', 'Ignore API compatibility checks')
         .option('--profile <profile>', 'The profile to use')
         .option('--project <project>', 'The project to use')
+        .option('--stereotypes <stereotypes...>', 'Stereotype(s) to apply during deployment, use "none" to remove ALL stereotypes.\nNOTE: These are not persisted with the skill definition')
         .action(withCompatibilityCheck(async (skillNames, options) => {
             try {
                 checkForEmptyArgs({ skillNames });
