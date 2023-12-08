@@ -200,8 +200,12 @@ export class DeploySkillCommand {
         await Promise.all(skillNames.map(async (skillName) => {
             debug('%s.executeDeploySkill(%s)', profile.name, skillName);
             try {
-                const response = await catalog.deploySkill(options.project || profile.project, profile.token, skillName, options.stereotypes, options.verbose);
-                printSuccess(`Deployed Skill ${skillName}: ${response.message}`, options);
+                const response = await catalog.deploySkill(options.project || profile.project, profile.token, skillName, options.stereotypes, options.dryrun, options.verbose);
+                if (options.dryrun) {
+                    printSuccess(JSON.stringify(response, null, 2), options);
+                } else {
+                    printSuccess(`Deployed Skill ${skillName}: ${response.message}`, options);
+                }
             } catch (err) {
                 handleError(err, options, `Failed to deploy Skill ${skillName}`);
             }

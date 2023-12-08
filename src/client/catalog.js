@@ -101,14 +101,15 @@ export default class Catalog {
         }
     }
 
-    deploySkill(projectId, token, skillName, stereotypes, verbose = false) {
+    deploySkill(projectId, token, skillName, stereotypes, dryrun = false, verbose = false) {
         checkProject(projectId);
         const endpoint = `${this.endpoints.skills(projectId)}/${encodeURIComponent(skillName)}/deploy`;
         debug('deploySkill(%s) => %s', skillName, endpoint);
         return got
             .get(endpoint, {
             headers: defaultHeaders(token),
-            searchParams: qs.stringify({ verbose, stereotypes }),
+                // Using qs as got doesn't handle serializing arrays well and this works with TSOA OOB
+            searchParams: qs.stringify({ verbose, dryrun, stereotypes }),
         }).json();
     }
 
