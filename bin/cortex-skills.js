@@ -35,6 +35,8 @@ export function create() {
         .option('--no-compat', 'Ignore API compatibility checks')
         .option('--profile <profile>', 'The profile to use')
         .option('--project <project>', 'The project to use')
+        .option('--dryrun', 'Return the K8S skill resource and skip deployment to the cluster')
+        .option('--stereotypes <stereotypes...>', 'Stereotype(s) to apply during deployment: use "none" to remove ALL stereotypes.\nNOTE: These will not be persisted with the skill definition')
         .action(withCompatibilityCheck(async (skillNames, options) => {
             try {
                 checkForEmptyArgs({ skillNames });
