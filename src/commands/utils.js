@@ -429,6 +429,17 @@ export const EXTERNALROLESFORMAT = [
     { column: 'Group', field: 'group' },
     { column: 'Roles', field: 'roles' },
 ];
+
+const TABLEFORMATS = {
+    OPTIONSTABLEFORMAT,
+    LISTTABLEFORMAT,
+    CONNECTIONTABLEFORMAT,
+    SESSIONTABLEFORMAT,
+    RUNTABLEFORMAT,
+    DEPENDENCYTABLEFORMAT,
+    EXTERNALROLESFORMAT,
+};
+
 export const generateNameFromTitle = (title) => title.replace(specialCharsExceptHyphen, '')
     .replace(space, '-')
     .replace(beginAndEndWithHyphen, '')
@@ -577,51 +588,104 @@ export function checkForEmptyArgs(args) {
     });
   }
 
-/**
- * Prints the normalized error object (see `@constructError()`), then exits the
- * program.
- */
-export function printNormalizedError(normedError, options, prefix = 'Error', exit = true) {
-    debug(normedError);
-    printError(`${prefix}: ${normedError.status}, ${normedError.message}`, undefined, false);
-    if (normedError.details !== undefined && normedError.details !== null) {
-        if (typeof normedError.details === 'string' || normedError.details instanceof String) {
-            // Print details if its a string, and exit
-            printError(normedError.details);
-        } else if (!Array.isArray(normedError.details)) {
-            // TSOA API validation error case
-            const transformedResponse = transformTSOAValidation(normedError.details);
-            if (transformedResponse !== null) {
-                // eslint-disable-next-line no-param-reassign
-                normedError.details = transformedResponse;
-            }
-        }
-        printTable(OPTIONSTABLEFORMAT, normedError.details);
-    }
-     if (exit) {
-        printError(''); // Just exit
-    }
-}
+
+// /**
+//  * Prints the normalized error object (see `@constructError()`), then exits the
+//  * program.
+//  */
+// export function printNormalizedError(normedError, options, prefix = 'Error', exit = true) {
+//     debug(normedError);
+//     printError(`${prefix}: ${normedError.status}, ${normedError.message}`, undefined, false);
+//     if (normedError.details !== undefined && normedError.details !== null) {
+//         if (typeof normedError.details === 'string' || normedError.details instanceof String) {
+//             // Print details if its a string, and exit
+//             printError(normedError.details);
+//         } else if (!Array.isArray(normedError.details)) {
+//             // TSOA API validation error case
+//             const transformedResponse = transformTSOAValidation(normedError.details);
+//             if (transformedResponse !== null) {
+//                 // eslint-disable-next-line no-param-reassign
+//                 normedError.details = transformedResponse;
+//             }
+//         }
+//         printTable(OPTIONSTABLEFORMAT, normedError.details);
+//     }
+//     if (exit) {
+//         printError(''); // Just exit
+//     }
+// }
+
 
 /**
- * Creates a normalized error object (see `@constructError()` for how it is
- * normalized), then prints the error and exits.
+ * Prints a normalized version of any given Error and exits the program (see
+ * `@constructError()` for how the error is normalized).
  *
  * @param {Error} error
  * @param {object} options
  * @param {string} prefix
- * @param {bool} exit
  */
-export function handleError(error, options, prefix = 'Error', exit = true) {
-    debug(error);
-    let normedError;
-    const isNormedError = Object.keys(error).includes('success');
-    if (isNormedError) {
-        normedError = error; // assume its already been normalized
-    } else {
-        normedError = constructError(error);
+export function handleError(error, options, prefix = 'Error') {
+    let details;
+    let respCode;
+    // fallback to text in message or standard error message
+    const errResp = error?.response;
+    let errorText = errResp?.body;
+    if (errorText?.trim().length === 0 || error.name === 'RequestError') {
+        errorText = error.message;
+    } else if (error.name === 'ParseError' || error.code === 'ERR_BODY_PARSE_FAILURE') {
+        errorText = 'Unable to parse response from server. Try running again with "--debug" for more details.';
+        details = error.message;
     }
-    printNormalizedError(normedError, options, prefix, exit);
+    // if JSON was returned, look for either a message or error in it
+    try {
+        const resp = errResp ? JSON.parse(errorText) : {};
+        respCode = resp.code;
+        if (resp?.message || resp?.error) {
+            errorText = resp?.message || resp?.error;
+        } else {
+            errorText = error.message; // perhaps a vanilla Error
+        }
+        // eslint-disable-next-line prefer-destructuring
+        details = resp.details;
+    } catch (e) {
+        // Guess it wasn't JSON!
+    }
+    // todo make figuring out the status code more consistent? this might be a holdover from request vs got?
+    const status = errResp?.statusCode || respCode || error?.code || error?.status || '';
+    printError(`${prefix}: ${status}, ${errorText}`, undefined, false);
+    if (details !== undefined && details !== null) {
+        const format = TABLEFORMATS[options.tableformat] ?? OPTIONSTABLEFORMAT;
+        // TSOA API validation error case
+        if (!Array.isArray(details)) {
+            const transformedResponse = transformTSOAValidation(details);
+            if (transformedResponse !== null) {
+                normedError.details = transformedResponse;
+            }
+        }
+        printTable(format, details);
+    }
+    printError(''); // Just exit
 }
+
+// /**
+//  * Creates a normalized error object (see `@constructError()` for how it is
+//  * normalized), then prints the error and exits.
+//  *
+//  * @param {Error} error
+//  * @param {object} options
+//  * @param {string} prefix
+//  * @param {bool} exit
+//  */
+// export function handleError(error, options, prefix = 'Error', exit = true) {
+//     debug(error);
+//     let normedError;
+//     const isNormedError = Object.keys(error).includes('success');
+//     if (isNormedError) {
+//         normedError = error; // assume its already been normalized
+//     } else {
+//         normedError = constructError(error);
+//     }
+//     printNormalizedError(normedError, options, prefix, exit);
+// }
 
 export { deleteFolderRecursive as deleteFile };
