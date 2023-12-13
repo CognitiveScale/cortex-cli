@@ -417,6 +417,17 @@ export const EXTERNALROLESFORMAT = [
     { column: 'Group', field: 'group' },
     { column: 'Roles', field: 'roles' },
 ];
+
+const TABLEFORMATS = {
+    OPTIONSTABLEFORMAT,
+    LISTTABLEFORMAT,
+    CONNECTIONTABLEFORMAT,
+    SESSIONTABLEFORMAT,
+    RUNTABLEFORMAT,
+    DEPENDENCYTABLEFORMAT,
+    EXTERNALROLESFORMAT,
+};
+
 export const generateNameFromTitle = (title) => title.replace(specialCharsExceptHyphen, '')
     .replace(space, '-')
     .replace(beginAndEndWithHyphen, '')
@@ -582,7 +593,11 @@ export function handleError(error, options, prefix = 'Error') {
     try {
         const resp = errResp ? JSON.parse(errorText) : {};
         respCode = resp.code;
-        if (resp?.message || resp?.error) errorText = resp?.message || resp?.error;
+        if (resp?.message || resp?.error) {
+            errorText = resp?.message || resp?.error;
+        } else {
+            errorText = error.message; // perhaps a vanilla Error
+        }
         // eslint-disable-next-line prefer-destructuring
         details = resp.details;
     } catch (e) {
@@ -592,6 +607,7 @@ export function handleError(error, options, prefix = 'Error') {
     const status = errResp?.statusCode || respCode || error?.code || error?.status || '';
     printError(`${prefix}: ${status}, ${errorText}`, undefined, false);
     if (details !== undefined && details !== null) {
+        const format = TABLEFORMATS[options.tableformat] ?? OPTIONSTABLEFORMAT;
         // TSOA API validation error case
         if (!Array.isArray(details)) {
             const transformedResponse = transformTSOAValidation(details);
@@ -599,7 +615,7 @@ export function handleError(error, options, prefix = 'Error') {
                 details = transformedResponse;
             }
         }
-        printTable(OPTIONSTABLEFORMAT, details);
+        printTable(format, details);
     }
     printError(''); // Just exit
 }

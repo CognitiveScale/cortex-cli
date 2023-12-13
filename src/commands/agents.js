@@ -19,7 +19,7 @@ import {
     printError,
     printExtendedLogs,
     printSuccess,
-    printTable, writeOutput, printErrorDetails, constructError,
+    printTable, writeOutput, printErrorDetails, constructError, handleError,
 } from './utils.js';
 
 const debug = debugSetup('cortex:cli');
@@ -35,24 +35,17 @@ export class ListAgentsCommand {
         debug('%s.executeListAgents()', profile.name);
         const catalog = new Catalog(profile.url);
         // eslint-disable-next-line consistent-return
-        catalog.listAgents(options.project || profile.project, profile.token, options.filter, options.limit, options.skip, options.sort).then((response) => {
-            if (response.success) {
-                const result = response.agents;
-                // TODO remove --query on deprecation
-                if (options.json || options.query) {
-                    getFilteredOutput(result, options);
-                } else {
-                    printExtendedLogs(result, options);
-                    handleTable(LISTTABLEFORMAT, result, (o) => ({ ...o, updatedAt: o.updatedAt ? dayjs(o.updatedAt).fromNow() : '-' }), 'No agents found');
-                }
+        try {
+            const { agents } = await catalog.listAgents(options.project || profile.project, profile.token, options.filter, options.limit, options.skip, options.sort);
+            if (options.json || options.query) {
+                getFilteredOutput(agents, options);
             } else {
-                return handleListFailure(response, options, 'Agents');
+                printExtendedLogs(agents, options);
+                handleTable(LISTTABLEFORMAT, agents, (o) => ({ ...o, updatedAt: o.updatedAt ? dayjs(o.updatedAt).fromNow() : '-' }), 'No agents found');
             }
-        })
-            .catch((err) => {
-            debug(err);
-            printError(`Failed to list agents: ${err.status} ${err.message}`, options);
-        });
+        } catch (err) {
+            handleError(err, options, 'Failed to list agents');
+        }
     }
 }
 export class DescribeAgentCommand {
@@ -70,12 +63,9 @@ export class DescribeAgentCommand {
             try {
                 debug('%s.executeDescribeAgentVersions(%s)', profile.name, agentName);
                 const response = await catalog.describeAgentVersions(options.project || profile.project, profile.token, agentName);
-                if (response.success) {
                     return writeOutput(getFilteredOutput(response.agent, options), options);
-                }
-                return printError(`Failed to describe agent versions ${agentName}: ${response.message}`, options);
             } catch (err) {
-                return printError(`Failed to describe agent versions ${agentName}: ${err.status} ${err.message}`, options);
+                return handleError(err, options, `Failed to describe agent versions ${agentName}`);
             }
         } else {
             debug('%s.executeDescribeAgent(%s)', profile.name, agentName);
@@ -84,7 +74,7 @@ export class DescribeAgentCommand {
                 if ((output ?? 'json').toLowerCase() === 'json') return getFilteredOutput(response, options);
                 return writeOutput(response, options);
             } catch (err) {
-                return printError(`Failed to describe agent ${agentName}: ${err.status} ${err.message}`, options);
+                return handleError(err, options, `Failed to describe agent ${agentName}`);
             }
         }
     }
@@ -135,34 +125,55 @@ export class GetActivationCommand {
     async execute(activationId, options) {
         const profile = await loadProfile(options.profile);
         debug('%s.getActivation(%s, %s)', profile.name, activationId, JSON.stringify(options));
-        const { report, verbose, project } = options;
+        const {
+            report,
+            verbose,
+            project,
+        } = options;
         const agents = new Agents(profile.url);
-        agents.getActivation(project || profile.project, profile.token, activationId, verbose, report).then((response) => {
-            if (response.success) {
-                if (options.report && !options.json) {
-                    const result = filterObject(response.result, getQueryOptions(options));
-                    const tableSpec = [
-                        { column: 'Name', field: 'name', width: 40 },
-                        { column: 'Title', field: 'title', width: 40 },
-                        { column: 'Type', field: 'type', width: 20 },
-                        { column: 'Status', field: 'status', width: 20 },
-                        { column: 'Elapsed (ms)', field: 'elapsed', width: 30 },
-                    ];
-                    printSuccess(`Status: ${_.get(result, 'status')}`);
-                    printSuccess(`Elapsed Time (ms): ${_.get(result, 'elapsed')}`);
-                    printTable(tableSpec, _.sortBy(_.get(result, 'transits'), ['start', 'end']));
-                } else {
-                    getFilteredOutput(response.result, options);
-                }
+        try {
+            const { activations } = agents.getActivation(project || profile.project, profile.token, activationId, verbose, report);
+            if (options.report && !options.json) {
+                const result = filterObject(activations, getQueryOptions(options));
+                const tableSpec = [
+                    {
+                        column: 'Name',
+                        field: 'name',
+                        width: 40,
+                    },
+                    {
+                        column: 'Title',
+                        field: 'title',
+                        width: 40,
+                    },
+                    {
+                        column: 'Type',
+                        field: 'type',
+                        width: 20,
+                    },
+                    {
+                        column: 'Status',
+                        field: 'status',
+                        width: 20,
+                    },
+                    {
+                        column: 'Elapsed (ms)',
+                        field: 'elapsed',
+                        width: 30,
+                    },
+                ];
+                printSuccess(`Status: ${_.get(result, 'status')}`);
+                printSuccess(`Elapsed Time (ms): ${_.get(result, 'elapsed')}`);
+                printTable(tableSpec, _.sortBy(_.get(result, 'transits'), ['start', 'end']));
             } else {
-                printError(`Failed to get activation ${activationId}: ${response.message}`, options);
+                getFilteredOutput(activations, options);
             }
-        })
-            .catch((err) => {
-            printError(`Failed to get activation ${activationId}: ${err.status} ${err.message}`, options);
-        });
+        } catch (err) {
+            handleError(err, options, `Failed to get activation ${activationId}`);
+        }
     }
 }
+
 export class CancelActivationCommand {
     constructor(program) {
         this.program = program;
@@ -461,17 +472,10 @@ export class SaveAgentCommand {
             const catalog = new Catalog(profile.url);
             const project = options.project || profile.project;
             try {
-                const response = await catalog.saveAgent(project, profile.token, agent);
-                if (response.success) {
-                    printSuccess(`Agent "${agent.name}" saved in project "${project}"`, options);
-                } else if (response.details) {
-                    console.log(`Failed to save agent: ${response.status} ${response.message}`);
-                    printErrorDetails(response, options);
-                } else {
-                    printError(JSON.stringify(response));
-                }
+                await catalog.saveAgent(project, profile.token, agent);
+                printSuccess(`Agent "${agent.name}" saved in project "${project}"`, options);
             } catch (err) {
-                printError(`Failed to save agent: ${err.status} ${err.message}`, options);
+                handleError(err, options, 'Failed to save agent');
             }
         }));
     }

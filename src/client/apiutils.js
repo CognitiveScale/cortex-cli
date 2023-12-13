@@ -16,10 +16,10 @@ const gotOpts = {
     followRedirect: false,
     // Put a reasonable timeout
     timeout: {
-        lookup: 100,
-        connect: 50,
-        secureConnect: 100,
-        socket: 1000,
+        lookup: 200,
+        connect: 100,
+        secureConnect: 200,
+        socket: 2000,
         // send: 10000, // Not "SAFE" with large uploads
         response: 2000,
     },

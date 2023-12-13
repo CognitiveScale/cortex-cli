@@ -4,7 +4,7 @@ import path from 'node:path';
 import { readFile } from 'node:fs/promises';
 import { v1 as uuid } from 'uuid';
 import { Listr } from 'listr2';
-import { parseObject, printSuccess, printError } from '../utils.js';
+import { parseObject, printSuccess, printError, handleError } from '../utils.js';
 import { getSkillInfo, buildImageTag } from './workspace-utils.js';
 import { loadProfile } from '../../config.js';
 import Catalog from '../../client/catalog.js';
@@ -63,12 +63,14 @@ export default class WorkspacePublishCommand {
         if (skillInfo.length > 0) {
             const profile = await loadProfile(options.profile);
             /// If the user passed in a project name, validate it with the cluster
-            let project = options.project || profile.project;
+            const project = options.project || profile.project;
             if (project) {
                 const apiServer = new ApiServerClient(profile.url);
-                await apiServer.getProject(profile.token, project)
-                    .then((prj) => project = prj.name)
-                    .catch(() => printError(`Project ${project} not found.`, options));
+                try {
+                    await apiServer.getProject(profile.token, project);
+                } catch (err) {
+                    handleError(err, options, `Project ${project} not found`);
+                }
             } else {
                 throw new Error('Project must be specified');
             }

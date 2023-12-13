@@ -1,8 +1,7 @@
-import _ from 'lodash';
 import fs from 'node:fs';
 import path from 'node:path';
-import { Listr } from 'listr2'
-import { printError, printSuccess, printWarning } from '../utils.js';
+import { Listr } from 'listr2';
+import { printError, printSuccess } from '../utils.js';
 import { getSkillInfo, buildImageTag } from './workspace-utils.js';
 import { loadProfile } from '../../config.js';
 import dockerCli from '../../client/dockerClient.js';
