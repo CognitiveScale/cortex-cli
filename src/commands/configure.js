@@ -184,12 +184,12 @@ export const PrintEnvVars = class {
                 if (t.envValue == null) {
                     // using default
                     const defaultPart = `(default: ${t.defaultValue}, unit: ${unit})`;
-                    const exportPart = `export ${t.envVar}=`;
+                    const exportPart = `#export ${t.envVar}=`;
                     const spacing = ' '.repeat(len - exportPart.length);
                     vars.push(`${exportPart}${spacing}${defaultPart}`);
                 } else {
                     // user set value
-                    const unitPart = `(unit: ${unit})`;
+                    const unitPart =  `# (unit: ${unit})`;
                     const exportPart = `export ${t.envVar}=${t.envValue}`;
                     const spacing = ' '.repeat(len - exportPart.length);
                     vars.push(`${exportPart}${spacing}${unitPart}`);
