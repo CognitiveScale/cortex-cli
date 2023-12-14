@@ -22,9 +22,7 @@ export default (class Assessments {
         }
         return got
             .post(url, body)
-            .json()
-            .then((res) => res)
-            .catch((err) => constructError(err));
+            .json();
     }
 
     queryResources(token, name, projectId, type, skip, limit, filter, sort) {
@@ -40,9 +38,7 @@ export default (class Assessments {
         debug('queryResources => %s', url);
         return got
             .get(url, { headers: defaultHeaders(token) })
-            .json()
-            .then((res) => res)
-            .catch((err) => constructError(err));
+            .json();
     }
 
     listResourceTypes(token) {
@@ -50,9 +46,7 @@ export default (class Assessments {
         debug('listResourceTypes => %s', url);
         return got
             .get(url, { headers: defaultHeaders(token) })
-            .json()
-            .then((res) => res)
-            .catch((err) => constructError(err));
+            .json();
     }
 
     createAssessment(token, name, title, description, scope, componentName, componentTypes, overwrite) {
@@ -70,9 +64,7 @@ export default (class Assessments {
                 componentTypes,
                 overwrite,
             }),
-        }).json()
-            .then((res) => res)
-            .catch((err) => constructError(err));
+        }).json();
     }
 
     listAssessment(token, skip, limit, filter, sort) {
@@ -81,9 +73,7 @@ export default (class Assessments {
         })}`;
         debug('listAssessment => %s', url);
         return got
-            .get(url, { headers: defaultHeaders(token) }).json()
-            .then((res) => res)
-            .catch((err) => constructError(err));
+            .get(url, { headers: defaultHeaders(token) }).json();
     }
 
     getAssessment(token, name) {
@@ -92,9 +82,7 @@ export default (class Assessments {
         return got
             .get(url, {
             headers: defaultHeaders(token),
-        }).json()
-            .then((res) => res)
-            .catch((err) => constructError(err));
+        }).json();
     }
 
     deleteAssessment(token, name) {
@@ -103,9 +91,7 @@ export default (class Assessments {
         return got
             .delete(url, {
             headers: defaultHeaders(token),
-        }).json()
-            .then((res) => res)
-            .catch((err) => constructError(err));
+        }).json();
     }
 
     runAssessment(token, name) {
@@ -114,9 +100,7 @@ export default (class Assessments {
         return got
             .post(url, {
             headers: defaultHeaders(token),
-        }).json()
-            .then((res) => res)
-            .catch((err) => constructError(err));
+        }).json();
     }
 
     listAssessmentReports(token, name) {
@@ -125,9 +109,7 @@ export default (class Assessments {
         return got
             .get(url, {
             headers: defaultHeaders(token),
-        }).json()
-            .then((res) => res)
-            .catch((err) => constructError(err));
+        }).json();
     }
 
     getAssessmentReport(token, name, reportId) {
@@ -136,9 +118,7 @@ export default (class Assessments {
         return got
             .get(url, {
             headers: defaultHeaders(token),
-        }).json()
-            .then((res) => res)
-            .catch((err) => constructError(err));
+        }).json();
     }
 
     exportAssessmentReport(token, name, reportId, types) {

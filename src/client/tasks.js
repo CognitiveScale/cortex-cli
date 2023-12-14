@@ -49,9 +49,8 @@ export default (class Tasks {
         if (params) {
             opts.searchParams = params;
         }
-        return gotAPIUtils
-            .get(endpoint, opts).json()
-            .catch((err) => constructError(err));
+        return got
+            .get(endpoint, opts).json();
     }
 
     taskLogs(projectId, token, taskName, follow = false, verbose = false) {
@@ -83,9 +82,7 @@ export default (class Tasks {
             .delete(endpoint, {
             headers: defaultHeaders(token),
             searchParams: { verbose },
-        }).json()
-            .then((res) => ({ ...res }))
-            .catch((err) => constructError(err));
+        }).json();
     }
 
     pauseTask(projectId, token, taskName, verbose = false) {
@@ -96,9 +93,7 @@ export default (class Tasks {
             .post(endpoint, {
             headers: defaultHeaders(token),
             searchParams: { verbose },
-        }).json()
-            .then((res) => ({ ...res }))
-            .catch((err) => constructError(err));
+        }).json();
     }
 
     resumeTask(projectId, token, taskName, verbose = false) {
@@ -109,8 +104,6 @@ export default (class Tasks {
             .post(endpoint, {
             headers: defaultHeaders(token),
             searchParams: { verbose },
-        }).json()
-            .then((res) => ({ ...res }))
-            .catch((err) => constructError(err));
+        }).json();
     }
 });

@@ -2,7 +2,7 @@ import debugSetup from 'debug';
 import { loadProfile } from '../config.js';
 import Users from '../client/users.js';
 import {
- printSuccess, printError, printWarning, filterObject, handleTable, getFilteredOutput,
+    printSuccess, printError, printWarning, filterObject, handleTable, getFilteredOutput, handleError,
 } from './utils.js';
 /*
  * Copyright 2023 Cognitive Scale, Inc. All Rights Reserved.
@@ -38,25 +38,20 @@ export const UserGrantCommand = class {
         const form = createGrant(options);
         debug('%s.grantUser(%s)', profile.name, user || 'self');
         const client = new Users(profile.url, user);
-        const call = (deleteFlag, token, body) => {
-            if (deleteFlag) {
-                return client.removeGrantFromUser(token, body);
-            }
-            return client.createGrantForUser(token, body);
-        };
-        call(options.delete, profile.token, form).then((response) => {
-            if (response.success) {
-                const result = filterObject(response.result, options);
-                printSuccess(JSON.stringify(result, null, 2), options);
-            } else {
-                const func = (options.delete) ? 'delete' : 'create';
-                printError(`Failed to ${func} grant for user : ${response.message}`, options);
-            }
-        })
-            .catch((err) => {
+        try {
+            const call = (deleteFlag, token, body) => {
+                if (deleteFlag) {
+                    return client.removeGrantFromUser(token, body);
+                }
+                return client.createGrantForUser(token, body);
+            };
+            const response = await call(options.delete, profile.token, form);
+            const result = filterObject(response.result, options);
+            printSuccess(JSON.stringify(result, null, 2), options);
+        } catch (err) {
             const func = (options.delete) ? 'delete' : 'create';
-            printError(`Failed to ${func} grant for user : ${err.status} ${err.message}`, options);
-        });
+            handleError(err, options, `Failed to ${func} grant for user`);
+        }
     }
 };
 export const UserDeleteCommand = class {
@@ -68,17 +63,13 @@ export const UserDeleteCommand = class {
         const profile = await loadProfile(options.profile);
         debug('%s.deleteServiceUser(%s)', profile.name, user);
         const client = new Users(profile.url, user);
-        client.deleteServiceUser(profile.token, user).then((response) => {
-            if (response.success) {
-                const result = filterObject(response.result, options);
-                printSuccess(JSON.stringify(result, null, 2), options);
-            } else {
-                printError(`Failed to delete user ${user} : ${response.message}`, options);
-            }
-        })
-            .catch((err) => {
-            printError(`Failed to delete user : ${err.status} ${err.message}`, options);
-        });
+        try {
+            const response = await client.deleteServiceUser(profile.token, user);
+            const result = filterObject(response, options);
+            printSuccess(JSON.stringify(result, null, 2), options);
+        } catch (err) {
+                    handleError(err, options, 'Failed to delete user');
+        }
     }
 };
 export const UserCreateCommand = class {
@@ -90,17 +81,13 @@ export const UserCreateCommand = class {
         const profile = await loadProfile(options.profile);
         debug('%s.createServiceUser(%s)', profile.name, user);
         const client = new Users(profile.url, user);
-        client.createServiceUser(profile.token, user).then((response) => {
-            if (response.success) {
-                const result = filterObject(response.result, options);
-                printSuccess(JSON.stringify(result.config, null), options);
-            } else {
-                printError(`Failed to create user ${user} : ${response.message}`, options);
-            }
-        })
-            .catch((err) => {
-            printError(`Failed to create user : ${err.status} ${err.message}`, options);
-        });
+        try {
+            const response = await client.createServiceUser(profile.token, user);
+            const result = filterObject(response, options);
+            printSuccess(JSON.stringify(result.config, null), options);
+        } catch (err) {
+            handleError(err, options, 'Failed to create user');
+        }
     }
 };
 export const UserListCommand = class {
@@ -112,24 +99,24 @@ export const UserListCommand = class {
         const profile = await loadProfile(options.profile);
         debug('%s.listServiceUsers', profile.name);
         const client = new Users(profile.url, 'self');
-        client.listServiceUsers(profile.token).then((response) => {
-            if (response.success) {
-                const { result } = response;
-                // TODO remove --query on deprecation
-                if (options.json || options.query) {
-                    getFilteredOutput(result, options);
-                } else {
-                    handleTable([{ column: 'User', field: 'user' }], result.users.map((x) => ({ user: x })), null, 'No service users found');
-                }
+        try {
+            const response = await client.listServiceUsers(profile.token);
+            const { result } = response;
+            // TODO remove --query on deprecation
+            if (options.json || options.query) {
+                getFilteredOutput(result, options);
             } else {
-                printError(`Failed to list service users : ${response.message}`, options);
+                handleTable([{
+                    column: 'User',
+                    field: 'user',
+                }], result.users.map((x) => ({ user: x })), null, 'No service users found');
             }
-        })
-            .catch((err) => {
-            printError(`Failed to list service users : ${err.status} ${err.message}`, options);
-        });
+        } catch (err) {
+            handleError(err, options, 'Failed to list service users');
+        }
     }
 };
+
 export const UserDescribeCommand = class {
     constructor(program) {
         this.program = program;
@@ -155,14 +142,10 @@ export const UserDescribeCommand = class {
         const client = new Users(profile.url, user, flags);
         try {
             const response = await client.describeUser(profile.token);
-            if (response.success) {
-                const result = filterObject(response.result, options);
-                printSuccess(JSON.stringify(result, null, 2), options);
-            } else {
-                printError(`Failed to describe user : ${response.message}`, options);
-            }
+            const result = filterObject(response, options);
+            printSuccess(JSON.stringify(result, null, 2), options);
         } catch (err) {
-            printError(`Failed to describe user : ${err.status} ${err.message}`, options);
+            handleError(err, options, 'Failed to describe user');
         }
     }
 };
@@ -181,19 +164,14 @@ export const UserProjectAssignCommand = class {
             }
             return client.addUsersToProject(token, assignProject, users);
         };
-        call(options.delete, profile.token, project, options.users).then((response) => {
-            if (response.success) {
-                const result = filterObject(response.result, options);
-                printSuccess(JSON.stringify(result, null, 2), options);
-            } else {
-                const func = (options.delete) ? 'unassign' : 'assign';
-                printError(`Failed to ${func} users from project : ${response.message}`, options);
-            }
-        })
-            .catch((err) => {
+        try {
+            const response = await call(options.delete, profile.token, project, options.users);
+            const result = filterObject(response.result, options);
+            printSuccess(JSON.stringify(result, null, 2), options);
+        } catch (err) {
             const func = (options.delete) ? 'unassign' : 'assign';
-            printError(`Failed to ${func} users from project : ${err.status} ${err.message}`, options);
-        });
+            handleError(err, options, `Failed to ${func} users from project`);
+        }
     }
 };
 export const UserResetPATCommand = class {
@@ -206,14 +184,12 @@ export const UserResetPATCommand = class {
         const { user } = options;
         debug('%s.UserResetPATCommand(%s)', profile.name, user);
         const client = new Users(profile.url, 'self');
-        client.resetUserPAT(profile.token, user).then((response) => {
-            if (response.success) {
-                const { result } = response;
-                printSuccess(JSON.stringify(result, null, 2), options);
-            } else {
-                printError(`Failed to invalidate user PAT: ${response.message}`, options);
-            }
-        });
+        try {
+            const result = await client.resetUserPAT(profile.token, user);
+            printSuccess(JSON.stringify(result, null, 2), options);
+        } catch (err) {
+            handleError(err, options, 'Failed to invalidate user PAT');
+        }
     }
 };
 export const UserGetPATCommand = class {
@@ -226,13 +202,11 @@ export const UserGetPATCommand = class {
         const { user } = options;
         debug('%s.UserGetPATCommand(%s)', profile.name);
         const client = new Users(profile.url, 'self');
-        client.getUserPAT(profile.token, user).then((response) => {
-            if (response.success) {
-                const { result } = response;
-                printSuccess(JSON.stringify(result.config, null, 2), options);
-            } else {
-                printError(`Failed to fetch user PAT: ${response.message}`, options);
-            }
-        });
+        try {
+            const result = await client.getUserPAT(profile.token, user);
+            printSuccess(JSON.stringify(result.config, null, 2), options);
+        } catch (err) {
+                handleError(err, options, 'Failed to fetch user PAT');
+        }
     }
 };

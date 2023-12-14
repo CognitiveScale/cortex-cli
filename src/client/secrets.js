@@ -32,9 +32,7 @@ export default (class Secrets {
         return got
             .get(endpoint, {
             headers: defaultHeaders(token),
-        }).json()
-            .then((result) => ({ success: true, result }))
-            .catch((err) => constructError(err));
+        }).json();
     }
 
     readSecret(projectId, token, keyName) {
@@ -44,9 +42,7 @@ export default (class Secrets {
         return got
             .get(endpoint, {
             headers: defaultHeaders(token),
-        }).json()
-            .then((result) => ({ success: true, result }))
-            .catch((err) => constructError(err));
+        }).json();
     }
 
     deleteSecret(projectId, token, keyName) {
@@ -68,8 +64,6 @@ export default (class Secrets {
             .post(endpoint, {
             headers: defaultHeaders(token),
             json: body,
-        }).json()
-            .then((result) => ({ ...result }))
-            .catch((err) => constructError(err));
+        }).json();
     }
 });

@@ -6,7 +6,7 @@ import map from 'lodash/fp/map.js';
 import { loadProfile } from '../config.js';
 import Secrets from '../client/secrets.js';
 import {
- printSuccess, printError, filterObject, parseObject, printTable, handleTable, handleDeleteFailure, getFilteredOutput, 
+    printSuccess, printError, filterObject, parseObject, printTable, handleTable, getFilteredOutput, handleError,
 } from './utils.js';
 
 const debug = debugSetup('cortex:cli');
@@ -19,26 +19,24 @@ export const ListSecretsCommand = class {
         const profile = await loadProfile(options.profile);
         debug('%s.listsecrets(%s)', profile.name);
         const secrets = new Secrets(profile.url);
-        secrets.listSecrets(options.project || profile.project, profile.token)
-            .then((response) => {
-            if (response.success) {
-                const { result } = response;
-                // TODO remove --query on deprecation
-                if (options.json || options.query) {
-                    getFilteredOutput(result, options);
-                } else {
-                    const tableSpec = [
-                        { column: 'Secret Key Name', field: 'keyName', width: 50 },
-                    ];
-                    handleTable(tableSpec, map((x) => ({ keyName: x }), result), null, 'No secrets found');
-                }
+        try {
+            const result = await secrets.listSecrets(options.project || profile.project, profile.token);
+            // TODO remove --query on deprecation
+            if (options.json || options.query) {
+                getFilteredOutput(result, options);
             } else {
-                printError(`Failed to list secrets: ${response.message}`, options);
+                const tableSpec = [
+                    {
+                        column: 'Secret Key Name',
+                        field: 'keyName',
+                        width: 50,
+                    },
+                ];
+                handleTable(tableSpec, map((x) => ({ keyName: x }), result), null, 'No secrets found');
             }
-        })
-            .catch((err) => {
-            printError(`Failed to list secrets : ${err.status} ${err.message}`, options);
-        });
+        } catch (err) {
+            handleError(err, options, 'Failed to list secrets');
+        }
     }
 };
 export const ReadSecretsCommand = class {
@@ -50,9 +48,9 @@ export const ReadSecretsCommand = class {
         const profile = await loadProfile(options.profile);
         debug('%s.readsecret(%s)', profile.name, keyName);
         const secrets = new Secrets(profile.url);
-        secrets.readSecret(options.project || profile.project, profile.token, keyName).then((response) => {
-            if (response.success) {
-                const result = filterObject(response.result, options);
+        try {
+            const response = await secrets.readSecret(options.project || profile.project, profile.token, keyName);
+                const result = filterObject(response, options);
                 if (options.json) printSuccess(JSON.stringify(result, null, 2), options);
                 else {
                     const tableSpec = [
@@ -61,13 +59,9 @@ export const ReadSecretsCommand = class {
                     ];
                     printTable(tableSpec, [{ keyName, value: JSON.stringify(getOr(undefined, 'value', result), null, 2) }]);
                 }
-            } else {
-                printError(`Failed to read secure secret : ${response.message}`, options);
+            } catch (err) {
+                    handleError(err, options, 'Failed to read secure secret');
             }
-        })
-            .catch((err) => {
-            printError(`Failed to read secure secret : ${err.status} ${err.message}`, options);
-        });
     }
 };
 export const WriteSecretsCommand = class {
@@ -98,15 +92,12 @@ export const WriteSecretsCommand = class {
             return printError(`Failed to write secret : keyName did not conform to regex ${JSON.stringify(invalidCharsRegex)}`, options);
         }
         const secrets = new Secrets(profile.url);
-        return secrets.writeSecret(options.project || profile.project, profile.token, keyName, data).then((response) => {
-            if (response.success) {
-                return printSuccess(response.message, options);
-            }
-            return printError(`Failed to write secret: ${response.status} ${response.message}`, options);
-        })
-            .catch((err) => {
-            printError(`Failed to write secret : ${err.status} ${err.message}`, options);
-        });
+        try {
+            const response = secrets.writeSecret(options.project || profile.project, profile.token, keyName, data);
+            return printSuccess(response.message, options);
+        } catch (err) {
+            return handleError(err, options, 'Failed to write secret');
+        }
     }
 };
 export const DeleteSecretCommand = class {
@@ -120,16 +111,9 @@ export const DeleteSecretCommand = class {
         const secretsClient = new Secrets(profile.url);
         try {
             const response = await secretsClient.deleteSecret(options.project || profile.project, profile.token, keyName);
-            if (response.success) {
-                return printSuccess(response?.message ?? response, options);
-            }
-            return handleDeleteFailure(response, options, 'Secret');
+            printSuccess(response?.message ?? response, options);
         } catch (err) {
-            let message = err?.message;
-            if (err?.response?.body) {
-                message = JSON.parse(err?.response?.body)?.message ?? err.message;
-            }
-            return printError(`Secret deletion failed: ${err?.response?.statusCode ?? ''} ${message}.`, options);
+            handleError(err, options, `Secret "${keyName}" deletion failed`);
         }
     }
 };

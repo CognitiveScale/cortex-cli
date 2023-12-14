@@ -2,7 +2,7 @@ import fs from 'node:fs';
 import { pipeline } from 'node:stream/promises';
 import debugSetup from 'debug';
 import { got, defaultHeaders } from './apiutils.js';
-import { constructError, checkProject } from '../commands/utils.js';
+import { checkProject } from '../commands/utils.js';
 import Content from './content.js';
 
 const debug = debugSetup('cortex:cli');
@@ -25,9 +25,7 @@ export default (class Experiments {
             .get(endpoint, {
             headers: defaultHeaders(token),
             searchParams: query,
-        }).json()
-            .then((result) => ({ success: true, result }))
-            .catch((err) => constructError(err));
+        }).json();
     }
 
     describeExperiment(projectId, token, name) {
@@ -37,9 +35,7 @@ export default (class Experiments {
         return got
             .get(endpoint, {
             headers: defaultHeaders(token),
-        }).json()
-            .then((result) => ({ success: true, result }))
-            .catch((err) => constructError(err));
+        }).json();
     }
 
     deleteExperiment(projectId, token, name) {
@@ -49,9 +45,7 @@ export default (class Experiments {
         return got
             .delete(endpoint, {
             headers: defaultHeaders(token),
-        }).json()
-            .then((result) => ({ success: true, result }))
-            .catch((err) => constructError(err));
+        }).json();
     }
 
     listRuns(projectId, token, experimentName, filter, limit, sort, skip) {
@@ -67,9 +61,7 @@ export default (class Experiments {
             .get(endpoint, {
             headers: defaultHeaders(token),
             searchParams: query,
-        }).json()
-            .then((result) => ({ success: true, result }))
-            .catch((err) => constructError(err));
+        }).json();
     }
 
     describeRun(projectId, token, experimentName, runId) {
@@ -79,9 +71,7 @@ export default (class Experiments {
         return got
             .get(endpoint, {
             headers: defaultHeaders(token),
-        }).json()
-            .then((result) => ({ success: true, result }))
-            .catch((err) => constructError(err));
+        }).json();
     }
 
     deleteRun(projectId, token, experimentName, runId) {
@@ -91,9 +81,7 @@ export default (class Experiments {
         return got
             .delete(endpoint, {
             headers: defaultHeaders(token),
-        }).json()
-            .then((result) => ({ success: true, result }))
-            .catch((err) => constructError(err));
+        }).json();
     }
 
     _artifactKey(experimentName, runId, artifact) {
@@ -103,16 +91,12 @@ export default (class Experiments {
     // eslint-disable-next-line no-unused-vars
     async downloadArtifact(projectId, token, experimentName, runId, artifactName, showProgress = false) {
         checkProject(projectId);
-        try {
             // Check if run exists..
-            await this.describeRun(projectId, token, experimentName, runId);
-            // just generate the key and avoid hop to managed content..
-            const key = this._artifactKey(experimentName, runId, artifactName);
-            const cont = new Content(this.cortexUrl);
-            return cont.downloadContent(projectId, token, key, showProgress);
-        } catch (err) {
-            return constructError(err);
-        }
+        await this.describeRun(projectId, token, experimentName, runId);
+        // just generate the key and avoid hop to managed content..
+        const key = this._artifactKey(experimentName, runId, artifactName);
+        const cont = new Content(this.cortexUrl);
+        return cont.downloadContent(projectId, token, key, showProgress);
     }
 
     saveExperiment(projectId, token, experimentObj) {
@@ -123,9 +107,7 @@ export default (class Experiments {
             .post(endpoint, {
             headers: defaultHeaders(token),
             json: experimentObj,
-        }).json()
-            .then((result) => ({ success: true, result }))
-            .catch((err) => constructError(err));
+        }).json();
     }
 
     createRun(projectId, token, runObj) {
@@ -136,9 +118,7 @@ export default (class Experiments {
             .post(endpoint, {
             headers: defaultHeaders(token),
             json: runObj,
-        }).json()
-            .then((result) => ({ success: true, result }))
-            .catch((err) => constructError(err));
+        }).json();
     }
 
     updateRun(projectId, token, runObj) {
@@ -149,22 +129,15 @@ export default (class Experiments {
             .post(endpoint, {
             headers: defaultHeaders(token),
             json: runObj,
-        }).json()
-            .then((result) => ({ success: true, result }))
-            .catch((err) => constructError(err));
+        }).json();
     }
 
-    async uploadArtifact(projectId, token, experimentName, runId, content, artifact, contentType = 'application/octet-stream') {
+    uploadArtifact(projectId, token, experimentName, runId, content, artifact, contentType = 'application/octet-stream') {
         checkProject(projectId);
         const endpoint = `${this.endpoint(projectId)}/${encodeURIComponent(experimentName)}/runs/${encodeURIComponent(runId)}/artifacts/${artifact}`;
         debug('uploadArtifact(%s, %s) => %s', artifact, content, endpoint);
-        try {
-            const message = await pipeline(fs.createReadStream(content), got.stream.put(endpoint, {
+            return pipeline(fs.createReadStream(content), got.stream.put(endpoint, {
                 headers: defaultHeaders(token, { 'Content-Type': contentType }),
             }));
-            return { success: true, message };
-        } catch (err) {
-            return constructError(err);
-        }
     }
 });

@@ -6,7 +6,7 @@ import relativeTime from 'dayjs/plugin/relativeTime.js';
 import { loadProfile } from '../config.js';
 import Actions from '../client/actions.js';
 import {
- printSuccess, printError, filterObject, parseObject, isNumeric, handleTable, printExtendedLogs, handleListFailure, handleDeleteFailure, getFilteredOutput, 
+    printSuccess, printError, filterObject, parseObject, isNumeric, handleTable, printExtendedLogs, getFilteredOutput, handleError,
 } from './utils.js';
 
 const debug = debugSetup('cortex:cli');
@@ -21,32 +21,51 @@ export const ListActionsCommand = class {
         const profile = await loadProfile(options.profile);
         debug('%s.executeListActions()', profile.name);
         const actions = new Actions(profile.url);
-        actions.listActions(options.project || profile.project, profile.token, options.filter, options.limit, options.skip, options.sort)
+        try {
+            const response = await actions.listActions(options.project || profile.project, profile.token, options.filter, options.limit, options.skip, options.sort);
             // eslint-disable-next-line consistent-return
-            .then((response) => {
-            if (response.success) {
-                const result = response.actions;
-                // TODO remove --query on deprecation
-                if (options.json || options.query) {
-                    getFilteredOutput(result, options);
-                } else {
-                    printExtendedLogs(result, options);
-                    const tableSpec = [
-                        { column: 'Name', field: 'name', width: 30 },
-                        { column: 'Type', field: 'type', width: 8 },
-                        { column: 'Image', field: 'image', width: 50 },
-                        { column: 'Modified', field: 'updatedAt', width: 26 },
-                        { column: 'Author', field: 'createdBy', width: 26 },
-                    ];
-                    handleTable(tableSpec, result, (o) => ({ ...o, updatedAt: o.updatedAt ? dayjs(o.updatedAt).fromNow() : '-' }), 'No actions found');
-                }
+            const result = response.actions;
+            // TODO remove --query on deprecation
+            if (options.json || options.query) {
+                getFilteredOutput(result, options);
             } else {
-                return handleListFailure(response, options, 'Actions');
+                printExtendedLogs(result, options);
+                const tableSpec = [
+                    {
+                        column: 'Name',
+                        field: 'name',
+                        width: 30,
+                    },
+                    {
+                        column: 'Type',
+                        field: 'type',
+                        width: 8,
+                    },
+                    {
+                        column: 'Image',
+                        field: 'image',
+                        width: 50,
+                    },
+                    {
+                        column: 'Modified',
+                        field: 'updatedAt',
+                        width: 26,
+                    },
+                    {
+                        column: 'Author',
+                        field: 'createdBy',
+                        width: 26,
+                    },
+                ];
+                handleTable(tableSpec, result, (o) => ({
+                    ...o,
+                    updatedAt: o.updatedAt ? dayjs(o.updatedAt)
+                        .fromNow() : '-',
+                }), 'No actions found');
             }
-        })
-            .catch((err) => {
-            printError(`Failed to list actions: ${err.status} ${err.message}`, options);
-        });
+        } catch (err) {
+            handleError(err, options, 'Failed to list actions');
+        }
     }
 };
 export const DescribeActionCommand = class {
@@ -58,17 +77,12 @@ export const DescribeActionCommand = class {
         const profile = await loadProfile(options.profile);
         debug('%s.executeDescribeAction(%s)', profile.name, actionName);
         const actions = new Actions(profile.url);
-        actions.describeAction(options.project || profile.project, profile.token, actionName)
-            .then((response) => {
-            if (response.success) {
-                getFilteredOutput(response.action, options);
-            } else {
-                printError(`Failed to describe action: ${response.status} ${response.message}`, options);
-            }
-        })
-            .catch((err) => {
-            printError(`Failed to describe action: ${err.status} ${err.message}`, options);
-        });
+        try {
+            const response = await actions.describeAction(options.project || profile.project, profile.token, actionName);
+            getFilteredOutput(response.action, options);
+        } catch (err) {
+            handleError(err, options, `Failed to describe action "${actionName}"`);
+        }
     }
 };
 export const DeployActionCommand = class {
@@ -155,13 +169,9 @@ export const DeployActionCommand = class {
             }
             const actions = new Actions(profile.url);
             const response = await actions.deployAction(options.project || profile.project, profile.token, actionInst);
-            if (response.success) {
-                printSuccess(JSON.stringify(response.message, null, 2), options);
-            } else {
-                printError(`Action deployment failed: ${response.status} ${response.message}`, options);
-            }
+            printSuccess(JSON.stringify(response.message, null, 2), options);
         } catch (err) {
-            printError(`Failed to deploy action: ${err.status} ${err.message}`, options);
+            printError(err, options, 'Failed to deploy action');
         }
     }
 };
@@ -174,16 +184,12 @@ export const DeleteActionCommand = class {
         const profile = await loadProfile(options.profile);
         debug('%s.executeDeleteAction(%s)', profile.name, actionName);
         const actions = new Actions(profile.url);
-        actions.deleteAction(options.project || profile.project, profile.token, actionName)
-            .then((response) => {
-            if (response.success) {
-                const result = filterObject(response, options);
-                return printSuccess(JSON.stringify(result, null, 2), options);
-            }
-            return handleDeleteFailure(response, options, 'Action');
-        })
-            .catch((err) => {
-            printError(`Failed to delete action: ${err.status} ${err.message}`, options);
-        });
+        try {
+            const response = await actions.deleteAction(options.project || profile.project, profile.token, actionName);
+            const result = filterObject(response, options);
+            return printSuccess(JSON.stringify(result, null, 2), options);
+        } catch (err) {
+            return handleError(err, { ...options, tableformat: 'DEPENDENCYTABLEFORMAT' }, `Failed to delete action "${actionName}"`, options);
+        }
     }
 };

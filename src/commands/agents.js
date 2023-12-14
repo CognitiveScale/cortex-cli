@@ -13,13 +13,16 @@ import {
     getFilteredOutput,
     getQueryOptions,
     handleDeleteFailure,
-    handleListFailure,
     handleTable,
     parseObject,
     printError,
     printExtendedLogs,
     printSuccess,
-    printTable, writeOutput, printErrorDetails, constructError, handleError,
+    printTable,
+    writeOutput,
+    printErrorDetails,
+    constructError,
+    handleError,
 } from './utils.js';
 
 const debug = debugSetup('cortex:cli');
@@ -132,9 +135,9 @@ export class GetActivationCommand {
         } = options;
         const agents = new Agents(profile.url);
         try {
-            const { activations } = agents.getActivation(project || profile.project, profile.token, activationId, verbose, report);
+            const activation = await agents.getActivation(project || profile.project, profile.token, activationId, verbose, report);
             if (options.report && !options.json) {
-                const result = filterObject(activations, getQueryOptions(options));
+                const result = filterObject(activation, getQueryOptions(options));
                 const tableSpec = [
                     {
                         column: 'Name',
@@ -166,7 +169,7 @@ export class GetActivationCommand {
                 printSuccess(`Elapsed Time (ms): ${_.get(result, 'elapsed')}`);
                 printTable(tableSpec, _.sortBy(_.get(result, 'transits'), ['start', 'end']));
             } else {
-                getFilteredOutput(activations, options);
+                getFilteredOutput(activation, options);
             }
         } catch (err) {
             handleError(err, options, `Failed to get activation ${activationId}`);
@@ -223,43 +226,56 @@ export class ListActivationsCommand {
         if (options.skip) queryParams.skip = options.skip;
         if (options.sort) queryParams.sort = _.toLower(options.sort);
         if (options.filter) queryParams.filter = options.filter;
+        try {
         // eslint-disable-next-line consistent-return
-        agents.listActivations(options.project || profile.project, profile.token, queryParams).then((response) => {
-            if (response.success) {
-                const result = response.result.activations;
-                // TODO remove --query on deprecation
-                if (options.json || options.query) {
-                    getFilteredOutput(result, options);
-                } else {
-                    printExtendedLogs(result, options);
-                    const tableSpec = [
-                        { column: 'Name', field: 'name', width: 30 },
-                        { column: 'Activation Id', field: 'activationId', width: 40 },
-                        { column: 'Status', field: 'status', width: 20 },
-                        { column: 'Started', field: 'start', width: 65 },
-                    ];
-                    const genName = (o) => {
-                        if (o.agentName) {
-                            return `${o.agentName} (Agent)`;
-                        }
-                        if (o.skillName) {
-                            return `${o.skillName} (Skill)`;
-                        }
-                        return '-';
-                    };
-                    handleTable(tableSpec, _.map(result, (o) => ({
-                        ...o,
-                        name: genName(o),
-                        start: o.start ? dayjs(o.start).fromNow() : '-',
-                    })), null, 'No activations found');
+        const response = await agents.listActivations(options.project || profile.project, profile.token, queryParams);
+        const result = response.activations;
+        // TODO remove --query on deprecation
+        if (options.json || options.query) {
+            getFilteredOutput(result, options);
+        } else {
+            printExtendedLogs(result, options);
+            const tableSpec = [
+                {
+                    column: 'Name',
+                    field: 'name',
+                    width: 30,
+                },
+                {
+                    column: 'Activation Id',
+                    field: 'activationId',
+                    width: 40,
+                },
+                {
+                    column: 'Status',
+                    field: 'status',
+                    width: 20,
+                },
+                {
+                    column: 'Started',
+                    field: 'start',
+                    width: 65,
+                },
+            ];
+            const genName = (o) => {
+                if (o.agentName) {
+                    return `${o.agentName} (Agent)`;
                 }
-            } else {
-                return handleListFailure(response, options, 'Activations');
-            }
-        })
-            .catch((err) => {
-            printError(`Failed to list activations: ${err.status} ${err.message}`, options);
-        });
+                if (o.skillName) {
+                    return `${o.skillName} (Skill)`;
+                }
+                return '-';
+            };
+            handleTable(tableSpec, _.map(result, (o) => ({
+                ...o,
+                name: genName(o),
+                start: o.start ? dayjs(o.start)
+                    .fromNow() : '-',
+            })), null, 'No activations found');
+        }
+        } catch (err) {
+            handleError(err, options, 'Failed to list activations');
+        }
     }
 }
 export class ListServicesCommand {
@@ -299,33 +315,48 @@ export class ListAgentSnapshotsCommand {
         const profile = await loadProfile(options.profile);
         debug('%s.listAgentSnapshots(%s)', profile.name, agentName);
         const agents = new Agents(profile.url);
-        agents.listAgentSnapshots(options.project || profile.project, profile.token, agentName, options.filter, options.limit, options.skip, options.sort)
+        try {
+        const response = await agents.listAgentSnapshots(options.project || profile.project, profile.token, agentName, options.filter, options.limit, options.skip, options.sort);
             // eslint-disable-next-line consistent-return
-            .then((response) => {
-            if (response.success) {
-                const result = response.result.snapshots;
-                // TODO remove --query on deprecation
-                if (options.json || options.query) {
-                    getFilteredOutput(result, options);
-                } else {
-                    printExtendedLogs(result, options);
-                    const tableSpec = [
-                        { column: 'Snapshot ID', field: 'snapshotId', width: 40 },
-                        { column: 'Title', field: 'title', width: 40 },
-                        // Removed as this is confusing for end users, agent version may not change
-                        //                        { column: 'Agent Version', field: 'agentVersion', width: 15 },
-                        { column: 'Created', field: 'createdAt', width: 26 },
-                        { column: 'Author', field: 'createdBy', width: 26 },
-                    ];
-                    handleTable(tableSpec, result, (o) => ({ ...o, createdAt: o.createdAt ? dayjs(o.createdAt).fromNow() : '-' }), 'No snapshots found');
-                }
-            } else {
-                return handleListFailure(response, options, 'Agent-snapshots');
-            }
-        })
-            .catch((err) => {
-            printError(`Failed to list agent snapshots ${agentName}: ${err.status} ${err.message}`, options);
-        });
+        const result = response.result.snapshots;
+        // TODO remove --query on deprecation
+        if (options.json || options.query) {
+            getFilteredOutput(result, options);
+        } else {
+            printExtendedLogs(result, options);
+            const tableSpec = [
+                {
+                    column: 'Snapshot ID',
+                    field: 'snapshotId',
+                    width: 40,
+                },
+                {
+                    column: 'Title',
+                    field: 'title',
+                    width: 40,
+                },
+                // Removed as this is confusing for end users, agent version may not change
+                //                        { column: 'Agent Version', field: 'agentVersion', width: 15 },
+                {
+                    column: 'Created',
+                    field: 'createdAt',
+                    width: 26,
+                },
+                {
+                    column: 'Author',
+                    field: 'createdBy',
+                    width: 26,
+                },
+            ];
+            handleTable(tableSpec, result, (o) => ({
+                ...o,
+                createdAt: o.createdAt ? dayjs(o.createdAt)
+                    .fromNow() : '-',
+            }), 'No snapshots found');
+        }
+        } catch (err) {
+            handleError(err, options, `Failed to list agent snapshots ${agentName}`);
+        }
     }
 }
 export class DescribeAgentSnapshotCommand {
@@ -340,9 +371,6 @@ export class DescribeAgentSnapshotCommand {
         const output = options?.output?.toLowerCase() ?? 'json';
         try {
             const response = await agents.describeAgentSnapshot(options.project || profile.project, profile.token, snapshotId, output);
-            if (response.success === false) {
-                return printError(`Failed to describe agent snapshot ${snapshotId}: ${response.message}`);
-            }
             if (output === 'json') {
                 const result = filterObject(JSON.parse(response), options);
                 return printSuccess(JSON.stringify(result, null, 2), options);

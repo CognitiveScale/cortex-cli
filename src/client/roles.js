@@ -50,9 +50,7 @@ export default class Roles {
         return got
             .get(endpoint, {
             headers: defaultHeaders(token),
-        }).json()
-            .then((res) => ({ success: true, result: res }))
-            .catch((err) => constructError(err));
+        }).json();
     }
 
     deleteRole(token) {
@@ -61,9 +59,7 @@ export default class Roles {
         return got
             .delete(endpoint, {
             headers: defaultHeaders(token),
-        }).json()
-            .then((res) => ({ success: true, result: res }))
-            .catch((err) => constructError(err));
+        }).json();
     }
 
     createRole(token, body) {
@@ -73,9 +69,7 @@ export default class Roles {
             .post(endpoint, {
             headers: defaultHeaders(token),
             json: body,
-        }).json()
-            .then((res) => ({ success: true, result: res }))
-            .catch((err) => constructError(err));
+        }).json();
     }
 
     addUsersToRole(token, users) {
@@ -85,9 +79,7 @@ export default class Roles {
             .post(endpoint, {
             headers: defaultHeaders(token),
             json: { users },
-        }).json()
-            .then((res) => ({ success: true, result: res }))
-            .catch((err) => constructError(err));
+        }).json();
     }
 
     removeUsersFromRole(token, users) {
@@ -97,9 +89,7 @@ export default class Roles {
             .delete(endpoint, {
             headers: defaultHeaders(token),
             json: { users },
-        }).json()
-            .then((res) => ({ success: true, result: res }))
-            .catch((err) => constructError(err));
+        }).json();
     }
 
     createGrantForRole(token, body) {
@@ -109,9 +99,7 @@ export default class Roles {
             .post(endpoint, {
             headers: defaultHeaders(token),
             json: body,
-        }).json()
-            .then((res) => ({ success: true, result: res }))
-            .catch((err) => constructError(err));
+        }).json();
     }
 
     removeGrantFromRole(token, body) {
@@ -121,9 +109,7 @@ export default class Roles {
             .delete(endpoint, {
             headers: defaultHeaders(token),
             json: body,
-        }).json()
-            .then((res) => ({ success: true, result: res }))
-            .catch((err) => constructError(err));
+        }).json();
     }
 
     listRoles(token, project) {
@@ -135,9 +121,7 @@ export default class Roles {
         return got
             .get(endpoint, {
             headers: defaultHeaders(token),
-        }).json()
-            .then((res) => ({ success: true, result: res }))
-            .catch((err) => constructError(err));
+        }).json();
     }
 
     addRolesToProject(token, project, roles) {
@@ -147,9 +131,7 @@ export default class Roles {
             .post(endpoint, {
             headers: defaultHeaders(token),
             json: { project, roles },
-        }).json()
-            .then((res) => ({ success: true, result: res }))
-            .catch((err) => constructError(err));
+        }).json();
     }
 
     removeRolesFromProject(token, project, roles) {
@@ -159,9 +141,7 @@ export default class Roles {
             .delete(endpoint, {
             headers: defaultHeaders(token),
             json: { project, roles },
-        }).json()
-            .then((res) => ({ success: true, result: res }))
-            .catch((err) => constructError(err));
+        }).json();
     }
 
     listExternalGroups(token) {
@@ -170,9 +150,7 @@ export default class Roles {
         return got
             .get(endpoint, {
             headers: defaultHeaders(token),
-        }).json()
-            .then((res) => ({ success: true, result: res }))
-            .catch((err) => constructError(err));
+        }).json();
     }
 
     describeExternalGroup(token, externalGroup) {
@@ -181,9 +159,7 @@ export default class Roles {
         return got
             .get(endpoint, {
             headers: defaultHeaders(token),
-        }).json()
-            .then((res) => ({ success: true, result: res }))
-            .catch((err) => constructError(err));
+        }).json();
     }
 
     deleteExternalGroup(token, externalGroup) {
@@ -192,9 +168,7 @@ export default class Roles {
         return got
             .delete(endpoint, {
             headers: defaultHeaders(token),
-        }).json()
-            .then((res) => ({ success: true, result: res }))
-            .catch((err) => constructError(err));
+        }).json();
     }
 
     addExternalGroupToRole(token, externalGroup) {
@@ -204,9 +178,7 @@ export default class Roles {
             .post(endpoint, {
             headers: defaultHeaders(token),
             json: { externalGroup },
-        }).json()
-            .then((res) => ({ success: true, result: res }))
-            .catch((err) => constructError(err));
+        }).json();
     }
 
     removeExternalGroupFromRole(token, externalGroup) {
@@ -215,8 +187,6 @@ export default class Roles {
         return got
             .delete(endpoint, {
             headers: defaultHeaders(token),
-        }).json()
-            .then((res) => ({ success: true, result: res }))
-            .catch((err) => constructError(err));
+        }).json();
     }
 }

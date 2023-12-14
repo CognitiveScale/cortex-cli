@@ -6,7 +6,7 @@ import debugSetup from 'debug';
 import { loadProfile } from '../config.js';
 import Content from '../client/content.js';
 import {
-    printSuccess, printError, getSourceFiles, humanReadableFileSize, handleTable, getFilteredOutput, checkProject, printNormalizedError, handleError,
+    printSuccess, printError, getSourceFiles, humanReadableFileSize, handleTable, getFilteredOutput, checkProject, handleError,
 } from './utils.js';
 
 const debug = debugSetup('cortex:cli');
@@ -17,13 +17,11 @@ async function upload(contentClient, profile, options, contentKey, filePath, exi
     }
     const showProgress = !!options.progress;
     const contentType = _.get(options, 'contentType', 'application/octet-stream');
-    const response = await contentClient.uploadContentStreaming(options.project || profile.project, profile.token, contentKey, filePath, showProgress, contentType);
-    if (response.success) {
+    try {
+        await contentClient.uploadContentStreaming(options.project || profile.project, profile.token, contentKey, filePath, showProgress, contentType);
         printSuccess('Content successfully uploaded.', options);
-    } else {
-        const message = `Failed to upload content ${filePath}: ${response.status} ${response.message}`;
-        printNormalizedError(response, options, `Failed to upload content ${filePath}`, exit);
-        throw Error(message); // Temp fix to make recursive upload stop uploading, until uploadContentStreaming() throws
+    } catch (err) {
+        handleError(err, options, `Failed to upload content ${filePath}`);
     }
 }
 
@@ -36,29 +34,24 @@ export class ListContent {
         const profile = await loadProfile(options.profile);
         debug('%s.listContent()', profile.name);
         const content = new Content(profile.url);
-        content.listContent(options.project || profile.project, profile.token, options.prefix).then((response) => {
-            if (response.success) {
-                const result = response.message;
-                // TODO remove --query on deprecation
-                if (options.json || options.query) {
-                    getFilteredOutput(result, options);
-                } else {
-                    const tableSpec = [
-                        { column: 'Key', field: 'Key', width: 70 },
-                        { column: 'Content Type', field: 'ContentType', width: 30 },
-                        { column: 'Last Modified', field: 'LastModified', width: 30 },
-                        { column: 'Size (bytes)', field: 'Size', width: 20 },
-                    ];
-                    handleTable(tableSpec, response.message, null, 'No content found');
-                }
-            } else {
-                printError(`Failed to list content: ${response.status} ${response.message}`, options);
-            }
-        })
-            .catch((err) => {
-            debug(err);
-            printError(`Failed to list content: ${err.status} ${err.message}`, options);
-        });
+        try {
+        const response = await content.listContent(options.project || profile.project, profile.token, options.prefix);
+        const result = response.message;
+        // TODO remove --query on deprecation
+        if (options.json || options.query) {
+            getFilteredOutput(result, options);
+        } else {
+            const tableSpec = [
+                { column: 'Key', field: 'Key', width: 70 },
+                { column: 'Content Type', field: 'ContentType', width: 30 },
+                { column: 'Last Modified', field: 'LastModified', width: 30 },
+                { column: 'Size (bytes)', field: 'Size', width: 20 },
+            ];
+            handleTable(tableSpec, response.message, null, 'No content found');
+        }
+        } catch (err) {
+            handleError(err, options, 'Failed to list content');
+        }
     }
 }
 export class UploadContent {
@@ -112,17 +105,12 @@ export class DeleteContent {
         const profile = await loadProfile(options.profile);
         debug('%s.deleteContent()', profile.name);
         const content = new Content(profile.url);
-        content.deleteContent(options.project || profile.project, profile.token, contentKey).then((response) => {
-            if (response.success) {
-                printSuccess('Content successfully deleted.', options);
-            } else {
-                printError(`Failed to delete content: ${response.status} ${response.message}`, options);
-            }
-        })
-            .catch((err) => {
-            debug(err);
-            printError(`Failed to delete content: ${err.status} ${err.message}`, options);
-        });
+        try {
+            await content.deleteContent(options.project || profile.project, profile.token, contentKey);
+            printSuccess('Content successfully deleted.', options);
+        } catch (err) {
+            handleError(err, options, 'Failed to delete content');
+        }
     }
 }
 export class DownloadContent {

@@ -11,8 +11,6 @@ import {
     LISTTABLEFORMAT,
     RUNTABLEFORMAT,
     printExtendedLogs,
-    handleListFailure,
-    handleDeleteFailure,
     printSuccess,
     printError,
     filterObject,
@@ -20,7 +18,7 @@ import {
     fileExists,
     handleTable,
     getFilteredOutput,
-    printErrorDetails,
+    handleError,
 } from './utils.js';
 
 const _ = {
@@ -44,21 +42,13 @@ export class SaveModelCommand {
         const model = parseObject(modelDefStr, options);
         debug('%o', model);
         const models = new Models(profile.url);
-        models.saveModel(options.project || profile.project, profile.token, model).then((response) => {
-            if (response.success) {
-                printSuccess('Model saved', options);
-                printSuccess(JSON.stringify(_.pick(response.message, ['version', 'created', 'modelId']), null, 2));
-            } else if (response.details) {
-                console.log(`Failed to save model: ${response.status} ${response.message}`);
-                printErrorDetails(response, options);
-                printError(''); // Just exit
-            } else {
-                printError(JSON.stringify(response));
-            }
-        })
-            .catch((err) => {
-            printError(`Failed to save model: ${err.status} ${err.message}`, options);
-        });
+        try {
+            const response = await models.saveModel(options.project || profile.project, profile.token, model);
+            printSuccess('Model saved', options);
+            printSuccess(JSON.stringify(_.pick(response, ['version', 'created', 'modelId']), null, 2));
+        } catch (err) {
+            handleError(err, options,'Failed to save model');
+        }
     }
 }
 export class ListModelsCommand {
@@ -72,24 +62,19 @@ export class ListModelsCommand {
         debug('%s.executeListModels()', profile.name);
         const models = new Models(profile.url);
         // eslint-disable-next-line consistent-return
-        models.listModels(options.project || profile.project, options.skip, options.limit, options.filter, options.sort, options.tags, profile.token).then((response) => {
-            if (response.success) {
-                const result = response.models;
-                // TODO remove --query on deprecation
-                if (options.json || options.query) {
-                    getFilteredOutput(result, options);
-                } else {
-                    printExtendedLogs(result, options);
-                    handleTable(LISTTABLEFORMAT, result, (o) => ({ ...o, updatedAt: o.updatedAt ? dayjs(o.updatedAt).fromNow() : '-' }), 'No models found');
-                }
+        try {
+            const response = await models.listModels(options.project || profile.project, options.skip, options.limit, options.filter, options.sort, options.tags, profile.token);
+            const result = response.models;
+            // TODO remove --query on deprecation
+            if (options.json || options.query) {
+                getFilteredOutput(result, options);
             } else {
-                return handleListFailure(response, options, 'Models');
+                printExtendedLogs(result, options);
+                handleTable(LISTTABLEFORMAT, result, (o) => ({ ...o, updatedAt: o.updatedAt ? dayjs(o.updatedAt).fromNow() : '-' }), 'No models found');
             }
-        })
-            .catch((err) => {
-            debug(err);
-            printError(`Failed to list models: ${err.status} ${err.message}`, options);
-        });
+        } catch (err) {
+            handleError(err, options, 'Failed to list models');
+        }
     }
 }
 export class ListModelRunsCommand {
@@ -102,25 +87,20 @@ export class ListModelRunsCommand {
         const profile = await loadProfile(options.profile);
         debug('%s.executeListModels()', profile.name);
         const models = new Models(profile.url);
+        try {
         // eslint-disable-next-line consistent-return
-        models.listModelRuns(options.project || profile.project, modelName, profile.token, options.filter, options.limit, options.skip, options.sort).then((response) => {
-            if (response.success) {
-                const result = response.runs;
-                // TODO remove --query on deprecation
-                if (options.json || options.query) {
-                    getFilteredOutput(result, options);
-                } else {
-                    printExtendedLogs(result, options);
-                    handleTable(RUNTABLEFORMAT, result, (o) => ({ ...o, updatedAt: o.updatedAt ? dayjs(o.updatedAt).fromNow() : '-' }), 'No runs found');
-                }
+            const response = await models.listModelRuns(options.project || profile.project, modelName, profile.token, options.filter, options.limit, options.skip, options.sort);
+            const result = response.runs;
+            // TODO remove --query on deprecation
+            if (options.json || options.query) {
+                getFilteredOutput(result, options);
             } else {
-                return handleListFailure(response, options, 'Model-runs');
+                printExtendedLogs(result, options);
+                handleTable(RUNTABLEFORMAT, result, (o) => ({ ...o, updatedAt: o.updatedAt ? dayjs(o.updatedAt).fromNow() : '-' }), 'No runs found');
             }
-        })
-            .catch((err) => {
-            debug(err);
-            printError(`Failed to list model runs: ${err.status} ${err.message}`, options);
-        });
+        } catch (err) {
+            handleError(err, options, 'Failed to list model runs');
+        }
     }
 }
 
@@ -133,16 +113,12 @@ export class DescribeModelCommand {
         const profile = await loadProfile(options.profile);
         const models = new Models(profile.url);
         debug('%s.executeDescribeModel(%s)', profile.name, modelName);
-        models.describeModel(options.project || profile.project, profile.token, modelName, options.verbose).then((response) => {
-            if (response.success) {
-                getFilteredOutput(response.model, options);
-            } else {
-                printError(`Failed to describe model ${modelName}: ${response.message}`, options);
-            }
-        })
-            .catch((err) => {
-            printError(`Failed to describe model ${modelName}: ${err.status} ${err.message}`, options);
-        });
+        try {
+        const response = await models.describeModel(options.project || profile.project, profile.token, modelName, options.verbose);
+        getFilteredOutput(response.model, options);
+        } catch (err) {
+            handleError(err, options, `Failed to describe model ${modelName}`);
+        }
     }
 }
 export const DeleteModelCommand = class {
@@ -154,17 +130,13 @@ export const DeleteModelCommand = class {
         const profile = await loadProfile(options.profile);
         debug('%s.executeDeleteModel(%s)', profile.name, modelName);
         const models = new Models(profile.url);
-        models.deleteModel(options.project || profile.project, profile.token, modelName)
-            .then((response) => {
-            if (response && response.success) {
-                const result = filterObject(response, options);
-                return printSuccess(JSON.stringify(result, null, 2), options);
-            }
-            return handleDeleteFailure(response, options, 'Model');
-        })
-            .catch((err) => {
-            printError(`Failed to delete model: ${err.status} ${err.message}`, options);
-        });
+        try {
+            const response = await models.deleteModel(options.project || profile.project, profile.token, modelName);
+            const result = filterObject(response, options);
+            return printSuccess(JSON.stringify(result, null, 2), options);
+        } catch (err) {
+            handleError(err, { ...options, tableformat: 'DEPENDENCYTABLEFORMAT'}, `Failed to delete model "${modelName}"`);
+        }
     }
 };
 export class UpdateModelStatusCommand {
@@ -177,10 +149,7 @@ export class UpdateModelStatusCommand {
         const models = new Models(profile.url);
         debug('%s.executeUpdateModelStatus(%s)', profile.name, modelName, status);
         try {
-            const updateModelStatusObj = await models.updateModelStatus(options.project || profile.project, profile.token, modelName, status);
-            if (!updateModelStatusObj.success) {
-                printError(JSON.stringify(updateModelStatusObj));
-            }
+            await models.updateModelStatus(options.project || profile.project, profile.token, modelName, status);
             printSuccess(`Model ${status}ed`, options);
         } catch (err) {
             printError(`Failed to publish model ${modelName}: ${err.status} ${err.message}`, options);
@@ -201,32 +170,15 @@ export class RegisterModelCommand {
             const model = parseObject(modelDefStr, options);
             debug('%o', model);
             const saveExperimentResponse = await experiments.saveExperiment(options.project || profile.project, profile.token, model);
-            if (!saveExperimentResponse.success) {
-                printErrorDetails(saveExperimentResponse, options);
-                printError(JSON.stringify(saveExperimentResponse));
-                return;
-            }
             const experimentName = _.get(saveExperimentResponse, 'result.name', '');
             const saveRunResponse = await experiments.createRun(options.project || profile.project, profile.token, experimentName);
-            if (!saveRunResponse.success) {
-                if (saveRunResponse.details) {
-                    printErrorDetails(saveRunResponse);
-                    return;
-                }
-                printError(JSON.stringify(saveRunResponse));
-                return;
-            }
             const runId = _.get(saveRunResponse, 'result.runId', '');
             const contentType = _.get(options, 'contentType', 'application/octet-stream');
-            const uploadArtifactResponse = await experiments.uploadArtifact(options.project || profile.project, profile.token, experimentName, runId, model.filePath, model.artifact, contentType);
-            if (uploadArtifactResponse.success) {
-                printSuccess('Artifact successfully uploaded.', options);
-                printSuccess(JSON.stringify(saveRunResponse.result, null, 2), options);
-                return;
-            }
-            printError(`Failed to upload Artifact: ${uploadArtifactResponse.status} ${uploadArtifactResponse.message}`, options);
+            await experiments.uploadArtifact(options.project || profile.project, profile.token, experimentName, runId, model.filePath, model.artifact, contentType);
+            printSuccess('Artifact successfully uploaded.', options);
+            printSuccess(JSON.stringify(saveRunResponse.result, null, 2), options);
         } catch (err) {
-            printError(`Failed to upload model: ${err.status} ${err.message}`, options);
+            handleError(err, options, 'Failed to upload model');
         }
     }
 }

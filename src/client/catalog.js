@@ -85,16 +85,12 @@ export default class Catalog {
             searchParams.verbose = verbose;
             searchParams.status = verbose;
         }
-        try {
-            const res = got.get(endpoint, {
-                headers: defaultHeaders(token),
-                searchParams,
-            });
-            if (output.toLocaleLowerCase() === 'json') return res.json();
-            return res.text();
-        } catch (err) {
-            return constructError(err);
-        }
+        const res = got.get(endpoint, {
+            headers: defaultHeaders(token),
+            searchParams,
+        });
+        if (output.toLocaleLowerCase() === 'json') return res.json();
+        return res.text();
     }
 
     deploySkill(projectId, token, skillName, stereotypes, dryrun = false, verbose = false) {
@@ -464,31 +460,23 @@ export default class Catalog {
             searchParams.verbose = verbose;
             searchParams.status = verbose;
         }
-        try {
-            const res = got.get(endpoint, {
-                headers: defaultHeaders(token),
-                searchParams,
-            });
-            if (['json', 'pretty'].includes(output.toLocaleLowerCase())) return res.json();
-            return res.text();
-        } catch (err) {
-            return constructError(err);
-        }
+        const res = got.get(endpoint, {
+            headers: defaultHeaders(token),
+            searchParams,
+        });
+        if (['json', 'pretty'].includes(output.toLocaleLowerCase())) return res.json();
+        return res.text();
     }
 
     deployApplication(projectId, token, name) {
         checkProject(projectId);
         const endpoint = `${this.endpoints.applications(projectId)}/${encodeURIComponent(name)}/deploy`;
         debug('deployApplication(%s) => %s', name, endpoint);
-        try {
-            return got
-                .get(endpoint, {
-                    headers: defaultHeaders(token),
-                })
-                .json();
-        } catch (err) {
-            return constructError(err);
-        }
+        return got
+            .get(endpoint, {
+                headers: defaultHeaders(token),
+            })
+            .json();
     }
 
     unDeployApplication(projectId, token, name) {

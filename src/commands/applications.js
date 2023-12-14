@@ -64,16 +64,10 @@ export class SaveAppCommand {
                     app.actions.map((a) => a.podSpec = podSpec);
                 }
                 const response = await catalog.saveApplication(options.project || profile.project, profile.token, app);
-                if (response.success) {
-                    printSuccess(`Application saved: ${JSON.stringify(response.message)}`, options);
-                } else {
-                    console.log(`Failed to save application: ${response.message}`);
-                    printErrorDetails(response, options);
-                    printError(''); // Just exit
-                }
+                printSuccess(`Application saved: ${JSON.stringify(response.message)}`, options);
             }));
         } catch (err) {
-            printError(`Failed to save application: ${_.get(err, 'response.body.error', err.message)}`, options);
+            handleError(err, options, 'Failed to save application');
         }
     }
 }

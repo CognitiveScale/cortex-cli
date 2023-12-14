@@ -2,7 +2,7 @@ import debugSetup from 'debug';
 import { loadProfile } from '../config.js';
 import Roles from '../client/roles.js';
 import {
- printSuccess, printError, filterObject, EXTERNALROLESFORMAT, handleTable, getFilteredOutput, 
+    printSuccess, printError, filterObject, EXTERNALROLESFORMAT, handleTable, getFilteredOutput, handleError,
 } from './utils.js';
 /*
  * Copyright 2023 Cognitive Scale, Inc. All Rights Reserved.
@@ -37,17 +37,13 @@ export const RoleDeleteCommand = class {
         const profile = await loadProfile(options.profile);
         debug('%s.deleteRole(%s)', profile.name, role);
         const client = new Roles(profile.url, role);
-        client.deleteRole(profile.token).then((response) => {
-            if (response.success) {
-                const result = filterObject(response.result, options);
-                printSuccess(JSON.stringify(result, null, 2), options);
-            } else {
-                printError(`Failed to delete role : ${response.message}`, options);
-            }
-        })
-            .catch((err) => {
-            printError(`Failed to delete role : ${err.status} ${err.message}`, options);
-        });
+        try {
+            const response = await client.deleteRole(profile.token);
+            const result = filterObject(response.result, options);
+            printSuccess(JSON.stringify(result, null, 2), options);
+        } catch (err) {
+            handleError(err, options, 'Failed to delete role');
+        }
     }
 };
 export const RoleCreateCommand = class {
@@ -61,17 +57,13 @@ export const RoleCreateCommand = class {
         form.role = role;
         debug('%s.createRole(%s)', profile.name);
         const client = new Roles(profile.url);
-        client.createRole(profile.token, form).then((response) => {
-            if (response.success) {
-                const result = filterObject(response.result, options);
-                printSuccess(JSON.stringify(result, null, 2), options);
-            } else {
-                printError(`Failed to create role : ${response.message}`, options);
-            }
-        })
-            .catch((err) => {
-            printError(`Failed to create role : ${err.status} ${err.message}`, options);
-        });
+        try {
+            const response = await client.createRole(profile.token, form);
+            const result = filterObject(response.result, options);
+            printSuccess(JSON.stringify(result, null, 2), options);
+        } catch (err) {
+            handleError(err, options, 'Failed to create role');
+        }
     }
 };
 export const RoleAssignCommand = class {
@@ -89,19 +81,14 @@ export const RoleAssignCommand = class {
             }
             return client.addUsersToRole(token, users);
         };
-        call(options.delete, profile.token, options.users).then((response) => {
-            if (response.success) {
-                const result = filterObject(response.result, options);
-                printSuccess(JSON.stringify(result, null, 2), options);
-            } else {
-                const func = (options.delete) ? 'unassign' : 'assign';
-                printError(`Failed to ${func} user from role : ${response.message}`, options);
-            }
-        })
-            .catch((err) => {
+        try {
+        const response = await call(options.delete, profile.token, options.users);
+        const result = filterObject(response.result, options);
+        printSuccess(JSON.stringify(result, null, 2), options);
+        } catch (err) {
             const func = (options.delete) ? 'unassign' : 'assign';
             printError(`Failed to ${func} user from role : ${err.status} ${err.message}`, options);
-        });
+        }
     }
 };
 export const RoleGrantCommand = class {
@@ -120,19 +107,14 @@ export const RoleGrantCommand = class {
             }
             return client.createGrantForRole(token, body);
         };
-        call(options.delete, profile.token, form).then((response) => {
-            if (response.success) {
-                const result = filterObject(response.result, options);
-                printSuccess(JSON.stringify(result, null, 2), options);
-            } else {
-                const func = (options.delete) ? 'delete' : 'create';
-                printError(`Failed to ${func} grant for role : ${response.message}`, options);
-            }
-        })
-            .catch((err) => {
+        try {
+            const response = await call(options.delete, profile.token, form);
+            const result = filterObject(response.result, options);
+            printSuccess(JSON.stringify(result, null, 2), options);
+        } catch (err) {
             const func = (options.delete) ? 'delete' : 'create';
-            printError(`Failed to ${func} grant for role : ${err.status} ${err.message}`, options);
-        });
+            handleError(err, options, `Failed to ${func} grant for role`);
+        }
     }
 };
 export const RoleDescribeCommand = class {
@@ -151,17 +133,13 @@ export const RoleDescribeCommand = class {
             flags.push('users');
         }
         const client = new Roles(profile.url, role, flags);
-        client.describeRole(profile.token).then((response) => {
-            if (response.success) {
-                const result = filterObject(response.result, options);
-                printSuccess(JSON.stringify(result, null, 2), options);
-            } else {
-                printError(`Failed to describe role : ${response.message}`, options);
-            }
-        })
-            .catch((err) => {
-            printError(`Failed to describe role : ${err.status} ${err.message}`, options);
-        });
+        try {
+            const response = await client.describeRole(profile.token);
+            const result = filterObject(response.result, options);
+            printSuccess(JSON.stringify(result, null, 2), options);
+        } catch (err) {
+            handleError(err, options, 'Failed to describe role');
+        }
     }
 };
 export const RoleListCommand = class {
@@ -174,22 +152,18 @@ export const RoleListCommand = class {
         debug('%s.listRole(%s)', profile.name);
         const flags = [];
         const client = new Roles(profile.url, flags);
-        client.listRoles(profile.token, options.project).then((response) => {
-            if (response.success) {
-                const { result } = response;
-                // TODO remove --query on deprecation
-                if (options.json || options.query) {
-                    getFilteredOutput(result, options);
-                } else {
-                    handleTable([{ column: 'Role', field: 'role' }], result.roles.map((x) => ({ role: x })), null, 'No roles found');
-                }
-            } else {
-                printError(`Failed to list roles : ${response.message}`, options);
-            }
-        })
-            .catch((err) => {
-            printError(`Failed to list roles : ${err.status} ${err.message}`, options);
-        });
+        try {
+        const response = await client.listRoles(profile.token, options.project);
+        const { result } = response;
+        // TODO remove --query on deprecation
+        if (options.json || options.query) {
+            getFilteredOutput(result, options);
+        } else {
+            handleTable([{ column: 'Role', field: 'role' }], result.roles.map((x) => ({ role: x })), null, 'No roles found');
+        }
+        } catch (err) {
+            handleError(err, options, 'Failed to list roles');
+        }
     }
 };
 export const RoleProjectAssignCommand = class {
@@ -207,19 +181,14 @@ export const RoleProjectAssignCommand = class {
             }
             return client.addRolesToProject(token, assignProject, roles);
         };
-        call(options.delete, profile.token, project, options.roles).then((response) => {
-            if (response.success) {
-                const result = filterObject(response.result, options);
-                printSuccess(JSON.stringify(result, null, 2), options);
-            } else {
-                const func = (options.delete) ? 'unassign' : 'assign';
-                printError(`Failed to ${func} roles from project : ${response.message}`, options);
-            }
-        })
-            .catch((err) => {
+        try {
+            const response = await call(options.delete, profile.token, project, options.roles);
+            const result = filterObject(response.result, options);
+            printSuccess(JSON.stringify(result, null, 2), options);
+        } catch (err) {
             const func = (options.delete) ? 'unassign' : 'assign';
-            printError(`Failed to ${func} roles from project : ${err.status} ${err.message}`, options);
-        });
+            handleError(err, options, `Failed to ${func} roles from project`);
+        }
     }
 };
 export const ExternalGroupListCommand = class {
@@ -231,22 +200,18 @@ export const ExternalGroupListCommand = class {
         const profile = await loadProfile(options.profile);
         debug('%s.listExternalGroup(%s)', profile.name);
         const client = new Roles(profile.url, null);
-        client.listExternalGroups(profile.token).then((response) => {
-            if (response.success) {
-                const { result } = response;
-                // TODO remove --query on deprecation
-                if (options.json || options.query) {
-                    getFilteredOutput(result, options);
-                } else {
-                    handleTable(EXTERNALROLESFORMAT, result, (o) => ({ ...o, roles: o.roles.join(', ') }), null, 'No external roles found');
-                }
-            } else {
-                printError(`Failed to list external groups : ${response.message}`, options);
-            }
-        })
-            .catch((err) => {
-            printError(`Failed to list external groups : ${err.status} ${err.message}`, options);
-        });
+        try {
+        const response = await client.listExternalGroups(profile.token);
+        const { result } = response;
+        // TODO remove --query on deprecation
+        if (options.json || options.query) {
+            getFilteredOutput(result, options);
+        } else {
+            handleTable(EXTERNALROLESFORMAT, result, (o) => ({ ...o, roles: o.roles.join(', ') }), null, 'No external roles found');
+        }
+        } catch (err) {
+            handleError(err, options, 'Failed to list external groups');
+        }
     }
 };
 export const ExternalGroupDescribeCommand = class {
@@ -265,17 +230,13 @@ export const ExternalGroupDescribeCommand = class {
             flags.push('users');
         }
         const client = new Roles(profile.url, null, flags);
-        client.describeExternalGroup(profile.token, externalGroup).then((response) => {
-            if (response.success) {
-                const result = filterObject(response.result, options);
-                printSuccess(JSON.stringify(result, null, 2), options);
-            } else {
-                printError(`Failed to describe external group : ${response.message}`, options);
-            }
-        })
-            .catch((err) => {
-            printError(`Failed to describe external group : ${err.status} ${err.message}`, options);
-        });
+        try {
+            const response = await client.describeExternalGroup(profile.token, externalGroup);
+            const result = filterObject(response.result, options);
+            printSuccess(JSON.stringify(result, null, 2), options);
+        } catch (err) {
+            handleError(err, options, 'Failed to describe external group');
+        }
     }
 };
 export const ExternalGroupDeleteCommand = class {
@@ -287,17 +248,13 @@ export const ExternalGroupDeleteCommand = class {
         const profile = await loadProfile(options.profile);
         debug('%s.deleteExternalGroup(%s)', profile.name, externalGroup);
         const client = new Roles(profile.url, null);
-        client.deleteExternalGroup(profile.token, externalGroup).then((response) => {
-            if (response.success) {
-                const result = filterObject(response.result, options);
-                printSuccess(JSON.stringify(result, null, 2), options);
-            } else {
-                printError(`Failed to delete external group : ${response.message}`, options);
-            }
-        })
-            .catch((err) => {
-            printError(`Failed to delete external group : ${err.status} ${err.message}`, options);
-        });
+        try {
+            const response = await client.deleteExternalGroup(profile.token, externalGroup);
+            const result = filterObject(response.result, options);
+            printSuccess(JSON.stringify(result, null, 2), options);
+        } catch (err) {
+            handleError(err, options, 'Failed to delete external group');
+        }
     }
 };
 export const ExternalGroupAssignCommand = class {
@@ -315,18 +272,13 @@ export const ExternalGroupAssignCommand = class {
             }
             return client.addExternalGroupToRole(token, externalGroup);
         };
-        call(options.delete, profile.token, options.externalGroup).then((response) => {
-            if (response.success) {
-                const result = filterObject(response.result, options);
-                printSuccess(JSON.stringify(result, null, 2), options);
-            } else {
-                const func = (options.delete) ? 'unassign' : 'assign';
-                printError(`Failed to ${func} external group from role : ${response.message}`, options);
-            }
-        })
-            .catch((err) => {
+        try {
+            const response = await call(options.delete, profile.token, options.externalGroup);
+            const result = filterObject(response.result, options);
+            printSuccess(JSON.stringify(result, null, 2), options);
+        } catch (err) {
             const func = (options.delete) ? 'unassign' : 'assign';
-            printError(`Failed to ${func} external group from role : ${err.status} ${err.message}`, options);
-        });
+            handleError(err, options, `Failed to ${func} external group from role`);
+        }
     }
 };

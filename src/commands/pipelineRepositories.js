@@ -5,7 +5,18 @@ import relativeTime from 'dayjs/plugin/relativeTime.js';
 import { loadProfile } from '../config.js';
 import Pipelines from '../client/pipelineRepositories.js';
 import {
- fileExists, printSuccess, printError, parseObject, handleTable, printExtendedLogs, handleListFailure, handleDeleteFailure, getFilteredOutput, printCrossTable,
+  fileExists,
+  printSuccess,
+  printError,
+  parseObject,
+  handleTable,
+  printExtendedLogs,
+  handleListFailure,
+  handleDeleteFailure,
+  getFilteredOutput,
+  printCrossTable,
+  handleError,
+  DEPENDENCYTABLEFORMAT,
 } from './utils.js';
 
 const debug = debugSetup('cortex:cli');
@@ -35,13 +46,10 @@ export const SavePipelineRepoCommand = class {
 
     const repo = new Pipelines(profile.url);
     try {
-      const response = await repo.savePipelineRepo(options.project || profile.project, profile.token, repoObj);
-      if (response.success) {
+        await repo.savePipelineRepo(options.project || profile.project, profile.token, repoObj);
         return printSuccess('Pipeline Repository saved', options);
-      }
-      return printError(`Failed to save pipeline repository: ${response.status} ${response.message}`, options);
     } catch (err) {
-      return printError(`Failed to save pipeline repository: ${err.response.body.message}`, options);
+      return handleError(err, options,'Failed to save pipeline repository');
     }
   }
 };
@@ -57,7 +65,6 @@ export const ListPipelineRepoCommand = class {
     const repos = new Pipelines(profile.url);
     try {
       const response = await repos.listPipelineRepo(options.project || profile.project, profile.token, options.filter, options.limit, options.skip, options.sort);
-      if (response.success) {
         const result = response.pipelineRepositories;
         if (options.json) {
           return getFilteredOutput(result, options);
@@ -71,8 +78,6 @@ export const ListPipelineRepoCommand = class {
           { column: 'Author', field: 'createdBy', width: 22 },
         ];
         return handleTable(tableSpec, result, (o) => ({ ...o, updatedAt: o.updatedAt ? dayjs(o.updatedAt).fromNow() : '-' }), 'No pipeline repositories found');
-      }
-      return handleListFailure(response, options, 'Pipeline Repositories');
     } catch (err) {
       return printError(`Failed to list pipeline repositories: ${err.status} ${err.message}`, options);
     }
@@ -90,12 +95,9 @@ export const DescribePipelineRepoCommand = class {
     const repos = new Pipelines(profile.url);
     try {
       const response = await repos.describePipelineRepo(options.project || profile.project, profile.token, pipelineRepoName);
-      if (response.success) {
-        return getFilteredOutput(response.pipelineRepository, options);
-      }
-      return printError(`Failed to describe pipeline repository: ${response.status} ${response.message}`, options);
+      return getFilteredOutput(response.pipelineRepository, options);
     } catch (err) {
-      return printError(`Failed to describe pipeline repository: ${err.status} ${err.message}`, options);
+      return handleError(err, options, 'Failed to describe pipeline repository');
     }
   }
 };
@@ -111,12 +113,9 @@ export const DeletePipelineRepoCommand = class {
     const repos = new Pipelines(profile.url);
     try {
       const response = await repos.deletePipelineRepo(options.project || profile.project, profile.token, pipelineRepoName);
-      if (response.success) {
-        return printSuccess(response?.message ?? response, options);
-      }
-      return handleDeleteFailure(response, options, 'Pipeline Repository');
+      return printSuccess(response?.message ?? response, options);
     } catch (err) {
-      return printError(`Failed to delete pipeline repository: ${err.status} ${err.message}`, options);
+      return handleError(err, { ...options, tableformat: 'DEPENDENCYTABLEFORMAT' }, 'Failed to delete pipeline repository');
     }
   }
 };

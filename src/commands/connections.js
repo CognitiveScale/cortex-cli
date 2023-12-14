@@ -15,9 +15,8 @@ import {
     fileExists,
     handleTable,
     printExtendedLogs,
-    handleListFailure,
-    handleDeleteFailure,
     getFilteredOutput,
+    printErrorDetails, handleError, DEPENDENCYTABLEFORMAT,
 } from './utils.js';
 
 const debug = debugSetup('cortex:cli');
@@ -33,24 +32,20 @@ export class ListConnections {
         debug('%s.listConnections()', profile.name);
         const conns = new Connections(profile.url);
         // eslint-disable-next-line consistent-return
-        conns.listConnections(options.project || profile.project, profile.token, options.filter, options.limit, options.skip, options.sort).then((response) => {
-            if (response.success) {
-                const result = response.result.connections;
-                // TODO remove --query on deprecation
-                if (options.json || options.query) {
-                    getFilteredOutput(result, options);
-                } else {
-                    printExtendedLogs(result, options);
-                    handleTable(CONNECTIONTABLEFORMAT, result, (o) => ({ ...o, createdAt: o.createdAt ? dayjs(o.createdAt).fromNow() : '-' }), 'No connections found');
-                }
+        try {
+            const response = await conns.listConnections(options.project || profile.project, profile.token, options.filter, options.limit, options.skip, options.sort);
+            const result = response.connections;
+            // TODO remove --query on deprecation
+            if (options.json || options.query) {
+                getFilteredOutput(result, options);
             } else {
-                return handleListFailure(response, options, 'Connections');
+                printExtendedLogs(result, options);
+                handleTable(CONNECTIONTABLEFORMAT, result, (o) => ({ ...o, createdAt: o.createdAt ? dayjs(o.createdAt).fromNow() : '-' }), 'No connections found');
             }
-        })
-            .catch((err) => {
+        } catch (err) {
             debug(err);
-            printError(`Failed to list connections: ${err.status} ${err.message}`, options);
-        });
+            handleError(err, options, 'Failed to list connections');
+        }
     }
 }
 export class SaveConnectionCommand {
@@ -82,38 +77,25 @@ export class SaveConnectionCommand {
         const jdbcJarFilePath = this.getParamsValue(connObj, 'jdbc_jar_file');
         const contentKey = this.getParamsValue(connObj, 'managed_content_key') || this.getParamsValue(connObj, 'plugin_jar');
         if (jdbcJarFilePath && !jdbcJarFilePath.includes('--Insert jar file path--')) {
-            const content = new Content(profile.url);
-            const connection = new Connections(profile.url);
-            content.uploadContentStreaming(options.project || profile.project, profile.token, contentKey, jdbcJarFilePath)
-                .then(() => {
+            try {
+                const content = new Content(profile.url);
+                const connection = new Connections(profile.url);
+                await content.uploadContentStreaming(options.project || profile.project, profile.token, contentKey, jdbcJarFilePath);
                 const marshaledConnObj = connObj;
                 marshaledConnObj.params = this.stripJarPathFromParams(marshaledConnObj.params);
-                connection.saveConnection(options.project || profile.project, profile.token, marshaledConnObj).then((response) => {
-                    if (response.success) {
-                        printSuccess('Connection saved', options);
-                    } else {
-                        printError(`Failed to save connection: ${response.status} ${response.message}`, options);
-                    }
-                })
-                    .catch((err) => {
-                    printError(`Failed to save connection: ${err.response.body.message}`, options);
-                });
-            })
-                .catch((err) => {
-                printError(`Failed to upload jdbc jar: ${err.status} ${err.message}`, options);
-            });
+                await connection.saveConnection(options.project || profile.project, profile.token, marshaledConnObj);
+                printSuccess('Connection saved', options);
+            } catch (err) {
+                handleError(err, options, 'Failed to upload jdbc jar');
+            }
         } else {
+            try {
             const connection = new Connections(profile.url);
-            connection.saveConnection(options.project || profile.project, profile.token, connObj).then((response) => {
-                if (response.success) {
-                    printSuccess('Connection saved', options);
-                } else {
-                    printError(`Failed to save connection: ${response.status} ${response.message}`, options);
-                }
-            })
-                .catch((err) => {
-                printError(`Failed to save connection: ${err.response.body.message}`, options);
-            });
+            await connection.saveConnection(options.project || profile.project, profile.token, connObj);
+            printSuccess('Connection saved', options);
+            } catch (err) {
+                handleError(err, options, 'Failed to save connection');
+            }
         }
     }
 }
@@ -126,16 +108,12 @@ export class DescribeConnectionCommand {
         const profile = await loadProfile(options.profile);
         debug('%s.executeDescribeConnection(%s)', profile.name, connectionName);
         const connection = new Connections(profile.url);
-        connection.describeConnection(options.project || profile.project, profile.token, connectionName).then((response) => {
-            if (response.success) {
-                getFilteredOutput(response.result, options);
-            } else {
-                printError(`Failed to describe connection ${connectionName}: ${response.message}`, options);
-            }
-        })
-            .catch((err) => {
-            printError(`Failed to describe connection ${connectionName}: ${err.status} ${err.message}`, options);
-        });
+        try {
+            const response = await connection.describeConnection(options.project || profile.project, profile.token, connectionName);
+            getFilteredOutput(response.result, options);
+        } catch (err) {
+            handleError(err, options, `Failed to describe connection ${connectionName}`);
+        }
     }
 }
 export class DeleteConnectionCommand {
@@ -147,18 +125,16 @@ export class DeleteConnectionCommand {
         const profile = await loadProfile(options.profile);
         debug('%s.executeDeleteConnection(%s)', profile.name, connectionName);
         const connection = new Connections(profile.url);
-        connection.deleteConnection(options.project || profile.project, profile.token, connectionName).then((response) => {
-            if (response.success) {
-                const result = filterObject(response.result, options);
-                return printSuccess(JSON.stringify(result, null, 2), options);
-            }
-            return handleDeleteFailure(response, options, 'Connection');
-        })
-            .catch((err) => {
-            printError(`Failed to delete connection ${connectionName}: ${err.status} ${err.message}`, options);
-        });
+        try {
+            const response = await connection.deleteConnection(options.project || profile.project, profile.token, connectionName);
+            const result = filterObject(response.result, options);
+            return printSuccess(JSON.stringify(result, null, 2), options);
+        } catch (err) {
+            return handleError(err, { ...options, tableformat: 'DEPENDENCYTABLEFORMAT' }, 'Failed to delete connection ${connectionName}');
+        }
     }
 }
+
 export class ListConnectionsTypes {
     constructor(program) {
         this.program = program;
@@ -169,11 +145,11 @@ export class ListConnectionsTypes {
         const profile = await loadProfile(options.profile);
         debug('%s.listConnectionsTypes()', profile.name);
         const conns = new Connections(profile.url);
-        conns.listConnectionsTypes(profile.token, options.limit, options.skip, options.sort)
         // eslint-disable-next-line consistent-return
-        .then((response) => {
-        if (response.success) {
-            const result = response.connectionTypes;
+        try {
+            const response = await conns.listConnectionsTypes(profile.token, options.limit, options.skip, options.sort);
+            const result = response?.connectionTypes;
+            // TODO remove --query on deprecation
             if (options.json || options.query) {
                 getFilteredOutput(result, options);
             } else {
@@ -206,13 +182,11 @@ export class ListConnectionsTypes {
                     },
                 ];
                 handleTable(tableSpec, result, null, 'No connection types found');
-            } 
-        } else {
-                return handleListFailure(response, options, 'Connections');
-            } 
-        })
-            .catch((err) => {
-            printError(`Failed to list connection types: ${err.status} ${err.message}`, options);
-        });
+                }
+            } catch (err) {
+                debug(err);
+                 printError(`Failed to list connection types: ${err.status} ${err.message}`, options, false);
+                 printErrorDetails(err?.response, options);
+        }
     }
 }

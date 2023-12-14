@@ -35,9 +35,7 @@ export default class Actions {
             .post(endpoint, {
             headers: defaultHeaders(token),
             json: body,
-        }).json()
-            .then((res) => ({ success: true, message: res }))
-            .catch((err) => constructError(err));
+        }).json();
     }
 
     listActions(projectId, token, filter, limit, skip, sort) {
@@ -52,9 +50,7 @@ export default class Actions {
             .get(this.endpointV4(projectId), {
             headers: defaultHeaders(token),
             searchParams: query,
-        }).json()
-            .then((actions) => actions)
-            .catch((err) => constructError(err));
+        }).json();
     }
 
     describeAction(projectId, token, actionName) {
@@ -63,9 +59,7 @@ export default class Actions {
         debug('describeAction(%s) => %s', actionName, endpoint);
         return got
             .get(endpoint, { headers: defaultHeaders(token) })
-            .json()
-            .then((action) => action)
-            .catch((err) => constructError(err));
+            .json();
     }
 
     getLogsAction(projectId, token, actionName) {
@@ -74,15 +68,7 @@ export default class Actions {
         debug('getLogsAction(%s) => %s', actionName, endpoint);
         return got
             .get(endpoint, { headers: defaultHeaders(token) })
-            .json()
-            .then((logs) => {
-            if (_.isArray(logs)) {
-                // returns plain array for Rancher daemons
-                return { success: true, logs };
-            }
-            return logs;
-        })
-            .catch((err) => constructError(err));
+            .json();
     }
 
     deleteAction(projectId, token, actionName) {
@@ -93,9 +79,7 @@ export default class Actions {
             .delete(endpoint, {
             headers: defaultHeaders(token),
         })
-            .json()
-            .then((action) => ({ success: true, action }))
-            .catch((err) => constructError(err));
+            .json();
     }
 
     getConfig(projectId, token) {
@@ -106,9 +90,7 @@ export default class Actions {
             .get(endpoint, {
             headers: defaultHeaders(token),
         })
-            .json()
-            .then((config) => ({ success: true, config }))
-            .catch((err) => constructError(err));
+            .json();
     }
 
     static getCanonicalJobId(jobId) {

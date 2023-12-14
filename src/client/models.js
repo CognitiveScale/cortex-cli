@@ -32,9 +32,7 @@ export default (class Models {
             .post(endpoint, {
             headers: defaultHeaders(token),
             json: modelObj,
-        }).json()
-            .then((res) => ({ success: true, message: res }))
-            .catch((err) => constructError(err));
+        }).json();
     }
 
     updateModelStatus(projectId, token, modelName, status) {
@@ -45,9 +43,7 @@ export default (class Models {
             .post(endpoint, {
             headers: defaultHeaders(token),
             json: {},
-        }).json()
-            .then((res) => ({ success: true, message: res }))
-            .catch((err) => constructError(err));
+        }).json();
     }
 
     deleteModel(projectId, token, modelName) {
@@ -57,10 +53,7 @@ export default (class Models {
         return got
             .delete(endpoint, {
             headers: defaultHeaders(token),
-        })
-            .json()
-            .then((model) => ({ success: true, model }))
-            .catch((err) => constructError(err));
+        }).json();
     }
 
     describeModel(projectId, token, modelName, verbose) {
@@ -71,9 +64,7 @@ export default (class Models {
             .get(endpoint, {
             headers: defaultHeaders(token),
             searchParams: { verbose },
-        }).json()
-            .then((model) => ({ success: true, model }))
-            .catch((err) => constructError(err));
+        }).json();
     }
 
     listModels(projectId, skip, limit, filter, sort, tags, token) {
@@ -90,10 +81,7 @@ export default (class Models {
             .get(endpoint, {
             headers: defaultHeaders(token),
             searchParams: query,
-        })
-            .json()
-            .then((modelsResp) => ({ success: true, ...modelsResp }))
-            .catch((err) => constructError(err));
+        }).json();
     }
 
     listModelRuns(projectId, modelName, token, filter, limit, skip, sort) {
@@ -109,9 +97,6 @@ export default (class Models {
             .get(endpoint, {
             headers: defaultHeaders(token),
             searchParams: query,
-        })
-            .json()
-            .then((modelsResp) => ({ success: true, ...modelsResp }))
-            .catch((err) => constructError(err));
+        }).json();
     }
 });

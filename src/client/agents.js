@@ -62,9 +62,7 @@ export default (class Agents {
             opts.searchParams = { report };
         }
         return got
-            .get(endpoint, opts).json()
-            .then((result) => ({ success: true, result }))
-            .catch((err) => constructError(err));
+            .get(endpoint, opts).json();
     }
 
     cancelActivation(projectId, token, activationId, inFlight) {
@@ -89,9 +87,7 @@ export default (class Agents {
             opts.searchParams = params;
         }
         return got
-            .get(endpoint, opts).json()
-            .then((result) => ({ success: true, result }))
-            .catch((err) => constructError(err));
+            .get(endpoint, opts).json();
     }
 
     listAgentSnapshots(projectId, token, agentName, filter, limit, skip, sort) {
@@ -110,9 +106,7 @@ export default (class Agents {
             .get(endpoint, {
             headers: defaultHeaders(token),
             searchParams: query,
-        }).json()
-            .then((result) => ({ success: true, result }))
-            .catch((err) => constructError(err));
+        }).json();
     }
 
     describeAgentSnapshot(projectId, token, snapshotId, output) {
@@ -123,8 +117,7 @@ export default (class Agents {
             .get(endpoint, {
             headers: defaultHeaders(token),
             searchParams: { output, deps: true },
-        }).text()
-            .catch((err) => constructError(err));
+        }).text();
     }
 
     createAgentSnapshot(projectId, token, snapshot) {
@@ -135,8 +128,6 @@ export default (class Agents {
             .post(endpoint, {
             headers: defaultHeaders(token),
             json: snapshot,
-        }).json()
-            .then((result) => ({ success: true, result }))
-            .catch((err) => constructError(err));
+        }).json();
     }
 });

@@ -39,9 +39,7 @@ export const ListPipelineCommand = class {
       if (options.repo && options.filter) {
         printWarning('WARNING: --repo and --filter options are incompatible! The --filter option will be used', options);
       }
-      const response = await pipelines.listPipelines(options.project || profile.project, profile.token, filter, options.limit, options.skip, options.sort);
-      if (response.success) {
-        const result = response.pipelines;
+      const result = await pipelines.listPipelines(options.project || profile.project, profile.token, filter, options.limit, options.skip, options.sort);
         if (options.json) {
           return getFilteredOutput(result, options);
         }
@@ -54,10 +52,8 @@ export const ListPipelineCommand = class {
           { column: 'Author', field: 'createdBy', width: 22 },
         ];
         return handleTable(tableSpec, result, (o) => ({ ...o, updatedAt: o.updatedAt ? dayjs(o.updatedAt).fromNow() : '-' }), 'No pipelines found');
-      }
-      return handleListFailure(response, options, 'Pipelines');
     } catch (err) {
-      return printError(`Failed to list pipelines: ${err.status} ${err.message}`, options);
+      return handleError(err, options, 'Failed to list pipelines');
     }
   }
 };
@@ -73,12 +69,9 @@ export const DescribePipelineCommand = class {
     const pipelines = new Pipelines(profile.url);
     try {
       const response = await pipelines.describePipeline(options.project || profile.project, profile.token, pipelineName, gitRepoName, options.sha);
-      if (response.success) {
-        return getFilteredOutput(response.pipeline, options);
-      }
-      return printError(`Failed to describe pipeline: ${response.status} ${response.message}`, options);
+      return getFilteredOutput(response.pipeline, options);
     } catch (err) {
-      return printError(`Failed to describe pipeline: ${err.status} ${err.message}`, options);
+      return handleError(err, options, 'Failed to describe pipeline');
     }
   }
 };
@@ -93,11 +86,11 @@ export const RunPipelineCommand = class {
     debug('%s.executeRunPipeline(%s)', profile.name, pipelineName);
     let params = {};
     if (options.params) {
-      try {
-        params = parseObject(options.params, options);
-      } catch (e) {
-        printError(`Failed to parse params: ${options.params}. Error: ${e}`, options);
-      }
+        try {
+            params = parseObject(options.params, options);
+        } catch (e) {
+            printError(`Failed to parse params: ${options.params} Error: ${e}`, options);
+        }
     } else if (options.paramsFile) {
       if (!fs.existsSync(options.paramsFile)) {
         printError(`File does not exist at: ${options.paramsFile}`, options);
@@ -108,11 +101,6 @@ export const RunPipelineCommand = class {
     const pipelines = new Pipelines(profile.url);
     try {
       const response = await pipelines.runPipeline(options.project || profile.project, profile.token, pipelineName, gitRepoName, params, options);
-      if (!response.success) {
-        printError(`Failed to run pipeline: ${response.status} ${response.message}`, options);
-        return;
-      }
-
       // Prefer 'runId' but support 'activationId' as a fallback
       if (response?.activationId) {
         response.runId = response?.runId || response?.activationId;
@@ -128,7 +116,7 @@ export const RunPipelineCommand = class {
         printSuccess(response.message);
       }
     } catch (err) {
-      printError(`Failed to run pipeline: ${err.status} ${err.message}`, options);
+      return handleError(err, options, 'Failed to run pipeline');
     }
   }
 };
@@ -181,7 +169,6 @@ export const DescribePipelineRunCommand = class {
     const pipelines = new Pipelines(profile.url);
     try {
       const response = await pipelines.describePipelineRun(options.project || profile.project, profile.token, runId);
-      if (response.success) {
         if (options.json) {
           getFilteredOutput(response, options);
         } else {
@@ -203,11 +190,8 @@ export const DescribePipelineRunCommand = class {
           printSuccess('Details:');
           printTable(tableSpec, _.sortBy(blocks, ['start', 'end']));
         }
-      } else {
-        printError(`Failed to desribe pipeline run ${runId}: ${response.message}`, options);
-      }
     } catch (err) {
-      printError(`Failed to describe pipeline run ${runId}: ${err.status} ${err.message}`, options);
+      handleError(err, options, `Failed to describe pipeline run ${runId}`, options);
     }
   }
 };
@@ -224,7 +208,6 @@ export const ListPipelineRunsCommand = class {
     try {
       const response = await pipelines.listPipelineRuns(options.project || profile.project,
         profile.token, pipelineName, gitRepoName, options.limit, options.skip, options.sort, options.filter);
-      if (response.success) {
         const result = response.activations;
         // TODO remove --query on deprecation
         if (options.json || options.query) {
@@ -251,10 +234,8 @@ export const ListPipelineRunsCommand = class {
             name: genName(o),
             start: o.start ? dayjs(o.start).fromNow() : '-',
         })), null, 'No pipeline runs found');
-    }
-    return handleListFailure(response, options, 'PipelineRuns');
     } catch (err) {
-      return printError(`Failed to list pipelne runs: ${err.status} ${err.message}`, options);
+      return handleError(err, options, 'Failed to list pipelne runs');
     }
   }
 };
