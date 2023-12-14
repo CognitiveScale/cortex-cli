@@ -189,7 +189,7 @@ export const PrintEnvVars = class {
                     vars.push(`${exportPart}${spacing}${defaultPart}`);
                 } else {
                     // user set value
-                    const unitPart =  `# (unit: ${unit})`;
+                    const unitPart = `# (unit: ${unit})`;
                     const exportPart = `export ${t.envVar}=${t.envValue}`;
                     const spacing = ' '.repeat(len - exportPart.length);
                     vars.push(`${exportPart}${spacing}${unitPart}`);
