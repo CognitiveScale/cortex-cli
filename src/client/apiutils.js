@@ -16,8 +16,8 @@ const gotOpts = {
     followRedirect: false,
     // Put a reasonable timeout, see: https://github.com/sindresorhus/got/blob/main/documentation/6-timeout.md
     timeout: {
-        lookup: 100,
-        connect: 50,
+        lookup: 75, // greater than 100 not recommended
+        connect: 100,
         secureConnect: 100,
         socket: 1000,
         // send: 10000, // Not "SAFE" with large uploads
