@@ -132,9 +132,7 @@ describe('configure', () => {
 
     describe('Configure Env', () => {
         const project = 'testproject';
-        const numDefaultVars = 4;
-        const numTimeoutVars = 5;
-        const totalVars = numDefaultVars + numTimeoutVars;
+        const totalVars = 4 + 5 + 1; // default + timeouts + retries
         const expectedToken = 'eyJhbGciOiJFZERTQSIsImtpZCI6Ilg0dTJIdjRWeEw3N2JFOE45ZFQ0bHRWQm9Kc1NMVEg0YlkxYTVXTDZ3TlkifQ.eyJzdWIiOiJ0ZXN0X3VzZXIiLCJhdWQiOiJjb3J0ZXgiLCJpc3MiOiJjb2duaXRpdmVzY2FsZS5jb20iLCJpYXQiOjEyOTQ3NjU4NzEsImV4cCI6MTI5NDg1MjI3MX0.JyU-9ie7W_YlGxj76A2VQa2H9Ex_lE-KttQxV1wRLOCki48QvabDMmKsb3fDRMK0zoW_ZSpN7KlNU6S5a7lwBA';
 
         it('prints cortex env variables', async () => {
@@ -151,6 +149,7 @@ describe('configure', () => {
             expect(output).to.include('#export CORTEX_TIMEOUT_SECURE_CONNECT=                      (default: 100, unit: ms)');
             expect(output).to.include('#export CORTEX_TIMEOUT_SOCKET=                              (default: 1000, unit: ms)');
             expect(output).to.include('#export CORTEX_TIMEOUT_RESPONSE=                            (default: 2000, unit: ms)');
+            expect(output).to.include('#export CORTEX_API_RETRY=                                   (default: 3)');
         });
 
         it('configure env does NOT pick up CORTEX_TOKEN & CORTEX_URI environment variables', async () => {
@@ -168,14 +167,16 @@ describe('configure', () => {
             expect(output).to.include('export CORTEX_URI=http://localhost:8000');
             expect(output).to.include('export CORTEX_URL=http://localhost:8000');
             // default timeouts
-            expect(output).to.include('#export CORTEX_TIMEOUT_LOOKUP=                              (default: 100, unit: ms)');
-            expect(output).to.include('#export CORTEX_TIMEOUT_CONNECT=                             (default: 50, unit: ms)');
+            expect(output).to.include('#export CORTEX_TIMEOUT_LOOKUP=                              (default: 75, unit: ms)');
+            expect(output).to.include('#export CORTEX_TIMEOUT_CONNECT=                             (default: 100, unit: ms)');
             expect(output).to.include('#export CORTEX_TIMEOUT_SECURE_CONNECT=                      (default: 100, unit: ms)');
             expect(output).to.include('#export CORTEX_TIMEOUT_SOCKET=                              (default: 1000, unit: ms)');
             expect(output).to.include('#export CORTEX_TIMEOUT_RESPONSE=                            (default: 2000, unit: ms)');
+            expect(output).to.include('#export CORTEX_API_RETRY=                                   (default: 3)');
         });
 
         it('prints user defined timeout environment variables', async () => {
+            process.env.CORTEX_API_RETRY = 0;
             process.env.CORTEX_TIMEOUT_LOOKUP = 100;
             process.env.CORTEX_TIMEOUT_CONNECT = 200;
             process.env.CORTEX_TIMEOUT_SECURE_CONNECT = 'false';
@@ -194,9 +195,11 @@ describe('configure', () => {
             expect(output).to.include('export CORTEX_TIMEOUT_SECURE_CONNECT=false                  # (unit: ms)');
             expect(output).to.include('export CORTEX_TIMEOUT_SOCKET=1000                           # (unit: ms)');
             expect(output).to.include('export CORTEX_TIMEOUT_RESPONSE=2000                         # (unit: ms)');
+            expect(output).to.include('export CORTEX_API_RETRY=0');
         });
 
         it('prints user defined timeout environment variables along with defaults', async () => {
+            process.env.CORTEX_API_RETRY = 0;
             process.env.CORTEX_TIMEOUT_CONNECT = 200;
             process.env.CORTEX_TIMEOUT_SECURE_CONNECT = 'false';
             await create().parseAsync(['node', 'configure', 'env', '--project', project]);
@@ -213,6 +216,7 @@ describe('configure', () => {
             // prints user defined variables
             expect(output).to.include('export CORTEX_TIMEOUT_CONNECT=200                           # (unit: ms)');
             expect(output).to.include('export CORTEX_TIMEOUT_SECURE_CONNECT=false                  # (unit: ms)');
+            expect(output).to.include('export CORTEX_API_RETRY=0');
         });
     });
 });

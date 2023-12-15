@@ -7,7 +7,7 @@ import {
  readConfig, defaultConfig, generateJwt, loadProfile, durationRegex, 
 } from '../config.js';
 import { printSuccess, printError, useColor } from './utils.js';
-import { getTimeoutUnit, getTimeoutValues } from '../client/apiutils.js';
+import { getTimeoutUnit, getGotEnvOverrides } from '../client/apiutils.js';
 /*
  * Copyright 2023 Cognitive Scale, Inc. All Rights Reserved.
  *
@@ -175,24 +175,38 @@ export const PrintEnvVars = class {
             vars.push(`export CORTEX_URL=${profile.url}`);
             vars.push(`export CORTEX_PROJECT=${options.project || profile.project}`);
 
-            // Print timeout options
-            const timeout = getTimeoutValues();
+            // Print timeout options, including time unit
+            const { timeout, retry } = getGotEnvOverrides();
             const unit = getTimeoutUnit();
+            const len = 60; // fixed length to apply consistent spacing
             timeout.forEach((t) => {
-                // use fixed length to apply consistent spacing (should be more than enough)
-                const len = 60;
-                if (t.envValue == null) {
-                    // using default
-                    const defaultPart = `(default: ${t.defaultValue}, unit: ${unit})`;
-                    const exportPart = `#export ${t.envVar}=`;
-                    const spacing = ' '.repeat(len - exportPart.length);
-                    vars.push(`${exportPart}${spacing}${defaultPart}`);
-                } else {
-                    // user set value
+                if (t.userDefined) {
+                    // Print the exact value set by the user & units
                     const unitPart = `# (unit: ${unit})`;
                     const exportPart = `export ${t.envVar}=${t.envValue}`;
                     const spacing = ' '.repeat(len - exportPart.length);
                     vars.push(`${exportPart}${spacing}${unitPart}`);
+                } else {
+                    // Print comment showing default & units
+                    const defaultPart = `(default: ${t.defaultValue}, unit: ${unit})`;
+                    const exportPart = `#export ${t.envVar}=`;
+                    const spacing = ' '.repeat(len - exportPart.length);
+                    vars.push(`${exportPart}${spacing}${defaultPart}`);
+                }
+            });
+
+            // Print retry options
+            retry.forEach((v) => {
+                if (v.userDefined) {
+                    // Print the exact value set by the user
+                    const exportPart = `export ${v.envVar}=${v.envValue}`;
+                    vars.push(`${exportPart}`);
+                } else {
+                    // Print comment showing default
+                    const defaultPart = `(default: ${v.defaultValue})`;
+                    const exportPart = `#export ${v.envVar}=`;
+                    const spacing = ' '.repeat(len - exportPart.length);
+                    vars.push(`${exportPart}${spacing}${defaultPart}`);
                 }
             });
             return printSuccess(vars.join('\n'), { color: 'off' });

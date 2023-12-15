@@ -24,7 +24,7 @@ const gotOpts = {
         response: 2000,
     },
     retry: {
-        limit: 0, // no retries - fail fast
+        limit: 3, // 3 retries
     },
     headers: {
         'user-agent': getUserAgent(),
@@ -58,45 +58,94 @@ const gotOpts = {
     },
 };
 
-export function getTimeoutValues() {
-    return [
-        {
-            envVar: 'CORTEX_TIMEOUT_LOOKUP',
-            envValue: process.env.CORTEX_TIMEOUT_LOOKUP,
-            defaultValue: gotOpts.timeout.lookup,
-            key: 'lookup',
-        },
-        {
-            envVar: 'CORTEX_TIMEOUT_CONNECT',
-            envValue: process.env.CORTEX_TIMEOUT_CONNECT,
-            defaultValue: gotOpts.timeout.connect,
-            key: 'connect',
-        },
-        {
-            envVar: 'CORTEX_TIMEOUT_SECURE_CONNECT',
-            envValue: process.env.CORTEX_TIMEOUT_SECURE_CONNECT,
-            defaultValue: gotOpts.timeout.secureConnect,
-            key: 'secureConnect',
-        },
-        {
-            envVar: 'CORTEX_TIMEOUT_SOCKET',
-            envValue: process.env.CORTEX_TIMEOUT_SOCKET,
-            defaultValue: gotOpts.timeout.socket,
-            key: 'socket',
-        },
-        // {
-        //     envVar: 'CORTEX_TIMEOUT_SEND',
-        //     envValue: process.env.CORTEX_TIMEOUT_SEND,
-        //     defaultValue: gotOpts.timeout.send,
-        //     key: 'send',
-        // },
-        {
-            envVar: 'CORTEX_TIMEOUT_RESPONSE',
-            envValue: process.env.CORTEX_TIMEOUT_RESPONSE,
-            defaultValue: gotOpts.timeout.response,
-            key: 'response',
-        },
-    ];
+// TODO: convert to ES6 class (use getters, etc.) or Typescript?
+function gotEnvValues() {
+    return {
+        timeout: [
+            {
+                envVar: 'CORTEX_TIMEOUT_LOOKUP',
+                envValue: process.env.CORTEX_TIMEOUT_LOOKUP,
+                defaultValue: gotOpts.timeout.lookup,
+                key: 'lookup',
+            },
+            {
+                envVar: 'CORTEX_TIMEOUT_CONNECT',
+                envValue: process.env.CORTEX_TIMEOUT_CONNECT,
+                defaultValue: gotOpts.timeout.connect,
+                key: 'connect',
+            },
+            {
+                envVar: 'CORTEX_TIMEOUT_SECURE_CONNECT',
+                envValue: process.env.CORTEX_TIMEOUT_SECURE_CONNECT,
+                defaultValue: gotOpts.timeout.secureConnect,
+                key: 'secureConnect',
+            },
+            {
+                envVar: 'CORTEX_TIMEOUT_SOCKET',
+                envValue: process.env.CORTEX_TIMEOUT_SOCKET,
+                defaultValue: gotOpts.timeout.socket,
+                key: 'socket',
+            },
+            // {
+            //     envVar: 'CORTEX_TIMEOUT_SEND',
+            //     envValue: process.env.CORTEX_TIMEOUT_SEND,
+            //     defaultValue: gotOpts.timeout.send,
+            //     key: 'send',
+            // },
+            {
+                envVar: 'CORTEX_TIMEOUT_RESPONSE',
+                envValue: process.env.CORTEX_TIMEOUT_RESPONSE,
+                defaultValue: gotOpts.timeout.response,
+                key: 'response',
+            },
+
+        ],
+        retry: [
+            {
+                envVar: 'CORTEX_API_RETRY',
+                envValue: process.env.CORTEX_API_RETRY,
+                defaultValue: gotOpts.retry.limit,
+                key: 'limit',
+            },
+        ],
+    };
+}
+
+export function getGotEnvOverrides() {
+    function resolveNumericValue(v) {
+        // if its nullish -> keep the default
+        // if its a non-negative number -> parse as an int, then apply to k
+        // if its falsey or not a number -> use no timeout
+        if (v == null) {
+            return null; // use default
+        }
+        const value = parseInt(v, 10);
+        if (value >= 0) {
+            return value; // user defined int
+        }
+        return false; // use no timeout
+    }
+
+    // NOTE: 'parsedValue' & 'userDefined' fields are resolved dynamically
+    const values = gotEnvValues();
+    Object.keys(values.timeout).forEach((k) => {
+        // Parse each environment variable override. If result is (bool) false,
+        // then the key should NOT be set. If it's nullish, then the user didn't
+        // set a value.
+        const entry = values.timeout[k];
+        entry.parsedValue = resolveNumericValue(entry.envValue);
+        entry.skipAssignment = (entry.parsedValue === false);
+        entry.userDefined = (entry.parsedValue != null);
+    });
+    Object.keys(values.retry).forEach((k) => {
+        // Ditto (from above).
+        const entry = values.retry[k];
+        entry.parsedValue = resolveNumericValue(entry.envValue);
+        entry.skipAssignment = (entry.parsedValue === false);
+        entry.userDefined = (entry.parsedValue != null);
+    });
+    debug('got Environment Variables: %s', JSON.stringify(values));
+    return values;
 }
 
 export function getTimeoutUnit() {
@@ -104,28 +153,20 @@ export function getTimeoutUnit() {
 }
 
 function getEnvOptions() {
-    function resolveTimeout(v) {
-        // if its nullish -> keep the default
-        // if its a positive number -> parse as an int, then apply to k
-        // if its falsey or non-positive number -> use no timeout
-        if (v == null) {
-            return null; // use default
-        }
-        const value = parseInt(v, 10);
-        if (value > 0) {
-            return value; // user defined int
-        }
-        return false; // use no timeout
-    }
+    const retry = {};
     const timeout = {};
-    const timeoutValues = getTimeoutValues();
+    const { timeout: timeoutValues, retry: retryValues } = getGotEnvOverrides();
     timeoutValues.forEach((t) => {
-        const parsed = resolveTimeout(t.envValue);
-        if (parsed !== false) {
-            timeout[t.key] = parsed ?? t.defaultValue;
+        if (!t.skipAssignment) {
+            timeout[t.key] = t.parsedValue ?? t.defaultValue; // could use 'userDefined', but ?? is shorter
         }
     });
-    return { ...gotOpts, timeout };
+    retryValues.forEach((v) => {
+        if (!v.skipAssignment) {
+            retry[v.key] = v.parsedValue ?? v.defaultValue; // could use 'userDefined', but ?? is shorter
+        }
+    });
+    return { ...gotOpts, timeout, retry };
 }
 
 const gotExt = got.extend(getEnvOptions());
