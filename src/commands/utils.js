@@ -142,7 +142,8 @@ export const constructError = (error) => {
         errorText = error.message;
         details = '\nTry running the command again with \'--no-timeout\' or increase\n'
             + 'the network timeout values via environment variables. Run\n'
-            + '"cortex configure env" to view your current network timeout settings.';
+            + '"cortex configure env" to view the environment variables\n'
+            + 'controlling the network timeout settings.';
     }
     // if JSON was returned, look for either a message or error in it
     try {
