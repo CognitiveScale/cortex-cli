@@ -146,11 +146,11 @@ describe('configure', () => {
             expect(output).to.include('export CORTEX_URL=http://localhost:8000');
             expect(output).to.include(`export CORTEX_PROJECT=${project}`);
             // default timeouts
-            expect(output).to.include('export CORTEX_TIMEOUT_LOOKUP=                               (default: 100, unit: ms)');
-            expect(output).to.include('export CORTEX_TIMEOUT_CONNECT=                              (default: 50, unit: ms)');
-            expect(output).to.include('export CORTEX_TIMEOUT_SECURE_CONNECT=                       (default: 100, unit: ms)');
-            expect(output).to.include('export CORTEX_TIMEOUT_SOCKET=                               (default: 1000, unit: ms)');
-            expect(output).to.include('export CORTEX_TIMEOUT_RESPONSE=                             (default: 2000, unit: ms)');
+            expect(output).to.include('#export CORTEX_TIMEOUT_LOOKUP=                              (default: 100, unit: ms)');
+            expect(output).to.include('#export CORTEX_TIMEOUT_CONNECT=                             (default: 50, unit: ms)');
+            expect(output).to.include('#export CORTEX_TIMEOUT_SECURE_CONNECT=                      (default: 100, unit: ms)');
+            expect(output).to.include('#export CORTEX_TIMEOUT_SOCKET=                              (default: 1000, unit: ms)');
+            expect(output).to.include('#export CORTEX_TIMEOUT_RESPONSE=                            (default: 2000, unit: ms)');
         });
 
         it('configure env does NOT pick up CORTEX_TOKEN & CORTEX_URI environment variables', async () => {
@@ -168,14 +168,14 @@ describe('configure', () => {
             expect(output).to.include('export CORTEX_URI=http://localhost:8000');
             expect(output).to.include('export CORTEX_URL=http://localhost:8000');
             // default timeouts
-            expect(output).to.include('export CORTEX_TIMEOUT_LOOKUP=                               (default: 100, unit: ms)');
-            expect(output).to.include('export CORTEX_TIMEOUT_CONNECT=                              (default: 50, unit: ms)');
-            expect(output).to.include('export CORTEX_TIMEOUT_SECURE_CONNECT=                       (default: 100, unit: ms)');
-            expect(output).to.include('export CORTEX_TIMEOUT_SOCKET=                               (default: 1000, unit: ms)');
-            expect(output).to.include('export CORTEX_TIMEOUT_RESPONSE=                             (default: 2000, unit: ms)');
+            expect(output).to.include('#export CORTEX_TIMEOUT_LOOKUP=                              (default: 100, unit: ms)');
+            expect(output).to.include('#export CORTEX_TIMEOUT_CONNECT=                             (default: 50, unit: ms)');
+            expect(output).to.include('#export CORTEX_TIMEOUT_SECURE_CONNECT=                      (default: 100, unit: ms)');
+            expect(output).to.include('#export CORTEX_TIMEOUT_SOCKET=                              (default: 1000, unit: ms)');
+            expect(output).to.include('#export CORTEX_TIMEOUT_RESPONSE=                            (default: 2000, unit: ms)');
         });
 
-        it('configure env does pick up timeout environment variables', async () => {
+        it('prints user defined timeout environment variables', async () => {
             process.env.CORTEX_TIMEOUT_LOOKUP = 100;
             process.env.CORTEX_TIMEOUT_CONNECT = 200;
             process.env.CORTEX_TIMEOUT_SECURE_CONNECT = 'false';
@@ -189,11 +189,30 @@ describe('configure', () => {
             expect(output).to.include('export CORTEX_URI=http://localhost:8000');
             expect(output).to.include('export CORTEX_URL=http://localhost:8000');
             // prints user defined variables
-            expect(output).to.include('export CORTEX_TIMEOUT_LOOKUP=100                            (unit: ms)');
-            expect(output).to.include('export CORTEX_TIMEOUT_CONNECT=200                           (unit: ms)');
-            expect(output).to.include('export CORTEX_TIMEOUT_SECURE_CONNECT=false                  (unit: ms)');
-            expect(output).to.include('export CORTEX_TIMEOUT_SOCKET=1000                           (unit: ms)');
-            expect(output).to.include('export CORTEX_TIMEOUT_RESPONSE=2000                         (unit: ms)');
+            expect(output).to.include('export CORTEX_TIMEOUT_LOOKUP=100                            # (unit: ms)');
+            expect(output).to.include('export CORTEX_TIMEOUT_CONNECT=200                           # (unit: ms)');
+            expect(output).to.include('export CORTEX_TIMEOUT_SECURE_CONNECT=false                  # (unit: ms)');
+            expect(output).to.include('export CORTEX_TIMEOUT_SOCKET=1000                           # (unit: ms)');
+            expect(output).to.include('export CORTEX_TIMEOUT_RESPONSE=2000                         # (unit: ms)');
+        });
+
+        it('prints user defined timeout environment variables along with defaults', async () => {
+            process.env.CORTEX_TIMEOUT_CONNECT = 200;
+            process.env.CORTEX_TIMEOUT_SECURE_CONNECT = 'false';
+            await create().parseAsync(['node', 'configure', 'env', '--project', project]);
+            const output = getPrintedLines()[0].split('\n');
+            expect(output).to.length(totalVars);
+            expect(output).to.include(`export CORTEX_PROJECT=${project}`);
+            expect(output).to.include(`export CORTEX_TOKEN=${expectedToken}`);
+            expect(output).to.include('export CORTEX_URI=http://localhost:8000');
+            expect(output).to.include('export CORTEX_URL=http://localhost:8000');
+            // default timeouts
+            expect(output).to.include('#export CORTEX_TIMEOUT_LOOKUP=                              (default: 100, unit: ms)');
+            expect(output).to.include('#export CORTEX_TIMEOUT_SOCKET=                              (default: 1000, unit: ms)');
+            expect(output).to.include('#export CORTEX_TIMEOUT_RESPONSE=                            (default: 2000, unit: ms)');
+            // prints user defined variables
+            expect(output).to.include('export CORTEX_TIMEOUT_CONNECT=200                           # (unit: ms)');
+            expect(output).to.include('export CORTEX_TIMEOUT_SECURE_CONNECT=false                  # (unit: ms)');
         });
     });
 });
