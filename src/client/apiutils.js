@@ -155,17 +155,22 @@ export function getTimeoutUnit() {
 function getEnvOptions() {
     const retry = {};
     const timeout = {};
-    const { timeout: timeoutValues, retry: retryValues } = getGotEnvOverrides();
-    timeoutValues.forEach((t) => {
-        if (!t.skipAssignment) {
-            timeout[t.key] = t.parsedValue ?? t.defaultValue; // could use 'userDefined', but ?? is shorter
-        }
-    });
-    retryValues.forEach((v) => {
-        if (!v.skipAssignment) {
-            retry[v.key] = v.parsedValue ?? v.defaultValue; // could use 'userDefined', but ?? is shorter
-        }
-    });
+    if (process.env.CORTEX_TIMEOUT_IGNORE) {
+        debug('Ignoring all timeout configuration from env variables');
+    } else {
+        debug('Loading timeout configuration from env variables');
+        const { timeout: timeoutValues, retry: retryValues } = getGotEnvOverrides();
+        timeoutValues.forEach((t) => {
+            if (!t.skipAssignment) {
+                timeout[t.key] = t.parsedValue ?? t.defaultValue; // could use 'userDefined', but ?? is shorter
+            }
+        });
+        retryValues.forEach((v) => {
+            if (!v.skipAssignment) {
+                retry[v.key] = v.parsedValue ?? v.defaultValue; // could use 'userDefined', but ?? is shorter
+            }
+        });
+    }
     return { ...gotOpts, timeout, retry };
 }
 

@@ -57,6 +57,10 @@ export async function create(profileName) {
         .option('--debug', 'Enables enhanced log output for debugging', false)
         .on('option:debug', () => {
             process.env.DEBUG = '*';
+        })
+        .option('--no-timeout', 'Disables all network timeouts for slower connections (not recommended)')
+        .on('option:no-timeout', () => {
+            process.env.CORTEX_TIMEOUT_IGNORE = '*';
         });
     const supportedCommands = await resolveAvailableSubcommands(profileName);
     const _toObject = (nameAndArgs, description) => ({ nameAndArgs, description });
