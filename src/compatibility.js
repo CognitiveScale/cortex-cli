@@ -12,7 +12,7 @@ import npmFetch from 'npm-registry-fetch';
 import Semver from 'semver';
 import { got } from './client/apiutils.js';
 import { loadProfile } from './config.js';
-import { printError, printWarning, readPackageJSON } from './commands/utils.js';
+import { handleError, constructError, printError, printWarning, readPackageJSON } from './commands/utils.js';
 
 const debug = debugSetup('cortex:cli');
 
@@ -44,7 +44,7 @@ function getRequiredVersion(profile) {
             const { semver } = res;
             return semver;
         }).catch((err) => {
-            throw new Error(`Unable to fetch compatibility: ${err.message}`);
+            throw err; // let caller deal with it
         });
 }
 
@@ -74,28 +74,25 @@ function upgradeRequired(args) {
     process.exit(-1);
 }
 
+// exported for testing purposes
 export async function getCompatibility(profile) {
     debug('getCompatibility => %s profile', profile.name);
+    // fail if unable to contact cortex service (allow caller to handle error)
+    const requirements = await getRequiredVersion(profile);
+    const satisfied = Semver.satisfies(pkg.version, requirements);
     try {
-        // fail if unable to contact cortex service
-        const requirements = await getRequiredVersion(profile);
-        const satisfied = Semver.satisfies(pkg.version, requirements);
-        try {
-            // warn user but don't fail
-            const versions = await getAvailableVersions(pkg.name);
-            debug('getCompatibility => versions: %s, requirements: %s', versions, requirements);
-            const compatibleVersions = filter((v) => Semver.satisfies(v, requirements), versions);
-            debug('getCompatibility => compatible versions: %s', compatibleVersions);
-            const { version: current } = pkg;
-            const latest = last(compatibleVersions);
-            debug('getCompatibility => satisfied: %s', satisfied);
-            return ({ current, latest, satisfied });
-        } catch (e) {
-            printWarning(`Warning unable to check for cortex-cli update: ${e.message}`);
-            return ({ current: pkg.version, latest: pkg.version, satisfied });
-        }
+        // Warn user but don't fail if npm is unavailable
+        const versions = await getAvailableVersions(pkg.name);
+        debug('getCompatibility => versions: %s, requirements: %s', versions, requirements);
+        const compatibleVersions = filter((v) => Semver.satisfies(v, requirements), versions);
+        debug('getCompatibility => compatible versions: %s', compatibleVersions);
+        const { version: current } = pkg;
+        const latest = last(compatibleVersions);
+        debug('getCompatibility => satisfied: %s', satisfied);
+        return ({ current, latest, satisfied });
     } catch (e) {
-        throw new Error(`Unable to contact cortex: ${e.message}`);
+        printWarning(`Warning unable to check for cortex-cli update: ${e.message}`);
+        return ({ current: pkg.version, latest: pkg.version, satisfied });
     }
 }
 
@@ -114,7 +111,7 @@ export async function doCompatibilityCheck(profile, doCheck = true) {
                 upgradeAvailable({ current, latest });
             }
         } catch (error) {
-            printError(error);
+            handleError(error, undefined, 'Unable to contact cortex for compatibility check');
         }
     }
     return Promise.resolve();

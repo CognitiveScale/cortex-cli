@@ -163,6 +163,7 @@ export const PrintEnvVars = class {
             // on their profile.  Picking up env variables would be
             // inconsistent.
             const vars = [];
+            const defaults = [];
             const profile = await loadProfile(options.profile, false);
             const ttl = options.ttl || '1d';
             if (!durationRegex.test(ttl)) {
@@ -191,7 +192,7 @@ export const PrintEnvVars = class {
                     const defaultPart = `(default: ${t.defaultValue}, unit: ${unit})`;
                     const exportPart = `#export ${t.envVar}=`;
                     const spacing = ' '.repeat(len - exportPart.length);
-                    vars.push(`${exportPart}${spacing}${defaultPart}`);
+                    defaults.push(`${exportPart}${spacing}${defaultPart}`);
                 }
             });
 
@@ -206,9 +207,10 @@ export const PrintEnvVars = class {
                     const defaultPart = `(default: ${v.defaultValue})`;
                     const exportPart = `#export ${v.envVar}=`;
                     const spacing = ' '.repeat(len - exportPart.length);
-                    vars.push(`${exportPart}${spacing}${defaultPart}`);
+                    defaults.push(`${exportPart}${spacing}${defaultPart}`);
                 }
             });
+            vars.push('\n# The default value is used for the following environment variables:\n#', ...defaults);
             return printSuccess(vars.join('\n'), { color: 'off' });
         } catch (err) {
             return printError(err.message, {}, true);

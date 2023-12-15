@@ -138,6 +138,9 @@ export const constructError = (error) => {
     } else if (error.name === 'ParseError' || error.code === 'ERR_BODY_PARSE_FAILURE') {
         errorText = 'Unable to parse response from server. Try running again with "--debug" for more details.';
         details = error.message;
+    } else if (error.name === 'TimeoutError' || error.code === 'ETIMEDOUT') {
+        errorText = error.message;
+        details = 'Try increasing the network timeout values via environment variables.\nRun "cortex configure env" to view your current network timeout settings.';
     }
     // if JSON was returned, look for either a message or error in it
     try {
@@ -569,8 +572,11 @@ export function handleError(error, options, prefix = 'Error') {
     const normedError = constructError(error);
     printError(`${prefix}: ${normedError.status}, ${normedError.message}`, undefined, false);
     if (normedError.details !== undefined && normedError.details !== null) {
-        // TSOA API validation error case
-        if (!Array.isArray(normedError.details)) {
+        if (typeof normedError.details === 'string' || normedError.details instanceof String) {
+            // Print details if its a string, and exit
+            printError(normedError.details);
+        } else if (!Array.isArray(normedError.details)) {
+            // TSOA API validation error case
             const transformedResponse = transformTSOAValidation(normedError.details);
             if (transformedResponse !== null) {
                 normedError.details = transformedResponse;
