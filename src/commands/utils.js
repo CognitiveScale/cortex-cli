@@ -556,41 +556,27 @@ export function checkForEmptyArgs(args) {
     });
   }
 
-// Yet another error handling function, need to rationalize these
+/**
+ * Prints a normalized version of any given Error and exits the proram (see
+ * `@constructError()` for how the error is normalized).
+ *
+ * @param {Error} error
+ * @param {object} options
+ * @param {string} prefix
+ */
 export function handleError(error, options, prefix = 'Error') {
-    let details;
-    let respCode;
-    // fallback to text in message or standard error message
-    const errResp = error?.response;
-    let errorText = errResp?.body;
-    if (errorText?.trim().length === 0 || error.name === 'RequestError') {
-        errorText = error.message;
-    } else if (error.name === 'ParseError' || error.code === 'ERR_BODY_PARSE_FAILURE') {
-        errorText = 'Unable to parse response from server. Try running again with "--debug" for more details.';
-        details = error.message;
-    }
-    // if JSON was returned, look for either a message or error in it
-    try {
-        const resp = errResp ? JSON.parse(errorText) : {};
-        respCode = resp.code;
-        if (resp?.message || resp?.error) errorText = resp?.message || resp?.error;
-        // eslint-disable-next-line prefer-destructuring
-        details = resp.details;
-    } catch (e) {
-        // Guess it wasn't JSON!
-    }
-    // todo make figuring out the status code more consistent? this might be a holdover from request vs got?
-    const status = errResp?.statusCode || respCode || error?.code || error?.status || '';
-    printError(`${prefix}: ${status}, ${errorText}`, undefined, false);
-    if (details !== undefined && details !== null) {
+    // TODO: why aren't 'options' used?
+    const normedError = constructError(error);
+    printError(`${prefix}: ${normedError.status}, ${normedError.message}`, undefined, false);
+    if (normedError.details !== undefined && normedError.details !== null) {
         // TSOA API validation error case
-        if (!Array.isArray(details)) {
-            const transformedResponse = transformTSOAValidation(details);
+        if (!Array.isArray(normedError.details)) {
+            const transformedResponse = transformTSOAValidation(normedError.details);
             if (transformedResponse !== null) {
-                details = transformedResponse;
+                normedError.details = transformedResponse;
             }
         }
-        printTable(OPTIONSTABLEFORMAT, details);
+        printTable(OPTIONSTABLEFORMAT, normedError.details);
     }
     printError(''); // Just exit
 }

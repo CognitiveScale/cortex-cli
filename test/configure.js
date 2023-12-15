@@ -53,6 +53,7 @@ describe('configure', () => {
         delete process.env.CORTEX_TIMEOUT_SECURE_CONNECT;
         delete process.env.CORTEX_TIMEOUT_SOCKET;
         delete process.env.CORTEX_TIMEOUT_RESPONSE;
+        delete process.env.CORTEX_API_RETRY;
     });
     afterEach(() => {
         sandbox.restore();
