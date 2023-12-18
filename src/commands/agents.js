@@ -11,7 +11,6 @@ import {
     LISTTABLEFORMAT,
     filterObject,
     getFilteredOutput,
-    getQueryOptions,
     handleDeleteFailure,
     handleListFailure,
     handleTable,
