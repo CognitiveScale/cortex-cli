@@ -91,7 +91,7 @@ export function getSkillInfo(target) {
     if (target.endsWith('skill.yaml')) {
         skillFiles = statSync(path.resolve(target)) ? [target] : [];
     } else {
-        skillFiles = globSync('./skills/**/skill.yaml', {
+        skillFiles = globSync('./skills/**/skill*.yaml', {
             cwd: target,
             absolute: true,
         });
@@ -117,5 +117,6 @@ export async function buildImageTag(profile, actionName) {
     }
     const registry = await getCurrentRegistry(profile);
     const namespace = registry.namespace || '';
-    return urljoin(registry.url, namespace, actionName);
+    // Strip :tag so retagging during publish
+    return urljoin(registry.url, namespace, actionName.split(':')[0]);
 }

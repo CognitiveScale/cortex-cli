@@ -62,9 +62,7 @@ export default (class Agents {
             opts.searchParams = { report };
         }
         return got
-            .get(endpoint, opts).json()
-            .then((result) => ({ success: true, result }))
-            .catch((err) => constructError(err));
+            .get(endpoint, opts).json();
     }
 
     cancelActivation(projectId, token, activationId, inFlight) {

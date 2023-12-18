@@ -14,18 +14,13 @@ export default class WorkspaceBuildCommand {
     async buildAction(target, action, stdoutHandler, options) {
         const actionPath = path.join(target, 'actions', action.name);
         const expectedDockerfile = path.join(actionPath, 'Dockerfile');
-        try {
-            if (!fs.existsSync(expectedDockerfile)) {
-                throw Error(`Unable to build action '${action.name}': Missing Dockerfile '${expectedDockerfile}', \nCheck that the 'actions/<name>' folder and action's name match or add a 'Dockerfile' in the path provided`);
-            }
-            const imageTag = await buildImageTag(this.profile, action.image);
-            return dockerCli(options).build({
-                 imageTag, contextPath: actionPath, dockerFile: expectedDockerfile, stdoutHandler,
-            });
-        } catch (err) {
-            printError(`${expectedDockerfile}:\n\t ${err.message}`, options);
-            return Promise.reject(err);
+        if (!fs.existsSync(expectedDockerfile)) {
+            throw Error(`Unable to build action '${action.name}': Missing Dockerfile '${expectedDockerfile}', \nCheck that the 'actions/<name>' folder and action's name match or add a 'Dockerfile' in the path provided`);
         }
+        const imageTag = await buildImageTag(this.profile, action.image);
+        return dockerCli(options).build({
+             imageTag, contextPath: actionPath, dockerFile: expectedDockerfile, stdoutHandler,
+        });
     }
 
     async execute(folder, options) {

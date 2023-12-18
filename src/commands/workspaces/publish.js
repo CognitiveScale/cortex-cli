@@ -4,7 +4,12 @@ import path from 'node:path';
 import { readFile } from 'node:fs/promises';
 import { v1 as uuid } from 'uuid';
 import { Listr } from 'listr2';
-import { parseObject, printSuccess, printError, handleError } from '../utils.js';
+import {
+    parseObject,
+    printSuccess,
+    printError,
+    handleError,
+} from '../utils.js';
 import { getSkillInfo, buildImageTag } from './workspace-utils.js';
 import { loadProfile } from '../../config.js';
 import Catalog from '../../client/catalog.js';
@@ -191,8 +196,12 @@ export default class WorkspacePublishCommand {
                             title: `Saving skill ${skillName}`,
                             task: async (dCtx, dTask) => {
                                 // pass options if we want to skip docker push for example
-
-                                await this.catalogClient.saveSkill(project, profile.token, info.skill);
+                                try {
+                                    await this.catalogClient.saveSkill(project, profile.token, info.skill);
+                                } catch (err) {
+                                    // TODO make wrapper function like handleError();
+                                    throw Error(`Unable to save skill ${skillName}: ${err.message}`);
+                                }
                                 dTask.title = `Skill ${info.skill.name} saved`;
                             },
                         });

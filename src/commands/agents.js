@@ -132,9 +132,8 @@ export class GetActivationCommand {
         } = options;
         const agents = new Agents(profile.url);
         try {
-            const { activations } = agents.getActivation(project || profile.project, profile.token, activationId, verbose, report);
+            const activation = await agents.getActivation(project || profile.project, profile.token, activationId, verbose, report);
             if (options.report && !options.json) {
-                const result = filterObject(activations, getQueryOptions(options));
                 const tableSpec = [
                     {
                         column: 'Name',
@@ -162,11 +161,11 @@ export class GetActivationCommand {
                         width: 30,
                     },
                 ];
-                printSuccess(`Status: ${_.get(result, 'status')}`);
-                printSuccess(`Elapsed Time (ms): ${_.get(result, 'elapsed')}`);
-                printTable(tableSpec, _.sortBy(_.get(result, 'transits'), ['start', 'end']));
+                printSuccess(`Status: ${activation?.status}`);
+                printSuccess(`Elapsed Time (ms): ${activation?.elapsed}`);
+                printTable(tableSpec, _.sortBy(activation?.transits, ['start', 'end']));
             } else {
-                getFilteredOutput(activations, options);
+                getFilteredOutput(activation, options);
             }
         } catch (err) {
             handleError(err, options, `Failed to get activation ${activationId}`);
