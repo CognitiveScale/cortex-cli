@@ -138,7 +138,7 @@ describe('configure', () => {
             await create().parseAsync(['node', 'configure', 'env', '--project', project]);
             const output = getPrintedLines()[0].split('\n');
             expect(output).to.length(totalVars);
-            expect(output).to.include(`export CORTEX_TOKEN=`); // token is dynamic (not checking exact value)
+            expect(output).to.include('export CORTEX_TOKEN='); // token is dynamic (not checking exact value)
             expect(output).to.include('export CORTEX_URI=http://localhost:8000');
             expect(output).to.include('export CORTEX_URL=http://localhost:8000');
             expect(output).to.include(`export CORTEX_PROJECT=${project}`);
@@ -162,7 +162,7 @@ describe('configure', () => {
             const output = getPrintedLines()[0].split('\n');
             expect(output).to.length(totalVars);
             expect(output).to.include(`export CORTEX_PROJECT=${project}`);
-            expect(output).to.include(`export CORTEX_TOKEN=`); // token is dynamic (not checking exact value)
+            expect(output).to.include('export CORTEX_TOKEN='); // token is dynamic (not checking exact value)
             expect(output).to.include('export CORTEX_URI=http://localhost:8000');
             expect(output).to.include('export CORTEX_URL=http://localhost:8000');
             // default timeouts
@@ -185,7 +185,7 @@ describe('configure', () => {
             const output = getPrintedLines()[0].split('\n');
             expect(output).to.length(totalVars);
             expect(output).to.include(`export CORTEX_PROJECT=${project}`);
-            expect(output).to.include(`export CORTEX_TOKEN=`); // token is dynamic (not checking exact value)
+            expect(output).to.include('export CORTEX_TOKEN='); // token is dynamic (not checking exact value)
             expect(output).to.include('export CORTEX_URI=http://localhost:8000');
             expect(output).to.include('export CORTEX_URL=http://localhost:8000');
             // prints user defined variables
@@ -205,7 +205,7 @@ describe('configure', () => {
             const output = getPrintedLines()[0].split('\n');
             expect(output).to.length(totalVars);
             expect(output).to.include(`export CORTEX_PROJECT=${project}`);
-            expect(output).to.include(`export CORTEX_TOKEN=`); // token is dynamic (not checking exact value)
+            expect(output).to.include('export CORTEX_TOKEN='); // token is dynamic (not checking exact value)
             expect(output).to.include('export CORTEX_URI=http://localhost:8000');
             expect(output).to.include('export CORTEX_URL=http://localhost:8000');
             // default timeouts
