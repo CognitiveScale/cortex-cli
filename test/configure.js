@@ -133,7 +133,7 @@ describe('configure', () => {
 
     describe('Configure Env', () => {
         const project = 'testproject';
-        const totalVars = 4 + 5 + 1 + 3; // default + timeouts + retries + extra
+        const totalVars = 4 + 5 + 1 + 4; // # default vars + # timeouts vars + # retries var + # lines of extra text
         it('prints cortex env variables', async () => {
             await create().parseAsync(['node', 'configure', 'env', '--project', project]);
             const output = getPrintedLines()[0].split('\n');

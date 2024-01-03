@@ -210,7 +210,9 @@ export const PrintEnvVars = class {
                     defaults.push(`${exportPart}${spacing}${defaultPart}`);
                 }
             });
-            vars.push('\n# The default value is used for the following environment variables:\n#', ...defaults);
+            vars.push('\n# The default value is used for the following environment variables. Non-negative\n'
+                + '# integer values will be applied to timeouts, while all other values will disable the timeout.\n#',
+                ...defaults);
             return printSuccess(vars.join('\n'), { color: 'off' });
         } catch (err) {
             return printError(err.message, {}, true);
