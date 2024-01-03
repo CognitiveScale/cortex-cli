@@ -18,7 +18,6 @@ import {
     handleListFailure,
     handleDeleteFailure,
     getFilteredOutput,
-    printErrorDetails,
 } from './utils.js';
 
 const debug = debugSetup('cortex:cli');
@@ -170,11 +169,11 @@ export class ListConnectionsTypes {
         const profile = await loadProfile(options.profile);
         debug('%s.listConnectionsTypes()', profile.name);
         const conns = new Connections(profile.url);
+        conns.listConnectionsTypes(profile.token, options.limit, options.skip, options.sort)
         // eslint-disable-next-line consistent-return
-        try {
-            const response = await conns.listConnectionsTypes(profile.token, options.limit, options.skip, options.sort);
-            const result = response?.connectionTypes;
-            // TODO remove --query on deprecation
+        .then((response) => {
+        if (response.success) {
+            const result = response.connectionTypes;
             if (options.json || options.query) {
                 getFilteredOutput(result, options);
             } else {
@@ -207,11 +206,13 @@ export class ListConnectionsTypes {
                     },
                 ];
                 handleTable(tableSpec, result, null, 'No connection types found');
-                }
-            } catch (err) {
-                debug(err);
-                 printError(`Failed to list connection types: ${err.status} ${err.message}`, options, false);
-                 printErrorDetails(err?.response, options);
-        }
+            } 
+        } else {
+                return handleListFailure(response, options, 'Connections');
+            } 
+        })
+            .catch((err) => {
+            printError(`Failed to list connection types: ${err.status} ${err.message}`, options);
+        });
     }
 }
