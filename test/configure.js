@@ -138,7 +138,9 @@ describe('configure', () => {
             await create().parseAsync(['node', 'configure', 'env', '--project', project]);
             const output = getPrintedLines()[0].split('\n');
             expect(output).to.length(totalVars);
-            expect(output).to.include('export CORTEX_TOKEN='); // token is dynamic (not checking exact value)
+            // token is dynamic (not checking exact value)
+            // eslint-disable-next-line no-unused-expressions
+            expect(output.some((v) => v.includes('export CORTEX_TOKEN='))).to.be.true;
             expect(output).to.include('export CORTEX_URI=http://localhost:8000');
             expect(output).to.include('export CORTEX_URL=http://localhost:8000');
             expect(output).to.include(`export CORTEX_PROJECT=${project}`);
@@ -161,10 +163,12 @@ describe('configure', () => {
             await create().parseAsync(['node', 'configure', 'env', '--project', project]);
             const output = getPrintedLines()[0].split('\n');
             expect(output).to.length(totalVars);
-            expect(output).to.include(`export CORTEX_PROJECT=${project}`);
-            expect(output).to.include('export CORTEX_TOKEN='); // token is dynamic (not checking exact value)
+            // token is dynamic (not checking exact value)
+            // eslint-disable-next-line no-unused-expressions
+            expect(output.some((v) => v.includes('export CORTEX_TOKEN='))).to.be.true;
             expect(output).to.include('export CORTEX_URI=http://localhost:8000');
             expect(output).to.include('export CORTEX_URL=http://localhost:8000');
+            expect(output).to.include(`export CORTEX_PROJECT=${project}`);
             // default timeouts
             expect(output).to.include('#export CORTEX_TIMEOUT_LOOKUP=                              (default: 75, unit: ms)');
             expect(output).to.include('#export CORTEX_TIMEOUT_CONNECT=                             (default: 100, unit: ms)');
@@ -184,10 +188,12 @@ describe('configure', () => {
             await create().parseAsync(['node', 'configure', 'env', '--project', project]);
             const output = getPrintedLines()[0].split('\n');
             expect(output).to.length(totalVars);
-            expect(output).to.include(`export CORTEX_PROJECT=${project}`);
-            expect(output).to.include('export CORTEX_TOKEN='); // token is dynamic (not checking exact value)
+            // token is dynamic (not checking exact value)
+            // eslint-disable-next-line no-unused-expressions
+            expect(output.some((v) => v.includes('export CORTEX_TOKEN='))).to.be.true;
             expect(output).to.include('export CORTEX_URI=http://localhost:8000');
             expect(output).to.include('export CORTEX_URL=http://localhost:8000');
+            expect(output).to.include(`export CORTEX_PROJECT=${project}`);
             // prints user defined variables
             expect(output).to.include('export CORTEX_TIMEOUT_LOOKUP=100                            # (unit: ms)');
             expect(output).to.include('export CORTEX_TIMEOUT_CONNECT=200                           # (unit: ms)');
@@ -204,10 +210,12 @@ describe('configure', () => {
             await create().parseAsync(['node', 'configure', 'env', '--project', project]);
             const output = getPrintedLines()[0].split('\n');
             expect(output).to.length(totalVars);
-            expect(output).to.include(`export CORTEX_PROJECT=${project}`);
-            expect(output).to.include('export CORTEX_TOKEN='); // token is dynamic (not checking exact value)
+            // token is dynamic (not checking exact value)
+            // eslint-disable-next-line no-unused-expressions
+            expect(output.some((v) => v.includes('export CORTEX_TOKEN='))).to.be.true;
             expect(output).to.include('export CORTEX_URI=http://localhost:8000');
             expect(output).to.include('export CORTEX_URL=http://localhost:8000');
+            expect(output).to.include(`export CORTEX_PROJECT=${project}`);
             // default timeouts
             expect(output).to.include('#export CORTEX_TIMEOUT_LOOKUP=                              (default: 75, unit: ms)');
             expect(output).to.include('#export CORTEX_TIMEOUT_SOCKET=                              (default: 1000, unit: ms)');
