@@ -160,8 +160,7 @@ export const PrintEnvVars = class {
         try {
             // Token & URI are not picked from env variables, likely because
             // this command is meant to help the user configure their env based
-            // on their profile.  Picking up env variables would be
-            // inconsistent.
+            // on their profile. Picking up env variables would be inconsistent!
             const vars = [];
             const defaults = [];
             const profile = await loadProfile(options.profile, false);
@@ -176,7 +175,7 @@ export const PrintEnvVars = class {
             vars.push(`export CORTEX_URL=${profile.url}`);
             vars.push(`export CORTEX_PROJECT=${options.project || profile.project}`);
 
-            // Print timeout options, including time unit
+            // Include timeout options with units & default
             const { timeout, retry } = getGotEnvOverrides();
             const unit = getTimeoutUnit();
             const len = 60; // fixed length to apply consistent spacing
@@ -196,7 +195,7 @@ export const PrintEnvVars = class {
                 }
             });
 
-            // Print retry options
+            // Include retry options with defaults
             retry.forEach((v) => {
                 if (v.userDefined) {
                     // Print the exact value set by the user
@@ -210,9 +209,24 @@ export const PrintEnvVars = class {
                     defaults.push(`${exportPart}${spacing}${defaultPart}`);
                 }
             });
-            vars.push('\n# The default value is used for the following environment variables. Non-negative\n'
-                + '# integer values will be applied to timeouts, while all other values will disable the timeout.\n#',
-                ...defaults);
+
+            // Include reference text as bash comments (slightly verbose)
+            if (defaults.length > 0) {
+                vars.push('\n# The default value is used for the following environment variables.',
+                    '# Non-negative integers values will be applied to timeouts, while all other',
+                    '# values will disable the timeout. For additional information on the timeout',
+                    '# meanings, refer to the corresponding timeout values at:',
+                    '# https://github.com/sindresorhus/got/blob/main/documentation/6-timeout.md',
+                    '#',
+                    ...defaults);
+            } else {
+                vars.push('\n# Non-negative integer values will be applied to timeouts, while all other',
+                    '# values will disable the timeout. For additional information on the timeout',
+                    '# meanings, refer to the corresponding timeout values at:',
+                    '# https://github.com/sindresorhus/got/blob/main/documentation/6-timeout.md',
+                    '#',
+                    ...defaults);
+            }
             return printSuccess(vars.join('\n'), { color: 'off' });
         } catch (err) {
             return printError(err.message, {}, true);
