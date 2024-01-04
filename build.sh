@@ -26,6 +26,8 @@ function local_docker(){
 
 # This runs inside a linux docker container
 function docker_build(){
+    # Needed when using newer git
+    git config --global --add safe.directory /work
     export CI="script"
     # libsecrets is needed for keytar node-gyp build
     apt-get update
