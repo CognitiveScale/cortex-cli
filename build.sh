@@ -41,7 +41,7 @@ function docker_build(){
     npm ci --unsafe-perm --userconfig=/root/.npmrc --ignore-scripts
     npm rebuild
     npm test
-    npm scan
+    npm run scan
     echo ${VERSION} > version.txt
     ./generate_docs.sh
     BRANCH=$(git symbolic-ref --short -q HEAD)
