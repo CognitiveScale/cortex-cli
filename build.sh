@@ -1,6 +1,10 @@
 #!/bin/bash -eux
 
 # Copied from: https://bitbucket.org/cognitivescale/cortex-console/src
+if [ "$(dirname "$0")" = "/work" ]; then
+    # Needed when using newer git
+    git config --global --add safe.directory /work
+fi
 
 IMAGE_NAME=$(git remote -v | grep "(fetch)" | sed -E "s/.*git@.*:.*\/(.*)\.git.*/\1/")
 BRANCH=$(git symbolic-ref --short -q HEAD)
@@ -26,8 +30,6 @@ function local_docker(){
 
 # This runs inside a linux docker container
 function docker_build(){
-    # Needed when using newer git
-    git config --global --add safe.directory /work
     export CI="script"
     # libsecrets is needed for keytar node-gyp build
     apt-get update
@@ -64,6 +66,7 @@ function docker_build(){
 
 ## MAIN
 cd "$(dirname "$0")"
+
 echo "##### BUILDING BRANCH[${BRANCH}],VERSION[${VERSION}] of IMAGE[${IMAGE_NAME}] ######"
 case ${1-local} in
     CI)
