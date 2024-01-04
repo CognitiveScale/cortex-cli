@@ -1,7 +1,7 @@
 #!/bin/bash -eux
 
 # Copied from: https://bitbucket.org/cognitivescale/cortex-console/src
-if [ "$(dirname "$0")" = "/work" ]; then
+if [ "$PWD" = "/work" ]; then
     # Needed when using newer git
     git config --global --add safe.directory /work
 fi
