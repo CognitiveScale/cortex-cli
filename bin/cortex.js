@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 import { Command } from 'commander';
 import esMain from 'es-main';
-import { readPackageJSON } from '../src/commands/utils.js';
+import { readPackageJSON, printError } from '../src/commands/utils.js';
 import { loadProfileWithoutFailure } from '../src/config.js';
 import { getAllSubcommands, FeatureController } from '../src/features.js';
 
@@ -15,11 +15,19 @@ async function resolveAvailableSubcommands(profileName) {
         // testing
         supportedCommands = getAllSubcommands();
     } else {
-        if (profile === undefined || profile === null) {
-            // Check to only Load the users Profile & do a compatibility check
-            // once on startup
-            profile = await loadProfileWithoutFailure(profileName);
-        }
+      if (profile === undefined || profile === null) {
+          // Alert the user that CORTEX_TOKEN is set, this has a higher
+          // priority than other methods of retrieving the token. The Alert
+          // happens at startup, rather than downstream when getting the value
+          // from the env, as to only alert the user once (avoid duplicate
+          // messages in cases where the variable is loaded multiple times).
+          if (process.env.CORTEX_TOKEN) {
+              printError('Using token from "CORTEX_TOKEN" environment variable', {}, false);
+          }
+          // Check to only Load the users Profile & do a compatibility check
+          // once on startup
+          profile = await loadProfileWithoutFailure(profileName);
+      }
         if (profile) {
             // if the profile was found, then side-load the token & feature
             // flags to avoid future calls to the server
@@ -49,6 +57,10 @@ export async function create(profileName) {
         .option('--debug', 'Enables enhanced log output for debugging', false)
         .on('option:debug', () => {
             process.env.DEBUG = '*';
+        })
+        .option('--no-timeout', 'Disables all network timeouts for slower connections (not recommended)')
+        .on('option:no-timeout', () => {
+            process.env.CORTEX_TIMEOUT_IGNORE = '*';
         });
     const supportedCommands = await resolveAvailableSubcommands(profileName);
     const _toObject = (nameAndArgs, description) => ({ nameAndArgs, description });

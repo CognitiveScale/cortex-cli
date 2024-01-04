@@ -126,7 +126,6 @@ async function loadDynamicProfileProps(profileType, useenv) {
         let jwtFromEnv;
         if (process.env.CORTEX_TOKEN) {
             jwtFromEnv = process.env.CORTEX_TOKEN;
-            printError('Using token from "CORTEX_TOKEN" environment variable', {}, false);
         }
         profileType.url = getCortexUrlFromEnv() || profileType.url;
         profileType.token = jwtFromEnv || profileType.token;

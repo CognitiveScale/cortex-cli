@@ -45,6 +45,15 @@ describe('configure', () => {
         printSpy = sandbox.spy(console, 'log');
         errorSpy = sandbox.spy(console, 'error');
         fs.copyFileSync('./test/cortex/config', path.join(tmpDir, 'config'));
+        // reset env variables
+        delete process.env.CORTEX_TOKEN;
+        delete process.env.CORTEX_URI;
+        delete process.env.CORTEX_TIMEOUT_LOOKUP;
+        delete process.env.CORTEX_TIMEOUT_CONNECT;
+        delete process.env.CORTEX_TIMEOUT_SECURE_CONNECT;
+        delete process.env.CORTEX_TIMEOUT_SOCKET;
+        delete process.env.CORTEX_TIMEOUT_RESPONSE;
+        delete process.env.CORTEX_API_RETRY;
     });
     afterEach(() => {
         sandbox.restore();
@@ -120,5 +129,101 @@ describe('configure', () => {
         printSpy.resetHistory();
         await create().parseAsync(['node', 'configure', 'list']);
         expect(getPrintedLines()).to.eql(['default', 'other', 'conftest']);
+    });
+
+    describe('Configure Env', () => {
+        const project = 'testproject';
+        const totalVars = 4 + 5 + 1; // # default vars + # timeouts vars + # retries var
+        it('prints cortex env variables', async () => {
+            await create().parseAsync(['node', 'configure', 'env', '--project', project]);
+            const output = getPrintedLines()[0].split('\n');
+            expect(output?.length).to.be.above(totalVars); // above because of additional text
+            // token is dynamic (not checking exact value)
+            // eslint-disable-next-line no-unused-expressions
+            expect(output.some((v) => v.includes('export CORTEX_TOKEN='))).to.be.true;
+            expect(output).to.include('export CORTEX_URI=http://localhost:8000');
+            expect(output).to.include('export CORTEX_URL=http://localhost:8000');
+            expect(output).to.include(`export CORTEX_PROJECT=${project}`);
+            // default timeouts
+            expect(output).to.include('#export CORTEX_TIMEOUT_LOOKUP=                              (default: 75, unit: ms)');
+            expect(output).to.include('#export CORTEX_TIMEOUT_CONNECT=                             (default: 100, unit: ms)');
+            expect(output).to.include('#export CORTEX_TIMEOUT_SECURE_CONNECT=                      (default: 100, unit: ms)');
+            expect(output).to.include('#export CORTEX_TIMEOUT_SOCKET=                              (default: 1000, unit: ms)');
+            expect(output).to.include('#export CORTEX_TIMEOUT_RESPONSE=                            (default: 2000, unit: ms)');
+            expect(output).to.include('#export CORTEX_API_RETRY=                                   (default: 3)');
+        });
+
+        it('configure env does NOT pick up CORTEX_TOKEN & CORTEX_URI environment variables', async () => {
+            // Token & URI are not picked from env variables, likely because
+            // this command is meant to help the user configure their env based
+            // on their profile.  Picking up env variables would be
+            // inconsistent.
+            process.env.CORTEX_TOKEN = 'asdf';
+            process.env.CORTEX_URI = 'http://localhost:5000';
+            await create().parseAsync(['node', 'configure', 'env', '--project', project]);
+            const output = getPrintedLines()[0].split('\n');
+            expect(output?.length).to.be.above(totalVars); // above because of additional text
+            // token is dynamic (not checking exact value)
+            // eslint-disable-next-line no-unused-expressions
+            expect(output.some((v) => v.includes('export CORTEX_TOKEN='))).to.be.true;
+            expect(output).to.include('export CORTEX_URI=http://localhost:8000');
+            expect(output).to.include('export CORTEX_URL=http://localhost:8000');
+            expect(output).to.include(`export CORTEX_PROJECT=${project}`);
+            // default timeouts
+            expect(output).to.include('#export CORTEX_TIMEOUT_LOOKUP=                              (default: 75, unit: ms)');
+            expect(output).to.include('#export CORTEX_TIMEOUT_CONNECT=                             (default: 100, unit: ms)');
+            expect(output).to.include('#export CORTEX_TIMEOUT_SECURE_CONNECT=                      (default: 100, unit: ms)');
+            expect(output).to.include('#export CORTEX_TIMEOUT_SOCKET=                              (default: 1000, unit: ms)');
+            expect(output).to.include('#export CORTEX_TIMEOUT_RESPONSE=                            (default: 2000, unit: ms)');
+            expect(output).to.include('#export CORTEX_API_RETRY=                                   (default: 3)');
+        });
+
+        it('prints user defined timeout environment variables', async () => {
+            process.env.CORTEX_API_RETRY = 0;
+            process.env.CORTEX_TIMEOUT_LOOKUP = 100;
+            process.env.CORTEX_TIMEOUT_CONNECT = 200;
+            process.env.CORTEX_TIMEOUT_SECURE_CONNECT = 'false';
+            process.env.CORTEX_TIMEOUT_SOCKET = 1000;
+            process.env.CORTEX_TIMEOUT_RESPONSE = 2000;
+            await create().parseAsync(['node', 'configure', 'env', '--project', project]);
+            const output = getPrintedLines()[0].split('\n');
+            expect(output?.length).to.be.above(totalVars); // above because of additional text
+            // token is dynamic (not checking exact value)
+            // eslint-disable-next-line no-unused-expressions
+            expect(output.some((v) => v.includes('export CORTEX_TOKEN='))).to.be.true;
+            expect(output).to.include('export CORTEX_URI=http://localhost:8000');
+            expect(output).to.include('export CORTEX_URL=http://localhost:8000');
+            expect(output).to.include(`export CORTEX_PROJECT=${project}`);
+            // prints user defined variables
+            expect(output).to.include('export CORTEX_TIMEOUT_LOOKUP=100                            # (unit: ms)');
+            expect(output).to.include('export CORTEX_TIMEOUT_CONNECT=200                           # (unit: ms)');
+            expect(output).to.include('export CORTEX_TIMEOUT_SECURE_CONNECT=false                  # (unit: ms)');
+            expect(output).to.include('export CORTEX_TIMEOUT_SOCKET=1000                           # (unit: ms)');
+            expect(output).to.include('export CORTEX_TIMEOUT_RESPONSE=2000                         # (unit: ms)');
+            expect(output).to.include('export CORTEX_API_RETRY=0');
+        });
+
+        it('prints user defined timeout environment variables along with defaults', async () => {
+            process.env.CORTEX_API_RETRY = 0;
+            process.env.CORTEX_TIMEOUT_CONNECT = 200;
+            process.env.CORTEX_TIMEOUT_SECURE_CONNECT = 'false';
+            await create().parseAsync(['node', 'configure', 'env', '--project', project]);
+            const output = getPrintedLines()[0].split('\n');
+            expect(output?.length).to.be.above(totalVars); // above because of additional text
+            // token is dynamic (not checking exact value)
+            // eslint-disable-next-line no-unused-expressions
+            expect(output.some((v) => v.includes('export CORTEX_TOKEN='))).to.be.true;
+            expect(output).to.include('export CORTEX_URI=http://localhost:8000');
+            expect(output).to.include('export CORTEX_URL=http://localhost:8000');
+            expect(output).to.include(`export CORTEX_PROJECT=${project}`);
+            // default timeouts
+            expect(output).to.include('#export CORTEX_TIMEOUT_LOOKUP=                              (default: 75, unit: ms)');
+            expect(output).to.include('#export CORTEX_TIMEOUT_SOCKET=                              (default: 1000, unit: ms)');
+            expect(output).to.include('#export CORTEX_TIMEOUT_RESPONSE=                            (default: 2000, unit: ms)');
+            // prints user defined variables
+            expect(output).to.include('export CORTEX_TIMEOUT_CONNECT=200                           # (unit: ms)');
+            expect(output).to.include('export CORTEX_TIMEOUT_SECURE_CONNECT=false                  # (unit: ms)');
+            expect(output).to.include('export CORTEX_API_RETRY=0');
+        });
     });
 });

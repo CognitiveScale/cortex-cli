@@ -7,6 +7,7 @@ import {
  readConfig, defaultConfig, generateJwt, loadProfile, durationRegex, 
 } from '../config.js';
 import { printSuccess, printError, useColor } from './utils.js';
+import { getTimeoutUnit, getGotEnvOverrides } from '../client/apiutils.js';
 /*
  * Copyright 2023 Cognitive Scale, Inc. All Rights Reserved.
  *
@@ -157,7 +158,11 @@ export const PrintEnvVars = class {
 
     async execute(options) {
         try {
+            // Token & URI are not picked from env variables, likely because
+            // this command is meant to help the user configure their env based
+            // on their profile. Picking up env variables would be inconsistent!
             const vars = [];
+            const defaults = [];
             const profile = await loadProfile(options.profile, false);
             const ttl = options.ttl || '1d';
             if (!durationRegex.test(ttl)) {
@@ -169,6 +174,59 @@ export const PrintEnvVars = class {
             // not sure why we used URI previously ??
             vars.push(`export CORTEX_URL=${profile.url}`);
             vars.push(`export CORTEX_PROJECT=${options.project || profile.project}`);
+
+            // Include timeout options with units & default
+            const { timeout, retry } = getGotEnvOverrides();
+            const unit = getTimeoutUnit();
+            const len = 60; // fixed length to apply consistent spacing
+            timeout.forEach((t) => {
+                if (t.userDefined) {
+                    // Print the exact value set by the user & units
+                    const unitPart = `# (unit: ${unit})`;
+                    const exportPart = `export ${t.envVar}=${t.envValue}`;
+                    const spacing = ' '.repeat(len - exportPart.length);
+                    vars.push(`${exportPart}${spacing}${unitPart}`);
+                } else {
+                    // Print comment showing default & units
+                    const defaultPart = `(default: ${t.defaultValue}, unit: ${unit})`;
+                    const exportPart = `#export ${t.envVar}=`;
+                    const spacing = ' '.repeat(len - exportPart.length);
+                    defaults.push(`${exportPart}${spacing}${defaultPart}`);
+                }
+            });
+
+            // Include retry options with defaults
+            retry.forEach((v) => {
+                if (v.userDefined) {
+                    // Print the exact value set by the user
+                    const exportPart = `export ${v.envVar}=${v.envValue}`;
+                    vars.push(`${exportPart}`);
+                } else {
+                    // Print comment showing default
+                    const defaultPart = `(default: ${v.defaultValue})`;
+                    const exportPart = `#export ${v.envVar}=`;
+                    const spacing = ' '.repeat(len - exportPart.length);
+                    defaults.push(`${exportPart}${spacing}${defaultPart}`);
+                }
+            });
+
+            // Include reference text as bash comments (slightly verbose)
+            if (defaults.length > 0) {
+                vars.push('\n# The default value is used for the following environment variables.',
+                    '# Non-negative integers values will be applied to timeouts, while all other',
+                    '# values will disable the timeout. For additional information on the timeout',
+                    '# meanings, refer to the corresponding timeout values at:',
+                    '# https://github.com/sindresorhus/got/blob/main/documentation/6-timeout.md',
+                    '#',
+                    ...defaults);
+            } else {
+                vars.push('\n# Non-negative integer values will be applied to timeouts, while all other',
+                    '# values will disable the timeout. For additional information on the timeout',
+                    '# meanings, refer to the corresponding timeout values at:',
+                    '# https://github.com/sindresorhus/got/blob/main/documentation/6-timeout.md',
+                    '#',
+                    ...defaults);
+            }
             return printSuccess(vars.join('\n'), { color: 'off' });
         } catch (err) {
             return printError(err.message, {}, true);
