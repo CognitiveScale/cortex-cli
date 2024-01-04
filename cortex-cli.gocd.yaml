@@ -11,7 +11,7 @@ pipelines:
           clean_workspace: yes
           jobs:
             Build:
-              elastic_profile_id: gocd-test-agent-dind
+              elastic_profile_id: gocd-agent-dind-2023
               artifacts:
                 - build:
                     source: cruise-output/buildReport*.json
@@ -21,24 +21,16 @@ pipelines:
                     source: cortex-cli-docs.md
                 - build:
                     source: cortex-cli.tgz
-                - test:
-                    source: coverage
-              tabs:
-                coverage: testoutput/coverage/index.html
               tasks:
                 - script: |
-                    set -eux
-                    git clone git@github.com:CognitiveScale/gocd-pipeline-scripts.git
-                    ./gocd-pipeline-scripts/common/c12e-common.sh dev
-                    ./gocd-pipeline-scripts/common/sonar-scan.sh scan
-                    echo ./gocd-pipeline-scripts/cortex5/docs/update-docs.sh cli
+                      c12e-common.sh dev
       - publish:
           clean_workspace: true
           approval:
             type: manual
           jobs:
             Promote:
-              elastic_profile_id: gocd-test-agent-dind
+              elastic_profile_id: gocd-agent-dind-2023
               environment_variables:
                 PROMOTE_BRANCH: "main"
               tasks:
@@ -69,7 +61,7 @@ pipelines:
           clean_workspace: yes
           jobs:
             Build:
-              elastic_profile_id: gocd-test-agent-dind
+              elastic_profile_id: gocd-agent-dind-2023
               artifacts:
                 - build:
                     source: cortex-cli-docs.md
@@ -81,14 +73,12 @@ pipelines:
                 coverage: testoutput/coverage/index.html
               tasks:
                 - script: |
-                    git clone git@github.com:CognitiveScale/gocd-pipeline-scripts.git
-                    ./gocd-pipeline-scripts/common/c12e-common.sh master
-                    echo ./gocd-pipeline-scripts/cortex5/docs/update-docs.sh cli
+                    c12e-common.sh master
       - publishDocs:
           clean_workspace: yes
           jobs:
             commitDocs:
-              elastic_profile_id: gocd-test-agent-dind
+              elastic_profile_id: gocd-agent-dind-2023
               tasks:
                 - fetch:
                     stage: build
@@ -121,7 +111,7 @@ pipelines:
             allow_only_on_success: false
           jobs:
             Build:
-              elastic_profile_id: gocd-test-agent-dind
+              elastic_profile_id: gocd-agent-dind-2023
               artifacts:
                 - build:
                     source: cruise-output/buildReport*.json
@@ -131,13 +121,7 @@ pipelines:
                     source: cortex-cli-docs.md
                 - build:
                     source: cortex-cli.tgz
-                - test:
-                    source: coverage
-              tabs:
-                coverage: testoutput/coverage/index.html
               timeout: 0
               tasks:
                 - script: |
-                    set -eux
-                    git clone git@github.com:CognitiveScale/gocd-pipeline-scripts.git
-                    ./gocd-pipeline-scripts/common/c12e-common.sh dev
+                    c12e-common.sh dev
