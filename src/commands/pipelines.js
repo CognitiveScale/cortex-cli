@@ -158,7 +158,8 @@ export const ListPipelineRunsCommand = class {
     debug('%s.executeListPipelineRuns(%s, %s)', profile.name, pipelineName);
     const pipelines = new Pipelines(profile.url);
     try {
-      const response = await pipelines.listPipelineRuns(options.project || profile.project, profile.token, pipelineName, gitRepoName);
+      const response = await pipelines.listPipelineRuns(options.project || profile.project,
+        profile.token, pipelineName, gitRepoName, options.limit, options.skip, options.sort, options.filter);
       if (response.success) {
         const result = response.activations;
         // TODO remove --query on deprecation

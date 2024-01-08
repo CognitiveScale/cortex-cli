@@ -117,6 +117,8 @@ export function create() {
   .option('--profile <profile>', 'The profile to use')
   .option('--project <project>', 'The project to use')
   .option('--json [searchPath]', QUERY_JSON_HELP_TEXT)
+  .option('--limit <limit>', 'Limit number of records', DEFAULT_LIST_LIMIT_COUNT)
+  .option('--skip <skip>', 'Skip number of records', DEFAULT_LIST_SKIP_COUNT)
   .action(withCompatibilityCheck((pipelineName, gitRepoName, options) => {
     try {
       checkForEmptyArgs({ pipelineName, gitRepoName });
