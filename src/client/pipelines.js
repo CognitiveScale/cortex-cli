@@ -84,13 +84,19 @@ export default class Pipelines {
       }
     }
 
-    async listPipelineRuns(projectId, token, name, gitRepoName) {
+    async listPipelineRuns(projectId, token, name, gitRepoName, limit, skip, sort, filter) {
       checkProject(projectId);
-      const endpoint = `${this.endpointV4(projectId)}/${encodeURIComponent(name)}/run?gitRepoName=${gitRepoName}`;
+      const endpoint = `${this.endpointV4(projectId)}/${encodeURIComponent(name)}/run`;
       debug('listPipelineRuns(%s, %s) => %s', name, gitRepoName, endpoint);
+      const query = { gitRepoName };
+      if (filter) query.filter = filter;
+      if (limit) query.limit = limit;
+      if (sort) query.sort = sort;
+      if (skip) query.skip = skip;
       try {
         return await got.get(endpoint, {
           headers: defaultHeaders(token),
+          searchParams: query,
         }).json();
       } catch (err) {
         return constructError(err);
