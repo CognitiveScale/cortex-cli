@@ -562,17 +562,7 @@ export function checkForEmptyArgs(args) {
     });
   }
 
-/**
- * Prints a normalized version of any given Error and exits the proram (see
- * `@constructError()` for how the error is normalized).
- *
- * @param {Error} error
- * @param {object} options
- * @param {string} prefix
- */
-export function handleError(error, options, prefix = 'Error') {
-    // TODO: why aren't 'options' used?
-    const normedError = constructError(error);
+export function printNormalizedError(normedError, options, prefix = 'Error', exit = true) {
     printError(`${prefix}: ${normedError.status}, ${normedError.message}`, undefined, false);
     if (normedError.details !== undefined && normedError.details !== null) {
         if (typeof normedError.details === 'string' || normedError.details instanceof String) {
@@ -587,7 +577,24 @@ export function handleError(error, options, prefix = 'Error') {
         }
         printTable(OPTIONSTABLEFORMAT, normedError.details);
     }
-    printError(''); // Just exit
+     if (exit) {
+        printError(''); // Just exit
+    }
+}
+
+/**
+ * Prints a normalized version of any given Error and exits the proram (see
+ * `@constructError()` for how the error is normalized).
+ *
+ * @param {Error} error
+ * @param {object} options
+ * @param {string} prefix
+ * @param {bool} exit
+ */
+export function handleError(error, options, prefix = 'Error', exit = true) {
+    // TODO: why aren't 'options' used?
+    const normedError = constructError(error);
+    printNormalizedError(normedError, undefined, prefix, exit);
 }
 
 export { deleteFolderRecursive as deleteFile };

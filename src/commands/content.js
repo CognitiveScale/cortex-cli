@@ -6,7 +6,7 @@ import debugSetup from 'debug';
 import { loadProfile } from '../config.js';
 import Content from '../client/content.js';
 import {
-    printSuccess, printError, getSourceFiles, humanReadableFileSize, handleTable, getFilteredOutput, checkProject,
+    printSuccess, printError, getSourceFiles, humanReadableFileSize, handleTable, getFilteredOutput, checkProject, printNormalizedError,
 } from './utils.js';
 
 const debug = debugSetup('cortex:cli');
@@ -22,7 +22,7 @@ async function upload(contentClient, profile, options, contentKey, filePath, exi
         printSuccess('Content successfully uploaded.', options);
     } else {
         const message = `Failed to upload content ${filePath}: ${response.status} ${response.message}`;
-        printError(message, options, exit);
+        printNormalizedError(response, options, `Failed to upload content ${filePath}`, exit);
         throw Error(message); // Temp fix to make recursive upload stop uploading, until uploadContentStreaming() throws
     }
 }
