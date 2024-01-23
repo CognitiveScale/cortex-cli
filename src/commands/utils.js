@@ -562,6 +562,10 @@ export function checkForEmptyArgs(args) {
     });
   }
 
+/**
+ * Prints the normalized error object (see `@constructError()`), then exits the
+ * program.
+ */
 export function printNormalizedError(normedError, options, prefix = 'Error', exit = true) {
     printError(`${prefix}: ${normedError.status}, ${normedError.message}`, undefined, false);
     if (normedError.details !== undefined && normedError.details !== null) {
@@ -583,8 +587,8 @@ export function printNormalizedError(normedError, options, prefix = 'Error', exi
 }
 
 /**
- * Prints a normalized version of any given Error and exits the proram (see
- * `@constructError()` for how the error is normalized).
+ * Creates a normalized error object (see `@constructError()` for how it is
+ * normalized), then prints the error and exits.
  *
  * @param {Error} error
  * @param {object} options
