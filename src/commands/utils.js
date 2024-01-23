@@ -126,7 +126,12 @@ const deleteFolderRecursive = (filepath) => {
     }
 };
 
-// TODO replace with handleError, to reduce duplicate code.
+/**
+ * Returns an error object (with `success`, `message`, `details`, and `status` fields), from a given `Error`.
+ *
+ * @param {Error} error
+ * @return {object} An object describing the original error with additional details
+ */
 export const constructError = (error) => {
     let details;
     let respCode;
@@ -161,6 +166,7 @@ export const constructError = (error) => {
         success: false, message: errorText, details, status,
     };
 };
+
 export function writeToFile(content, filepath, createDir = true) {
     const dir = path.dirname(filepath);
     if (createDir && !fs.existsSync(dir)) {
@@ -567,6 +573,7 @@ export function checkForEmptyArgs(args) {
  * program.
  */
 export function printNormalizedError(normedError, options, prefix = 'Error', exit = true) {
+    debug(normedError);
     printError(`${prefix}: ${normedError.status}, ${normedError.message}`, undefined, false);
     if (normedError.details !== undefined && normedError.details !== null) {
         if (typeof normedError.details === 'string' || normedError.details instanceof String) {
@@ -576,6 +583,7 @@ export function printNormalizedError(normedError, options, prefix = 'Error', exi
             // TSOA API validation error case
             const transformedResponse = transformTSOAValidation(normedError.details);
             if (transformedResponse !== null) {
+                // eslint-disable-next-line no-param-reassign
                 normedError.details = transformedResponse;
             }
         }
@@ -596,9 +604,15 @@ export function printNormalizedError(normedError, options, prefix = 'Error', exi
  * @param {bool} exit
  */
 export function handleError(error, options, prefix = 'Error', exit = true) {
-    // TODO: why aren't 'options' used?
-    const normedError = constructError(error);
-    printNormalizedError(normedError, undefined, prefix, exit);
+    debug(error);
+    let normedError;
+    const isNormedError = Object.keys(error).includes('success');
+    if (isNormedError) {
+        normedError = error; // assume its already been normalized
+    } else {
+        normedError = constructError(error);
+    }
+    printNormalizedError(normedError, options, prefix, exit);
 }
 
 export { deleteFolderRecursive as deleteFile };

@@ -6,7 +6,7 @@ import debugSetup from 'debug';
 import { loadProfile } from '../config.js';
 import Content from '../client/content.js';
 import {
-    printSuccess, printError, getSourceFiles, humanReadableFileSize, handleTable, getFilteredOutput, checkProject, printNormalizedError,
+    printSuccess, printError, getSourceFiles, humanReadableFileSize, handleTable, getFilteredOutput, checkProject, printNormalizedError, handleError,
 } from './utils.js';
 
 const debug = debugSetup('cortex:cli');
@@ -136,8 +136,7 @@ export class DownloadContent {
         const content = new Content(profile.url);
         const showProgress = !!options.progress;
         content.downloadContent(options.project || profile.project, profile.token, contentKey, showProgress).catch((err) => {
-            debug(err);
-            printNormalizedError(err, options, `Failed to download content`)
+            handleError(err, options, 'Failed to download content');
         });
     }
 }
