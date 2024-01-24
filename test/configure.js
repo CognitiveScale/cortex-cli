@@ -146,8 +146,8 @@ describe('configure', () => {
             expect(output).to.include(`export CORTEX_PROJECT=${project}`);
             // default timeouts
             expect(output).to.include('#export CORTEX_TIMEOUT_LOOKUP=                              (default: 75, unit: ms)');
-            expect(output).to.include('#export CORTEX_TIMEOUT_CONNECT=                             (default: 100, unit: ms)');
-            expect(output).to.include('#export CORTEX_TIMEOUT_SECURE_CONNECT=                      (default: 100, unit: ms)');
+            expect(output).to.include('#export CORTEX_TIMEOUT_CONNECT=                             (default: 400, unit: ms)');
+            expect(output).to.include('#export CORTEX_TIMEOUT_SECURE_CONNECT=                      (default: 400, unit: ms)');
             expect(output).to.include('#export CORTEX_TIMEOUT_SOCKET=                              (default: 1000, unit: ms)');
             expect(output).to.include('#export CORTEX_TIMEOUT_RESPONSE=                            (default: 2000, unit: ms)');
             expect(output).to.include('#export CORTEX_API_RETRY=                                   (default: 3)');
@@ -171,8 +171,8 @@ describe('configure', () => {
             expect(output).to.include(`export CORTEX_PROJECT=${project}`);
             // default timeouts
             expect(output).to.include('#export CORTEX_TIMEOUT_LOOKUP=                              (default: 75, unit: ms)');
-            expect(output).to.include('#export CORTEX_TIMEOUT_CONNECT=                             (default: 100, unit: ms)');
-            expect(output).to.include('#export CORTEX_TIMEOUT_SECURE_CONNECT=                      (default: 100, unit: ms)');
+            expect(output).to.include('#export CORTEX_TIMEOUT_CONNECT=                             (default: 400, unit: ms)');
+            expect(output).to.include('#export CORTEX_TIMEOUT_SECURE_CONNECT=                      (default: 400, unit: ms)');
             expect(output).to.include('#export CORTEX_TIMEOUT_SOCKET=                              (default: 1000, unit: ms)');
             expect(output).to.include('#export CORTEX_TIMEOUT_RESPONSE=                            (default: 2000, unit: ms)');
             expect(output).to.include('#export CORTEX_API_RETRY=                                   (default: 3)');
