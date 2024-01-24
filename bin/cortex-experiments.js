@@ -2,7 +2,7 @@
 import chalk from 'chalk';
 import esMain from 'es-main';
 import { Command } from 'commander';
-import { withCompatibilityCheck } from '../src/compatibility.js';
+import { callCommand } from '../src/compatibility.js';
 import {
     DEFAULT_LIST_LIMIT_COUNT,
     DEFAULT_LIST_SKIP_COUNT,
@@ -45,12 +45,8 @@ export function create() {
         .option('--limit <limit>', 'Limit number of records', DEFAULT_LIST_LIMIT_COUNT)
         .option('--skip <skip>', 'Skip number of records', DEFAULT_LIST_SKIP_COUNT)
         .option('--sort <sort>', 'A Mongo style sort statement to use in the query.', GET_DEFAULT_SORT_CLI_OPTION(DEFAULT_LIST_SORT_PARAMS.updatedAt))
-        .action(withCompatibilityCheck((options) => {
-            try {
+        .action(callCommand((options) => {
                 new ListExperiments(program).execute(options);
-            } catch (err) {
-                console.error(chalk.red(err.message));
-            }
         }));
 // Describe Experiment
     program
@@ -63,13 +59,9 @@ export function create() {
         .option('--project <project>', 'The project to use')
         .option('--json [searchPath]', QUERY_JSON_HELP_TEXT)
         .option('--query <query>', `[DEPRECATION WARNING] ${QUERY_JSON_HELP_TEXT}`)
-        .action(withCompatibilityCheck((experimentName, options) => {
-            try {
+        .action(callCommand((experimentName, options) => {
                 checkForEmptyArgs({ experimentName });
                 new DescribeExperimentCommand(program).execute(experimentName, options);
-            } catch (err) {
-                console.error(chalk.red(err.message));
-            }
         }));
 // Delete Experiment
     program
@@ -79,13 +71,9 @@ export function create() {
         .option('--color [boolean]', 'Turn on/off colors for JSON output.', 'true')
         .option('--profile <profile>', 'The profile to use')
         .option('--project <project>', 'The project to use')
-        .action(withCompatibilityCheck((experimentName, options) => {
-            try {
+        .action(callCommand((experimentName, options) => {
                 checkForEmptyArgs({ experimentName });
                 new DeleteExperimentCommand(program).execute(experimentName, options);
-            } catch (err) {
-                console.error(chalk.red(err.message));
-            }
         }));
 // List Runs
     program
@@ -101,13 +89,9 @@ export function create() {
         .option('--limit <limit>', 'Limit number of records', DEFAULT_LIST_LIMIT_COUNT)
         .option('--skip <skip>', 'Skip number of records', DEFAULT_LIST_SKIP_COUNT)
         .option('--sort <sort>', 'A Mongo style sort statement to use in the query.', GET_DEFAULT_SORT_CLI_OPTION(DEFAULT_LIST_SORT_PARAMS._updatedAt))
-        .action(withCompatibilityCheck((experimentName, options) => {
-            try {
+        .action(callCommand((experimentName, options) => {
                 checkForEmptyArgs({ experimentName });
                 new ListRuns(program).execute(experimentName, options);
-            } catch (err) {
-                console.error(chalk.red(err.message));
-            }
         }));
 // Describe Run
     program
@@ -120,13 +104,9 @@ export function create() {
         .option('--project <project>', 'The project to use')
         .option('--json [searchPath]', QUERY_JSON_HELP_TEXT)
         .option('--query <query>', `[DEPRECATION WARNING] ${QUERY_JSON_HELP_TEXT}`)
-        .action(withCompatibilityCheck((experimentName, runId, options) => {
-            try {
+        .action(callCommand((experimentName, runId, options) => {
                 checkForEmptyArgs({ experimentName, runId });
                 new DescribeRunCommand(program).execute(experimentName, runId, options);
-            } catch (err) {
-                console.error(chalk.red(err.message));
-            }
         }));
 // Delete Run
     program
@@ -136,13 +116,9 @@ export function create() {
         .option('--color [boolean]', 'Turn on/off colors for JSON output.', 'true')
         .option('--profile <profile>', 'The profile to use')
         .option('--project <project>', 'The project to use')
-        .action(withCompatibilityCheck((experimentName, runId, options) => {
-            try {
+        .action(callCommand((experimentName, runId, options) => {
                 checkForEmptyArgs({ experimentName, runId });
                 new DeleteRunCommand(program).execute(experimentName, runId, options);
-            } catch (err) {
-                console.error(chalk.red(err.message));
-            }
         }));
 // Download Artifact
     program
@@ -152,13 +128,9 @@ export function create() {
         .option('--color [boolean]', 'Turn on/off colors for JSON output.', 'true')
         .option('--profile <profile>', 'The profile to use')
         .option('--project <project>', 'The project to use')
-        .action(withCompatibilityCheck((experimentName, runId, artifactName, options) => {
-            try {
+        .action(callCommand((experimentName, runId, artifactName, options) => {
                 checkForEmptyArgs({ experimentName, runId, artifactName });
                 new DownloadArtifactCommand(program).execute(experimentName, runId, artifactName, options);
-            } catch (err) {
-                console.error(chalk.red(err.message));
-            }
         }));
 // Save Experiment
     program
@@ -169,12 +141,8 @@ export function create() {
         .option('--profile <profile>', 'The profile to use')
         .option('--project <project>', 'The project to use')
         .option('-y, --yaml', 'Use YAML for experiment definition format')
-        .action(withCompatibilityCheck((experimentDefinition, options) => {
-            try {
+        .action(callCommand((experimentDefinition, options) => {
                 new SaveExperimentCommand(program).execute(experimentDefinition, options);
-            } catch (err) {
-                console.error(chalk.red(err.message));
-            }
         }));
 // Save Experiment
     program
@@ -185,12 +153,8 @@ export function create() {
         .option('--profile <profile>', 'The profile to use')
         .option('--project <project>', 'The project to use')
         .option('-y, --yaml', 'Use YAML for run definition format')
-        .action(withCompatibilityCheck((runDefinition, options) => {
-            try {
+        .action(callCommand((runDefinition, options) => {
                 new CreateRunCommand(program).execute(runDefinition, options);
-            } catch (err) {
-                console.error(chalk.red(err.message));
-            }
         }));
 // Upload Artifact
     program
@@ -202,8 +166,7 @@ export function create() {
         .option('--project <project>', 'The project to use')
         .option('--content-type <MIME type>', 'Sets the `Content-Type` or MIME type of the content ( default: application/octet-stream )')
         .option('--chunkSize <int>', 'Number of files to simultaneous upload', 10)
-        .action(withCompatibilityCheck((experimentName, runId, filePath, artifactKey, options) => {
-            try {
+        .action(callCommand((experimentName, runId, filePath, artifactKey, options) => {
                 checkForEmptyArgs({
                     experimentName,
                     runId,
@@ -211,9 +174,6 @@ export function create() {
                     artifactKey,
                 });
                 new UploadArtifactCommand(program).execute(experimentName, runId, filePath, artifactKey, options);
-            } catch (err) {
-                console.error(chalk.red(err.message));
-            }
         }));
     return program;
 }

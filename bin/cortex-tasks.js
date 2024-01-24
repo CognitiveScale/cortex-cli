@@ -1,7 +1,7 @@
 import chalk from 'chalk';
 import esMain from 'es-main';
 import { Command } from 'commander';
-import { withCompatibilityCheck } from '../src/compatibility.js';
+import { callCommand } from '../src/compatibility.js';
 import {
  ListTasksCommand, DescribeTaskCommand, TaskLogsCommand, TaskDeleteCommand, TaskPauseCommand, TaskResumeCommand, 
 } from '../src/commands/tasks.js';
@@ -38,12 +38,8 @@ export function create() {
         .option('--limit <limit>', 'Limit number of records', DEFAULT_LIST_LIMIT_COUNT)
         .option('--skip <skip>', 'Skip number of records', DEFAULT_LIST_SKIP_COUNT)
         .option('--sort <sort>', 'A Mongo style sort statement to use in the query.', GET_DEFAULT_SORT_CLI_OPTION(DEFAULT_LIST_SORT_PARAMS.startTime))
-        .action(withCompatibilityCheck(async (options) => {
-            try {
+        .action(callCommand(async (options) => {
                 await new ListTasksCommand(program).execute(options);
-            } catch (err) {
-                console.error(chalk.red(err.message));
-            }
         }));
     program
         .command('describe <taskName>')
@@ -55,13 +51,9 @@ export function create() {
         .option('--project <project>', 'The project to use')
         .option('--k8s', 'Return the full k8sResource in the response')
         // .option('-o, --output <json|yaml|k8s>', 'Format output as yaml or k8s resources')
-        .action(withCompatibilityCheck((taskName, options) => {
-            try {
+        .action(callCommand((taskName, options) => {
                 checkForEmptyArgs({ taskName });
                 new DescribeTaskCommand(program).execute(taskName, options);
-            } catch (err) {
-                console.error(chalk.red(err.message));
-            }
         }));
 // Get task logs
     program
@@ -73,14 +65,9 @@ export function create() {
         .option('--follow [boolean]', 'Stream live logs', false)
         // TODO enable when we want to support tasks
         // .option('--type [type]', 'The type of action logs to fetch [skill|task]')
-        .action(withCompatibilityCheck(async (taskName, options) => {
-            try {
+        .action(callCommand((taskName, options) => {
                 checkForEmptyArgs({ taskName });
-                
-                await new TaskLogsCommand(program).execute(taskName, options);
-            } catch (err) {
-                console.error(chalk.red(err.message));
-            }
+                new TaskLogsCommand(program).execute(taskName, options);
         }));
 // Delete a task
     program
@@ -89,13 +76,9 @@ export function create() {
         .option('--no-compat', 'Ignore API compatibility checks')
         .option('--profile <profile>', 'The profile to use')
         .option('--project <project>', 'The project to use')
-        .action(withCompatibilityCheck(async (taskName, options) => {
-            try {
+        .action(callCommand(async (taskName, options) => {
                 checkForEmptyArgs({ taskName });
                 await new TaskDeleteCommand(program).execute(taskName, options);
-            } catch (err) {
-                console.error(chalk.red(err.message));
-            }
         }));
 // Pause a task
     program
@@ -104,13 +87,9 @@ export function create() {
         .option('--no-compat', 'Ignore API compatibility checks')
         .option('--profile <profile>', 'The profile to use')
         .option('--project <project>', 'The project to use')
-        .action(withCompatibilityCheck(async (taskName, options) => {
-            try {
+        .action(callCommand(async (taskName, options) => {
                 checkForEmptyArgs({ taskName });
                 await new TaskPauseCommand(program).execute(taskName, options);
-            } catch (err) {
-                console.error(chalk.red(err.message));
-            }
         }));
 // Resume a task
     program
@@ -119,13 +98,9 @@ export function create() {
         .option('--no-compat', 'Ignore API compatibility checks')
         .option('--profile <profile>', 'The profile to use')
         .option('--project <project>', 'The project to use')
-        .action(withCompatibilityCheck(async (taskName, options) => {
-            try {
+        .action(callCommand(async (taskName, options) => {
                 checkForEmptyArgs({ taskName });
                 await new TaskResumeCommand(program).execute(taskName, options);
-            } catch (err) {
-                console.error(chalk.red(err.message));
-            }
         }));
     return program;
 }

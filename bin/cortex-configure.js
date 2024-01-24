@@ -15,11 +15,7 @@ export function create() {
         .option('--profile <profile>', 'The profile to configure', 'default')
         .option('--project <project>', 'The default project')
         .action(async (options, command) => {
-            try {
                 await new ConfigureCommand(command).execute(options);
-            } catch (err) {
-                console.error(chalk.red(err.message));
-            }
         });
     program
         .command('token')
@@ -29,11 +25,7 @@ export function create() {
         .option('--ttl <time>', 'The amount of time for this login to remain active, expressed as a number of hours, days, or weeks (e.g. 1h, 2d, 2w)')
         .option('--color [boolean]', 'Turn on/off colors for JSON output.', 'true')
         .action(async (options) => {
-            try {
                 await new GetAccessToken(program).execute(options);
-            } catch (err) {
-                console.error(chalk.red(err.message));
-            }
         });
     program
         .command('list')

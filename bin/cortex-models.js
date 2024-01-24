@@ -2,7 +2,7 @@
 import chalk from 'chalk';
 import esMain from 'es-main';
 import { Command } from 'commander';
-import { withCompatibilityCheck } from '../src/compatibility.js';
+import { callCommand } from '../src/compatibility.js';
 import {
  DeleteModelCommand, SaveModelCommand, DescribeModelCommand, ListModelsCommand, UpdateModelStatusCommand, ListModelRunsCommand, 
 } from '../src/commands/models.js';
@@ -32,12 +32,8 @@ export function create() {
         .option('--limit <limit>', 'Limit number of records', DEFAULT_LIST_LIMIT_COUNT)
         .option('--skip <skip>', 'Skip number of records', DEFAULT_LIST_SKIP_COUNT)
         .option('--sort <sort>', 'A Mongo style sort statement to use in the query.', GET_DEFAULT_SORT_CLI_OPTION(DEFAULT_LIST_SORT_PARAMS.updatedAt))
-        .action(withCompatibilityCheck((options) => {
-            try {
+        .action(callCommand((options) => {
                 new ListModelsCommand(program).execute(options);
-            } catch (err) {
-                console.error(chalk.red(err.message));
-            }
         }));
 // Describe Model
     program
@@ -51,13 +47,9 @@ export function create() {
         .option('--json [searchPath]', QUERY_JSON_HELP_TEXT)
         .option('--query <query>', `[DEPRECATION WARNING] ${QUERY_JSON_HELP_TEXT}`)
         .option('--verbose', 'Verbose output')
-        .action(withCompatibilityCheck((modelName, options) => {
-            try {
+        .action(callCommand((modelName, options) => {
                 checkForEmptyArgs({ modelName });
                 new DescribeModelCommand(program).execute(modelName, options);
-            } catch (err) {
-                console.error(chalk.red(err.message));
-            }
         }));
 // Delete Model
     program
@@ -67,13 +59,9 @@ export function create() {
         .option('--color [boolean]', 'Turn on/off colors for JSON output.', 'true')
         .option('--profile <profile>', 'The profile to use')
         .option('--project <project>', 'The project to use')
-        .action(withCompatibilityCheck((modelName, options) => {
-            try {
+        .action(callCommand((modelName, options) => {
                 checkForEmptyArgs({ modelName });
                 new DeleteModelCommand(program).execute(modelName, options);
-            } catch (err) {
-                console.error(chalk.red(err.message));
-            }
         }));
 // Save Model
     program
@@ -84,12 +72,8 @@ export function create() {
         .option('--profile <profile>', 'The profile to use')
         .option('--project <project>', 'The project to use')
         .option('-y, --yaml', 'Use YAML for model definition format')
-        .action(withCompatibilityCheck((modelDefinition, options) => {
-            try {
+        .action(callCommand((modelDefinition, options) => {
                 new SaveModelCommand(program).execute(modelDefinition, options);
-            } catch (err) {
-                console.error(chalk.red(err.message));
-            }
         }));
 // Publish a Model
     program
@@ -101,13 +85,9 @@ export function create() {
         .option('--project <project>', 'The project to use')
         .option('-y, --yaml', 'Use YAML for model definition format')
         .option('--content-type <MIME type>', 'Sets the `Content-Type` or MIME type of the content ( default: application/octet-stream )')
-        .action(withCompatibilityCheck((modelName, options) => {
-            try {
+        .action(callCommand((modelName, options) => {
                 checkForEmptyArgs({ modelName });
                 new UpdateModelStatusCommand(program).execute(modelName, options, 'publish');
-            } catch (err) {
-                console.error(chalk.red(err.message));
-            }
         }));
 // Unpublish a Model
     program
@@ -119,13 +99,9 @@ export function create() {
         .option('--project <project>', 'The project to use')
         .option('-y, --yaml', 'Use YAML for model definition format')
         .option('--content-type <MIME type>', 'Sets the `Content-Type` or MIME type of the content ( default: application/octet-stream )')
-        .action(withCompatibilityCheck((modelName, options) => {
-            try {
+        .action(callCommand((modelName, options) => {
                 checkForEmptyArgs({ modelName });
                 new UpdateModelStatusCommand(program).execute(modelName, options, 'unpublish');
-            } catch (err) {
-                console.error(chalk.red(err.message));
-            }
         }));
 // List model runs
     program
@@ -141,13 +117,9 @@ export function create() {
         .option('--limit <limit>', 'Limit number of records', DEFAULT_LIST_LIMIT_COUNT)
         .option('--skip <skip>', 'Skip number of records', DEFAULT_LIST_SKIP_COUNT)
         .option('--sort <sort>', 'A Mongo style sort statement to use in the query.', GET_DEFAULT_SORT_CLI_OPTION(DEFAULT_LIST_SORT_PARAMS._updatedAt))
-        .action(withCompatibilityCheck((modelName, options) => {
-            try {
+        .action(callCommand((modelName, options) => {
                 checkForEmptyArgs({ modelName });
                 new ListModelRunsCommand(program).execute(modelName, options);
-            } catch (err) {
-                console.error(chalk.red(err.message));
-            }
         }));
     return program;
 }

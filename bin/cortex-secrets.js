@@ -3,7 +3,7 @@ import chalk from 'chalk';
 import esMain from 'es-main';
 import process from 'node:process';
 import { Command } from 'commander';
-import { withCompatibilityCheck } from '../src/compatibility.js';
+import { callCommand } from '../src/compatibility.js';
 import {
  ListSecretsCommand, ReadSecretsCommand, WriteSecretsCommand, DeleteSecretCommand, 
 } from '../src/commands/secrets.js';
@@ -26,13 +26,8 @@ export function create() {
         .option('--query <query>', `[DEPRECATION WARNING] ${QUERY_JSON_HELP_TEXT}`)
         .option('--profile <profile>', 'The profile to use')
         .option('--project <project>', 'The project to use')
-        .action(withCompatibilityCheck((options) => {
-            try {
-                return new ListSecretsCommand(program).execute(options);
-            } catch (err) {
-                return console.error(chalk.red(err.message));
-            }
-        }));
+        .action(callCommand((options) => new ListSecretsCommand(program).execute(options)));
+
 // Read Secure Value
     program
         .command('describe <keyName>')
@@ -43,13 +38,9 @@ export function create() {
         .option('--json', 'Output results using JSON')
         .option('--profile <profile>', 'The profile to use')
         .option('--project <project>', 'The project to use')
-        .action(withCompatibilityCheck((keyName, options) => {
-            try {
+        .action(callCommand((keyName, options) => {
                 checkForEmptyArgs({ keyName });
                 return new ReadSecretsCommand(program).execute(keyName, options);
-            } catch (err) {
-                return console.error(chalk.red(err.message));
-            }
         }));
 // Write Secure Value
     program
@@ -61,12 +52,8 @@ export function create() {
         .option('--data-file <dataFile>', 'A file containing either JSON or YAML formatted value to save')
         .option('--profile <profile>', 'The profile to use')
         .option('--project <project>', 'The project to use')
-        .action(withCompatibilityCheck((keyName, value, options) => {
-            try {
+        .action(callCommand((keyName, value, options) => {
                 return new WriteSecretsCommand(program).execute(keyName, value, options);
-            } catch (err) {
-                return console.error(chalk.red(err.message));
-            }
         }));
 // Delete Secret
     program
@@ -76,13 +63,9 @@ export function create() {
         .option('--color [boolean]', 'Turn on/off colors for JSON output.', 'true')
         .option('--profile <profile>', 'The profile to use')
         .option('--project <project>', 'The project to use')
-        .action(withCompatibilityCheck((keyName, options) => {
-            try {
+        .action(callCommand((keyName, options) => {
                 checkForEmptyArgs({ keyName });
                 return new DeleteSecretCommand(program).execute(keyName, options);
-            } catch (err) {
-                return console.error(chalk.red(err.message));
-            }
         }));
     return program;
 }

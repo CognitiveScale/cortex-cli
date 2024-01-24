@@ -8,7 +8,7 @@ import {
   DescribePipelineRunCommand,
   ListPipelineRunsCommand,
 } from '../src/commands/pipelines.js';
-import { withCompatibilityCheck } from '../src/compatibility.js';
+import { callCommand } from '../src/compatibility.js';
 import {
   LIST_JSON_HELP_TEXT,
   DEFAULT_LIST_LIMIT_COUNT,
@@ -40,13 +40,7 @@ export function create() {
     .option('--limit <limit>', 'Limit number of records', DEFAULT_LIST_LIMIT_COUNT)
     .option('--skip <skip>', 'Skip number of records', DEFAULT_LIST_SKIP_COUNT)
     .option('--sort <sort>', 'A Mongo style sort statement to use in the query.', GET_DEFAULT_SORT_CLI_OPTION(DEFAULT_LIST_SORT_PARAMS.updatedAt))
-    .action(withCompatibilityCheck((options) => {
-      try {
-        return new ListPipelineCommand(pipelines).execute(options);
-      } catch (err) {
-        return printError(err.message);
-      }
-    }));
+    .action(callCommand((options) => new ListPipelineCommand(pipelines).execute(options)));
 
   // Describe
   pipelines
@@ -59,13 +53,9 @@ export function create() {
   .option('--profile <profile>', 'The profile to use')
   .option('--project <project>', 'The project to use')
   .option('--json [searchPath]', QUERY_JSON_HELP_TEXT)
-  .action(withCompatibilityCheck((pipelineName, gitRepoName, options) => {
-    try {
+  .action(callCommand((pipelineName, gitRepoName, options) => {
       checkForEmptyArgs({ pipelineName, gitRepoName });
       return new DescribePipelineCommand(pipelines).execute(pipelineName, gitRepoName, options);
-    } catch (err) {
-      return printError(err.message);
-    }
   }));
   
   // Run Pipeline
@@ -83,13 +73,9 @@ export function create() {
   .option('--block <block>', 'Block name to run a specific block')
   .option('--scheduleName <name>', 'Identifier to uniquely identify a Pipelines schedule')
   .option('--scheduleCron <cron>', 'Schedule Pipeline to run periodically using a cron schedule string for example: "0 0 * * *", @hourly, or @daily')
-  .action(withCompatibilityCheck((pipelineName, gitRepoName, options) => {
-    try {
+  .action(callCommand((pipelineName, gitRepoName, options) => {
       checkForEmptyArgs({ pipelineName, gitRepoName });
       return new RunPipelineCommand(pipelines).execute(pipelineName, gitRepoName, options);
-    } catch (err) {
-      return printError(err.message);
-    }
   }));
 
   // Describe Pipeline Run
@@ -102,13 +88,9 @@ export function create() {
   .option('--profile <profile>', 'The profile to use')
   .option('--project <project>', 'The project to use')
   .option('--json [searchPath]', QUERY_JSON_HELP_TEXT)
-  .action(withCompatibilityCheck((runId, options) => {
-    try {
+  .action(callCommand((runId, options) => {
       checkForEmptyArgs({ runId });
       return new DescribePipelineRunCommand(pipelines).execute(runId, options);
-    } catch (err) {
-      return printError(err.message);
-    }
   }));
 
   // List Pipeline Run
@@ -123,13 +105,9 @@ export function create() {
   .option('--json [searchPath]', QUERY_JSON_HELP_TEXT)
   .option('--limit <limit>', 'Limit number of records', DEFAULT_LIST_LIMIT_COUNT)
   .option('--skip <skip>', 'Skip number of records', DEFAULT_LIST_SKIP_COUNT)
-  .action(withCompatibilityCheck((pipelineName, gitRepoName, options) => {
-    try {
+  .action(callCommand((pipelineName, gitRepoName, options) => {
       checkForEmptyArgs({ pipelineName, gitRepoName });
       return new ListPipelineRunsCommand(pipelines).execute(pipelineName, gitRepoName, options);
-    } catch (err) {
-      return printError(err.message);
-    }
   }));
 
   return pipelines;

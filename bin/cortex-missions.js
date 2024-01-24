@@ -4,7 +4,7 @@ import esMain from 'es-main';
 import fs from 'node:fs';
 import { Command } from 'commander';
 import { checkForEmptyArgs, parseObject, printError } from '../src/commands/utils.js';
-import { withCompatibilityCheck } from '../src/compatibility.js';
+import { callCommand } from '../src/compatibility.js';
 import {
  DEFAULT_LIST_SKIP_COUNT, DEFAULT_LIST_LIMIT_COUNT, GET_DEFAULT_SORT_CLI_OPTION, DEFAULT_LIST_SORT_PARAMS, LIST_JSON_HELP_TEXT, QUERY_JSON_HELP_TEXT, 
 } from '../src/constants.js';
@@ -33,13 +33,9 @@ export function create() {
         .option('--limit <limit>', 'Limit number of records', DEFAULT_LIST_LIMIT_COUNT)
         .option('--skip <skip>', 'Skip number of records', DEFAULT_LIST_SKIP_COUNT)
         .option('--sort <sort>', 'A Mongo style sort statement to use in the query.', GET_DEFAULT_SORT_CLI_OPTION(DEFAULT_LIST_SORT_PARAMS._updatedAt))
-        .action(withCompatibilityCheck((campaignName, options) => {
-            try {
+        .action(callCommand((campaignName, options) => {
                 checkForEmptyArgs({ campaignName });
                 new ListMissionsCommand(program).execute(campaignName, options);
-            } catch (err) {
-                console.error(chalk.red(err.message));
-            }
         }));
     program
         .command('describe <campaignName> <missionName>')
@@ -49,13 +45,9 @@ export function create() {
         .option('--color [boolean]', 'Turn on/off colors for JSON output.', 'true')
         .option('--profile <profile>', 'The profile to use')
         .option('--project <project>', 'The project to use')
-        .action(withCompatibilityCheck((campaignName, missionName, options) => {
-            try {
+        .action(callCommand((campaignName, missionName, options) => {
                 checkForEmptyArgs({ campaignName, missionName });
                 new DescribeMissionCommand(program).execute(campaignName, missionName, options);
-            } catch (err) {
-                console.error(chalk.red(err.message));
-            }
         }));
     program
         .command('deploy <campaignName> <missionName>')
@@ -64,13 +56,9 @@ export function create() {
         .option('--color [boolean]', 'Turn on/off colors for JSON output.', 'true')
         .option('--profile <profile>', 'The profile to use')
         .option('--project <project>', 'The project to use')
-        .action(withCompatibilityCheck((campaignName, missionName, options) => {
-            try {
+        .action(callCommand((campaignName, missionName, options) => {
                 checkForEmptyArgs({ campaignName, missionName });
                 new DeployMissionCommand(program).execute(campaignName, missionName, options);
-            } catch (err) {
-                console.error(chalk.red(err.message));
-            }
         }));
     program
         .command('invoke <campaignName> <missionName>')
@@ -81,9 +69,8 @@ export function create() {
         .option('--project <project>', 'The project to use')
         .option('--params <params>', 'JSON params to send to the action')
         .option('--params-file <paramsFile>', 'A file containing either JSON or YAML formatted params')
-        .action(withCompatibilityCheck((campaignName, missionName, options) => {
+        .action(callCommand((campaignName, missionName, options) => {
             checkForEmptyArgs({ campaignName, missionName });
-            try {
                 let params = {};
                 if (options.params) {
                     try {
@@ -111,9 +98,6 @@ export function create() {
                     throw new Error('Empty payload received in params');
                 }
                 new InvokeAgentServiceCommand(program).execute(`${campaignName}-${missionName}`, 'mission_manager_service', options);
-            } catch (err) {
-                console.error(chalk.red(err.message));
-            }
         }));
     program
         .command('undeploy <campaignName> <missionName>')
@@ -122,13 +106,9 @@ export function create() {
         .option('--color [boolean]', 'Turn on/off colors for JSON output.', 'true')
         .option('--profile <profile>', 'The profile to use')
         .option('--project <project>', 'The project to use')
-        .action(withCompatibilityCheck((campaignName, missionName, options) => {
-            try {
+        .action(callCommand((campaignName, missionName, options) => {
                 checkForEmptyArgs({ campaignName, missionName });
                 new UndeployMissionCommand(program).execute(campaignName, missionName, options);
-            } catch (err) {
-                console.error(chalk.red(err.message));
-            }
         }));
     program
         .command('status <activationId>')
@@ -137,13 +117,9 @@ export function create() {
         .option('--color [boolean]', 'Turn on/off colors for JSON output.', 'true')
         .option('--profile <profile>', 'The profile to use')
         .option('--project <project>', 'The project to use')
-        .action(withCompatibilityCheck((activationId, options) => {
-            try {
+        .action(callCommand((activationId, options) => {
                 checkForEmptyArgs({ activationId });
                 new DownloadContent(program).execute(`mission_runtime/${activationId}/status.chk`, options);
-            } catch (err) {
-                console.error(chalk.red(err.message));
-            }
         }));
     return program;
 }

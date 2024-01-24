@@ -3,7 +3,7 @@ import chalk from 'chalk';
 import esMain from 'es-main';
 import process from 'node:process';
 import { Command } from 'commander';
-import { withCompatibilityCheck } from '../src/compatibility.js';
+import { callCommand } from '../src/compatibility.js';
 import {
  CreateProjectCommand, ListProjectsCommand, DescribeProjectCommand, DeleteProjectCommand, 
 } from '../src/commands/projects.js';
@@ -29,12 +29,8 @@ export function create() {
         .option('-t, --title <string>', 'The project title')
         .option('-d, --description <string>', 'The project description')
         .option('-y, --yaml', 'Use YAML for project definition format')
-        .action(withCompatibilityCheck((projectDefinition, options) => {
-            try {
+        .action(callCommand((projectDefinition, options) => {
                 return new CreateProjectCommand(program).execute(projectDefinition, options);
-            } catch (err) {
-                return console.error(chalk.red(err.message));
-            }
         }));
 // List Projects
     program
@@ -50,12 +46,8 @@ export function create() {
         .option('--limit <limit>', 'Limit number of records', DEFAULT_LIST_LIMIT_COUNT)
         .option('--skip <skip>', 'Skip number of records', DEFAULT_LIST_SKIP_COUNT)
         .option('--sort <sort>', 'A Mongo style sort statement to use in the query.', GET_DEFAULT_SORT_CLI_OPTION(DEFAULT_LIST_SORT_PARAMS._updatedAt))
-        .action(withCompatibilityCheck((options) => {
-            try {
+        .action(callCommand((options) => {
                 return new ListProjectsCommand(program).execute(options);
-            } catch (err) {
-                return console.error(chalk.red(err.message));
-            }
         }));
 // Get|Describe Project
     program
@@ -67,13 +59,9 @@ export function create() {
         .option('--profile <profile>', 'The profile to use')
         .option('--json [searchPath]', QUERY_JSON_HELP_TEXT)
         .option('--query <query>', `[DEPRECATION WARNING] ${QUERY_JSON_HELP_TEXT}`)
-        .action(withCompatibilityCheck((projectName, options) => {
-            try {
+        .action(callCommand((projectName, options) => {
                 checkForEmptyArgs({ projectName });
                 return new DescribeProjectCommand(program).execute(projectName, options);
-            } catch (err) {
-                return console.error(chalk.red(err.message));
-            }
         }));
 // Delete Project
     program
@@ -83,13 +71,9 @@ export function create() {
         .option('--no-compat', 'Ignore API compatibility checks')
         .option('--color [boolean]', 'Turn on/off colors for JSON output.', 'true')
         .option('--profile <profile>', 'The profile to use')
-        .action(withCompatibilityCheck((projectName, options) => {
-            try {
+        .action(callCommand((projectName, options) => {
                 checkForEmptyArgs({ projectName });
                 return new DeleteProjectCommand(program).execute(projectName, options);
-            } catch (err) {
-                return console.error(chalk.red(err.message));
-            }
         }));
     return program;
 }

@@ -2,7 +2,7 @@
 import chalk from 'chalk';
 import esMain from 'es-main';
 import { Command } from 'commander';
-import { withCompatibilityCheck } from '../src/compatibility.js';
+import { callCommand } from '../src/compatibility.js';
 import {
     CreateAssessmentCommand,
     DeleteAssessmentCommand,
@@ -38,12 +38,8 @@ export function create() {
         .option('--profile <profile>', 'The profile to use')
         .option('--json [searchQuery]', LIST_JSON_HELP_TEXT)
         .option('--query <query>', `[DEPRECATION WARNING] ${QUERY_JSON_HELP_TEXT}`)
-        .action(withCompatibilityCheck((options) => {
-            try {
+        .action(callCommand((options) => {
                 new ListResourceTypesCommand(program).execute(options);
-            } catch (err) {
-                console.error(chalk.red(err.message));
-            }
         }));
     program
         .command('dependency-tree [dependencyFile]')
@@ -58,12 +54,8 @@ export function create() {
         .option('--json [searchQuery]', LIST_JSON_HELP_TEXT)
         .option('--query <query>', `[DEPRECATION WARNING] ${QUERY_JSON_HELP_TEXT}`)
         .option('--missing [boolean]', 'Filter only missing dependencies')
-        .action(withCompatibilityCheck((dependencyFile, options) => {
-            try {
+        .action(callCommand((dependencyFile, options) => {
                 new DependencyTreeCommand(program).execute(dependencyFile, options);
-            } catch (err) {
-                console.error(chalk.red(err.message));
-            }
         }));
     program
         .command('list-resources')
@@ -81,12 +73,8 @@ export function create() {
         .option('--limit <limit>', 'Limit number of records', DEFAULT_LIST_LIMIT_COUNT)
         .option('--skip <skip>', 'Skip number of records', DEFAULT_LIST_SKIP_COUNT)
         .option('--sort <sort>', 'A Mongo style sort statement to use in the query.')
-        .action(withCompatibilityCheck((options) => {
-            try {
+        .action(callCommand((options) => {
                 new ListResourcesCommand(program).execute(options);
-            } catch (err) {
-                console.error(chalk.red(err.message));
-            }
         }));
     program
         .command('create [assessmentDefinition]')
@@ -103,12 +91,8 @@ export function create() {
         .option('--color [boolean]', 'Turn on/off colors for JSON output.', 'true')
         .option('--profile <profile>', 'The profile to use')
         .option('-y, --yaml', 'Use YAML format')
-        .action(withCompatibilityCheck((assessmentDefinition, options) => {
-            try {
+        .action(callCommand((assessmentDefinition, options) => {
                 new CreateAssessmentCommand(program).execute(assessmentDefinition, options);
-            } catch (err) {
-                console.error(chalk.red(err.message));
-            }
         }));
     program
         .command('list')
@@ -125,12 +109,8 @@ export function create() {
         .option('--limit <limit>', 'Limit number of records', DEFAULT_LIST_LIMIT_COUNT)
         .option('--skip <skip>', 'Skip number of records', DEFAULT_LIST_SKIP_COUNT)
         .option('--sort <sort>', 'A Mongo style sort statement to use in the query.', GET_DEFAULT_SORT_CLI_OPTION(DEFAULT_LIST_SORT_PARAMS._updatedAt))
-        .action(withCompatibilityCheck((options) => {
-            try {
+        .action(callCommand((options) => {
                 new ListAssessmentCommand(program).execute(options);
-            } catch (err) {
-                console.error(chalk.red(err.message));
-            }
         }));
     program
         .command('describe <assessmentName>')
@@ -139,13 +119,9 @@ export function create() {
         .option('--no-compat', 'Ignore API compatibility checks')
         .option('--color [boolean]', 'Turn on/off colors for JSON output.', 'true')
         .option('--profile <profile>', 'The profile to use')
-        .action(withCompatibilityCheck((assessmentName, options) => {
-            try {
+        .action(callCommand((assessmentName, options) => {
                 checkForEmptyArgs({ assessmentName });
                 new DescribeAssessmentCommand(program).execute(assessmentName, options);
-            } catch (err) {
-                console.error(chalk.red(err.message));
-            }
         }));
     program
         .command('delete <assessmentName>')
@@ -153,13 +129,9 @@ export function create() {
         .option('--no-compat', 'Ignore API compatibility checks')
         .option('--color [boolean]', 'Turn on/off colors for JSON output.', 'true')
         .option('--profile <profile>', 'The profile to use')
-        .action(withCompatibilityCheck((assessmentName, options) => {
-            try {
+        .action(callCommand((assessmentName, options) => {
                 checkForEmptyArgs({ assessmentName });
                 new DeleteAssessmentCommand(program).execute(assessmentName, options);
-            } catch (err) {
-                console.error(chalk.red(err.message));
-            }
         }));
     program
         .command('report <assessmentName>')
@@ -167,13 +139,9 @@ export function create() {
         .option('--no-compat', 'Ignore API compatibility checks')
         .option('--color [boolean]', 'Turn on/off colors for JSON output.', 'true')
         .option('--profile <profile>', 'The profile to use')
-        .action(withCompatibilityCheck((assessmentName, options) => {
-            try {
+        .action(callCommand((assessmentName, options) => {
                 checkForEmptyArgs({ assessmentName });
                 new RunAssessmentCommand(program).execute(assessmentName, options);
-            } catch (err) {
-                console.error(chalk.red(err.message));
-            }
         }));
     program
         .command('list-report <assessmentName>')
@@ -186,13 +154,9 @@ export function create() {
         .option('--profile <profile>', 'The profile to use')
         .option('--json [searchQuery]', LIST_JSON_HELP_TEXT)
         .option('--query <query>', `[DEPRECATION WARNING] ${QUERY_JSON_HELP_TEXT}`)
-        .action(withCompatibilityCheck((assessmentName, options) => {
-            try {
+        .action(callCommand((assessmentName, options) => {
                 checkForEmptyArgs({ assessmentName });
                 new ListAssessmentReportCommand(program).execute(assessmentName, options);
-            } catch (err) {
-                console.error(chalk.red(err.message));
-            }
         }));
     program
         .command('get-report <assessmentName> <reportId>')
@@ -203,13 +167,9 @@ export function create() {
         .option('--profile <profile>', 'The profile to use')
         .option('--json [searchQuery]', LIST_JSON_HELP_TEXT)
         .option('--query <query>', `[DEPRECATION WARNING] ${QUERY_JSON_HELP_TEXT}`)
-        .action(withCompatibilityCheck((assessmentName, reportId, options) => {
-            try {
+        .action(callCommand((assessmentName, reportId, options) => {
                 checkForEmptyArgs({ assessmentName, reportId });
                 new GetAssessmentReportCommand(program).execute(assessmentName, reportId, options);
-            } catch (err) {
-                console.error(chalk.red(err.message));
-            }
         }));
     program
         .command('export-report <assessmentName> <reportId>')
@@ -220,13 +180,9 @@ export function create() {
         .option('--no-compat', 'Ignore API compatibility checks')
         .option('--color [boolean]', 'Turn on/off colors for JSON output.', 'true')
         .option('--profile <profile>', 'The profile to use')
-        .action(withCompatibilityCheck((assessmentName, reportId, options) => {
-            try {
+        .action(callCommand((assessmentName, reportId, options) => {
                 checkForEmptyArgs({ assessmentName, reportId });
                 new ExportAssessmentReportCommand(program).execute(assessmentName, reportId, options);
-            } catch (err) {
-                console.error(chalk.red(err.message));
-            }
         }));
     return program;
 }

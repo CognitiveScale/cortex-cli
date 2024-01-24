@@ -2,7 +2,7 @@
 import chalk from 'chalk';
 import esMain from 'es-main';
 import { Command } from 'commander';
-import { withCompatibilityCheck } from '../src/compatibility.js';
+import { callCommand } from '../src/compatibility.js';
 import DockerLoginCommand from '../src/commands/docker.js';
 
 export function create() {
@@ -19,12 +19,8 @@ export function create() {
         .option('--profile <profile>', 'The profile to use')
         .option('--project <project>', 'The project to use')
         .option('--ttl <time>', 'The amount of time for this login to remain active, expressed as a number of hours, days, or weeks (e.g. 1h, 2d, 2w)', '14d')
-        .action(withCompatibilityCheck((options) => {
-            try {
+        .action(callCommand((options) => {
                 new DockerLoginCommand(program).execute(options);
-            } catch (err) {
-                console.error(chalk.red(err.message));
-            }
         }));
     return program;
 }

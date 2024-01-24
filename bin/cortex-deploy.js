@@ -3,7 +3,7 @@ import chalk from 'chalk';
 import esMain from 'es-main';
 
 import { Command } from 'commander';
-import { withCompatibilityCheck } from '../src/compatibility.js';
+import { callCommand } from '../src/compatibility.js';
 import {
  DeploySnapshotCommand, DeployCampaignCommand, DeployConnectionCommand, DeployExperimentCommand, DeploySkillCommand, 
 } from '../src/commands/deploy.js';
@@ -23,12 +23,8 @@ export function create() {
         .option('-y, --yaml', 'Use YAML for snapshot export format')
         .option('-f, --force', 'Force delete existing exported files')
         .option('--latestRun [boolean]', 'Export latest run of Experiment(s) if not specified')
-        .action(withCompatibilityCheck((snapshotIds, options) => {
-            try {
+        .action(callCommand((snapshotIds, options) => {
                 new DeploySnapshotCommand(program).execute(snapshotIds, options);
-            } catch (err) {
-                console.error(chalk.red(err.message));
-            }
         }));
     program
         .command('campaign <campaignName>')
@@ -38,12 +34,8 @@ export function create() {
         .option('--profile <profile>', 'The profile to use')
         .option('--project <project>', 'The project to use')
         .option('--deployable [boolean]', 'Export only ready to deploy Campaigns', true)
-        .action(withCompatibilityCheck((campaignName, options) => {
-            try {
+        .action(callCommand((campaignName, options) => {
                 new DeployCampaignCommand(program).execute(campaignName, options);
-            } catch (err) {
-                console.error(chalk.red(err.message));
-            }
         }));
     program
         .command('connection <connectionName>')
@@ -52,12 +44,8 @@ export function create() {
         .option('--color [boolean]', 'Turn on/off colors for JSON output.', 'true')
         .option('--profile <profile>', 'The profile to use')
         .option('--project <project>', 'The project to use')
-        .action(withCompatibilityCheck((connectionName, options) => {
-            try {
+        .action(callCommand((connectionName, options) => {
                 new DeployConnectionCommand(program).execute(connectionName, options);
-            } catch (err) {
-                console.error(chalk.red(err.message));
-            }
         }));
     program
         .command('skill <skillName>')
@@ -67,12 +55,8 @@ export function create() {
         .option('--profile <profile>', 'The profile to use')
         .option('--project <project>', 'The project to use')
         .option('--latestRun [boolean]', 'Export latest run of experiment if not specified')
-        .action(withCompatibilityCheck((skillName, options) => {
-            try {
+        .action(callCommand((skillName, options) => {
                 new DeploySkillCommand(program).execute(skillName, options);
-            } catch (err) {
-                console.error(chalk.red(err.message));
-            }
         }));
     program
         .command('experiment <experimentName> [runId]')
@@ -82,12 +66,8 @@ export function create() {
         .option('--profile <profile>', 'The profile to use')
         .option('--project <project>', 'The project to use')
         .option('--latestRun [boolean]', 'Export latest run of experiment if not specified')
-        .action(withCompatibilityCheck((experimentName, runId, options) => {
-            try {
+        .action(callCommand((experimentName, runId, options) => {
                 new DeployExperimentCommand(program).execute(experimentName, runId, options);
-            } catch (err) {
-                console.error(chalk.red(err.message));
-            }
         }));
     return program;
 }

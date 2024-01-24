@@ -2,7 +2,7 @@
 import chalk from 'chalk';
 import esMain from 'es-main';
 import { Command } from 'commander';
-import { withCompatibilityCheck } from '../src/compatibility.js';
+import { callCommand } from '../src/compatibility.js';
 import {
  ListContent, UploadContent, DeleteContent, DownloadContent, 
 } from '../src/commands/content.js';
@@ -24,12 +24,8 @@ export function create() {
         .option('--json [searchQuery]', LIST_JSON_HELP_TEXT)
         .option('--query <query>', `[DEPRECATION WARNING] ${QUERY_JSON_HELP_TEXT}`)
         .option('--prefix <prefix>', 'Filter contents with the given prefix.')
-        .action(withCompatibilityCheck((options) => {
-            try {
+        .action(callCommand((options) => {
                 new ListContent(program).execute(options);
-            } catch (err) {
-                console.error(chalk.red(err.message));
-            }
         }));
 // Upload Content
     program
@@ -44,12 +40,8 @@ export function create() {
         .option('--project <project>', 'The project to use')
         .option('--content-type <MIME type>', 'Sets the `Content-Type` or MIME type of the content ( default: application/octet-stream )')
         .option('--chunkSize <int>', 'Number of files to simultaneous upload', 10)
-        .action(withCompatibilityCheck(async (contentKey, filePath, options) => {
-            try {
+        .action(callCommand(async (contentKey, filePath, options) => {
                 return await new UploadContent(program).execute(contentKey, filePath, options);
-            } catch (err) {
-                return console.error(chalk.red(err.message));
-            }
         }));
 // Delete Content
     program
@@ -59,12 +51,8 @@ export function create() {
         .option('--color [boolean]', 'Turn on/off colors for JSON output.', 'true')
         .option('--profile <profile>', 'The profile to use')
         .option('--project <project>', 'The project to use')
-        .action(withCompatibilityCheck((contentKey, options) => {
-            try {
+        .action(callCommand((contentKey, options) => {
                 new DeleteContent(program).execute(contentKey, options);
-            } catch (err) {
-                console.error(chalk.red(err.message));
-            }
         }));
 // Download Content
     program
@@ -75,12 +63,8 @@ export function create() {
         .option('--color [boolean]', 'Turn on/off colors for JSON output.', 'true')
         .option('--profile <profile>', 'The profile to use')
         .option('--project <project>', 'The project to use')
-        .action(withCompatibilityCheck((contentKey, options) => {
-            try {
+        .action(callCommand((contentKey, options) => {
                 new DownloadContent(program).execute(contentKey, options);
-            } catch (err) {
-                console.error(chalk.red(err.message));
-            }
         }));
     return program;
 }

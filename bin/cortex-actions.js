@@ -2,7 +2,7 @@
 import chalk from 'chalk';
 import esMain from 'es-main';
 import { Command } from 'commander';
-import { withCompatibilityCheck } from '../src/compatibility.js';
+import { callCommand } from '../src/compatibility.js';
 import {
  ListActionsCommand, DescribeActionCommand, DeleteActionCommand, DeployActionCommand, 
 } from '../src/commands/actions.js';
@@ -30,12 +30,8 @@ export function create() {
         .option('--limit <limit>', 'Limit number of records', DEFAULT_LIST_LIMIT_COUNT)
         .option('--skip <skip>', 'Skip number of records', DEFAULT_LIST_SKIP_COUNT)
         .option('--sort <sort>', 'A Mongo style sort statement to use in the query.', GET_DEFAULT_SORT_CLI_OPTION(DEFAULT_LIST_SORT_PARAMS.updatedAt))
-        .action(withCompatibilityCheck((options) => {
-            try {
+        .action(callCommand((options) => {
                 new ListActionsCommand(program).execute(options);
-            } catch (err) {
-                console.error(chalk.red(err.message));
-            }
         }));
 // Describe Action
     program
@@ -49,13 +45,9 @@ export function create() {
         .option('--json [searchPath]', QUERY_JSON_HELP_TEXT)
         .option('--query <query>', `[DEPRECATION WARNING] ${QUERY_JSON_HELP_TEXT}`)
         .option('-d, --download', 'Download code binary in response')
-        .action(withCompatibilityCheck((actionName, options) => {
-            try {
+        .action(callCommand((actionName, options) => {
                 checkForEmptyArgs({ actionName });
                 new DescribeActionCommand(program).execute(actionName, options);
-            } catch (err) {
-                console.error(chalk.red(err.message));
-            }
         }));
 // Delete Action
     program
@@ -65,13 +57,9 @@ export function create() {
         .option('--color [boolean]', 'Turn on/off colors for JSON output.', 'true')
         .option('--profile <profile>', 'The profile to use')
         .option('--project <project>', 'The project to use')
-        .action(withCompatibilityCheck((actionName, options) => {
-            try {
+        .action(callCommand((actionName, options) => {
                 checkForEmptyArgs({ actionName });
                 new DeleteActionCommand(program).execute(actionName, options);
-            } catch (err) {
-                console.error(chalk.red(err.message));
-            }
         }));
 // Deploy Action
     program
@@ -97,12 +85,8 @@ export function create() {
         // TODO this command is non-functional, comment for now to avoid confusion
         // .option('--push-docker', 'Push Docker image to the Cortex registry.')
         .option('-y, --yaml', 'Use YAML format')
-        .action(withCompatibilityCheck((actionName, options) => {
-            try {
+        .action(callCommand((actionName, options) => {
                 new DeployActionCommand(program).execute(actionName, options);
-            } catch (err) {
-                console.error(chalk.red(err.message));
-            }
         }));
     return program;
 }

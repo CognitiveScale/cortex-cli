@@ -2,7 +2,7 @@
 import chalk from 'chalk';
 import esMain from 'es-main';
 import { Command } from 'commander';
-import { withCompatibilityCheck } from '../src/compatibility.js';
+import { callCommand } from '../src/compatibility.js';
 import {
     DEFAULT_LIST_LIMIT_COUNT,
     DEFAULT_LIST_SKIP_COUNT,
@@ -42,13 +42,9 @@ export function create() {
         .option('--profile <profile>', 'The profile to use')
         .option('--project <project>', 'The project to use')
         .option('-y, --yaml', 'Use YAML for agent definition format')
-        .action(withCompatibilityCheck((agentDefinitions, options) => {
-            try {
-                new SaveAgentCommand(program).execute(agentDefinitions, options);
-            } catch (err) {
-                console.error(chalk.red(err.message));
-            }
-        }));
+        .action(callCommand(
+            (agentDefinitions, options) => new SaveAgentCommand(program).execute(agentDefinitions, options)
+        ));
 // List Agents
     program
         .command('list')
@@ -64,12 +60,8 @@ export function create() {
         .option('--limit <limit>', 'Limit number of records', DEFAULT_LIST_LIMIT_COUNT)
         .option('--skip <skip>', 'Skip number of records', DEFAULT_LIST_SKIP_COUNT)
         .option('--sort <sort>', 'A Mongo style sort statement to use in the query.', GET_DEFAULT_SORT_CLI_OPTION(DEFAULT_LIST_SORT_PARAMS.updatedAt))
-        .action(withCompatibilityCheck((options) => {
-            try {
-                new ListAgentsCommand(program).execute(options);
-            } catch (err) {
-                console.error(chalk.red(err.message));
-            }
+        .action(callCommand((options) => {
+            new ListAgentsCommand(program).execute(options);
         }));
 // Deploy agent
     program
@@ -78,13 +70,9 @@ export function create() {
         .option('--no-compat', 'Ignore API compatibility checks')
         .option('--profile <profile>', 'The profile to use')
         .option('--project <project>', 'The project to use')
-        .action(withCompatibilityCheck((agentNames, options) => {
-            try {
+        .action(callCommand((agentNames, options) => {
                 checkForEmptyArgs({ agentNames });
                 new DeployAgentCommand(program).execute(agentNames, options);
-            } catch (err) {
-                console.error(chalk.red(err.message));
-            }
         }));
 // Describe Agent
     program
@@ -101,13 +89,9 @@ export function create() {
         .option('--query <query>', `[DEPRECATION WARNING] ${QUERY_JSON_HELP_TEXT}`)
         .option('--versions', 'To get list of versions of an agent')
         .option('--verbose', 'Verbose output', false)
-        .action(withCompatibilityCheck((agentName, options) => {
-            try {
+        .action(callCommand((agentName, options) => {
                 checkForEmptyArgs({ agentName });
                 new DescribeAgentCommand(program).execute(agentName, options);
-            } catch (err) {
-                console.error(chalk.red(err.message));
-            }
         }));
 // Invoke Agent Service
     program
@@ -122,13 +106,9 @@ export function create() {
         .option('--scheduleName <name>', 'Identifier to uniquely identify an agents schedule, defaults to the agent\'s name')
         .option('--scheduleCron <cron>', 'Schedule agent invoke periodically using a cron schedule string for example: "0 0 * * *", @hourly, or @daily')
         .option('--sync', 'Invoke the agent synchronously', false)
-        .action(withCompatibilityCheck((agentName, serviceName, options) => {
-            try {
+        .action(callCommand((agentName, serviceName, options) => {
                 checkForEmptyArgs({ agentName, serviceName });
                 new InvokeAgentServiceCommand(program).execute(agentName, serviceName, options);
-            } catch (err) {
-                console.error(chalk.red(err.message));
-            }
         }));
 // Delete Agent
     program
@@ -138,13 +118,9 @@ export function create() {
         .option('--color [boolean]', 'Turn on/off colors for JSON output.', 'true')
         .option('--profile <profile>', 'The profile to use')
         .option('--project <project>', 'The project to use')
-        .action(withCompatibilityCheck((agentName, options) => {
-            try {
+        .action(callCommand((agentName, options) => {
                 checkForEmptyArgs({ agentName });
                 new DeleteAgentCommand(program).execute(agentName, options);
-            } catch (err) {
-                console.error(chalk.red(err.message));
-            }
         }));
 // Undeploy agent
     program
@@ -153,13 +129,9 @@ export function create() {
         .option('--no-compat', 'Ignore API compatibility checks')
         .option('--profile <profile>', 'The profile to use')
         .option('--project <project>', 'The project to use')
-        .action(withCompatibilityCheck((agentNames, options) => {
-            try {
+        .action(callCommand((agentNames, options) => {
                 checkForEmptyArgs({ agentNames });
                 new UndeployAgentCommand(program).execute(agentNames, options);
-            } catch (err) {
-                console.error(chalk.red(err.message));
-            }
         }));
 // Get activation
     program
@@ -173,13 +145,9 @@ export function create() {
         .option('--report [boolean]', 'Get additional debugging info in activation response')
         .option('--json [searchPath]', QUERY_JSON_HELP_TEXT)
         .option('--query <query>', `[DEPRECATION WARNING] ${QUERY_JSON_HELP_TEXT}`)
-        .action(withCompatibilityCheck((activationId, options) => {
-            try {
+        .action(callCommand((activationId, options) => {
                 checkForEmptyArgs({ activationId });
                 new GetActivationCommand(program).execute(activationId, options);
-            } catch (err) {
-                console.error(chalk.red(err.message));
-            }
         }));
 // Cancel activation
     program
@@ -190,13 +158,9 @@ export function create() {
         .option('--profile <profile>', 'The profile to use')
         .option('--project <project>', 'The project to use')
         .option('--inFlight [boolean]', 'Leave inflight jobs running', false)
-        .action(withCompatibilityCheck((activationId, options) => {
-            try {
+        .action(callCommand((activationId, options) => {
                 checkForEmptyArgs({ activationId });
                 new CancelActivationCommand(program).execute(activationId, options);
-            } catch (err) {
-                console.error(chalk.red(err.message));
-            }
         }));
 
 // List activations
@@ -222,12 +186,8 @@ export function create() {
         // eslint-disable-next-line max-len
         .option('--sort <sort>', 'A Mongo style sort statement to use in the query.', GET_DEFAULT_SORT_CLI_OPTION(DEFAULT_LIST_SORT_PARAMS.start))
         .option('--filter <filter>', 'A Mongo style filter to use.')
-        .action(withCompatibilityCheck((options) => {
-            try {
+        .action(callCommand((options) => {
                 new ListActivationsCommand(program).execute(options);
-            } catch (err) {
-                console.error(chalk.red(err.message));
-            }
         }));
     program
         .command('list-services <agentName>')
@@ -238,13 +198,9 @@ export function create() {
         .option('--project <project>', 'The project to use')
         .option('--json [searchQuery]', LIST_JSON_HELP_TEXT)
         .option('--query <query>', `[DEPRECATION WARNING] ${QUERY_JSON_HELP_TEXT}`)
-        .action(withCompatibilityCheck((agentName, options) => {
-            try {
+        .action(callCommand((agentName, options) => {
                 checkForEmptyArgs({ agentName });
                 new ListServicesCommand(program).execute(agentName, options);
-            } catch (err) {
-                console.error(chalk.red(err.message));
-            }
         }));
 // Create Agent Snapshot
     program
@@ -256,12 +212,8 @@ export function create() {
         .option('--project <project>', 'The project to use')
         .option('--agentName <name[:version]>', 'The name of the agent to snapshot')
         .option('--title <title>', 'A descriptive title for the snapshot')
-        .action(withCompatibilityCheck((snapshotDefinition, options) => {
-            try {
+        .action(callCommand((snapshotDefinition, options) => {
                 new CreateAgentSnapshotCommand(program).execute(snapshotDefinition, options);
-            } catch (err) {
-                console.error(chalk.red(err.message));
-            }
         }));
     program
         .command('list-snapshots <agentName>')
@@ -276,13 +228,9 @@ export function create() {
         .option('--limit <limit>', 'Limit number of records', DEFAULT_LIST_LIMIT_COUNT)
         .option('--skip <skip>', 'Skip number of records', DEFAULT_LIST_SKIP_COUNT)
         .option('--sort <sort>', 'A Mongo style sort statement to use in the query.', GET_DEFAULT_SORT_CLI_OPTION(DEFAULT_LIST_SORT_PARAMS._updatedAt))
-        .action(withCompatibilityCheck((agentName, options) => {
-            try {
+        .action(callCommand((agentName, options) => {
                 checkForEmptyArgs({ agentName });
                 new ListAgentSnapshotsCommand(program).execute(agentName, options);
-            } catch (err) {
-                console.error(chalk.red(err.message));
-            }
         }));
     program
         .command('describe-snapshot <snapshotId>')
@@ -293,13 +241,9 @@ export function create() {
         .option('--profile <profile>', 'The profile to use')
         .option('--project <project>', 'The project to use')
         .option('-o, --output <json|yaml|k8s>', 'Format output as yaml or k8s resources')
-        .action(withCompatibilityCheck((snapshotId, options) => {
-            try {
+        .action(callCommand((snapshotId, options) => {
                 checkForEmptyArgs({ snapshotId });
                 new DescribeAgentSnapshotCommand(program).execute(snapshotId, options);
-            } catch (err) {
-                console.error(chalk.red(err.message));
-            }
         }));
     return program;
 }
