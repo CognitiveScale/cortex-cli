@@ -280,7 +280,7 @@ describe('Pipelines', () => {
         nock.isDone();
       });
 
-      it('should update-pipelines with custom Skill', async () => {
+      it('should update-pipelines with a custom skill and forceRecreate query params', async () => {
         const response = {
           success: true,
           code: 200,
@@ -299,9 +299,9 @@ describe('Pipelines', () => {
 
         nock(serverUrl)
           .post(/\/fabric\/v4\/projects\/.*\/pipeline-repositories\/.*\/update/)
-          .query({ skillName: 'my-skill' })
+          .query({ skillName: 'my-skill', forceRecreate: true })
           .reply(200, response);
-        await create().parseAsync(['node', 'repos', 'update-pipelines', 'repo1', '--project', PROJECT, '--skill', 'my-skill']);
+        await create().parseAsync(['node', 'repos', 'update-pipelines', 'repo1', '--project', PROJECT, '--skill', 'my-skill', '--force-recreate']);
         const output = getPrintedLines().join('');
         const errs = getErrorLines().join('');
         chai.expect(output).to.equal(

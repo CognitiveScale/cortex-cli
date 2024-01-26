@@ -70,12 +70,15 @@ export default class PipelineRepos {
     }
   }
 
-  async updateRepoPipelines(projectId, token, pipelineRepoName, skill) {
+  async updateRepoPipelines(projectId, token, pipelineRepoName, skill, forceRecreate) {
     checkProject(projectId);
     const params = {};
     const endpoint = `${this.endpoint(projectId)}/${encodeURIComponent(pipelineRepoName)}/update`;
     if (skill) {
       params.skillName = skill;
+    }
+    if (forceRecreate) {
+      params.forceRecreate = true;
     }
     debug('updateRepoPipelines(%s) => %s', pipelineRepoName, endpoint);
     try {
