@@ -108,6 +108,7 @@ export function create() {
     .option('--project <project>', 'The project to use')
     .option('--json [searchPath]', QUERY_JSON_HELP_TEXT)
     .option('--skill <skillName>', 'Name of the underlying Skill in the same Project to use for running the Pipeline')
+    .option('--force-recreate', 'Whether to force Pipelines to be recreated even if the Pipeline\'s state (git SHA) has not has not changed.')
     .action(withCompatibilityCheck((pipelineRepoName, options) => {
       try {
         checkForEmptyArgs({ pipelineRepoName });
