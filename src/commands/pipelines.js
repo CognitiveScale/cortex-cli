@@ -127,6 +127,38 @@ export const DescribePipelineRunCommand = class {
     this.program = program;
   }
 
+  getStateMatchingTransit(transit, states) {
+    const hasMatchingEndpoints = (s) => s?.from === transit?.from && s?.to === transit?.to;
+    return (states ?? []).find(hasMatchingEndpoints);
+  }
+
+  extractBlocksFromRun(pipelineRun) {
+    // NOTE: 'plan.states' & 'transits' should be equivalent, so try
+    // extracting details of the Pipeline run from the corresponding
+    // 'state'. Only consider Blocks to avoid confusion from input/output.
+    const blocks = pipelineRun?.transits?.map((t) => {
+      const state = this.getStateMatchingTransit(t, pipelineRun?.plan?.states);
+      // Skills are equivalent to Blocks, so it's clearer to rename the
+      // type. Plus extra Block metadata can be found in the Properties.
+      if (state?.type === 'skill') {
+        const props = state?.ref?.properties || [];
+        const blockProp = props.find((p) => p?.name === 'block');
+        const typeProp = props.find((p) => p?.name === 'type');
+        return {
+          type: typeProp?.value || '-', // i.e. block-type
+          start: t.start,
+          end: t.end,
+          status: t.status,
+          elapsed: t.end ? dayjs(t.end).diff(dayjs(t.start)) : 'N/A',
+          title: state?.ref?.title || t.title,
+          name: blockProp?.value || t.name,
+        };
+      }
+      return undefined;
+    }).filter((x) => x); // filter undefined
+    return blocks;
+  }
+
   async execute(runId, options) {
     const profile = await loadProfile(options.profile);
     debug('%s.executeDescribePipelineRun(%s)', profile.name, runId);
@@ -135,17 +167,20 @@ export const DescribePipelineRunCommand = class {
       const response = await pipelines.describePipelineRun(options.project || profile.project, profile.token, runId);
       if (response.success) {
         if (options.report && !options.json) {
-            const result = filterObject(response, getQueryOptions(options));
-            const tableSpec = [
-                { column: 'Name', field: 'name', width: 40 },
-                { column: 'Title', field: 'title', width: 40 },
-                { column: 'Type', field: 'type', width: 20 },
-                { column: 'Status', field: 'status', width: 20 },
-                { column: 'Elapsed (ms)', field: 'elapsed', width: 30 },
-            ];
-            printSuccess(`Status: ${_.get(result, 'status')}`);
-            printSuccess(`Elapsed Time (ms): ${_.get(result, 'elapsed')}`);
-            printTable(tableSpec, _.sortBy(_.get(result, 'transits'), ['start', 'end']));
+          const result = filterObject(response, getQueryOptions(options));
+          const tableSpec = [
+            { column: 'Block Name', field: 'name', width: 40 },
+            { column: 'Block Title', field: 'title', width: 40 },
+            { column: 'Type', field: 'type', width: 20 },
+            { column: 'Status', field: 'status', width: 20 },
+            { column: 'Elapsed Time (ms)', field: 'elapsed', width: 30 },
+          ];
+          const blocks = this.extractBlocksFromRun(result);
+          const elapsed = result?.end ? dayjs(result.end).diff(dayjs(result.start)) : 'N/A';
+          printSuccess(`Status: ${result?.status}`);
+          printSuccess(`Elapsed Time (ms): ${elapsed}\n`);
+          printSuccess('Details:');
+          printTable(tableSpec, _.sortBy(blocks, ['start', 'end']));
         } else {
             getFilteredOutput(response, options);
         }
