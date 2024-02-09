@@ -36,6 +36,7 @@ export function create() {
     .option('--project <project>', 'The project to use')
     .option('--json [searchQuery]', LIST_JSON_HELP_TEXT)
     .option('--filter <filter>', 'A Mongo style filter to use.')
+    .option('--repo <pipelineRepo>', 'Convenience flag for filtering by Pipeline Repository. Has a lower priority than --filter')
     .option('--limit <limit>', 'Limit number of records', DEFAULT_LIST_LIMIT_COUNT)
     .option('--skip <skip>', 'Skip number of records', DEFAULT_LIST_SKIP_COUNT)
     .option('--sort <sort>', 'A Mongo style sort statement to use in the query.', GET_DEFAULT_SORT_CLI_OPTION(DEFAULT_LIST_SORT_PARAMS.updatedAt))
