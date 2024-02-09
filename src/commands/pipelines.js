@@ -105,11 +105,19 @@ export const RunPipelineCommand = class {
     try {
       const response = await pipelines.runPipeline(options.project || profile.project, profile.token, pipelineName, gitRepoName, params, options);
       if (response.success) {
-        return getFilteredOutput(response, options);
+        // TODO: Should replacment of activationId -> runId be done at the API level ?
+        response.runId = response?.runId || response?.activationId; // support runId and activationId
+        delete response.activationId;
+        if (response.json) {
+          getFilteredOutput(response, options);
+        } else {
+          printSuccess(`Pipeline Run Submitted!\n\nUse "cortex pipelines describe-run ${response.runId}" to inspect the Pipeline Run`);
+        }
+        return;
       }
-      return printError(`Failed to run pipeline: ${response.status} ${response.message}`, options);
+      printError(`Failed to run pipeline: ${response.status} ${response.message}`, options);
     } catch (err) {
-      return printError(`Failed to run pipeline: ${err.status} ${err.message}`, options);
+      printError(`Failed to run pipeline: ${err.status} ${err.message}`, options);
     }
   }
 };

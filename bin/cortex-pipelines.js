@@ -76,6 +76,7 @@ export function create() {
   .option('--color [boolean]', 'Turn on/off colors for JSON output.', 'true')
   .option('--profile <profile>', 'The profile to use')
   .option('--project <project>', 'The project to use')
+  .option('--json [searchPath]', QUERY_JSON_HELP_TEXT)
   .option('--params <params>', 'JSON params to send to the action')
   .option('--params-file <paramsFile>', 'A file containing either JSON or YAML formatted params')
   .option('--commit <commit>', 'Git SHA for pipeline repository')
