@@ -100,7 +100,6 @@ export function create() {
   .option('--profile <profile>', 'The profile to use')
   .option('--project <project>', 'The project to use')
   .option('--json [searchPath]', QUERY_JSON_HELP_TEXT)
-  .option('--report', 'Whether to print out a summary report of the Pipeline run. Incompatible with `--json`')
   .action(withCompatibilityCheck((runId, options) => {
     try {
       checkForEmptyArgs({ runId });

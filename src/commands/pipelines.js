@@ -175,7 +175,10 @@ export const DescribePipelineRunCommand = class {
     try {
       const response = await pipelines.describePipelineRun(options.project || profile.project, profile.token, runId);
       if (response.success) {
-        if (options.report && !options.json) {
+        if (options.json) {
+          getFilteredOutput(response, options);
+        } else {
+          // Print table view of Pipeline Run
           const result = filterObject(response, getQueryOptions(options));
           const tableSpec = [
             { column: 'Block Name', field: 'name', width: 40 },
@@ -186,12 +189,12 @@ export const DescribePipelineRunCommand = class {
           ];
           const blocks = this.extractBlocksFromRun(result);
           const elapsed = result?.end ? dayjs(result.end).diff(dayjs(result.start)) : 'N/A';
+          const logsAvailable = Object.prototype.hasOwnProperty.call(result, 'response') ? 'Yes' : 'No';
           printSuccess(`Status: ${result?.status}`);
-          printSuccess(`Elapsed Time (ms): ${elapsed}\n`);
+          printSuccess(`Elapsed Time (ms): ${elapsed}`);
+          printSuccess(`Logs Available: ${logsAvailable}`);
           printSuccess('Details:');
           printTable(tableSpec, _.sortBy(blocks, ['start', 'end']));
-        } else {
-            getFilteredOutput(response, options);
         }
       } else {
         printError(`Failed to desribe pipeline run ${runId}: ${response.message}`, options);
