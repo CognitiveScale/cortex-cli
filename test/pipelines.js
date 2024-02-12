@@ -15,6 +15,7 @@ describe('Pipelines', () => {
   let sandbox;
   let printSpy;
   let errorSpy;
+  let warnSpy;
   const serverUrl = 'http://localhost:8000';
   beforeEach(() => {
     if (!nock.isActive()) {
@@ -27,6 +28,7 @@ describe('Pipelines', () => {
     sandbox.stub(process, 'exit').throws(Error('EXIT'));
     printSpy = sandbox.spy(console, 'log');
     errorSpy = sandbox.spy(console, 'error');
+    warnSpy = sandbox.spy(console, 'warn');
     nock(serverUrl).get(compatibilityApi()).reply(200, compatiblityResponse());
     nock(serverUrl).persist().get(infoApi()).reply(200, infoResponse());
     process.env.PREVIEW_FEATURES_ENABLED = '1';
@@ -43,8 +45,13 @@ describe('Pipelines', () => {
   function getPrintedLines() {
     return _.flatten(printSpy.args).map((s) => stripAnsi(s));
   }
+
   function getErrorLines() {
       return _.flatten(errorSpy.args).map((s) => stripAnsi(s));
+  }
+
+  function getWarningLines() {
+    return _.flatten(warnSpy.args).map((s) => stripAnsi(s));
   }
 
   describe('List Pipelines as an unsupported preview feature', () => {
@@ -66,39 +73,102 @@ describe('Pipelines', () => {
   });
 
   describe('Pipeline', () => {
-    it('lists pipelines - empty', async () => {
-      const response = { success: true, pipelines: [] };
-      nock(serverUrl).get(/\/fabric\/v4\/projects\/.*\/pipelines.*/).reply(200, response);
-      create();
-      await create().parseAsync(['node', 'pipelines', 'list', '--project', PROJECT]);
-      
-      const output = getPrintedLines();
-      const errs = getErrorLines();
-    //   eslint-disable-next-line no-unused-expressions
-      chai.expect(errs.join('')).to.be.empty;
-      chai.expect(output.join('')).to.contain('No pipelines found');
-      nock.isDone();
-    });
+    describe('#ListPipelines', () => {
+      it('lists pipelines - empty', async () => {
+        const response = { success: true, pipelines: [] };
+        nock(serverUrl).get(/\/fabric\/v4\/projects\/.*\/pipelines.*/).reply(200, response);
+        create();
+        await create().parseAsync(['node', 'pipelines', 'list', '--project', PROJECT]);
 
-    it('lists pipelines', async () => {
-      const response = {
-        success: true,
-        pipelines: [
-          { name: 'pipeline1', gitRepoName: 'repo1', sha: 'qwerty' },
-          { name: 'pipeline2', gitRepoName: 'repo2', sha: 'abcd' },
-        ],
-      };
-      nock(serverUrl).get(/\/fabric\/v4\/projects\/.*\/pipelines.*/).reply(200, response);
-      await create().parseAsync(['node', 'pipelines', 'list', '--project', PROJECT]);
-      const output = getPrintedLines().join('');
-      const errs = getErrorLines().join('');
-      chai.expect(output).to.contain('pipeline1');
-      chai.expect(output).to.contain('qwerty');
-      chai.expect(output).to.contain('pipeline2');
-      chai.expect(output).to.contain('qwerty');
-      // eslint-disable-next-line no-unused-expressions
-      chai.expect(errs).to.be.empty;
-      nock.isDone();
+        const output = getPrintedLines();
+        const errs = getErrorLines();
+        //   eslint-disable-next-line no-unused-expressions
+        chai.expect(errs.join('')).to.be.empty;
+        chai.expect(output.join('')).to.contain('No pipelines found');
+        nock.isDone();
+      });
+
+      it('lists pipelines', async () => {
+        const response = {
+          success: true,
+          pipelines: [
+            { name: 'pipeline1', gitRepoName: 'repo1', sha: 'qwerty' },
+            { name: 'pipeline2', gitRepoName: 'repo2', sha: 'abcd' },
+          ],
+        };
+        nock(serverUrl).get(/\/fabric\/v4\/projects\/.*\/pipelines.*/).reply(200, response);
+        await create().parseAsync(['node', 'pipelines', 'list', '--project', PROJECT]);
+        const output = getPrintedLines().join('');
+        const errs = getErrorLines().join('');
+        chai.expect(output).to.contain('pipeline1');
+        chai.expect(output).to.contain('qwerty');
+        chai.expect(output).to.contain('pipeline2');
+        chai.expect(output).to.contain('qwerty');
+        // eslint-disable-next-line no-unused-expressions
+        chai.expect(errs).to.be.empty;
+        nock.isDone();
+      });
+
+      it('lists pipelines in a repo', async () => {
+        const response = {
+          success: true,
+          pipelines: [
+            { name: 'pipeline1', gitRepoName: 'repo1', sha: 'qwerty' },
+            { name: 'pipeline2', gitRepoName: 'repo1', sha: 'abcd' },
+          ],
+        };
+        // NOTE: '--repo' is a shortcut for '--filter', and all query params are
+        // required by nock for the match to be succesful
+        nock(serverUrl)
+          .get(/\/fabric\/v4\/projects\/.*\/pipelines.*/)
+          .query({
+            filter: JSON.stringify({ gitRepoName: 'repo1' }),
+            limit: 20,
+            sort: JSON.stringify({ updatedAt: -1 }),
+            skip: 0,
+          }).reply(200, response);
+        await create().parseAsync(['node', 'pipelines', 'list', '--project', PROJECT, '--repo', 'repo1']);
+        const output = getPrintedLines().join('');
+        const errs = getErrorLines().join('');
+        chai.expect(output).to.contain('pipeline1');
+        chai.expect(output).to.contain('qwerty');
+        chai.expect(output).to.contain('pipeline2');
+        chai.expect(output).to.contain('qwerty');
+        // eslint-disable-next-line no-unused-expressions
+        chai.expect(errs).to.be.empty;
+        nock.isDone();
+      });
+
+      it('warns that --filter has a higher priority that --repo when listing pipelines', async () => {
+        const response = {
+          success: true,
+          pipelines: [
+            { name: 'pipeline1', gitRepoName: 'repo1', sha: 'qwerty' },
+            { name: 'pipeline2', gitRepoName: 'repo1', sha: 'abcd' },
+          ],
+        };
+        nock(serverUrl)
+          .get(/\/fabric\/v4\/projects\/.*\/pipelines/)
+          .query({
+            filter: JSON.stringify({ name: 'pipeline' }), // matches --filter
+            limit: 20,
+            sort: JSON.stringify({ updatedAt: -1 }),
+            skip: 0,
+          })
+          .reply(200, response);
+        await create().parseAsync(['node', 'pipelines', 'list', '--project', PROJECT, '--repo', 'repo1', '--filter', '{"name":"pipeline"}']);
+        const output = getPrintedLines().join('');
+        const warn = getWarningLines().join('');
+        const errs = getErrorLines().join('');
+        chai.expect(output).to.contain('pipeline1');
+        chai.expect(output).to.contain('qwerty');
+        chai.expect(output).to.contain('pipeline2');
+        chai.expect(output).to.contain('qwerty');
+        // eslint-disable-next-line no-unused-expressions
+        chai.expect(errs).to.be.empty;
+        chai.expect(warn).to.contain('WARNING: --repo and --filter options are incompatible! The --filter option will be used');
+        nock.isDone();
+      });
     });
 
     it('describes a pipeline', async () => {

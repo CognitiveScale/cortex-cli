@@ -16,6 +16,7 @@ import {
     getQueryOptions,
     printSuccess,
     printTable,
+    printWarning,
 } from './utils.js';
 
 const debug = debugSetup('cortex:cli');
@@ -35,6 +36,9 @@ export const ListPipelineCommand = class {
     try {
       const filteringByRepo = options.repo && !options.filter;
       const filter = filteringByRepo ? JSON.stringify({ gitRepoName: options.repo }) : options.filter;
+      if (options.repo && options.filter) {
+        printWarning('WARNING: --repo and --filter options are incompatible! The --filter option will be used', options);
+      }
       const response = await pipelines.listPipelines(options.project || profile.project, profile.token, filter, options.limit, options.skip, options.sort);
       if (response.success) {
         const result = response.pipelines;
