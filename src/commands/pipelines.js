@@ -108,7 +108,7 @@ export const RunPipelineCommand = class {
         // TODO: Should replacment of activationId -> runId be done at the API level ?
         response.runId = response?.runId || response?.activationId; // support runId and activationId
         delete response.activationId;
-        if (response.json) {
+        if (options.json) {
           getFilteredOutput(response, options);
         } else {
           printSuccess(`Pipeline Run Submitted!\n\nUse "cortex pipelines describe-run ${response.runId}" to inspect the Pipeline Run`);
