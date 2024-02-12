@@ -140,6 +140,11 @@ export const DescribePipelineRunCommand = class {
     // NOTE: 'plan.states' & 'transits' should be equivalent, so try
     // extracting details of the Pipeline run from the corresponding
     // 'state'. Only consider Blocks to avoid confusion from input/output.
+    //
+    // TODO:: states & transits aren't necessarily equivalent when running an
+    // single Block in a Pipeline. However, BUG https://cognitivescale.atlassian.net/browse/FAB-6294
+    // makes it so the entire Pipeline is run. Once that is resolved, the CLI
+    // can be configured to accurately print the plan.
     const blocks = pipelineRun?.transits?.map((t) => {
       const state = this.getStateMatchingTransit(t, pipelineRun?.plan?.states);
       // Skills are equivalent to Blocks, so it's clearer to rename the
