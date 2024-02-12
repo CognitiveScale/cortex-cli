@@ -213,20 +213,68 @@ describe('Pipelines', () => {
       }
     });
 
-    xit('trigger pipeline run', async () => {
-      const response = {
-        success: true,
-        activationId: '3d77f2d3-90ef-4061-a17d-fa2aecb3c6a4',
-      };
-      nock(serverUrl).post(/\/fabric\/v4\/projects\/.*\/pipelines\/.*\/run/).reply(200, response);
-      await create().parseAsync(['node', 'pipelines', 'run', 'pipeline1', 'repo1', '--project', PROJECT]);
-      const output = getPrintedLines().join('');
-      const errs = getErrorLines().join('');
-      const description = JSON.parse(output);
-      chai.expect(description).to.deep.equal(response);
-      // eslint-disable-next-line no-unused-expressions
-      chai.expect(errs).to.be.empty;
-      nock.isDone();
+    describe('#runPipeline()', () => {
+      it('runs a Pipeline', async () => {
+        const response = {
+          success: true,
+          activationId: '3d77f2d3-90ef-4061-a17d-fa2aecb3c6a4',
+        };
+        nock(serverUrl).post(/\/fabric\/v4\/projects\/.*\/pipelines\/.*\/run/).reply(200, response);
+        await create().parseAsync(['node', 'pipelines', 'run', 'pipeline1', 'repo1', '--project', PROJECT]);
+        const output = getPrintedLines().join('');
+        const errs = getErrorLines().join('');
+        chai.expect(output).to.equal(`Pipeline Run Submitted!\n\nUse "cortex pipelines describe-run ${response.activationId}" to inspect the Pipeline Run`);
+        // eslint-disable-next-line no-unused-expressions
+        chai.expect(errs).to.be.empty;
+        nock.isDone();
+      });
+
+      it('runs a Pipeline and prints the output as JSON', async () => {
+        const response = {
+          success: true,
+          activationId: '3d77f2d3-90ef-4061-a17d-fa2aecb3c6a4',
+        };
+        nock(serverUrl).post(/\/fabric\/v4\/projects\/.*\/pipelines\/.*\/run/).reply(200, response);
+        await create().parseAsync(['node', 'pipelines', 'run', 'pipeline1', 'repo1', '--project', PROJECT, '--json']);
+        const output = getPrintedLines().join('');
+        const errs = getErrorLines().join('');
+
+        const expected = { ...response };
+        expected.runId = expected.activationId; // output includes runId NOT activationId
+        delete expected.activationId;
+
+        const actual = JSON.parse(output);
+        chai.expect(actual).to.deep.equal(expected);
+        // eslint-disable-next-line no-unused-expressions
+        chai.expect(errs).to.be.empty;
+        nock.isDone();
+      });
+
+      it('fails to run a Pipeline due to params-file not found', async () => {
+        try {
+          await create().parseAsync(['node', 'pipelines', 'run', 'pipeline1', 'repo1', '--project', PROJECT, '--params-file', '/tmp/not-found.json']);
+        } catch {
+          const output = getPrintedLines().join('');
+          const errs = getErrorLines().join('');
+          chai.expect(errs).to.include('File does not exist at: /tmp/not-found.json');
+          // eslint-disable-next-line no-unused-expressions
+          chai.expect(output).to.be.empty;
+          nock.isDone();
+        }
+      });
+
+      it('fails to run a Pipeline due to invalid params', async () => {
+        try {
+          await create().parseAsync(['node', 'pipelines', 'run', 'pipeline1', 'repo1', '--project', PROJECT, '--params', '{']);
+        } catch {
+          const output = getPrintedLines().join('');
+          const errs = getErrorLines().join('');
+          chai.expect(errs).to.include('Failed to parse params: {. Error: YAMLException: unexpected end of the stream within a flow collection (2:1)');
+          // eslint-disable-next-line no-unused-expressions
+          chai.expect(output).to.be.empty;
+          nock.isDone();
+        }
+      });
     });
 
     xit('list pipeline runs', async () => {

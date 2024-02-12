@@ -93,17 +93,17 @@ export const RunPipelineCommand = class {
     debug('%s.executeRunPipeline(%s)', profile.name, pipelineName);
     let params = {};
     if (options.params) {
-        try {
-            params = parseObject(options.params, options);
-        } catch (e) {
-            printError(`Failed to parse params: ${options.params} Error: ${e}`, options);
-        }
+      try {
+        params = parseObject(options.params, options);
+      } catch (e) {
+        printError(`Failed to parse params: ${options.params}. Error: ${e}`, options);
+      }
     } else if (options.paramsFile) {
-        if (!fs.existsSync(options.paramsFile)) {
-            printError(`File does not exist at: ${options.paramsFile}`);
-        }
-        const paramsStr = fs.readFileSync(options.paramsFile);
-        params = parseObject(paramsStr, options);
+      if (!fs.existsSync(options.paramsFile)) {
+        printError(`File does not exist at: ${options.paramsFile}`, options);
+      }
+      const paramsStr = fs.readFileSync(options.paramsFile);
+      params = parseObject(paramsStr, options);
     }
     const pipelines = new Pipelines(profile.url);
     try {
