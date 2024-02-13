@@ -1,4 +1,3 @@
-import chalk from 'chalk';
 import esMain from 'es-main';
 import { Command } from 'commander';
 import { callCommand } from '../src/compatibility.js';

@@ -1,5 +1,4 @@
 #!/usr/bin/env node
-import chalk from 'chalk';
 import esMain from 'es-main';
 import { Command } from 'commander';
 import { callCommand } from '../src/compatibility.js';
@@ -43,8 +42,7 @@ export function create() {
         .option('--project <project>', 'The project to use')
         .option('-y, --yaml', 'Use YAML for agent definition format')
         .action(callCommand(
-            (agentDefinitions, options) => new SaveAgentCommand(program).execute(agentDefinitions, options)
-        ));
+            (agentDefinitions, options) => new SaveAgentCommand(program).execute(agentDefinitions, options)));
 // List Agents
     program
         .command('list')

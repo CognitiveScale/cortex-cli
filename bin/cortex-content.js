@@ -1,5 +1,4 @@
 #!/usr/bin/env node
-import chalk from 'chalk';
 import esMain from 'es-main';
 import { Command } from 'commander';
 import { callCommand } from '../src/compatibility.js';
@@ -40,9 +39,7 @@ export function create() {
         .option('--project <project>', 'The project to use')
         .option('--content-type <MIME type>', 'Sets the `Content-Type` or MIME type of the content ( default: application/octet-stream )')
         .option('--chunkSize <int>', 'Number of files to simultaneous upload', 10)
-        .action(callCommand(async (contentKey, filePath, options) => {
-                return await new UploadContent(program).execute(contentKey, filePath, options);
-        }));
+        .action(callCommand((contentKey, filePath, options) => new UploadContent(program).execute(contentKey, filePath, options)));
 // Delete Content
     program
         .command('delete <contentKey>')
@@ -51,9 +48,7 @@ export function create() {
         .option('--color [boolean]', 'Turn on/off colors for JSON output.', 'true')
         .option('--profile <profile>', 'The profile to use')
         .option('--project <project>', 'The project to use')
-        .action(callCommand((contentKey, options) => {
-                new DeleteContent(program).execute(contentKey, options);
-        }));
+        .action(callCommand((contentKey, options) => new DeleteContent(program).execute(contentKey, options)));
 // Download Content
     program
         .command('download <contentKey>')

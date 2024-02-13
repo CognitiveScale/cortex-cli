@@ -15,7 +15,6 @@
  */
 import debugSetup from 'debug';
 import { got, defaultHeaders } from './apiutils.js';
-import { constructError } from '../commands/utils.js';
 
 const debug = debugSetup('cortex:cli');
 export default class Roles {

@@ -47,7 +47,7 @@ export class SaveModelCommand {
             printSuccess('Model saved', options);
             printSuccess(JSON.stringify(_.pick(response, ['version', 'created', 'modelId']), null, 2));
         } catch (err) {
-            handleError(err, options,'Failed to save model');
+            handleError(err, options, 'Failed to save model');
         }
     }
 }
@@ -135,7 +135,7 @@ export const DeleteModelCommand = class {
             const result = filterObject(response, options);
             return printSuccess(JSON.stringify(result, null, 2), options);
         } catch (err) {
-            handleError(err, { ...options, tableformat: 'DEPENDENCYTABLEFORMAT'}, `Failed to delete model "${modelName}"`);
+            return handleError(err, { ...options, tableformat: 'DEPENDENCYTABLEFORMAT' }, `Failed to delete model "${modelName}"`);
         }
     }
 };

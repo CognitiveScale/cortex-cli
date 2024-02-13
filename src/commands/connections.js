@@ -16,7 +16,8 @@ import {
     handleTable,
     printExtendedLogs,
     getFilteredOutput,
-    printErrorDetails, handleError, DEPENDENCYTABLEFORMAT,
+    printErrorDetails,
+    handleError,
 } from './utils.js';
 
 const debug = debugSetup('cortex:cli');
@@ -130,7 +131,7 @@ export class DeleteConnectionCommand {
             const result = filterObject(response.result, options);
             return printSuccess(JSON.stringify(result, null, 2), options);
         } catch (err) {
-            return handleError(err, { ...options, tableformat: 'DEPENDENCYTABLEFORMAT' }, 'Failed to delete connection ${connectionName}');
+            return handleError(err, { ...options, tableformat: 'DEPENDENCYTABLEFORMAT' }, `Failed to delete connection ${connectionName}`);
         }
     }
 }

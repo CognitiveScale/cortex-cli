@@ -17,7 +17,7 @@ import {
   DEFAULT_LIST_SORT_PARAMS,
   QUERY_JSON_HELP_TEXT,
 } from '../src/constants.js';
-import { printError, checkForEmptyArgs } from '../src/commands/utils.js';
+import { checkForEmptyArgs } from '../src/commands/utils.js';
 
 export function create() {
   const pipelines = new Command();

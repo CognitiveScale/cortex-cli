@@ -40,7 +40,7 @@ export default (class Connections {
         }).json();
     }
 
-    async saveConnection(projectId, token, connObj) {
+    saveConnection(projectId, token, connObj) {
         checkProject(projectId);
         const endpoint = `${this.endpoint(projectId)}`;
         debug('saveConnection(%s) => %s', connObj.name, endpoint);

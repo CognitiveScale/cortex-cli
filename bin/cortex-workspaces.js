@@ -8,7 +8,6 @@ import WorkspacePublishCommand from '../src/commands/workspaces/publish.js';
 import {
  WorkspaceAddRegistryCommand, WorkspaceRemoveRegistryCommand, WorkspaceActivateRegistryCommand, WorkspaceListRegistryCommand, 
 } from '../src/commands/workspaces/registry.js';
-import { printError } from '../src/commands/utils.js';
 
 export function create() {
     const program = new Command();
@@ -20,9 +19,7 @@ export function create() {
         .option('--refresh', 'Refresh the Github access token')
         .option('--color [boolean]', 'Turn on/off colors', 'true')
         .description('Configures the Cortex Template System for generating skill templates')
-        .action((options) => {
-                return new WorkspaceConfigureCommand(program).execute(options);
-        });
+        .action((options) => (new WorkspaceConfigureCommand(program)).execute(options));
 
     program
         .command('generate [name] [destination]')
@@ -30,9 +27,7 @@ export function create() {
         .option('--notree [boolean]', 'Do not display generated file tree', 'false')
         .option('--template <templateName>', 'Name of template to use')
         .description('Generates a workspace based on a template from the template repository')
-        .action((name, destination, options) => {
-                return new WorkspaceGenerateCommand(program).execute(name, destination, options);
-        });
+        .action((name, destination, options) => new WorkspaceGenerateCommand(program).execute(name, destination, options));
 
     program
         .command('build [folder]')
@@ -41,9 +36,7 @@ export function create() {
         .option('--dockerCli <string>', 'Specify the docker client, the following are supported [docker, nerdctl, podman]. If not specified the cli will scan the PATH for available clients')
         .option('--skill <skill name>', 'Build only the specified skill')
         .description('Builds all skills in the workspace, or optionally only the specified skill')
-        .action((folder, options) => {
-                return new WorkspaceBuildCommand(program).execute(folder, options);
-        });
+        .action((folder, options) => (new WorkspaceBuildCommand(program)).execute(folder, options));
 
     program
         .command('publish [folder]')
@@ -92,6 +85,6 @@ export function create() {
     return program;
 }
 if (esMain(import.meta)) {
-    create().showHelpAfterError().parseAsync(process.argv);
+    await create().showHelpAfterError().parseAsync(process.argv);
 }
 export default create();

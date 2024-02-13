@@ -1,5 +1,4 @@
 #!/usr/bin/env node
-import chalk from 'chalk';
 import esMain from 'es-main';
 import fs from 'node:fs';
 import { Command } from 'commander';

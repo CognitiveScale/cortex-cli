@@ -11,12 +11,9 @@ import {
   parseObject,
   handleTable,
   printExtendedLogs,
-  handleListFailure,
-  handleDeleteFailure,
   getFilteredOutput,
   printCrossTable,
   handleError,
-  DEPENDENCYTABLEFORMAT,
 } from './utils.js';
 
 const debug = debugSetup('cortex:cli');
@@ -49,7 +46,7 @@ export const SavePipelineRepoCommand = class {
         await repo.savePipelineRepo(options.project || profile.project, profile.token, repoObj);
         return printSuccess('Pipeline Repository saved', options);
     } catch (err) {
-      return handleError(err, options,'Failed to save pipeline repository');
+      return handleError(err, options, 'Failed to save pipeline repository');
     }
   }
 };

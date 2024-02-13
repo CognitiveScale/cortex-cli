@@ -1,5 +1,4 @@
 #!/usr/bin/env node
-import chalk from 'chalk';
 import esMain from 'es-main';
 import process from 'node:process';
 import { Command } from 'commander';
@@ -107,9 +106,7 @@ export function create() {
         .option('--no-compat', 'Ignore API compatibility checks')
         .option('--profile <profile>', 'The profile to use')
         .option('--project <project>', 'The project to use')
-        .action(callCommand(async (names, options) => {
-                return await new UndeployAppCommand(program).execute(names, options);
-        }));
+        .action(callCommand((names, options) => new UndeployAppCommand(program).execute(names, options)));
 // Get Application logs
     program
         .command('logs <name>')
@@ -118,9 +115,7 @@ export function create() {
         .option('--profile <profile>', 'The profile to use')
         .option('--project <project>', 'The project to use')
         .option('--raw', 'Get raw logs as a stream')
-        .action(callCommand(async (name, options) => {
-                return await new AppLogsCommand(program).execute(name, options);
-        }));
+        .action(callCommand((name, options) => new AppLogsCommand(program).execute(name, options)));
     return program;
 }
 if (esMain(import.meta)) {

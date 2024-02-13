@@ -1,5 +1,4 @@
 #!/usr/bin/env node
-import chalk from 'chalk';
 import esMain from 'es-main';
 import process from 'node:process';
 import { Command } from 'commander';
@@ -29,9 +28,7 @@ export function create() {
         .option('-t, --title <string>', 'The project title')
         .option('-d, --description <string>', 'The project description')
         .option('-y, --yaml', 'Use YAML for project definition format')
-        .action(callCommand((projectDefinition, options) => {
-                return new CreateProjectCommand(program).execute(projectDefinition, options);
-        }));
+        .action(callCommand((projectDefinition, options) => new CreateProjectCommand(program).execute(projectDefinition, options)));
 // List Projects
     program
         .command('list')
@@ -46,9 +43,7 @@ export function create() {
         .option('--limit <limit>', 'Limit number of records', DEFAULT_LIST_LIMIT_COUNT)
         .option('--skip <skip>', 'Skip number of records', DEFAULT_LIST_SKIP_COUNT)
         .option('--sort <sort>', 'A Mongo style sort statement to use in the query.', GET_DEFAULT_SORT_CLI_OPTION(DEFAULT_LIST_SORT_PARAMS._updatedAt))
-        .action(callCommand((options) => {
-                return new ListProjectsCommand(program).execute(options);
-        }));
+        .action(callCommand((options) => new ListProjectsCommand(program).execute(options)));
 // Get|Describe Project
     program
         .command('describe <projectName>')

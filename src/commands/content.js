@@ -11,7 +11,7 @@ import {
 
 const debug = debugSetup('cortex:cli');
 
-async function upload(contentClient, profile, options, contentKey, filePath, exit = true) {
+async function upload(contentClient, profile, options, contentKey, filePath) {
     if (fs.lstatSync(filePath).isDirectory()) {
         printError('Uploads of directories require the option --recursive | -r', options);
     }

@@ -12,7 +12,7 @@ import {
 import {
  DEFAULT_LIST_SKIP_COUNT, DEFAULT_LIST_LIMIT_COUNT, DEFAULT_LIST_SORT_PARAMS, GET_DEFAULT_SORT_CLI_OPTION, LIST_JSON_HELP_TEXT, QUERY_JSON_HELP_TEXT,
 } from '../src/constants.js';
-import { printError, checkForEmptyArgs } from '../src/commands/utils.js';
+import { checkForEmptyArgs } from '../src/commands/utils.js';
 
 export function create() {
   const repos = new Command();
@@ -33,9 +33,7 @@ export function create() {
     .option('--limit <limit>', 'Limit number of records', DEFAULT_LIST_LIMIT_COUNT)
     .option('--skip <skip>', 'Skip number of records', DEFAULT_LIST_SKIP_COUNT)
     .option('--sort <sort>', 'A Mongo style sort statement to use in the query.', GET_DEFAULT_SORT_CLI_OPTION(DEFAULT_LIST_SORT_PARAMS.updatedAt))
-    .action(callCommand((options) => {
-        return new ListPipelineRepoCommand(repos).execute(options);
-    }));
+    .action(callCommand((options) => new ListPipelineRepoCommand(repos).execute(options)));
 
   // Describe
   repos
@@ -78,9 +76,7 @@ export function create() {
     .option('--branch <branch>', 'Git branch to checkout')
     .option('-y, --yaml', 'Use YAML for Pipeline Repository definition format')
     // TODO: should this have CLI args for <repo> & <branch>??
-    .action(callCommand((pipelineRepoDefinition, options) => {
-        return new SavePipelineRepoCommand(repos).execute(pipelineRepoDefinition, options);
-    }));
+    .action(callCommand((pipelineRepoDefinition, options) => new SavePipelineRepoCommand(repos).execute(pipelineRepoDefinition, options)));
 
     // Update pipelines
     repos

@@ -15,7 +15,7 @@
  */
 import debugSetup from 'debug';
 import { got, defaultHeaders } from './apiutils.js';
-import { constructError, checkProject } from '../commands/utils.js';
+import { checkProject } from '../commands/utils.js';
 
 const debug = debugSetup('cortex:cli');
 export default (class Sessions {

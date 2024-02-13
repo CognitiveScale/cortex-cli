@@ -1,5 +1,4 @@
 #!/usr/bin/env node
-import chalk from 'chalk';
 import esMain from 'es-main';
 import process from 'node:process';
 import { Command } from 'commander';
@@ -52,9 +51,7 @@ export function create() {
         .option('--data-file <dataFile>', 'A file containing either JSON or YAML formatted value to save')
         .option('--profile <profile>', 'The profile to use')
         .option('--project <project>', 'The project to use')
-        .action(callCommand((keyName, value, options) => {
-                return new WriteSecretsCommand(program).execute(keyName, value, options);
-        }));
+        .action(callCommand((keyName, value, options) => new WriteSecretsCommand(program).execute(keyName, value, options)));
 // Delete Secret
     program
         .command('delete <keyName>')
@@ -70,6 +67,6 @@ export function create() {
     return program;
 }
 if (esMain(import.meta)) {
-    create().showHelpAfterError().parseAsync(process.argv);
+    await create().showHelpAfterError().parseAsync(process.argv);
 }
 export default create();

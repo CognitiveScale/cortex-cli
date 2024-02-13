@@ -659,7 +659,7 @@ export function handleError(error, options, prefix = 'Error') {
         if (!Array.isArray(details)) {
             const transformedResponse = transformTSOAValidation(details);
             if (transformedResponse !== null) {
-                normedError.details = transformedResponse;
+                details = transformedResponse;
             }
         }
         printTable(format, details);

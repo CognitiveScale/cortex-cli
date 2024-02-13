@@ -1,5 +1,4 @@
 #!/usr/bin/env node
-import chalk from 'chalk';
 import esMain from 'es-main';
 import process from 'node:process';
 import { Command } from 'commander';
@@ -130,9 +129,9 @@ export function create() {
         .option('--no-compat', 'Ignore API compatibility checks')
         .option('--profile <profile>', 'The profile to use')
         .option('--project <project>', 'The project to use')
-        .action(callCommand(async (skillNames, options) => {
+        .action(callCommand((skillNames, options) => {
                 checkForEmptyArgs({ skillNames });
-                return await new UndeploySkillCommand(program).execute(skillNames, options);
+                return new UndeploySkillCommand(program).execute(skillNames, options);
         }));
 // Get Skill/action logs
     program
@@ -144,13 +143,13 @@ export function create() {
         .option('--raw', 'Get raw logs as a stream')
         // TODO enable when we want to support tasks
         // .option('--type [type]', 'The type of action logs to fetch [skill|task]')
-        .action(callCommand(async (skillName, actionName, options) => {
+        .action(callCommand((skillName, actionName, options) => {
                 checkForEmptyArgs({ skillName, actionName });
-                return await new SkillLogsCommand(program).execute(skillName, actionName, options);
+                return new SkillLogsCommand(program).execute(skillName, actionName, options);
         }));
     return program;
 }
 if (esMain(import.meta)) {
-    create().showHelpAfterError().parseAsync(process.argv);
+    await create().showHelpAfterError().parseAsync(process.argv);
 }
 export default create();

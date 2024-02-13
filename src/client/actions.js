@@ -1,9 +1,7 @@
 import _ from 'lodash';
 import debugSetup from 'debug';
 import { got, defaultHeaders } from './apiutils.js';
-import {
-    constructError, checkProject, printWarning,
-} from '../commands/utils.js';
+import { checkProject, printWarning } from '../commands/utils.js';
 import dockerCli from './dockerClient.js';
 
 const debug = debugSetup('cortex:cli');
