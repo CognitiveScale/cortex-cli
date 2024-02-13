@@ -130,13 +130,18 @@ export class DescribeAppCommand {
     async execute(name, options) {
         const profile = await loadProfile(options.profile);
         const {
-            verbose, output, project,
+            verbose, output, project, json,
         } = options;
-        const isPretty = (options?.output ?? 'pretty').toLowerCase() === 'pretty';
+
+        const isPretty = (options?.output ?? 'pretty').toLowerCase() === 'pretty' && json === undefined;
         debug('%s.executeDescribeApplication(%s)', profile.name, name);
         const catalog = new Catalog(profile.url);
         try {
-            const app = await catalog.describeApplication(project || profile.project, profile.token, name, verbose || isPretty, output);
+            const app = await catalog.describeApplication(
+                project || profile.project,
+                profile.token, name,
+                verbose || isPretty,
+                json === undefined ? output : 'json'); // if --json use output JSON
             if (isPretty) {
 // Strange spacing needed for output formatting
                 printSuccess(`Name: ${app.name}
@@ -152,7 +157,7 @@ Updated At: ${app._updatedAt}`, options);
                 rTable.push(...app?.match?.map(parseMatch) ?? []);
                 return console.log(rTable.toString());
             }
-            if (options?.output?.toLowerCase() === 'json') return getFilteredOutput(app, options);
+            if (options?.output?.toLowerCase() === 'json' || json !== undefined) return getFilteredOutput(app, options);
             return writeOutput(app, options);
         } catch (err) {
             return printError(`Failed to describe application ${name}: ${err.status ?? ''} ${err.message}`, options);
