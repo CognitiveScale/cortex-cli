@@ -15,6 +15,7 @@ describe('Pipelines', () => {
   let sandbox;
   let printSpy;
   let errorSpy;
+  let warnSpy;
   const serverUrl = 'http://localhost:8000';
   beforeEach(() => {
     if (!nock.isActive()) {
@@ -27,6 +28,7 @@ describe('Pipelines', () => {
     sandbox.stub(process, 'exit').throws(Error('EXIT'));
     printSpy = sandbox.spy(console, 'log');
     errorSpy = sandbox.spy(console, 'error');
+    warnSpy = sandbox.spy(console, 'warn');
     nock(serverUrl).get(compatibilityApi()).reply(200, compatiblityResponse());
     nock(serverUrl).persist().get(infoApi()).reply(200, infoResponse());
     process.env.PREVIEW_FEATURES_ENABLED = '1';
@@ -43,8 +45,13 @@ describe('Pipelines', () => {
   function getPrintedLines() {
     return _.flatten(printSpy.args).map((s) => stripAnsi(s));
   }
+
   function getErrorLines() {
       return _.flatten(errorSpy.args).map((s) => stripAnsi(s));
+  }
+
+  function getWarningLines() {
+    return _.flatten(warnSpy.args).map((s) => stripAnsi(s));
   }
 
   describe('List Pipelines as an unsupported preview feature', () => {
@@ -66,39 +73,102 @@ describe('Pipelines', () => {
   });
 
   describe('Pipeline', () => {
-    it('lists pipelines - empty', async () => {
-      const response = { success: true, pipelines: [] };
-      nock(serverUrl).get(/\/fabric\/v4\/projects\/.*\/pipelines.*/).reply(200, response);
-      create();
-      await create().parseAsync(['node', 'pipelines', 'list', '--project', PROJECT]);
-      
-      const output = getPrintedLines();
-      const errs = getErrorLines();
-    //   eslint-disable-next-line no-unused-expressions
-      chai.expect(errs.join('')).to.be.empty;
-      chai.expect(output.join('')).to.contain('No pipelines found');
-      nock.isDone();
-    });
+    describe('#ListPipelines', () => {
+      it('lists pipelines - empty', async () => {
+        const response = { success: true, pipelines: [] };
+        nock(serverUrl).get(/\/fabric\/v4\/projects\/.*\/pipelines.*/).reply(200, response);
+        create();
+        await create().parseAsync(['node', 'pipelines', 'list', '--project', PROJECT]);
 
-    it('lists pipelines', async () => {
-      const response = {
-        success: true,
-        pipelines: [
-          { name: 'pipeline1', gitRepoName: 'repo1', sha: 'qwerty' },
-          { name: 'pipeline2', gitRepoName: 'repo2', sha: 'abcd' },
-        ],
-      };
-      nock(serverUrl).get(/\/fabric\/v4\/projects\/.*\/pipelines.*/).reply(200, response);
-      await create().parseAsync(['node', 'pipelines', 'list', '--project', PROJECT]);
-      const output = getPrintedLines().join('');
-      const errs = getErrorLines().join('');
-      chai.expect(output).to.contain('pipeline1');
-      chai.expect(output).to.contain('qwerty');
-      chai.expect(output).to.contain('pipeline2');
-      chai.expect(output).to.contain('qwerty');
-      // eslint-disable-next-line no-unused-expressions
-      chai.expect(errs).to.be.empty;
-      nock.isDone();
+        const output = getPrintedLines();
+        const errs = getErrorLines();
+        //   eslint-disable-next-line no-unused-expressions
+        chai.expect(errs.join('')).to.be.empty;
+        chai.expect(output.join('')).to.contain('No pipelines found');
+        nock.isDone();
+      });
+
+      it('lists pipelines', async () => {
+        const response = {
+          success: true,
+          pipelines: [
+            { name: 'pipeline1', gitRepoName: 'repo1', sha: 'qwerty' },
+            { name: 'pipeline2', gitRepoName: 'repo2', sha: 'abcd' },
+          ],
+        };
+        nock(serverUrl).get(/\/fabric\/v4\/projects\/.*\/pipelines.*/).reply(200, response);
+        await create().parseAsync(['node', 'pipelines', 'list', '--project', PROJECT]);
+        const output = getPrintedLines().join('');
+        const errs = getErrorLines().join('');
+        chai.expect(output).to.contain('pipeline1');
+        chai.expect(output).to.contain('qwerty');
+        chai.expect(output).to.contain('pipeline2');
+        chai.expect(output).to.contain('qwerty');
+        // eslint-disable-next-line no-unused-expressions
+        chai.expect(errs).to.be.empty;
+        nock.isDone();
+      });
+
+      it('lists pipelines in a repo', async () => {
+        const response = {
+          success: true,
+          pipelines: [
+            { name: 'pipeline1', gitRepoName: 'repo1', sha: 'qwerty' },
+            { name: 'pipeline2', gitRepoName: 'repo1', sha: 'abcd' },
+          ],
+        };
+        // NOTE: '--repo' is a shortcut for '--filter', and all query params are
+        // required by nock for the match to be succesful
+        nock(serverUrl)
+          .get(/\/fabric\/v4\/projects\/.*\/pipelines.*/)
+          .query({
+            filter: JSON.stringify({ gitRepoName: 'repo1' }),
+            limit: 20,
+            sort: JSON.stringify({ updatedAt: -1 }),
+            skip: 0,
+          }).reply(200, response);
+        await create().parseAsync(['node', 'pipelines', 'list', '--project', PROJECT, '--repo', 'repo1']);
+        const output = getPrintedLines().join('');
+        const errs = getErrorLines().join('');
+        chai.expect(output).to.contain('pipeline1');
+        chai.expect(output).to.contain('qwerty');
+        chai.expect(output).to.contain('pipeline2');
+        chai.expect(output).to.contain('qwerty');
+        // eslint-disable-next-line no-unused-expressions
+        chai.expect(errs).to.be.empty;
+        nock.isDone();
+      });
+
+      it('warns that --filter has a higher priority that --repo when listing pipelines', async () => {
+        const response = {
+          success: true,
+          pipelines: [
+            { name: 'pipeline1', gitRepoName: 'repo1', sha: 'qwerty' },
+            { name: 'pipeline2', gitRepoName: 'repo1', sha: 'abcd' },
+          ],
+        };
+        nock(serverUrl)
+          .get(/\/fabric\/v4\/projects\/.*\/pipelines/)
+          .query({
+            filter: JSON.stringify({ name: 'pipeline' }), // matches --filter
+            limit: 20,
+            sort: JSON.stringify({ updatedAt: -1 }),
+            skip: 0,
+          })
+          .reply(200, response);
+        await create().parseAsync(['node', 'pipelines', 'list', '--project', PROJECT, '--repo', 'repo1', '--filter', '{"name":"pipeline"}']);
+        const output = getPrintedLines().join('');
+        const warn = getWarningLines().join('');
+        const errs = getErrorLines().join('');
+        chai.expect(output).to.contain('pipeline1');
+        chai.expect(output).to.contain('qwerty');
+        chai.expect(output).to.contain('pipeline2');
+        chai.expect(output).to.contain('qwerty');
+        // eslint-disable-next-line no-unused-expressions
+        chai.expect(errs).to.be.empty;
+        chai.expect(warn).to.contain('WARNING: --repo and --filter options are incompatible! The --filter option will be used');
+        nock.isDone();
+      });
     });
 
     it('describes a pipeline', async () => {
@@ -143,20 +213,68 @@ describe('Pipelines', () => {
       }
     });
 
-    xit('trigger pipeline run', async () => {
-      const response = {
-        success: true,
-        activationId: '3d77f2d3-90ef-4061-a17d-fa2aecb3c6a4',
-      };
-      nock(serverUrl).post(/\/fabric\/v4\/projects\/.*\/pipelines\/.*\/run/).reply(200, response);
-      await create().parseAsync(['node', 'pipelines', 'run', 'pipeline1', 'repo1', '--project', PROJECT]);
-      const output = getPrintedLines().join('');
-      const errs = getErrorLines().join('');
-      const description = JSON.parse(output);
-      chai.expect(description).to.deep.equal(response);
-      // eslint-disable-next-line no-unused-expressions
-      chai.expect(errs).to.be.empty;
-      nock.isDone();
+    describe('#runPipeline()', () => {
+      it('runs a Pipeline', async () => {
+        const response = {
+          success: true,
+          activationId: '3d77f2d3-90ef-4061-a17d-fa2aecb3c6a4',
+        };
+        nock(serverUrl).post(/\/fabric\/v4\/projects\/.*\/pipelines\/.*\/run/).reply(200, response);
+        await create().parseAsync(['node', 'pipelines', 'run', 'pipeline1', 'repo1', '--project', PROJECT]);
+        const output = getPrintedLines().join('');
+        const errs = getErrorLines().join('');
+        chai.expect(output).to.equal(`Pipeline Run Submitted!\n\nUse "cortex pipelines describe-run ${response.activationId}" to inspect the Pipeline Run`);
+        // eslint-disable-next-line no-unused-expressions
+        chai.expect(errs).to.be.empty;
+        nock.isDone();
+      });
+
+      it('runs a Pipeline and prints the output as JSON', async () => {
+        const response = {
+          success: true,
+          activationId: '3d77f2d3-90ef-4061-a17d-fa2aecb3c6a4',
+        };
+        nock(serverUrl).post(/\/fabric\/v4\/projects\/.*\/pipelines\/.*\/run/).reply(200, response);
+        await create().parseAsync(['node', 'pipelines', 'run', 'pipeline1', 'repo1', '--project', PROJECT, '--json']);
+        const output = getPrintedLines().join('');
+        const errs = getErrorLines().join('');
+
+        const expected = { ...response };
+        expected.runId = expected.activationId; // output includes runId NOT activationId
+        delete expected.activationId;
+
+        const actual = JSON.parse(output);
+        chai.expect(actual).to.deep.equal(expected);
+        // eslint-disable-next-line no-unused-expressions
+        chai.expect(errs).to.be.empty;
+        nock.isDone();
+      });
+
+      it('fails to run a Pipeline due to params-file not found', async () => {
+        try {
+          await create().parseAsync(['node', 'pipelines', 'run', 'pipeline1', 'repo1', '--project', PROJECT, '--params-file', '/tmp/not-found.json']);
+        } catch {
+          const output = getPrintedLines().join('');
+          const errs = getErrorLines().join('');
+          chai.expect(errs).to.include('File does not exist at: /tmp/not-found.json');
+          // eslint-disable-next-line no-unused-expressions
+          chai.expect(output).to.be.empty;
+          nock.isDone();
+        }
+      });
+
+      it('fails to run a Pipeline due to invalid params', async () => {
+        try {
+          await create().parseAsync(['node', 'pipelines', 'run', 'pipeline1', 'repo1', '--project', PROJECT, '--params', '{']);
+        } catch {
+          const output = getPrintedLines().join('');
+          const errs = getErrorLines().join('');
+          chai.expect(errs).to.include('Failed to parse params: {. Error: YAMLException: unexpected end of the stream within a flow collection (2:1)');
+          // eslint-disable-next-line no-unused-expressions
+          chai.expect(output).to.be.empty;
+          nock.isDone();
+        }
+      });
     });
 
     xit('list pipeline runs', async () => {
@@ -180,46 +298,48 @@ describe('Pipelines', () => {
       nock.isDone();
     });
 
-    xit('describe pipeline run', async () => {
-      const response = {
-        success: true,
-        agentName: 'toy-pipeline',
-        channelId: 'd9e97efc-c663-43e7-a435-2b85d6977d1c',
-        payload: {
+    describe('#describePipelineRun()', () => {
+      xit('describe pipeline run', async () => {
+        const response = {
+          success: true,
+          agentName: 'toy-pipeline',
+          channelId: 'd9e97efc-c663-43e7-a435-2b85d6977d1c',
+          payload: {
             config: '/app/conf/spark-conf-sensa-data-pipeline.json',
             app_command: [
-                '--var',
-                'key=value',
-                '--pipeline',
-                'claro_pipeline',
-                '--config',
-                'config_catalog.yml',
-                '.',
-                '--repo',
-                'git@github.com:CognitiveScale/sensa-data-pipelines.git',
-                '--block',
-                'someblock',
+              '--var',
+              'key=value',
+              '--pipeline',
+              'claro_pipeline',
+              '--config',
+              'config_catalog.yml',
+              '.',
+              '--repo',
+              'git@github.com:CognitiveScale/sensa-data-pipelines.git',
+              '--block',
+              'someblock',
             ],
-        },
-        projectId: 'mc-test',
-        requestId: '54ea4199-1590-46ca-b49d-2f2574ef5873',
-        serviceName: 'input',
-        sessionId: '54ea4199-1590-46ca-b49d-2f2574ef5873',
-        sync: false,
-        timestamp: 1696875227736,
-        token: 'eyJhbGciOiJxm_K3fAA',
-        username: 'cortex@example.com',
-        start: 1696875227868,
-        status: 'COMPLETE',
-        end: 1696875239664,
-        response: {},
-      };
-      nock(serverUrl).get(/\/fabric\/v4\/projects\/.*\/pipelines\/.*\/run\/.*/).query({ gitRepoName: 'repo1' }).reply(200, response);
-      await create().parseAsync(['node', 'pipelines', 'describe-run', 'pipeline1', 'repo1', 'd9e97efc-c663-43e7-a435-2b85d6977d1c', '--project', PROJECT]);
-      const errs = getErrorLines().join('');
-      // eslint-disable-next-line no-unused-expressions
-      chai.expect(errs).to.be.empty;
-      nock.isDone();
+          },
+          projectId: 'mc-test',
+          requestId: '54ea4199-1590-46ca-b49d-2f2574ef5873',
+          serviceName: 'input',
+          sessionId: '54ea4199-1590-46ca-b49d-2f2574ef5873',
+          sync: false,
+          timestamp: 1696875227736,
+          token: 'eyJhbGciOiJxm_K3fAA',
+          username: 'cortex@example.com',
+          start: 1696875227868,
+          status: 'COMPLETE',
+          end: 1696875239664,
+          response: {},
+        };
+        nock(serverUrl).get(/\/fabric\/v4\/projects\/.*\/pipelines\/.*\/run\/.*/).query({ gitRepoName: 'repo1' }).reply(200, response);
+        await create().parseAsync(['node', 'pipelines', 'describe-run', 'pipeline1', 'repo1', 'd9e97efc-c663-43e7-a435-2b85d6977d1c', '--project', PROJECT]);
+        const errs = getErrorLines().join('');
+        // eslint-disable-next-line no-unused-expressions
+        chai.expect(errs).to.be.empty;
+        nock.isDone();
+      });
     });
   });
 });
