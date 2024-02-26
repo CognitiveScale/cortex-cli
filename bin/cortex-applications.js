@@ -50,7 +50,7 @@ export function create() {
         .option('--profile <profile>', 'The profile to use')
         .option('--project <project>', 'The project to use')
         .option('-f, --output-file <file>', 'Write output to file instead of stdout')
-        .option('-o, --output <pretty|json|yaml>', 'Format output as yaml or k8s resource', 'pretty')
+        .option('-o, --output <pretty|json|yaml|k8s>', 'Format output as yaml or k8s resource', 'pretty')
         .option('--json [searchPath]', QUERY_JSON_HELP_TEXT)
         .option('--query <query>', `[DEPRECATION WARNING] ${QUERY_JSON_HELP_TEXT}`)
         .option('--verbose', 'Verbose output', false)
