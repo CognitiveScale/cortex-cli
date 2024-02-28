@@ -52,14 +52,21 @@ export default (class Tasks {
             .catch((err) => constructError(err));
     }
 
-    taskLogs(projectId, token, taskName, verbose = false) {
+    taskLogs(projectId, token, taskName, follow = false, verbose = false) {
         checkProject(projectId);
         const endpoint = `${this.endpointV4(projectId)}/tasks/${taskName}/logs`;
         debug('taskLogs(%s) => %s', taskName, endpoint);
+        if (follow) {
+            return got.stream(endpoint, {
+                headers: defaultHeaders(token),
+                searchParams: { follow, verbose },
+                isStream: true,
+            });  
+        } 
         return got
             .get(endpoint, {
             headers: defaultHeaders(token),
-            searchParams: { verbose },
+            searchParams: { follow, verbose },
         }).json()
             .then((res) => ({ ...res }))
             .catch((err) => constructError(err));

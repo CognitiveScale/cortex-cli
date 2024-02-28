@@ -134,7 +134,38 @@ export class TaskLogsCommand {
         debug('%s.executeTaskLogs(%s)', profile.name, taskName);
         const tasks = new Tasks(profile.url);
         try {
-            const response = await tasks.taskLogs(options.project || profile.project, profile.token, taskName, options.verbose);
+            const response = await tasks.taskLogs(options.project || profile.project, profile.token, taskName, options.follow, options.verbose);
+            if (options.follow) {
+                const logs = [];
+                response.on('data', (chunk) => {
+                    const data = chunk.toString();
+                    
+                    // Split the data into individual lines
+                    const lines = data.split('\n');
+                    
+                    // Parse each line of the SSE stream
+                    lines.forEach((line) => {
+                        let eventData = line;
+                        if (line.startsWith('data:')) {
+                            // Extract the data part and log it
+                            eventData = line.substring(5).trim();
+                        }
+                        console.log(eventData);
+                        try {
+                            const parsedData = JSON.parse(eventData);
+                            logs.push(parsedData.log);
+                            printSuccess(parsedData.log, options);
+                        } catch (error) {
+                            console.error('Error parsing SSE data:', error);
+                            printSuccess(eventData, options);
+                        }
+                    });
+                });
+                
+                response.on('error', (error) => printError(`Failed to List Task Logs "${taskName}": ${error.message}`, options));
+
+                response.on('end', () => printSuccess(logs, options));
+            }
             if (response.success) {
                 return printSuccess(response.logs, options);
             }
