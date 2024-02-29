@@ -134,42 +134,54 @@ export class TaskLogsCommand {
         debug('%s.executeTaskLogs(%s)', profile.name, taskName);
         const tasks = new Tasks(profile.url);
         try {
-            const response = await tasks.taskLogs(options.project || profile.project, profile.token, taskName, options.follow, options.verbose);
-            if (options.follow) {
-                const logs = [];
-                response.on('data', (chunk) => {
-                    const data = chunk.toString();
-                    
-                    // Split the data into individual lines
-                    const lines = data.split('\n');
-                    
-                    // Parse each line of the SSE stream
-                    lines.forEach((line) => {
-                        let eventData = line;
-                        if (line.startsWith('data:')) {
-                            // Extract the data part and log it
-                            eventData = line.substring(5).trim();
-                        }
-                        console.log(eventData);
+            const { task } = await tasks.getTask(options.project || profile.project, taskName, profile.token);
+            const isFollow = options.follow && (_.lowerCase(task?.state) === 'active' || _.lowerCase(task?.state) === 'queued');
+
+            const response = await tasks.taskLogs(options.project || profile.project, profile.token, taskName, isFollow, options.verbose);
+            if (isFollow) {
+                return new Promise((resolve, reject) => {  
+                    response.on('data', (chunk) => {
+                        let data;
                         try {
-                            const parsedData = JSON.parse(eventData);
-                            logs.push(parsedData.log);
-                            printSuccess(parsedData.log, options);
-                        } catch (error) {
-                            console.error('Error parsing SSE data:', error);
-                            printSuccess(eventData, options);
+                            data = chunk.toString();
+
+                            // TODO: Improve following with proper standardized log response from pwgy & express-common
+                            const eventDataLines = _.filter(data.split('\n'), (d) => !_.isEmpty(d));
+                            eventDataLines.forEach((edl) => {
+                                let eventData;
+                                if (edl.startsWith('data:')) {
+                                    // Extract the data part of SSE event
+                                    eventData = edl.substring(5).trim();
+                                }
+                                
+                                let parsedEventData = JSON.parse(eventData);
+                                
+                                if (typeof parsedEventData === 'string' && parsedEventData.startsWith('{')) {
+                                    parsedEventData = JSON.parse(parsedEventData);
+                                }
+                                // Split the data into individual lines
+                                const lines = _.filter(parsedEventData?.log ? parsedEventData.log.split('\n') : parsedEventData.split('\n'), (d) => !_.isEmpty(d) && d !== '\n');
+
+                                lines.forEach((line) => {
+                                    printSuccess(line);
+                                });
+                            });
+                        } catch (e) {
+                            printError(`${e.message}`, options);
                         }
                     });
-                });
                 
-                response.on('error', (error) => printError(`Failed to List Task Logs "${taskName}": ${error.message}`, options));
+                    response.on('error', (error) => reject(error));
 
-                response.on('end', () => printSuccess(logs, options));
+                    response.on('end', () => resolve());
+                });
+            // eslint-disable-next-line no-else-return
+            } else {
+                if (response.success) {
+                    return printSuccess(response.logs, options);
+                }
+                return printError(`Failed to List Task Logs "${taskName}": ${response.message}`, options);      
             }
-            if (response.success) {
-                return printSuccess(response.logs, options);
-            }
-            return printError(`Failed to List Task Logs "${taskName}": ${response.message}`, options);
         } catch (err) {
             return printError(`Failed to query Task Logs "${taskName}": ${err.status} ${err.message}`, options);
         }

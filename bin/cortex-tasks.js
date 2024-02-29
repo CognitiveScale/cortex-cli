@@ -70,13 +70,14 @@ export function create() {
         .option('--no-compat', 'Ignore API compatibility checks')
         .option('--profile <profile>', 'The profile to use')
         .option('--project <project>', 'The project to use')
-        .option('--follow <follow>', 'Stream live logs', false)
+        .option('--follow [boolean]', 'Stream live logs', false)
         // TODO enable when we want to support tasks
         // .option('--type [type]', 'The type of action logs to fetch [skill|task]')
-        .action(withCompatibilityCheck((taskName, options) => {
+        .action(withCompatibilityCheck(async (taskName, options) => {
             try {
                 checkForEmptyArgs({ taskName });
-                new TaskLogsCommand(program).execute(taskName, options);
+                
+                await new TaskLogsCommand(program).execute(taskName, options);
             } catch (err) {
                 console.error(chalk.red(err.message));
             }
