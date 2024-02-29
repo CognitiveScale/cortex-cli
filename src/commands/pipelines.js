@@ -5,18 +5,17 @@ import _ from 'lodash';
 import relativeTime from 'dayjs/plugin/relativeTime.js';
 import { loadProfile } from '../config.js';
 import Pipelines from '../client/pipelines.js';
-import { 
-    printError,
-    handleTable,
-    printExtendedLogs,
-    handleListFailure,
-    getFilteredOutput,
-    parseObject,
-    filterObject,
-    getQueryOptions,
-    printSuccess,
-    printTable,
-    printWarning,
+import {
+  printError,
+  handleTable,
+  printExtendedLogs,
+  getFilteredOutput,
+  parseObject,
+  filterObject,
+  getQueryOptions,
+  printSuccess,
+  printTable,
+  printWarning, handleError,
 } from './utils.js';
 
 const debug = debugSetup('cortex:cli');
