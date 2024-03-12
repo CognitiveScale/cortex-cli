@@ -149,6 +149,10 @@ export const DeployActionCommand = class {
             if (actionInst.type === 'daemon' && _.has(actionInst, 'jobTimeout')) {
                 printError('Option jobTimeout not valid on daemon action types');
             }
+            if (_.has(actionInst, 'environmentVariables') && _.isEmpty(actionInst.environmentVariables)) {
+                // README: allowing user to ignore/skip environmentVariables by keeping it empty/null ("", [], null)
+                actionInst = _.omit(actionInst, 'environmentVariables');
+            }
             const actions = new Actions(profile.url);
             const response = await actions.deployAction(options.project || profile.project, profile.token, actionInst);
             if (response.success) {
