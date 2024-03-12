@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 import debugSetup from 'debug';
-import { got, defaultHeaders } from './apiutils.js';
+// eslint-disable-next-line import/no-unresolved
+import got from 'got';
+import { got as gotAPIUtils, defaultHeaders } from './apiutils.js';
 import { constructError, checkProject } from '../commands/utils.js';
 
 const debug = debugSetup('cortex:cli');
@@ -34,7 +36,7 @@ export default (class Tasks {
         if (params) {
             opts.searchParams = params;
         }
-        return got.get(endpoint, opts).json();
+        return gotAPIUtils.get(endpoint, opts).json();
     }
 
     getTask(projectId, taskName, token, params) {
@@ -47,29 +49,37 @@ export default (class Tasks {
         if (params) {
             opts.searchParams = params;
         }
-        return got
+        return gotAPIUtils
             .get(endpoint, opts).json()
             .catch((err) => constructError(err));
     }
 
-    taskLogs(projectId, token, taskName, verbose = false) {
+    taskLogs(projectId, token, taskName, follow = false, verbose = false) {
         checkProject(projectId);
         const endpoint = `${this.endpointV4(projectId)}/tasks/${taskName}/logs`;
         debug('taskLogs(%s) => %s', taskName, endpoint);
-        return got
-            .get(endpoint, {
-            headers: defaultHeaders(token),
-            searchParams: { verbose },
-        }).json()
-            .then((res) => ({ ...res }))
-            .catch((err) => constructError(err));
+        if (follow) {
+            return got.stream(endpoint, {
+              headers: defaultHeaders(token),
+              searchParams: { follow, verbose },
+            });
+        // eslint-disable-next-line no-else-return
+        } else {
+            return gotAPIUtils
+                .get(endpoint, {
+                headers: defaultHeaders(token),
+                searchParams: { follow, verbose },
+            }).json()
+                .then((res) => ({ ...res }))
+                .catch((err) => constructError(err));
+        }
     }
 
     deleteTask(projectId, token, taskName, verbose = false) {
         checkProject(projectId);
         const endpoint = `${this.endpointV4(projectId)}/tasks/${taskName}`;
         debug('deleteTask(%s) => %s', taskName, endpoint);
-        return got
+        return gotAPIUtils
             .delete(endpoint, {
             headers: defaultHeaders(token),
             searchParams: { verbose },
@@ -82,7 +92,7 @@ export default (class Tasks {
         checkProject(projectId);
         const endpoint = `${this.endpointV4(projectId)}/tasks/${taskName}/pause`;
         debug('pauseTask(%s) => %s', taskName, endpoint);
-        return got
+        return gotAPIUtils
             .post(endpoint, {
             headers: defaultHeaders(token),
             searchParams: { verbose },
@@ -95,7 +105,7 @@ export default (class Tasks {
         checkProject(projectId);
         const endpoint = `${this.endpointV4(projectId)}/tasks/${taskName}/resume`;
         debug('resumeTask(%s) => %s', taskName, endpoint);
-        return got
+        return gotAPIUtils
             .post(endpoint, {
             headers: defaultHeaders(token),
             searchParams: { verbose },

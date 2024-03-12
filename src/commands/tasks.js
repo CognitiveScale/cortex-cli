@@ -134,11 +134,54 @@ export class TaskLogsCommand {
         debug('%s.executeTaskLogs(%s)', profile.name, taskName);
         const tasks = new Tasks(profile.url);
         try {
-            const response = await tasks.taskLogs(options.project || profile.project, profile.token, taskName, options.verbose);
-            if (response.success) {
-                return printSuccess(response.logs, options);
+            const { task } = await tasks.getTask(options.project || profile.project, taskName, profile.token);
+            const isFollow = options.follow && (_.lowerCase(task?.state) === 'active' || _.lowerCase(task?.state) === 'queued');
+
+            const response = await tasks.taskLogs(options.project || profile.project, profile.token, taskName, isFollow, options.verbose);
+            if (isFollow) {
+                return new Promise((resolve, reject) => {  
+                    response.on('data', (chunk) => {
+                        let data;
+                        try {
+                            data = chunk.toString();
+
+                            // TODO: Improve following with proper standardized log response from pwgy & express-common
+                            const eventDataLines = _.filter(data.split('\n'), (d) => !_.isEmpty(d));
+                            eventDataLines.forEach((edl) => {
+                                let eventData;
+                                if (edl.startsWith('data:')) {
+                                    // Extract the data part of SSE event
+                                    eventData = edl.substring(5).trim();
+                                }
+                                
+                                let parsedEventData = JSON.parse(eventData);
+                                
+                                if (typeof parsedEventData === 'string' && parsedEventData.startsWith('{')) {
+                                    parsedEventData = JSON.parse(parsedEventData);
+                                }
+                                // Split the data into individual lines
+                                const lines = _.filter(parsedEventData?.log ? parsedEventData.log.split('\n') : parsedEventData.split('\n'), (d) => !_.isEmpty(d) && d !== '\n');
+
+                                lines.forEach((line) => {
+                                    printSuccess(line);
+                                });
+                            });
+                        } catch (e) {
+                            printError(`${e.message}`, options);
+                        }
+                    });
+                
+                    response.on('error', (error) => reject(error));
+
+                    response.on('end', () => resolve());
+                });
+            // eslint-disable-next-line no-else-return
+            } else {
+                if (response.success) {
+                    return printSuccess(response.logs, options);
+                }
+                return printError(`Failed to List Task Logs "${taskName}": ${response.message}`, options);      
             }
-            return printError(`Failed to List Task Logs "${taskName}": ${response.message}`, options);
         } catch (err) {
             return printError(`Failed to query Task Logs "${taskName}": ${err.status} ${err.message}`, options);
         }
