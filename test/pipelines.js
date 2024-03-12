@@ -250,6 +250,47 @@ describe('Pipelines', () => {
         nock.isDone();
       });
 
+      it('runs a Pipeline on a set schedule with a default schedule name', async () => {
+        const pipeline = 'pipeline-name';
+        const cron = '@hourly';
+        const response = {
+          success: true,
+          message: `Scheduled Pipeline "pipeline1" with task "project-pipeline1" using cron "${cron}"`,
+        };
+        nock(serverUrl)
+          .post(`/fabric/v4/projects/${PROJECT}/pipelines/${pipeline}/run`)
+          .query({ scheduleCron: cron })
+          .reply(200, response);
+        await create().parseAsync(['node', 'pipelines', 'run', pipeline, 'repo1', '--project', PROJECT, '--scheduleCron', cron]);
+        const output = getPrintedLines().join('');
+        const errs = getErrorLines().join('');
+        chai.expect(output).to.equal(response.message);
+        // eslint-disable-next-line no-unused-expressions
+        chai.expect(errs).to.be.empty;
+        nock.isDone();
+      });
+
+      it('runs a Pipeline on a set schedule with a user specified schedule name', async () => {
+        const pipeline = 'pipeline-name';
+        const name = 'my-custom-schedule';
+        const cron = '@hourly';
+        const response = {
+          success: true,
+          message: `Scheduled Pipeline "pipeline1" with task "${name}" using cron "${cron}"`,
+        };
+        nock(serverUrl)
+          .post(`/fabric/v4/projects/${PROJECT}/pipelines/${pipeline}/run`)
+          .query({ scheduleCron: cron, scheduleName: name })
+          .reply(200, response);
+        await create().parseAsync(['node', 'pipelines', 'run', pipeline, 'repo1', '--project', PROJECT, '--scheduleCron', cron, '--scheduleName', name]);
+        const output = getPrintedLines().join('');
+        const errs = getErrorLines().join('');
+        chai.expect(output).to.equal(response.message);
+        // eslint-disable-next-line no-unused-expressions
+        chai.expect(errs).to.be.empty;
+        nock.isDone();
+      });
+
       it('fails to run a Pipeline due to params-file not found', async () => {
         try {
           await create().parseAsync(['node', 'pipelines', 'run', 'pipeline1', 'repo1', '--project', PROJECT, '--params-file', '/tmp/not-found.json']);

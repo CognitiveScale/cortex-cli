@@ -81,6 +81,8 @@ export function create() {
   .option('--params-file <paramsFile>', 'A file containing either JSON or YAML formatted params')
   .option('--commit <commit>', 'Git SHA for pipeline repository')
   .option('--block <block>', 'Block name to run a specific block')
+  .option('--scheduleName <name>', 'Identifier to uniquely identify a Pipelines schedule')
+  .option('--scheduleCron <cron>', 'Schedule Pipeline to run periodically using a cron schedule string for example: "0 0 * * *", @hourly, or @daily')
   .action(withCompatibilityCheck((pipelineName, gitRepoName, options) => {
     try {
       checkForEmptyArgs({ pipelineName, gitRepoName });

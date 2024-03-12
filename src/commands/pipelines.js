@@ -108,18 +108,25 @@ export const RunPipelineCommand = class {
     const pipelines = new Pipelines(profile.url);
     try {
       const response = await pipelines.runPipeline(options.project || profile.project, profile.token, pipelineName, gitRepoName, params, options);
-      if (response.success) {
-        // TODO: Should replacment of activationId -> runId be done at the API level ?
-        response.runId = response?.runId || response?.activationId; // support runId and activationId
-        delete response.activationId;
-        if (options.json) {
-          getFilteredOutput(response, options);
-        } else {
-          printSuccess(`Pipeline Run Submitted!\n\nUse "cortex pipelines describe-run ${response.runId}" to inspect the Pipeline Run`);
-        }
+      if (!response.success) {
+        printError(`Failed to run pipeline: ${response.status} ${response.message}`, options);
         return;
       }
-      printError(`Failed to run pipeline: ${response.status} ${response.message}`, options);
+
+      // Prefer 'runId' but support 'activationId' as a fallback
+      if (response?.activationId) {
+        response.runId = response?.runId || response?.activationId;
+        delete response.activationId;
+      }
+
+      if (options.json) {
+        getFilteredOutput(response, options);
+      } else if (response?.runId) {
+        printSuccess(`Pipeline Run Submitted!\n\nUse "cortex pipelines describe-run ${response.runId}" to inspect the Pipeline Run`);
+      } else if (response?.message) {
+        // Print the message from server - expected when a Pipeline is scheduled
+        printSuccess(response.message);
+      }
     } catch (err) {
       printError(`Failed to run pipeline: ${err.status} ${err.message}`, options);
     }

@@ -54,6 +54,14 @@ export default class Pipelines {
       const endpoint = `${this.endpointV4(projectId)}/${encodeURIComponent(name)}/run`;
       debug('runPipeline(%s, %s) => %s', name, gitRepoName, endpoint);
       const { commit, block } = options;
+      const query = { };
+      if (options?.scheduleName) {
+        query.scheduleName = options.scheduleName;
+      }
+      if (options?.scheduleCron) {
+        query.scheduleCron = options.scheduleCron;
+      }
+
       const body = { gitRepoName, ...params };
       if (commit) {
         body.commit = commit;
@@ -65,6 +73,7 @@ export default class Pipelines {
         return await got.post(endpoint, {
           headers: defaultHeaders(token),
           json: body,
+          searchParams: query,
         }).json();
       } catch (err) {
         return constructError(err);
