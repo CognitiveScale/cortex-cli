@@ -68,10 +68,6 @@ export class UploadContent {
         const chunkSize = parseInt(options.chunkSize, 10);
         if (options.recursive) {
             const files = getSourceFiles(filePath);
-            // if (err) {
-            //     debug(err);
-            //     printError(`Failed to upload content: ${err.status} ${err.message}`, options);
-            // }
             const totalBytes = files.reduce((accum, current) => {
                 console.log(`${humanReadableFileSize(current.size)}\t${current.relative} -> ${contentKey}/${current.relative}`);
                 return accum + current.size;

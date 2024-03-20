@@ -109,12 +109,23 @@ describe('configure', () => {
         expect(payload.exp).to.equal((iatDate / 1000) + (5 * 60));
     });
     it('ttl token with bad ttl', async () => {
-        await create().parseAsync(['node', 'configure', 'token', '--ttl', '99mx']);
+        try {
+            await create()
+                .parseAsync(['node', 'configure', 'token', '--ttl', '99mx']);
+            assert.fail('Should have thrown');
+        } catch (err) {
+            // NOP
+        }
         const output = getErrorLines();
         expect(output[0]).to.contain('Invalid --ttl');
     });
     it('ttl token default with bad profile', async () => {
-        await create().parseAsync(['node', 'configure', 'token', '--profile', 'nothere']);
+        try {
+            await create().parseAsync(['node', 'configure', 'token', '--profile', 'nothere']);
+            assert.fail('Should have thrown');
+        } catch (err) {
+            // NOP
+        }
         const output = getErrorLines();
         expect(output[0]).to.contain('Profile with name "nothere" could not be located in your configuration.');
         assert(process.exit.calledWith(1));

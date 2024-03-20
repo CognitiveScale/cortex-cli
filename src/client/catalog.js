@@ -127,6 +127,17 @@ export default class Catalog {
         return raw ? got.get(endpoint, gotOptions).text() : got.get(endpoint, gotOptions).json();
     }
 
+    applicationLogs(projectId, token, name, raw = false) {
+        checkProject(projectId);
+        const endpoint = `${this.endpoints.applications(projectId)}/${encodeURIComponent(name)}/logs`;
+        debug('applicationLogs(%s, %s) => %s', name, endpoint);
+        const gotOptions = {
+            headers: defaultHeaders(token),
+            searchParams: { raw },
+        };
+        return raw ? got.get(endpoint, gotOptions).text() : got.get(endpoint, gotOptions).json();
+    }
+
     // Agent
     deleteAgent(projectId, token, agentName) {
         checkProject(projectId);

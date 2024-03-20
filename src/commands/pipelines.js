@@ -38,7 +38,7 @@ export const ListPipelineCommand = class {
       if (options.repo && options.filter) {
         printWarning('WARNING: --repo and --filter options are incompatible! The --filter option will be used', options);
       }
-      const result = await pipelines.listPipelines(options.project || profile.project, profile.token, filter, options.limit, options.skip, options.sort);
+      const { pipelines: result } = await pipelines.listPipelines(options.project || profile.project, profile.token, filter, options.limit, options.skip, options.sort);
         if (options.json) {
           return getFilteredOutput(result, options);
         }
@@ -80,6 +80,7 @@ export const RunPipelineCommand = class {
     this.program = program;
   }
 
+  // eslint-disable-next-line consistent-return
   async execute(pipelineName, gitRepoName, options) {
     const profile = await loadProfile(options.profile);
     debug('%s.executeRunPipeline(%s)', profile.name, pipelineName);
@@ -88,11 +89,11 @@ export const RunPipelineCommand = class {
         try {
             params = parseObject(options.params, options);
         } catch (e) {
-            printError(`Failed to parse params: ${options.params} Error: ${e}`, options);
+            return printError(`Failed to parse params: ${options.params} Error: ${e}`, options);
         }
     } else if (options.paramsFile) {
       if (!fs.existsSync(options.paramsFile)) {
-        printError(`File does not exist at: ${options.paramsFile}`, options);
+        return printError(`File does not exist at: ${options.paramsFile}`, options);
       }
       const paramsStr = fs.readFileSync(options.paramsFile);
       params = parseObject(paramsStr, options);
@@ -107,12 +108,14 @@ export const RunPipelineCommand = class {
       }
 
       if (options.json) {
-        getFilteredOutput(response, options);
-      } else if (response?.runId) {
-        printSuccess(`Pipeline Run Submitted!\n\nUse "cortex pipelines describe-run ${response.runId}" to inspect the Pipeline Run`);
-      } else if (response?.message) {
+        return getFilteredOutput(response, options);
+      }
+      if (response?.runId) {
+        return printSuccess(`Pipeline Run Submitted!\n\nUse "cortex pipelines describe-run ${response.runId}" to inspect the Pipeline Run`);
+      }
+      if (response?.message) {
         // Print the message from server - expected when a Pipeline is scheduled
-        printSuccess(response.message);
+        return printSuccess(response.message);
       }
     } catch (err) {
       return handleError(err, options, 'Failed to run pipeline');

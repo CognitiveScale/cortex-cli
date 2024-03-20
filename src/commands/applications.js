@@ -188,7 +188,7 @@ export class AppLogsCommand {
             debug('%s.executeApplicationLogs(%s,%s)', profile.name, name);
     
             const catalog = new Catalog(profile.url);
-            const response = await catalog.skillLogs(options.project || profile.project, profile.token, name, name, options.raw);
+            const response = await catalog.applicationLogs(options.project || profile.project, profile.token, name, options.raw);
     
             if (options.raw) {
                 try {

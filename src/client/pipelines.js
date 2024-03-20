@@ -1,5 +1,5 @@
 import debugSetup from 'debug';
-import { constructError, checkProject } from '../commands/utils.js';
+import { checkProject } from '../commands/utils.js';
 import { got, defaultHeaders } from './apiutils.js';
 import PipelineRepos from './pipelineRepositories.js';
 
@@ -12,7 +12,7 @@ export default class Pipelines {
       this.endpointV4 = (projectId) => `${cortexUrl}/fabric/v4/projects/${projectId}/${PIPELINE_API}`;
     }
   
-    async listPipelines(projectId, token, filter, limit, skip, sort) {
+    listPipelines(projectId, token, filter, limit, skip, sort) {
       checkProject(projectId);
       const endpoint = this.endpointV4(projectId);
       debug('listPipelines() => %s', endpoint);
@@ -21,17 +21,13 @@ export default class Pipelines {
       if (limit) query.limit = limit;
       if (sort) query.sort = sort;
       if (skip) query.skip = skip;
-      try {
-        return await got.get(endpoint, {
-          headers: defaultHeaders(token),
-          searchParams: query,
-        }).json();
-      } catch (err) {
-        return constructError(err);
-      }
+      return got.get(endpoint, {
+        headers: defaultHeaders(token),
+        searchParams: query,
+      }).json();
     }
 
-    async describePipeline(projectId, token, name, gitRepoName, sha) {
+    describePipeline(projectId, token, name, gitRepoName, sha) {
       checkProject(projectId);
       const endpoint = `${this.endpointV4(projectId)}/${encodeURIComponent(name)}`;
       debug('describePipeline(%s, %s) => %s', name, gitRepoName, endpoint);
@@ -39,17 +35,13 @@ export default class Pipelines {
       if (sha) {
         searchParams.sha = sha;
       }
-      try {
-        return await got.get(endpoint, {
+        return got.get(endpoint, {
           headers: defaultHeaders(token),
           searchParams: { ...searchParams },
         }).json();
-      } catch (err) {
-        return constructError(err);
-      }
     }
 
-    async runPipeline(projectId, token, name, gitRepoName, params, options) {
+    runPipeline(projectId, token, name, gitRepoName, params, options) {
       checkProject(projectId);
       const endpoint = `${this.endpointV4(projectId)}/${encodeURIComponent(name)}/run`;
       debug('runPipeline(%s, %s) => %s', name, gitRepoName, endpoint);
@@ -69,31 +61,23 @@ export default class Pipelines {
       if (block) {
         body.block = block;
       }
-      try {
-        return await got.post(endpoint, {
+        return got.post(endpoint, {
           headers: defaultHeaders(token),
           json: body,
           searchParams: query,
         }).json();
-      } catch (err) {
-        return constructError(err);
-      }
     }
 
-    async describePipelineRun(projectId, token, runId) {
+    describePipelineRun(projectId, token, runId) {
       checkProject(projectId);
       const endpoint = `${this.endpointV4(projectId)}/run/${runId}`;
       debug('describePipeline(%s) => %s', runId, endpoint);
-      try {
-        return await got.get(endpoint, {
+        return got.get(endpoint, {
           headers: defaultHeaders(token),
         }).json();
-      } catch (err) {
-        return constructError(err);
-      }
     }
 
-    async listPipelineRuns(projectId, token, name, gitRepoName, limit, skip, sort, filter) {
+    listPipelineRuns(projectId, token, name, gitRepoName, limit, skip, sort, filter) {
       checkProject(projectId);
       const endpoint = `${this.endpointV4(projectId)}/${encodeURIComponent(name)}/run`;
       debug('listPipelineRuns(%s, %s) => %s', name, gitRepoName, endpoint);
@@ -102,14 +86,10 @@ export default class Pipelines {
       if (limit) query.limit = limit;
       if (sort) query.sort = sort;
       if (skip) query.skip = skip;
-      try {
-        return await got.get(endpoint, {
-          headers: defaultHeaders(token),
-          searchParams: query,
-        }).json();
-      } catch (err) {
-        return constructError(err);
-      }
+      return got.get(endpoint, {
+        headers: defaultHeaders(token),
+        searchParams: query,
+      }).json();
     }
 
     repos() {
