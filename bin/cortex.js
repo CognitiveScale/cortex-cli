@@ -5,7 +5,7 @@ import { readPackageJSON, printError } from '../src/commands/utils.js';
 import { loadProfileWithoutFailure } from '../src/config.js';
 import { getAllSubcommands, FeatureController } from '../src/features.js';
 
-// Global varible storing the users profile, used to avoid redundantly loading the Profile
+// Global variable storing the users profile, used to avoid redundantly loading the Profile
 let profile;
 
 async function resolveAvailableSubcommands(profileName) {
