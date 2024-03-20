@@ -126,8 +126,14 @@ export class DescribeAppCommand {
         const {
             verbose, output, project, json,
         } = options;
-
-        const isPretty = (options?.output ?? 'pretty').toLowerCase() === 'pretty' && json === undefined;
+        let computedOutput = output;
+        // If I specify json/verbose/output=json json ensure output is json.
+        if (output.toLowerCase() === 'json' || verbose || json !== undefined) {
+            computedOutput = 'json';
+        } else {
+            computedOutput = output;
+        }
+        const isPretty = (options?.output ?? 'pretty').toLowerCase() === 'pretty' && computedOutput !== 'json';
         debug('%s.executeDescribeApplication(%s)', profile.name, name);
         const catalog = new Catalog(profile.url);
         try {
@@ -135,7 +141,8 @@ export class DescribeAppCommand {
                 project || profile.project,
                 profile.token, name,
                 verbose || isPretty,
-                json === undefined ? output : 'json'); // if --json use output JSON
+                computedOutput,
+                 ); // if --json use output JSON
             if (isPretty) {
 // Strange spacing needed for output formatting
                 printSuccess(`Name: ${app.name}
@@ -151,8 +158,11 @@ Updated At: ${app._updatedAt}`, options);
                 rTable.push(...app?.match?.map(parseMatch) ?? []);
                 return console.log(rTable.toString());
             }
-            if (options?.output?.toLowerCase() === 'json' || json !== undefined) return getFilteredOutput(app, options);
-            return writeOutput(app, options);
+            if (options?.output?.toLowerCase() === 'json' || json !== undefined) {
+                return getFilteredOutput(app, options);
+            }
+            // format output if json
+            return writeOutput(computedOutput === 'json' ? JSON.stringify(app, null, 2) : app, options);
         } catch (err) {
             return printError(`Failed to describe application ${name}: ${err.status ?? ''} ${err.message}`, options);
         }
