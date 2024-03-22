@@ -7,6 +7,8 @@ import {
   RunPipelineCommand,
   DescribePipelineRunCommand,
   ListPipelineRunsCommand,
+  PipelineTemplateConfigureCommand,
+  PipelineGenerateCommand,
 } from '../src/commands/pipelines.js';
 import { withCompatibilityCheck } from '../src/compatibility.js';
 import {
@@ -131,6 +133,33 @@ export function create() {
       return printError(err.message);
     }
   }));
+
+
+  // Configure Pipeline Template Github Repository
+  pipelines
+    .command('configure')
+    .option('--refresh', 'Refresh the Github access token')
+    .description('Configure the Cortex Template system for generating Pipeline templates')
+    .action((options) => {
+      try {
+        return new PipelineTemplateConfigureCommand(pipelines).execute(options);
+      } catch (err) {
+        return printError(err.message);
+      }
+    });
+
+  // Generate a Pipeline template
+  pipelines.command('generate [pipelineName] [destination]')
+    .option('--notree [boolean]', 'Do not dispaly generated file tree', 'false')
+    .option('--template <templateName>', 'Name of the template to use')
+    .description('Generates a folder based on a Pipeline template from the template repository')
+    .action((pipelineName, destination, options) => {
+      try {
+        return new PipelineGenerateCommand(pipelines).execute(pipelineName, destination, options);
+      } catch (err) {
+        return printError(err.message);
+      }
+    });
 
   return pipelines;
 }

@@ -100,6 +100,7 @@ const ProfileSchemaV5 = Joi.object().keys({
     currentRegistry: Joi.string().required(),
     templateConfig: Joi.any().required(),
     featureFlags: Joi.object().optional(),
+    pipelineTemplateConfig: Joi.any().optional(),
 });
 
 /* eslint-disable no-param-reassign */
@@ -339,7 +340,7 @@ class ConfigV4 {
 }
 class ProfileV5 {
     constructor(name, {
- url, username, issuer, audience, jwk, project, registries, currentRegistry, templateConfig, featureFlags,
+ url, username, issuer, audience, jwk, project, registries, currentRegistry, templateConfig, featureFlags, pipelineTemplateConfig,
 }, templateConfigV4) {
         this.name = name;
         this.url = url;
@@ -357,6 +358,10 @@ class ProfileV5 {
         };
         this.currentRegistry = currentRegistry || 'Cortex Private Registry';
         this.templateConfig = templateConfig || templateConfigV4 || {
+            repo: 'CognitiveScale/cortex-code-templates',
+            branch: 'main',
+        };
+        this.pipelineTemplateConfig = pipelineTemplateConfig || {
             repo: 'CognitiveScale/cortex-code-templates',
             branch: 'main',
         };
@@ -383,6 +388,7 @@ class ProfileV5 {
             registries: this.registries,
             currentRegistry: this.currentRegistry,
             templateConfig: this.templateConfig,
+            pipelineTemplateConfig: this.pipelineTemplateConfig,
             featureFlags: this.featureFlags, // TODO: is featureFlags needed as a field?
         };
     }

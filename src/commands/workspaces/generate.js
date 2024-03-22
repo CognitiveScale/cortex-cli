@@ -17,9 +17,28 @@ import {
 } from '../utils.js';
 
 const METADATA_FILENAME = 'metadata.json';
-export default class WorkspaceGenerateCommand {
-    constructor(program) {
+
+export class BaseGenerateCommand {
+    /**
+     * Creates a `BaseGenerateCommand`.
+     *
+     * @param {object} program Commander program object
+     * @param {string} resourceName Name of the resource being generated (e.g. Skill, Pipeline, Foo, Bar)
+     * @param {string} resourceFolderName Name of the folder in the repository that will be
+     * @param {string} resourceTemplateName Expected folder name for the template - will be wrapped in underscores (e.g. __skillname__, __pipelinename__)
+     */
+    constructor(program, resourceName, resourceFolderName, resourceTemplateName) {
+        // Adhoc way of implemeting an abstract class that enforces a 'configureSubcommand()' method to be present
+        if (new.target === BaseGenerateCommand) {
+            throw new TypeError('Cannot construct BaseGenerateCommand instances directly!');
+        }
+        if (typeof this.configureSubcommand !== 'function') {
+            throw new TypeError('Cannot construct instance of BaseGenerateCommand without overriding async method "configureSubcommand()"!');
+        }
         this.program = program;
+        this.resourceName = resourceName;
+        this.resourceFolderName = resourceFolderName;
+        this.resourceTemplateName = resourceTemplateName;
     }
 
     async loadTemplateTree({ repo, branch }) {
@@ -88,7 +107,7 @@ export default class WorkspaceGenerateCommand {
             {
                 type: 'input',
                 name: 'name',
-                message: 'Enter a name for the skill:',
+                message: `Enter a name for the ${this.resourceName}:`,
                 validate: (answer) => {
                     const validation = validateName(answer);
                     return validation.status || validation.message;
@@ -113,13 +132,14 @@ export default class WorkspaceGenerateCommand {
             printError(this.config.profiles[this.config.currentProfile].templateConfig
                 ? 'Github authorization is invalid. Running configuration now.\n'
                 : 'Workspace generator is not configured. Running configuration now.\n', this.options, false);
-            await (new WorkspaceConfigureCommand(this.program)).execute({ refresh: true });
+            await this.configureSubcommand();
             this.config = readConfig();
         }
-        if (name && fs.existsSync(path.join(destinationPath, 'skills', name))) {
-            printError(`Skill ${name} already exists!`, this.options);
+        if (name && fs.existsSync(path.join(destinationPath, this.resourceFolderName, name))) {
+            printError(`${this.resourceName} ${name} already exists!`, this.options);
             return;
         }
+
         await this.loadTemplateTree(this.config.profiles[this.config.currentProfile].templateConfig);
         if (this.tree.length) {
             const template = await this.selectTemplate(options.template);
@@ -127,8 +147,8 @@ export default class WorkspaceGenerateCommand {
                 const templateFolder = path.posix.dirname(template.template.path);
                 const templateFiles = this.globTree(`${templateFolder}/**`);
                 const treeObj = {};
-                if (fs.existsSync(path.join(destinationPath, 'skills', template.name))) {
-                    printError(`Skill ${template.name} already exists!`, this.options);
+                if (fs.existsSync(path.join(destinationPath, this.resourceFolderName, template.name))) {
+                    printError(`${this.resourceName} ${template.name} already exists!`, this.options);
                     return;
                 }
                 const generatedFiles = _.map(templateFiles, (f) => {
@@ -137,7 +157,7 @@ export default class WorkspaceGenerateCommand {
                         const destFile = _.drop(f.path.split('/'), rootPathComponents.length);
                         const targetPath = path.join(...destFile);
                         return _.template(targetPath, { interpolate: /__([\s\S]+?)__/g })({
-                            skillname: generateNameFromTitle(template.name),
+                            [this.resourceTemplateName]: generateNameFromTitle(template.name),
                         });
                     } catch (err) {
                         printError(err.message, this.options);
@@ -150,7 +170,7 @@ export default class WorkspaceGenerateCommand {
                         const fileName = path.posix.basename(f.path);
                         if (fileName !== METADATA_FILENAME) {
                             const templateVars = {
-                                skillname: generateNameFromTitle(template.name),
+                                [this.resourceTemplateName]: generateNameFromTitle(template.name),
                                 generatedFiles,
                                 template: template.template,
                             };
@@ -181,5 +201,16 @@ export default class WorkspaceGenerateCommand {
         } else {
             printError('Unable to retrieve templates', this.options);
         }
+    }
+}
+
+
+export class WorkspaceGenerateCommand extends BaseGenerateCommand {
+    constructor(program) {
+        super(program, 'Skill', 'skills', 'skillname');
+    }
+
+    async configureSubcommand() {
+        await (new WorkspaceConfigureCommand(this.program)).execute({ refresh: true });
     }
 }

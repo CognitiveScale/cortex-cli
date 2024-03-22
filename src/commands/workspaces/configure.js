@@ -18,14 +18,17 @@ const GITHUB_DEVICECODE_REQUEST_URL = 'https://github.com/login/device/code';
 const GITHUB_DEVICECODE_RESPONSE_URL = 'https://github.com/login/oauth/access_token';
 
 export default class WorkspaceConfigureCommand {
-    constructor(program) {
+    constructor(program, configKey = 'templateconfig') {
         this.program = program;
+        this.configKey = configKey;
     }
 
     async execute(opts) {
         this.options = opts;
         try {
             const config = readConfig();
+            const { configKey } = this;
+            console.log(configKey);
             const currentProfile = config.profiles[config.currentProfile];
             console.log(`Configuring workspaces for profile ${chalk.green(config.currentProfile)}`);
             const answers = await inquirer.prompt([
@@ -33,13 +36,13 @@ export default class WorkspaceConfigureCommand {
                     type: 'input',
                     name: 'repo',
                     message: 'Template Repository URL:   ',
-                    default: _.get(currentProfile, 'templateConfig.repo', DEFAULT_TEMPLATE_REPO),
+                    default: _.get(currentProfile, `${configKey}.repo`, DEFAULT_TEMPLATE_REPO),
                 },
                 {
                     type: 'input',
                     name: 'branch',
                     message: 'Template Repository Branch:',
-                    default: _.get(currentProfile, 'templateConfig.branch', DEFAULT_TEMPLATE_BRANCH),
+                    default: _.get(currentProfile, `${configKey}.branch`, DEFAULT_TEMPLATE_BRANCH),
                 },
             ]);
             const githubToken = await validateToken();
@@ -84,7 +87,7 @@ export default class WorkspaceConfigureCommand {
                                 if (accessToken.access_token) {
                                     clearTimeout(pollTimer);
                                     persistToken(accessToken);
-                                    config.profiles[config.currentProfile].templateConfig = answers;
+                                    config.profiles[config.currentProfile][configKey] = answers;
                                     config.save();
                                     printSuccess('\x1b[0G\x1b[2KGithub token configuration successful.', options);
                                     resolve();
@@ -125,7 +128,7 @@ export default class WorkspaceConfigureCommand {
                     printError('\x1b[2KDevice Code request failed.  Please try again.', this.options);
                 }
             } else {
-                config.profiles[config.currentProfile].templateConfig = answers;
+                config.profiles[config.currentProfile][configKey] = answers;
                 config.save();
             }
         } catch (error) {

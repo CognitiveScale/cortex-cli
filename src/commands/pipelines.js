@@ -18,10 +18,12 @@ import {
     printTable,
     printWarning,
 } from './utils.js';
+import WorkspaceConfigureCommand from './workspaces/configure.js';
+import { BaseGenerateCommand } from './workspaces/generate.js';
+
 
 const debug = debugSetup('cortex:cli');
 dayjs.extend(relativeTime);
-
 
 
 export const ListPipelineCommand = class {
@@ -256,5 +258,28 @@ export const ListPipelineRunsCommand = class {
     } catch (err) {
       return printError(`Failed to list pipelne runs: ${err.status} ${err.message}`, options);
     }
+  }
+};
+
+// NOTE: Easiest way to piggy-back of the existing functionality from Workspaces is to
+// directly use the same logic via inheritance. Originally tried refactoring the super
+// class, but the result left 2 implementations with very similar code.
+//
+// The constructor assigns a different configKey to avoid collision from sharing the
+// same property in the config file.
+export const PipelineTemplateConfigureCommand = class extends WorkspaceConfigureCommand {
+  constructor(program) {
+    super(program, 'pipelineTemplateConfig');
+  }
+};
+
+
+export const PipelineGenerateCommand = class extends BaseGenerateCommand {
+  constructor(program) {
+    super(program, 'Pipeline', 'pipelines', 'pipelinename');
+  }
+
+  async configureSubcommand() {
+    await (new PipelineTemplateConfigureCommand(this.program)).execute({ refresh: true });
   }
 };
