@@ -276,7 +276,7 @@ export const PipelineTemplateConfigureCommand = class extends WorkspaceConfigure
 
 export const PipelineGenerateCommand = class extends BaseGenerateCommand {
   constructor(program) {
-    super(program, 'Pipeline', 'pipelines', 'pipelinename');
+    super(program, 'Pipeline', 'pipelines', 'pipelinename', 'pipelineTemplateConfig');
   }
 
   async configureSubcommand() {
