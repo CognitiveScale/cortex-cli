@@ -168,10 +168,11 @@ export class BaseGenerateCommand {
      * @returns {object} object conatining 
      */
     async selectTemplate(tree, templateName) {
+        // TODO(LA): Need to apply an additional filter below (when getting choices)
+        //  to only include those which match a pre-defined resource type (e.g. 'pipeline', 'skill' <-- use as default).
         const registryUrl = await this.getRegistry();
         debug('Docker Registry URL: %s', registryUrl);
         const fileNames = this.globTree(tree, METADATA_FILENAME);
-        // debug('Files found matching glob pattern: %s', JSON.stringify(fileNames));
         const choices = await Promise.all(_.map(fileNames, async (value) => {
             const data = JSON.parse((await this.readFile(value.path)).toString());
             return {
@@ -271,6 +272,26 @@ export class BaseGenerateCommand {
     }
 
     async execute(name, destination, options) {
+        // TODO: Add some documentation (comments + mermaid diagram) showing what the heck is going on here
+        //
+        // NOTE(LA): Sequence of steps in generation process
+        // - read config file
+        // - fetch & validate existing github token
+        // - If the token isn't valid, then force the user to configure the template repository
+        //   - Reread the config, after prompts
+        // - Check if the destination to copy to the template to exists 
+        // - Load Git Tree(s) corresponding to the Repo/Branch
+        //   - Query the repo to get the HEAD (SHA) for the branch
+        //   - Query git tree(s), recursive
+        // - Early exit If there are NOT results for the Git Tree
+        // - Select the template
+        //   - Use glob (minimatch) to list the potential template folders in the returned Git Tree. A template folder must include a `metadata.json` file
+        //   - Read the `metadata.json` file for each potential template
+        //   - Promp the user for the template they want (provide potential templates as choices)
+        // - Use glob to find the files corresponding to the template (i.e. those which need to be copied)
+        // - Check if the destination folder already exists (if so early exit)
+        // - Generate the files, using templating to substitute the desired names, etc.
+        // - Compute the file tree for everyting generated and display it to the user
         this.options = options;
         this.name = name;
         this.destination = destination;
@@ -290,6 +311,7 @@ export class BaseGenerateCommand {
 
         const templateConfig = this.config.profiles[this.config.currentProfile][this.configKey];
         debug('Loading Templates - template configuration: %s', JSON.stringify(templateConfig));
+        // TODO: Use variable substition for theis color coding ? 
         printToTerminal('\x1b[0G\x1b[2KLoading templates...');
         const tree = await this.fetchTemplateGitTrees(templateConfig);
         printToTerminal('\x1b[0G\x1b[2KTemplates loaded.\x1b[1E');
