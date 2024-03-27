@@ -21,7 +21,32 @@ const debug = debugSetup('cortex:cli');
 
 const METADATA_FILENAME = 'metadata.json';
 
-export class BaseGenerateCommand {
+/**
+ * Class wrapping the raw results from fetching a Git Tree.
+ *
+ * (Primarily meant for type hinting).
+ */
+export class GitTreeWrapper {
+    constructor({
+        // eslint-disable-next-line no-shadow
+        path, mode, type, sha, size, url,
+    }) {
+        this.path = path;
+        this.mode = mode;
+        this.type = type;
+        this.sha = sha;
+        this.size = size;
+        this.url = url;
+        if (!this.path) {
+            throw TypeError('Raw Git Tree is missing attribute "path"');
+        }
+        if (!this.type) {
+            throw TypeError('Raw Git Tree is missing attribute "type"');
+        }
+    }
+}
+
+export class TemplateGenerationCommand {
     /**
      * Creates a `BaseGenerateCommand`.
      *
@@ -33,25 +58,57 @@ export class BaseGenerateCommand {
      */
     constructor(program, resourceName, resourceFolderName, resourceTemplateName, configKey) {
         // Adhoc way of implemeting an abstract class that enforces a 'configureSubcommand()' method to be present
-        if (new.target === BaseGenerateCommand) {
-            throw new TypeError('Cannot construct BaseGenerateCommand instances directly!');
+        if (new.target === TemplateGenerationCommand) {
+            throw new TypeError('Cannot construct TemplateGenerationCommand instances directly!');
         }
         if (typeof this.configureSubcommand !== 'function') {
-            throw new TypeError('Cannot construct instance of BaseGenerateCommand without overriding async method "configureSubcommand()"!');
+            throw new TypeError('Cannot construct instance of TemplateGenerationCommand without overriding async method "configureSubcommand()"!');
         }
+        // Set options controlling direct behavior
         this.program = program;
         this.resourceName = resourceName;
         this.resourceFolderName = resourceFolderName;
         this.resourceTemplateName = resourceTemplateName;
         this.configKey = configKey;
     }
+
+    /**
+     * Initializes the `BaseGenerateCommand` by setting execution-time options and retrieving the template
+     * configuration from the config file.
+     *
+     * @param {string} name Desired name for the generated template
+     * @param {string} destination Path to where the template should be generated
+     * @param {option} options CLI runtime options
+     */
+    async init(name, destination, options) {
+        this.options = options;
+        this.name = name;
+        this.destination = destination;
+        this.config = readConfig();
+        this.githubToken = await validateToken();
+        this.authorization = this.githubToken;
+        const templateConfig = this.getTemplateConfig();
+        this.gitRepo = templateConfig.repo;
+        this.branch = templateConfig.branch;
+        debug('Initialized template configuration. Raw configuration: %s', JSON.stringify(templateConfig));
+        debug('GitHub Token Set? %s', this.githubToken != null);
+    }
+
+    /**
+     * Returns the configuration for the template repository/branch.
+     *
+     * @returns {object} The configuraiton for the template repository
+     */
+    getTemplateConfig() {
+        return this.config.profiles[this.config.currentProfile][this.configKey];
+    }
     
     /**
-     * Queries GitHub to get the Git Tree(s) in a repository.
+     * Queries GitHub to get the Git Tree(s) from a repository.
      *
      * @param {string} repo Github repository identifier (e.g. `org/repo`)
      * @param {string} sha Git SHA referencing the commit in the repository to retrieve
-     * @returns object
+     * @returns {object} object returned by the GitHub API
      */
     fetchGitTree(repo, sha) {
         const uri = `repos/${repo}/git/trees/${sha}?recursive=true`;
@@ -62,34 +119,36 @@ export class BaseGenerateCommand {
     }
 
     /**
-     * Loads Git Tree(s) corresponding to the HEAD of a specific branch in a git repository.
+     * Loads Git Tree(s) corresponding to the HEAD of configured repo/branch.
      *
-     * @param {object} param0 Object with `repo` and `branch` keys
-     * @return Array<Object> - array of Git tree objects
+     * @return {Array<GitTreeWrapper>} array of Git tree objects
      */
-    async fetchTemplateGitTrees({ repo, branch }) {
-        // TODO: remove the assignments to 'this' to be outside of these methods
-        this.gitRepo = repo;
-        this.branch = branch;
-        this.authorization = this.githubToken;
-        const ghUri = `repos/${repo}/branches/${branch || 'main'}`;
-        debug('Loading templates from "%s" (branch = "%s"). URI: %s', repo, branch, ghUri);
-        const tree = await ghGot(ghUri, {
+    async fetchGitTreeFromBranch() {
+        const ghUri = `repos/${this.gitRepo}/branches/${this.branch || 'main'}`;
+        debug('Loading templates from "%s" (branch = "%s"). URI: %s', this.gitRepo, this.branch, ghUri);
+        const options = {
             headers: { authorization: this.authorization },
-        })
+        };
+        const tree = await ghGot(ghUri, options)
         .then((resp) => resp.body)
-        .then((resp) => this.fetchGitTree(repo, resp.commit.sha))
+        .then((resp) => this.fetchGitTree(this.gitRepo, resp.commit.sha))
         .then((resp) => resp.body.tree)
-        .catch(() => []);
+        .then((resp) => resp.map((t) => new GitTreeWrapper(t)))
+        .catch((e) => {
+            debug('Error encountered while trying to fetch the git tree for the repository. %s', e);
+            if (e?.response?.statusCode === 404) {
+                printError('Unable to retrieve templates. Repository or branch not found!', this.options);
+            }
+        });
         return tree;
     }
 
     /**
-     * Filters the Git Trees to blobs that match the given glob pattern.
+     * Filters the Git Trees to only those that are blobs that match the glob pattern.
      *
-     * @param {Array<object>} tree array of git tree objects
+     * @param {Array<GitTreeWrapper>} tree array of git tree objects
      * @param {string} glob pattern to match
-     * @returns Array<object>
+     * @returns {Array<GitTreeWrapper>} instances matching the glob pattern
      */
     globTree(tree, glob) {
         debug('Checking for templates that include the glob pattern: %s', glob);
@@ -98,7 +157,7 @@ export class BaseGenerateCommand {
     }
 
     /**
-     * Reads a file path in the remote git repository.
+     * Reads a file in the configured remote git repository.
      *
      * @param {string} filePath path to the file in the repository
      * @returns `Buffer` A Buffer with the contents of the file
@@ -132,7 +191,7 @@ export class BaseGenerateCommand {
      * @param {string} registryUrl URL to Docker registry
      * @param {Array<string>} choices 
      * @param {string | null | undefined} template 
-     * @returns object with user answers (`template`, `name`, `registry`)
+     * @returns {object} object with user answers (`template`, `name`, `registry`)
      */
     async promptUser(registryUrl, choices, template) {
         const answers = await inquirer.prompt([
@@ -163,13 +222,14 @@ export class BaseGenerateCommand {
      * Selects the template to clone by fetching the potential choices from the given
      * Git Tree(s) and prompting the user for their desired template.
      *
-     * @param {Array<object>} tree Git Tree(s) describing the repository
+     * @param {Array<GitTreeWrapper>} tree Git Trees for the contents of repository
      * @param {string | null | undefined} templateName Name of template
-     * @returns {object} object conatining 
+     * @returns {object} object with user selections (`template`, `name`, `registry`)
      */
     async selectTemplate(tree, templateName) {
         // TODO(LA): Need to apply an additional filter below (when getting choices)
         //  to only include those which match a pre-defined resource type (e.g. 'pipeline', 'skill' <-- use as default).
+        // TODO(LA): Should only consider template choices that have 'enabled == true'
         const registryUrl = await this.getRegistry();
         debug('Docker Registry URL: %s', registryUrl);
         const fileNames = this.globTree(tree, METADATA_FILENAME);
@@ -201,28 +261,28 @@ export class BaseGenerateCommand {
      * @param {string} name Name of the resource to be generated
      */
     checkDestinationExists(destinationPath, name) {
-        // Check if destination already exists
+        // Fail if destination already exists
         if (fs.existsSync(path.join(destinationPath, this.resourceFolderName, name))) {
             printError(`${this.resourceName} ${name} already exists!`, this.options);
         }
     }
 
     /**
-     * ??
+     * Applies templating over the filenames in the set of files to generate.
      *
-     * @param {*} templateFolder 
-     * @param {*} templateFiles 
-     * @param {*} template 
-     * @returns 
+     * @param {string} templateFolder Folder name for the template to be generated
+     * @param {Array<object>} templateFiles Files that will be templated
+     * @param {string} templateName String name to apply to the template
+     * @returns {string} A string with all the filenames to generate separated by `<br>`
      */
-    generateFiles(templateFolder, templateFiles, template) {
+    applyTemplatingToFilenames(templateFolder, templateFiles, templateName) {
         const generatedFiles = _.map(templateFiles, (f) => {
             try {
                 const rootPathComponents = templateFolder.split('/');
                 const destFile = _.drop(f.path.split('/'), rootPathComponents.length);
                 const targetPath = path.join(...destFile);
                 return _.template(targetPath, { interpolate: /__([\s\S]+?)__/g })({
-                    [this.resourceTemplateName]: generateNameFromTitle(template.name),
+                    [this.resourceTemplateName]: generateNameFromTitle(templateName),
                 });
             } catch (err) {
                 printError(err.message, this.options);
@@ -233,15 +293,16 @@ export class BaseGenerateCommand {
     }
 
     /**
-     * ????
+     * Generates the selected template by templating its contents and writing its content to disk.
+     * Returns the file tree with what files were created.
      *
-     * @param {*} destinationPath 
-     * @param {*} generatedFiles 
-     * @param {*} template 
-     * @param {*} templateFiles 
-     * @returns {object}
+     * @param {string} destinationPath path to generate template at
+     * @param {string} generatedFiles String with all the filenames that will be created
+     * @param {object} template Object with `template`, `name`, and `registry`
+     * @param {Array<Object>} templateFiles Array of objects representing files to generate
+     * @returns {object} An object containing the file tree for all generated files
      */
-    async computeFileTree(destinationPath, generatedFiles, template, templateFiles) {
+    async generateTemplatedFiles(destinationPath, generatedFiles, template, templateFiles) {
         const treeObj = {};
         await Promise.all(_.map(templateFiles, async (f) => {
             try {
@@ -271,66 +332,59 @@ export class BaseGenerateCommand {
         return treeObj;
     }
 
-    async execute(name, destination, options) {
-        // TODO: Add some documentation (comments + mermaid diagram) showing what the heck is going on here
-        //
-        // NOTE(LA): Sequence of steps in generation process
-        // - read config file
-        // - fetch & validate existing github token
-        // - If the token isn't valid, then force the user to configure the template repository
-        //   - Reread the config, after prompts
-        // - Check if the destination to copy to the template to exists 
-        // - Load Git Tree(s) corresponding to the Repo/Branch
-        //   - Query the repo to get the HEAD (SHA) for the branch
-        //   - Query git tree(s), recursive
-        // - Early exit If there are NOT results for the Git Tree
-        // - Select the template
-        //   - Use glob (minimatch) to list the potential template folders in the returned Git Tree. A template folder must include a `metadata.json` file
-        //   - Read the `metadata.json` file for each potential template
-        //   - Promp the user for the template they want (provide potential templates as choices)
-        // - Use glob to find the files corresponding to the template (i.e. those which need to be copied)
-        // - Check if the destination folder already exists (if so early exit)
-        // - Generate the files, using templating to substitute the desired names, etc.
-        // - Compute the file tree for everyting generated and display it to the user
-        this.options = options;
-        this.name = name;
-        this.destination = destination;
-        this.config = readConfig();
-        this.githubToken = await validateToken();
-        const destinationPath = path.resolve(destination || process.cwd());
+    /**
+     * Generates the specified template at the given destination.
+     *
+     * @param {Array<GitTreeWrapper} tree Git Tree with contents of template
+     * @param {object} template Object representing the template to generate
+     * @param {string} destinationPath Path to create the template under
+     * @returns {object} An object containing the file tree for all generated files
+     */
+    generateTemplate(tree, template, destinationPath) {
+        // Find the set of files to template
+        const templateFolder = path.posix.dirname(template.template.path);
+        const templateFiles = this.globTree(tree, `${templateFolder}/**`);
+        this.checkDestinationExists(destinationPath, template.name);
+        const filesToGenerate = this.applyTemplatingToFilenames(templateFolder, templateFiles, template.name);
+        return this.generateTemplatedFiles(destinationPath, filesToGenerate, template, templateFiles);
+    }
 
+    /**
+     * Executes the template generation.
+     *
+     * @param {string} name Desired name for the generated template
+     * @param {string} destination Path to where the template should be generated
+     * @param {option} options CLI runtime options
+     */
+    async execute(name, destination, options) {
+        await this.init(name, destination, options);
+        const destinationPath = path.resolve(destination || process.cwd());
         if (!this.githubToken) {
+            // Force registry configuration, if unset, and reload the config
             debug('Github Token not initialized for Profile "%s" in config section "%s" - beginning configuration step', this.config.currentProfile, this.configKey);
-            printError(this.config.profiles[this.config.currentProfile][this.configKey]
+            printError(this.getTemplateConfig()
                 ? 'Github authorization is invalid. Running configuration now.\n'
-                : 'Workspace generator is not configured. Running configuration now.\n', this.options, false);
+                : 'Generator is not configured. Running configuration now.\n', this.options, false);
             await this.configureSubcommand();
-            this.config = readConfig();
+            await this.init(name, destination, options);
         }
         this.checkDestinationExists(destinationPath, name);
-
-        const templateConfig = this.config.profiles[this.config.currentProfile][this.configKey];
-        debug('Loading Templates - template configuration: %s', JSON.stringify(templateConfig));
-        // TODO: Use variable substition for theis color coding ? 
+        // TODO: Use variable substition for this color coding ? 
         printToTerminal('\x1b[0G\x1b[2KLoading templates...');
-        const tree = await this.fetchTemplateGitTrees(templateConfig);
+        const tree = await this.fetchGitTreeFromBranch();
         printToTerminal('\x1b[0G\x1b[2KTemplates loaded.\x1b[1E');
         if (tree.length) {
             const template = await this.selectTemplate(tree, options.template);
             if (template) {
-                const templateFolder = path.posix.dirname(template.template.path);
-                const templateFiles = this.globTree(tree, `${templateFolder}/**`);
-                this.checkDestinationExists(destinationPath, template.name);
-                const generatedFiles = this.generateFiles(templateFolder, templateFiles, template);
+                const treeObj = this.generateTemplate(tree, template, destinationPath);
                 console.log('');
-                const treeObj = this.computeFileTree(destinationPath, generatedFiles, template, templateFiles);
                 if (!options || !boolean(options.notree)) {
                     printSuccess('Generated the following files:');
                     console.log('');
                     console.log(destinationPath);
                     console.log(treeify.asTree(treeObj, true));
                 }
-                printSuccess('Workspace generation complete.', this.options);
+                printSuccess('Generation complete.', this.options);
             }
         } else {
             printError('Unable to retrieve templates', this.options);
@@ -339,7 +393,7 @@ export class BaseGenerateCommand {
 }
 
 
-export class WorkspaceGenerateCommand extends BaseGenerateCommand {
+export class WorkspaceGenerateCommand extends TemplateGenerationCommand {
     constructor(program) {
         super(program, 'Skill', 'skills', 'skillname', 'templateConfig');
     }

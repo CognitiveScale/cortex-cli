@@ -17,7 +17,7 @@ const DEFAULT_TEMPLATE_BRANCH = 'main';
 const GITHUB_DEVICECODE_REQUEST_URL = 'https://github.com/login/device/code';
 const GITHUB_DEVICECODE_RESPONSE_URL = 'https://github.com/login/oauth/access_token';
 
-export class BaseConfigureCommand {
+export class TemplateConfigureCommand {
     /**
      * Creates a Command object that prompts the user to configures a remote Github Repository & Branch
      * as the source of for templates.
@@ -28,8 +28,8 @@ export class BaseConfigureCommand {
      */
     constructor(program, configKey, context) {
         // Adhoc way of implemeting an abstract class
-        if (new.target === BaseConfigureCommand) {
-            throw new TypeError('Cannot construct BaseConfigureCommand instances directly!');
+        if (new.target === TemplateConfigureCommand) {
+            throw new TypeError('Cannot construct TemplateConfigureCommand instances directly!');
         }
         this.program = program;
         this.configKey = configKey;
@@ -149,7 +149,7 @@ export class BaseConfigureCommand {
     }
 }
 
-export class WorkspaceConfigureCommand extends BaseConfigureCommand {
+export class WorkspaceConfigureCommand extends TemplateConfigureCommand {
     constructor(program) {
         super(program, 'templateConfig', 'workspaces');
     }

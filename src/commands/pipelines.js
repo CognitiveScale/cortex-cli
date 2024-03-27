@@ -18,8 +18,8 @@ import {
     printTable,
     printWarning,
 } from './utils.js';
-import WorkspaceConfigureCommand from './workspaces/configure.js';
-import { BaseGenerateCommand } from './workspaces/generate.js';
+import { TemplateConfigureCommand } from './workspaces/configure.js';
+import { TemplateGenerationCommand } from './workspaces/generate.js';
 
 
 const debug = debugSetup('cortex:cli');
@@ -262,19 +262,17 @@ export const ListPipelineRunsCommand = class {
 };
 
 // NOTE: Easiest way to piggy-back of the existing functionality from Workspaces is to
-// directly use the same logic via inheritance. Originally tried refactoring the super
-// class, but the result left 2 implementations with very similar code.
+// directly use the same logic via inheritance.
 //
 // The constructor assigns a different configKey to avoid collision from sharing the
 // same property in the config file.
-export const PipelineTemplateConfigureCommand = class extends WorkspaceConfigureCommand {
+export const PipelineTemplateConfigureCommand = class extends TemplateConfigureCommand {
   constructor(program) {
-    super(program, 'pipelineTemplateConfig');
+    super(program, 'pipelineTemplateConfig', 'Pipelines');
   }
 };
 
-
-export const PipelineGenerateCommand = class extends BaseGenerateCommand {
+export const PipelineGenerateCommand = class extends TemplateGenerationCommand {
   constructor(program) {
     super(program, 'Pipeline', 'pipelines', 'pipelinename', 'pipelineTemplateConfig');
   }
