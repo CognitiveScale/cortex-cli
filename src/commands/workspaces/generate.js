@@ -232,20 +232,28 @@ export class TemplateGenerationCommand {
      * @returns {object} object with user selections (`template`, `name`, `registry`)
      */
     async selectTemplate(tree, templateName) {
-        // TODO(LA): Need to apply an additional filter below (when getting choices)
-        //  to only include those which match a pre-defined resource type (e.g. 'pipeline', 'skill' <-- use as default).
-        // TODO(LA): Should only consider template choices that have 'enabled == true'
-        const registryUrl = await this.getRegistry();
-        debug('Docker Registry URL: %s', registryUrl);
-        const fileNames = this.globTree(tree, METADATA_FILENAME);
-        const choices = await Promise.all(_.map(fileNames, async (value) => {
+        // Utils for proessing the Metadata file
+        const loadMetadata = async (value) => {
             const data = JSON.parse((await this.readFile(value.path)).toString());
             return {
                 name: data.title,
                 value: { ...data, path: value.path },
             };
-        }));
-        debug('Potential Choices: %s', JSON.stringify(choices));
+        };
+        const filterByEnabled = (data) => data.value?.enabled;
+        const filterByResourceType = (data) => (data.value?.resourceType) === this.resourceName;
+
+        // Find possible choices for the template selection
+        const registryUrl = await this.getRegistry();
+        debug('Docker Registry URL: %s', registryUrl);
+        const fileNames = this.globTree(tree, METADATA_FILENAME);
+        const choices = (await Promise.all(_.map(fileNames, loadMetadata)))
+            .filter(filterByEnabled)
+            .filter(filterByResourceType);
+        debug(JSON.stringify(choices));
+        debug('Potential Choices: %s', JSON.stringify(choices.map((c) => c.name)));
+
+        // Prompt user for selected template (handle template specified up front)
         let template;
         if (templateName) {
             const templateChoice = _.find(choices, { name: templateName });
