@@ -21,6 +21,11 @@ const debug = debugSetup('cortex:cli');
 
 const METADATA_FILENAME = 'metadata.json';
 
+// ANSI escape sequences for pretty printing messages during generation.
+// Reference: https://gist.github.com/fnky/458719343aabd01cfb17a3a4f7296797#cursor-controls
+const RESET_CURSOR_ANSI_ESCAPE = '\x1b[0G\x1b[2K';
+const CURSOR_NEXT_LINE_ANSI_ESCAPE = '\x1b[1E';
+
 /**
  * Class wrapping the raw results from fetching a Git Tree.
  *
@@ -369,10 +374,9 @@ export class TemplateGenerationCommand {
             await this.init(name, destination, options);
         }
         this.checkDestinationExists(destinationPath, name);
-        // TODO: Use variable substition for this color coding ? 
-        printToTerminal('\x1b[0G\x1b[2KLoading templates...');
+        printToTerminal(`${RESET_CURSOR_ANSI_ESCAPE}Loading templates...`);
         const tree = await this.fetchGitTreeFromBranch();
-        printToTerminal('\x1b[0G\x1b[2KTemplates loaded.\x1b[1E');
+        printToTerminal(`${RESET_CURSOR_ANSI_ESCAPE}Templates loaded.${CURSOR_NEXT_LINE_ANSI_ESCAPE}`);
         if (tree.length) {
             const template = await this.selectTemplate(tree, options.template);
             if (template) {
