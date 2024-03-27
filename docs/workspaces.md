@@ -26,6 +26,7 @@ The primary repository with templates can be found at: <https://github.com/Cogni
     ```
 
 * Templates can be nested in any subfolder in the repository
+* The templating process works via the [loadsh template](https://docs-lodash.com/v4/template/) util. Refer to that documentation for how variables are templated.
 
 ### Additional Reference
 

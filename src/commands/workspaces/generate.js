@@ -31,7 +31,7 @@ const CURSOR_NEXT_LINE_ANSI_ESCAPE = '\x1b[1E';
  *
  * (Primarily meant for type hinting).
  */
-export class GitTreeWrapper {
+class GitTreeWrapper {
     constructor({
         // eslint-disable-next-line no-shadow
         path, mode, type, sha, size, url,
@@ -234,6 +234,7 @@ export class TemplateGenerationCommand {
     async selectTemplate(tree, templateName) {
         // Utils for proessing the Metadata file
         const loadMetadata = async (value) => {
+            // TODO: this should have error handling to avoid a bad template crashing the CLI
             const data = JSON.parse((await this.readFile(value.path)).toString());
             return {
                 name: data.title,
