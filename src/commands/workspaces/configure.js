@@ -17,10 +17,23 @@ const DEFAULT_TEMPLATE_BRANCH = 'main';
 const GITHUB_DEVICECODE_REQUEST_URL = 'https://github.com/login/device/code';
 const GITHUB_DEVICECODE_RESPONSE_URL = 'https://github.com/login/oauth/access_token';
 
-export default class WorkspaceConfigureCommand {
-    constructor(program, configKey = 'templateconfig') {
+export class BaseConfigureCommand {
+    /**
+     * Creates a Command object that prompts the user to configures a remote Github Repository & Branch
+     * as the source of for templates.
+     *
+     * @param {object} program Commander progrma object
+     * @param {string} configKey Key in user Config file to store the configuration settings under
+     * @param {string} context String context for what is being configured - e.g. 'Pipelines', 'Workspaces'
+     */
+    constructor(program, configKey, context) {
+        // Adhoc way of implemeting an abstract class
+        if (new.target === BaseConfigureCommand) {
+            throw new TypeError('Cannot construct BaseConfigureCommand instances directly!');
+        }
         this.program = program;
         this.configKey = configKey;
+        this.context = context;
     }
 
     async execute(opts) {
@@ -28,9 +41,8 @@ export default class WorkspaceConfigureCommand {
         try {
             const config = readConfig();
             const { configKey } = this;
-            console.log(configKey);
             const currentProfile = config.profiles[config.currentProfile];
-            console.log(`Configuring workspaces for profile ${chalk.green(config.currentProfile)}`);
+            console.log(`Configuring ${this.context} for profile ${chalk.green(config.currentProfile)}`);
             const answers = await inquirer.prompt([
                 {
                     type: 'input',
@@ -134,5 +146,11 @@ export default class WorkspaceConfigureCommand {
         } catch (error) {
             printError(error.message, this.options);
         }
+    }
+}
+
+export class WorkspaceConfigureCommand extends BaseConfigureCommand {
+    constructor(program) {
+        super(program, 'templateConfig', 'workspaces');
     }
 }

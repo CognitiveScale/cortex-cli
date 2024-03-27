@@ -10,7 +10,7 @@ import { isText } from 'istextorbinary';
 import treeify from 'treeify';
 import { boolean } from 'boolean';
 import _ from 'lodash';
-import WorkspaceConfigureCommand from './configure.js';
+import { WorkspaceConfigureCommand } from './configure.js';
 import { readConfig, loadProfile } from '../../config.js';
 import { printToTerminal, validateToken } from './workspace-utils.js';
 import {
