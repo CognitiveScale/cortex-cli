@@ -376,7 +376,7 @@ export class TemplateGenerationCommand {
         if (tree.length) {
             const template = await this.selectTemplate(tree, options.template);
             if (template) {
-                const treeObj = this.generateTemplate(tree, template, destinationPath);
+                const treeObj = await this.generateTemplate(tree, template, destinationPath);
                 console.log('');
                 if (!options || !boolean(options.notree)) {
                     printSuccess('Generated the following files:');
