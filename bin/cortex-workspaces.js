@@ -1,8 +1,8 @@
 import { Command } from 'commander';
 import process from 'node:process';
 import esMain from 'es-main';
-import WorkspaceConfigureCommand from '../src/commands/workspaces/configure.js';
-import WorkspaceGenerateCommand from '../src/commands/workspaces/generate.js';
+import { WorkspaceConfigureCommand } from '../src/commands/workspaces/configure.js';
+import { WorkspaceGenerateCommand } from '../src/commands/workspaces/generate.js';
 import WorkspaceBuildCommand from '../src/commands/workspaces/build.js';
 import WorkspacePublishCommand from '../src/commands/workspaces/publish.js';
 import {
