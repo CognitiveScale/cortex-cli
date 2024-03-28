@@ -1,6 +1,7 @@
 import debugSetup from 'debug';
 import fs from 'fs';
 import dayjs from 'dayjs';
+import path from 'path';
 import _ from 'lodash';
 import relativeTime from 'dayjs/plugin/relativeTime.js';
 import { loadProfile } from '../config.js';
@@ -275,6 +276,18 @@ export const PipelineTemplateConfigureCommand = class extends TemplateConfigureC
 export const PipelineGenerateCommand = class extends TemplateGenerationCommand {
   constructor(program) {
     super(program, 'Pipeline', 'pipelines', 'pipelinename', 'pipelineTemplateConfig');
+  }
+
+  // TODO: Need a better way to handle this filtering
+  filterByFileName(filepath) {
+    // NOTE: It is common for dbt's templating (jinja2?) to collide with Lodash's templating syntax.
+    // Current workaround is to exclude DBT & SQL files from templating, only downside is that those
+    // can't use the {{pipelinename}} variable.
+    const fileName = path.posix.basename(filepath);
+    if (path.extname(fileName) === '.sql' || filepath.includes('dbt_packages') || filepath.includes('/dbt/')) {
+      return true;
+    }
+    return false;
   }
 
   async configureSubcommand() {

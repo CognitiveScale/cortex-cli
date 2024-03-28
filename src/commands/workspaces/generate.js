@@ -69,6 +69,9 @@ export class TemplateGenerationCommand {
         if (typeof this.configureSubcommand !== 'function') {
             throw new TypeError('Cannot construct instance of TemplateGenerationCommand without overriding async method "configureSubcommand()"!');
         }
+        if (typeof this.filterByFileName !== 'function') {
+            throw new TypeError('Cannot construct instance of TemplateGenerationCommand without overriding async method "filterByFileName(string) -> bool"!');
+        }
         // Set options controlling direct behavior
         this.program = program;
         this.resourceName = resourceName;
@@ -158,7 +161,9 @@ export class TemplateGenerationCommand {
     globTree(tree, glob) {
         debug('Checking for templates that include the glob pattern: %s', glob);
         const filterFunc = minimatch.filter(glob, { matchBase: true });
-        return _.filter(tree, (f) => f.type === 'blob' && filterFunc(f.path));
+        const res = _.filter(tree, (f) => f.type === 'blob' && filterFunc(f.path));
+        debug('Number of results matching glob pattern "%s": %s', glob, res.length);
+        return res;
     }
 
     /**
@@ -236,6 +241,7 @@ export class TemplateGenerationCommand {
         const loadMetadata = async (value) => {
             // TODO: this should have error handling to avoid a bad template crashing the CLI
             const data = JSON.parse((await this.readFile(value.path)).toString());
+            debug('Successfully read metadata file: %s', value.path);
             return {
                 name: data.title,
                 value: { ...data, path: value.path },
@@ -299,11 +305,42 @@ export class TemplateGenerationCommand {
                     [this.resourceTemplateName]: generateNameFromTitle(templateName),
                 });
             } catch (err) {
-                printError(err.message, this.options);
+                this.handleTemplatingError(templateName, f, err);
             }
             return undefined;
         }).join('<br>');
         return generatedFiles;
+    }
+
+    /**
+     * Error handler for templating specific scenarios - exits the program.
+     *
+     * @param {string} templateName Name of the template being copied
+     * @param {GitTreeWrapper} file File object that was being templated
+     * @param {Error} err Error that was thrown
+     */
+    handleTemplatingError(templateName, file, err) {
+        debug('Template Name: %s', templateName);
+        debug('File details: %s', file);
+        debug('Error details: %s', err);
+        const message = `Failed to generate file "${file.path}" in template "${templateName}"!\n`
+            + `This is possibly the result of the ${this.resourceName} template having an invalid syntax.\n`
+            + `\nError: ${err.message}`;
+        printError(message, this.options);
+    }
+
+    /**
+     * Returns whether a given file (path) in the template should be excluded from the template.
+     * Should return `true` if the file should be copied without modification.
+     *
+     * The default implementation allows for all files to be templated.
+     *
+     * @param {string} filepath
+     * @returns {boolean} true if the file should NOT be templated, false otherwise
+     */
+    // eslint-disable-next-line no-unused-vars
+    filterByFileName(filepath) {
+        return false;
     }
 
     /**
@@ -328,8 +365,8 @@ export class TemplateGenerationCommand {
                         template: template.template,
                     };
                     let buf = await this.readFile(f.path);
-                    /// Try not to template any non-text files.
-                    if (isText(null, buf)) {
+                    /// Try not to template any non-text files, and allow for a filter
+                    if (isText(null, buf) && !this.filterByFileName(f.path)) {
                         buf = Buffer.from(_.template(buf.toString(), { interpolate: /{{([\s\S]+?)}}/g })(templateVars));
                     }
                     const relPath = f.path.slice(path.dirname(template.template.path).length);
@@ -340,7 +377,7 @@ export class TemplateGenerationCommand {
                     _.set(treeObj, sourcePath.split('/'), null);
                 }
             } catch (err) {
-                printError(err.message, this.options);
+                this.handleTemplatingError(template.name, f, err);
             }
         }));
         return treeObj;
