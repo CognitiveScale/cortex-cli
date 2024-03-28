@@ -17,7 +17,6 @@ import {
     isNumeric,
     handleTable,
     printExtendedLogs,
-    handleDeleteFailure,
     getFilteredOutput,
     writeOutput, printErrorDetails, handleError,
 } from './utils.js';
@@ -66,16 +65,10 @@ export class SaveSkillCommand {
                     skill.actions.map((a) => a.podSpec = podSpec);
                 }
                 const response = await catalog.saveSkill(options.project || profile.project, profile.token, skill);
-                if (response.success) {
-                    printSuccess(`Skill saved: ${JSON.stringify(response.message)}`, options);
-                } else {
-                    console.log(`Failed to save skill: ${response.message}`);
-                    printErrorDetails(response, options);
-                    printError(''); // Just exit
-                }
+                printSuccess(`Skill saved: ${JSON.stringify(response.message)}`, options);
             }));
         } catch (err) {
-            printError(`Failed to save skill: ${_.get(err, 'status', '')} ${_.get(err, 'response.body.error', err.message)}`, options);
+            handleError(err, options, 'Failed to save skill');
         }
     }
 }
@@ -91,11 +84,11 @@ export class ListSkillsCommand {
         try {
             const status = !_.get(options, 'nostatus', false); // default show status, if nostatus==true status == false
             const shared = !_.get(options, 'noshared', false);
-            const response = await catalog.listSkills(options.project || profile.project, profile.token, { status, shared }, options.filter, options.limit, options.skip, options.sort);
-            let result = response.skills;
+            const { skills } = await catalog.listSkills(options.project || profile.project, profile.token, { status, shared }, options.filter, options.limit, options.skip, options.sort);
             const tableFormat = LISTTABLEFORMAT;
+            let result = skills;
             if (options.nostatus === undefined) {
-                result = result.map((skillStat) => {
+                result = skills.map((skillStat) => {
                     const statuses = _.isEmpty(skillStat.actionStatuses) ? skillStat.deployStatus : skillStat.actionStatuses.map((s) => `${s.name}: ${s.state}`).join(' ');
                     return {
                         ...skillStat,
@@ -130,7 +123,7 @@ export class DescribeSkillCommand {
         const catalog = new Catalog(profile.url);
         try {
             const response = await catalog.describeSkill(project || profile.project, profile.token, skillName, verbose, output);
-            if ((options?.output ?? 'json').toLowerCase() === 'json') return getFilteredOutput(response, options);
+            if ((output ?? 'json').toLowerCase() === 'json') return getFilteredOutput(response, options);
             return writeOutput(response, options);
         } catch (err) {
             return printError(`Failed to describe skill ${skillName}: ${err.status} ${err.message}`, options);
@@ -178,14 +171,10 @@ export class SkillLogsCommand {
                 } catch (err) {
                     printSuccess(response, options);
                 }
-            } else if (response.success) {
-                printSuccess(JSON.stringify(response.logs), options);
-            } else {
-                printError(`Failed to fetch Skill/Action Logs ${skillName}/${actionName}: ${response.body.message}`, options);
+            printSuccess(JSON.stringify(response.logs), options);
             }
         } catch (err) {
-            const { status, message } = constructError(err);
-            printError(`Failed to fetch Skill/Action Logs ${skillName}/${actionName}: ${status} ${message}`, options);
+            handleError(err, options, `Failed to fetch Skill/Action Logs ${skillName}/${actionName}`);
         }
     }
 }
@@ -258,19 +247,15 @@ export class DeleteSkillCommand {
         const profile = await loadProfile(options.profile);
         debug('%s.executeDeleteSkill(%s)', profile.name, skillName);
         const catalog = new Catalog(profile.url);
-        catalog.deleteSkill(options.project || profile.project, profile.token, skillName)
-            .then((response) => {
-            if (response.success) {
-                const result = filterObject(response, options);
-                if (options.json) {
-                    return printSuccess(JSON.stringify(result, null, 2), options);
-                }
-                return printSuccess(result.message);
+        try {
+            const response = await catalog.deleteSkill(options.project || profile.project, profile.token, skillName);
+            const result = filterObject(response, options);
+            if (options.json) {
+                return printSuccess(JSON.stringify(result, null, 2), options);
             }
-            return handleDeleteFailure(response, options, 'Skill');
-        })
-            .catch((err) => {
-            printError(`Failed to delete skill: ${err.status} ${err.message}`, options);
-        });
+            return printSuccess(result.message);
+        } catch (err) {
+            return handleError(err, { ...options, tableformat: 'DEPENDENCYTABLEFORMAT' }, `Failed to delete skill ${skillName}`);
+        }
     }
 }

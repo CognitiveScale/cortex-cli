@@ -2,7 +2,7 @@
 import esMain from 'es-main';
 import process from 'node:process';
 import { Command } from 'commander';
-import { withCompatibilityCheck } from '../src/compatibility.js';
+import { callCommand } from '../src/compatibility.js';
 import {
     DEFAULT_LIST_LIMIT_COUNT,
     DEFAULT_LIST_SKIP_COUNT,
@@ -33,7 +33,7 @@ export function create() {
         .option('--json [searchPath]', QUERY_JSON_HELP_TEXT)
         .option('--query <query>', `[DEPRECATION WARNING] ${QUERY_JSON_HELP_TEXT}`)
         .option('--verbose', 'Verbose output', false)
-        .action(withCompatibilityCheck(async (skillName, options) => {
+        .action(callCommand(async (skillName, options) => {
                 await new DescribeStereotypeCommand(program).execute(skillName, options);
         }));
 // List Stereotypes
@@ -52,7 +52,7 @@ export function create() {
         .option('--limit <limit>', 'Limit number of records', DEFAULT_LIST_LIMIT_COUNT)
         .option('--skip <skip>', 'Skip number of records', DEFAULT_LIST_SKIP_COUNT)
         .option('--sort <sort>', 'A Mongo style sort statement to use in the query.', GET_DEFAULT_SORT_CLI_OPTION(DEFAULT_LIST_SORT_PARAMS.updatedAt))
-        .action(withCompatibilityCheck(async (options) => {
+        .action(callCommand(async (options) => {
                 await new ListStereotypesCommand(program).execute(options);
         }));
 // Delete Stereotype
@@ -64,7 +64,7 @@ export function create() {
         .option('--json', 'Output results using JSON')
         .option('--profile <profile>', 'The profile to use')
         .option('--project <project>', 'The project to use')
-        .action(withCompatibilityCheck(async (skillName, options) => {
+        .action(callCommand(async (skillName, options) => {
                 await new DeleteStereotypeCommand(program).execute(skillName, options);
         }));
 // Save Stereotype
@@ -80,7 +80,7 @@ export function create() {
         .option('--podspec <podspec>', 'A file containing either a JSON or YAML formatted pod spec to merge with the skill definition, used for specifying resources (like memory, ephemeral storage, CPUs, and GPUs) and tolerations (like allowing pods to be scheduled on tainted nodes).')
         .option('-y, --yaml', 'Use YAML for skill definition format')
         .option('--scaleCount <count>', 'Scale count, only used for daemon action types')
-        .action(withCompatibilityCheck(async (skillDefinitions, options) => {
+        .action(callCommand(async (skillDefinitions, options) => {
                 await new SaveStereotypeCommand(program).execute(skillDefinitions, options);
         }));
     return program;

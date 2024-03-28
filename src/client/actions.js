@@ -1,7 +1,8 @@
 import _ from 'lodash';
 import debugSetup from 'debug';
 import { got, defaultHeaders } from './apiutils.js';
-import { constructError, callMe, checkProject } from '../commands/utils.js';
+import { checkProject, printWarning } from '../commands/utils.js';
+import dockerCli from './dockerClient.js';
 
 const debug = debugSetup('cortex:cli');
 export default class Actions {
@@ -18,7 +19,7 @@ export default class Actions {
         }
         debug('deployAction(%s, docker=%s, ttl=%s) => %s', actionInst.name, actionInst.image, actionInst.ttl, endpoint);
         const body = { ...actionInst };
-        // image & docker floating around fixup just in case..
+        // image & docker floating around fixup just in case.
         if (body.docker) {
             body.image = body.docker;
             delete body.docker;
@@ -32,9 +33,7 @@ export default class Actions {
             .post(endpoint, {
             headers: defaultHeaders(token),
             json: body,
-        }).json()
-            .then((res) => ({ success: true, message: res }))
-            .catch((err) => constructError(err));
+        }).json();
     }
 
     listActions(projectId, token, filter, limit, skip, sort) {
@@ -49,9 +48,7 @@ export default class Actions {
             .get(this.endpointV4(projectId), {
             headers: defaultHeaders(token),
             searchParams: query,
-        }).json()
-            .then((actions) => actions)
-            .catch((err) => constructError(err));
+        }).json();
     }
 
     describeAction(projectId, token, actionName) {
@@ -60,9 +57,7 @@ export default class Actions {
         debug('describeAction(%s) => %s', actionName, endpoint);
         return got
             .get(endpoint, { headers: defaultHeaders(token) })
-            .json()
-            .then((action) => action)
-            .catch((err) => constructError(err));
+            .json();
     }
 
     getLogsAction(projectId, token, actionName) {
@@ -71,15 +66,7 @@ export default class Actions {
         debug('getLogsAction(%s) => %s', actionName, endpoint);
         return got
             .get(endpoint, { headers: defaultHeaders(token) })
-            .json()
-            .then((logs) => {
-            if (_.isArray(logs)) {
-                // returns plain array for Rancher daemons
-                return { success: true, logs };
-            }
-            return logs;
-        })
-            .catch((err) => constructError(err));
+            .json();
     }
 
     deleteAction(projectId, token, actionName) {
@@ -90,9 +77,7 @@ export default class Actions {
             .delete(endpoint, {
             headers: defaultHeaders(token),
         })
-            .json()
-            .then((action) => ({ success: true, action }))
-            .catch((err) => constructError(err));
+            .json();
     }
 
     getConfig(projectId, token) {
@@ -103,9 +88,7 @@ export default class Actions {
             .get(endpoint, {
             headers: defaultHeaders(token),
         })
-            .json()
-            .then((config) => ({ success: true, config }))
-            .catch((err) => constructError(err));
+            .json();
     }
 
     static getCanonicalJobId(jobId) {
@@ -129,18 +112,23 @@ export default class Actions {
     }
 
     async _maybePushDockerImage(image, token, pushDocker) {
+        // This is a helper to push a local or remote image to a private registry
         if (!image || !pushDocker) {
             return image;
         }
         const registryUrl = await this._cortexRegistryUrl(token);
         const imageName = image.replace(/.+\..+\//, '');
-        // const { payload } = jwtVerify(token);
-        // TODO fix path
         const cortexImageUrl = this._cortexRegistryImagePath(registryUrl, imageName, '');
-        await callMe(`docker login -u cli --password ${token} ${registryUrl}`);
-        await callMe(`docker pull ${image} || echo "Docker pull failed using local image"`);
-        await callMe(`docker tag ${image} ${cortexImageUrl}`);
-        await callMe(`docker push ${cortexImageUrl}`);
+        // TODO support non cortex registry !!
+        await dockerCli().login(registryUrl, 'cli', token);
+        try {
+            await dockerCli()
+                .pull(image);
+        } catch (err) {
+            printWarning(`Docker pull failed using local image: ${err.message}`);
+        }
+        await dockerCli().tag(image, cortexImageUrl);
+        await dockerCli().push(cortexImageUrl);
         return cortexImageUrl;
     }
 }

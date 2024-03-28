@@ -5,7 +5,7 @@ import relativeTime from 'dayjs/plugin/relativeTime.js';
 import { loadProfile } from '../config.js';
 import Tasks from '../client/tasks.js';
 import {
-    printSuccess, printError, handleTable, printExtendedLogs, getFilteredOutput, handleListFailure,
+    printSuccess, printError, handleTable, printExtendedLogs, getFilteredOutput, handleListFailure, handleError,
 } from './utils.js';
 /*
  * Copyright 2023 Cognitive Scale, Inc. All Rights Reserved.
@@ -115,12 +115,9 @@ export const DescribeTaskCommand = class {
         const tasks = new Tasks(profile.url);
         try {
             const response = await tasks.getTask(options.project || profile.project, taskName, profile.token, queryParams);
-            if (response.success === false) {
-                return printError(`Failed to describe task ${taskName}: ${response.message}`);
-            }
             return printSuccess(JSON.stringify(response, null, 2), options);
         } catch (err) {
-            return printError(`Failed to fetch task ${taskName}: ${err.status} ${err.message}`, options);
+            return handleError(err, options, `Failed to describe task ${taskName}`);
         }
     }
 };
@@ -139,7 +136,7 @@ export class TaskLogsCommand {
 
             const response = await tasks.taskLogs(options.project || profile.project, profile.token, taskName, isFollow, options.verbose);
             if (isFollow) {
-                return new Promise((resolve, reject) => {  
+                return new Promise((resolve, reject) => {
                     response.on('data', (chunk) => {
                         let data;
                         try {
@@ -153,9 +150,9 @@ export class TaskLogsCommand {
                                     // Extract the data part of SSE event
                                     eventData = edl.substring(5).trim();
                                 }
-                                
+
                                 let parsedEventData = JSON.parse(eventData);
-                                
+
                                 if (typeof parsedEventData === 'string' && parsedEventData.startsWith('{')) {
                                     parsedEventData = JSON.parse(parsedEventData);
                                 }
@@ -170,7 +167,7 @@ export class TaskLogsCommand {
                             printError(`${e.message}`, options);
                         }
                     });
-                
+
                     response.on('error', (error) => reject(error));
 
                     response.on('end', () => resolve());
@@ -180,10 +177,10 @@ export class TaskLogsCommand {
                 if (response.success) {
                     return printSuccess(response.logs, options);
                 }
-                return printError(`Failed to List Task Logs "${taskName}": ${response.message}`, options);      
+                return printError(`Failed to List Task Logs "${taskName}": ${response.message}`, options);
             }
         } catch (err) {
-            return printError(`Failed to query Task Logs "${taskName}": ${err.status} ${err.message}`, options);
+            return printError(err, options, `Failed to query Task Logs "${taskName}"`);
         }
     }
 }
@@ -198,12 +195,9 @@ export class TaskDeleteCommand {
         const tasks = new Tasks(profile.url);
         try {
             const response = await tasks.deleteTask(options.project || profile.project, profile.token, taskName, options.verbose);
-            if (response.success) {
-                return printSuccess(JSON.stringify(response), options);
-            }
-            return printError(`Failed to delete ${taskName}: ${response.message}`, options);
+            return printSuccess(JSON.stringify(response), options);
         } catch (err) {
-            return printError(`Error deleting ${taskName}: ${err.status} ${err.message}`, options);
+            return handleError(err, options, `Error deleting ${taskName}`);
         }
     }
 }
@@ -219,13 +213,10 @@ export class TaskPauseCommand {
         try {
             return Promise.all(taskNames.map(async (taskName) => {
                 const response = await tasks.pauseTask(options.project || profile.project, profile.token, taskName, options.verbose);
-                if (response.success) {
                     return printSuccess(JSON.stringify(response), options);
-                }
-                return printError(`Failed to pause "${taskName}": ${response.message}`, options);
             }));
         } catch (err) {
-            return printError(`Error pausing "${taskNames.join(',')}": ${err.status} ${err.message}`, options);
+            return handleError(err, options, `Error pausing "${taskNames.join(',')}"`);
         }
     }
 }
@@ -241,13 +232,10 @@ export class TaskResumeCommand {
         try {
             return Promise.all(taskNames.map(async (taskName) => {
                 const response = await tasks.resumeTask(options.project || profile.project, profile.token, taskName, options.verbose);
-                if (response.success) {
-                    return printSuccess(JSON.stringify(response), options);
-                }
-                return printError(`Failed to resume task "${taskName}": ${response.message}`, options);
+                return printSuccess(JSON.stringify(response), options);
             }));
         } catch (err) {
-            return printError(`Error resume tasks "${taskNames.join(',')}": ${err.status} ${err.message}`, options);
+            return handleError(err, options, `Error resume tasks "${taskNames.join(',')}`);
         }
     }
 }

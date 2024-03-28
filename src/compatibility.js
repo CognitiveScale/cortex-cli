@@ -117,18 +117,28 @@ export async function doCompatibilityCheck(profile, doCheck = true) {
     return Promise.resolve();
 }
 
-export function withCompatibilityCheck(fn) {
-    return (...args) => {
-        const command = args.find((a) => a !== undefined && typeof a.opts === 'function');
-        const options = command.opts();
-        // Explicit duplicate compatibility check to avoid unnecessarily loading the Profile
-        if (shouldDoCompatibilityCheck(options.compat)) {
-            const { profile: profileName } = options;
-            return loadProfile(profileName)
-                .then((profile) => doCompatibilityCheck(profile))
-                .then(() => fn(...args))
-                .catch((error) => printError(error));
+/**
+ * Call the cli command
+ * 1) Check cli/server compability
+ * 2) Pass parsed args call command
+ * 3) handle exceptions
+ * @param fn
+ * @returns {(function(...[*]): Promise<*|undefined>)|*}
+ */
+export function callCommand(fn) {
+    return async (...args) => {
+        try {
+            const command = args.find((a) => a !== undefined && typeof a.opts === 'function');
+            const options = command.opts();
+            // Explicit duplicate compatibility check to avoid unnecessarily loading the Profile
+            if (shouldDoCompatibilityCheck(options.compat)) {
+                const { profile: profileName } = options;
+                const profile = await loadProfile(profileName);
+                await doCompatibilityCheck(profile);
+            }
+            return fn(...args);
+        } catch (err) {
+            handleError(err);
         }
-        return Promise.resolve().then(() => fn(...args));
     };
 }

@@ -4,7 +4,7 @@ import { loadProfile } from '../config.js';
 import ApiServerClient from '../client/apiServerClient.js';
 import Catalog from '../client/catalog.js';
 import {
- printSuccess, printError, printTable, handleTable, printExtendedLogs, handleListFailure, getFilteredOutput, 
+    printSuccess, printError, printTable, handleTable, printExtendedLogs, handleListFailure, getFilteredOutput, handleError,
 } from './utils.js';
 /*
  * Copyright 2023 Cognitive Scale, Inc. All Rights Reserved.
@@ -36,8 +36,7 @@ export class ListCampaignsCommand {
         try {
             const sortParam = (options.sort || '{}').replace(/"/g, '\'');
             const filterParam = (options.filter || '{}').replace(/"/g, '\'');
-            const response = await cli.listCampaigns(options.project || profile.project, profile.token, filterParam, options.limit, options.skip, sortParam);
-            const result = response;
+            const result = await cli.listCampaigns(options.project || profile.project, profile.token, filterParam, options.limit, options.skip, sortParam);
             // TODO remove --query on deprecation
             if (options.json || options.query) {
                 getFilteredOutput(result, options);
@@ -121,23 +120,20 @@ export class DeployCampaignCommand {
         debug('%s.executeDeployCampaignCommand(%s)', profile.name, campaignName);
         const cli = new Catalog(profile.url);
         try {
-            cli.deployCampaign(options.project || profile.project, profile.token, campaignName).then((response) => {
-                if (response.success === false) throw response;
-                const output = _.get(response, 'data.message') || JSON.stringify(response.data || response, null, 2);
-                if (!response.data.warnings || response.data.warnings.length === 0) {
-                    printSuccess(output, options);
-                } else {
-                    printError('Campaign deployed with warnings', options, false);
-                    printTable([{ column: 'Warnings', field: 'message' }], response.data.warnings.map((w) => ({ message: w })));
-                }
-            }).catch((e) => {
-                printError(`Failed to deploy campaign: ${e.status} ${e.message}`, options);
-            });
+            const response = await cli.deployCampaign(options.project || profile.project, profile.token, campaignName);
+            const output = response?.message ?? JSON.stringify(response, null, 2);
+            if (!response.warnings || response.warnings.length === 0) {
+                printSuccess(output, options);
+            } else {
+                printError('Campaign deployed with warnings', options, false);
+                printTable([{ column: 'Warnings', field: 'message' }], response.warnings.map((w) => ({ message: w })));
+            }
         } catch (err) {
-            printError(`Failed to deploy campaign: ${err.status} ${err.message}`, options);
+            handleError(err, options, 'Failed to deploy campaign');
         }
     }
 }
+
 export class UndeployCampaignCommand {
     constructor(program) {
         this.program = program;
@@ -149,20 +145,16 @@ export class UndeployCampaignCommand {
         debug('%s.executeUndeployCampaignCommand(%s)', profile.name, campaignName);
         const cli = new Catalog(profile.url);
         try {
-            cli.undeployCampaign(options.project || profile.project, profile.token, campaignName).then((response) => {
-                if (response.success === false) throw response;
-                const output = _.get(response, 'data.message') || JSON.stringify(response.data || response, null, 2);
-                if (!response.data.warnings || response.data.warnings.length === 0) {
-                    printSuccess(output, options);
-                } else {
-                    printError('Campaign undeployed with warnings', options, false);
-                    printTable([{ column: 'Warnings', field: 'message' }], response.data.warnings.map((w) => ({ message: w })));
-                }
-            }).catch((e) => {
-                printError(`Failed to undeploy campaign: ${e.status} ${e.message}`, options);
-            });
+            const response = await cli.undeployCampaign(options.project || profile.project, profile.token, campaignName);
+            const output = response?.message ?? JSON.stringify(response || response, null, 2);
+            if (!response.warnings || response.warnings.length === 0) {
+                printSuccess(output, options);
+            } else {
+                printError('Campaign undeployed with warnings', options, false);
+                printTable([{ column: 'Warnings', field: 'message' }], response.warnings.map((w) => ({ message: w })));
+            }
         } catch (err) {
-            printError(`Failed to undeploy campaign: ${err.status} ${err.message}`, options);
+            handleError(err, options, 'Failed to undeploy campaign');
         }
     }
 }
@@ -177,15 +169,11 @@ export class UndeployMissionCommand {
         debug('%s.executeUndeployMissionCommand(%s)', profile.name, missionName);
         const cli = new Catalog(profile.url);
         try {
-            cli.undeployMission(options.project || profile.project, profile.token, campaignName, missionName).then((response) => {
-                if (response.success === false) throw response;
-                const output = _.get(response, 'data.message') || JSON.stringify(response.data || response, null, 2);
-                printSuccess(output, options);
-            }).catch((e) => {
-                printError(`Failed to undeploy mission: ${e.status} ${e.message}`, options);
-            });
+            const response = await cli.undeployMission(options.project || profile.project, profile.token, campaignName, missionName);
+            const output = response?.message ?? JSON.stringify(response, null, 2);
+            printSuccess(output, options);
         } catch (err) {
-            printError(`Failed to undeploy mission: ${err.status} ${err.message}`, options);
+            handleError(err, options, 'Failed to undeploy mission');
         }
     }
 }
@@ -203,9 +191,8 @@ export class ListMissionsCommand {
         try {
             const sortParam = (options.sort || '{}').replace(/"/g, '\'');
             const filterParam = (options.filter || '{}').replace(/"/g, '\'');
-            cli.listMissions(options.project || profile.project, profile.token, campaign, filterParam, options.limit, options.skip, sortParam).then((response) => {
-                if (response.success === false) throw response;
-                const data = Object.values(response.data);
+            const response = await cli.listMissions(options.project || profile.project, profile.token, campaign, filterParam, options.limit, options.skip, sortParam);
+                const data = Object.values(response);
                 // TODO remove --query on deprecation
                 if (options.json || options.query) {
                     getFilteredOutput(data, options);
@@ -219,9 +206,6 @@ export class ListMissionsCommand {
                     ];
                     handleTable(tableSpec, data, null, 'No missions found');
                 }
-            }).catch((err) => {
-                handleListFailure(_.get(err, 'response.errors[0]', err), options, 'Missions');
-            });
         } catch (err) {
             handleListFailure(_.get(err, 'response.errors[0]', err), options, 'Missions');
         }
@@ -237,11 +221,13 @@ export class DeployMissionCommand {
         const profile = await loadProfile(options.profile);
         debug('%s.executeDeployMissionCommand(%s)', profile.name, campaign);
         const cli = new Catalog(profile.url);
-        cli.deployMission(options.project || profile.project, profile.token, campaign, mission).then((response) => {
-            if (response.success === false) throw response;
-            const output = _.get(response, 'data.message') || JSON.stringify(response.data || response, null, 2);
+        try {
+            const response = await cli.deployMission(options.project || profile.project, profile.token, campaign, mission);
+            const output = response?.message ?? JSON.stringify(response, null, 2);
             printSuccess(output, options);
-        }).catch((err) => printError(`Failed to deploy mission ${mission} of campaign ${campaign}: ${err.status} ${err.message}`, options));
+        } catch (err) {
+            printError(`Failed to deploy mission ${mission} of campaign ${campaign}: ${err.status} ${err.message}`, options);
+        }
     }
 }
 export class DescribeMissionCommand {
@@ -254,9 +240,11 @@ export class DescribeMissionCommand {
         const profile = await loadProfile(options.profile);
         debug('%s.executeDescribeMissionCommand(%s)', profile.name, campaign);
         const cli = new Catalog(profile.url);
-        cli.getMission(options.project || profile.project, profile.token, campaign, mission).then((response) => {
-            if (response.success === false) throw response;
-            printSuccess(JSON.stringify(response.data, null, 2), options);
-        }).catch((err) => printError(`Failed to describe mission ${mission} of campaign ${campaign}: ${err.status} ${err.message}`, options));
+        try {
+            const response = await cli.getMission(options.project || profile.project, profile.token, campaign, mission);
+            printSuccess(JSON.stringify(response, null, 2), options);
+        } catch (err) {
+            printError(`Failed to describe mission ${mission} of campaign ${campaign}: ${err.status} ${err.message}`, options);
+        }
     }
 }

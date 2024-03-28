@@ -1,8 +1,7 @@
 #!/usr/bin/env node
-import chalk from 'chalk';
 import esMain from 'es-main';
 import { Command } from 'commander';
-import { withCompatibilityCheck } from '../src/compatibility.js';
+import { callCommand } from '../src/compatibility.js';
 import {
  DEFAULT_LIST_SKIP_COUNT, DEFAULT_LIST_LIMIT_COUNT, GET_DEFAULT_SORT_CLI_OPTION, DEFAULT_LIST_SORT_PARAMS, LIST_JSON_HELP_TEXT, QUERY_JSON_HELP_TEXT, 
 } from '../src/constants.js';
@@ -30,12 +29,8 @@ export function create() {
         .option('--limit <limit>', 'Limit number of records', DEFAULT_LIST_LIMIT_COUNT)
         .option('--skip <skip>', 'Skip number of records', DEFAULT_LIST_SKIP_COUNT)
         .option('--sort <sort>', 'A Mongo style sort statement to use in the query.', GET_DEFAULT_SORT_CLI_OPTION(DEFAULT_LIST_SORT_PARAMS._updatedAt))
-        .action(withCompatibilityCheck((options) => {
-            try {
+        .action(callCommand((options) => {
                 new ListCampaignsCommand(program).execute(options);
-            } catch (err) {
-                console.error(chalk.red(err.message));
-            }
         }));
 // Get|Describe Campaign
     program
@@ -48,13 +43,9 @@ export function create() {
         .option('--project <project>', 'The project to use')
         .option('--json [searchPath]', QUERY_JSON_HELP_TEXT)
         .option('--query <query>', `[DEPRECATION WARNING] ${QUERY_JSON_HELP_TEXT}`)
-        .action(withCompatibilityCheck((campaignName, options) => {
-            try {
+        .action(callCommand((campaignName, options) => {
                 checkForEmptyArgs({ campaignName });
                 new DescribeCampaignCommand(program).execute(campaignName, options);
-            } catch (err) {
-                console.error(chalk.red(err.message));
-            }
         }));
     program
         .command('export <campaignName>')
@@ -65,13 +56,9 @@ export function create() {
         .option('--project <project>', 'The project to use')
         .option('--deployable [boolean]', 'Export only deployable missions', true)
         .option('--o <output>', 'Export file name')
-        .action(withCompatibilityCheck(async (campaignName, options) => {
-            try {
+        .action(callCommand(async (campaignName, options) => {
                 checkForEmptyArgs({ campaignName });
                 await new ExportCampaignCommand(program).execute(campaignName, options);
-            } catch (err) {
-                console.error(chalk.red(err.message));
-            }
         }));
     program
         .command('import <campaignExportFilepath>')
@@ -82,13 +69,9 @@ export function create() {
         .option('--project <project>', 'The project to use')
         .option('--deploy [boolean]', 'Set missions status Ready To Deploy', true)
         .option('--overwrite [boolean]', 'Overwrite existing deployed missions with the imported one', false)
-        .action(withCompatibilityCheck((campaignName, options) => {
-            try {
+        .action(callCommand((campaignName, options) => {
                 checkForEmptyArgs({ campaignName });
                 new ImportCampaignCommand(program).execute(campaignName, options);
-            } catch (err) {
-                console.error(chalk.red(err.message));
-            }
         }));
     program
         .command('deploy <campaignName>')
@@ -97,13 +80,9 @@ export function create() {
         .option('--color [boolean]', 'Turn on/off colors for JSON output.', 'true')
         .option('--profile <profile>', 'The profile to use')
         .option('--project <project>', 'The project to use')
-        .action(withCompatibilityCheck((campaignName, options) => {
-            try {
+        .action(callCommand((campaignName, options) => {
                 checkForEmptyArgs({ campaignName });
                 new DeployCampaignCommand(program).execute(campaignName, options);
-            } catch (err) {
-                console.error(chalk.red(err.message));
-            }
         }));
     program
         .command('undeploy <campaignName>')
@@ -112,13 +91,9 @@ export function create() {
         .option('--color [boolean]', 'Turn on/off colors for JSON output.', 'true')
         .option('--profile <profile>', 'The profile to use')
         .option('--project <project>', 'The project to use')
-        .action(withCompatibilityCheck((campaignName, options) => {
-            try {
+        .action(callCommand((campaignName, options) => {
                 checkForEmptyArgs({ campaignName });
                 new UndeployCampaignCommand(program).execute(campaignName, options);
-            } catch (err) {
-                console.error(chalk.red(err.message));
-            }
         }));
     return program;
 }

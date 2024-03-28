@@ -5,9 +5,9 @@ import relativeTime from 'dayjs/plugin/relativeTime.js';
 import { loadProfile } from '../config.js';
 import Catalog from '../client/catalog.js';
 import {
- LISTTABLEFORMAT, filterObject, printExtendedLogs, handleListFailure, getFilteredOutput, handleDeleteFailure,
+    LISTTABLEFORMAT, filterObject, printExtendedLogs, getFilteredOutput,
 
- printSuccess, printError, parseObject, handleTable, 
+    printSuccess, parseObject, handleTable, handleError,
 } from './utils.js';
 
 const debug = debugSetup('cortex:cli');
@@ -28,13 +28,10 @@ export class SaveTypeCommand {
             if (!('types' in type)) normalizedType.types = [type];
             else normalizedType = type;
             const catalog = new Catalog(profile.url);
-            const response = await catalog.saveType(options.project || profile.project, profile.token, normalizedType);
-            if (response.success) {
-                return printSuccess('Type definition saved', options);
-            }
-            return printError(`${response.message}: ${JSON.stringify(response.details || '')} `);
+            await catalog.saveType(options.project || profile.project, profile.token, normalizedType);
+            return printSuccess('Type definition saved', options);
         } catch (err) {
-            return printError(`Failed to save type: ${err.status} ${err.message}`, options);
+            return handleError(err, options, 'Failed to save type');
         }
     }
 }
@@ -43,29 +40,22 @@ export class ListTypesCommand {
         this.program = program;
     }
 
-    // eslint-disable-next-line consistent-return
     async execute(options) {
         const profile = await loadProfile(options.profile);
         debug('%s.executeListTypes()', profile.name);
         const catalog = new Catalog(profile.url);
-        // eslint-disable-next-line consistent-return
-        catalog.listTypes(options.project || profile.project, profile.token, options.limit, options.skip, options.sort).then((response) => {
-            if (response.success) {
-                const result = response.types;
-                // TODO remove --query on deprecation
-                if (options.json || options.query) {
-                    getFilteredOutput(result, options);
-                } else {
-                    printExtendedLogs(result, options);
-                    handleTable(LISTTABLEFORMAT, result, (o) => ({ ...o, updatedAt: o.updatedAt ? dayjs(o.updatedAt).fromNow() : '-' }), 'No types found');
+        try {
+        const { types } = await catalog.listTypes(options.project || profile.project, profile.token, options.limit, options.skip, options.sort);
+        // TODO remove --query on deprecation
+        if (options.json || options.query) {
+            getFilteredOutput(types, options);
+        } else {
+            printExtendedLogs(types, options);
+            handleTable(LISTTABLEFORMAT, types, (o) => ({ ...o, updatedAt: o.updatedAt ? dayjs(o.updatedAt).fromNow() : '-' }), 'No types found');
                 }
-            } else {
-                return handleListFailure(response, options, 'Types');
-            }
-        })
-            .catch((err) => {
-            printError(`Failed to list types: ${err.status} ${err.message}`, options);
-        });
+        } catch (err) {
+            handleError(err, options, 'Failed to list types');
+        }
     }
 }
 export class DescribeTypeCommand {
@@ -77,18 +67,15 @@ export class DescribeTypeCommand {
         const profile = await loadProfile(options.profile);
         debug('%s.executeDescribeType(%s)', profile.name, typeName);
         const catalog = new Catalog(profile.url);
-        catalog.describeType(options.project || profile.project, profile.token, typeName).then((response) => {
-            if (response.success) {
-                getFilteredOutput(response.type, options);
-            } else {
-                printError(`Failed to describe type ${typeName}: ${response.message}`, options);
-            }
-        })
-            .catch((err) => {
-            printError(`Failed to describe type ${typeName}: ${err.status} ${err.message}`, options);
-        });
+        try {
+            const response = await catalog.describeType(options.project || profile.project, profile.token, typeName);
+            getFilteredOutput(response, options);
+        } catch (err) {
+            handleError(err, options, `Failed to describe type ${typeName}`);
+        }
     }
 }
+
 export class DeleteTypeCommand {
     constructor(program) {
         this.program = program;
@@ -98,15 +85,12 @@ export class DeleteTypeCommand {
         const profile = await loadProfile(options.profile);
         debug('%s.executeDeleteType(%s)', profile.name, typeName);
         const catalog = new Catalog(profile.url);
-        catalog.deleteType(options.project || profile.project, profile.token, typeName).then((response) => {
-            if (response.success) {
-                const result = filterObject(response.type, options);
-                return printSuccess(JSON.stringify(result, null, 2), options);
-           }
-            return handleDeleteFailure(response, options, 'Types');
-        })
-            .catch((err) => {
-            printError(`Failed to delete type ${typeName}: ${err.status} ${err.message}`, options);
-        });
+        try {
+            const response = await catalog.deleteType(options.project || profile.project, profile.token, typeName);
+            const result = filterObject(response, options);
+            return printSuccess(JSON.stringify(result, null, 2), options);
+        } catch (err) {
+            return handleError(err, options, `Failed to delete type ${typeName}`);
+        }
     }
 }

@@ -208,7 +208,7 @@ describe('Pipelines', () => {
         const errs = getErrorLines().join('');
         // eslint-disable-next-line no-unused-expressions
         chai.expect(output).to.be.empty;
-        chai.expect(errs).to.contain('Failed to describe pipeline: 404 pipeline with name nonExistentPipeline not found');
+        chai.expect(errs).to.contain('Failed to describe pipeline: 404, pipeline with name nonExistentPipeline not found');
         nock.isDone();
       }
     });
@@ -310,7 +310,7 @@ describe('Pipelines', () => {
         } catch {
           const output = getPrintedLines().join('');
           const errs = getErrorLines().join('');
-          chai.expect(errs).to.include('Failed to parse params: {. Error: YAMLException: unexpected end of the stream within a flow collection (2:1)');
+          chai.expect(errs).to.include('Failed to parse params: { Error: YAMLException: unexpected end of the stream within a flow collection (2:1)');
           // eslint-disable-next-line no-unused-expressions
           chai.expect(output).to.be.empty;
           nock.isDone();

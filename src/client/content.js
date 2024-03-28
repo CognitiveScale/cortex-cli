@@ -28,9 +28,7 @@ export default (class Content {
             .get(endpoint, {
             headers: defaultHeaders(token),
             searchParams: query,
-        }).json()
-            .then((message) => ({ success: true, message }))
-            .catch((err) => constructError(err));
+        }).json();
     }
 
     // eslint-disable-next-line no-unused-vars
@@ -62,9 +60,7 @@ export default (class Content {
         return got
             .delete(endpoint, {
             headers: defaultHeaders(token),
-        }).json()
-            .then((message) => ({ success: true, message }))
-            .catch((err) => constructError(err));
+        }).json();
     }
 
     // TODO progress

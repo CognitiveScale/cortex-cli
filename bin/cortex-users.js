@@ -1,8 +1,7 @@
 #!/usr/bin/env node
-import chalk from 'chalk';
 import esMain from 'es-main';
 import { Command } from 'commander';
-import { withCompatibilityCheck } from '../src/compatibility.js';
+import { callCommand } from '../src/compatibility.js';
 import {
  UserProjectAssignCommand, UserDescribeCommand, UserGrantCommand, UserCreateCommand, UserListCommand, UserDeleteCommand, UserResetPATCommand, UserGetPATCommand,
 } from '../src/commands/users.js';
@@ -22,12 +21,8 @@ export function create() {
         .option('--profile <profile>', 'The profile to use')
         .option('--user <user>', 'The user to describe, self for default')
         .option('--roles', 'Include grant inheritance from roles')
-        .action(withCompatibilityCheck(async (user, options) => {
-            try {
+        .action(callCommand(async (user, options) => {
                 await new UserDescribeCommand(program).execute(user, options);
-            } catch (err) {
-                console.error(chalk.red(err.message));
-            }
         }));
     program.command('grant <user>')
         .description('Manage user grants')
@@ -39,13 +34,9 @@ export function create() {
         .option('--profile <profile>', 'The profile to use')
         .option('--delete', 'Remove grant from user')
         .option('--deny', 'Explicit deny of action(s)')
-        .action(withCompatibilityCheck((user, options) => {
-            try {
+        .action(callCommand((user, options) => {
                 checkForEmptyArgs({ user });
                 new UserGrantCommand(program).execute(user, options);
-            } catch (err) {
-                console.error(chalk.red(err.message));
-            }
         }));
     program.command('project <project>')
         .description('Manage a list of user assignments on a project')
@@ -54,39 +45,27 @@ export function create() {
         .option('--profile <profile>', 'The profile to use')
         .requiredOption('--users <users...>', 'Users to add/remove on project')
         .option('--delete', 'Unassign users from project')
-        .action(withCompatibilityCheck((project, options) => {
-            try {
+        .action(callCommand((project, options) => {
                 checkForEmptyArgs({ project });
                 new UserProjectAssignCommand(program).execute(project, options);
-            } catch (err) {
-                console.error(chalk.red(err.message));
-            }
         }));
     program.command('delete <user>')
         .description('Deletes a service user and disables any existing tokens created by the user')
         .option('--no-compat', 'Ignore API compatibility checks')
         .option('--color [boolean]', 'Turn on/off colors for JSON output.', 'true')
         .option('--profile <profile>', 'The profile to use')
-        .action(withCompatibilityCheck((user, options) => {
-            try {
+        .action(callCommand((user, options) => {
                 checkForEmptyArgs({ user });
                 new UserDeleteCommand(program).execute(user, options);
-            } catch (err) {
-                console.error(chalk.red(err.message));
-            }
         }));
     program.command('create <user>')
         .description('Creates a service user (with no assigned roles/grants) that can authenticate with and call Fabric API\'s')
         .option('--no-compat', 'Ignore API compatibility checks')
         .option('--color [boolean]', 'Turn on/off colors for JSON output.', 'true')
         .option('--profile <profile>', 'The profile to use')
-        .action(withCompatibilityCheck((user, options) => {
-            try {
+        .action(callCommand((user, options) => {
                 checkForEmptyArgs({ user });
                 new UserCreateCommand(program).execute(user, options);
-            } catch (err) {
-                console.error(chalk.red(err.message));
-            }
         }));
     program.command('list')
         .description('Lists all service users created within Cortex')
@@ -96,12 +75,8 @@ export function create() {
         .option('--query <query>', `[DEPRECATION WARNING] ${QUERY_JSON_HELP_TEXT}`)
         .option('--color [boolean]', 'Turn on/off colors for JSON output.', 'true')
         .option('--profile <profile>', 'The profile to use')
-        .action(withCompatibilityCheck((options) => {
-            try {
+        .action(callCommand((options) => {
                 new UserListCommand(program).execute(options);
-            } catch (err) {
-                console.error(chalk.red(err.message));
-            }
         }));
     program.command('reset-pat')
         .description('Invalidates personal access token (PAT) for a specified user within Cortex')
@@ -109,12 +84,8 @@ export function create() {
         .option('--color [boolean]', 'Turn on/off colors for JSON output.', 'true')
         .option('--profile <profile>', 'The profile to use')
         .option('--user <user>', 'The user to reset personal access token')
-        .action(withCompatibilityCheck((options) => {
-            try {
+        .action(callCommand((options) => {
                 new UserResetPATCommand(program).execute(options);
-            } catch (err) {
-                console.error(chalk.red(err.message));
-            }
         }));
     program.command('get-pat')
         .description('Fetch personal access token (PAT) for a specified user within Cortex')
@@ -122,12 +93,8 @@ export function create() {
         .option('--color [boolean]', 'Turn on/off colors for JSON output.', 'true')
         .option('--profile <profile>', 'The profile to use')
         .option('--user <user>', 'The user to reset personal access token (admins only)')
-        .action(withCompatibilityCheck((options) => {
-            try {
+        .action(callCommand((options) => {
                 new UserGetPATCommand(program).execute(options);
-            } catch (err) {
-                console.error(chalk.red(err.message));
-            }
         }));
     return program;
 }

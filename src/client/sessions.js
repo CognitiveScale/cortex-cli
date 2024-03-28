@@ -15,7 +15,7 @@
  */
 import debugSetup from 'debug';
 import { got, defaultHeaders } from './apiutils.js';
-import { constructError, checkProject } from '../commands/utils.js';
+import { checkProject } from '../commands/utils.js';
 
 const debug = debugSetup('cortex:cli');
 export default (class Sessions {
@@ -32,9 +32,7 @@ export default (class Sessions {
             .post(endpoint, {
             headers: defaultHeaders(token),
             json: sessionObj,
-        }).json()
-            .then((res) => ({ success: true, message: res }))
-            .catch((err) => constructError(err));
+        }).json();
     }
 
     deleteSession(projectId, token, sessionName) {
@@ -45,9 +43,7 @@ export default (class Sessions {
             .delete(endpoint, {
             headers: defaultHeaders(token),
         })
-            .json()
-            .then((session) => ({ success: true, session }))
-            .catch((err) => constructError(err));
+            .json();
     }
 
     describeSession(projectId, token, sessionName, verbose) {
@@ -58,9 +54,7 @@ export default (class Sessions {
             .get(endpoint, {
             headers: defaultHeaders(token),
             searchParams: { verbose },
-        }).json()
-            .then((session) => ({ success: true, session }))
-            .catch((err) => constructError(err));
+        }).json();
     }
 
     listSessions(projectId, token, limit) {
@@ -71,8 +65,6 @@ export default (class Sessions {
             .get(endpoint, {
             headers: defaultHeaders(token),
         })
-            .json()
-            .then((sessionsResp) => ({ success: true, ...sessionsResp }))
-            .catch((err) => constructError(err));
+            .json();
     }
 });

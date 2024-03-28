@@ -1,7 +1,3 @@
-import debugSetup from 'debug';
-import URL from 'url-parse';
-import { printSuccess, printError, callMe } from './utils.js';
-import { generateJwt, loadProfile } from '../config.js';
 /*
  * Copyright 2023 Cognitive Scale, Inc. All Rights Reserved.
  *
@@ -17,25 +13,20 @@ import { generateJwt, loadProfile } from '../config.js';
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-const debug = debugSetup('cortex:cli');
+import { printError, printSuccess } from './utils.js';
+import { privateRegLogin } from '../client/dockerClient.js';
+
 export default class DockerLoginCommand {
     constructor(program) {
         this.program = program;
     }
 
     async execute(options) {
-        const profile = await loadProfile(options.profile);
-        const ttl = options.ttl || '14d';
         try {
-            // TODO fetch this from new endpoint or maybe store this in the profile??
-            const registryUrl = (new URL(profile.url)).hostname.replace('api', 'private-registry');
-            const jwt = await generateJwt(profile, ttl);
-            const command = `docker login -u cli --password ${jwt} ${registryUrl}`;
-            debug('%s.executeDockerLogin(%s)', profile.name, command);
-            await callMe(command);
+            await privateRegLogin(options);
             printSuccess(JSON.stringify('Login Succeeded', null, 2), options);
         } catch (err) {
-            printError(`Failed to docker login: ${err.message || err}`, options);
+            printError(`Failed to docker login: ${err?.message ?? err}`, options);
         }
     }
 }

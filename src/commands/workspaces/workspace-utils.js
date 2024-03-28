@@ -110,6 +110,7 @@ export async function getCurrentRegistry(profile = undefined) {
     // use internal name instead of key/label
     return Object.values(regProfile.registries).find((r) => r.name = regProfile.currentRegistry);
 }
+
 export async function buildImageTag(profile, actionName) {
     if (actionName.includes('/')) {
         return actionName;

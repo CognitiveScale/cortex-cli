@@ -4,9 +4,9 @@ import debugSetup from 'debug';
 import { loadProfile } from '../config.js';
 import Sessions from '../client/sessions.js';
 import {
-    SESSIONTABLEFORMAT, handleListFailure, getFilteredOutput,
+    SESSIONTABLEFORMAT, getFilteredOutput,
 
-    printSuccess, printError, filterObject, parseObject, handleTable, printErrorDetails,
+    printSuccess, printError, filterObject, parseObject, handleTable, handleError,
 } from './utils.js';
 
 const debug = debugSetup('cortex:cli');
@@ -24,21 +24,13 @@ export class SaveSessionCommand {
         const sessionDefStr = fs.readFileSync(sessionDefinition);
         const session = parseObject(sessionDefStr, options);
         debug('%o', session);
-        const sessions = new Sessions(profile.url);
-        sessions.saveSession(options.project || profile.project, profile.token, session).then((response) => {
-            if (response.success) {
-                printSuccess(_.get(response, 'message.message', 'Session saved'), options);
-            } else if (response.details) {
-                console.log(`Failed to save session: ${response.status} ${response.message}`);
-                printErrorDetails(response, options);
-                printError(''); // Just exit
-            } else {
-                printError(JSON.stringify(response));
-            }
-        })
-            .catch((err) => {
-            printError(`Failed to save session: ${err.status} ${err.message}`, options);
-        });
+        try {
+            const sessions = new Sessions(profile.url);
+            const response = await sessions.saveSession(options.project || profile.project, profile.token, session);
+            printSuccess(_.get(response, 'message.message', 'Session saved'), options);
+        } catch (err) {
+            handleError(err, options, 'Failed to save session');
+        }
     }
 }
 export class ListSessionsCommand {
@@ -50,21 +42,16 @@ export class ListSessionsCommand {
         const profile = await loadProfile(options.profile);
         debug('%s.executeListSessions()', profile.name);
         const sessions = new Sessions(profile.url);
-        sessions.listSessions(options.project || profile.project, profile.token, options.limit).then((response) => {
-            if (response.success) {
-                const result = response.sessions;
-                // TODO remove --query on deprecation
-                if (options.json || options.query) {
-                    return getFilteredOutput(result, options);
-                }
-                return handleTable(SESSIONTABLEFORMAT, result, null, 'No sessions found');
+        try {
+            const { sessions: result } = await sessions.listSessions(options.project || profile.project, profile.token, options.limit);
+            // TODO remove --query on deprecation
+            if (options.json || options.query) {
+                return getFilteredOutput(result, options);
             }
-            return handleListFailure(response, options, 'Sessions');
-        })
-            .catch((err) => {
-            debug(err);
-            printError(`Failed to list sessions: ${err.status} ${err.message}`, options);
-        });
+            return handleTable(SESSIONTABLEFORMAT, result, null, 'No sessions found');
+        } catch (err) {
+            return handleError(err, options, 'Failed to list sessions');
+        }
     }
 }
 export class DescribeSessionCommand {
@@ -76,16 +63,12 @@ export class DescribeSessionCommand {
         const profile = await loadProfile(options.profile);
         const sessions = new Sessions(profile.url);
         debug('%s.executeDescribeSession(%s)', profile.name, sessionName);
-        sessions.describeSession(options.project || profile.project, profile.token, sessionName, options.verbose).then((response) => {
-            if (response.success) {
-                getFilteredOutput(response.session, options);
-            } else {
-                printError(`Failed to describe session ${sessionName}: ${response.message}`, options);
-            }
-        })
-            .catch((err) => {
-            printError(`Failed to describe session ${sessionName}: ${err.status} ${err.message}`, options);
-        });
+        try {
+            const response = await sessions.describeSession(options.project || profile.project, profile.token, sessionName, options.verbose);
+            getFilteredOutput(response.session, options);
+        } catch (err) {
+            handleError(err, options, `Failed to describe session ${sessionName}`);
+        }
     }
 }
 export class DeleteSessionCommand {
@@ -97,17 +80,12 @@ export class DeleteSessionCommand {
         const profile = await loadProfile(options.profile);
         debug('%s.executeDeleteSession(%s)', profile.name, sessionName);
         const sessions = new Sessions(profile.url);
-        sessions.deleteSession(options.project || profile.project, profile.token, sessionName)
-            .then((response) => {
-            if (response && response.success) {
-                const result = filterObject(response, options);
-                printSuccess(JSON.stringify(result, null, 2), options);
-            } else {
-                printError(`Session deletion failed: ${response.status} ${response.message}.`, options);
-            }
-        })
-            .catch((err) => {
-            printError(`Failed to delete session: ${err.status} ${err.message}`, options);
-        });
+        try {
+            const response = await sessions.deleteSession(options.project || profile.project, profile.token, sessionName);
+            const result = filterObject(response, options);
+            printSuccess(JSON.stringify(result, null, 2), options);
+        } catch (err) {
+            handleError(err, options, 'Failed to delete session');
+        }
     }
 }

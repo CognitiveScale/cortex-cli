@@ -1,9 +1,8 @@
 #!/usr/bin/env node
-import chalk from 'chalk';
 import esMain from 'es-main';
 import process from 'node:process';
 import { Command } from 'commander';
-import { withCompatibilityCheck } from '../src/compatibility.js';
+import { callCommand } from '../src/compatibility.js';
 import {
     DEFAULT_LIST_LIMIT_COUNT,
     DEFAULT_LIST_SKIP_COUNT,
@@ -37,13 +36,9 @@ export function create() {
         .option('--project <project>', 'The project to use')
         .option('--dryrun', 'Return the K8S skill resource and skip deployment to the cluster')
         .option('--stereotypes <stereotypes...>', 'Stereotype(s) to apply during deployment: use "none" to remove ALL stereotypes.\nNOTE: These will not be persisted with the skill definition')
-        .action(withCompatibilityCheck(async (skillNames, options) => {
-            try {
+        .action(callCommand(async (skillNames, options) => {
                 checkForEmptyArgs({ skillNames });
                 await new DeploySkillCommand(program).execute(skillNames, options);
-            } catch (err) {
-                console.error(chalk.red(err.message));
-            }
         }));
 // Describe Skill
     program
@@ -59,13 +54,9 @@ export function create() {
         .option('--json [searchPath]', QUERY_JSON_HELP_TEXT)
         .option('--query <query>', `[DEPRECATION WARNING] ${QUERY_JSON_HELP_TEXT}`)
         .option('--verbose', 'Verbose output', false)
-        .action(withCompatibilityCheck(async (skillName, options) => {
-            try {
+        .action(callCommand(async (skillName, options) => {
                 checkForEmptyArgs({ skillName });
                 await new DescribeSkillCommand(program).execute(skillName, options);
-            } catch (err) {
-                console.error(chalk.red(err.message));
-            }
         }));
 // Invoke Skill
     program
@@ -78,13 +69,9 @@ export function create() {
         .option('--params <params>', 'JSON params to send to the action')
         .option('--params-file <paramsFile>', 'A file containing either JSON or YAML formatted params')
         .option('--sync', 'Invoke the skill synchronously', false)
-        .action(withCompatibilityCheck(async (skillName, inputName, options) => {
-            try {
+        .action(callCommand(async (skillName, inputName, options) => {
                 checkForEmptyArgs({ skillName, inputName });
                 await new InvokeSkillCommand(program).execute(skillName, inputName, options);
-            } catch (err) {
-                console.error(chalk.red(err.message));
-            }
         }));
 // List Skills
     program
@@ -103,12 +90,8 @@ export function create() {
         .option('--limit <limit>', 'Limit number of records', DEFAULT_LIST_LIMIT_COUNT)
         .option('--skip <skip>', 'Skip number of records', DEFAULT_LIST_SKIP_COUNT)
         .option('--sort <sort>', 'A Mongo style sort statement to use in the query.', GET_DEFAULT_SORT_CLI_OPTION(DEFAULT_LIST_SORT_PARAMS.updatedAt))
-        .action(withCompatibilityCheck(async (options) => {
-            try {
+        .action(callCommand(async (options) => {
                 await new ListSkillsCommand(program).execute(options);
-            } catch (err) {
-                console.error(chalk.red(err.message));
-            }
         }));
 // Delete Skill
     program
@@ -119,13 +102,9 @@ export function create() {
         .option('--json', 'Output results using JSON')
         .option('--profile <profile>', 'The profile to use')
         .option('--project <project>', 'The project to use')
-        .action(withCompatibilityCheck(async (skillName, options) => {
-            try {
+        .action(callCommand(async (skillName, options) => {
                 checkForEmptyArgs({ skillName });
                 await new DeleteSkillCommand(program).execute(skillName, options);
-            } catch (err) {
-                console.error(chalk.red(err.message));
-            }
         }));
 // Save Skill
     program
@@ -140,12 +119,8 @@ export function create() {
         .option('--podspec <podspec>', 'A file containing either a JSON or YAML formatted pod spec to merge with the skill definition, used for specifying resources (like memory, ephemeral storage, CPUs, and GPUs) and tolerations (like allowing pods to be scheduled on tainted nodes).')
         .option('-y, --yaml', 'Use YAML for skill definition format')
         .option('--scaleCount <count>', 'Scale count, only used for daemon action types')
-        .action(withCompatibilityCheck(async (skillDefinitions, options) => {
-            try {
+        .action(callCommand(async (skillDefinitions, options) => {
                 await new SaveSkillCommand(program).execute(skillDefinitions, options);
-            } catch (err) {
-                console.error(chalk.red(err.message));
-            }
         }));
 // Undeploy Skill
     program
@@ -154,13 +129,9 @@ export function create() {
         .option('--no-compat', 'Ignore API compatibility checks')
         .option('--profile <profile>', 'The profile to use')
         .option('--project <project>', 'The project to use')
-        .action(withCompatibilityCheck(async (skillNames, options) => {
-            try {
+        .action(callCommand((skillNames, options) => {
                 checkForEmptyArgs({ skillNames });
-                return await new UndeploySkillCommand(program).execute(skillNames, options);
-            } catch (err) {
-                return console.error(chalk.red(err.message));
-            }
+                return new UndeploySkillCommand(program).execute(skillNames, options);
         }));
 // Get Skill/action logs
     program
@@ -172,17 +143,13 @@ export function create() {
         .option('--raw', 'Get raw logs as a stream')
         // TODO enable when we want to support tasks
         // .option('--type [type]', 'The type of action logs to fetch [skill|task]')
-        .action(withCompatibilityCheck(async (skillName, actionName, options) => {
-            try {
+        .action(callCommand((skillName, actionName, options) => {
                 checkForEmptyArgs({ skillName, actionName });
-                return await new SkillLogsCommand(program).execute(skillName, actionName, options);
-            } catch (err) {
-                return console.error(chalk.red(err.message));
-            }
+                return new SkillLogsCommand(program).execute(skillName, actionName, options);
         }));
     return program;
 }
 if (esMain(import.meta)) {
-    create().showHelpAfterError().parseAsync(process.argv);
+    await create().showHelpAfterError().parseAsync(process.argv);
 }
 export default create();

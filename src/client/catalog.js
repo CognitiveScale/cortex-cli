@@ -49,9 +49,7 @@ export default class Catalog {
             .delete(endpoint, {
                 headers: defaultHeaders(token),
             })
-            .json()
-            .then((skill) => skill)
-            .catch((err) => constructError(err));
+            .json();
     }
 
     saveSkill(projectId, token, skillObj) {
@@ -61,9 +59,7 @@ export default class Catalog {
             .post(this.endpoints.skills(projectId), {
             headers: defaultHeaders(token),
             json: skillObj,
-        }).json()
-            .then((res) => ({ success: true, message: res }))
-            .catch((err) => constructError(err));
+        }).json();
     }
 
     listSkills(projectId, token, query, filter, limit, skip, sort) {
@@ -89,16 +85,12 @@ export default class Catalog {
             searchParams.verbose = verbose;
             searchParams.status = verbose;
         }
-        try {
-            const res = got.get(endpoint, {
-                headers: defaultHeaders(token),
-                searchParams,
-            });
-            if (output.toLocaleLowerCase() === 'json') return res.json();
-            return res.text();
-        } catch (err) {
-            return constructError(err);
-        }
+        const res = got.get(endpoint, {
+            headers: defaultHeaders(token),
+            searchParams,
+        });
+        if (output.toLocaleLowerCase() === 'json') return res.json();
+        return res.text();
     }
 
     deploySkill(projectId, token, skillName, stereotypes, dryrun = false, verbose = false) {
@@ -135,6 +127,17 @@ export default class Catalog {
         return raw ? got.get(endpoint, gotOptions).text() : got.get(endpoint, gotOptions).json();
     }
 
+    applicationLogs(projectId, token, name, raw = false) {
+        checkProject(projectId);
+        const endpoint = `${this.endpoints.applications(projectId)}/${encodeURIComponent(name)}/logs`;
+        debug('applicationLogs(%s, %s) => %s', name, endpoint);
+        const gotOptions = {
+            headers: defaultHeaders(token),
+            searchParams: { raw },
+        };
+        return raw ? got.get(endpoint, gotOptions).text() : got.get(endpoint, gotOptions).json();
+    }
+
     // Agent
     deleteAgent(projectId, token, agentName) {
         checkProject(projectId);
@@ -144,9 +147,7 @@ export default class Catalog {
             .delete(endpoint, {
                 headers: defaultHeaders(token),
             })
-            .json()
-            .then((agent) => ({ success: true, agent }))
-            .catch((err) => constructError(err));
+            .json();
     }
 
     listAgents(projectId, token, filter, limit, skip, sort) {
@@ -163,9 +164,7 @@ export default class Catalog {
             headers: defaultHeaders(token),
             searchParams: query,
         })
-            .json()
-            .then((agentResp) => ({ success: true, ...agentResp }))
-            .catch((err) => constructError(err));
+            .json();
     }
 
     async listServices(projectId, token, agentName) {
@@ -190,9 +189,7 @@ export default class Catalog {
             .post(endpoint, {
             headers: defaultHeaders(token),
             json: agentObj,
-        }).json()
-            .then((res) => ({ success: true, message: res }))
-            .catch((err) => constructError(err));
+        }).json();
     }
 
     describeAgent(projectId, token, agentName, verbose = false, output = 'json') {
@@ -235,9 +232,7 @@ export default class Catalog {
             .get(endpoint, {
             headers: defaultHeaders(token),
             searchParams: { verbose },
-        }).json()
-            .then((res) => ({ ...res }))
-            .catch((err) => constructError(err));
+        }).json();
     }
 
     unDeployAgent(projectId, token, agentName, verbose = false) {
@@ -248,9 +243,7 @@ export default class Catalog {
             .get(endpoint, {
             headers: defaultHeaders(token),
             searchParams: { verbose },
-        }).json()
-            .then((res) => ({ ...res }))
-            .catch((err) => constructError(err));
+        }).json();
     }
 
     // Type
@@ -264,9 +257,7 @@ export default class Catalog {
             headers: defaultHeaders(token),
             json: types,
         })
-            .json()
-            .then((message) => ({ success: true, message }))
-            .catch((err) => constructError(err));
+            .json();
     }
 
     describeType(projectId, token, typeName) {
@@ -277,9 +268,7 @@ export default class Catalog {
             .get(endpoint, {
             headers: defaultHeaders(token),
         })
-            .json()
-            .then((type) => ({ success: true, type }))
-            .catch((err) => constructError(err));
+            .json();
     }
 
     listTypes(projectId, token, limit, skip, sort) {
@@ -295,9 +284,7 @@ export default class Catalog {
             headers: defaultHeaders(token),
             searchParams: query,
         })
-            .json()
-            .then((types) => ({ success: true, ...types }))
-            .catch((err) => constructError(err));
+            .json();
     }
 
     deleteType(projectId, token, typeName) {
@@ -308,9 +295,7 @@ export default class Catalog {
             .delete(endpoint, {
             headers: defaultHeaders(token),
         })
-            .json()
-            .then((type) => ({ success: true, type }))
-            .catch((err) => constructError(err));
+            .json();
     }
 
     // Campaign
@@ -376,9 +361,7 @@ export default class Catalog {
             .get(endpoint, {
             headers: defaultHeaders(token),
         })
-            .json()
-            .then((res) => ({ success: true, data: res }))
-            .catch((err) => constructError(err));
+            .json();
     }
 
     deployCampaign(projectId, token, campaign) {
@@ -389,9 +372,7 @@ export default class Catalog {
             .get(endpoint, {
             headers: defaultHeaders(token),
         })
-            .json()
-            .then((res) => ({ success: true, data: res }))
-            .catch((err) => constructError(err));
+            .json();
     }
 
     // Mission
@@ -403,9 +384,7 @@ export default class Catalog {
             .get(endpoint, {
             headers: defaultHeaders(token),
         })
-            .json()
-            .then((res) => ({ success: true, data: res }))
-            .catch((err) => constructError(err));
+            .json();
     }
 
     listMissions(projectId, token, campaign, filter, limit, skip, sort) {
@@ -422,9 +401,7 @@ export default class Catalog {
             headers: defaultHeaders(token),
             searchParams: query,
         })
-            .json()
-            .then((res) => ({ success: true, data: res }))
-            .catch((err) => constructError(err));
+            .json();
     }
 
     deployMission(projectId, token, campaign, mission) {
@@ -435,9 +412,7 @@ export default class Catalog {
             .get(endpoint, {
             headers: defaultHeaders(token),
         })
-            .json()
-            .then((res) => ({ success: true, data: res }))
-            .catch((err) => constructError(err));
+            .json();
     }
 
     getMission(projectId, token, campaign, mission) {
@@ -448,9 +423,7 @@ export default class Catalog {
             .get(endpoint, {
             headers: defaultHeaders(token),
         })
-            .json()
-            .then((res) => ({ success: true, data: res }))
-            .catch((err) => constructError(err));
+            .json();
     }
 
     // Application
@@ -472,9 +445,7 @@ export default class Catalog {
             .post(this.endpoints.applications(projectId), {
                 headers: defaultHeaders(token),
                 json: appObj,
-            }).json()
-            .then((res) => ({ success: true, message: res }))
-            .catch((err) => constructError(err));
+            }).json();
     }
 
     listApplications(projectId, token, query, filter, limit, skip, sort) {
@@ -500,31 +471,23 @@ export default class Catalog {
             searchParams.verbose = verbose;
             searchParams.status = verbose;
         }
-        try {
-            const res = got.get(endpoint, {
-                headers: defaultHeaders(token),
-                searchParams,
-            });
-            if (['json', 'pretty'].includes(output.toLocaleLowerCase())) return res.json();
-            return res.text();
-        } catch (err) {
-            return constructError(err);
-        }
+        const res = got.get(endpoint, {
+            headers: defaultHeaders(token),
+            searchParams,
+        });
+        if (['json', 'pretty'].includes(output.toLocaleLowerCase())) return res.json();
+        return res.text();
     }
 
     deployApplication(projectId, token, name) {
         checkProject(projectId);
         const endpoint = `${this.endpoints.applications(projectId)}/${encodeURIComponent(name)}/deploy`;
         debug('deployApplication(%s) => %s', name, endpoint);
-        try {
-            return got
-                .get(endpoint, {
-                    headers: defaultHeaders(token),
-                })
-                .json();
-        } catch (err) {
-            return constructError(err);
-        }
+        return got
+            .get(endpoint, {
+                headers: defaultHeaders(token),
+            })
+            .json();
     }
 
     unDeployApplication(projectId, token, name) {

@@ -10,7 +10,7 @@ import relativeTime from 'dayjs/plugin/relativeTime.js';
 import { loadProfile } from '../config.js';
 import Assessments from '../client/assessments.js';
 import {
- printSuccess, printError, parseObject, handleTable, printExtendedLogs, handleListFailure, getFilteredOutput, 
+    printSuccess, printError, parseObject, handleTable, printExtendedLogs, getFilteredOutput, handleError,
 } from './utils.js';
 
 const _ = {
@@ -33,10 +33,9 @@ export const ListResourcesCommand = class {
         const profile = await loadProfile(options.profile);
         debug('%s.ListResourcesCommand()', profile.name);
         const client = new Assessments(profile.url);
-        client.queryResources(profile.token, options.name, options.scope, options.type, options.skip, options.limit, options.filter, options.sort)
-            // eslint-disable-next-line consistent-return
-            .then((response) => {
-            if (response.success === false) return handleListFailure(response, options, 'Cortex resources');
+        try {
+            const response = await client.queryResources(profile.token, options.name, options.scope, options.type, options.skip, options.limit, options.filter, options.sort);
+                // eslint-disable-next-line consistent-return
             // TODO remove --query on deprecation
             if (options.json || options.query) {
                 getFilteredOutput(response, options);
@@ -50,10 +49,9 @@ export const ListResourcesCommand = class {
                 ];
                 handleTable(tableSpec, response.data, null, 'No matching resources found');
             }
-        })
-            .catch((err) => {
-            printError(`Failed to list Cortex resources: ${err.status} ${err.message}`, options);
-        });
+        } catch (err) {
+            handleError(err, options, 'Failed to list Cortex resources');
+        }
     }
 };
 export const ListResourceTypesCommand = class {
@@ -66,24 +64,21 @@ export const ListResourceTypesCommand = class {
         const profile = await loadProfile(options.profile);
         debug('%s.ListResourceTypesCommand()', profile.name);
         const client = new Assessments(profile.url);
-        client.listResourceTypes(profile.token)
-            .then((response) => {
-            if (response.success === false) throw response;
-            const data = _.compact(response.data);
-            // TODO remove --query on deprecation
-            if (options.json || options.query) {
-                getFilteredOutput(data, options);
-            } else {
-                const types = data.map((t) => ({ type: t }));
-                const tableSpec = [
-                    { column: 'Resource Type', field: 'type' },
-                ];
-                handleTable(tableSpec, types, null, 'Resource Types not available');
-            }
-        })
-            .catch((err) => {
-            printError(`Failed to list Cortex resource types: ${err.status} ${err.message}`, options);
-        });
+        try {
+        const data = await client.listResourceTypes(profile.token);
+        // TODO remove --query on deprecation
+        if (options.json || options.query) {
+            getFilteredOutput(data, options);
+        } else {
+            const types = data.map((t) => ({ type: t }));
+            const tableSpec = [
+                { column: 'Resource Type', field: 'type' },
+            ];
+            handleTable(tableSpec, types, null, 'Resource Types not available');
+        }
+        } catch (err) {
+            handleError(err, options, 'Failed to list Cortex resource types');
+        }
     }
 };
 export const DependencyTreeCommand = class {
@@ -100,26 +95,26 @@ export const DependencyTreeCommand = class {
         if (dependencyFile) {
             body = JSON.parse(fs.readFileSync(dependencyFile).toString());
         }
-        client.getDependenciesOfResource(profile.token, options.scope, options.type, options.name, body, options.missing)
-            .then((response) => {
-            if (response.success === false) throw response;
-            // TODO remove --query on deprecation
-            if (options.json || options.query) {
-                getFilteredOutput(response, options);
-            } else {
-                const tableSpec = [
-                    { column: 'Name', field: 'name' },
-                    { column: 'Title', field: 'title' },
-                    { column: 'Resource Type', field: 'type' },
-                ];
-                handleTable(tableSpec, response.data, null, 'No downstream dependency found');
-            }
-        })
-            .catch((err) => {
-            printError(`Failed to list dependency Cortex resource: ${err.status} ${err.message}`, options);
-        });
+        try {
+        const response = await client.getDependenciesOfResource(profile.token, options.scope, options.type, options.name, body, options.missing);
+
+        // TODO remove --query on deprecation
+        if (options.json || options.query) {
+            getFilteredOutput(response, options);
+        } else {
+            const tableSpec = [
+                { column: 'Name', field: 'name' },
+                { column: 'Title', field: 'title' },
+                { column: 'Resource Type', field: 'type' },
+            ];
+            handleTable(tableSpec, response.data, null, 'No downstream dependency found');
+        }
+        } catch (err) {
+            handleError(err, options, 'Failed to list dependency Cortex resource');
+        }
     }
 };
+
 export const CreateAssessmentCommand = class {
     constructor(program) {
         this.program = program;
@@ -139,20 +134,22 @@ export const CreateAssessmentCommand = class {
                 printError(`Failed to read assessment definition "${assessmentDef}": ${err.message}`, options);
             }
         }
-        client.createAssessment(profile.token, options.name || assessment.name, options.title || assessment.title, options.description || assessment.description, options.scope || assessment.scope, options.component || assessment.component, options.type || assessment.type, options.overwrite || assessment.overwrite)
-            .then((response) => {
-            if (response.success === false) throw response;
-            if (response.success) {
-                printSuccess(`Assessment ${options.name} saved successfully`, options);
-            } else {
-                printError(`Failed to save assessment: ${JSON.stringify(response)}`);
-            }
-        })
-            .catch((err) => {
-            printError(`Failed to save assessment: ${err.status} ${err.message}`, options);
-        });
+        try {
+            await client.createAssessment(profile.token,
+                options.name || assessment.name,
+                options.title || assessment.title,
+                options.description || assessment.description,
+                options.scope || assessment.scope,
+                options.component || assessment.component,
+                options.type || assessment.type,
+                options.overwrite || assessment.overwrite);
+            printSuccess(`Assessment ${options.name} saved successfully`, options);
+        } catch (err) {
+            handleError(err, options, 'Failed to save assessment');
+        }
     }
 };
+
 export const ListAssessmentCommand = class {
     constructor(program) {
         this.program = program;
@@ -163,10 +160,8 @@ export const ListAssessmentCommand = class {
         const profile = await loadProfile(options.profile);
         debug('%s.ListAssessmentCommand()', profile.name);
         const client = new Assessments(profile.url);
-        client.listAssessment(profile.token, options.skip, options.limit, options.filter, options.sort)
-            // eslint-disable-next-line consistent-return
-            .then((response) => {
-            if (response.success === false) return handleListFailure(response, options, 'Assessments');
+        try {
+            const response = await client.listAssessment(profile.token, options.skip, options.limit, options.filter, options.sort);
             const result = response.data;
             // TODO remove --query on deprecation
             if (options.json || options.query) {
@@ -174,20 +169,44 @@ export const ListAssessmentCommand = class {
             } else {
                 printExtendedLogs(result, options);
                 const tableSpec = [
-                    { column: 'Name', field: 'name' },
-                    { column: 'Title', field: 'title' },
-                    { column: 'Description', field: 'description' },
-                    { column: 'Projects', field: 'scope' },
-                    { column: '# Reports', field: 'reportCount' },
-                    { column: 'Modified', field: '_updatedAt' },
-                    { column: 'Author', field: '_createdBy' },
+                    {
+                        column: 'Name',
+                        field: 'name',
+                    },
+                    {
+                        column: 'Title',
+                        field: 'title',
+                    },
+                    {
+                        column: 'Description',
+                        field: 'description',
+                    },
+                    {
+                        column: 'Projects',
+                        field: 'scope',
+                    },
+                    {
+                        column: '# Reports',
+                        field: 'reportCount',
+                    },
+                    {
+                        column: 'Modified',
+                        field: '_updatedAt',
+                    },
+                    {
+                        column: 'Author',
+                        field: '_createdBy',
+                    },
                 ];
-                handleTable(tableSpec, result, (o) => ({ ...o, _updatedAt: o._updatedAt ? dayjs(o._updatedAt).fromNow() : '-' }), 'No Assessments found');
+                handleTable(tableSpec, result, (o) => ({
+                    ...o,
+                    _updatedAt: o._updatedAt ? dayjs(o._updatedAt)
+                        .fromNow() : '-',
+                }), 'No Assessments found');
             }
-        })
-            .catch((err) => {
-            printError(`Failed to list assessment: ${err.status} ${err.message}`, options);
-        });
+        } catch (err) {
+            handleError(err, options, 'Failed to list assessment');
+        }
     }
 };
 export const DescribeAssessmentCommand = class {

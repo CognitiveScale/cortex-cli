@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 import esMain from 'es-main';
 import { Command } from 'commander';
-import { withCompatibilityCheck } from '../src/compatibility.js';
+import { callCommand } from '../src/compatibility.js';
 import {
   ListPipelineRepoCommand,
   DescribePipelineRepoCommand,
@@ -12,7 +12,7 @@ import {
 import {
  DEFAULT_LIST_SKIP_COUNT, DEFAULT_LIST_LIMIT_COUNT, DEFAULT_LIST_SORT_PARAMS, GET_DEFAULT_SORT_CLI_OPTION, LIST_JSON_HELP_TEXT, QUERY_JSON_HELP_TEXT,
 } from '../src/constants.js';
-import { printError, checkForEmptyArgs } from '../src/commands/utils.js';
+import { checkForEmptyArgs } from '../src/commands/utils.js';
 
 export function create() {
   const repos = new Command();
@@ -33,13 +33,7 @@ export function create() {
     .option('--limit <limit>', 'Limit number of records', DEFAULT_LIST_LIMIT_COUNT)
     .option('--skip <skip>', 'Skip number of records', DEFAULT_LIST_SKIP_COUNT)
     .option('--sort <sort>', 'A Mongo style sort statement to use in the query.', GET_DEFAULT_SORT_CLI_OPTION(DEFAULT_LIST_SORT_PARAMS.updatedAt))
-    .action(withCompatibilityCheck((options) => {
-      try {
-        return new ListPipelineRepoCommand(repos).execute(options);
-      } catch (err) {
-        return printError(err.message);
-      }
-    }));
+    .action(callCommand((options) => new ListPipelineRepoCommand(repos).execute(options)));
 
   // Describe
   repos
@@ -51,13 +45,9 @@ export function create() {
     .option('--profile <profile>', 'The profile to use')
     .option('--project <project>', 'The project to use')
     .option('--json [searchPath]', QUERY_JSON_HELP_TEXT)
-    .action(withCompatibilityCheck((pipelineRepoName, options) => {
-      try {
+    .action(callCommand((pipelineRepoName, options) => {
         checkForEmptyArgs({ pipelineRepoName });
         return new DescribePipelineRepoCommand(repos).execute(pipelineRepoName, options);
-      } catch (err) {
-        return printError(err.message);
-      }
     }));
 
   // Delete
@@ -68,13 +58,9 @@ export function create() {
     .option('--color [boolean]', 'Turn on/off colors for JSON output.', 'true')
     .option('--profile <profile>', 'The profile to use')
     .option('--project <project>', 'The project to use')
-    .action(withCompatibilityCheck((pipelineRepoName, options) => {
-      try {
+    .action(callCommand((pipelineRepoName, options) => {
         checkForEmptyArgs({ pipelineRepoName });
         return new DeletePipelineRepoCommand(repos).execute(pipelineRepoName, options);
-      } catch (err) {
-        return printError(err.message);
-      }
     }));
 
    // Save
@@ -90,13 +76,7 @@ export function create() {
     .option('--branch <branch>', 'Git branch to checkout')
     .option('-y, --yaml', 'Use YAML for Pipeline Repository definition format')
     // TODO: should this have CLI args for <repo> & <branch>??
-    .action(withCompatibilityCheck((pipelineRepoDefinition, options) => {
-      try {
-        return new SavePipelineRepoCommand(repos).execute(pipelineRepoDefinition, options);
-      } catch (err) {
-        return printError(err.message);
-      }
-    }));
+    .action(callCommand((pipelineRepoDefinition, options) => new SavePipelineRepoCommand(repos).execute(pipelineRepoDefinition, options)));
 
     // Update pipelines
     repos
@@ -109,13 +89,9 @@ export function create() {
     .option('--json [searchPath]', QUERY_JSON_HELP_TEXT)
     .option('--skill <skillName>', 'Name of the underlying Skill in the same Project to use for running the Pipeline')
     .option('--force-recreate', 'Whether to force Pipelines to be recreated even if the Pipeline\'s state (git SHA) has not has not changed.')
-    .action(withCompatibilityCheck((pipelineRepoName, options) => {
-      try {
+    .action(callCommand((pipelineRepoName, options) => {
         checkForEmptyArgs({ pipelineRepoName });
         return new UpdateRepoPipelinesCommand(repos).execute(pipelineRepoName, options);
-      } catch (err) {
-        return printError(err.message);
-      }
     }));
 
   return repos;

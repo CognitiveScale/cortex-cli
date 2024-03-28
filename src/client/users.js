@@ -16,7 +16,6 @@
 import debugSetup from 'debug';
 import _ from 'lodash';
 import { got, defaultHeaders } from './apiutils.js';
-import { constructError } from '../commands/utils.js';
 
 const debug = debugSetup('cortex:cli');
 export default class Users {
@@ -48,9 +47,7 @@ export default class Users {
         return got
             .post(endpoint, {
             headers: defaultHeaders(token),
-        }).json()
-            .then((res) => ({ success: true, result: res }))
-            .catch((err) => constructError(err));
+        }).json();
     }
 
     deleteServiceUser(token, user) {
@@ -59,9 +56,7 @@ export default class Users {
         return got
             .delete(endpoint, {
             headers: defaultHeaders(token),
-        }).json()
-            .then((res) => ({ success: true, result: res }))
-            .catch((err) => constructError(err));
+        }).json();
     }
 
     listServiceUsers(token) {
@@ -70,9 +65,7 @@ export default class Users {
         return got
             .get(endpoint, {
             headers: defaultHeaders(token),
-        }).json()
-            .then((res) => ({ success: true, result: res }))
-            .catch((err) => constructError(err));
+        }).json();
     }
 
     describeUser(token) {
@@ -81,9 +74,7 @@ export default class Users {
         return got
             .get(endpoint, {
             headers: defaultHeaders(token),
-        }).json()
-            .then((res) => ({ success: true, result: res }))
-            .catch((err) => constructError(err));
+        }).json();
     }
 
     createGrantForUser(token, body) {
@@ -93,9 +84,7 @@ export default class Users {
             .post(endpoint, {
             headers: defaultHeaders(token),
             json: body,
-        }).json()
-            .then((res) => ({ success: true, result: res }))
-            .catch((err) => constructError(err));
+        }).json();
     }
 
     removeGrantFromUser(token, body) {
@@ -105,9 +94,7 @@ export default class Users {
             .delete(endpoint, {
             headers: defaultHeaders(token),
             json: body,
-        }).json()
-            .then((res) => ({ success: true, result: res }))
-            .catch((err) => constructError(err));
+        }).json();
     }
 
     addUsersToProject(token, project, users) {
@@ -117,9 +104,7 @@ export default class Users {
             .post(endpoint, {
             headers: defaultHeaders(token),
             json: { project, users },
-        }).json()
-            .then((res) => ({ success: true, result: res }))
-            .catch((err) => constructError(err));
+        }).json();
     }
 
     removeUsersFromProject(token, project, users) {
@@ -129,9 +114,7 @@ export default class Users {
             .delete(endpoint, {
             headers: defaultHeaders(token),
             json: { project, users },
-        }).json()
-            .then((res) => ({ success: true, result: res }))
-            .catch((err) => constructError(err));
+        }).json();
     }
 
     resetUserPAT(token, user) {
@@ -141,9 +124,7 @@ export default class Users {
             .post(endpoint, {
                 headers: defaultHeaders(token),
                 json: { user },
-            }).json()
-                .then((res) => ({ success: true, result: res }))
-                .catch((err) => constructError(err));
+            }).json();
     }
 
     getUserPAT(token, user) {
@@ -156,8 +137,6 @@ export default class Users {
             requestOptions.searchParams = { user };
         }
         return got
-            .get(endpoint, requestOptions).json()
-                .then((res) => ({ success: true, result: res }))
-                .catch((err) => constructError(err));
+            .get(endpoint, requestOptions).json();
     }
 }

@@ -37,25 +37,18 @@ export default (class Connections {
             .get(endpoint, {
             headers: defaultHeaders(token),
             searchParams: query,
-        }).json()
-            .then((result) => ({ success: true, result }))
-            .catch((err) => constructError(err));
+        }).json();
     }
 
-    async saveConnection(projectId, token, connObj) {
+    saveConnection(projectId, token, connObj) {
         checkProject(projectId);
         const endpoint = `${this.endpoint(projectId)}`;
         debug('saveConnection(%s) => %s', connObj.name, endpoint);
-        try {
-            const message = await got
-                .post(endpoint, {
-                headers: defaultHeaders(token),
-                json: connObj,
-            }).json();
-            return { success: true, message };
-        } catch (err) {
-            return constructError(err);
-        }
+        return got
+            .post(endpoint, {
+            headers: defaultHeaders(token),
+            json: connObj,
+        }).json();
     }
 
     describeConnection(projectId, token, connectionName) {
@@ -65,9 +58,7 @@ export default (class Connections {
         return got
             .get(endpoint, {
             headers: defaultHeaders(token),
-        }).json()
-            .then((result) => ({ success: true, result }))
-            .catch((err) => constructError(err));
+        }).json();
     }
 
     deleteConnection(projectId, token, connectionName) {
@@ -77,9 +68,7 @@ export default (class Connections {
         return got
             .delete(endpoint, {
             headers: defaultHeaders(token),
-        }).json()
-            .then((result) => ({ success: true, result }))
-            .catch((err) => constructError(err));
+        }).json();
     }
 
     listConnectionsTypes(token, limit, skip, sort) {
